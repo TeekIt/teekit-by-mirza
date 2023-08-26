@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<!--
+This is a starter template page. Use this page to start your new project from
+scratch. This page gets rid of all links and provides the needed markup only.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="ie=edge" http-equiv="x-ua-compatible">
+
+  <title>TeekIT Admin | Dashboard</title>
+
+  <!-- Font Awesome Icons -->
+  <link href="plugins/fontawesome-free/css/all.min.css" rel="stylesheet">
+  <!-- Theme style -->
+  <link href="dist/css/adminlte.min.css" rel="stylesheet">
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <div class="container">
+      <!-- Left navbar links -->
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link d-sm-block d-md-block d-lg-none " data-widget="pushmenu" href="#" role="button"><i
+            class="fas fa-bars"></i></a>
+        </li>
+      </ul>
+
+      <!-- SEARCH FORM -->
+      <form class="d-block w-100 ml-3">
+        <div class="input-group input-group-sm" style=" border-bottom: 1px solid #d4d4d4; ">
+          <div class="input-group-append">
+            <button class="bg-transparent  btn btn-navbar" type="submit">
+              <i class="bg-transparent fas fa-search" style="    color: #3a4b83;"></i>
+            </button>
+          </div>
+          <input aria-label="Search" class="bg-transparent  form-control form-control-navbar w-100" placeholder="Search"
+                 type="search">
+
+        </div>
+      </form>
+
+      <!-- Right navbar links -->
+      <ul class="navbar-nav ml-sm-5">
+        <li class="nav-item d-block">
+          <a class="nav-link" href="#">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary" style=" overflow: initial; ">
+    <!-- Brand Logo -->
+    <a class="nav-link nav-sidebar-arrow" onclick="jQuery('.navbar-nav>.nav-item>.nav-link').click();"> <img
+      alt="" src="res/img/arrow.png"></a>
+    <a class="brand-link" href="index3.html" style="display:block;opacity: 1">
+      <img alt="AdminLTE Logo" class="brand-image" src="res/img/logo.png" style="display: block; opacity: 1">
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar user panel (optional) -->
+
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-5">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-accordion="false" data-widget="treeview" role="menu">
+          <!-- Add icons to the links using the .nav-icon class
+               with font-awesome or any other icon font library -->
+          <li class="nav-item">
+            <a class="nav-link " href="stores.html">
+              <i class="nav-icon fas fa-store-alt"></i>
+              <p class="ml-2">
+                Stores
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " href="customers.html">
+              <i class="nav-icon fas fa-users-cog"></i>
+              <p class="ml-2">
+                Customers
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="drivers.html">
+              <i class="nav-icon fas fa-biking"></i>
+              <p class="ml-2">
+                Drivers
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="orders.html">
+              <i class="nav-icon fas fa-clipboard-list"></i>
+              <p class="ml-2">
+                Orders
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="queries.html">
+              <i class="nav-icon fas fa-question-circle"></i>
+              <p class="ml-2">
+                Queries
+              </p>
+            </a>
+          </li>
+
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-12">
+            <h1 class="m-0 text-dark text-center">Admin Dashboard</h1>
+            <a class="text-site-primary text-center m-auto d-block" href="index.html"
+               style="width: fit-content;text-decoration: underline; font-size: 3.0em; line-height: 1;">Home</a>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <div class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card  pl-4 pr-4 pb-4 p-4" >
+              <div class="card-body">
+                <div class="row">
+
+                  <div class="col-md-3 pl- pr- pb-">
+                    <div class="">
+                      <h5 class="d-block text-center p-3 pb-0 m-0 text-site-primary"><a class="font-weight-bold  text-site-primary"
+                                                                                        href="#">Company Logo</a></h5>
+                    </div>
+                    <div class="card-text">
+                      <div class="col-md-12">
+                    <span class="img-container">
+                    <img alt="" class="d-block m-auto img-fluid" src="res/img/store_logo.png">
+                    </span>
+                      </div>
+                    </div>
+
+
+                  </div>
+                  <div class="col-md-2" style="margin-top: 9%;">
+                    <div class="">
+                      <h5 class="d-block text-center p-3 pb-0 m-0 text-site-primary"><a class="font-weight-bold  text-site-primary"
+                                                                                        href="#">Favicon</a></h5>
+                    </div>
+                    <div class="card-text">
+                      <div class="col-md-12">
+                    <span class="img-container" style="padding: 20px;width: fit-content;margin: 0 auto;">
+                    <img alt="" class="d-block m-auto" style="max-width: 50px;" src="res/img/store_logo.png">
+                    </span>
+                      </div>
+                    </div>
+
+
+                  </div>
+                  <div class="col-md-7">
+                    <h5 class="font-weight-bold d-block text-center p-3 pb-0 m-0 text-site-primary">
+                      <a class="ml-2 mr-2 text-site-primary text-left float-left"
+                                                                                      href="#">Teek IT</a>
+                      <a class="ml-2 mr-2 text-site-primary text-center d-inline-block"
+                                                                                      href="#">Slogan</a>
+                      <a class="ml-2 mr-2 text-site-primary text-right float-right"
+                                                                                      href="#">Edit</a></h5>
+                    <div class="row">
+                      <div class="col-md-12">
+                        <textarea style="border:0;margin-top: 0px;margin-bottom: 0px;height: 227px;min-height: 227px;max-height: 227px;width: 100%;min-width: 100%;max-width: 100%;background: #f4f6f9;border-radius: 15px;" placeholder="Help" name="" class="form-control" onresize="return 0;" id="" ></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="content-header">
+          <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-12">
+                <h1 class="m-0 text-dark text-center">Terms & Conditions</h1>
+              </div><!-- /.col -->
+            </div><!-- /.row -->
+          </div><!-- /.container-fluid -->
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card  pl-4 pr-4 pb-4 p-4" >
+              <div class="card-body">
+                <div class="row">
+
+                  <div class="col-md-12">
+                    <textarea style=" border:0;margin-top: 0px;margin-bottom: 0px;height: 127px;min-height: 127px;max-height: 127px;width: 100%;min-width: 100%;max-width: 100%;background: #f4f6f9;border-radius: 15px;" placeholder="3 wolf moon retro jean shorts chambray sustainable roof party. Shoreditch vegan artisan Helvetica. Tattooed Codeply Echo Park Godard kogi, next level irony ennui twee squid fap selvage. Meggings flannel Brooklyn literally small batch, mumblecore PBR try-hard kale chips. Brooklyn vinyl lumbersexual bicycle rights, viral fap cronut leggings squid chillwave pickled gentrify mustache. 3 wolf moon hashtag church-key." name="" class="form-control" onresize="return 0;"  ></textarea>
+                    <button style=" width: fit-content; margin-top: 15px!important; background: #ffcf42; border: 0; padding: 10px 60px; border-radius: 30px!important; color: black; " class="btn btn-secondary rounded mt-3 text-center align-content-center btn-block m-auto">Done</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /.row -->
+    </div><!-- /.container-fluid -->
+  </div>
+  <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+
+
+</div>
+<!-- ./wrapper -->
+
+<!-- REQUIRED SCRIPTS -->
+
+<!-- jQuery -->
+<script src="plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="dist/js/adminlte.min.js"></script>
+<style>
+  table tr:first-of-type td {
+    border-top: 0;
+  }
+
+  .brand-link {
+    background-color: white;
+  }
+
+  [class*=sidebar-dark-] {
+    background-color: #3a4b83;
+  }
+
+  [class*=sidebar-dark-] * {
+    color: #fff;
+  }
+
+  nav.main-header {
+    box-shadow: 0 0px 1px rgba(0, 0, 0, .25), 0 4px 15px rgba(0, 0, 0, .22) !important;
+  }
+
+  .brand-link .brand-image {
+    max-height: 90px;
+  }
+
+  nav.main-header {
+    min-height: 120px;
+  }
+
+  .navbar-light .navbar-nav .nav-link, nav.main-header a {
+    color: #3a4b83;
+    font-weight: 600;
+  }
+
+  .brand-link {
+    min-height: 120px;
+  }
+
+  .brand-link .brand-image {
+    float: unset;
+    margin: 0 auto;
+    display: block;
+  }
+
+  [class*=sidebar-dark] .brand-link {
+    margin: 0;
+    padding: 0;
+  }
+
+  .brand-link .brand-image {
+    padding-top: 25px;
+  }
+
+  .sidebar-mini.sidebar-collapse .main-sidebar.sidebar-focused .brand-link, .sidebar-mini.sidebar-collapse .main-sidebar:hover .brand-link, .sidebar-mini.sidebar-collapse .main-sidebar:hover {
+    width: 4.6rem;
+  }
+
+  .nav-sidebar-arrow {
+    position: absolute;
+    top: 55%;
+    right: -17px;
+    cursor: pointer;
+    background: #ffcf42;
+    border-radius: 100% 100%;
+    padding: 0;
+  }
+
+  .nav-sidebar-arrow img {
+    max-width: inherit;
+    max-height: 40px;
+  }
+
+  .sidebar-collapse .nav-sidebar-arrow img {
+    transform: rotate(178deg);
+  }
+
+  .content-header h1 {
+    font-size: 3.5rem;
+  }
+
+  .text-site-primary {
+    color: #3a4b83;
+  }
+
+
+  .card-body {
+    padding: 5px 5px;
+  }
+
+  .img-container {
+    background: #f4f6f9;
+    display: block;
+    margin-left: 30px;
+    margin-right: 30px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    border-radius: 20px;
+  }
+
+  .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active, .sidebar-light-primary .nav-sidebar > .nav-item > .nav-link.active {
+    box-shadow: unset;
+    color: #ffcf42;
+    background-color: unset;
+  }
+
+  .sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active *, .sidebar-light-primary .nav-sidebar > .nav-item > .nav-link.active * {
+    color: #ffcf42;
+  }
+</style>
+</body>
+</html>
