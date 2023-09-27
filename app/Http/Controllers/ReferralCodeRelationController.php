@@ -35,7 +35,7 @@ class ReferralCodeRelationController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $is_verified = User::verifyReferralCode($request->referral_code);
+            $is_verified = User::verifyReferralCode($request->user_id, $request->referral_code);
             if (!$is_verified) {
                 return JsonResponseCustom::getApiResponse(
                     [],
