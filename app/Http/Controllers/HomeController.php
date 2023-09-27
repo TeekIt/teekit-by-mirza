@@ -82,59 +82,6 @@ class HomeController extends Controller
         }
     }
     /**
-     * It will show the inventory
-     * @version 1.1.0
-     */
-    // public function inventory(Request $request)
-    // {
-    //     if (Gate::allows('seller') || Gate::allows('child_seller')) {
-    //         if (Gate::allows('child_seller')) {
-    //             $child_seller_id = Auth::id();
-    //             $qty = Qty::where('users_id', $child_seller_id)->first();
-    //             $child_seller = User::where('id', $child_seller_id)->first();
-    //             $parent_seller_id = $child_seller->parent_store_id;
-    //             $featured = Products::query()->where('user_id', $parent_seller_id)->where('featured', '=', 1)->orderBy('id', 'DESC')->get();
-    //             if (!empty($qty)) {
-    //                 $inventory = Products::where('user_id', $parent_seller_id)
-    //                     ->with([
-    //                         'quantities' => function ($q) use ($child_seller_id) {
-    //                             $q->where('users_id', $child_seller_id);
-    //                         }
-    //                     ]);
-    //             } else {
-    //                 $inventory = Products::with('quantity')->where('user_id', $parent_seller_id);
-    //             }
-    //         }
-    //         //if not child seller then this condition will run for parent store
-    //         else {
-    //             $parent_seller_id = Auth::id();
-    //             $inventory = Products::query()->where('user_id', '=', $parent_seller_id)->orderBy('id', 'DESC');
-    //             $featured = Products::query()->where('user_id', '=', $parent_seller_id)->where('featured', '=', 1)->orderBy('id', 'DESC')->get();
-    //         }
-    //         //searching product by name and category
-    //         if ($request->search) $inventory = $inventory->where('product_name', 'LIKE', "%{$request->search}%");
-    //         if ($request->category) $inventory = $inventory->where('category_id', '=', $request->category);
-    //         $categories = Categories::all();
-    //         Gate::allows('child_seller') ? $inventory = $inventory->paginate(20) : $inventory = $inventory->paginate(9);
-    //         $inventory_p = $inventory;
-    //         $inventories = $inventory;
-    //         $featured_products = [];
-    //         if (Gate::allows('seller')) {
-    //             $featured_products = [];
-    //             $inventories = [];
-    //             foreach ($inventory as $in) {
-    //                 $inventories[] = Products::getProductInfo($in->id);
-    //             }
-    //         }
-    //         foreach ($featured as $in) {
-    //             $featured_products[] = Products::getProductInfo($in->id);
-    //         }
-    //         return view('shopkeeper.inventory.list', compact('inventories', 'featured_products', 'inventory_p', 'categories'));
-    //     } else {
-    //         abort(404);
-    //     }
-    // }
-    /**
      * It will redirect us to
      * edit inventory page
      * @version 1.0.0
@@ -355,7 +302,7 @@ class HomeController extends Controller
                 $product->save();
                 $product_id = $product->id;
                 $product_quantity = $request->qty;
-                $this->addProductQty($product_id, $user_id, $product_quantity);
+                Qty::addProductQty($user_id, $product_id, $$data['category_id'], $product_quantity);
                 if ($request->hasFile('gallery')) {
                     $images = $request->file('gallery');
                     foreach ($images as $image) {
@@ -624,15 +571,8 @@ class HomeController extends Controller
      */
     public function orders(Request $request)
     {
-        //        $inventory = Products::query()->where('user_id','=',Auth::id())->paginate(9);
-        //        $inventory_p = $inventory;
-        //        $inventories = [];
-        //        foreach ($inventory as $in){
-        //            $inventories[] = Products::getProductInfo($in->id);
-        //        }
         $return_arr = [];
-        // $orders = Orders::query()->where('seller_id', '=', Auth::id())->where('payment_status', '!=', 'hidden')->orderByDesc('id');
-        $orders = Orders::query()->where('seller_id', '=', Auth::id())->orderByDesc('id');
+        $orders = Orders::where('seller_id', '=', Auth::id())->orderByDesc('id');
         if ($request->search) {
             $order = Orders::find($request->search);
             $order->is_viewed = 1;
@@ -656,19 +596,6 @@ class HomeController extends Controller
         }
         $orders = $return_arr;
         return view('shopkeeper.orders.list', compact('orders', 'orders_p'));
-    }
-    /**
-     * Since our qty has now it's separate migration,
-     * this will help us add qty with given details to qty table
-     * @version 1.0.0
-     */
-    public function addProductQty($product_id, $user_id, $product_quantity)
-    {
-        $quantity = new Qty();
-        $quantity->products_id = $product_id;
-        $quantity->users_id = $user_id;
-        $quantity->qty = $product_quantity;
-        $quantity->save();
     }
     /**
      * Convert's CSV file to JSON
@@ -764,57 +691,19 @@ class HomeController extends Controller
                 $product->length = $importData[17];
                 $product->save();
 
-                //this function will add qty to it's particular table
+                //this function will add qty to it's parti;cular table
                 $product_id = (int)$product->id;
                 $product_quantity = ($importData[3] == "") ? 0 : $importData[3];
-                $this->addProductQty($product_id, $user_id, $product_quantity);
+                Qty::addProductQty($user_id, $product_id, $product->category_id, $product_quantity);
+
                 $product_images = new productImages();
                 $product_images->product_id = (int)$product->id;
                 $product_images->product_image = $importData[18];
                 $product_images->save();
-
                 $j++;
             }
         }
         flash('Your Bulk Products Have Been Imported Successfully!');
-        // if ($request->hasFile('file')) {
-        //     $import_data = json_decode($this->csvToJson($request->file('file')), true);
-        //     foreach ($import_data as $p) {
-        //         if (isset($p['images'])) {
-        //             $images = explode(',', $p['images']);
-        //             unset($p['images']);
-        //         }
-        //         if (is_array($p))
-        //             $ppt = array_keys($p);
-        //         $product = new Products();
-        //         print_r($product);
-        //         exit;
-        //         foreach ($ppt as $t) {
-        //             if ($t == 'colors') {
-        //                 $colors = explode(',', $p[$t]);
-        //                 $product->$t = json_encode(array_fill_keys($colors, true));
-        //             } elseif (($t == 'bike' && $p[$t] == null) || ($t == 'van' && $p[$t] == null)) {
-        //                 $product->$t = 0;
-        //             } else {
-        //                 $product->$t = $p[$t];
-        //             }
-        //         }
-
-        //         $product->user_id = $user_id;
-        //         $product->save();
-        //         $p_id = $product->id;
-        //         if (isset($images)) {
-        //             foreach ($images as $image) {
-        //                 $product_images = new productImages();
-        //                 $product_images->product_id = (int)$p_id;
-        //                 $product_images->product_image = $image;
-        //                 $product_images->save();
-        //             }
-        //         }
-        //     }
-
-        //     flash('Importing Complete');
-        // }
         return redirect()->back();
     }
     /**

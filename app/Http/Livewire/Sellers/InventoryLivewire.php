@@ -146,10 +146,6 @@ class InventoryLivewire extends Component
             2nd after entering the Qty for each product a child store can see his own entered Qty 
              */
             $data = Products::getChildSellerProductsForView(auth()->id(), $this->search, $this->category_id);
-            // $data = $returned_array['data'];
-            // $this->owner = $returned_array['owner'];
-            // dd($data);
-            
             // $this->quantity = $this->populateQuantityArray($data, $this->owner);
             $this->quantity = $this->populateQuantityArray($data);
         }

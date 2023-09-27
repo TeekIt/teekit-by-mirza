@@ -8,7 +8,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use JWTAuth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class EntrustRole
 {

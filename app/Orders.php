@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Http\Controllers\ProductsController;
 use Illuminate\Database\Eloquent\Model;
 
 class Orders extends Model
@@ -29,6 +30,34 @@ class Orders extends Model
     {
         return $this->belongsTo(User::class, 'seller_id');
     }
+
+    public function products()
+    {
+        return $this->hasManyThrough(
+            Products::class,
+            OrderItems::class,
+            'order_id',
+            'id',
+            'id',
+            'product_id'
+        );
+    }
+
+    // public function categories()
+    // {
+    //     return $this->hasManyThrough(
+    //         Category::class,
+    //         ExerciseRelation::class,
+    //         // Intermediate model...
+    //         'ex_id',
+    //         // Foreign key on the ExerciseRelation model...
+    //         'id',
+    //         // Local key on the Category model...
+    //         'id',
+    //         // Local key on the Exercise model...
+    //         'cat_id' // Foreign key on the ExerciseRelation table...
+    //     );
+    // }
     /**
      * Helpers
      */
@@ -72,4 +101,53 @@ class Orders extends Model
             'order_status' => $status
         ]);
     }
+
+    public static function getOrdersForView(int $order_id = null)
+    {
+        return Orders::with('products')
+            ->when($order_id, function ($query) use ($order_id) {
+                return $query->where('id', '=', $order_id);
+            })
+            ->orderByDesc('id')
+            ->paginate(10);
+
+
+        // $return_arr = [];
+        // $orders = Orders::where('seller_id', '=', Auth::id())->orderByDesc('id');
+        // if ($request->search) {
+        //     $order = Orders::find($request->search);
+        //     $order->is_viewed = 1;
+        //     $order->save();
+        //     $orders = $orders->where('id', '=', $request->search);
+        // }
+        // $orders = $orders->paginate(10);
+        // $orders_p = $orders;
+
+        // foreach ($orders as $order) {
+        //     //$order_items = [];
+        //     $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
+        //     $item_arr = [];
+        //     foreach ($items as $item) {
+        //         $product = (new ProductsController())->getProductInfo($item->product_id);
+        //         $item['product'] = $product;
+        //         $item_arr[] = $item;
+        //     }
+        //     $order['items'] = $item_arr;
+        //     $return_arr[] = $order;
+        // }
+        // $orders = $return_arr;
+        // return view('shopkeeper.orders.list', compact('orders', 'orders_p'));
+    }
+
+    // public static function getParentSellerProductsDescForView(int $seller_id, string $search = '', int $category_id = null)
+    // {
+    //     return Products::with('category', 'rattings')
+    //         ->where('product_name', 'LIKE', "%{$search}%")
+    //         ->where('user_id', '=', $seller_id)
+    //         ->when($category_id, function ($query, $category_id) {
+    //             return $query->where('category_id', '=', $category_id);
+    //         })
+    //         ->orderByDesc('id')
+    //         ->paginate(12);
+    // }
 }

@@ -42,6 +42,14 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ request()->is('seller/orders') ? 'active' : '' }}" href="{{route('seller.orders')}}">
+                        <i class="nav-icon fas fa-clipboard-list"></i>
+                        <p class="ml-2">
+                            Orders Test
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ request()->is('withdrawals') ? 'active' : '' }}" href="/withdrawals">
                         <i class="nav-icon fas fa-clipboard-list"></i>
                         <p class="ml-2">
@@ -61,15 +69,15 @@
                         <li class="nav-item">
                             <a href="{{route('usergeneral')}}" class="nav-link">
                                 <i class="fas fa-gears nav-icon"></i>
-                                <p>User General Settings</p>
+                                <p>Seller General Settings</p>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a href="/settings/general" class="nav-link">
                                 <i class="fas fa-gears nav-icon"></i>
                                 <p>General Settings</p>
                             </a>
-                        </li>
+                        </li> --}}
                         <li class="nav-item">
                             <a href="/settings/payment" class="nav-link">
                                 <i class="fas fa-money nav-icon"></i>

@@ -12,6 +12,7 @@ class Qty extends Model
      * @var string
      */
     protected $guarded = [];
+    
     protected $table = 'qty';
     /**
      * Relations
@@ -58,15 +59,23 @@ class Qty extends Model
 
     public static function updateChildProductQty(array $quantity)
     {
-        // dd($quantity);
-        // We have to use updateOrInsert() here
         return Qty::updateOrCreate(
             ['users_id' => $quantity['child_seller_id'], 'products_id' => $quantity['prod_id']],
             ['qty' => $quantity['qty']]
         );
-        // return Qty::where('id', $quantity['qty_id'])
-        //     ->update([
-        //         'qty' => $quantity['qty']
-        //     ]);
+    }
+    /**
+     * Since our qty has now it's separate migration,
+     * this will help us add qty with given details to qty table
+     * @author Muhammad Abdullah Mirza
+     */
+    public static function addProductQty($user_id, $product_id, $category_id, $product_quantity)
+    {
+        $quantity = new Qty();
+        $quantity->users_id = $user_id;
+        $quantity->products_id = $product_id;
+        $quantity->category_id = $category_id;
+        $quantity->qty = $product_quantity;
+        return $quantity->save();
     }
 }

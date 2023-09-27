@@ -213,46 +213,6 @@ Route::middleware(['jwt.verify'])->group(function () {
 | Random API Routes
 |--------------------------------------------------------------------------
 */
-// Stripe Live API's
-// Route::get('payment_intent', function () {
-//     $ch = curl_init();
-//     $amount = $_REQUEST['amount'];
-//     $currency = $_REQUEST['currency'];
-//     $headers[] = 'Content-Type: application/x-www-form-urlencoded';
-//     curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
-//     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-//     curl_setopt($ch, CURLOPT_POST, 1);
-//     curl_setopt($ch, CURLOPT_POSTFIELDS, "amount=$amount&currency=$currency&metadata[integration_check]=accept_a_payment");
-//     curl_setopt($ch, CURLOPT_USERPWD, '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' . ':' . '');
-//     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-//     $result = curl_exec($ch);
-//     if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
-
-//     curl_close($ch);
-//     return response()->json(json_decode($result), 200);
-// });
-
-// Stripe Test API's
-// Route::get('payment_intent/test', function () {
-//     // $ch = curl_init();
-//     // $amount = $_REQUEST['amount'];
-//     // $currency = $_REQUEST['currency'];
-//     // $headers[] = 'Content-Type: application/x-www-form-urlencoded';
-//     // curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
-//     // curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-//     // curl_setopt($ch, CURLOPT_POST, 1);
-//     // curl_setopt($ch, CURLOPT_POSTFIELDS, "amount=$amount&currency=$currency&metadata[integration_check]=accept_a_payment");
-//     // curl_setopt($ch, CURLOPT_USERPWD, 'sk_test_51IY9sYIiDDGv1gaVKsxU0EXr96lHcCvwXHwYAdN81Cqrj1TBL4HErJpczWJpYFIQ1qbCOQxnxIM3UfsBtWC2MKeD00QRkUKg6q' . ':' . '');
-//     // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-//     // $result = curl_exec($ch);
-//     // if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
-
-//     // curl_close($ch);
-//     // return response()->json(json_decode($result), 200);
-// });
-
 Route::get('payment_intent', [StripeServices::class, 'createPaymentIntent']);
 Route::get('payment_intent/request_incremental_authorization_support', [StripeServices::class, 'requestIncrementalAuthorizationSupport']);
 Route::get('payment_intent/perform_incremental_authorization', [StripeServices::class, 'performIncrementalAuthorization']);

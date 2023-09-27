@@ -7,6 +7,7 @@ use App\Orders;
 use App\Services\JsonResponseCustom;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Throwable;

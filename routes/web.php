@@ -14,6 +14,7 @@ use App\Http\Controllers\StuartDeliveryController;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
+use App\Http\Livewire\Sellers\OrdersLivewire;
 use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
 use Illuminate\Support\Facades\Route;
 /*
@@ -108,6 +109,10 @@ Route::prefix('orders')->group(function () {
     Route::get('/cancel/{order_id}', [HomeController::class, 'cancelOrder'])->name('cancel_order');
     Route::get('/{order_id}/remove/{item_id}/product/{product_price}/{product_qty}', [HomeController::class, 'removeProductFromOrder'])->name('remove_order_product');
     Route::get('/verify/{order_id}', [HomeController::class, 'clickToVerify'])->name('verify_order');
+});
+
+Route::middleware(['auth','auth.sellers'])->prefix('seller')->group(function () {
+    Route::get('orders', OrdersLivewire::class)->name('seller.orders');
 });
 /*
 |--------------------------------------------------------------------------

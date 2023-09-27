@@ -46,22 +46,9 @@ class ProductsController extends Controller
     //         ], 500);
     //     }
     // }
+  
     /**
-     * Since our qty has now it's separate migration,
-     * this will help us add qty with given details to qty table
-     * @version 1.0.0
-     */
-    public function addProductQty($product_id, $user_id, $product_quantity)
-    {
-        $quantity = new Qty();
-        $quantity->products_id = $product_id;
-        $quantity->users_id = $user_id;
-        $quantity->qty = $product_quantity;
-        $quantity->save();
-    }
-    /**
-     * Since our qty has now it's separate migration,
-     * this will help us update qty with given details to qty table
+     * This will help us to update the qty with the given details
      * @version 1.0.0
      */
     public function updateProductQty($product_id, $user_id, $product_quantity)
@@ -100,7 +87,7 @@ class ProductsController extends Controller
         //this function will add qty to it's particular table
         $product_id = $product->id;
         $product_quantity = $request->qty;
-        $this->addProductQty($product_id, $user_id, $product_quantity);
+        Qty::addProductQty($user_id, $product_id, $product->category_id, $product_quantity);
         if ($request->hasFile('images')) {
             $images = $request->file('images');
             foreach ($images as $image) {
@@ -177,9 +164,7 @@ class ProductsController extends Controller
                     $i++;
                     continue;
                 }
-                for ($c = 0; $c < $num; $c++) {
-                    $importData_arr[$i][] = $filedata[$c];
-                }
+                for ($c = 0; $c < $num; $c++) $importData_arr[$i][] = $filedata[$c];
                 $i++;
             }
             fclose($file); //Close after reading
@@ -190,7 +175,6 @@ class ProductsController extends Controller
                 $product->category_id = $importData[0];
                 $product->product_name = $importData[1];
                 $product->sku = $importData[2];
-                // $product->qty = ($importData[3] == "") ? 0 : $importData[3];
                 $product->price = str_replace(',', '', $importData[4]);
                 $product->discount_percentage = ($importData[5] == "") ? 0 : $importData[5];
                 $product->weight = $importData[6];
@@ -207,10 +191,11 @@ class ProductsController extends Controller
                 $product->width = $importData[16];
                 $product->length = $importData[17];
                 $product->save();
-                //this function will add qty to it's particular table
+
+                //This function will add qty to it's particular table
                 $product_id = (int)$product->id;
                 $product_quantity = ($importData[3] == "") ? 0 : $importData[3];
-                $this->addProductQty($product_id, $user_id, $product_quantity);
+                Qty::addProductQty($user_id, $product_id, $product->category_id, $product_quantity);
 
                 $product_images = new productImages();
                 $product_images->product_id = (int)$product->id;
@@ -311,19 +296,18 @@ class ProductsController extends Controller
         $qty = Products::with('quantity')
             ->where('id', $product_id)
             ->first();
-            if($qty){
-        $quantity = $qty->quantity->qty;
-        $product = Products::with('quantity')
-            ->select(['*', DB::raw("$quantity as qty")])
-            ->find($product_id);
-        $product->images = productImages::query()->where('product_id', '=', $product->id)->get();
-        $product->category = Categories::find($product->category_id);
-        $product->ratting = (new RattingsController())->getRatting($product_id);
-        return $product;
-            }else
-            {
-                return $product="";
-            }
+        if ($qty) {
+            $quantity = $qty->quantity->qty;
+            $product = Products::with('quantity')
+                ->select(['*', DB::raw("$quantity as qty")])
+                ->find($product_id);
+            $product->images = productImages::query()->where('product_id', '=', $product->id)->get();
+            $product->category = Categories::find($product->category_id);
+            $product->ratting = (new RattingsController())->getRatting($product_id);
+            return $product;
+        } else {
+            return $product = "";
+        }
     }
 
     public function getProductInfoWithQty($product_id, $store_id)
@@ -654,17 +638,7 @@ class ProductsController extends Controller
     // {
     //     return Products::find($product_id)->user_id;
     // }
-    /**
-     * Subtracts or Add qty
-     * @author Mirza Abdullah Izhar
-     * @version 1.0.0
-     */
-    // public function updateQty($product_id, $qty, $operation)
-    // {
-    //     if ($operation == 'subtract') {
-    //         $qty = (new Qty())->updateProductQty($product_id, '', $qty);
-    //     }
-    // }
+
     /**
      *It will export products into csv
      * @version 1.0.0
@@ -756,7 +730,7 @@ class ProductsController extends Controller
             }
             $article = Products::search($request->product_name);
             $article->where('status', 1);
-            
+
             if (isset($store_ids)) $article->whereIn('user_id', $store_ids['ids']);
             if (isset($request->category_id)) $article->where('category_id', $request->category_id);
             if (isset($request->store_id)) $article->where('user_id', $request->store_id);

@@ -514,4 +514,3 @@
             });
         }
     </script>
-    {{-- @yield('scripts') --}}

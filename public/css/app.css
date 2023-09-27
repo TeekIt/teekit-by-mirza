@@ -97,6 +97,11 @@ nav.main-header a {
     color: #3a4b83;
 }
 
+.btn-site-primary {
+    background-color: #3a4b83 !important;
+    border: none !important;
+    color: white !important;
+}
 
 .card-body {
     padding: 5px 5px;
