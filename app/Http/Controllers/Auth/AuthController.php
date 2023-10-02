@@ -483,7 +483,7 @@ class AuthController extends Controller
             $pagination = $products->toArray();
             if (!$products->isEmpty()) {
                 foreach ($products as $product) {
-                    $data[] = (new ProductsController())->getProductInfo($product->id);
+                    $data[] = Products::getProductInfo($product->id);
                 }
                 unset($pagination['data']);
                 return response()->json([

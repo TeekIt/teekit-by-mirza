@@ -104,7 +104,7 @@ class Categories extends Model
         $pagination = $products->toArray();
         if (!$products->isEmpty()) {
             $products_data = [];
-            foreach ($products as $product) $products_data[] = (new ProductsController())->getProductInfo($product->id);
+            foreach ($products as $product) $products_data[] = Products::getProductInfo($product->id);
             unset($pagination['data']);
             return ['data' => $products_data, 'pagination' => $pagination];
         } else {
@@ -124,7 +124,7 @@ class Categories extends Model
         $pagination = $products->toArray();
         if (!$products->isEmpty()) {
             $products_data = [];
-            foreach ($products as $product) $products_data[] = (new ProductsController())->getProductInfo($product->id);
+            foreach ($products as $product) $products_data[] = Products::getProductInfo($product->id);
             unset($pagination['data']);
             return ['data' => $products_data, 'pagination' => $pagination];
         } else {

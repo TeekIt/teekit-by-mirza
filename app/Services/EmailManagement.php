@@ -9,6 +9,20 @@ use Illuminate\Support\Facades\Mail;
 
 final class EmailManagement
 {
+    public static function sendStoreApprovedEmail(object $user)
+    {
+        $html = '<html>
+                    Hi, ' . $user->name . '<br><br>
+                    Thank you for registering on ' . env('APP_NAME') . '.
+                    <br>
+                    Your store has been approved. Please login to your
+                    <a href="' . url('/') . '">Store</a> to manage it.
+                    <br><br><br>
+                </html>';
+        $subject = url('/') . ': Account Approved!';
+        Mail::to($user->email)->send(new StoreRegisterMail($html, $subject));
+    }
+
     public static function sendDriverAccVerificationMail(object $driver)
     {
         $verification_code = Crypt::encrypt($driver->email);

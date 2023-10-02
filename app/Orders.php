@@ -4,6 +4,7 @@ namespace App;
 
 use App\Http\Controllers\ProductsController;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Orders extends Model
 {
@@ -102,52 +103,39 @@ class Orders extends Model
         ]);
     }
 
-    public static function getOrdersForView(int $order_id = null)
+    public static function isViewed(int $id)
     {
-        return Orders::with('products')
-            ->when($order_id, function ($query) use ($order_id) {
-                return $query->where('id', '=', $order_id);
-            })
-            ->orderByDesc('id')
-            ->paginate(10);
-
-
-        // $return_arr = [];
-        // $orders = Orders::where('seller_id', '=', Auth::id())->orderByDesc('id');
-        // if ($request->search) {
-        //     $order = Orders::find($request->search);
-        //     $order->is_viewed = 1;
-        //     $order->save();
-        //     $orders = $orders->where('id', '=', $request->search);
-        // }
-        // $orders = $orders->paginate(10);
-        // $orders_p = $orders;
-
-        // foreach ($orders as $order) {
-        //     //$order_items = [];
-        //     $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
-        //     $item_arr = [];
-        //     foreach ($items as $item) {
-        //         $product = (new ProductsController())->getProductInfo($item->product_id);
-        //         $item['product'] = $product;
-        //         $item_arr[] = $item;
-        //     }
-        //     $order['items'] = $item_arr;
-        //     $return_arr[] = $order;
-        // }
-        // $orders = $return_arr;
-        // return view('shopkeeper.orders.list', compact('orders', 'orders_p'));
+        $order = Orders::find($id);
+        $order->is_viewed = 1;
+        $order->save();
+        return $order;
     }
 
-    // public static function getParentSellerProductsDescForView(int $seller_id, string $search = '', int $category_id = null)
-    // {
-    //     return Products::with('category', 'rattings')
-    //         ->where('product_name', 'LIKE', "%{$search}%")
-    //         ->where('user_id', '=', $seller_id)
-    //         ->when($category_id, function ($query, $category_id) {
-    //             return $query->where('category_id', '=', $category_id);
-    //         })
-    //         ->orderByDesc('id')
-    //         ->paginate(12);
-    // }
+    public static function getOrdersForView(int $id = null, int $seller_id)
+    {
+        // First we will update the "is_viewed" column if the order is searched by ID
+        if ($id) static::isViewed($id);
+        // Now we will fetch the required data
+        $orders = Orders::with('order_items')
+            ->when($id, function ($query) use ($id) {
+                return $query->where('id', '=', $id);
+            })
+            ->where('seller_id', '=', $seller_id)
+            ->orderByDesc('id');
+        
+        $orders = $orders->paginate(8);
+        $pagination = $orders;
+
+        foreach ($orders as $order) {
+            // Calling the products relation
+            $items = $order->order_items;
+            $item_arr = [];
+            foreach ($items as $item) $item_arr[] = Products::getProductInfo($item->product_id);
+
+            $order['items'] = $item_arr;
+            $data[] = $order;
+        }
+
+        return ['orders' => $data, 'pagination' => $pagination];
+    }
 }

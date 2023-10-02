@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Services\EmailManagement;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\StoreRegisterMail;
 use App\Models\ReferralCodeRelation;
@@ -238,27 +239,14 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function sendStoreApprovedEmail(object $user)
-    {
-        $html = '<html>
-            Hi, ' . $user->name . '<br><br>
-            Thank you for registering on ' . env('APP_NAME') . '.
-            <br>
-            Your store has been approved. Please login to your
-            <a href="' . url('/') . '">Store</a> to manage it.
-            <br><br><br>
-                     </html>';
-        $subject = url('/') . ': Account Approved!';
-        Mail::to($user->email)
-            ->send(new StoreRegisterMail($html, $subject));
-    }
+    
 
     public static function activeOrBlockStore(int $user_id, int $status)
     {
         User::where('id', '=', $user_id)->update(['is_active' => $status]);
         if ($status == 1) {
             $user = User::findOrFail($user_id);
-            static::sendStoreApprovedEmail($user);
+            EmailManagement::sendStoreApprovedEmail($user);
         }
         return true;
     }
@@ -301,17 +289,6 @@ class User extends Authenticatable implements JWTSubject
         $data = User::where('referral_code', $referral_code)->first();
         return (is_null($data)) ? false :  $data;
     }
-
-    // public static function updateWalletAndStatus(int $status, float $bonus, int $user_id)
-    // {
-    //     $user = User::find($user_id);
-    //     if ($user) {
-    //         $user->pending_withdraw += $bonus;
-    //         // $user->referral_useable = $status;
-    //         $user->save();
-    //     }
-    //     return $user;
-    // }
 
     public static function addIntoWallet(int $user_id, float $amount)
     {

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\User;
 use App\Qty;
+use App\Rattings;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Stripe\Product;
@@ -106,7 +107,7 @@ class ProductsController extends Controller
                 $product_images->save();
             }
         }
-        $product =  $this->getProductInfo($product->id);
+        $product =  Products::getProductInfo($product->id);
         return JsonResponseCustom::getApiResponse(
             $product,
             true,
@@ -278,7 +279,7 @@ class ProductsController extends Controller
         $product_id = $product->id;
         $product_quantity = $request->qty;
         $this->updateProductQty($product_id, $user_id, $product_quantity);
-        $product =  $this->getProductInfo($product->id);
+        $product =  Products::getProductInfo($product->id);
         return JsonResponseCustom::getApiResponse(
             $product,
             true,
@@ -291,42 +292,42 @@ class ProductsController extends Controller
      * as well as qty data for the products from qty table
      * @version 1.0.0
      */
-    public function getProductInfo($product_id)
-    {
-        $qty = Products::with('quantity')
-            ->where('id', $product_id)
-            ->first();
-        if ($qty) {
-            $quantity = $qty->quantity->qty;
-            $product = Products::with('quantity')
-                ->select(['*', DB::raw("$quantity as qty")])
-                ->find($product_id);
-            $product->images = productImages::query()->where('product_id', '=', $product->id)->get();
-            $product->category = Categories::find($product->category_id);
-            $product->ratting = (new RattingsController())->getRatting($product_id);
-            return $product;
-        } else {
-            return $product = "";
-        }
-    }
+    // public function getProductInfo($product_id)
+    // {
+    //     $qty = Products::with('quantity')
+    //         ->where('id', $product_id)
+    //         ->first();
+    //     if ($qty) {
+    //         $quantity = $qty->quantity->qty;
+    //         $product = Products::with('quantity')
+    //             ->select(['*', DB::raw("$quantity as qty")])
+    //             ->find($product_id);
+    //         $product->images = productImages::query()->where('product_id', '=', $product->id)->get();
+    //         $product->category = Categories::find($product->category_id);
+    //         $product->ratting = Rattings::getRatting($product_id);
+    //         return $product;
+    //     } else {
+    //         return $product = "";
+    //     }
+    // }
 
-    public function getProductInfoWithQty($product_id, $store_id)
-    {
-        $qty = Products::with('quantity')
-            ->where('user_id', $store_id)
-            ->where('id', $product_id)
-            ->first();
-        $quantity = $qty->quantity->qty;
-        $product = Products::with('quantity')
-            ->where('user_id', $store_id)
-            ->where('id', $product_id)
-            ->select(['*', DB::raw("$quantity as qty")])
-            ->first();
-        $product->images = productImages::query()->where('product_id', '=', $product->id)->get();
-        $product->category = Categories::find($product->category_id);
-        $product->ratting = (new RattingsController())->getRatting($product_id);
-        return $product;
-    }
+    // public function getProductInfoWithQty($product_id, $store_id)
+    // {
+    //     $qty = Products::with('quantity')
+    //         ->where('user_id', $store_id)
+    //         ->where('id', $product_id)
+    //         ->first();
+    //     $quantity = $qty->quantity->qty;
+    //     $product = Products::with('quantity')
+    //         ->where('user_id', $store_id)
+    //         ->where('id', $product_id)
+    //         ->select(['*', DB::raw("$quantity as qty")])
+    //         ->first();
+    //     $product->images = productImages::query()->where('product_id', '=', $product->id)->get();
+    //     $product->category = Categories::find($product->category_id);
+    //     $product->ratting = Rattings::getRatting($product_id);
+    //     return $product;
+    // }
     /**
      * All products listing
      * @author Mirza Abdullah Izhar
@@ -342,7 +343,7 @@ class ProductsController extends Controller
             if (!empty($products)) {
                 $products_data = [];
                 foreach ($products as $product) {
-                    $data = $this->getProductInfo($product->id);
+                    $data = Products::getProductInfo($product->id);
                     $data->store = User::find($product->user_id);
                     $products_data[] = $data;
                 }
@@ -385,7 +386,7 @@ class ProductsController extends Controller
         if (!empty($products)) {
             $products_data = [];
             foreach ($products as $product) {
-                $products_data[] = $this->getProductInfo($product->id);
+                $products_data[] = Products::getProductInfo($product->id);
             }
             unset($pagination['data']);
             return JsonResponseCustom::getApiResponseExtention(
@@ -417,7 +418,7 @@ class ProductsController extends Controller
             if (!$products->isEmpty()) {
                 $products_data = [];
                 foreach ($products as $product) {
-                    $products_data[] = $this->getProductInfo($product->id);
+                    $products_data[] = Products::getProductInfo($product->id);
                 }
 
                 unset($pagination['data']);
@@ -465,7 +466,7 @@ class ProductsController extends Controller
                     continue;
                 }
                 $i = $i + 1;
-                $t = $this->getProductInfo($product->id);
+                $t = Products::getProductInfo($product->id);
                 $t->distance = $product->distance;
                 //$t->distance = round($product->distance);
                 $products_data[] = $t;
@@ -507,7 +508,7 @@ class ProductsController extends Controller
             }
             $store = Products::where('id', $request->product_id)->first();
             $store_id = $store->user_id;
-            $product = $this->getProductInfoWithQty($request->product_id, $store_id);
+            $product = Products::getProductInfoWithQty($request->product_id, $store_id);
             if (!empty($product)) {
                 $product->store = User::find($product->user_id);
                 unset($product->quantity);
@@ -553,7 +554,7 @@ class ProductsController extends Controller
     public function deleteImage($image_id, $product_id)
     {
         productImages::find($image_id)->delete();
-        return $this->getProductInfo($product_id);
+        return Products::getProductInfo($product_id);
     }
     /**
      * It list the featured products
@@ -568,7 +569,7 @@ class ProductsController extends Controller
             if (!$featured_products->isEmpty()) {
                 $products_data = [];
                 foreach ($featured_products as $product) {
-                    $data = $this->getProductInfo($product->id);
+                    $data = Products::getProductInfo($product->id);
                     $data->store = User::find($product->user_id);
                     $products_data[] = $data;
                 }
@@ -610,6 +611,7 @@ class ProductsController extends Controller
     //     if ($product->discount_percentage > 0) return $product->discount_percentage * 1.2;
     //     return $product->price * 1.2;
     // }
+
     /**
      * It find's the volumn of the given product
      * @author Mirza Abdullah Izhar
@@ -649,7 +651,7 @@ class ProductsController extends Controller
         $products = Products::getParentSellerProductsAsc($user_id);
         $all_products = [];
         foreach ($products as $product) {
-            $pt = json_decode(json_encode($this->getProductInfo($product->id)->toArray()));
+            $pt = json_decode(json_encode(Products::getProductInfo($product->id)->toArray()));
             unset($pt->category);
             unset($pt->ratting);
             unset($pt->id);
@@ -674,7 +676,7 @@ class ProductsController extends Controller
      *helper function for exporting products
      * @version 1.0.0
      */
-    function jsonToCsv($json, $csvFilePath = false, $boolOutputFile = false)
+    public function jsonToCsv($json, $csvFilePath = false, $boolOutputFile = false)
     {
         // See if the string contains something
         if (empty($json)) {
@@ -750,7 +752,7 @@ class ProductsController extends Controller
             $pagination = $products->toArray();
             if (!$products->isEmpty()) {
                 $products_data = [];
-                foreach ($products as $product) $products_data[] = $this->getProductInfo($product->id);
+                foreach ($products as $product) $products_data[] = Products::getProductInfo($product->id);
                 unset($pagination['data']);
                 return JsonResponseCustom::getApiResponseExtention(
                     $products_data,
@@ -981,7 +983,7 @@ class ProductsController extends Controller
             $pagination = $products->toArray();
 
             if (!$products->isEmpty()) {
-                foreach ($products as $product) $data[] = (new ProductsController())->getProductInfo($product->id);
+                foreach ($products as $product) $data[] = Products::getProductInfo($product->id);
                 unset($pagination['data']);
                 return JsonResponseCustom::getApiResponseExtention(
                     $data,

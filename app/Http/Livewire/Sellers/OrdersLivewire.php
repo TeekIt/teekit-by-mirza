@@ -2,8 +2,10 @@
 
 namespace App\Http\Livewire\Sellers;
 
+use App\Drivers;
 use App\Orders;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -11,6 +13,7 @@ class OrdersLivewire extends Component
 {
     use WithPagination;
     public
+        $seller_id,
         $name,
         $l_name,
         $email,
@@ -28,6 +31,11 @@ class OrdersLivewire extends Component
         $search = '';
 
     protected $paginationTheme = 'bootstrap';
+
+    public function mount()
+    {
+        $this->seller_id = Auth::id();
+    }
 
     public function resetModal()
     {
@@ -82,8 +90,7 @@ class OrdersLivewire extends Component
 
     public function render()
     {
-        // $data = Orders::getOrdersForView(1662);
-        // dd($data);
-        return view('livewire.sellers.orders-livewire');
+        $data = Orders::getOrdersForView(null, $this->seller_id);
+        return view('livewire.sellers.orders-livewire', compact('data'));
     }
 }

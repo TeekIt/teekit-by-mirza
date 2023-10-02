@@ -587,7 +587,7 @@ class HomeController extends Controller
             $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
             $item_arr = [];
             foreach ($items as $item) {
-                $product = (new ProductsController())->getProductInfo($item->product_id);
+                $product = Products::getProductInfo($item->product_id);
                 $item['product'] = $product;
                 $item_arr[] = $item;
             }
@@ -822,7 +822,7 @@ class HomeController extends Controller
                 $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = (new ProductsController())->getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($item->product_id);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
@@ -863,7 +863,7 @@ class HomeController extends Controller
                 $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = (new ProductsController())->getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($item->product_id);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
@@ -1107,7 +1107,7 @@ class HomeController extends Controller
                 $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = (new ProductsController())->getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($item->product_id);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
@@ -1148,7 +1148,7 @@ class HomeController extends Controller
                 $items = OrderItems::query()->where('order_id', '=', $order->order_id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = (new ProductsController())->getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($item->product_id);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
@@ -1190,7 +1190,7 @@ class HomeController extends Controller
                 $items = OrderItems::query()->where('order_id', '=', $order->order_id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = (new ProductsController())->getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($item->product_id);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }

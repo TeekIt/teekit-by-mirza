@@ -170,8 +170,7 @@
         </div>
         <div class="col-12 col-sm-6 col-md-5 col-xl-5">
             <div class="input-group py-4 my-2">
-                <input type="text" wire:model.debounce.500ms="search" class="form-control py-3"
-                    placeholder="Search here...">
+                <input type="text" wire:model.debounce.500ms="search" class="form-control py-3" placeholder="Search here...">
                 <button class="btn btn-site-primary px-4" type="button"><i class='fas fa-search'></i></button>
             </div>
         </div>
@@ -182,10 +181,13 @@
         </div>
     </div>
     <!-- /Content Header -->
+    {{-- @dd($data['orders']) --}}
 
     <!-- Main Content -->
     <div class="container border border-danger">
-        @for ($x = 0; $x < 3; $x++)
+        @forelse ($data['orders'] as $order)
+            {{-- @dd($order) --}}
+
             <!-- Single Order Content -->
             <div class="col-md-12 p-4 pr-4">
                 <div class="card">
@@ -208,29 +210,30 @@
                                 <tbody>
                                     <tr>
                                         <td><b>Order#</b></td>
-                                        <td>1</td>
+                                        <td>{{ $order->id }}</td>
                                         <td><b>Order Status</b></td>
-                                        <td><span class="badge badge-warning">pending</span></td>
+                                        <td><span class="badge badge-warning">{{ $order->order_status }}</span></td>
                                     </tr>
 
                                     <tr>
                                         <td><b>Placed At</b></td>
-                                        <td>2023-03-15 21:48:35</td>
+                                        <td>{{ $order->created_at }}</td>
                                         <td><b>Order Type</b></td>
-                                        <td><span class="badge badge-info">self-pickup</span></td>
+                                        <td><span class="badge badge-info">{{ $order->type }}</span></td>
                                     </tr>
 
                                     <tr>
                                         <td><b>Order Total</b></td>
-                                        <td>£10.00</td>
+                                        <td>£{{ $order->order_total }}</td>
                                         <td><b>Payment Status</b></td>
-                                        <td><span class="badge badge-primary">paid</span></td>
+                                        <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <!-- /Order Header -->
 
+                        {{-- Old Div --}}
                         <div>
                             @if ('$order->order_status' == 'pending')
                                 <a href="{{ route('accept_order', ['order_id' => 1]) }}" class="d-block btn btn-warning float-right">Click when preparing order</a>
@@ -245,33 +248,41 @@
                                 @endif
                             @endif
                         </div>
+                        {{-- //Old Div --}}
 
                         <div class="card-text border border-info">
-                            @for ($i = 0; $i < 3; $i++)
+                            @foreach ($order->items as $item)
+                            {{-- @dd($item) --}}
+
                                 <!-- Order Items -->
                                 <div class="row mb-2 border border-success">
                                     <div class="col-md-2">
                                         <span class="img-container">
-                                            <img class="d-block m-auto" src="{{ asset('icons/customer.png') }}" alt="">
+                                            {{-- <img class="d-block m-auto" src="{{ asset(config('constants.BUCKET') . $item->feature_img) }}"> --}}
+                                            @if (str_contains($item->feature_img, 'https://'))
+                                                <img class="d-block m-auto" src="{{ asset($item->feature_img) }}">
+                                            @else
+                                                <img class="d-block m-auto" src="{{ config('constants.BUCKET') . $item->feature_img }}">
+                                            @endif
                                         </span>
                                     </div>
                                     <div class="col-10">
                                         <table class="table">
                                             <tr>
                                                 <td class="text-site-primary"><b>Product Name:</b></td>
-                                                <td>Soudal Multi Purpose Silicone 270ml Clear</td>
+                                                <td>{{ $item->product_name }}</td>
                                             </tr>
                                             <tr>
                                                 <td class="text-site-primary"><b>Category:</b></td>
-                                                <td>Adhesives & Sealants</td>
+                                                <td>{{ $item->category->category_name }}</td>
                                             </tr>
                                             <tr>
                                                 <td class="text-site-primary"><b>SKU:</b></td>
-                                                <td>LS121644</td>
+                                                <td>{{ $item->sku }}</td>
                                             </tr>
                                             <tr>
                                                 <td class="text-site-primary"><b>QTY:</b></td>
-                                                <td>3</td>
+                                                <td>NA</td>
                                             </tr>
                                             <tr>
                                                 <td class="text-site-primary"><b>I don't have this product!</b></td>
@@ -285,14 +296,17 @@
                                     </div>
                                 </div>
                                 <!-- /Order Items -->
-                            @endfor
+                            @endforeach
                         </div>
 
                     </div>
                 </div>
             </div>
             <!-- /Single Order Content -->
-        @endfor
+        @empty
+            <h1>No orders yet... :(</h1>
+        @endforelse
+
 
         <div class="row">
 
@@ -488,4 +502,5 @@
             </div>
         </div>
     @endif
+
 </div>
