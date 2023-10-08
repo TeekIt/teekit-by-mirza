@@ -2,8 +2,21 @@
 
 namespace App\Services;
 
+use Stripe\Refund;
+use Stripe\Stripe;
+
 final class StripeServices
 {
+    public static function getLiveApiKey()
+    {
+        return config('constants.STRIPE_LIVE_API_KEY');
+    }
+
+    public static function getTestApiKey()
+    {
+        return config('constants.STRIPE_TEST_API_KEY');
+    }
+
     public static function createPaymentIntent()
     {
         $ch = curl_init();
@@ -12,7 +25,7 @@ final class StripeServices
             'currency' => $_REQUEST['currency']
         ];
         // $headers[] = 'Content-Type: application/x-www-form-urlencoded';
-        $api_key = (request()->getPathInfo() === '/api/payment_intent/test') ? config('constants.STRIPE_TEST_API_KEY') : config('constants.STRIPE_LIVE_API_KEY');
+        $api_key = (request()->getPathInfo() === '/api/payment_intent/test') ? static::getTestApiKey() : static::getLiveApiKey();
 
         curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -43,7 +56,7 @@ final class StripeServices
             'capture_method' => 'manual',
             'payment_method_options[card][request_incremental_authorization_support]' => 'true',
         ];
-        $api_key = (request()->getPathInfo() === '/api/payment_intent/test/request_incremental_authorization_support') ? config('constants.STRIPE_TEST_API_KEY') : config('constants.STRIPE_LIVE_API_KEY');
+        $api_key = (request()->getPathInfo() === '/api/payment_intent/test/request_incremental_authorization_support') ? static::getTestApiKey() : static::getLiveApiKey();
 
         curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -71,7 +84,7 @@ final class StripeServices
         $query_params = [
             'amount' => $_REQUEST['amount']
         ];
-        $api_key = (request()->getPathInfo() === '/api/payment_intent/test/perform_incremental_authorization') ? config('constants.STRIPE_TEST_API_KEY') : config('constants.STRIPE_LIVE_API_KEY');
+        $api_key = (request()->getPathInfo() === '/api/payment_intent/test/perform_incremental_authorization') ? static::getTestApiKey() : static::getLiveApiKey();
 
         curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $payment_intent_id . '/increment_authorization');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -98,7 +111,7 @@ final class StripeServices
         $query_params = [
             'amount_to_capture' => $_REQUEST['amount']
         ];
-        $api_key = (request()->getPathInfo() === '/api/payment_intent/test/capture') ? config('constants.STRIPE_TEST_API_KEY') : config('constants.STRIPE_LIVE_API_KEY');
+        $api_key = (request()->getPathInfo() === '/api/payment_intent/test/capture') ? static::getTestApiKey() : static::getLiveApiKey();
 
         curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $payment_intent_id . '/capture');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -116,5 +129,12 @@ final class StripeServices
             '',
             config('constants.HTTP_OK')
         );
+    }
+
+    public static function refundCustomer(object $order)
+    {
+        $api_key = (url('/') === config('constants.LIVE_SITE_URL')) ? static::getLiveApiKey() : static::getTestApiKey();
+        Stripe::setApiKey($api_key);
+        Refund::create(['charge' => $order->transaction_id]);
     }
 }

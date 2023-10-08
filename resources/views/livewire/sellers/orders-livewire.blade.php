@@ -1,4 +1,14 @@
 <div class="content">
+    <div class="bs-toast toast toast-placement-ex m-2 fade bg-danger top-0 end-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
+        <div class="toast-header">
+            <i class="bx bx-bell me-2"></i>
+            <div class="me-auto fw-semibold">Error</div>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            The cross button is not working - please resolve this error
+        </div>
+    </div>
     @if (session()->has('error'))
         <div class="bs-toast toast toast-placement-ex m-2 fade bg-danger top-0 end-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
             <div class="toast-header">
@@ -198,12 +208,37 @@
                                 <thead>
                                     <tr>
                                         <td colspan="4">
-                                            <button class="btn btn-warning" title="Click here when preparing order">
-                                                Preparing Order
-                                            </button>
-                                            <button class="btn btn-danger" title="Cancel the whole order">
-                                                Cancel Order
-                                            </button>
+                                            @if ($order->order_status == 'pending')
+                                                <button class="btn btn-warning" wire:click="orderIsReady({{ $order }})" wire:target="orderIsReady({{ $order }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Click here when preparing order">
+                                                    <span wire:target="orderIsReady({{ $order }})" wire:loading.remove>
+                                                        Preparing Order
+                                                    </span>
+                                                    <span wire:target="orderIsReady({{ $order }})" wire:loading>
+                                                        <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                                    </span>
+                                                </button>
+
+                                                <button class="btn btn-danger" wire:click="cancelOrder({{ $order }})" wire:target="cancelOrder({{ $order }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Cancel the whole order">
+                                                    <span wire:target="cancelOrder({{ $order }})" wire:loading.remove>
+                                                        Cancel Order
+                                                    </span>
+                                                    <span wire:target="cancelOrder({{ $order }})" wire:loading>
+                                                        <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                                    </span>
+                                                </button>
+                                            @endif
+
+                                            @if (!empty($order->delivery_boy_id))
+                                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deliveryBoyDetailsModal" title="View delivery boy details">
+                                                    Delivery Boy Details
+                                                </button>
+                                            @endif
+
+                                            @if ($order->order_status == 'cancelled')
+                                                <button class="btn btn-dark" title="This order has been cencelled" disabled>
+                                                    Order Cancelled
+                                                </button>
+                                            @endif
                                         </td>
                                     </tr>
                                 </thead>
@@ -232,27 +267,9 @@
                             </table>
                         </div>
                         <!-- /Order Header -->
-
-                        {{-- Old Div --}}
-                        <div>
-                            @if ('$order->order_status' == 'pending')
-                                <a href="{{ route('accept_order', ['order_id' => 1]) }}" class="d-block btn btn-warning float-right">Click when preparing order</a>
-                                <a href="{{ route('cancel_order', ['order_id' => 1]) }}" onclick="cancelOrder(event)" class="d-block btn btn-danger float-right" style="margin-right: 20px">
-                                    Cancel Order
-                                </a>
-                            @else
-                                @if (!empty($order->delivery_boy_id))
-                                    <a href="#" data-bs-toggle="modal" data-bs-target="#detailsModal{{ 1 }}" class="btn btn-primary d-block float-right">
-                                        View Driver Details
-                                    </a>
-                                @endif
-                            @endif
-                        </div>
-                        {{-- //Old Div --}}
-
                         <div class="card-text border border-info">
                             @foreach ($order->items as $item)
-                            {{-- @dd($item) --}}
+                                {{-- @dd($item) --}}
 
                                 <!-- Order Items -->
                                 <div class="row mb-2 border border-success">

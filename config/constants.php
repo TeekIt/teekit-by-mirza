@@ -102,18 +102,26 @@ return [
     |--------------------------------------------------------------------------
     */
     'STRIPE_LIVE_API_KEY' => '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:',
+    'STRIPE_LIVE_PUBLISH_KEY' => 'pk_live_51IY9sYIiDDGv1gaVD23fTmgGwOdmPwFKvCP64BrGQPQngITPSBBOclUe6sz8vyN18Kli1iKq2JfeR754kkdbSm5T00u0M4kL0H',
     /*
     |--------------------------------------------------------------------------
     | Stripe Test Cridentials Key
     |--------------------------------------------------------------------------
     */
     'STRIPE_TEST_API_KEY' => 'sk_test_51IY9sYIiDDGv1gaVKsxU0EXr96lHcCvwXHwYAdN81Cqrj1TBL4HErJpczWJpYFIQ1qbCOQxnxIM3UfsBtWC2MKeD00QRkUKg6q:',
+    'STRIPE_TEST_PUBLISH_KEY' => 'pk_test_51IY9sYIiDDGv1gaVP2DSlWvT0tnrFstp62txvamB1icDpBjwXy1KtrZmiWLFjrxHmxlMrTyWbnnBWNMblbNMizwS004MoCvzJB',
     /*
     |--------------------------------------------------------------------------
     | Admin Email
     |--------------------------------------------------------------------------
     */
     'ADMIN_EMAIL' => 'admin@teekit.co.uk',
+    /*
+    |--------------------------------------------------------------------------
+    | Site URL
+    |--------------------------------------------------------------------------
+    */
+    'LIVE_SITE_URL' => 'https://app.teekit.co.uk/',
     /*
     |--------------------------------------------------------------------------
     | HTTP Status Codes

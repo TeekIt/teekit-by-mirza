@@ -711,17 +711,17 @@ class HomeController extends Controller
      * @author Huzaifa Haleem
      * @version 1.0.0
      */
-    public function changeOrderStatus($order_id)
-    {
-        Orders::where('id', '=', $order_id)->update(['order_status' => 'ready', 'is_viewed' => 1]);
-        $order = Orders::find($order_id);
-        $user = $order->user;
-        if ($order->type == 'self-pickup') {
-            Mail::to($user->email)
-                ->send(new OrderIsReadyMail($order));
-        }
-        return Redirect::back();
-    }
+    // public function changeOrderStatus($order_id)
+    // {
+    //     Orders::where('id', '=', $order_id)->update(['order_status' => 'ready', 'is_viewed' => 1]);
+    //     $order = Orders::find($order_id);
+    //     $user = $order->user;
+    //     if ($order->type == 'self-pickup') {
+    //         Mail::to($user->email)
+    //             ->send(new OrderIsReadyMail($order));
+    //     }
+    //     return Redirect::back();
+    // }
     /**
      * Change's order status to "delivered"
      * @author Mirza Abdullah Izhar
@@ -1398,29 +1398,29 @@ class HomeController extends Controller
      * @throws \Twilio\Exceptions\ConfigurationException
      * It will change the order status to canceled
      */
-    public function cancelOrder($order_id)
-    {
-        $order = Orders::findOrFail($order_id);
-        $order->load('user');
-        $order->load('store');
-        // dd($order->transaction_id);
-        Stripe\Stripe::setApiKey(config('app.STRIPE_SECRET'));
-        Stripe\Refund::create(['charge' => $order->transaction_id]);
-        $order->order_status = 'cancelled';
-        $order->save();
-        $message = "Hello " . $order->user->name . " .
-            Your order from " . $order->store->name . " was unsuccessful.
-            Unfortunately " . $order->store->name . " is unable to complete your order. But don't worry 
-            you have not been charged.
-            If you need any kinda of assistance, please contact us via email at:
-            admin@teekit.co.uk";
-        $sms = new TwilioSmsService();
-        $sms->sendSms($order->user->phone, $message);
-        Mail::to([$order->user->email])
-            ->send(new OrderIsCanceledMail($order));
-        flash('Order is successfully cancelled')->success();
-        return back();
-    }
+    // public function cancelOrder($order_id)
+    // {
+    //     $order = Orders::findOrFail($order_id);
+    //     $order->load('user');
+    //     $order->load('store');
+    //     // dd($order->transaction_id);
+    //     Stripe\Stripe::setApiKey(config('app.STRIPE_SECRET'));
+    //     Stripe\Refund::create(['charge' => $order->transaction_id]);
+    //     $order->order_status = 'cancelled';
+    //     $order->save();
+    //     $message = "Hello " . $order->user->name . " .
+    //         Your order from " . $order->store->name . " was unsuccessful.
+    //         Unfortunately " . $order->store->name . " is unable to complete your order. But don't worry 
+    //         you have not been charged.
+    //         If you need any kinda of assistance, please contact us via email at:
+    //         admin@teekit.co.uk";
+    //     $sms = new TwilioSmsService();
+    //     $sms->sendSms($order->user->phone, $message);
+    //     Mail::to([$order->user->email])
+    //         ->send(new OrderIsCanceledMail($order));
+    //     flash('Order is successfully cancelled')->success();
+    //     return back();
+    // }
     /**
      * It will remove a single product from the given order
      * @version 1.0.0

@@ -22,14 +22,14 @@ class Orders extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function delivery_boy()
-    {
-        return $this->belongsTo(User::class, 'delivery_boy_id');
-    }
-
     public function store()
     {
         return $this->belongsTo(User::class, 'seller_id');
+    }
+
+    public function delivery_boy()
+    {
+        return $this->belongsTo(User::class, 'delivery_boy_id');
     }
 
     public function products()
@@ -59,6 +59,7 @@ class Orders extends Model
     //         'cat_id' // Foreign key on the ExerciseRelation table...
     //     );
     // }
+
     /**
      * Helpers
      */
@@ -122,7 +123,7 @@ class Orders extends Model
             })
             ->where('seller_id', '=', $seller_id)
             ->orderByDesc('id');
-        
+
         $orders = $orders->paginate(8);
         $pagination = $orders;
 
@@ -137,5 +138,10 @@ class Orders extends Model
         }
 
         return ['orders' => $data, 'pagination' => $pagination];
+    }
+
+    public static function getOrderById(int $id)
+    {
+        return Orders::with(['order_items', 'user', 'store', 'delivery_boy'])->where('id', $id)->first();
     }
 }

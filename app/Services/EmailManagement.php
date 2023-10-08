@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\OrderIsReadyMail;
 use App\Mail\StoreRegisterMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -26,11 +27,11 @@ final class EmailManagement
     public static function sendDriverAccVerificationMail(object $driver)
     {
         $verification_code = Crypt::encrypt($driver->email);
-            $FRONTEND_URL = url('/');
+        $FRONTEND_URL = url('/');
 
-            $account_verification_link = $FRONTEND_URL . '/auth/verify?token=' . $verification_code;
+        $account_verification_link = $FRONTEND_URL . '/auth/verify?token=' . $verification_code;
 
-            $body = '<html>
+        $body = '<html>
                 Hi, ' . $driver->f_name . '<br><br>
                 Thank you for registering on ' . env('APP_NAME') . '.
                 <br>
@@ -40,8 +41,13 @@ final class EmailManagement
                 <br><br><br>
                 </html>';
 
-            $subject = env('APP_NAME') . ': Account Verification';
+        $subject = env('APP_NAME') . ': Account Verification';
 
-            Mail::to($driver->email)->send(new StoreRegisterMail($body, $subject));
+        Mail::to($driver->email)->send(new StoreRegisterMail($body, $subject));
+    }
+
+    public static function sendPickUpYouOrderMail(object $order)
+    {
+        Mail::to($order->user->email)->send(new OrderIsReadyMail($order));
     }
 }
