@@ -2,15 +2,19 @@
 
 namespace App\Services;
 
+use App\Drivers;
+use App\Mail\OrderIsCanceledMail;
 use App\Mail\OrderIsReadyMail;
 use App\Mail\StoreRegisterMail;
+use App\Orders;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 
 final class EmailManagement
 {
-    public static function sendStoreApprovedEmail(object $user)
+    public static function sendStoreApprovedEmail(User $user)
     {
         $html = '<html>
                     Hi, ' . $user->name . '<br><br>
@@ -24,7 +28,7 @@ final class EmailManagement
         Mail::to($user->email)->send(new StoreRegisterMail($html, $subject));
     }
 
-    public static function sendDriverAccVerificationMail(object $driver)
+    public static function sendDriverAccVerificationMail(Drivers $driver)
     {
         $verification_code = Crypt::encrypt($driver->email);
         $FRONTEND_URL = url('/');
@@ -46,8 +50,13 @@ final class EmailManagement
         Mail::to($driver->email)->send(new StoreRegisterMail($body, $subject));
     }
 
-    public static function sendPickUpYouOrderMail(object $order)
+    public static function sendPickupYourOrderMail(Orders $order)
     {
         Mail::to($order->user->email)->send(new OrderIsReadyMail($order));
+    }
+
+    public static function sendOrderHasBeenCancelledMail(Orders $order)
+    {
+        Mail::to([$order->user->email])->send(new OrderIsCanceledMail($order));
     }
 }

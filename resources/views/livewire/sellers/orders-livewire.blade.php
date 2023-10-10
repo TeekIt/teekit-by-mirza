@@ -1,38 +1,20 @@
 <div class="content">
-    <div class="bs-toast toast toast-placement-ex m-2 fade bg-danger top-0 end-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
-        <div class="toast-header">
-            <i class="bx bx-bell me-2"></i>
-            <div class="me-auto fw-semibold">Error</div>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-            The cross button is not working - please resolve this error
-        </div>
-    </div>
-    @if (session()->has('error'))
-        <div class="bs-toast toast toast-placement-ex m-2 fade bg-danger top-0 end-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
-            <div class="toast-header">
-                <i class="bx bx-bell me-2"></i>
-                <div class="me-auto fw-semibold">Error</div>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
+    <div class="container pt-4">
+        @if (session()->has('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong>
                 {{ session()->get('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        </div>
-    @endif
-    @if (session()->has('success'))
-        <div class="bs-toast toast toast-placement-ex m-2 fade bg-success top-0 end-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-delay="2000">
-            <div class="toast-header">
-                <i class="bx bx-bell me-2"></i>
-                <div class="me-auto fw-semibold">Success</div>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
+        @endif
+        @if (session()->has('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Success!</strong>
                 {{ session()->get('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        </div>
-    @endif
+        @endif
+    </div>
     {{-- ************************************ Delivery Boy Details Model ************************************ --}}
     <div wire:ignore.self class="modal fade" id="deliveryBoyDetailsModal" tabindex="-1" aria-labelledby="deliveryBoyDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -107,7 +89,7 @@
                     <div class="alert alert-warning" role="alert">
                         <h5>Please Read Carefully!</h5>
                         <p>
-                            <b>Must call the customer before searching an alternative</b> to know customer choice. If you don't call & the customer complains about the alternative product you have selected by yourself then Teekit may cancel your whole order with full money refund to the customer.
+                            <b>Must call the customer before searching an alternative</b> to know your customer choice. If you don't call & the customer complains about the alternative product which you have selected by yourself then Teekit may cancel your whole order with full refund to the customer.
                         </p>
                         <p>
                         <h4>Cutomer Contact: +44 3170188986</h4>
@@ -115,18 +97,33 @@
                     </div>
                     <form>
                         <div class="row">
-                            <div class="col-10 form-floating border border-danger">
+                            {{-- <div class="col-9 form-floating border border-danger">
                                 <input type="text" class="form-control" placeholder="Search alternative product">
                                 <label>Search alternative product</label>
+                            </div> --}}
+
+                            <div class="col-9 form-floating border border-danger">
+                                <input list="products" class="form-control" placeholder="Search alternative product">
+                                <datalist id="products">
+                                    <option value="volvo">Volvo</option>
+                                    <option value="saab">Saab</option>
+                                    <option value="3">Fiat</option>
+                                    <option value="audi">Audi</option>
+                                </datalist>
+                                <label>Search alternative product</label>
                             </div>
-                            <div class="col-2 border border-danger">
-                                <button class="btn btn-primary py-3 w-100 mx-1 px-0 " title="Add this product to the order">
+
+                            <div class="col-3 btn-group border border-danger" role="group">
+                                <button type="button" class="btn btn-site-primary py-3 w-100 px-0" title="Add this product to the order">
                                     <span class="fas fa-plus"></span>
+                                </button>
+                                <button type="button" class="btn btn-danger py-3 w-100 px-0" title="Remove the inserted product">
+                                    <span class="fas fa-minus"></span>
                                 </button>
                             </div>
                         </div>
                         {{-- Product Container --}}
-                        <div class="row mb-2 border border-success">
+                        <div class="row mt-3 border border-success">
                             <div class="col-md-2">
                                 <span class="img-container">
                                     <img class="d-block m-auto" src="{{ asset('icons/customer.png') }}" alt="">
@@ -209,20 +206,20 @@
                                     <tr>
                                         <td colspan="4">
                                             @if ($order->order_status == 'pending')
-                                                <button class="btn btn-warning" wire:click="orderIsReady({{ $order }})" wire:target="orderIsReady({{ $order }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Click here when preparing order">
-                                                    <span wire:target="orderIsReady({{ $order }})" wire:loading.remove>
+                                                <button class="btn btn-warning" wire:click="orderIsReady({{ $order }}, {{ $order->id }})" wire:target="orderIsReady({{ $order }}, {{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Click here when preparing order">
+                                                    <span wire:target="orderIsReady({{ $order }}, {{ $order->id }})" wire:loading.remove>
                                                         Preparing Order
                                                     </span>
-                                                    <span wire:target="orderIsReady({{ $order }})" wire:loading>
+                                                    <span wire:target="orderIsReady({{ $order }}, {{ $order->id }})" wire:loading>
                                                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                                                     </span>
                                                 </button>
 
-                                                <button class="btn btn-danger" wire:click="cancelOrder({{ $order }})" wire:target="cancelOrder({{ $order }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Cancel the whole order">
-                                                    <span wire:target="cancelOrder({{ $order }})" wire:loading.remove>
+                                                <button class="btn btn-danger" wire:click="cancelOrder({{ $order }}, {{ $order->id }})" wire:target="cancelOrder({{ $order }}, {{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Cancel the whole order">
+                                                    <span wire:target="cancelOrder({{ $order }}, {{ $order->id }})" wire:loading.remove>
                                                         Cancel Order
                                                     </span>
-                                                    <span wire:target="cancelOrder({{ $order }})" wire:loading>
+                                                    <span wire:target="cancelOrder({{ $order }}, {{ $order->id }})" wire:loading>
                                                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                                                     </span>
                                                 </button>
@@ -301,14 +298,16 @@
                                                 <td class="text-site-primary"><b>QTY:</b></td>
                                                 <td>NA</td>
                                             </tr>
-                                            <tr>
-                                                <td class="text-site-primary"><b>I don't have this product!</b></td>
-                                                <td>
-                                                    <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal">
-                                                        Search Alternative
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                            @if ($order->order_status != 'cancelled')
+                                                <tr>
+                                                    <td class="text-site-primary"><b>I don't have this product!</b></td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal">
+                                                            Search Alternative
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endif
                                         </table>
                                     </div>
                                 </div>

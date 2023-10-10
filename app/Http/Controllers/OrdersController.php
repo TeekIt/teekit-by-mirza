@@ -476,22 +476,21 @@ class OrdersController extends Controller
                     }
                     if (url()->current() == 'https://app.teekit.co.uk/api/orders/new' || url()->current() == 'https://teekitapi.com/api/orders/new') {
                         // For sending SMS notification for "New Order"
-                        $sms = new TwilioSmsService();
                         $message_for_admin = "A new order #" . $order_id . " has been received. Please check TeekIt's platform, or SignIn here now:https://app.teekit.co.uk/login";
                         $message_for_customer = "Thanks for your order. Your order has been accepted by the store. Please quote verification code: " . $verification_code . " on delivery. TeekIt";
 
-                        $sms->sendSms($request->phone_number, $message_for_customer);
-                        // $sms->sendSms('+923362451199', $message_for_customer); //Rameesha Number
-                        // $sms->sendSms('+923002986281', $message_for_customer); //Fahad Number
+                        TwilioSmsService::sendSms($request->phone_number, $message_for_customer);
+                        // TwilioSmsService::sendSms('+923362451199', $message_for_customer); //Rameesha Number
+                        // TwilioSmsService::sendSms('+923002986281', $message_for_customer); //Fahad Number
 
                         // To restrict "New Order" SMS notifications only for UK numbers
                         if (strlen($seller->business_phone) == 13 && str_contains($seller->business_phone, '+44')) {
-                            $sms->sendSms($seller->business_phone, $message_for_admin);
+                            TwilioSmsService::sendSms($seller->business_phone, $message_for_admin);
                         }
-                        $sms->sendSms('+447976621849', $message_for_admin); //Azim Number
-                        $sms->sendSms('+447490020063', $message_for_admin); //Eesa Number
-                        $sms->sendSms('+447817332090', $message_for_admin); //Junaid Number
-                        $sms->sendSms('+923170155625', $message_for_admin); //Mirza Number
+                        TwilioSmsService::sendSms('+447976621849', $message_for_admin); //Azim Number
+                        TwilioSmsService::sendSms('+447490020063', $message_for_admin); //Eesa Number
+                        TwilioSmsService::sendSms('+447817332090', $message_for_admin); //Junaid Number
+                        TwilioSmsService::sendSms('+923170155625', $message_for_admin); //Mirza Number
                     }
                     $verification_codes = new VerificationCodes();
                     $verification_codes->order_id = $order_id;

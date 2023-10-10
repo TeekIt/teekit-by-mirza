@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Orders;
 use Stripe\Refund;
 use Stripe\Stripe;
 
@@ -131,7 +132,7 @@ final class StripeServices
         );
     }
 
-    public static function refundCustomer(object $order)
+    public static function refundCustomer(Orders $order)
     {
         $api_key = (url('/') === config('constants.LIVE_SITE_URL')) ? static::getLiveApiKey() : static::getTestApiKey();
         Stripe::setApiKey($api_key);

@@ -7,6 +7,7 @@ use App\Mail\OrderIsReadyMail;
 use App\Orders;
 use App\Services\EmailManagement;
 use App\Services\StripeServices;
+use App\Services\TwilioSmsService;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -86,7 +87,7 @@ class OrdersLivewire extends Component
         $this->application_fee = $data->application_fee;
     }
 
-    public function orderIsReady($order)
+    public function orderIsReady($order, $id)
     {
         try {
             /* Perform some operation */
@@ -94,7 +95,7 @@ class OrdersLivewire extends Component
             $updated = Orders::updateOrderStatus($order['id'], 'ready');
             if ($order['type'] == 'self-pickup') {
                 $order_details = Orders::getOrderById($order['id']);
-                EmailManagement::sendPickUpYouOrderMail($order_details);
+                EmailManagement::sendPickupYourOrderMail($order_details);
             }
             /* Operation finished */
             sleep(1);
@@ -113,36 +114,30 @@ class OrdersLivewire extends Component
         try {
             /* Perform some operation */
             $order_details = Orders::getOrderById($order['id']);
-            // dd($order_details->order_status);
-
+            // dd($order_details);
             Orders::updateOrderStatus($order['id'], 'cancelled');
+            // StripeServices::refundCustomer($order_details);
+            
 
-            // $order_details->order_status = 'cancelled';
-            // $order_details->save();
-            dd($order_details);
-
-            StripeServices::refundCustomer($order_details);
-
-            $message = "Hello " . $order->user->name . " .
-            Your order from " . $order->store->name . " was unsuccessful.
-            Unfortunately " . $order->store->name . " is unable to complete your order. But don't worry 
+            $message = "Hello " . $order_details->user->name . " .
+            Your order from " . $order_details->store->name . " was unsuccessful.
+            Unfortunately " . $order_details->store->name . " is unable to complete your order. But don't worry 
             you have not been charged.
             If you need any kinda of assistance, please contact us via email at:
             admin@teekit.co.uk";
-            $sms = new TwilioSmsService();
-            $sms->sendSms($order->user->phone, $message);
-            Mail::to([$order->user->email])
-                ->send(new OrderIsCanceledMail($order));
-            flash('Order is successfully cancelled')->success();
-            return back();
+
+            // TwilioSmsService::sendSms($order_details->user->phone, $message);
+            // EmailManagement::sendOrderHasBeenCancelledMail($order_details);
 
             /* Operation finished */
             sleep(1);
-            if ($updated) {
-                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-            } else {
-                session()->flash('error', config('constants.UPDATION_FAILED'));
-            }
+            session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
+
+            // if ($cancelled) {
+            //     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            // } else {
+            //     session()->flash('error', config('constants.UPDATION_FAILED'));
+            // }
         } catch (Exception $error) {
             session()->flash('error', $error);
         }

@@ -32,6 +32,6 @@ class OrderIsReadyMail extends Mailable
     {
         $order = $this->order;
         return $this->view('emails.order_is_ready', compact('order'))
-            ->subject("Your order is ready to pickup.");
+            ->subject("Your Order Is Ready To Pickup");
     }
 }

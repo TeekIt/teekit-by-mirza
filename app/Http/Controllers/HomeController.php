@@ -1383,8 +1383,7 @@ class HomeController extends Controller
             Your order from " . $order->store->name . " has successfully been delivered.
             If you have experienced any issues with your order, please contact us via email at:
             admin@teekit.co.uk";
-        $sms = new TwilioSmsService();
-        $sms->sendSms($order->user->phone, $message);
+        TwilioSmsService::sendSms($order->user->phone, $message);
         Mail::to([$order->user->email])
             ->send(new OrderIsCompletedMail('user'));
         Mail::to([$order->delivery_boy->email])
@@ -1415,7 +1414,7 @@ class HomeController extends Controller
     //         If you need any kinda of assistance, please contact us via email at:
     //         admin@teekit.co.uk";
     //     $sms = new TwilioSmsService();
-    //     $sms->sendSms($order->user->phone, $message);
+    //     TwilioSmsService::sendSms($order->user->phone, $message);
     //     Mail::to([$order->user->email])
     //         ->send(new OrderIsCanceledMail($order));
     //     flash('Order is successfully cancelled')->success();
