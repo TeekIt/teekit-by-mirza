@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\RattingsController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class Products extends Model
 {
@@ -117,7 +118,7 @@ class Products extends Model
         $product = Products::with('quantity')
             ->where('id', $product_id)
             ->first();
-        $product->images = productImages::query()->where('product_id', '=', $product->id)->get();
+        $product->images = productImages::where('product_id', '=', $product->id)->get();
         $product->category = Categories::find($product->category_id);
         $product->ratting = Rattings::getRatting($product_id);
         return $product;
@@ -256,6 +257,27 @@ class Products extends Model
     {
         $ids = explode(',', $request->ids);
         return Products::query()->whereIn('id', $ids)->paginate();
+    }
+    // SAP == Search Alternative Product
+    public static function getProductsForSAPModal(int $seller_id, string $search = '')
+    {
+        if(!empty($search)) $search = str_replace(' ', '%', $search);
+        return Products::join('qty', 'products.id', '=', 'qty.products_id')
+            ->select('products.id as prod_id', 'products.product_name', 'qty.qty', 'products.price')
+            ->where('products.user_id', $seller_id)
+            ->where('qty.users_id', $seller_id)
+            ->when($search, function ($query, $search) {
+                return $query->where('products.product_name', 'LIKE', "%{$search}%");
+            })
+            ->simplePaginate(5, ['*'], 'sap_products_page');
+
+        // return Cache::remember('getProductsForSAPModal' . $seller_id, now()->addDays(30), function () use ($seller_id) {
+        //     return Products::join('qty', 'products.id', '=', 'qty.products_id')
+        //         ->select('products.id as prod_id', 'products.product_name', 'qty.qty', 'products.price')
+        //         ->where('products.user_id', $seller_id)
+        //         ->where('qty.users_id', $seller_id)
+        //         ->simplePaginate(5, ['*'], 'sap_products');
+        // });
     }
 
     public static function markAsFeatured($id, $status)

@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Sellers;
 use App\Drivers;
 use App\Mail\OrderIsReadyMail;
 use App\Orders;
+use App\Products;
 use App\Services\EmailManagement;
 use App\Services\StripeServices;
 use App\Services\TwilioSmsService;
@@ -18,6 +19,8 @@ class OrdersLivewire extends Component
     use WithPagination;
     public
         $seller_id,
+        $receiver_name,
+        $phone_number,
         $name,
         $l_name,
         $email,
@@ -39,6 +42,7 @@ class OrdersLivewire extends Component
     public function mount()
     {
         $this->seller_id = Auth::id();
+        $this->resetAllPaginators();
     }
 
     public function resetModal()
@@ -68,6 +72,11 @@ class OrdersLivewire extends Component
         $this->resetValidation();
     }
 
+    public function resetAllPaginators()
+    {
+        $this->resetPage('sap_products_page');
+    }
+
     public function renderInfoModal($id)
     {
         $data = Drivers::getUserByID($id);
@@ -85,6 +94,13 @@ class OrdersLivewire extends Component
         $this->total_withdraw = $data->total_withdraw;
         $this->is_online = $data->is_online;
         $this->application_fee = $data->application_fee;
+    }
+
+    public function toggleGetSapModal($receiver_name, $phone_number)
+    {
+        /* Details of the cutomer who has placed the order */
+        $this->receiver_name = $receiver_name;
+        $this->phone_number = $phone_number;
     }
 
     public function orderIsReady($order, $id)
@@ -105,6 +121,7 @@ class OrdersLivewire extends Component
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
         } catch (Exception $error) {
+            report($error);
             session()->flash('error', $error);
         }
     }
@@ -114,10 +131,10 @@ class OrdersLivewire extends Component
         try {
             /* Perform some operation */
             $order_details = Orders::getOrderById($order['id']);
-            // dd($order_details);
+            dd($order_details);
             Orders::updateOrderStatus($order['id'], 'cancelled');
             // StripeServices::refundCustomer($order_details);
-            
+
 
             $message = "Hello " . $order_details->user->name . " .
             Your order from " . $order_details->store->name . " was unsuccessful.
@@ -139,6 +156,7 @@ class OrdersLivewire extends Component
             //     session()->flash('error', config('constants.UPDATION_FAILED'));
             // }
         } catch (Exception $error) {
+            report($error);
             session()->flash('error', $error);
         }
     }

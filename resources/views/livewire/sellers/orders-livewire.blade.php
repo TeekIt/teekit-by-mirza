@@ -86,78 +86,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="alert alert-warning" role="alert">
-                        <h5>Please Read Carefully!</h5>
-                        <p>
-                            <b>Must call the customer before searching an alternative</b> to know your customer choice. If you don't call & the customer complains about the alternative product which you have selected by yourself then Teekit may cancel your whole order with full refund to the customer.
-                        </p>
-                        <p>
-                        <h4>Cutomer Contact: +44 3170188986</h4>
-                        </p>
-                    </div>
-                    <form>
-                        <div class="row">
-                            {{-- <div class="col-9 form-floating border border-danger">
-                                <input type="text" class="form-control" placeholder="Search alternative product">
-                                <label>Search alternative product</label>
-                            </div> --}}
-
-                            <div class="col-9 form-floating border border-danger">
-                                <input list="products" class="form-control" placeholder="Search alternative product">
-                                <datalist id="products">
-                                    <option value="volvo">Volvo</option>
-                                    <option value="saab">Saab</option>
-                                    <option value="3">Fiat</option>
-                                    <option value="audi">Audi</option>
-                                </datalist>
-                                <label>Search alternative product</label>
-                            </div>
-
-                            <div class="col-3 btn-group border border-danger" role="group">
-                                <button type="button" class="btn btn-site-primary py-3 w-100 px-0" title="Add this product to the order">
-                                    <span class="fas fa-plus"></span>
-                                </button>
-                                <button type="button" class="btn btn-danger py-3 w-100 px-0" title="Remove the inserted product">
-                                    <span class="fas fa-minus"></span>
-                                </button>
-                            </div>
-                        </div>
-                        {{-- Product Container --}}
-                        <div class="row mt-3 border border-success">
-                            <div class="col-md-2">
-                                <span class="img-container">
-                                    <img class="d-block m-auto" src="{{ asset('icons/customer.png') }}" alt="">
-                                </span>
-                            </div>
-                            <div class="col-10">
-                                <table class="table">
-                                    <tr>
-                                        <td class="text-site-primary"><b>Product Name:</b></td>
-                                        <td>Soudal Multi Purpose Silicone 270ml Clear</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-site-primary"><b>Category:</b></td>
-                                        <td>Adhesives & Sealants</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-site-primary"><b>SKU:</b></td>
-                                        <td>LS121644</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-site-primary"><b>Available QTY:</b></td>
-                                        <td>3</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-site-primary"><b>QTY you want to add:</b></td>
-                                        <td>
-                                            <input type="number" class="form-control col-3">
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-
-                    </form>
+                    <livewire:sellers.modals.search-alternative-product-modal :receiver_name="$receiver_name" :phone_number="$phone_number">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetModal">
@@ -272,7 +201,6 @@
                                 <div class="row mb-2 border border-success">
                                     <div class="col-md-2">
                                         <span class="img-container">
-                                            {{-- <img class="d-block m-auto" src="{{ asset(config('constants.BUCKET') . $item->feature_img) }}"> --}}
                                             @if (str_contains($item->feature_img, 'https://'))
                                                 <img class="d-block m-auto" src="{{ asset($item->feature_img) }}">
                                             @else
@@ -302,7 +230,7 @@
                                                 <tr>
                                                     <td class="text-site-primary"><b>I don't have this product!</b></td>
                                                     <td>
-                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal">
+                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="toggleGetSapModal('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
                                                             Search Alternative
                                                         </button>
                                                     </td>
