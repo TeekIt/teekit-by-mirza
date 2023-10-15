@@ -86,7 +86,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal"></button>
                 </div>
                 <div class="modal-body">
-                    <livewire:sellers.modals.search-alternative-product-modal :receiver_name="$receiver_name" :phone_number="$phone_number">
+                    @if (empty($receiver_name) && empty($phone_number))
+                        <div class="col-12 text-center">
+                            <div class="spinner-border" role="status"></div>
+                        </div>
+                    @else
+                        <livewire:sellers.modals.search-alternative-product-modal :receiver_name="$receiver_name" :phone_number="$phone_number">
+                    @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetModal">
@@ -120,14 +126,14 @@
     {{-- @dd($data['orders']) --}}
 
     <!-- Main Content -->
-    <div class="container border border-danger">
+    <div class="container">
         @forelse ($data['orders'] as $order)
             {{-- @dd($order) --}}
 
             <!-- Single Order Content -->
             <div class="col-md-12 p-4 pr-4">
                 <div class="card">
-                    <div class="card-body p-2 pl-5 pr-5 pb-5 border border-dark">
+                    <div class="card-body p-2 pl-5 pr-5 pb-5">
                         <!-- Order Header -->
                         <div class="p-2 mb-2">
                             <table class="table table-striped table-responsive-sm">
@@ -154,14 +160,14 @@
                                                 </button>
                                             @endif
 
-                                            @if (!empty($order->delivery_boy_id))
+                                            @if ($order->delivery_boy_id != '')
                                                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deliveryBoyDetailsModal" title="View delivery boy details">
                                                     Delivery Boy Details
                                                 </button>
                                             @endif
 
                                             @if ($order->order_status == 'cancelled')
-                                                <button class="btn btn-dark" title="This order has been cencelled" disabled>
+                                                <button class="btn btn-dark" disabled title="This order has been cencelled">
                                                     Order Cancelled
                                                 </button>
                                             @endif
@@ -193,12 +199,12 @@
                             </table>
                         </div>
                         <!-- /Order Header -->
-                        <div class="card-text border border-info">
+                        <div class="card-text">
                             @foreach ($order->items as $item)
                                 {{-- @dd($item) --}}
 
                                 <!-- Order Items -->
-                                <div class="row mb-2 border border-success">
+                                <div class="row mb-2">
                                     <div class="col-md-2">
                                         <span class="img-container">
                                             @if (str_contains($item->feature_img, 'https://'))
@@ -230,7 +236,7 @@
                                                 <tr>
                                                     <td class="text-site-primary"><b>I don't have this product!</b></td>
                                                     <td>
-                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="toggleGetSapModal('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
+                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
                                                             Search Alternative
                                                         </button>
                                                     </td>
@@ -447,4 +453,12 @@
         </div>
     @endif
 
+    @push('scripts')
+        <script>
+            Livewire.on('resetChildComponentProperties', function() {
+                Livewire.emit('resetChildModal');
+                // console.log('Child method called');
+            });
+        </script>
+    @endpush
 </div>

@@ -8,14 +8,15 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/* Search Alternative Product shortly known as "SAP" */
 class SearchAlternativeProductModal extends Component
 {
     use WithPagination;
 
     public
         $product,
-        // $receiver_name, 
-        // $phone_number,
+        $receiver_name, 
+        $phone_number,
         $search = '';
 
     protected $paginationTheme = 'bootstrap';
@@ -28,9 +29,30 @@ class SearchAlternativeProductModal extends Component
     public function mount($receiver_name, $phone_number)
     {
         $this->resetAllPaginators();
-        // dd($receiver_name);
-        // $this->receiver_name = $receiver_name;
-        // $this->phone_number = $phone_number;
+        $this->receiver_name = $receiver_name;
+        $this->phone_number = $phone_number;
+    }
+
+    public function resetChildModal()
+    {
+        $this->resetAllErrors();
+        dd('called');
+        // $this->reset([
+        //     'name',
+        //     'l_name',
+        //     'email',
+        //     'phone',
+        //     'address_1',
+        //     'lat',
+        //     'lon',
+        //     'user_img',
+        //     'last_login',
+        //     'email_verified_at',
+        //     'pending_withdraw',
+        //     'total_withdraw',
+        //     'is_online',
+        //     'application_fee',
+        // ]);
     }
 
     public function resetAllPaginators()
@@ -60,11 +82,9 @@ class SearchAlternativeProductModal extends Component
         }
     }
 
-    public function render($receiver_name = null, $phone_number = null)
+    public function render()
     {
-        // dd($receiver_name);
-        $name = $receiver_name;
         $products = Products::getProductsForSAPModal(Auth::id(), $this->search);
-        return view('livewire.sellers.modals.search-alternative-product-modal', compact('products', 'name', 'phone_number'));
+        return view('livewire.sellers.modals.search-alternative-product-modal', compact('products'));
     }
 }

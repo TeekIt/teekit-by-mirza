@@ -4,8 +4,8 @@
         <p>
             <b>Must call the customer before searching an alternative</b> to know your customer's choice. If you don't call & the customer complains about the alternative product which you have selected by yourself then Teekit may cancel your whole order with full refund to the customer.
         </p>
-        <h4>Customer Name: {{ $name }}</h4>
-        <h4>Cutomer Contact: {{ $phone_number }}</h4>
+        <h4>Customer Name: {{ $receiver_name }}</h4>
+        <h4>Customer Contact: {{ $phone_number }}</h4>
     </div>
     @if (empty($product))
         {{-- Search Container --}}
@@ -59,14 +59,14 @@
                     </tr>
                 </tfoot>
             </table>
-            <div class="text-center" wire:loading wire:target="search">
+            <div class="col-12 text-center" wire:loading wire:target="search">
                 <div class="spinner-border" role="status"></div>
             </div>
         </div>
     @else
         {{-- Product Container --}}
         <div class="row mt-3">
-            <div class="col-md-2">
+            <div class="col-md-12 col-lg-2">
                 <span class="img-container">
                     @if (str_contains($product->feature_img, 'https://'))
                         <img class="d-block m-auto" src="{{ asset($product->feature_img) }}">
@@ -75,7 +75,7 @@
                     @endif
                 </span>
             </div>
-            <div class="col-10">
+            <div class="col-md-12 col-lg-10">
                 <table class="table">
                     <tr>
                         <td class="text-site-primary"><b>Product Name:</b></td>

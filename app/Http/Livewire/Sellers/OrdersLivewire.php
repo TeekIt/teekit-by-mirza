@@ -21,20 +21,6 @@ class OrdersLivewire extends Component
         $seller_id,
         $receiver_name,
         $phone_number,
-        $name,
-        $l_name,
-        $email,
-        $phone,
-        $address_1,
-        $lat,
-        $lon,
-        $user_img,
-        $last_login,
-        $email_verified_at,
-        $pending_withdraw,
-        $total_withdraw,
-        $is_online,
-        $application_fee,
         $search = '';
 
     protected $paginationTheme = 'bootstrap';
@@ -49,20 +35,8 @@ class OrdersLivewire extends Component
     {
         $this->resetAllErrors();
         $this->reset([
-            'name',
-            'l_name',
-            'email',
-            'phone',
-            'address_1',
-            'lat',
-            'lon',
-            'user_img',
-            'last_login',
-            'email_verified_at',
-            'pending_withdraw',
-            'total_withdraw',
-            'is_online',
-            'application_fee',
+            'receiver_name',
+            'phone_number'
         ]);
     }
 
@@ -96,7 +70,7 @@ class OrdersLivewire extends Component
         $this->application_fee = $data->application_fee;
     }
 
-    public function toggleGetSapModal($receiver_name, $phone_number)
+    public function renderSAPModal($receiver_name, $phone_number)
     {
         /* Details of the cutomer who has placed the order */
         $this->receiver_name = $receiver_name;
