@@ -43,26 +43,16 @@ class Orders extends Model
             'product_id'
         );
     }
-
-    // public function categories()
-    // {
-    //     return $this->hasManyThrough(
-    //         Category::class,
-    //         ExerciseRelation::class,
-    //         // Intermediate model...
-    //         'ex_id',
-    //         // Foreign key on the ExerciseRelation model...
-    //         'id',
-    //         // Local key on the Category model...
-    //         'id',
-    //         // Local key on the Exercise model...
-    //         'cat_id' // Foreign key on the ExerciseRelation table...
-    //     );
-    // }
-
     /**
      * Helpers
      */
+    public static function replaceWithAlternativePrice(int $order_id, float $current_prod_price, float $alternative_prod_price)
+    {
+        $order = Orders::find($order_id);
+        $order->order_total = ($order->order_total - $current_prod_price) + $alternative_prod_price;
+        return $order->save();
+    }
+
     public static function fetchTransportType(int $order_id = null)
     {
         $transposrt_type = [];

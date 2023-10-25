@@ -21,6 +21,8 @@
         @include('javascript.google-map')
     @endif
 
+    @include('jquery.control-modals')
+    
     <script>
         function checkbox() {
             $("#chkSelect").change(function() {

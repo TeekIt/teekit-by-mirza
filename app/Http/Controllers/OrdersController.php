@@ -392,13 +392,6 @@ class OrdersController extends Controller
             }
             $grouped_seller = [];
             foreach ($request->items as $item) {
-                // $product_id = $item['product_id'];
-                // $qty = $item['qty'];
-                // $user_choice = $item['user_choice'];
-                // $product_price = (new ProductsController())->getProductPrice($item['product_id']);
-                // $product_seller_id = (new ProductsController())->getProductSellerID($item['product_id']);
-                // $product_volumn = (new ProductsController())->getProductVolumn($item['product_id']);
-                // $product_weight = (new ProductsController())->getProductWeight($item['product_id']);
                 $temp = [];
                 $temp['product_id'] = $item['product_id'];
                 $temp['qty'] = $item['qty'];

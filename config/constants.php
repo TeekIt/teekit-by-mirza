@@ -74,6 +74,7 @@ return [
     'MAX_LIMIT' => 'Promo code usage has reached its maximum limit.',
     'DATA_ALREADY_EXISTS' => 'Data already exists against id:- ',
     'CACHE_REMOVED_FAILED' => 'Sorry due to some issue your cahce can not be removed.',
+    'QTY_SHOULD_NOT_BE_GREATER' => 'You cannot enter quantity more then your stock.',
     /*
     |--------------------------------------------------------------------------
     | Digital Ocean Bucket

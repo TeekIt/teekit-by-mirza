@@ -86,18 +86,15 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal"></button>
                 </div>
                 <div class="modal-body">
-                    @if (empty($receiver_name) && empty($phone_number))
+                    @if (empty($order_id) || empty($current_prod_id) || empty($receiver_name) || empty($phone_number))
                         <div class="col-12 text-center">
                             <div class="spinner-border" role="status"></div>
                         </div>
                     @else
-                        <livewire:sellers.modals.search-alternative-product-modal :receiver_name="$receiver_name" :phone_number="$phone_number">
+                        <livewire:sellers.modals.search-alternative-product-modal :order_id="$order_id" :current_prod_id="$current_prod_id" :receiver_name="$receiver_name" :phone_number="$phone_number">
                     @endif
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetModal">
-                        Confirm
-                    </button>
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetModal">
                         Cancel
                     </button>
@@ -236,7 +233,7 @@
                                                 <tr>
                                                     <td class="text-site-primary"><b>I don't have this product!</b></td>
                                                     <td>
-                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
+                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal({{ $order->id }}, {{ $item->id }}, '{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
                                                             Search Alternative
                                                         </button>
                                                     </td>

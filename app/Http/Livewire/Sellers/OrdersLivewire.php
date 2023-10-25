@@ -19,6 +19,8 @@ class OrdersLivewire extends Component
     use WithPagination;
     public
         $seller_id,
+        $order_id,
+        $current_prod_id,
         $receiver_name,
         $phone_number,
         $search = '';
@@ -70,14 +72,16 @@ class OrdersLivewire extends Component
         $this->application_fee = $data->application_fee;
     }
 
-    public function renderSAPModal($receiver_name, $phone_number)
+    public function renderSAPModal($order_id, $current_prod_id, $receiver_name, $phone_number)
     {
         /* Details of the cutomer who has placed the order */
+        $this->order_id = $order_id;
+        $this->current_prod_id = $current_prod_id;
         $this->receiver_name = $receiver_name;
         $this->phone_number = $phone_number;
     }
 
-    public function orderIsReady($order, $id)
+    public function orderIsReady($order)
     {
         try {
             /* Perform some operation */

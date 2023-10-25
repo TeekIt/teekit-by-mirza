@@ -113,16 +113,16 @@ class Products extends Model
         return $product;
     }
 
-    public static function getProductInfoWithQty(int $product_id)
-    {
-        $product = Products::with('quantity')
-            ->where('id', $product_id)
-            ->first();
-        $product->images = productImages::where('product_id', '=', $product->id)->get();
-        $product->category = Categories::find($product->category_id);
-        $product->ratting = Rattings::getRatting($product_id);
-        return $product;
-    }
+    // public static function getProductInfoWithQty(int $product_id)
+    // {
+    //     $product = Products::with('quantity')
+    //         ->where('id', $product_id)
+    //         ->first();
+    //     $product->images = productImages::where('product_id', '=', $product->id)->get();
+    //     $product->category = Categories::find($product->category_id);
+    //     $product->ratting = Rattings::getRatting($product_id);
+    //     return $product;
+    // }
 
     public static function getOnlyProductDetailsById(int $product_id)
     {
@@ -270,14 +270,6 @@ class Products extends Model
                 return $query->where('products.product_name', 'LIKE', "%{$search}%");
             })
             ->simplePaginate(5, ['*'], 'sap_products_page');
-
-        // return Cache::remember('getProductsForSAPModal' . $seller_id, now()->addDays(30), function () use ($seller_id) {
-        //     return Products::join('qty', 'products.id', '=', 'qty.products_id')
-        //         ->select('products.id as prod_id', 'products.product_name', 'qty.qty', 'products.price')
-        //         ->where('products.user_id', $seller_id)
-        //         ->where('qty.users_id', $seller_id)
-        //         ->simplePaginate(5, ['*'], 'sap_products');
-        // });
     }
 
     public static function markAsFeatured($id, $status)
