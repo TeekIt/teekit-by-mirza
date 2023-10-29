@@ -11,7 +11,6 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 /* Search Alternative Product shortly known as "SAP" */
-
 class SearchAlternativeProductModal extends Component
 {
     use WithPagination;
@@ -20,10 +19,10 @@ class SearchAlternativeProductModal extends Component
         $product_details,
         $order_id,
         $current_prod_id,
+        $current_prod_qty,
         $receiver_name,
         $phone_number,
         $selected_qty,
-        $qty_error = false,
         $search = '';
 
     protected $paginationTheme = 'bootstrap';
@@ -42,11 +41,12 @@ class SearchAlternativeProductModal extends Component
     //     $this->resetAllPaginators();
     //     dd($receiver_name);
     // }
-    public function mount($order_id, $current_prod_id, $receiver_name, $phone_number)
+    public function mount($order_id, $current_prod_id, $current_prod_qty, $receiver_name, $phone_number)
     {
         $this->resetAllPaginators();
         $this->order_id = $order_id;
         $this->current_prod_id = $current_prod_id;
+        $this->current_prod_qty = $current_prod_qty;
         $this->receiver_name = $receiver_name;
         $this->phone_number = $phone_number;
     }
@@ -83,7 +83,7 @@ class SearchAlternativeProductModal extends Component
         $this->resetAllPaginators();
     }
 
-    public function removeProduct()
+    public function removeAlternativeProduct()
     {
         $this->product_details = null;
     }
@@ -100,23 +100,25 @@ class SearchAlternativeProductModal extends Component
         }
     }
 
-    public function addProductIntoOrder($product_details)
+    public function addProductIntoOrder($alternative_product)
     {
         $this->validate();
         try {
             /* Perform some operation */
-            if ($product_details['quantity']['qty'] < $this->selected_qty) {
-                session()->flash('qty_is_greater_error', config('constants.QTY_SHOULD_NOT_BE_GREATER'));
+            if ($alternative_product['quantity']['qty'] < $this->selected_qty) {
+                return session()->flash('qty_should_not_be_greater', config('constants.QTY_SHOULD_NOT_BE_GREATER'));
             } else {
-                $alternative_prod_price = $product_details['price'] * $this->selected_qty;
-                $current_prod_details = Products::getOnlyProductDetailsById($this->current_prod_id);
-                Orders::replaceWithAlternativePrice($this->order_id, $current_prod_details->price, $alternative_prod_price);
-                $updated = OrderItems::replaceWithAlternativeProduct($this->order_id, $this->current_prod_id, $product_details['id'], $this->selected_qty);
+                $current_product = Products::getOnlyProductDetailsById($this->current_prod_id);
+                $current_prod_price = $current_product->price * $this->current_prod_qty;
+                $alternative_prod_price = $alternative_product['price'] * $this->selected_qty;
+
+                $replaced = Orders::replaceWithAlternativePrice($this->order_id, $current_prod_price, $alternative_prod_price);
+                $updated = OrderItems::replaceWithAlternativeProduct($this->order_id, $this->current_prod_id, $alternative_product['id'], $this->selected_qty);
             }
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'searchAlternativeProductModal']);
-            if ($updated) {
+            if ($replaced && $updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.UPDATION_FAILED'));

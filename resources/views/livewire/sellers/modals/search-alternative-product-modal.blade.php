@@ -10,18 +10,14 @@
     @if (empty($product_details))
         {{-- Search Container --}}
         <div class="row">
-            <div class="col-12 form-floating">
-                <input type="search" wire:model.debounce.500ms="search" class="form-control" placeholder="Search alternative product">
-                <label>Search alternative product</label>
+            <div class="form-group">
+                <div class="input-group">
+                    <input type="search" wire:model.debounce.500ms="search" class="form-control" placeholder="Search alternative product">
+                    <div class="input-group-append">
+                        <button class="btn btn-site-primary"><i class='fas fa-search'></i></button>
+                    </div>
+                </div>
             </div>
-            {{-- <div class="col-12 col-sm-3 btn-group border border-danger" role="group">
-            <button type="button" class="btn btn-site-primary py-3 w-100 px-0" title="Add this product to the order">
-                <span class="fas fa-plus"></span>
-            </button>
-            <button type="button" class="btn btn-danger py-3 w-100 px-0" title="Remove the inserted product">
-                <span class="fas fa-minus"></span>
-            </button>
-        </div> --}}
         </div>
         {{-- Products List --}}
         <div class="mt-3">
@@ -102,8 +98,8 @@
                             <td class="text-site-primary"><b>QTY you want to add:</b></td>
                             <td>
                                 <input type="number" wire:model.defer="selected_qty" class="col-3 form-control">
-                                @if (session()->has('qty_is_greater_error'))
-                                    <p class="text-danger">{{ session()->get('qty_is_greater_error') }}</p>
+                                @if (session()->has('qty_should_not_be_greater'))
+                                    <p class="text-danger">{{ session()->get('qty_should_not_be_greater') }}</p>
                                 @endif
                                 <small class="text-danger">
                                     @error('selected_qty')
@@ -121,9 +117,9 @@
                                             <span class="spinner-border spinner-border-sm text-dark" role="status" aria-hidden="true"></span>
                                         </span>
                                     </button>
-                                    <button type="button" class="btn btn-outline-danger py-3 px-0 w-100" wire:click="removeProduct" wire:target="removeProduct" wire:loading.class="btn-outline-dark" wire:loading.class.remove="btn-outline-danger" wire:loading.attr="disabled" title="Remove this product to select another one">
-                                        <span class="fas fa-trash" wire:target="removeProduct" wire:loading.remove></span>
-                                        <span wire:target="removeProduct" wire:loading>
+                                    <button type="button" class="btn btn-outline-danger py-3 px-0 w-100" wire:click="removeAlternativeProduct" wire:target="removeAlternativeProduct" wire:loading.class="btn-outline-dark" wire:loading.class.remove="btn-outline-danger" wire:loading.attr="disabled" title="Remove this product to select another one">
+                                        <span class="fas fa-trash" wire:target="removeAlternativeProduct" wire:loading.remove></span>
+                                        <span wire:target="removeAlternativeProduct" wire:loading>
                                             <span class="spinner-border spinner-border-sm text-dark" role="status" aria-hidden="true"></span>
                                         </span>
                                     </button>

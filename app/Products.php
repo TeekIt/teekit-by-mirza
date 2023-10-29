@@ -264,8 +264,8 @@ class Products extends Model
         if(!empty($search)) $search = str_replace(' ', '%', $search);
         return Products::join('qty', 'products.id', '=', 'qty.products_id')
             ->select('products.id as prod_id', 'products.product_name', 'qty.qty', 'products.price')
-            ->where('products.user_id', $seller_id)
             ->where('qty.users_id', $seller_id)
+            ->where('products.user_id', $seller_id)
             ->when($search, function ($query, $search) {
                 return $query->where('products.product_name', 'LIKE', "%{$search}%");
             })

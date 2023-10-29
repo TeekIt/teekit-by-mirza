@@ -13,8 +13,11 @@
 <link href="{{ asset('res/dist/css/adminlte.min.css') }}" rel="stylesheet">
 <!-- Bootstrap 5 CSS -->
 <link href="{{ asset('bootstrap5/css/bootstrap.min.css') }}" rel="stylesheet">
+{{-- <link href="{{ asset('res/plugins/select2/css/select2.min.css') }}" rel="stylesheet"> --}}
 <!-- Custom CSS -->
 <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 <link href="{{asset('css/custom-styles.css')}}" rel="stylesheet">
 <!-- Google Font: Source Sans Pro -->
 <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+<!-- JQuery Time Picker CSS -->
+<link rel="stylesheet" href="{{ asset('res/dist/css/jquery.timepicker.min.css') }}">

@@ -39,6 +39,7 @@ return [
     'VERIFICATION_SUCCESS' => 'Verification Successful.',
     'CACHE_REMOVED_SUCCESSFULLY' => 'All Cached data of your App has been removed successfully.',
     'WITHDRAWAL_REQUEST_SUBMITTED' => 'Withdrawal request is successfully submitted.',
+    'PRODUCT_REMOVED_SUCCESSFULLY' => 'Product has been removed successfully.',
     /*
     |--------------------------------------------------------------------------
     | Failure Constants
@@ -75,6 +76,7 @@ return [
     'DATA_ALREADY_EXISTS' => 'Data already exists against id:- ',
     'CACHE_REMOVED_FAILED' => 'Sorry due to some issue your cahce can not be removed.',
     'QTY_SHOULD_NOT_BE_GREATER' => 'You cannot enter quantity more then your stock.',
+    'PRODUCT_REMOVED_FAILED' => 'There is an error while removing the product.',
     /*
     |--------------------------------------------------------------------------
     | Digital Ocean Bucket

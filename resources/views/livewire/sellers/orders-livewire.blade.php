@@ -86,12 +86,72 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal"></button>
                 </div>
                 <div class="modal-body">
-                    @if (empty($order_id) || empty($current_prod_id) || empty($receiver_name) || empty($phone_number))
+                    @if (empty($order_id) || empty($current_prod_id) || empty($current_prod_qty) || empty($receiver_name) || empty($phone_number))
                         <div class="col-12 text-center">
                             <div class="spinner-border" role="status"></div>
                         </div>
                     @else
-                        <livewire:sellers.modals.search-alternative-product-modal :order_id="$order_id" :current_prod_id="$current_prod_id" :receiver_name="$receiver_name" :phone_number="$phone_number">
+                        <livewire:sellers.modals.search-alternative-product-modal :order_id="$order_id" :current_prod_id="$current_prod_id" :current_prod_qty="$current_prod_qty" :receiver_name="$receiver_name" :phone_number="$phone_number">
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetModal">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- ************************************ Remove Product From Order Model ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="removeItemFromOrderModel" tabindex="-1" aria-labelledby="removeItemFromOrderModelLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModelLabel">Remove This Item From The Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <h2 class="text-danger">WARNING!</h2>
+                        <p>Are you sure that you want to remove this product from the order??</p>
+                        <p class="fw-bold">You can't undo this action</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-site-primary" wire:click="removeItemFromOrder" wire:target="removeItemFromOrder" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled">
+                        <span wire:target="removeItemFromOrder" wire:loading.remove>
+                            Confirm
+                        </span>
+                        <span wire:target="removeItemFromOrder" wire:loading>
+                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                        </span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetModal">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- ************************************ Show Customer Contact Model ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="showCustomerContactModel" tabindex="-1" aria-labelledby="showCustomerContactModelLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModelLabel">Customer Contact Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (empty($receiver_name) || empty($phone_number))
+                        <div class="col-12 text-center">
+                            <div class="spinner-border" role="status"></div>
+                        </div>
+                    @else
+                        <div class="text-center">
+                            <h2 class="text-danger"><i class="fas fa-phone-alt"></i> CALL THE CUSTOMER</h2>
+                            <p class="fw-bold">Customer Name: {{ $receiver_name }}</p>
+                            <p class="fw-bold">Customer Contact: {{ $phone_number }}</p>
+                        </div>
                     @endif
                 </div>
                 <div class="modal-footer">
@@ -109,7 +169,7 @@
         </div>
         <div class="col-12 col-sm-6 col-md-5 col-xl-5">
             <div class="input-group py-4 my-2">
-                <input type="text" wire:model.debounce.500ms="search" class="form-control py-3" placeholder="Search here...">
+                <input type="text" wire:model.debounce.500ms="search" class="form-control py-3" placeholder="Search by order#">
                 <button class="btn btn-site-primary px-4" type="button"><i class='fas fa-search'></i></button>
             </div>
         </div>
@@ -172,6 +232,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    {{-- @dd($order) --}}
                                     <tr>
                                         <td><b>Order#</b></td>
                                         <td>{{ $order->id }}</td>
@@ -197,7 +258,7 @@
                         </div>
                         <!-- /Order Header -->
                         <div class="card-text">
-                            @foreach ($order->items as $item)
+                            @foreach ($order->items as $index => $item)
                                 {{-- @dd($item) --}}
 
                                 <!-- Order Items -->
@@ -211,31 +272,62 @@
                                             @endif
                                         </span>
                                     </div>
-                                    <div class="col-10">
+                                    <div class="col-12 col-sm-10">
                                         <table class="table">
                                             <tr>
-                                                <td class="text-site-primary"><b>Product Name:</b></td>
-                                                <td>{{ $item->product_name }}</td>
+                                                <td class="col-4 text-site-primary"><b>Product Id: (Remove in production)</b></td>
+                                                <td class="col-8">{{ $item->id }}</td>
                                             </tr>
                                             <tr>
-                                                <td class="text-site-primary"><b>Category:</b></td>
-                                                <td>{{ $item->category->category_name }}</td>
+                                                <td class="col-4 text-site-primary"><b>Product Name:</b></td>
+                                                <td class="col-8">{{ $item->product_name }}</td>
                                             </tr>
                                             <tr>
-                                                <td class="text-site-primary"><b>SKU:</b></td>
-                                                <td>{{ $item->sku }}</td>
+                                                <td class="col-4 text-site-primary"><b>Category:</b></td>
+                                                <td class="col-8">{{ $item->category->category_name }}</td>
                                             </tr>
                                             <tr>
-                                                <td class="text-site-primary"><b>QTY:</b></td>
-                                                <td>NA</td>
+                                                <td class="col-4 text-site-primary"><b>SKU:</b></td>
+                                                <td class="col-8">{{ $item->sku }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="col-4 text-site-primary"><b>QTY:</b></td>
+                                                <td class="col-8"> {{ $order->order_items[$index]->product_qty }} </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="col-4 text-site-primary"><b>Price:</b></td>
+                                                <td class="col-8"> £{{ $item->price }} </td>
                                             </tr>
                                             @if ($order->order_status != 'cancelled')
                                                 <tr>
-                                                    <td class="text-site-primary"><b>I don't have this product!</b></td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal({{ $order->id }}, {{ $item->id }}, '{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
-                                                            Search Alternative
+                                                    <td class="col-4 text-site-primary">
+                                                        <b>I don't have this product!</b>
+                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="If you don't have this product then go for the option selected by the user by clicking the front button.">
+                                                            <i class="fas fa-exclamation-circle"></i>
                                                         </button>
+                                                    </td>
+                                                    <td class="col-8">
+                                                        @if ($order->order_items[$index]->user_choice === 1)
+                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal({{ $order->id }}, {{ $item->id }}, {{ $order->order_items[$index]->product_qty }}, '{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
+                                                                <i class="fas fa-search"></i>
+                                                                Search Alternative
+                                                            </button>
+                                                        @elseif ($order->order_items[$index]->user_choice === 2)
+                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#removeItemFromOrderModel" wire:click="renderRemoveItemModal({{ $order->order_items[$index] }})">
+                                                                <i class="fas fa-minus-circle"></i>
+                                                                Remove Product
+                                                            </button>
+                                                        @elseif ($order->order_items[$index]->user_choice === 4)
+                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#showCustomerContactModel" wire:click="renderCustomerContactModel('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
+                                                                <i class="fas fa-phone-alt"></i>
+                                                                Call The Customer
+                                                            </button>
+                                                        @elseif ($order->order_items[$index]->user_choice === 5)
+                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal({{ $order->id }}, {{ $item->id }}, {{ $order->order_items[$index]->product_qty }}, '{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
+                                                                <i class="fas fa-times"></i>
+                                                                Cancel Order
+                                                            </button>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endif

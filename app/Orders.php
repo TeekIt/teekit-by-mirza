@@ -46,6 +46,12 @@ class Orders extends Model
     /**
      * Helpers
      */
+    public static function subFromOrderTotal(array $order_item, float $prod_total_price) {
+        $order = self::find($order_item['order_id']);
+        $order->order_total = $order->order_total - $prod_total_price;
+        return $order->save();
+    }
+
     public static function replaceWithAlternativePrice(int $order_id, float $current_prod_price, float $alternative_prod_price)
     {
         $order = Orders::find($order_id);

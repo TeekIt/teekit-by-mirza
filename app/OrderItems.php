@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Stripe\OrderReturn;
 
 class OrderItems extends Model
 {
@@ -21,6 +22,11 @@ class OrderItems extends Model
     /**
      * Helpers
      */
+    public static function removeItem(array $order_item)
+    {
+        return OrderItems::where('id', $order_item['id'])->delete();
+    }
+
     public static function replaceWithAlternativeProduct(int $order_id, int $current_prod_id, int $alternative_prod_id, int $selected_qty)
     {
         return OrderItems::where('order_id', $order_id)

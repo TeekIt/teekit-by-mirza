@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Sellers;
 
 use App\Drivers;
 use App\Mail\OrderIsReadyMail;
+use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Services\EmailManagement;
@@ -21,8 +22,10 @@ class OrdersLivewire extends Component
         $seller_id,
         $order_id,
         $current_prod_id,
+        $current_prod_qty,
         $receiver_name,
         $phone_number,
+        $order_item,
         $search = '';
 
     protected $paginationTheme = 'bootstrap';
@@ -37,8 +40,12 @@ class OrdersLivewire extends Component
     {
         $this->resetAllErrors();
         $this->reset([
+            'order_id',
+            'current_prod_id',
+            'current_prod_qty',
             'receiver_name',
-            'phone_number'
+            'phone_number',
+            'order_item'
         ]);
     }
 
@@ -72,11 +79,23 @@ class OrdersLivewire extends Component
         $this->application_fee = $data->application_fee;
     }
 
-    public function renderSAPModal($order_id, $current_prod_id, $receiver_name, $phone_number)
+    public function renderSAPModal($order_id, $current_prod_id, $current_prod_qty, $receiver_name, $phone_number)
     {
-        /* Details of the cutomer who has placed the order */
+        /* Details of the current product & cutomer who has placed the order */
         $this->order_id = $order_id;
         $this->current_prod_id = $current_prod_id;
+        $this->current_prod_qty = $current_prod_qty;
+        $this->receiver_name = $receiver_name;
+        $this->phone_number = $phone_number;
+    }
+
+    public function renderRemoveItemModal($order_item)
+    {
+        $this->order_item = $order_item;
+    }
+
+    public function renderCustomerContactModel($receiver_name, $phone_number)
+    {
         $this->receiver_name = $receiver_name;
         $this->phone_number = $phone_number;
     }
@@ -133,6 +152,27 @@ class OrdersLivewire extends Component
             // } else {
             //     session()->flash('error', config('constants.UPDATION_FAILED'));
             // }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error);
+        }
+    }
+
+    public function removeItemFromOrder()
+    {
+        try {
+            /* Perform some operation */
+            $prod_total_price = $this->order_item['product_price'] * $this->order_item['product_qty'];
+            $removed = OrderItems::removeItem($this->order_item);
+            $updated = Orders::subFromOrderTotal($this->order_item, $prod_total_price);
+            /* Operation finished */
+            sleep(1);
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'removeItemFromOrderModel']);
+            if ($removed && $updated) {
+                session()->flash('success', config('constants.PRODUCT_REMOVED_SUCCESSFULLY'));
+            } else {
+                session()->flash('error', config('constants.PRODUCT_REMOVED_FAILED'));
+            }
         } catch (Exception $error) {
             report($error);
             session()->flash('error', $error);
