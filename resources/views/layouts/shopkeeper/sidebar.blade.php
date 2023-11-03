@@ -67,9 +67,9 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{route('usergeneral')}}" class="nav-link">
+                            <a href="{{route('seller.settings.general')}}" class="nav-link">
                                 <i class="fas fa-gears nav-icon"></i>
-                                <p>Seller General Settings</p>
+                                <p>General</p>
                             </a>
                         </li>
                         {{-- <li class="nav-item">
@@ -81,7 +81,7 @@
                         <li class="nav-item">
                             <a href="/settings/payment" class="nav-link">
                                 <i class="fas fa-money nav-icon"></i>
-                                <p>Payment Settings</p>
+                                <p>Payment</p>
                             </a>
                         </li>
                     </ul>

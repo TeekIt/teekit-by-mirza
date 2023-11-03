@@ -80,7 +80,6 @@ Route::prefix('inventory')->group(function () {
 Route::prefix('settings')->group(function () {
     Route::post('/user_info/update', [HomeController::class, 'userInfoUpdate'])->name('admin.userinfo.update');
     Route::get('/general', [HomeController::class, 'generalSettings']);
-    Route::get('/usergeneral', UserGeneralSettings::class)->name('usergeneral');;
     Route::get('/payment', [HomeController::class, 'paymentSettings']);
     Route::post('/payment/update', [HomeController::class, 'paymentSettingsUpdate'])->name('payment_settings_update');
     Route::post('/user_img/update', [HomeController::class, 'userImgUpdate'])->name('user_img_update');
@@ -111,8 +110,9 @@ Route::prefix('orders')->group(function () {
     Route::get('/verify/{order_id}', [HomeController::class, 'clickToVerify'])->name('verify_order');
 });
 
-Route::middleware(['auth','auth.sellers'])->prefix('seller')->group(function () {
+Route::prefix('seller')->middleware(['auth','auth.sellers'])->group(function () {
     Route::get('orders', OrdersLivewire::class)->name('seller.orders');
+    Route::get('/settings/general', UserGeneralSettings::class)->name('seller.settings.general');
 });
 /*
 |--------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-<div class="content">
+<div class="container-xxl flex-grow-1 container-p-y">
     <div class="container pt-4">
         @if (session()->has('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -163,7 +163,7 @@
         </div>
     </div>
     <!-- Content Header -->
-    <div class="row">
+    <div class="row border border-danger">
         <div class="col-12 col-sm-6 col-md-5 col-xl-6">
             <h4 class="py-4 my-1">Orders</h4>
         </div>
@@ -173,11 +173,11 @@
                 <button class="btn btn-site-primary px-4" type="button"><i class='fas fa-search'></i></button>
             </div>
         </div>
-        <div class="col-12 col-md-2 col-xl-1">
-            {{-- <button type="button" class="btn btn-danger my-3 py-3 w-100" title="Delete selected data" onclick="delUsers()">
+        {{-- <div class="col-12 col-md-2 col-xl-1">
+            <button type="button" class="btn btn-danger my-3 py-3 w-100" title="Delete selected data" onclick="delUsers()">
                 <i class="fas fa-trash-alt"></i>
-            </button> --}}
-        </div>
+            </button>
+        </div> --}}
     </div>
     <!-- /Content Header -->
     {{-- @dd($data['orders']) --}}
