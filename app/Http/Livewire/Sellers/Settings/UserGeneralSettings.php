@@ -80,6 +80,8 @@ class UserGeneralSettings extends Component
                 } else {
                     session()->flash('error', config('constants.UPDATION_FAILED'));
                 }
+            } else {
+                session()->flash('error', 'Your old password is incorrect.');
             }
         } catch (Exception $error) {
             session()->flash('error', $error);
