@@ -18,6 +18,7 @@ use App\Services\TwilioSmsService;
 use App\User;
 use App\VerificationCodes;
 use App\WithdrawalRequests;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
