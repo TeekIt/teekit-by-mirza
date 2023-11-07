@@ -135,7 +135,7 @@ Route::prefix('driver')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('notifications')->group(function () {
-    Route::get('', [NotificationsController::class, 'getNotifications']);
+    Route::get('/', [NotificationsController::class, 'getNotifications']);
     Route::post('save_token', [NotificationsController::class, 'saveToken']);
     Route::get('delete/{notification_id}', [NotificationsController::class, 'deleteNotification']);
     Route::post('send_test', [NotificationsController::class, 'notificationSendTest']);
@@ -164,7 +164,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     });
 
     Route::prefix('orders')->group(function () {
-        Route::get('', [OrdersController::class, 'index']);
+        Route::get('/', [OrdersController::class, 'index']);
         Route::post('new', [OrdersController::class, 'new']);
         Route::get('seller', [OrdersController::class, 'sellerOrders']);
         Route::get('delivery_boy_orders/{delivery_boy_id}', [OrdersController::class, 'deliveryBoyOrders']);
