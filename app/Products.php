@@ -143,7 +143,7 @@ class Products extends Model
 
     public static function getParentSellerProductsAsc(int $seller_id)
     {
-        return Products::where('user_id', '=', $seller_id)->where('status', '=', 1)->orderByAsc('id')->get();
+        return Products::where('user_id', '=', $seller_id)->where('status', '=', 1)->orderBy('id', 'asc')->get();
     }
 
     public static function getParentSellerProductsDescForView(int $seller_id, string $search = '', int $category_id = null)

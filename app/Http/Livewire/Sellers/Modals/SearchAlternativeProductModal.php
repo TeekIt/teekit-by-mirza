@@ -117,6 +117,8 @@ class SearchAlternativeProductModal extends Component
             }
             /* Operation finished */
             sleep(1);
+            $this->emit('callParentResetModal');
+            $this->emit('alternativeProductIncluded');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'searchAlternativeProductModal']);
             if ($replaced && $updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));

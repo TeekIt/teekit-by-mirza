@@ -30,9 +30,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Laracasts\Flash\Flash;
 use Stripe;
 use Throwable;
-
 class HomeController extends Controller
 {
     /**
@@ -61,7 +61,7 @@ class HomeController extends Controller
             $total_sales = Orders::query()->where('payment_status', '=', 'paid')->where('seller_id', '=', Auth::id())->sum('order_total');
             $all_orders = Orders::where('seller_id', Auth::id())
                 ->whereNotNull('order_status')
-                ->orderby(\DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3
+                ->orderby(DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3
                  when order_status = "onTheWay" then 4 when order_status = "delivered" then 5 end'))
                 ->paginate(5);
             return view('shopkeeper.child_dashboard', compact('user', 'pending_orders', 'total_products', 'total_orders', 'total_sales', 'all_orders'));
@@ -74,7 +74,7 @@ class HomeController extends Controller
             $total_sales = Orders::query()->where('payment_status', '=', 'paid')->where('seller_id', '=', Auth::id())->sum('order_total');
             $all_orders = Orders::where('seller_id', \auth()->id())
                 ->whereNotNull('order_status')
-                ->orderby(\DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3
+                ->orderby(DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3
                  when order_status = "onTheWay" then 4 when order_status = "delivered" then 5 end'))
                 ->paginate(5);
             return view('shopkeeper.dashboard', compact('user', 'pending_orders', 'total_products', 'total_orders', 'total_sales', 'all_orders'));
@@ -505,6 +505,54 @@ class HomeController extends Controller
      * @author Huzaifa Haleem
      * @version 1.0.0
      */
+    // public function locationUpdate(Request $request)
+    // {
+    //     dd($request->all());
+    //     $data = $request->Address;
+    //     $location = $request->location_text;
+    //     $user = User::find(Auth::id());
+    //     $user->business_location = json_encode($data);
+    //     $user->address_1 = $location;
+    //     $user->lat = $data['lat'];
+    //     $user->lon = $data['long'];
+    //     $user->save();
+    //     flash('Location Updated');
+    //     return redirect()->back();
+    // }
+
+    // public function locationUpdate(Request $request)
+    // {
+    //     // Validate the incoming data
+    //     $request->validate([
+    //         'Address' => 'required|array',
+    //         'location_text' => 'required|string',
+    //         'Address.lat' => 'required|numeric',
+    //         'Address.long' => 'required|numeric',
+    //     ]);
+
+    //     $data = $request->input('Address');
+    //     $location = $request->input('location_text');
+
+    //     $user = User::find(Auth::id());
+
+    //     if ($user) {
+    //         $user->business_location = json_encode($data);
+    //         $user->address_1 = $location;
+    //         $user->lat = $data['lat'];
+    //         $user->lon = $data['long'];
+
+    //         if ($user->save()) {
+    //             session()->flash('success', 'Location Updated');
+    //         } else {
+    //             session()->flash('error', 'Failed to update location. Please try again.');
+    //         }
+    //     } else {
+    //         session()->flash('error', 'User not found.');
+    //     }
+
+    //     return redirect()->back();
+    // }
+
     public function locationUpdate(Request $request)
     {
         try {
@@ -535,6 +583,7 @@ class HomeController extends Controller
             session()->flash('error', $error);
         }
     }
+
     /**
      * Update's user password
      * @author Mirza Abdullah Izhar

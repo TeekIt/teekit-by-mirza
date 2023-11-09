@@ -27,8 +27,13 @@ class OrdersLivewire extends Component
         $phone_number,
         $order_item,
         $search = '';
-
+    
     protected $paginationTheme = 'bootstrap';
+
+    protected $listeners = [
+        'callParentResetModal' => 'resetModal',
+        'alternativeProductIncluded' => 'render'
+    ];
 
     public function mount()
     {

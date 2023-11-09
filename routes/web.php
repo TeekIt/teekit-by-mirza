@@ -17,6 +17,7 @@ use App\Http\Livewire\Admin\DriversLivewire;
 use App\Http\Livewire\Sellers\OrdersLivewire;
 use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 /*
 |--------------------------------------------------------------------------
 | Web Routes

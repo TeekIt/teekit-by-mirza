@@ -10,7 +10,6 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <!-- Sidebar user panel (optional) -->
-
         <!-- Sidebar Menu -->
         <nav class="mt-5">
             <ul class="nav nav-pills nav-sidebar flex-column" data-accordion="false" data-widget="treeview"
@@ -72,12 +71,12 @@
                                 <p>General</p>
                             </a>
                         </li>
-                        {{-- <li class="nav-item">
+                        <li class="nav-item">
                             <a href="/settings/general" class="nav-link">
                                 <i class="fas fa-gears nav-icon"></i>
                                 <p>General Settings</p>
                             </a>
-                        </li> --}}
+                        </li>
                         <li class="nav-item">
                             <a href="/settings/payment" class="nav-link">
                                 <i class="fas fa-money nav-icon"></i>

@@ -2,13 +2,15 @@
 
 namespace App\Http\Livewire\Sellers\Settings;
 
+use App\Products;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Storage; 
+use Illuminate\Support\Facades\File;
 
 class UserGeneralSettings extends Component
 {
@@ -25,11 +27,15 @@ class UserGeneralSettings extends Component
         $old_password,
         $new_password,
         $image,
-        $search = '';
+        $Image ,
+        $search = '',
+        $Address = [] ,
+        $location_text 
+        ;
 
     protected $rules = [
         'old_password' => 'required|min:8',
-        'new_password' => 'required|min:8'
+        'new_password' => 'required|min:8',
     ];
 
     public function mount()
@@ -42,11 +48,11 @@ class UserGeneralSettings extends Component
         try {
             $user = User::find(auth()->id());
             $filename = auth()->user()->name;
-            if ($this->image) {
+            if ($this->Image) {
                 // Generate a unique file name
-                $filename = uniqid($user->id . '_' . $user->name . '_') . '.' . $this->image->getClientOriginalExtension();
+                $filename = uniqid($user->id . '_' . $user->name . '_') . '.' . $this->Image->getClientOriginalExtension();
                 // Store the file in the designated storage disk
-                Storage::disk('spaces')->put($filename, $this->image->get());
+                Storage::disk('spaces')->put($filename, $this->Image->get());
                 // Check if the file was successfully stored
                 if (Storage::disk('spaces')->exists($filename)) {
                     info("File is stored successfully: " . $filename);
@@ -62,7 +68,68 @@ class UserGeneralSettings extends Component
             session()->flash('success', 'Image updated successfully.');
         } catch (Exception $error) {
             session()->flash('error', $error);
+            // dd($error);
         }
+    }
+
+    public function exportProducts()
+    {
+        $user_id = Auth::id();
+        $products = Products::getParentSellerProductsAsc($user_id);
+        $all_products = [];
+        foreach ($products as $product) {
+            $pt = json_decode(json_encode(Products::getProductInfo($product->id)->toArray()));
+            unset($pt->category);
+            unset($pt->ratting);
+            unset($pt->id);
+            unset($pt->user_id);
+            unset($pt->created_at);
+            unset($pt->updated_at);
+            $temp_img = [];
+            if (isset($pt->images)) {
+                foreach ($pt->images as $img) $temp_img[] = $img->product_image;
+            }
+            $pt->images = implode(',', $temp_img);
+            $all_products[] = $pt;
+        }
+        $destinationPath = public_path() . "/upload/csv/";
+        if (!is_dir($destinationPath)) {
+            mkdir($destinationPath, 0777, true);
+        }
+        $file = time() . '_export.csv';
+        return  $this->jsonToCsv(json_encode($all_products), $destinationPath . $file, true);
+    }
+
+    public function jsonToCsv($json, $csvFilePath = false, $boolOutputFile = false)
+    {
+        if (empty($json)) {
+            die("The JSON string is empty!");
+        }
+
+        if (is_array($json) === false) {
+            $json = json_decode($json, true);
+        }
+
+        $strTempFile = public_path() . "/upload/csv/" . 'csvOutput' . date("U") . ".csv";
+        $f = fopen($strTempFile, "w+");
+        $csvFilePath = $strTempFile;
+        $firstLineKeys = false;
+
+        foreach ($json as $line) {
+            if (empty($firstLineKeys)) {
+                $firstLineKeys = array_keys($line);
+                fputcsv($f, array_map('strval', $firstLineKeys));
+                $firstLineKeys = array_flip($firstLineKeys);
+            }
+
+            // Using array_merge is important to maintain the order of keys according to the first element
+            // $line = array_map('strval', $line);
+            fputcsv($f, array_merge($firstLineKeys, $line));
+        }
+
+        fclose($f);
+
+        return response()->download($csvFilePath, null, ['Content-Type' => 'text/csv'])->deleteFileAfterSend();
     }
 
     public function passwordUpdate()
