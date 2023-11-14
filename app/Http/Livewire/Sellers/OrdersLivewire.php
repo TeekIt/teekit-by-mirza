@@ -31,8 +31,8 @@ class OrdersLivewire extends Component
     protected $paginationTheme = 'bootstrap';
 
     protected $listeners = [
-        'callParentResetModal' => 'resetModal',
-        'alternativeProductIncluded' => 'render'
+        'alternativeProductIncluded' => 'render',
+        'callParentResetModal' => 'resetModal'
     ];
 
     public function mount()
