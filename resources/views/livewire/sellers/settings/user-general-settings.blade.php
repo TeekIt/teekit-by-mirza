@@ -59,7 +59,7 @@
                                                                 @enderror
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-8 ">
+                                                        <div class="col-md-8">
                                                             <div class="form-group">
                                                                 <table class="w-100">
                                                                     <tr>
@@ -221,7 +221,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label >Name</label>
+                            <label>Name</label>
                             <input type="text" wire:model.defer="name" name="name" id="name" class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" value="{{ $user->name }}">
                             @if ($errors->has('name'))
                                 <span class="invalid-feedback" role="alert">
@@ -233,7 +233,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label >Business Name</label>
+                            <label>Business Name</label>
                             <input type="text" wire:model.defer="business_name" id="business_name" class="form-control" value="{{ $user->business_name }}">
                             <p id="business_name" class="text-danger business_name error"></p>
                         </div>
@@ -242,7 +242,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label >Email</label>
+                            <label>Email</label>
                             <div class="row ">
                                 <div class="col-md-12">
                                     <input type="tel" class="form-control" wire:model.defer="email" wire:model="phone" value="{{ $user->phone }}">
@@ -253,7 +253,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label >Business Phone</label>
+                            <label>Business Phone</label>
                             <div class="row ">
                                 <div class="col-md-12">
                                     <input type="text" class="form-control" id="business_phone" wire:model.defer="business_phone" value="{{ $user->business_phone }}">
@@ -266,7 +266,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label >Phone</label>
+                            <label>Phone</label>
                             <div class="row ">
                                 <div class="col-md-12">
                                     <input type="tel" class="form-control" wire:model.defer="phone" value="{{ $user->phone }}">

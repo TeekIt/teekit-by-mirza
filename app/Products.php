@@ -6,10 +6,8 @@ use Validator;
 use Illuminate\Http\Request;
 use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
-use App\Http\Controllers\RattingsController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 
 class Products extends Model
 {
@@ -241,7 +239,8 @@ class Products extends Model
     {
         return Products::whereHas('user', function ($query) {
             $query->where('is_active', 1);
-        })->where('status', 1)->paginate();
+        })->where('status', 1)
+        ->paginate();
     }
 
     public static function getProductsByLocation(object $request)
@@ -253,7 +252,7 @@ class Products extends Model
             ->paginate();
     }
 
-    public static function getBulkProducts($request)
+    public static function getBulkProducts(object $request)
     {
         $ids = explode(',', $request->ids);
         return Products::query()->whereIn('id', $ids)->paginate();
@@ -272,7 +271,7 @@ class Products extends Model
             ->simplePaginate(5, ['*'], 'sap_products_page');
     }
 
-    public static function markAsFeatured($id, $status)
+    public static function markAsFeatured(int $id, int $status)
     {
         return Products::where('id', $id)
             ->where('user_id', Auth::id())
@@ -281,7 +280,7 @@ class Products extends Model
             ]);
     }
 
-    public static function toggleProduct($id, $status)
+    public static function toggleProduct(int $id, int $status)
     {
         return Products::where('id', $id)
             ->where('user_id', Auth::id())
@@ -290,7 +289,7 @@ class Products extends Model
             ]);
     }
 
-    public static function toggleAllProducts($status)
+    public static function toggleAllProducts(int $status)
     {
         return Products::where('user_id', Auth::id())
             ->update([

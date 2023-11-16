@@ -52,26 +52,24 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 |--------------------------------------------------------------------------
 */
 Route::prefix('inventory')->group(function () {
-    // Route::get('/', [HomeController::class, 'inventory'])->name('inventory');
-
     Route::middleware('auth')->group(function () {
         Route::get('/', InventoryLivewire::class)->name('inventory');
+        Route::get('/add', [HomeController::class, 'inventoryAdd'])->name('inventory.add.single');
+        Route::post('/add', [HomeController::class, 'inventoryAddDB'])->name('add_inventory');
+        Route::get('/add_bulk', [HomeController::class, 'inventoryAddBulk'])->name('inventory.add.bulk');
+        Route::get('/edit/{product_id}', [HomeController::class, 'inventoryEdit'])->name('inventory.edit');
+        Route::post('/update/{product_id}', [HomeController::class, 'inventoryUpdate'])->name('update_inventory');
+        Route::get('/image/delete/{image_id}', [HomeController::class, 'deleteImg']);
     });
 
-    // Route::get('/admin/test/sellers/parent', ParentSellersLiveWire::class)->name('admin.sellers.test.parent');
-    Route::get('/edit/{product_id}', [HomeController::class, 'inventoryEdit']);
-    Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
-    Route::get('/add', [HomeController::class, 'inventoryAdd']);
-    Route::get('/add_bulk', [HomeController::class, 'inventoryAddBulk']);
-    Route::post('/add', [HomeController::class, 'inventoryAddDB'])->name('add_inventory');
-    Route::get('/image/delete/{image_id}', [HomeController::class, 'deleteImg']);
-    Route::post('/update/{product_id}', [HomeController::class, 'inventoryUpdate'])->name('update_inventory');
-    Route::get('/disable/{product_id}', [HomeController::class, 'inventoryDisable'])->name('inventory_disable');
-    Route::get('/enable/{product_id}', [HomeController::class, 'inventoryEnable'])->name('inventory_enable');
-    Route::get('/enable_all', [HomeController::class, 'inventoryEnableAll'])->name('enable_all');
-    Route::get('/disable_all', [HomeController::class, 'inventoryDisableAll'])->name('disable_all');
-    Route::get('/feature/add/{product_id}', [HomeController::class, 'markAsFeatured'])->name('markAsFeatured');
-    Route::get('/feature/remove/{product_id}', [HomeController::class, 'removeFromFeatured'])->name('removeFromFeatured');
+    // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
+
+    // Route::get('/disable/{product_id}', [HomeController::class, 'inventoryDisable'])->name('inventory_disable');
+    // Route::get('/enable/{product_id}', [HomeController::class, 'inventoryEnable'])->name('inventory_enable');
+    // Route::get('/enable_all', [HomeController::class, 'inventoryEnableAll'])->name('enable_all');
+    // Route::get('/disable_all', [HomeController::class, 'inventoryDisableAll'])->name('disable_all');
+    // Route::get('/feature/add/{product_id}', [HomeController::class, 'markAsFeatured'])->name('markAsFeatured');
+    // Route::get('/feature/remove/{product_id}', [HomeController::class, 'removeFromFeatured'])->name('removeFromFeatured');
 });
 /*
 |--------------------------------------------------------------------------
@@ -111,7 +109,7 @@ Route::prefix('orders')->group(function () {
     Route::get('/verify/{order_id}', [HomeController::class, 'clickToVerify'])->name('verify_order');
 });
 
-Route::prefix('seller')->middleware(['auth','auth.sellers'])->group(function () {
+Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function () {
     Route::get('orders', OrdersLivewire::class)->name('seller.orders');
     Route::get('/settings/general', UserGeneralSettings::class)->name('seller.settings.general');
 });

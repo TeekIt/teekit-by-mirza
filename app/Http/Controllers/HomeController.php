@@ -97,7 +97,7 @@ class HomeController extends Controller
                 abort(404);
             }
             $categories = Categories::all();
-            $inventory = Products::getProductInfoWithQty($product_id, $store_id);
+            $inventory = Products::getProductInfo($product_id);
             return view('shopkeeper.inventory.edit', compact('inventory', 'categories'));
         } else {
             abort(404);
@@ -135,109 +135,109 @@ class HomeController extends Controller
      * It will delete the product image
      * @version 1.0.0
      */
-    public function deleteImg($image_id)
-    {
-        if (Gate::allows('seller')) {
-            productImages::find($image_id)->delete();
-            return redirect()->back();
-        } else {
-            abort(404);
-        }
-    }
+    // public function deleteImg($image_id)
+    // {
+    //     if (Gate::allows('seller')) {
+    //         productImages::find($image_id)->delete();
+    //         return redirect()->back();
+    //     } else {
+    //         abort(404);
+    //     }
+    // }
     /**
      * Disable's a single product
      * @author Huzaifa Haleem
      * @version 1.1.0
      */
-    public function inventoryDisable($product_id)
-    {
-        $product = Products::find($product_id);
-        $product->status = 0;
-        // $product->qty = 0;
-        $product->save();
-        flash('Product Disabled Successfully')->success();
-        return Redirect::back();
-    }
+    // public function inventoryDisable($product_id)
+    // {
+    //     $product = Products::find($product_id);
+    //     $product->status = 0;
+    //     // $product->qty = 0;
+    //     $product->save();
+    //     flash('Product Disabled Successfully')->success();
+    //     return Redirect::back();
+    // }
     /**
      * Enable's a single product
      * @author Huzaifa Haleem
      * @version 1.1.0
      */
-    public function inventoryEnable($product_id)
-    {
-        $product = Products::find($product_id);
-        $product->status = 1;
-        $product->save();
-        flash('Product Enabled Successfully')->success();
-        return Redirect::back();
-    }
-    /**
-     * Enable's all products of logged-in user
-     * @author Mirza Abdullah Izhar
-     * @version 1.1.0
-     */
-    public function inventoryEnableAll(Request $request)
-    {
-        DB::table('products')
-            ->where('user_id', Auth::id())
-            ->update(['status' => 1]);
-        flash('All Products Enabled Successfully')->success();
-        return Redirect::back();
-    }
-    /**
-     * Disable's all products of logged-in user
-     * @author Mirza Abdullah Izhar
-     * @version 1.1.0
-     */
-    public function inventoryDisableAll(Request $request)
-    {
-        DB::table('products')
-            ->where('user_id', Auth::id())
-            ->update(['status' => 0]);
-        flash('All Products Disabled Successfully')->success();
-        return Redirect::back();
-    }
-    /**
-     * Feature the given product
-     * @author Mirza Abdullah Izhar
-     * @version 1.1.0
-     */
-    public function markAsFeatured(Request $request)
-    {
-        if (Gate::allows('seller')) {
-            $count = DB::table('products')
-                ->select()
-                ->where('user_id', Auth::id())
-                ->where('featured', 1)
-                ->count();
-            if ($count >= 6) {
-                flash('You Can Mark Maximum 6 Products As Featured')->success();
-            } else {
-                DB::table('products')
-                    ->where('id', $request->product_id)
-                    ->update(['featured' => 1]);
-                flash('Marked As Featured, Successfully')->success();
-            }
-            return Redirect::back();
-        } else {
-            abort(404);
-        }
-    }
-    /**
-     * Remove the given product from featured list
-     * @author Mirza Abdullah Izhar
-     * @version 1.1.0
-     */
-    public function removeFromFeatured(Request $request)
-    {
-        if (Gate::allows('seller')) {
-            DB::table('products')
-                ->where('id', $request->product_id)
-                ->update(['featured' => 0]);
-            flash('Removed From Featured, Successfully')->success();
-        }
-        return Redirect::back();
-    }
+    // public function inventoryEnable($product_id)
+    // {
+    //     $product = Products::find($product_id);
+    //     $product->status = 1;
+    //     $product->save();
+    //     flash('Product Enabled Successfully')->success();
+    //     return Redirect::back();
+    // }
+    // /**
+    //  * Enable's all products of logged-in user
+    //  * @author Mirza Abdullah Izhar
+    //  * @version 1.1.0
+    //  */
+    // public function inventoryEnableAll(Request $request)
+    // {
+    //     DB::table('products')
+    //         ->where('user_id', Auth::id())
+    //         ->update(['status' => 1]);
+    //     flash('All Products Enabled Successfully')->success();
+    //     return Redirect::back();
+    // }
+    // /**
+    //  * Disable's all products of logged-in user
+    //  * @author Mirza Abdullah Izhar
+    //  * @version 1.1.0
+    //  */
+    // public function inventoryDisableAll(Request $request)
+    // {
+    //     DB::table('products')
+    //         ->where('user_id', Auth::id())
+    //         ->update(['status' => 0]);
+    //     flash('All Products Disabled Successfully')->success();
+    //     return Redirect::back();
+    // }
+    // /**
+    //  * Feature the given product
+    //  * @author Mirza Abdullah Izhar
+    //  * @version 1.1.0
+    //  */
+    // public function markAsFeatured(Request $request)
+    // {
+    //     if (Gate::allows('seller')) {
+    //         $count = DB::table('products')
+    //             ->select()
+    //             ->where('user_id', Auth::id())
+    //             ->where('featured', 1)
+    //             ->count();
+    //         if ($count >= 6) {
+    //             flash('You Can Mark Maximum 6 Products As Featured')->success();
+    //         } else {
+    //             DB::table('products')
+    //                 ->where('id', $request->product_id)
+    //                 ->update(['featured' => 1]);
+    //             flash('Marked As Featured, Successfully')->success();
+    //         }
+    //         return Redirect::back();
+    //     } else {
+    //         abort(404);
+    //     }
+    // }
+    // /**
+    //  * Remove the given product from featured list
+    //  * @author Mirza Abdullah Izhar
+    //  * @version 1.1.0
+    //  */
+    // public function removeFromFeatured(Request $request)
+    // {
+    //     if (Gate::allows('seller')) {
+    //         DB::table('products')
+    //             ->where('id', $request->product_id)
+    //             ->update(['featured' => 0]);
+    //         flash('Removed From Featured, Successfully')->success();
+    //     }
+    //     return Redirect::back();
+    // }
     /**
      * Inserts a single store product
      * @author Mirza Abdullah Izhar

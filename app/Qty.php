@@ -69,7 +69,7 @@ class Qty extends Model
      * this will help us add qty with given details to qty table
      * @author Muhammad Abdullah Mirza
      */
-    public static function addProductQty($user_id, $product_id, $category_id, $product_quantity)
+    public static function addProductQty(int $user_id, int $product_id, int $category_id, int $product_quantity)
     {
         $quantity = new Qty();
         $quantity->users_id = $user_id;
