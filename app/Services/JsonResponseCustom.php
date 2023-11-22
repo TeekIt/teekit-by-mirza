@@ -23,7 +23,7 @@ final class JsonResponseCustom
         ], $http_code);
     }
 
-    public static function getWebResponse($message, $status)
+    public static function getWebResponse($status, $message)
     {
         ($status) ? flash($message)->success() : flash($message)->error();
     }

@@ -1,5 +1,4 @@
 <?php
-
 use App\Http\Controllers\Admin\UserAndRoleController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Livewire\Admin\ParentSellersLiveWire;
@@ -38,7 +37,6 @@ use Illuminate\Support\Facades\Auth;
 |   * Confirming a user's email address 'Auth\VerificationController'
 |--------------------------------------------------------------------------
 */
-
 Auth::routes();
 /*
 |--------------------------------------------------------------------------

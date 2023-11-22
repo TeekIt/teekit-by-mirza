@@ -1,6 +1,6 @@
 <script>
     const signUp = () => {
-        let spinner = '<div  class="d-flex justify-content-center text-white"><div class="spinner-border myspinner"role="status"><span class="sr-only">Loading...</span></div></div>';
+        let spinner = '<div class="d-flex justify-content-center text-white"><div class="spinner-border myspinner"role="status"><span class="sr-only">Loading...</span></div></div>';
         let name = $('#name').val();
         let email = $('#email').val();
         let password = $('#password').val();

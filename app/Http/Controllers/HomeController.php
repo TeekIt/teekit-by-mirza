@@ -589,30 +589,30 @@ class HomeController extends Controller
      * @author Mirza Abdullah Izhar
      * @version 1.0.0
      */
-    public function passwordUpdate(Request $request)
-    {
-        $validate = Validator::make($request->all(), [
-            'old_password' => 'required|string|min:8',
-            'new_password' => 'required|string|min:8'
-        ]);
-        if ($validate->fails()) {
-            flash('Password must be 8 characters long.')->error();
-            return Redirect::back();
-        }
+    // public function passwordUpdate(Request $request)
+    // {
+    //     $validate = Validator::make($request->all(), [
+    //         'old_password' => 'required|string|min:8',
+    //         'new_password' => 'required|string|min:8'
+    //     ]);
+    //     if ($validate->fails()) {
+    //         flash('Password must be 8 characters long.')->error();
+    //         return Redirect::back();
+    //     }
 
-        $old_password = $request->old_password;
-        $new_password = $request->new_password;
+    //     $old_password = $request->old_password;
+    //     $new_password = $request->new_password;
 
-        $user = User::find(Auth::id());
-        if (Hash::check($old_password, $user->password)) {
-            $user->password = Hash::make($new_password);
-            $user->save();
-            flash('Your password has been updated successfully.')->success();
-        } else {
-            flash('Your old password is incorrect.')->error();
-        }
-        return redirect()->back();
-    }
+    //     $user = User::find(Auth::id());
+    //     if (Hash::check($old_password, $user->password)) {
+    //         $user->password = Hash::make($new_password);
+    //         $user->save();
+    //         flash('Your password has been updated successfully.')->success();
+    //     } else {
+    //         flash('Your old password is incorrect.')->error();
+    //     }
+    //     return redirect()->back();
+    // }
     /**
      * Update's payment settings
      * @author Huzaifa Haleem
@@ -1527,7 +1527,6 @@ class HomeController extends Controller
             return response()->json([
                 'errors' => $validatedData->errors()
             ], 200);
-            exit;
         }
         $phone = substr($request->phone, 0, 3);
         $business_phone = substr($request->business_phone, 0, 3);
