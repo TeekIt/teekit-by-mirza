@@ -3,7 +3,9 @@
 Web App:
 1) composer install.
 2) Create & modify the .env file.
-3) Change the permission of Storage folder to (chmod -R 777 storage) but 777 is a dangerous permission so we have to change it in the future.
+3) Change the owner of the following files:-
+	a) chown -R www-data:www-data bootstrap/
+	b) chown -R www-data:www-data storage/
 
 DB:
 1) Create a database cluster on Digital Ocean.
