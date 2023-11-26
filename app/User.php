@@ -296,9 +296,10 @@ class User extends Authenticatable implements JWTSubject
         return null;
     }
 
-    public static function verifyReferralCode(string $referral_code)
+    public static function verifyReferralCode(int $user_id, string $referral_code)
     {
-        $data = User::where('referral_code', $referral_code)->first();
+        $data = User::where('id', '!=', $user_id)
+        ->where('referral_code', $referral_code)->first();
         return (is_null($data)) ? false :  $data;
     }
 

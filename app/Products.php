@@ -15,6 +15,26 @@ class Products extends Model
     use Searchable;
 
     protected $fillable = ['*'];
+
+    public function toSearchableArray()
+    {
+        return [
+            'id' => $this->id,
+            'product_name' => $this->product_name,
+            'user_id' => $this->user_id,
+            'category_id' => $this->category_id,
+            'price' => $this->price,
+            'status' => $this->status,
+            'wieght' => $this->weight,
+            'brand' => $this->brand
+        ];
+    }
+
+    // Define filterable attributes for meilisearch
+    public function scoutFilterable()
+    {
+        return ['id', 'product_name', 'user_id', 'category_id', 'price', 'status', 'weight', 'brand'];
+    }
     /**
      * Relations
      */

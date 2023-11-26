@@ -80,7 +80,7 @@ return [
     'BUCKET' => 'https://user-imgs.sgp1.digitaloceanspaces.com/',
     /*
     |--------------------------------------------------------------------------
-    | Stuart Sandbox Cridentials Key
+    | Stuart Sandbox Cridentials
     |--------------------------------------------------------------------------
     */
     'STUART_SANDBOX_CLIENT_ID' => '7faa9066d638cb94b61f18040355f59ffd124cd94b5444f1ee992d1e3e594a19',
@@ -89,13 +89,25 @@ return [
     'STUART_SANDBOX_TOKEN_URL' => 'https://api.sandbox.stuart.com/oauth/token',
     /*
     |--------------------------------------------------------------------------
-    | Stuart Production Cridentials Key
+    | Stuart Production Cridentials
     |--------------------------------------------------------------------------
     */
     'STUART_PRODUCTION_CLIENT_ID' => '75f7341f983c842b6a4847707a1a03d4413687e7223c3f51be34359c2fa9e505',
     'STUART_PRODUCTION_CLIENT_SECRET' => '0144e8a9978851e7005a5a3ef53cba22dc1b6102f49c7add5bb22dedf74c9ba2',
     'STUART_PRODUCTION_JOBS_URL' => 'https://api.stuart.com/v2/jobs',
     'STUART_PRODUCTION_TOKEN_URL' => 'https://api.stuart.com/oauth/token',
+    /*
+    |--------------------------------------------------------------------------
+    | Stripe Production Cridentials
+    |--------------------------------------------------------------------------
+    */
+    'STRIPE_LIVE_API_KEY' => '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:',
+    /*
+    |--------------------------------------------------------------------------
+    | Stripe Test Cridentials Key
+    |--------------------------------------------------------------------------
+    */
+    'STRIPE_TEST_API_KEY' => 'sk_test_51IY9sYIiDDGv1gaVKsxU0EXr96lHcCvwXHwYAdN81Cqrj1TBL4HErJpczWJpYFIQ1qbCOQxnxIM3UfsBtWC2MKeD00QRkUKg6q:',
     /*
     |--------------------------------------------------------------------------
     | Admin Email
