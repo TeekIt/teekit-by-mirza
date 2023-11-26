@@ -39,9 +39,9 @@ final class StripeServices
         $query_params = [
             'amount' => $_REQUEST['amount'],
             'currency' => $_REQUEST['currency'],
-            'payment_method_types[]' => 'card_present',
+            'payment_method_types[]' => 'card',
             'capture_method' => 'manual',
-            'payment_method_options[card_present][request_incremental_authorization_support]' => 'true',
+            'payment_method_options[card][request_incremental_authorization_support]' => 'true',
         ];
         $api_key = (request()->getPathInfo() === '/api/payment_intent/test/request_incremental_authorization_support') ? config('constants.STRIPE_TEST_API_KEY') : config('constants.STRIPE_LIVE_API_KEY');
 

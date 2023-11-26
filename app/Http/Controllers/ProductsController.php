@@ -754,10 +754,9 @@ class ProductsController extends Controller
             if (isset($miles)) {
                 $store_ids =  $this->searchWrtNearByStores($user_lat, $user_lon,  $miles);
             }
-            $productName = $request->product_name;
-            // $article = Products::query();
-            $article = Products::search($productName);
+            $article = Products::search($request->product_name);
             $article->where('status', 1);
+            
             if (isset($store_ids)) $article->whereIn('user_id', $store_ids['ids']);
             if (isset($request->category_id)) $article->where('category_id', $request->category_id);
             if (isset($request->store_id)) $article->where('user_id', $request->store_id);
@@ -772,13 +771,12 @@ class ProductsController extends Controller
              */
             if (isset($request->min_weight)) $article->where('weight >', $request->min_weight);
             if (isset($request->max_weight)) $article->where('weight <', $request->max_weight);
+            // dd($article);
             $products = $article->paginate(20);
             $pagination = $products->toArray();
             if (!$products->isEmpty()) {
                 $products_data = [];
-                foreach ($products as $product) {
-                    $products_data[] = $this->getProductInfo($product->id);
-                }
+                foreach ($products as $product) $products_data[] = $this->getProductInfo($product->id);
                 unset($pagination['data']);
                 return JsonResponseCustom::getApiResponseExtention(
                     $products_data,
