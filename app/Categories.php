@@ -105,26 +105,6 @@ class Categories extends Model
         }
     }
 
-    public static function getProductsByStoreId(int $category_id, int $store_id)
-    {
-        $products = Products::whereHas('user', function ($query) {
-            $query->where('is_active', 1);
-        })
-            ->where('category_id', $category_id)
-            ->where('user_id', $store_id)
-            ->where('status', 1)
-            ->paginate(10);
-        $pagination = $products->toArray();
-        if (!$products->isEmpty()) {
-            $products_data = [];
-            foreach ($products as $product) $products_data[] = Products::getProductInfo($product->id);
-            unset($pagination['data']);
-            return ['data' => $products_data, 'pagination' => $pagination];
-        } else {
-            return [];
-        }
-    }
-
     public static function stores(int $category_id)
     {
         // Get IDs of both parent and child stores from the Qty table

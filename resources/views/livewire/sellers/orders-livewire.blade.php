@@ -1,7 +1,7 @@
 <div class="container-xxl flex-grow-1 container-p-y">
-    @if ($loading)
-        <div class="loading-indicator">Loading...</div>
-    @else
+    {{-- @if ($loading)
+        <div class="loading-indicator">Loading...</div> --}}
+    {{-- @else --}}
         <div class="container pt-4">
             @if (session()->has('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -348,7 +348,6 @@
 
 
             <div class="row">
-
                 {{-- @foreach ($orders as $order)
             <div class="col-md-12 p-4 pr-4">
                 <div class="card">
@@ -382,7 +381,7 @@
                                                 @if (!empty($u) && !in_array($key, $fields))
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="" class="text-capitalize">{{str_replace('_',' ',$key)}}</label>
+                                                        <label  class="text-capitalize">{{str_replace('_',' ',$key)}}</label>
                                                         <input type="text" disabled class="form-control" value="{{$u}}">
                                                     </div>
                                                 </div>
@@ -390,7 +389,7 @@
                                                 @endforeach
                                                 <div class="col-md-12">
                                                     <div class="form-group">
-                                                        <label for="" class="mt-5">
+                                                        <label  class="mt-5">
                                                             @if ($user->is_active == 0)
                                                             <a href="{{route('change_user_status',['user_id'=>$user->id,'status'=>1])}}"> <span class="text-success">Click here to Enable Account</span></a>
                                                             @else
@@ -508,12 +507,11 @@
                             $fields = ['is_online', 'is_active', 'business_name', 'business_location', 'business_hours', 'bank_details', 'settings', 'user_img', 'remember_token', 'created_at', 'updated_at', 'pending_withdraw', 'total_withdraw', 'application_fee', 'temp_code'];
                             ?>
                             <div class="row">
-
                                 @foreach (json_decode($user) as $key => $u)
                                     @if (!empty($u) && !in_array($key, $fields))
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="" class="text-capitalize">{{ str_replace('_', ' ', $key) }}</label>
+                                                <label class="text-capitalize">{{ str_replace('_', ' ', $key) }}</label>
                                                 <input type="text" disabled class="form-control" value="{{ $u }}">
                                             </div>
                                         </div>
@@ -521,7 +519,7 @@
                                 @endforeach
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label for="" class="mt-5">
+                                        <label class="mt-5">
                                             @if ($user->is_active == 0)
                                                 <a href="{{ route('change_user_status', ['user_id' => $user->id, 'status' => 1]) }}"> <span class="text-success">Click here to Enable Account</span></a>
                                             @else
@@ -541,7 +539,7 @@
                 </div>
             </div>
         @endif
-    @endif
+    {{-- @endif --}}
 
     {{-- @push('scripts')
         <script>

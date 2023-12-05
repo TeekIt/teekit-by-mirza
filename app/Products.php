@@ -64,7 +64,7 @@ class Products extends Model
 
     public function quantities()
     {
-        return $this->hasMany(Qty::class);
+        return $this->hasMany(Qty::class, 'products_id');
     }
     /**
      * Validators

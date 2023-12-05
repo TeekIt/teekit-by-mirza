@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Categories;
+use App\Qty;
 use App\Services\GoogleMap;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -142,7 +143,7 @@ class CategoriesController extends Controller
                 );
             }
             if ($request->store_id)
-                $data = Categories::getProductsByStoreId($request->category_id, $request->store_id);
+                $data = Qty::getProductsByGivenIds($request->category_id, $request->store_id);
             else
                 $data = Categories::getProducts($request->category_id);
             /* 

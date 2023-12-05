@@ -506,9 +506,7 @@ class ProductsController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $store = Products::where('id', $request->product_id)->first();
-            $store_id = $store->user_id;
-            $product = Products::getProductInfoWithQty($request->product_id, $store_id);
+            $product = Products::getProductInfo($request->product_id);
             if (!empty($product)) {
                 $product->store = User::find($product->user_id);
                 unset($product->quantity);

@@ -136,6 +136,10 @@ final class StripeServices
     {
         $api_key = (url('/') === config('constants.LIVE_SITE_URL')) ? static::getLiveApiKey() : static::getTestApiKey();
         Stripe::setApiKey($api_key);
-        Refund::create(['charge' => $order->transaction_id]);
+        Refund::create([
+            // 'charge' => $order->transaction_id,
+            'payment_intent' => $order->payment_intent,
+            'reason' => 'requested_by_customer'
+        ]);
     }
 }

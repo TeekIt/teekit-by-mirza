@@ -42,6 +42,22 @@ class Qty extends Model
     //     return true;
     // }
 
+    public static function getProductsByGivenIds(int $category_id, int $store_id)
+    {
+        $quantities = Qty::where('users_id', $store_id)
+            ->where('category_id', $category_id)
+            ->paginate(10);
+        $pagination = $quantities->toArray();
+        if (!$quantities->isEmpty()) {
+            $products_data = [];
+            foreach ($quantities as $single_index) $products_data[] = Products::getProductInfo($single_index->products_id);
+            unset($pagination['data']);
+            return ['data' => $products_data, 'pagination' => $pagination];
+        } else {
+            return [];
+        }
+    }
+
     public static function subtractProductQty(int $user_id, int $product_id, int $product_quantity)
     {
         return Qty::where('users_id', $user_id)

@@ -135,7 +135,7 @@ class OrdersLivewire extends Component
             $order_details = Orders::getOrderById($order['id']);
             dd($order_details);
             Orders::updateOrderStatus($order['id'], 'cancelled');
-            // StripeServices::refundCustomer($order_details);
+            StripeServices::refundCustomer($order_details);
 
 
             $message = "Hello " . $order_details->user->name . " .
