@@ -111,7 +111,7 @@ Route::get('sellers/{seller_id}/{product_name}', [AuthController::class, 'search
 Route::prefix('product')->group(function () {
     Route::post('search', [ProductsController::class, 'search']);
     Route::get('all', [ProductsController::class, 'all']);
-    Route::get('view/{product_id}', [ProductsController::class, 'view']);
+    Route::get('view', [ProductsController::class, 'view']);
     Route::post('view/bulk', [ProductsController::class, 'bulkView']);
     Route::get('seller/{seller_id}', [ProductsController::class, 'sellerProducts']);
     Route::get('sortbyprice', [ProductsController::class, 'sortByPrice']);

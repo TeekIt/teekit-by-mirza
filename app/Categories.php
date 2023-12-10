@@ -77,16 +77,10 @@ class Categories extends Model
 
     public static function getAllCategoriesByStoreId(int $store_id)
     {
-        // $categories_data = Categories::select('id as category_id', 'category_name', 'category_image', 'created_at', 'updated_at')
-        //     ->whereHas('products', function ($query) use ($store_id) {
-        //         $query->where('user_id', $store_id);
-        //     })->get();
         return  Categories::select('id as category_id', 'category_name', 'category_image', 'created_at', 'updated_at')
             ->whereHas('qty', function ($query) use ($store_id) {
                 $query->where('users_id', $store_id);
             })->get();
-
-        // return ($categories_data->isEmpty()) ? [] : $categories_data;
     }
 
     public static function getProducts(int $category_id)
@@ -97,7 +91,7 @@ class Categories extends Model
         $pagination = $products->toArray();
         if (!$products->isEmpty()) {
             $products_data = [];
-            foreach ($products as $product) $products_data[] = Products::getProductInfo($product->id);
+            foreach ($products as $product) $products_data[] = Products::getProductInfo($product->users_id, $product->id);
             unset($pagination['data']);
             return ['data' => $products_data, 'pagination' => $pagination];
         } else {

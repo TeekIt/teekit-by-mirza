@@ -17,14 +17,14 @@ class Qty extends Model
     /**
      * Relations
      */
-    public function products()
+    public function store()
     {
-        return $this->belongTo(Products::class);
+        return $this->belongsTo(User::class, 'users_id');
     }
 
     public function product()
     {
-        return $this->belongsTo(Products::class, 'users_id');
+        return $this->belongsTo(Products::class, 'products_id');
     }
     /**
      * Helpers

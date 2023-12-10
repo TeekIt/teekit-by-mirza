@@ -42,11 +42,6 @@ class Products extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function quantity()
-    {
-        return $this->hasOne(Qty::class);
-    }
-
     public function category()
     {
         return $this->belongsTo(Categories::class);
@@ -54,17 +49,22 @@ class Products extends Model
 
     public function images()
     {
-        return $this->hasMany(productImages::class);
+        return $this->hasMany(productImages::class, 'product_id');
     }
 
     public function rattings()
     {
-        return $this->hasMany(Rattings::class, 'product_id');
+        return $this->hasMany(Rattings::class);
+    }
+
+    public function quantity()
+    {
+        return $this->hasOne(Qty::class);
     }
 
     public function quantities()
     {
-        return $this->hasMany(Qty::class, 'products_id');
+        return $this->hasMany(Qty::class);
     }
     /**
      * Validators
@@ -101,14 +101,35 @@ class Products extends Model
     /**
      * Helpers
      */
-    public static function getProductInfo(int $product_id)
+    public static function getProductInfo(int $seller_id, int $product_id)
     {
-        $product = Products::find($product_id);
-        $product->quantity = Qty::where('users_id', '=', $product->user_id)->where('products_id', '=', $product->id)->first();
-        $product->images = productImages::where('product_id', '=', $product->id)->get();
-        $product->category = Categories::find($product->category_id);
-        $product->ratting = Rattings::getRatting($product_id);
-        return $product;
+        return self::with([
+            'quantity' => function ($query) use ($seller_id) {
+                $query->where('users_id', $seller_id)->with('store');
+            },
+            'images',
+            'category' 
+        ])
+            ->where('id', $product_id)
+            ->get();
+
+        // dd($product);
+
+        // $product = Products::find($product_id);
+        // $product->quantity = Qty::where('users_id', '=', $product->user_id)->where('products_id', '=', $product->id)->first();
+        // $product->images = productImages::where('product_id', '=', $product->id)->get();
+        // $product->category = Categories::find($product->category_id);
+        // $product->ratting = Rattings::getRatting($product_id);
+        // return $product;
+
+        // return Products::with('category', 'rattings')
+        // ->where('product_name', 'LIKE', "%{$search}%")
+        // ->where('user_id', '=', $seller_id)
+        // ->when($category_id, function ($query, $category_id) {
+        //     return $query->where('category_id', '=', $category_id);
+        // })
+        // ->orderByDesc('id')
+        // ->paginate(12);
     }
 
     // public static function getProductInfoWithQty(int $product_id)
@@ -240,7 +261,7 @@ class Products extends Model
         return Products::whereHas('user', function ($query) {
             $query->where('is_active', 1);
         })->where('status', 1)
-        ->paginate();
+            ->paginate();
     }
 
     public static function getProductsByLocation(object $request)
@@ -260,7 +281,7 @@ class Products extends Model
     // SAP == Search Alternative Product
     public static function getProductsForSAPModal(int $seller_id, string $search = '')
     {
-        if(!empty($search)) $search = str_replace(' ', '%', $search);
+        if (!empty($search)) $search = str_replace(' ', '%', $search);
         return Products::join('qty', 'products.id', '=', 'qty.products_id')
             ->select('products.id as prod_id', 'products.product_name', 'qty.qty', 'products.price')
             ->where('qty.users_id', $seller_id)

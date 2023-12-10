@@ -495,8 +495,9 @@ class ProductsController extends Controller
     public function view(Request $request)
     {
         try {
-            $validate = Validator::make($request->route()->parameters(), [
-                'product_id' => 'required|integer',
+            $validate = Validator::make($request->all(), [
+                'seller_id' => 'required|integer',
+                'product_id' => 'required|integer'
             ]);
             if ($validate->fails()) {
                 return JsonResponseCustom::getApiResponse(
@@ -506,24 +507,21 @@ class ProductsController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $product = Products::getProductInfo($request->product_id);
-            if (!empty($product)) {
-                $product->store = User::find($product->user_id);
-                unset($product->quantity);
+            $product = Products::getProductInfo($request->seller_id, $request->product_id);
+            if (!$product->isEmpty()) {
                 return JsonResponseCustom::getApiResponse(
                     $product,
                     true,
                     '',
                     config('constants.HTTP_OK')
                 );
-            } else {
-                return JsonResponseCustom::getApiResponse(
-                    [],
-                    false,
-                    config('constants.NO_RECORD'),
-                    config('constants.HTTP_OK')
-                );
             }
+            return JsonResponseCustom::getApiResponse(
+                [],
+                false,
+                config('constants.NO_RECORD'),
+                config('constants.HTTP_OK')
+            );
         } catch (Throwable $error) {
             report($error);
             return JsonResponseCustom::getApiResponse(
