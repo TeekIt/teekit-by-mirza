@@ -127,7 +127,7 @@ class Orders extends Model
             // Calling the products relation
             $items = $order->order_items;
             $item_arr = [];
-            foreach ($items as $item) $item_arr[] = Products::getProductInfo($item->product_id);
+            foreach ($items as $item) $item_arr[] = Products::getProductInfo($order->seller_id, $item->product_id);
 
             $order['items'] = $item_arr;
             $data[] = $order;

@@ -105,13 +105,16 @@ class Products extends Model
     {
         return self::with([
             'quantity' => function ($query) use ($seller_id) {
-                $query->where('users_id', $seller_id)->with('store');
+                $query->where('users_id', $seller_id);
             },
             'images',
-            'category' 
+            'category'
         ])
+            ->whereHas('quantity', function ($query) use ($seller_id) {
+                $query->where('users_id', $seller_id);
+            })
             ->where('id', $product_id)
-            ->get();
+            ->first();
 
         // dd($product);
 
