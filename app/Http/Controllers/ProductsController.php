@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Validator;
 use Stripe\Product;
 use Throwable;
 use App\Services\JsonResponseCustom;
+use Illuminate\Support\Facades\Cache;
 
 class ProductsController extends Controller
 {
@@ -959,8 +960,9 @@ class ProductsController extends Controller
     public function sellerProducts(Request $request)
     {
         try {
-            $validate = Validator::make($request->route()->parameters(), [
+            $validate = Validator::make($request->all(), [
                 'seller_id' => 'required|integer',
+                'page' => 'required|integer'
             ]);
             if ($validate->fails()) {
                 return JsonResponseCustom::getApiResponse(
@@ -970,19 +972,12 @@ class ProductsController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $seller_id = $request->seller_id;
-            $data = [];
-            $products = [];
-            $role_id = User::getUserRole($seller_id);
-            if ($role_id[0] == 5)
-                $products = Qty::getChildSellerProducts($seller_id);
-            else if ($role_id[0] == 2)
-                $products = Products::getParentSellerProducts($seller_id);
-            $pagination = $products->toArray();
-
-            if (!$products->isEmpty()) {
-                foreach ($products as $product) $data[] = Products::getProductInfo($product->id);
-                unset($pagination['data']);
+            $pagination = Cache::rememberForever('sellerProducts' . $request->seller_id . $request->page, function () use ($request) {
+                return Products::getProductsInfoBySellerId($request->seller_id)->toArray();
+            });
+            $data = $pagination['data'];
+            unset($pagination['data']);
+            if (!empty($data)) {
                 return JsonResponseCustom::getApiResponseExtention(
                     $data,
                     true,
@@ -991,14 +986,13 @@ class ProductsController extends Controller
                     $pagination,
                     config('constants.HTTP_OK')
                 );
-            } else {
-                return JsonResponseCustom::getApiResponse(
-                    [],
-                    false,
-                    config('constants.NO_RECORD'),
-                    config('constants.HTTP_OK')
-                );
             }
+            return JsonResponseCustom::getApiResponse(
+                [],
+                false,
+                config('constants.NO_RECORD'),
+                config('constants.HTTP_OK')
+            );
         } catch (Throwable $error) {
             report($error);
             return JsonResponseCustom::getApiResponse(

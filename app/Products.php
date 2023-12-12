@@ -101,6 +101,21 @@ class Products extends Model
     /**
      * Helpers
      */
+    public static function getProductsInfoBySellerId(int $seller_id)
+    {
+        return self::with([
+            'quantity' => function ($query) use ($seller_id) {
+                $query->where('users_id', $seller_id);
+            },
+            'images',
+            'category'
+        ])
+            ->whereHas('quantity', function ($query) use ($seller_id) {
+                $query->where('users_id', $seller_id);
+            })
+            ->paginate(20);
+    }
+
     public static function getProductInfo(int $seller_id, int $product_id)
     {
         return self::with([

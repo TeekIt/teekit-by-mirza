@@ -113,7 +113,7 @@ Route::prefix('product')->group(function () {
     Route::get('all', [ProductsController::class, 'all']);
     Route::get('view', [ProductsController::class, 'view']);
     Route::post('view/bulk', [ProductsController::class, 'bulkView']);
-    Route::get('seller/{seller_id}', [ProductsController::class, 'sellerProducts']);
+    Route::get('seller', [ProductsController::class, 'sellerProducts']);
     Route::get('sortbyprice', [ProductsController::class, 'sortByPrice']);
     Route::get('sortByLocation', [ProductsController::class, 'sortByLocation']);
     Route::post('recheck_products', [OrdersController::class, 'recheckProducts']);
