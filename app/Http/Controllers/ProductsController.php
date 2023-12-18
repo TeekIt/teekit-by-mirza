@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Validator;
 use Stripe\Product;
 use Throwable;
 use App\Services\JsonResponseCustom;
+use Exception;
 use Illuminate\Support\Facades\Cache;
 
 class ProductsController extends Controller
@@ -48,7 +49,7 @@ class ProductsController extends Controller
     //         ], 500);
     //     }
     // }
-  
+
     /**
      * This will help us to update the qty with the given details
      * @version 1.0.0
@@ -289,47 +290,6 @@ class ProductsController extends Controller
         );
     }
     /**
-     * This function return product information
-     * as well as qty data for the products from qty table
-     * @version 1.0.0
-     */
-    // public function getProductInfo($product_id)
-    // {
-    //     $qty = Products::with('quantity')
-    //         ->where('id', $product_id)
-    //         ->first();
-    //     if ($qty) {
-    //         $quantity = $qty->quantity->qty;
-    //         $product = Products::with('quantity')
-    //             ->select(['*', DB::raw("$quantity as qty")])
-    //             ->find($product_id);
-    //         $product->images = productImages::query()->where('product_id', '=', $product->id)->get();
-    //         $product->category = Categories::find($product->category_id);
-    //         $product->ratting = Rattings::getRatting($product_id);
-    //         return $product;
-    //     } else {
-    //         return $product = "";
-    //     }
-    // }
-
-    // public function getProductInfoWithQty($product_id, $store_id)
-    // {
-    //     $qty = Products::with('quantity')
-    //         ->where('user_id', $store_id)
-    //         ->where('id', $product_id)
-    //         ->first();
-    //     $quantity = $qty->quantity->qty;
-    //     $product = Products::with('quantity')
-    //         ->where('user_id', $store_id)
-    //         ->where('id', $product_id)
-    //         ->select(['*', DB::raw("$quantity as qty")])
-    //         ->first();
-    //     $product->images = productImages::query()->where('product_id', '=', $product->id)->get();
-    //     $product->category = Categories::find($product->category_id);
-    //     $product->ratting = Rattings::getRatting($product_id);
-    //     return $product;
-    // }
-    /**
      * All products listing
      * @author Mirza Abdullah Izhar
      * @version 1.0.0
@@ -337,34 +297,25 @@ class ProductsController extends Controller
     public function all()
     {
         try {
-            $products = Products::whereHas('user', function ($query) {
-                $query->where('is_active', 1);
-            })->where('status', 1)->paginate();
-            $pagination = $products->toArray();
-            if (!empty($products)) {
-                $products_data = [];
-                foreach ($products as $product) {
-                    $data = Products::getProductInfo($product->id);
-                    $data->store = User::find($product->user_id);
-                    $products_data[] = $data;
-                }
-                unset($pagination['data']);
+            $pagination = Products::getAllProducts()->toArray();
+            $data = $pagination['data'];
+            unset($pagination['data']);
+            if (!empty($data)) {
                 return JsonResponseCustom::getApiResponseExtention(
-                    $products_data,
+                    $data,
                     true,
                     '',
                     'pagination',
                     $pagination,
                     config('constants.HTTP_OK')
                 );
-            } else {
-                return JsonResponseCustom::getApiResponse(
-                    [],
-                    false,
-                    config('constants.NO_RECORD'),
-                    config('constants.HTTP_OK')
-                );
             }
+            return JsonResponseCustom::getApiResponse(
+                [],
+                false,
+                config('constants.NO_RECORD'),
+                config('constants.HTTP_OK')
+            );
         } catch (Throwable $error) {
             report($error);
             return JsonResponseCustom::getApiResponse(
@@ -600,47 +551,6 @@ class ProductsController extends Controller
         }
     }
     /**
-     * It find's the price of the given product
-     * @author Huzaifa Haleem
-     * @version 1.0.0
-     */
-    // public function getProductPrice($product_id)
-    // {
-    //     $product = Products::find($product_id);
-    //     if ($product->discount_percentage > 0) return $product->discount_percentage * 1.2;
-    //     return $product->price * 1.2;
-    // }
-
-    /**
-     * It find's the volumn of the given product
-     * @author Mirza Abdullah Izhar
-     * @version 1.0.0
-     */
-    // public function getProductVolumn($product_id)
-    // {
-    //     $product = (new Products())->getProductVolume($product_id);
-    //     return $product;
-    // }
-    /**
-     * It find's the weight of the given product
-     * @author Mirza Abdullah Izhar
-     * @version 1.0.0
-     */
-    // public function getProductWeight($product_id)
-    // {
-    //     return Products::getProductWeight($product_id);
-    // }
-    /**
-     * It find's the seller_id of the given product
-     * @author Huzaifa Haleem
-     * @version 1.0.0
-     */
-    // public function getProductSellerID($product_id)
-    // {
-    //     return Products::find($product_id)->user_id;
-    // }
-
-    /**
      *It will export products into csv
      * @version 1.0.0
      */
@@ -726,49 +636,39 @@ class ProductsController extends Controller
             $user_lat = $request->lat;
             $user_lon = $request->lon;
             $miles = $request->miles;
-            if (isset($miles)) {
-                $store_ids =  $this->searchWrtNearByStores($user_lat, $user_lon,  $miles);
-            }
-            $article = Products::search($request->product_name);
-            $article->where('status', 1);
+            if (isset($miles)) $store_ids =  $this->searchWrtNearByStores($user_lat, $user_lon,  $miles);
 
-            if (isset($store_ids)) $article->whereIn('user_id', $store_ids['ids']);
-            if (isset($request->category_id)) $article->where('category_id', $request->category_id);
-            if (isset($request->store_id)) $article->where('user_id', $request->store_id);
-            if (isset($request->brand)) $article->where('brand', $request->brand);
-            /**
-             * For price range
-             */
-            if (isset($request->min_price)) $article->where('price >', $request->min_price);
-            if (isset($request->max_price)) $article->where('price <', $request->max_price);
-            /**
-             * For weight range
-             */
-            if (isset($request->min_weight)) $article->where('weight >', $request->min_weight);
-            if (isset($request->max_weight)) $article->where('weight <', $request->max_weight);
-            // dd($article);
-            $products = $article->paginate(20);
+            $products = Products::searchProducts(
+                $request->product_name,
+                (isset($store_ids['ids'])) ? $store_ids['ids'] : null,
+                $request->category_id,
+                $request->store_id,
+                $request->brand,
+                $request->min_price,
+                $request->max_price,
+                $request->min_weight,
+                $request->max_weight
+            );
+
             $pagination = $products->toArray();
+            $data = $pagination['data'];
+            unset($pagination['data']);
             if (!$products->isEmpty()) {
-                $products_data = [];
-                foreach ($products as $product) $products_data[] = Products::getProductInfo($product->id);
-                unset($pagination['data']);
                 return JsonResponseCustom::getApiResponseExtention(
-                    $products_data,
+                    $data,
                     true,
                     '',
                     'pagination',
                     $pagination,
                     config('constants.HTTP_OK')
                 );
-            } else {
-                return JsonResponseCustom::getApiResponse(
-                    [],
-                    false,
-                    config('constants.NO_RECORD'),
-                    config('constants.HTTP_OK')
-                );
             }
+            return JsonResponseCustom::getApiResponse(
+                [],
+                false,
+                config('constants.NO_RECORD'),
+                config('constants.HTTP_OK')
+            );
         } catch (Throwable $error) {
             report($error);
             return JsonResponseCustom::getApiResponse(

@@ -2,23 +2,26 @@
 
 namespace App;
 
-use Validator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class Products extends Model
 {
     use Searchable;
 
     protected $fillable = ['*'];
-
+    /**
+     * Built-In Helpers
+     */
     public function toSearchableArray()
     {
         return [
-            'id' => $this->id,
+            'id' =>  $this->id,
             'product_name' => $this->product_name,
             'user_id' => $this->user_id,
             'category_id' => $this->category_id,
@@ -28,7 +31,6 @@ class Products extends Model
             'brand' => $this->brand
         ];
     }
-
     // Define filterable attributes for meilisearch
     public function scoutFilterable()
     {
@@ -37,9 +39,9 @@ class Products extends Model
     /**
      * Relations
      */
-    public function user()
+    public function store()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function category()
@@ -101,6 +103,58 @@ class Products extends Model
     /**
      * Helpers
      */
+    // public static function searchProducts(string $product_name)
+    // {
+    //     return self::search($product_name)
+    //         ->query(fn ($query) => $query->with(['store', 'quantities', 'images', 'category']))
+    //         ->where('status', 1);
+    // }
+
+    public static function searchProducts(string $product_name, ?array $store_ids, ?int $category_id, ?int $store_id, ?string $brand, ?float $min_price, ?float $max_price, ?float $min_weight, ?float $max_weight): object
+    {
+        return self::search($product_name)
+            ->query(fn ($query) => $query->with(['store', 'quantities', 'images', 'category']))
+            ->where('status', 1)
+            ->when($store_ids, function ($query) use ($store_ids) {
+                return $query->where_in('user_id', $store_ids['ids']);
+            })
+            ->when($category_id, function ($query) use ($category_id) {
+                return $query->where('category_id', $category_id);
+            })
+            ->when($store_id, function ($query) use ($store_id) {
+                return $query->where('user_id', $store_id);
+            })
+            ->when($brand, function ($query) use ($brand) {
+                return $query->where('brand', $brand);
+            })
+            ->when($min_price, function ($query) use ($min_price) {
+                return $query->where('price', '>=', $min_price);
+            })
+            ->when($max_price, function ($query) use ($max_price) {
+                return $query->where('price', '<=', $max_price);
+            })
+            ->when($min_weight, function ($query) use ($min_weight) {
+                return $query->where('weight', '>=', $min_weight);
+            })
+            ->when($max_weight, function ($query) use ($max_weight) {
+                return $query->where('weight', '<=', $max_weight);
+            })
+            ->paginate(20);
+    }
+
+    public static function getAllProducts(): object
+    {
+        return self::with([
+            'quantity',
+            'images',
+            'category'
+        ])
+            ->whereHas('store', function ($query) {
+                $query->where('is_active', 1);
+            })
+            ->paginate(20);
+    }
+
     public static function getProductsInfoBySellerId(int $seller_id)
     {
         return self::with([
@@ -265,7 +319,7 @@ class Products extends Model
 
     public static function getFeaturedProducts(int $store_id)
     {
-        return Products::whereHas('user', function ($query) {
+        return Products::whereHas('store', function ($query) {
             $query->where('is_active', 1);
         })->where('user_id', '=', $store_id)
             ->where('featured', '=', 1)
@@ -276,7 +330,7 @@ class Products extends Model
 
     public static function getActiveProducts()
     {
-        return Products::whereHas('user', function ($query) {
+        return Products::whereHas('store', function ($query) {
             $query->where('is_active', 1);
         })->where('status', 1)
             ->paginate();

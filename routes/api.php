@@ -40,7 +40,6 @@ Route::get('/', function () {
 | Registration, confirmations and verification
 |--------------------------------------------------------------------------
 */
-
 Route::post('password/email', [ForgotPasswordController::class, 'getResetToken']);
 Route::post('password/reset', [ResetPasswordController::class, 'reset']);
 /*
@@ -109,8 +108,8 @@ Route::get('sellers/{seller_id}/{product_name}', [AuthController::class, 'search
 |--------------------------------------------------------------------------
 */
 Route::prefix('product')->group(function () {
-    Route::post('search', [ProductsController::class, 'search']);
     Route::get('all', [ProductsController::class, 'all']);
+    Route::post('search', [ProductsController::class, 'search']);
     Route::get('view', [ProductsController::class, 'view']);
     Route::post('view/bulk', [ProductsController::class, 'bulkView']);
     Route::get('seller', [ProductsController::class, 'sellerProducts']);
