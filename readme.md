@@ -69,7 +69,6 @@ WantedBy=default.target
 SCOUT_DRIVER=meilisearch
 MEILISEARCH_HOST=http://127.0.0.1:7700
 MEILISEARCH_KEY=masterKey
-
 8) Run the following commands:<br>
 php artisan scout:sync-index-settings<br>
 php artisan scout:import "App\Products"<br>
