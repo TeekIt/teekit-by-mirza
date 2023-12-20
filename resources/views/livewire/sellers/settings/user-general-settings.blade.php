@@ -96,31 +96,6 @@
                                                         </div>
                                                         <div class="row d-flex justify-content-center my-2">
                                                             <div class="col-md-12">
-                                                                {{-- <form action="{{ route('payment_settings_update') }}"
-                                                                method="POST" enctype="multipart/form-data">
-                                                                {{ csrf_field() }}
-                                                                <div class="row form-inline">
-                                                                    <div class="col-md-7">
-                                                                        <div class="form-group">
-                                                                            <label data-bs-toggle="modal"
-                                                                                data-target="#map_modal"> <i
-                                                                                    class="fa fa-map-marker text-danger"></i>
-                                                                                {{ substr($address, 0, 15) . '...' }}</label>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-4">
-                                                                        <label >Set Location &nbsp;</label>
-                                                                    </div>
-                                                                    <div class="col-md-8">
-                                                                        <div class="form-group ">           
-                                                                            <i class="fas fa-map-marked-alt text-primary fa-2x mt-2"  data-bs-toggle="modal" data-bs-target="#map_modal"></i>                                                 
-                                                                            <i class="fa fa-map-marker text-primary" data-bs-toggle="modal" data-bs-target="#map_modal"></i>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                
-                                                            </form> --}}
-                                                                {{-- <form wire::submit.prevent='setLocation' enctype="multipart/form-data"> --}}
                                                                 {{-- set location --}}
                                                                 <div class="row form-inline">
                                                                     <div class="col-md-4">
@@ -391,7 +366,7 @@
                                         <div class="col-md-12 mt-3 mb-3">
                                             <div class="form-group" style="height:100%; width:100%">
                                                 <input type="text" class="form-control" value="<?php echo $address; ?>" name="location_text" id="location_text" />
-                                                <div class="mt-3 mb-3" style="height: 100%; width: 100%; margin: 0px; padding: 0px;    min-height: 200px;" id="map-canvas"></div>
+                                                <div class="mt-3 mb-3" style="height: 100%; width: 100%; margin: 0px; padding: 0px; min-height: 200px;" id="map-canvas"></div>
                                             </div>
                                         </div>
                                         <div class="col-md-12">

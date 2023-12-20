@@ -81,21 +81,6 @@ class Products extends Model
             'qty' => 'required|string|max:255'
         ]);
     }
-
-    public static function updateValidator(Request $request): object
-    {
-        return Validator::make($request->all(), [
-            'category_id' => 'required',
-            'product_name' => 'required|string|max:255',
-            'product_description' => 'required|string',
-            'color' => 'required|string|max:255',
-            'size' => 'required|string|max:255',
-            'lat' => 'required|string|max:255',
-            'lon' => 'required|string|max:255',
-            'price' => 'required|string|max:255',
-            'qty' => 'required|string|max:255'
-        ]);
-    }
     /**
      * Helpers
      */

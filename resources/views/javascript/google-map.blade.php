@@ -1,6 +1,11 @@
 <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry,places&key=AIzaSyDS4Nf8Ict_2h4lih9DCIt_EpkkBnVd85A"></script>
 
 <script>
+    /* 
+     * For help related to this API please visit: 
+     * https://developers.google.com/maps/documentation/javascript/examples/places-autocomplete-addressform#maps_places_autocomplete_addressform-javascript 
+     */
+
     // Google Map Code - Begins
     var map;
     var marker;
@@ -10,8 +15,7 @@
         var mapOptions = {
             zoom: 12
         };
-        map = new google.maps.Map(document.getElementById('map-canvas'),
-            mapOptions);
+        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
         // Get GEOLOCATION
         if (navigator.geolocation) {
@@ -55,44 +59,69 @@
         }
 
         // get places auto-complete when user type in modal_location_text
-        var input = /** @type {HTMLInputElement} */
+        var address = /** @type {HTMLInputElement} */
             (document.getElementById('modal_location_text'));
 
-        var autocomplete = new google.maps.places.Autocomplete(input);
+        // var autocomplete = new google.maps.places.Autocomplete(address);
+        var autocomplete = new google.maps.places.Autocomplete(address, {
+            componentRestrictions: {
+                country: ["uk", "pk"]
+            },
+            fields: ["address_components", "geometry"]
+        });
         autocomplete.bindTo('bounds', map);
 
         var infowindow = new google.maps.InfoWindow();
+
         marker = new google.maps.Marker({
             map: map,
             anchorPoint: new google.maps.Point(0, -29),
             draggable: true
         });
+
         google.maps.event.addListener(marker, "dragend", function() {
             var lat, long;
-
-            console.log('i am dragged');
             lat = marker.getPosition().lat();
             long = marker.getPosition().lng();
-            set_lat_lng(lat, long);
+            setLatLong(lat, long);
         });
-
-        function set_lat_lng(lat, lng) {
-            document.getElementById("ad_lat").value = lat;
-            document.getElementById("ad_long").value = lng;
-        }
 
         google.maps.event.addListener(autocomplete, 'place_changed', function() {
             infowindow.close();
             marker.setVisible(true);
-            console.log();
+
             lat = autocomplete.getPlace().geometry.location.lat();
             long = autocomplete.getPlace().geometry.location.lng();
+            setLatLong(lat, long);
+
             var place = autocomplete.getPlace();
-            set_lat_lng(lat, long);
+            // Get each component of the address from the place details,
+            // and then fill-in the corresponding field on the form.
+            // place.address_components are google.maps.GeocoderAddressComponent objects
+            // which are documented at http://goo.gle/3l5i5Mr
+            for (const component of place.address_components) {
+                // @ts-ignore remove once typings fixed
+                const componentType = component.types[0];
+                switch (componentType) {
+                    case "locality":
+                        document.querySelector("#modal_city").value = component.long_name;
+                        break;
+                        // In the UK and Sweden, the component to display the city is postal_town
+                    case "postal_town":
+                        document.querySelector("#modal_city").value = component.long_name;
+                        break;
+                    case "administrative_area_level_1":
+                        document.querySelector("#modal_state").value = component.short_name;
+                        break;
+                    case "country":
+                        document.querySelector("#modal_country").value = component.long_name;
+                        break;
+                }
+            }
+
             if (!place.geometry) {
                 return;
             }
-
             // If the place has a geometry, then present it on a map.
             if (place.geometry.viewport) {
                 map.fitBounds(place.geometry.viewport);
@@ -112,26 +141,32 @@
             var address = '';
             if (place.address_components) {
                 address = [
-                    (place.address_components[0] && place.address_components[0].short_name || ''), (place
-                        .address_components[1] && place.address_components[1].short_name || ''), (place
-                        .address_components[2] && place.address_components[2].short_name || '')
+                    (place.address_components[0] && place.address_components[0].short_name || ''),
+                    (place.address_components[1] && place.address_components[1].short_name || ''),
+                    (place.address_components[2] && place.address_components[2].short_name || '')
                 ].join(' ');
             }
         });
     }
-    
-    google.maps.event.addDomListener(window, 'load', initialize);
+
+    const setLatLong = (lat, lng) => {
+        document.getElementById("modal_lat").value = lat;
+        document.getElementById("modal_long").value = lng;
+    }
+
+    // google.maps.event.addDomListener(window, 'load', initialize);
+    window.addEventListener('load', initialize);
     // Google Map Code - Ends
 
-    function submitLocation() {
-            $("#locationModel").click();
-            var user_address = document.getElementById("modal_location_text").value;
-            var user_lat = document.getElementById("ad_lat").value;
-            var user_lon = document.getElementById("ad_long").value;
-            document.getElementById("user_location").innerHTML = user_address;
-            document.getElementById("location_text").value = user_address;
-            document.getElementById("Address[lat]").value = user_lat;
-            document.getElementById("Address[lon]").value = user_lon;
-            $('#map_modal').modal('hide');
-        }
+    const submitLocation = () => {
+        document.getElementById("form_location_text").innerHTML = document.getElementById("modal_location_text").value;
+        document.getElementById("user_address").value = document.getElementById("modal_location_text").value;
+        document.getElementById("user_country").value = document.getElementById("modal_country").value;
+        document.getElementById("user_state").value = document.getElementById("modal_state").value;
+        document.getElementById("user_city").value = document.getElementById("modal_city").value;
+        document.getElementById("address[lat]").value = document.getElementById("modal_lat").value;
+        document.getElementById("address[lon]").value = document.getElementById("modal_long").value;
+        $("#locationModel").click();
+        // $('#map_modal').modal('hide');
+    }
 </script>

@@ -229,7 +229,7 @@ class ProductsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validate = Products::updateValidator($request);
+        $validate = Products::validator($request);
         if ($validate->fails()) {
             return JsonResponseCustom::getApiResponse(
                 [],

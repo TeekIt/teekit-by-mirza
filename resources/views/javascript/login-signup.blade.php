@@ -7,11 +7,13 @@
         let phone = $('#phone').val();
         let company_name = $('#company_name').val();
         let company_phone = $('#company_phone').val();
-        let location_text = $('#location_text').val();
-        let Address = [];
-        let lat = $('input[id="Address[lat]"]').val();
-        let lon = $('input[id="Address[lon]"]').val();
-        let select_values = $('#select_values').val();
+        let user_address = $('#user_address').val();
+        let user_country = $('#user_country').val();
+        let user_state = $('#user_state').val();
+        let user_city = $('#user_city').val();
+        let lat = $('input[id="address[lat]"]').val();
+        let lon = $('input[id="address[lon]"]').val();
+        let parent_store = $('#parent_store').val();
         let checked_value = 0;
         if ($('#chkSelect').is(':checked')) {
             checked_value = 1;
@@ -28,10 +30,13 @@
                 phone: phone,
                 company_name: company_name,
                 company_phone: company_phone,
-                location_text: location_text,
+                user_address: user_address,
+                user_country: user_country,
+                user_state: user_state,
+                user_city: user_city,
                 lat: lat,
                 lon: lon,
-                select_values: select_values,
+                parent_store: parent_store,
                 checked_value: checked_value
             },
             success: function(response) {
@@ -48,7 +53,6 @@
                 } else {
                     $('.error').html('');
                     if (response.errors.name) {
-                        // console.log(response.errors.name[0]);
                         $('.name').html('');
                         $('.name').html(response.errors.name[0]);
                     }
@@ -71,11 +75,10 @@
                         $('.location').html(response.errors.location_text[0]);
                     }
                     if ($('#chkSelect').is(":checked")) {
-                        if (response.errors.select_values) {
-                            $('.select_values').html(response.errors.select_values[0]);
+                        if (response.errors.parent_store) {
+                            $('.parent_store').html(response.errors.parent_store[0]);
                         }
                     }
-
                 }
             }
         });

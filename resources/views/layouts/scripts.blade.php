@@ -15,7 +15,7 @@
         @include('javascript.google-map')
     @endif
 
-    @if (request()->getPathInfo() === '/settings/usergeneral')
+    @if (request()->getPathInfo() === '/seller/settings/general')
         @include('javascript.seller-general-settings')
         @include('javascript.google-map')
     @endif
@@ -35,9 +35,9 @@
 
         // *********************************************************************** //
         gpt_box = jQuery('.change-height');
-        // console.log(gpt_box);
+       
         max = jQuery(gpt_box[0]).height();
-        //console.log(max);
+      
         jQuery.each(gpt_box, function(index, value) {
             if (jQuery(value).height() > max) {
                 max = jQuery(value).height();
