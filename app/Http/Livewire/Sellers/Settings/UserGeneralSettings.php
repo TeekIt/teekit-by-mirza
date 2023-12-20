@@ -9,7 +9,7 @@ use Livewire\Component;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage; 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
 class UserGeneralSettings extends Component
@@ -19,6 +19,7 @@ class UserGeneralSettings extends Component
     public
         $user_id,
         $name,
+        $Name,
         $l_name,
         $email,
         $business_name,
@@ -27,15 +28,16 @@ class UserGeneralSettings extends Component
         $old_password,
         $new_password,
         $image,
-        $Image ,
+        $Image,
         $search = '',
-        $Address = [] ,
-        $location_text 
-        ;
+        $Address = [],
+        $location_text,
+        $filename;
 
     protected $rules = [
         'old_password' => 'required|min:8',
         'new_password' => 'required|min:8',
+        'Image' => 'required',
     ];
 
     public function mount()
@@ -45,26 +47,26 @@ class UserGeneralSettings extends Component
 
     public function updateImage()
     {
+
         try {
-            $user = User::find(auth()->id());
-            $filename = auth()->user()->name;
+            $User = auth()->user();
+            $filename = null;
             if ($this->Image) {
-                // Generate a unique file name
-                $filename = uniqid($user->id . '_' . $user->name . '_') . '.' . $this->Image->getClientOriginalExtension();
-                // Store the file in the designated storage disk
+
+                $filename = uniqid($User->id . '_' . $User->name . '_') . '.' . $this->Image->getClientOriginalExtension();
+
                 Storage::disk('spaces')->put($filename, $this->Image->get());
-                // Check if the file was successfully stored
+
                 if (Storage::disk('spaces')->exists($filename)) {
                     info("File is stored successfully: " . $filename);
                 } else {
                     info("File is not found: " . $filename);
                 }
             }
-            // Update the user's user_img attribute
-            $user->user_img = $filename;
-            $user->save();
+
+            $User->user_img = $filename;
+            $User->save();
             sleep(1);
-            // Show a success message
             session()->flash('success', 'Image updated successfully.');
         } catch (Exception $error) {
             session()->flash('error', $error);
