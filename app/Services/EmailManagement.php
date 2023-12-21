@@ -8,7 +8,6 @@ use App\Mail\OrderIsReadyMail;
 use App\Mail\StoreRegisterMail;
 use App\Orders;
 use App\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 

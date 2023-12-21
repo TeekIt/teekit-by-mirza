@@ -100,8 +100,10 @@ Route::get('page', [PagesController::class, 'getPage']);
 | Seller API Routes
 |--------------------------------------------------------------------------
 */
-Route::get('sellers', [UsersController::class, 'sellers']);
-Route::get('sellers/{seller_id}/{product_name}', [AuthController::class, 'searchSellerProducts']);
+Route::prefix('sellers')->group(function () {
+    Route::get('/', [UsersController::class, 'sellers']);
+    Route::get('/{seller_id}/{product_name}', [AuthController::class, 'searchSellerProducts']);
+});
 /*
 |--------------------------------------------------------------------------
 | Products API Routes Without JWT Authentication

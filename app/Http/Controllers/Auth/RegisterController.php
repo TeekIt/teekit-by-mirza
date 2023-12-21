@@ -144,10 +144,13 @@ class RegisterController extends Controller
         $parent_store_id = ($request->input('parent_store')) ? User::getStoreByBusinessName($request->input('parent_store'))->id : null;
         $user = User::createStore(
             $data['name'],
-            $data['email'],
+            strtolower($data['email']),
             $data['password'],
             $data['phone'],
             $data['user_address'],
+            $data['user_country'],
+            $data['user_state'],
+            $data['user_city'],
             $data['company_name'],
             $data['company_phone'],
             $data['business_location'],
@@ -164,13 +167,6 @@ class RegisterController extends Controller
 
         // 2: parent store
         ($user->role_id === 2) ? EmailManagement::sendNewParentStoreMail($user) : EmailManagement::sendNewChildStoreMail($user, $request->input('parent_store'));
-
-        // if ($user->role_id === 5) {
-        //     $parent_store = $request->input('parent_store');
-            
-        // } else {
-            
-        // }
 
         // $admin_users = Role::with('users')->where('name', 'superadmin')->first();
         // $store_link = $FRONTEND_URL . '/customer/' . $user->id . '/details';

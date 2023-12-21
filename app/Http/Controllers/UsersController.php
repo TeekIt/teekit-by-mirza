@@ -9,6 +9,7 @@ use Throwable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use App\Services\JsonResponseCustom;
+use Illuminate\Support\Facades\App;
 
 class UsersController extends Controller
 {
@@ -109,13 +110,6 @@ class UsersController extends Controller
                 $pagination,
                 config('constants.HTTP_OK')
             );
-            // foreach ($users as $user) {
-            //     // dd($user);
-            //     // $result = $this->getDistanceBetweenPoints($user->lat, $user->lon, $request->query('lat'), $request->query('lon'));
-            //     $result = $this->getDistanceForMultipleDestinations($request->query('lat'), $request->query('lon'), $destinationCoordinates);
-            //     dd($result);
-            //     if ($result['distance'] <= 5) $data[] = self::getSellerInfo($user, $result);
-            // }
         } catch (Throwable $error) {
             report($error);
             return JsonResponseCustom::getApiResponse(

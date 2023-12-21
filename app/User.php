@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -23,8 +27,6 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'email_verified_at',
-        'is_active',
         'name',
         'l_name',
         'email',
@@ -32,21 +34,25 @@ class User extends Authenticatable implements JWTSubject
         'phone',
         'address_1',
         'address_2',
-        'postal_code',
+        'country',
+        'state',
+        'city',
+        'postcode',
         'business_name',
         'business_phone',
         'business_location',
+        'lat',
+        'lon',
         'business_hours',
         'settings',
         'bank_details',
         'user_img',
-        'postal_code',
         'vehicle_type',
-        'lat',
-        'lon',
         'role_id',
         'parent_store_id',
-        'referral_code'
+        'referral_code',
+        'email_verified_at',
+        'is_active'
     ];
     /**
      * The attributes that should be hidden for arrays.
@@ -89,71 +95,62 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Relations
      */
-    public function roles()
+    public function roles(): BelongsToMany
     {
         return $this->belongsToMany('App\Role', 'role_user');
     }
 
-    public function role()
+    public function role(): BelongsTo
     {
         return $this->belongsTo('App\Role');
     }
 
-    public function seller()
+    public function seller(): BelongsToMany
     {
         return $this->belongsToMany('App\Role', 'role_user')->wherePivot('role_id', 2);
     }
 
-    public function driver()
-    {
-        return $this->belongsToMany('App\Models\Role', 'role_user')->where('name', 'delivery_boy');
-    }
+    // public function driver(): BelongsToMany
+    // {
+    //     return $this->belongsToMany('App\Models\Role', 'role_user')->where('name', 'delivery_boy');
+    // }
 
-    public function orders()
+    public function orders(): HasMany
     {
         return $this->hasMany('App\Orders');
     }
 
-    public function referralRelations()
+    public function referralRelations(): HasOne
     {
         return $this->hasOne(ReferralCodeRelation::class, 'user_id');
     }
 
-    public function products()
+    public function products(): HasMany
     {
         return $this->hasMany(Products::class);
     }
-
     /**
      * Validators
      */
-    public static function validator(Request $request)
+    public static function validator(Request $request): object
     {
         return Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'l_name' => '',
-            'postal_code' => '',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|max:50',
             'business_name' => 'string|max:255',
             'business_location' => 'string|max:255',
-            'role' => 'required|string|max:255',
-            'address_1' => '',
-            'address_2' => '',
+            // 'role' => 'required|string|max:255',
+            'address_1' => 'required|string',
         ]);
     }
 
-    public static function updateValidator(Request $request)
+    public static function updateValidator(Request $request): object
     {
         return Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'l_name' => '',
-            'postal_code' => '',
-            'business_name' => '',
-            'business_location' => '',
             'user_img' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'address_1' => '',
-            'address_2' => ''
+            'address_1' => 'required|string'
         ]);
     }
     /**
@@ -206,7 +203,7 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
 
-    public static function getParentAndChildSellers()
+    public static function getParentAndChildSellers(): object
     {
         return self::where('is_active', 1)
             ->whereNotNull('lat')
@@ -216,7 +213,7 @@ class User extends Authenticatable implements JWTSubject
             ->paginate(10);
     }
 
-    public static function getParentSellers(string $search = '')
+    public static function getParentSellers(string $search = ''): object
     {
         return self::where('business_name', 'like', '%' . $search . '%')
             ->where('role_id', 2)
@@ -224,7 +221,7 @@ class User extends Authenticatable implements JWTSubject
             ->paginate(9);
     }
 
-    public static function getChildSellers(string $search = '')
+    public static function getChildSellers(string $search = ''): object
     {
         return self::where('business_name', 'like', '%' . $search . '%')
             ->where('role_id', 5)
@@ -232,7 +229,7 @@ class User extends Authenticatable implements JWTSubject
             ->paginate(9);
     }
 
-    public static function getCustomers(string $search = '')
+    public static function getCustomers(string $search = ''): object
     {
         return self::where('name', 'like', '%' .  $search . '%')
             ->where('role_id', 3)
@@ -240,7 +237,7 @@ class User extends Authenticatable implements JWTSubject
             ->paginate(9);
     }
 
-    public static function getBuyersWithReferralCode()
+    public static function getBuyersWithReferralCode(): object
     {
         return self::whereNotNull('referral_code')->paginate(10);
     }
@@ -250,12 +247,12 @@ class User extends Authenticatable implements JWTSubject
         return self::where('business_name', $business_name)->first();
     }
 
-    public static function getUserByID(int $user_id)
+    public static function getUserByID(int $user_id): object
     {
         return self::find($user_id);
     }
 
-    public function nearbyUsers($user_lat, $user_lon, $radius)
+    public function nearbyUsers($user_lat, $user_lon, $radius): object
     {
         return self::selectRaw("*, (  3961 * acos( cos( radians(" . $user_lat . ") ) *
                                 cos( radians(users.lat) ) *
@@ -268,7 +265,7 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function activeOrBlockStore(int $user_id, int $status)
+    public static function activeOrBlockStore(int $user_id, int $status): bool
     {
         self::where('id', '=', $user_id)->update(['is_active' => $status]);
         if ($status == 1) {
@@ -278,17 +275,17 @@ class User extends Authenticatable implements JWTSubject
         return true;
     }
 
-    public static function activeOrBlockCustomer(int $user_id, int $status)
+    public static function activeOrBlockCustomer(int $user_id, int $status): int
     {
         return self::where('id', '=', $user_id)->update(['is_active' => $status]);
     }
 
-    public static function getUserRole(int $user_id)
+    public static function getUserRole(int $user_id): int
     {
         return  self::where('id', $user_id)->pluck('role_id');
     }
 
-    public static function getUserInfo(int $user_id)
+    public static function getUserInfo(int $user_id): array|null
     {
         $user = self::with('referralRelations')->where('id', $user_id)->first();
         if ($user) {
@@ -311,7 +308,7 @@ class User extends Authenticatable implements JWTSubject
         return null;
     }
 
-    public static function verifyReferralCode(string $referral_code)
+    public static function verifyReferralCode(string $referral_code): bool|object
     {
         $data = self::where('referral_code', $referral_code)->first();
         return (is_null($data)) ? false :  $data;
