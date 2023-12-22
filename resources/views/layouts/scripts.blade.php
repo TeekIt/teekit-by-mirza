@@ -11,16 +11,16 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
     @if (request()->getPathInfo() === '/login')
-        @include('javascript.login-signup')
-        @include('javascript.google-map')
+        @include('javascript.signup-js')
+        @include('javascript.google-map-js')
     @endif
 
     @if (request()->getPathInfo() === '/seller/settings/general')
-        @include('javascript.seller-general-settings')
-        @include('javascript.google-map')
+        @include('javascript.seller-general-settings-js')
+        @include('javascript.google-map-js')
     @endif
 
-    @include('jquery.control-modals')
+    @include('jquery.control-modals-jquery')
     
     <script>
         function checkbox() {

@@ -8,7 +8,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PromoCodesController;
-use App\Http\Controllers\QtyController;
 use App\Http\Controllers\StuartDeliveryController;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
@@ -38,6 +37,7 @@ use Illuminate\Support\Facades\Auth;
 |--------------------------------------------------------------------------
 */
 Auth::routes();
+Route::get('auth/verify', [AuthController::class, 'verify']);
 /*
 |--------------------------------------------------------------------------
 | Home Routes
@@ -119,8 +119,6 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
 Route::get('/withdrawals', [HomeController::class, 'withdrawals'])->name('withdrawals');
 Route::post('/withdrawals', [HomeController::class, 'withdrawalsRequest'])->name('withdraw_request');
 Route::get('/withdrawals-drivers', [HomeController::class, 'withdrawalDrivers'])->name('withdrawals.drivers');
-
-Route::get('auth/verify', [AuthController::class, 'verify']);
 /*
 |--------------------------------------------------------------------------
 | Admin Routes

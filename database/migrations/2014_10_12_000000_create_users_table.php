@@ -43,34 +43,33 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique(); //modified
             $table->longText('password');
             $table->string('phone', 13)->nullable();
-            $table->string('address_1')->nullable();
-            $table->string('address_2')->nullable(); //do we need it ??
+            $table->string('business_name')->index()->nullable(); //modified
+            $table->string('business_phone', 13)->nullable();
+            $table->json('business_hours')->nullable();
+            $table->text('full_address')->nullable(); //modified
+            $table->text('unit_address')->nullable(); //modified
             $table->string('country', 70)->index()->nullable(); //new
             $table->string('state', 70)->index()->nullable(); //new
             $table->string('city', 70)->index()->nullable(); //new
-            $table->string('postcode', 10)->nullable(); //do we need it ??
-            $table->string('business_name')->index()->nullable(); //modified
-            $table->string('business_phone', 13)->nullable();
-            // $table->json('business_location')->nullable(); //do we need it ??
+            $table->string('postcode', 11)->index()->nullable(); //do we need it ??
             $table->decimal('lat', 11, 8)->index()->nullable(); //modified
             $table->decimal('lon', 11, 8)->index()->nullable(); //modified
-            $table->json('business_hours')->nullable();
             $table->json('bank_details')->nullable();
             $table->json('settings')->nullable();
             $table->text('user_img')->nullable();
-            $table->timestamp('last_login')->nullable();
-            $table->timestamp('email_verified_at')->nullable();
             $table->tinyInteger('is_active')->default(0);
+            $table->tinyInteger('is_online')->default(0);
             $table->string('remember_token', 100)->nullable();
             $table->tinyInteger('role_id')->index()->comment('1: superadmin, 2: seller, 3: buyer, 5: child_seller'); //modified
             $table->double('pending_withdraw', 8, 2)->default(0.00);
             $table->double('total_withdraw', 8, 2)->default(0.00);
-            $table->tinyInteger('is_online')->default(0);
             $table->integer('parent_store_id')->index()->nullable(); //modified
             $table->enum('vehicle_type', ['bike', 'car', 'van'])->nullable();
             $table->double('application_fee', 8, 2)->default(0.00);
             $table->string('temp_code', 6)->nullable();
-            $table->text('referral_code')->index()->nullable(); //modified
+            $table->string('referral_code')->index()->nullable(); //modified
+            $table->timestamp('last_login')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

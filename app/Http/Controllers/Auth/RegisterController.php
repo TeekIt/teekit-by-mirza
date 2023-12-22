@@ -2,15 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Mail\StoreRegisterMail;
-use App\Role;
 use App\User;
 use App\Http\Controllers\Controller;
 use App\Services\EmailManagement;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 
@@ -54,34 +49,23 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-        if ($data['checked_value'] != 0) {
-            return Validator::make($data, [
-                'name' => 'required|string|max:80',
-                'email' => 'required|string|email|max:80|unique:users',
-                'password' => 'required|string|min:8|max:50',
-                'phone' => 'required|string|min:10|max:10',
-                'company_name' => 'required|string|max:80|unique:users,business_name',
-                'company_phone' => 'required|string|min:10|max:10',
-                'user_address' => 'required|string',
-                'user_country' => 'required|string',
-                'user_state' => 'required|string',
-                'user_city' => 'required|string',
-                'parent_store' => 'required|exists:users,business_name'
-            ]);
-        } else {
-            return Validator::make($data, [
-                'name' => 'required|string|max:80',
-                'email' => 'required|string|email|max:80|unique:users',
-                'password' => 'required|string|min:8|max:50',
-                'phone' => 'required|string|min:10|max:10',
-                'company_name' => 'required|string|max:80|unique:users,business_name',
-                'company_phone' => 'required|string|min:10|max:10',
-                'user_address' => 'required|string',
-                'user_country' => 'required|string',
-                'user_state' => 'required|string',
-                'user_city' => 'required|string'
-            ]);
-        }
+        $rules = [
+            'name' => 'required|string|max:80',
+            'email' => 'required|string|email|max:80|unique:users',
+            'password' => 'required|string|min:8|max:50',
+            'phone' => 'required|string|min:10|max:10',
+            'business_name' => 'required|string|max:80|unique:users,business_name',
+            'business_phone' => 'required|string|min:10|max:10',
+            'address' => 'required|string',
+            'postcode' => 'required|string',
+            'country' => 'required|string',
+            'state' => 'required|string',
+            'city' => 'required|string',
+        ];
+    
+        if ($data['checked_value'] != 0) $rules['parent_store'] = 'required|exists:users,business_name';
+    
+        return Validator::make($data, $rules);
     }
 
     /**
@@ -92,6 +76,7 @@ class RegisterController extends Controller
      */
     protected function register(Request $request)
     {
+        // dd($request->toArray());
         $validator = $this->validator($request->all());
         if ($validator->fails()) {
             return response()->json([
@@ -99,8 +84,8 @@ class RegisterController extends Controller
             ], 200);
         }
         $data = $request->toArray();
-        $data['business_location']['lat'] = $data['lat'];
-        $data['business_location']['lon'] = $data['lon'];
+        // $data['business_location']['lat'] = $data['lat'];
+        // $data['business_location']['lon'] = $data['lon'];
         $business_hours = '{
             "time": {
                 "Monday": {
@@ -147,15 +132,16 @@ class RegisterController extends Controller
             strtolower($data['email']),
             $data['password'],
             $data['phone'],
-            $data['user_address'],
-            $data['user_country'],
-            $data['user_state'],
-            $data['user_city'],
-            $data['company_name'],
-            $data['company_phone'],
-            $data['business_location'],
-            $data['business_location']['lat'],
-            $data['business_location']['lon'],
+            $data['address'],
+            $data['unit_address'],
+            $data['postcode'],
+            $data['country'],
+            $data['state'],
+            $data['city'],
+            $data['business_name'],
+            $data['business_phone'],
+            $data['lat'],
+            $data['lon'],
             $business_hours,
             $request->input('parent_store') ? 5 : 2,
             $parent_store_id

@@ -58,9 +58,9 @@
             });
         }
 
-        // get places auto-complete when user type in modal_location_text
+        // get places auto-complete when user type in modal_address
         var address = /** @type {HTMLInputElement} */
-            (document.getElementById('modal_location_text'));
+            (document.getElementById('modal_address'));
 
         // var autocomplete = new google.maps.places.Autocomplete(address);
         var autocomplete = new google.maps.places.Autocomplete(address, {
@@ -103,6 +103,22 @@
                 // @ts-ignore remove once typings fixed
                 const componentType = component.types[0];
                 switch (componentType) {
+                    // case "street_number":
+                    //     console.log('street_number: ' + component.long_name);
+                    //     // address1 = `${component.long_name} ${address1}`;
+                    //     break;
+
+                    // case "route":
+                    //     console.log('route: ' + component.short_name);
+                    //     // address1 += component.short_name;
+                    //     break;
+                    case "postal_code":
+                        document.querySelector("#modal_postcode").value = component.long_name;
+                        break;
+                    // case "postal_code_suffix":
+                    //     console.log('postal_code_suffix: ' + component.long_name);
+                    //     // postcode = `${postcode}-${component.long_name}`;
+                    //     break;
                     case "locality":
                         document.querySelector("#modal_city").value = component.long_name;
                         break;
@@ -159,11 +175,13 @@
     // Google Map Code - Ends
 
     const submitLocation = () => {
-        document.getElementById("form_location_text").innerHTML = document.getElementById("modal_location_text").value;
-        document.getElementById("user_address").value = document.getElementById("modal_location_text").value;
-        document.getElementById("user_country").value = document.getElementById("modal_country").value;
-        document.getElementById("user_state").value = document.getElementById("modal_state").value;
-        document.getElementById("user_city").value = document.getElementById("modal_city").value;
+        document.getElementById("display_location").innerHTML = document.getElementById("modal_address").value;
+        document.getElementById("address").value = document.getElementById("modal_address").value;
+        document.getElementById("unit_address").value = document.getElementById("modal_unit_address").value;
+        document.getElementById("postcode").value = document.getElementById("modal_postcode").value;
+        document.getElementById("country").value = document.getElementById("modal_country").value;
+        document.getElementById("state").value = document.getElementById("modal_state").value;
+        document.getElementById("city").value = document.getElementById("modal_city").value;
         document.getElementById("address[lat]").value = document.getElementById("modal_lat").value;
         document.getElementById("address[lon]").value = document.getElementById("modal_long").value;
         $("#locationModel").click();

@@ -11,20 +11,28 @@
             <div class="modal-body">
                 <div class="p-3">
                     <div class="col-md-12 my-2">
-                        <label for="modal_location_text">Address</label>
-                        <input type="text" class="form-control" name="modal_location_text" id="modal_location_text" />
+                        <label for="modal_address">Address 1</label>
+                        <input type="text" class="form-control" name="modal_address" id="modal_address"/>
                     </div>
                     <div class="col-md-12 my-2">
-                        <label for="country">Country</label>
-                        <input tyep="text" class="form-control" name="modal_country" id="modal_country">
+                        <label for="modal_unit_address">Address 2 (optional)</label>
+                        <input type="text" class="form-control" placeholder="Apartment, unit, suite, or floor#" name="modal_unit_address" id="modal_unit_address">
                     </div>
                     <div class="col-md-12 my-2">
-                        <label for="state">State/Province</label>
-                        <input tyep="text" class="form-control" name="modal_state" id="modal_state">
+                        <label for="modal_postcode">Postcode</label>
+                        <input type="text" class="form-control" name="modal_postcode" id="modal_postcode" />
                     </div>
                     <div class="col-md-12 my-2">
-                        <label for="city">City</label>
-                        <input type="text" class="form-control" name="modal_city" id="modal_city">
+                        <label for="modal_country">Country</label>
+                        <input tyep="text" class="form-control" name="modal_country" id="modal_country" />
+                    </div>
+                    <div class="col-md-12 my-2">
+                        <label for="modal_state">State/Province</label>
+                        <input tyep="text" class="form-control" name="modal_state" id="modal_state" />
+                    </div>
+                    <div class="col-md-12 my-2">
+                        <label for="modal_city">City</label>
+                        <input type="text" class="form-control" name="modal_city" id="modal_city" />
                     </div>
                     {{-- Google Maps --}}
                     <div class="col-md-12 my-2">
@@ -33,11 +41,11 @@
                     <div class="row my-2">
                         <div class="col-md-6">
                             <label for="modal_lat">Lat</label>
-                            <input type="text" name="modal_lat" id="modal_lat" class="form-control">
+                            <input type="text" name="modal_lat" id="modal_lat" class="form-control" />
                         </div>
                         <div class="col-md-6">
                             <label for="modal_long">Long</label>
-                            <input type="text" name="modal_long" id="modal_long" class="form-control">
+                            <input type="text" name="modal_long" id="modal_long" class="form-control" />
                         </div>
                     </div>
                     <button type="submit" onclick="submitLocation()" class="d-no mt-3 btn btn-submit btn-block btn-outline-primary">
