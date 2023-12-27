@@ -60,7 +60,7 @@ class RegisterController extends Controller
             'postcode' => 'required|string',
             'country' => 'required|string',
             'state' => 'required|string',
-            'city' => 'required|string',
+            'city' => 'required|string'
         ];
     
         if ($data['checked_value'] != 0) $rules['parent_store'] = 'required|exists:users,business_name';
@@ -76,7 +76,6 @@ class RegisterController extends Controller
      */
     protected function register(Request $request)
     {
-        // dd($request->toArray());
         $validator = $this->validator($request->all());
         if ($validator->fails()) {
             return response()->json([

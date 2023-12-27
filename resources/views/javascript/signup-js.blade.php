@@ -78,6 +78,18 @@
                     if (response.errors.address) {
                         $('.location').html(response.errors.address[0]);
                     }
+                    if (response.errors.postcode) {
+                        $('.location').html(response.errors.postcode[0]);
+                    }
+                    if (response.errors.country) {
+                        $('.location').html(response.errors.country[0]);
+                    }
+                    if (response.errors.state) {
+                        $('.location').html(response.errors.state[0]);
+                    }
+                    if (response.errors.city) {
+                        $('.location').html(response.errors.city[0]);
+                    }
                     if ($('#chkSelect').is(":checked")) {
                         if (response.errors.parent_store) {
                             $('.parent_store').html(response.errors.parent_store[0]);
