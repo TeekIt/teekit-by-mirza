@@ -162,6 +162,28 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Helpers
      */
+    public static function updateStoreLocation(
+        int $user_id, 
+        string $full_address, 
+        string|null $unit_address, 
+        string $country, 
+        string $state, 
+        string $city, 
+        string $lat, 
+        string $lon)
+    {
+        $user = self::find($user_id);
+        $user->full_address = $full_address;
+        if(!is_null($unit_address)) $user->unit_address = $unit_address;
+        $user->country = $country;
+        $user->state = $state;
+        $user->city = $city;
+        $user->lat = $lat;
+        $user->lon = $lon;
+        return $user->save();
+        // return self::where('id', '=', $user_id)->update(['is_active' => $status]);
+    }
+
     public static function uploadImg(object $request)
     {
         $file = $request->file('user_img');

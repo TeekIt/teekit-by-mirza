@@ -27,17 +27,29 @@ class UserGeneralSettings extends Component
         $phone,
         $old_password,
         $new_password,
+        $full_address,
+        $unit_address,
+        $country,
+        $state,
+        $city,
+        $lat,
+        $lon,
         $image,
         $Image,
         $search = '',
-        $Address = [],
-        $location_text,
         $filename;
 
     protected $rules = [
         'old_password' => 'required|min:8',
         'new_password' => 'required|min:8',
         'Image' => 'required',
+        'full_address' => 'required|string',
+        'unit_address' => 'string',
+        'country' => 'required|string',
+        'state' => 'required|string',
+        'city' => 'required|string',
+        'lat' => 'required|numeric',
+        'lon' => 'required|numeric'
     ];
 
     public function mount()
@@ -45,9 +57,35 @@ class UserGeneralSettings extends Component
         $this->user_id = auth()->id();
     }
 
+    public function updateLocation()
+    {
+        dd($this->full_address);
+        $this->validate();
+        try {
+            $updated = User::updateStoreLocation(
+                $this->user_id, 
+                $this->full_address,
+                $this->unit_address,
+                $this->country,
+                $this->state,
+                $this->city,
+                $this->lat,
+                $this->lon
+            );
+            dd($updated);
+            sleep(1);
+                if ($updated) {
+                    session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+                } else {
+                    session()->flash('error', config('constants.UPDATION_FAILED'));
+                }
+        } catch (Exception $error) {
+            session()->flash('error', $error);
+        }
+    }
+
     public function updateImage()
     {
-
         try {
             $User = auth()->user();
             $filename = null;
@@ -70,7 +108,6 @@ class UserGeneralSettings extends Component
             session()->flash('success', 'Image updated successfully.');
         } catch (Exception $error) {
             session()->flash('error', $error);
-            // dd($error);
         }
     }
 

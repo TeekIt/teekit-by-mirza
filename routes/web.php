@@ -81,7 +81,7 @@ Route::prefix('settings')->group(function () {
     Route::post('/payment/update', [HomeController::class, 'paymentSettingsUpdate'])->name('payment_settings_update');
     Route::post('/user_img/update', [HomeController::class, 'userImgUpdate'])->name('user_img_update');
     Route::post('/time_update', [HomeController::class, 'timeUpdate'])->name('time_update');
-    Route::post('/location_update', [HomeController::class, 'locationUpdate'])->name('location_update');
+    // Route::post('/location_update', [HomeController::class, 'locationUpdate'])->name('location_update');
     Route::post('/password/update', [HomeController::class, 'passwordUpdate'])->name('password_update');
     Route::get('/change_settings/{setting_name}/{value}', [HomeController::class, 'changeSettings'])->name('change_settings')->where(['setting_name' => '^[a-z_]*$', 'value' => '[0-9]+']);
 });

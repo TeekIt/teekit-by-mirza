@@ -553,36 +553,36 @@ class HomeController extends Controller
     //     return redirect()->back();
     // }
 
-    public function locationUpdate(Request $request)
-    {
-        try {
-            $request->validate([
-                'Address' => 'required|array',
-                'location_text' => 'required|string',
-                'Address.lat' => 'required|numeric',
-                'Address.long' => 'required|numeric',
-            ]);
-            $data = $request->input('Address');
-            $location = $request->input('location_text');
-            $user = User::find(Auth::id());
-            if ($user) {
-                $user->business_location = json_encode($data);
-                $user->address_1 = $location;
-                $user->lat = $data['lat'];
-                $user->lon = $data['long'];
-                if ($user->update()) {
-                    session()->flash('success', 'Location Updated');
-                } else {
-                    session()->flash('error', 'Failed to update location. Please try again.');
-                }
-            } else {
-                session()->flash('error', 'User not found.');
-            }
-            return redirect()->back();
-        } catch (Exception $error) {
-            session()->flash('error', $error);
-        }
-    }
+    // public function locationUpdate(Request $request)
+    // {
+    //     try {
+    //         $request->validate([
+    //             'Address' => 'required|array',
+    //             'location_text' => 'required|string',
+    //             'Address.lat' => 'required|numeric',
+    //             'Address.long' => 'required|numeric',
+    //         ]);
+    //         $data = $request->input('Address');
+    //         $location = $request->input('location_text');
+    //         $user = User::find(Auth::id());
+    //         if ($user) {
+    //             $user->business_location = json_encode($data);
+    //             $user->address_1 = $location;
+    //             $user->lat = $data['lat'];
+    //             $user->lon = $data['long'];
+    //             if ($user->update()) {
+    //                 session()->flash('success', 'Location Updated');
+    //             } else {
+    //                 session()->flash('error', 'Failed to update location. Please try again.');
+    //             }
+    //         } else {
+    //             session()->flash('error', 'User not found.');
+    //         }
+    //         return redirect()->back();
+    //     } catch (Exception $error) {
+    //         session()->flash('error', $error);
+    //     }
+    // }
 
     /**
      * Update's user password
