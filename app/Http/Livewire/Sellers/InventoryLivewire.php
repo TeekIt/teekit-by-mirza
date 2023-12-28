@@ -3,10 +3,8 @@
 namespace App\Http\Livewire\Sellers;
 
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Auth;
 use App\Products;
 use App\Qty;
-use App\User;
 use Exception;
 use Livewire\Component;
 use App\Categories;

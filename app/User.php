@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Arr;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -163,18 +164,18 @@ class User extends Authenticatable implements JWTSubject
      * Helpers
      */
     public static function updateStoreLocation(
-        int $user_id, 
-        string $full_address, 
-        string|null $unit_address, 
-        string $country, 
-        string $state, 
-        string $city, 
-        string $lat, 
-        string $lon)
-    {
+        int $user_id,
+        string $full_address,
+        string|null $unit_address,
+        string $country,
+        string $state,
+        string $city,
+        string $lat,
+        string $lon
+    ) {
         $user = self::find($user_id);
         $user->full_address = $full_address;
-        if(!is_null($unit_address)) $user->unit_address = $unit_address;
+        if (!is_null($unit_address)) $user->unit_address = $unit_address;
         $user->country = $country;
         $user->state = $state;
         $user->city = $city;
@@ -247,6 +248,13 @@ class User extends Authenticatable implements JWTSubject
             ->whereIn('role_id', [2, 5])
             ->orderBy('business_name', 'asc')
             ->paginate(10);
+    }
+
+    public static function getParentSellersSpecificColumns(array $columns): object
+    {
+        return self::select($columns)
+            ->where('role_id', 2)
+            ->get();
     }
 
     public static function getParentSellers(string $search = ''): object

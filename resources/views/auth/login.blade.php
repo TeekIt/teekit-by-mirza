@@ -101,13 +101,12 @@
                         <input type="checkbox" name="checked_value" id="chkSelect" onclick="return checkbox()" />
                         I'm a child store
                     </label>
-                    <?php $stores = App\User::where('role_id', 2)->get(); ?>
-                    <div class="form-group row ">
+                    <div class="form-group row">
                         <div class="col-md-12 mt-0">
                             <div class="form-group text-light" id="content" style="display:none">
                                 <select class="form-control signup-input-fields text-light" id="parent_store" name="parent_store">
                                     <option value="" selected>Select your parent store</option>
-                                    @foreach ($stores as $store)
+                                    @foreach (App\User::getParentSellersSpecificColumns(['business_name']) as $store)
                                         <option value="{{ $store->business_name }}">{{ $store->business_name }}</option>
                                     @endforeach
                                 </select>

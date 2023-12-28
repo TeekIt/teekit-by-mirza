@@ -6,22 +6,22 @@
 
     <!-- AdminLTE App -->
     <script src="{{ asset('res/dist/js/adminlte.min.js') }}"></script>
-    <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
-    @if (request()->getPathInfo() === '/login')
+    @if (Route::current()->uri === 'login')
         @include('javascript.signup-js')
         @include('javascript.google-map-js')
     @endif
 
-    @if (request()->getPathInfo() === '/seller/settings/general')
+    @if (Route::current()->uri === 'seller/settings/general')
+        <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script>
         @include('javascript.seller-general-settings-js')
         @include('javascript.google-map-js')
     @endif
 
     @include('jquery.control-modals-jquery')
-    
+
     <script>
         function checkbox() {
             $("#chkSelect").change(function() {
@@ -35,9 +35,9 @@
 
         // *********************************************************************** //
         gpt_box = jQuery('.change-height');
-       
+
         max = jQuery(gpt_box[0]).height();
-      
+
         jQuery.each(gpt_box, function(index, value) {
             if (jQuery(value).height() > max) {
                 max = jQuery(value).height();

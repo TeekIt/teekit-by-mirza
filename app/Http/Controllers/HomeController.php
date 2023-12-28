@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Validator;
 use Laracasts\Flash\Flash;
 use Stripe;
 use Throwable;
+
 class HomeController extends Controller
 {
     /**
@@ -110,13 +111,9 @@ class HomeController extends Controller
      */
     public function inventoryAdd(Request $request)
     {
-        if (Gate::allows('seller')) {
-            $categories = Categories::all();
-            $inventory = new Products();
-            return view('shopkeeper.inventory.add', compact('inventory', 'categories'));
-        } else {
-            abort(404);
-        }
+        $categories = Categories::all();
+        $inventory = new Products();
+        return view('shopkeeper.inventory.add', compact('inventory', 'categories'));
     }
     /**
      * It will redirect us to add

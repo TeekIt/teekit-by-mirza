@@ -57,7 +57,7 @@ class Products extends Model
 
     public function rattings(): HasMany
     {
-        return $this->hasMany(Rattings::class);
+        return $this->hasMany(Rattings::class, 'product_id');
     }
 
     public function quantities(): HasMany
@@ -190,7 +190,8 @@ class Products extends Model
 
     public static function getParentSellerProductsDescForView(int $seller_id, string $search = '', int $category_id = null): object
     {
-        return self::with('category', 'rattings')
+        return self::with('category')
+            ->withAvg('rattings:ratting', 'average_ratting')
             ->where('product_name', 'LIKE', "%{$search}%")
             ->where('user_id', '=', $seller_id)
             ->when($category_id, function ($query, $category_id) {
