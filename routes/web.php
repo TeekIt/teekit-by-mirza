@@ -93,25 +93,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         Route::get('/edit/{product_id}', [HomeController::class, 'inventoryEdit'])->name('seller.inventory.edit');
         Route::post('/update/{product_id}', [HomeController::class, 'inventoryUpdate'])->name('seller.update_inventory');
         Route::get('/image/delete/{image_id}', [HomeController::class, 'seller.deleteImg']);
-
-        // Route::middleware('auth')->group(function () {
-        //     Route::get('/', InventoryLivewire::class)->name('inventory');
-        //     Route::get('/add', [HomeController::class, 'inventoryAdd'])->name('inventory.add.single');
-        //     Route::post('/add', [HomeController::class, 'inventoryAddDB'])->name('add_inventory');
-        //     Route::get('/add_bulk', [HomeController::class, 'inventoryAddBulk'])->name('inventory.add.bulk');
-        //     Route::get('/edit/{product_id}', [HomeController::class, 'inventoryEdit'])->name('inventory.edit');
-        //     Route::post('/update/{product_id}', [HomeController::class, 'inventoryUpdate'])->name('update_inventory');
-        //     Route::get('/image/delete/{image_id}', [HomeController::class, 'deleteImg']);
-        // });
-
         // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
-
-        // Route::get('/disable/{product_id}', [HomeController::class, 'inventoryDisable'])->name('inventory_disable');
-        // Route::get('/enable/{product_id}', [HomeController::class, 'inventoryEnable'])->name('inventory_enable');
-        // Route::get('/enable_all', [HomeController::class, 'inventoryEnableAll'])->name('enable_all');
-        // Route::get('/disable_all', [HomeController::class, 'inventoryDisableAll'])->name('disable_all');
-        // Route::get('/feature/add/{product_id}', [HomeController::class, 'markAsFeatured'])->name('markAsFeatured');
-        // Route::get('/feature/remove/{product_id}', [HomeController::class, 'removeFromFeatured'])->name('removeFromFeatured');
     });
 
     Route::get('orders', OrdersLivewire::class)->name('seller.orders');
