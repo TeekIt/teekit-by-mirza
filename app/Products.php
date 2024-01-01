@@ -147,7 +147,7 @@ class Products extends Model
     public static function getProductInfo(int $seller_id, int $product_id): object
     {
         return self::with([
-            'quantities' => function ($query) use ($seller_id) {
+            'quantities as qty' => function ($query) use ($seller_id) {
                 $query->where('users_id', $seller_id);
             },
             'images',
@@ -159,17 +159,6 @@ class Products extends Model
             ->where('id', $product_id)
             ->first();
     }
-
-    // public static function getProductInfoWithQty(int $product_id)
-    // {
-    //     $product = self::with('quantities')
-    //         ->where('id', $product_id)
-    //         ->first();
-    //     $product->images = productImages::where('product_id', '=', $product->id)->get();
-    //     $product->category = Categories::find($product->category_id);
-    //     $product->ratting = Rattings::getRatting($product_id);
-    //     return $product;
-    // }
 
     public static function getOnlyProductDetailsById(int $product_id): object
     {

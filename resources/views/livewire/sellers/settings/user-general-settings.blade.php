@@ -86,6 +86,91 @@
         </div>
         <!-- Google Map Modal - Ends -->
 
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            Update User Info
+                        </h5>
+                        <button type="button" class="close" aria-label="Close" data-bs-dismiss="modal">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" wire:model.defer="name" name="name" id="name" class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" value="{{ $user->name }}">
+                                    @if ($errors->has('name'))
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $errors->first('name') }}</strong>
+                                        </span>
+                                    @endif
+                                    <p id="name" class="text-danger name error"></p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Business Name</label>
+                                    <input type="text" wire:model.defer="business_name" id="business_name" class="form-control" value="{{ $user->business_name }}">
+                                    <p id="business_name" class="text-danger business_name error"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <div class="row ">
+                                        <div class="col-md-12">
+                                            <input type="email" class="form-control" wire:model.defer="email" value="{{ $user->email }}">
+                                            <p id="phone" class="text-danger phone error"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Business Phone</label>
+                                    <div class="row ">
+                                        <div class="col-md-12">
+                                            <input type="text" class="form-control" id="business_phone" wire:model.defer="business_phone" value="{{ $user->business_phone }}">
+                                        </div>
+                                    </div>
+                                    <p id="business_phone" class="text-danger business_phone error"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Phone</label>
+                                    <div class="row ">
+                                        <div class="col-md-12">
+                                            <input type="tel" class="form-control" wire:model.defer="phone" value="{{ $user->phone }}">
+                                            <p id="phone" class="text-danger phone error"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer hidden ">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" wire:click="update" wire:loading.class="btn-dark" wire:loading.class.remove="btn-primary" wire:loading.attr="disabled" wire:target="update">
+                                <span wire:loading.remove wire:target="update">Save</span>
+                                <span wire:loading wire:target="update">
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Content Header (Page header) -->
         <div class="content-header">
             <div class="container-fluid">
@@ -103,7 +188,6 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="offset-md-2 col-md-8 pl-4 pr-4 pb-4">
-                        {{-- <h4 class="text-left text-primary">Store Image</h4> --}}
                         <div class="card">
                             <div class="card-body-custom">
                                 <div class=" d-block text-right">
@@ -128,6 +212,7 @@
                                                         </div>
                                                     </div>
                                                 </form>
+
                                                 <form action="{{ route('user_img_update') }}" method="POST" enctype="multipart/form-data">
                                                     {{ csrf_field() }}
                                                     <div class="row form-inline">
@@ -168,7 +253,7 @@
                                                             <div class="col-lg-4"></div>
                                                             <div class="col-lg-8">
                                                                 <div class="text-center">
-                                                                    <a style="background: #ffcf42;color:black;font-weight: 600" class="col-lg-12 w-100 pb-2 border-0 btn btn-secondary rounded-pill" data-bs-toggle="modal" data-bs-target="#editUserModal{{ $user->id }}" onclick="event.preventDefault();">&nbsp;Edit&nbsp;</a>
+                                                                    <a style="background: #ffcf42;color:black;font-weight: 600" class="col-lg-12 w-100 pb-2 border-0 btn btn-secondary rounded-pill" data-bs-toggle="modal" data-bs-target="#editUserModal" onclick="event.preventDefault();">&nbsp;Edit&nbsp;</a>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -259,86 +344,6 @@
     </div>
     <!-- /.row -->
 </div><!-- /.container-fluid -->
-
-<div class="modal fade" id="editUserModal{{ $user->id }}" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" style="display: none;" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    Update User Info
-                </h5>
-                <button type="button" class="close" aria-label="Close" data-bs-dismiss="modal">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Name</label>
-                            <input type="text" wire:model.defer="name" name="name" id="name" class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" value="{{ $user->name }}">
-                            @if ($errors->has('name'))
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $errors->first('name') }}</strong>
-                                </span>
-                            @endif
-                            <p id="name" class="text-danger name error"></p>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Business Name</label>
-                            <input type="text" wire:model.defer="business_name" id="business_name" class="form-control" value="{{ $user->business_name }}">
-                            <p id="business_name" class="text-danger business_name error"></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Email</label>
-                            <div class="row ">
-                                <div class="col-md-12">
-                                    <input type="tel" class="form-control" wire:model.defer="email" wire:model.defer="phone" value="{{ $user->phone }}">
-                                    <p id="phone" class="text-danger phone error"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Business Phone</label>
-                            <div class="row ">
-                                <div class="col-md-12">
-                                    <input type="text" class="form-control" id="business_phone" wire:model.defer="business_phone" value="{{ $user->business_phone }}">
-                                </div>
-                            </div>
-                            <p id="business_phone" class="text-danger business_phone error"></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Phone</label>
-                            <div class="row ">
-                                <div class="col-md-12">
-                                    <input type="tel" class="form-control" wire:model.defer="phone" value="{{ $user->phone }}">
-                                    <p id="phone" class="text-danger phone error"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer hidden ">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" id="user_info_update" wire:click="update" class="btn btn-primary" data-bs-dismiss="modal">Save</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <div class="container-fluid">
     <div class="row">
         <div class="offset-md-2 col-md-8 pl-4 pr-4 pb-4">
@@ -374,7 +379,7 @@
                                             </div>
                                         </div>
                                         <?php
-                                            $bh = json_decode($business_hours, true);
+                                            $bh = json_decode($user->business_hours, true);
                                             $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
                                             for ($i = 0; $i < count($days); $i++) {
                                             ?>

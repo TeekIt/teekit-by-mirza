@@ -6,6 +6,7 @@ use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Qty;
+use App\Services\JsonResponseCustom;
 use App\User;
 use App\Services\TwilioSmsService;
 use App\VerificationCodes;
@@ -56,46 +57,58 @@ class OrdersController extends Controller
         }
     }
     /**
-     * List 2 products from recent orders of a customer
-     * w.r.t Store & Customer ID
      * @author Mirza Abdullah Izhar
-     * @version 1.0.0
      */
-    public function recentOrders(Request $request)
+    public function productsOfRecentOrder(Request $request)
     {
         try {
-            $recent_orders_prods_ids = DB::table('orders')
-                ->select('orders.id', 'order_items.product_id')
-                ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-                ->where('orders.user_id', '=', Auth::id())
-                ->where('orders.seller_id', '=', $request->store_id)
-                ->orderByDesc('id')
-                ->limit(2)
-                ->get();
-            if (!$recent_orders_prods_ids->isEmpty()) {
-                $recent_orders_prods_data = [];
-                foreach ($recent_orders_prods_ids as $product_id) {
-                    $recent_orders_prods_data[] = Products::getProductInfo($product_id->product_id);
-                }
-                return response()->json([
-                    'data' => $recent_orders_prods_data,
-                    'status' => true,
-                    'message' => ''
-                ], 200);
-            } else {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => config('constants.NO_RECORD')
-                ], 200);
+            $validate = Validator::make($request->all(), [
+                'limit' => 'required|integer',
+                'seller_id' => 'integer'
+            ]);
+            if ($validate->fails()) {
+                return JsonResponseCustom::getApiResponse(
+                    [],
+                    false,
+                    $validate->errors(),
+                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
+                );
             }
+            // dd(Orders::getProductsByBuyerId('desc', $request->limit, Auth::id(), $request->seller_id));
+            $order = Orders::getRecentOrderByBuyerId($request->limit, Auth::id(), $request->seller_id);
+            // dd($order->products);
+            // $recent_orders_prods_ids = DB::table('orders')
+            //     ->select('orders.id', 'order_items.product_id')
+            //     ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+            //     ->where('orders.user_id', '=', Auth::id())
+            //     ->where('orders.seller_id', '=', $request->store_id)
+            //     ->orderByDesc('id')
+            //     ->limit(2)
+            //     ->get();
+            if (!empty($order)) {
+                $recent_orders_prods_data = [];
+                foreach ($order->products as $product) $recent_orders_prods_data[] = Products::getProductInfo($request->seller_id, $product->id);
+                return JsonResponseCustom::getApiResponse(
+                    $recent_orders_prods_data,
+                    true,
+                    '',
+                    config('constants.HTTP_OK')
+                );
+            }
+            return JsonResponseCustom::getApiResponse(
+                [],
+                false,
+                config('constants.NO_RECORD'),
+                config('constants.HTTP_OK')
+            );
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 200);
+            return JsonResponseCustom::getApiResponse(
+                [],
+                false,
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**

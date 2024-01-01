@@ -208,6 +208,7 @@ class UserGeneralSettings extends Component
                 ]);
             /* Operation finished */
             sleep(1);
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'editUserModal']);
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {
@@ -232,12 +233,7 @@ class UserGeneralSettings extends Component
 
     public function render()
     {
-        $User = User::find($this->user_id);
-        $this->image = $User->user_img;
-        $user = $this->setUserInfo();
-        $business_hours = $user->business_hours;
-        $address = $user->address_1;
-        $business_location = $user->business_location;
-        return view('livewire.sellers.settings.user-general-settings', compact('business_hours', 'address', 'business_location', 'user'));
+        $user = $this->setUserInfo($this->user_id);
+        return view('livewire.sellers.settings.user-general-settings', compact('user'));
     }
 }

@@ -28,10 +28,6 @@ class Rattings extends Model
     /**
      * Helpers
      */
-    // public static function getRattingAverage(){
-    //     ret
-    // }
-
     public static function getRatting(int $product_id): array
     {
         $raw_ratting = Rattings::where('product_id', '=', $product_id);

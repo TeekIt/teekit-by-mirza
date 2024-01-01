@@ -23,6 +23,10 @@
     @include('jquery.control-modals-jquery')
 
     <script>
+        window.addEventListener('close-modal', event => $('#' + event.detail.id).modal('hide'));
+
+        window.addEventListener('show-modal', event => $('#' + event.detail.id).modal('show'));
+
         function checkbox() {
             $("#chkSelect").change(function() {
                 if ($(this).is(":checked")) {

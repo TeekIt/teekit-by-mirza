@@ -46,7 +46,8 @@ class Orders extends Model
     /**
      * Helpers
      */
-    public static function subFromOrderTotal(array $order_item, float $prod_total_price) {
+    public static function subFromOrderTotal(array $order_item, float $prod_total_price)
+    {
         $order = self::find($order_item['order_id']);
         $order->order_total = $order->order_total - $prod_total_price;
         return $order->save();
@@ -134,6 +135,39 @@ class Orders extends Model
         }
 
         return ['orders' => $data, 'pagination' => $pagination];
+    }
+
+    public static function getRecentOrderByBuyerId(int $limit, int $buyer_id, int|null $seller_id = null): object
+    {
+        // return self::with('products')
+        //     ->where('user_id', $buyer_id)
+        //     ->when($seller_id, function ($query) use ($seller_id) {
+        //         $query->where('seller_id', $seller_id);
+        //     })
+        //     ->orderBy('created_at', $order_by)
+        //     ->limit($limit)
+        //     ->get();
+
+        return self::with(['products' => fn ($query) => $query->take($limit)])
+            ->when($seller_id, fn ($query) => $query->where('seller_id', $seller_id))
+            ->where('user_id', $buyer_id)
+            ->latest()
+            ->first();
+
+        // DB::table('orders')
+        //     ->select('orders.id', 'order_items.product_id')
+        //     ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+        //     ->where('orders.user_id', '=', Auth::id())
+        //     ->where('orders.seller_id', '=', $request->store_id)
+        //     ->orderByDesc('id')
+        //     ->limit(2)
+        //     ->get();
+        // if (!$recent_orders_prods_ids->isEmpty()) {
+        //     $recent_orders_prods_data = [];
+        //     foreach ($recent_orders_prods_ids as $product_id) {
+        //         $recent_orders_prods_data[] = Products::getProductInfo($request->store_id, $product_id->product_id);
+        //     }
+        // }
     }
 
     public static function getOrderById(int $id)

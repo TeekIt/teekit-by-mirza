@@ -58,7 +58,7 @@ Route::prefix('auth')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('update', [AuthController::class, 'updateUser']);
     Route::post('updateStatus', [AuthController::class, 'updateStatus']);
-    Route::get('me', [AuthController::class, 'me']);
+    Route::get('me', [AuthController::class, 'me']); /////////////////////////////////////////////////////////////////////////////////////////////////
     Route::get('delivery_boys', [AuthController::class, 'deliveryBoys']);
     Route::get('get_user/{user_id}', [AuthController::class, 'getUserDetails']);
     Route::post('user/delete', [AuthController::class, 'deleteUser']);
@@ -102,7 +102,7 @@ Route::get('page', [PagesController::class, 'getPage']);
 */
 Route::prefix('sellers')->group(function () {
     Route::get('/', [UsersController::class, 'sellers']);
-    Route::get('/{seller_id}/{product_name}', [AuthController::class, 'searchSellerProducts']);
+    Route::get('{seller_id}/{product_name}', [AuthController::class, 'searchSellerProducts']);
 });
 /*
 |--------------------------------------------------------------------------
@@ -127,8 +127,8 @@ Route::prefix('product')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('driver')->group(function () {
-    Route::post('/register', [DriverController::class, 'registerDriver']);
-    Route::post('/login', [DriverController::class, 'loginDriver']);
+    Route::post('register', [DriverController::class, 'registerDriver']);
+    Route::post('login', [DriverController::class, 'loginDriver']);
 });
 /*
 |--------------------------------------------------------------------------
@@ -174,33 +174,33 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::get('update_assign', [OrdersController::class, 'updateAssign']);
         Route::post('customer_cancel_order', [OrdersController::class, 'customerCancelOrder']);
         Route::post('update', [OrdersController::class, 'updateOrder']);
-        Route::post('/estimated-time/{id}', [OrdersController::class, 'storeEstimatedTime']);
-        Route::get('/get-order-details/{id}', [OrdersController::class, 'getOrderDetailsTwo']);
-        Route::get('/recent_orders/{store_id}', [OrdersController::class, 'recentOrders']);
+        Route::post('estimated-time/{id}', [OrdersController::class, 'storeEstimatedTime']);
+        Route::get('get-order-details/{id}', [OrdersController::class, 'getOrderDetailsTwo']);
+        Route::get('products-of-recent-order', [OrdersController::class, 'productsOfRecentOrder']);
     });
 
     Route::prefix('driver')->group(function () {
-        Route::get('/info/{id}', [DriverController::class, 'info']);
-        Route::post('/add-lat-lon', [DriverController::class, 'addLatLon']);
-        Route::get('/withdrawable-balance', [DriverController::class, 'getWithdrawalBalance']);
-        Route::get('/request-withdrawal-balance', [DriverController::class, 'submitWithdrawal']);
-        Route::post('/bank-details', [DriverController::class, 'submitBankAccountDetails']);
-        Route::get('/all-withdrawals', [DriverController::class, 'driverAllWithdrawalRequests']);
-        Route::post('/check_verification_code/{order_id}', [DriverController::class, 'checkVerificationCode']);
-        Route::post('/driver_failed_to_enter_code/{order_id}', [DriverController::class, 'driverFailedToEnterCode']);
+        Route::get('info/{id}', [DriverController::class, 'info']);
+        Route::post('add-lat-lon', [DriverController::class, 'addLatLon']);
+        Route::get('withdrawable-balance', [DriverController::class, 'getWithdrawalBalance']);
+        Route::get('request-withdrawal-balance', [DriverController::class, 'submitWithdrawal']);
+        Route::post('bank-details', [DriverController::class, 'submitBankAccountDetails']);
+        Route::get('all-withdrawals', [DriverController::class, 'driverAllWithdrawalRequests']);
+        Route::post('check_verification_code/{order_id}', [DriverController::class, 'checkVerificationCode']);
+        Route::post('driver_failed_to_enter_code/{order_id}', [DriverController::class, 'driverFailedToEnterCode']);
     });
 
     Route::prefix('promocodes')->group(function () {
-        Route::post('/validate', [PromoCodesController::class, 'promocodesValidate']);
-        Route::post('/fetch_promocode_info', [PromoCodesController::class, 'fetchPromocodeInfo']);
-        Route::get('/all', [PromoCodesController::class, 'allPromocodes']);
+        Route::post('validate', [PromoCodesController::class, 'promocodesValidate']);
+        Route::post('fetch_promocode_info', [PromoCodesController::class, 'fetchPromocodeInfo']);
+        Route::get('all', [PromoCodesController::class, 'allPromocodes']);
     });
 
     Route::prefix('referral')->group(function () {
-        Route::post('/validate', [ReferralCodeRelationController::class, 'validateReferral']);
-        Route::get('/insert', [ReferralCodeRelationController::class, 'insertReferrals']);
-        Route::get('/details_by_id/{referral_relation_id}', [ReferralCodeRelationController::class, 'fetchReferralRelationDetails']);
-        Route::post('/update/referral_usable/status', [ReferralCodeRelationController::class, 'updateReferralStatus']);
+        Route::post('validate', [ReferralCodeRelationController::class, 'validateReferral']);
+        Route::get('insert', [ReferralCodeRelationController::class, 'insertReferrals']);
+        Route::get('details_by_id/{referral_relation_id}', [ReferralCodeRelationController::class, 'fetchReferralRelationDetails']);
+        Route::post('update/referral_usable/status', [ReferralCodeRelationController::class, 'updateReferralStatus']);
     });
 
     Route::prefix('wallet')->group(function () {

@@ -461,8 +461,8 @@ class ProductsController extends Controller
             }
             $product = Products::getProductInfo($request->seller_id, $request->product_id);
             if (!empty($product)) {
-                $product->store = $product->quantity->store;
-                unset($product->quantity->store);
+                $product->qty = $product->quantities[0]->qty;
+                unset($product->quantities);
                 return JsonResponseCustom::getApiResponse(
                     $product,
                     true,
