@@ -76,10 +76,10 @@ class OrdersController extends Controller
             }
             $order = Orders::getRecentOrderByBuyerId(Auth::id(), $request->prducts_limit, $request->seller_id);
             if (!empty($order)) {
-                $recent_orders_prods_data = [];
-                foreach ($order->products as $product) $recent_orders_prods_data[] = Products::getProductInfo($request->seller_id, $product->id, ['*']);
+                $recent_order_prods_data = [];
+                foreach ($order->products as $product) $recent_order_prods_data[] = Products::getProductInfo($request->seller_id, $product->id, ['*']);
                 return JsonResponseCustom::getApiResponse(
-                    $recent_orders_prods_data,
+                    $recent_order_prods_data,
                     true,
                     '',
                     config('constants.HTTP_OK')
