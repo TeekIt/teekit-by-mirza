@@ -98,7 +98,7 @@ class HomeController extends Controller
                 abort(404);
             }
             $categories = Categories::all();
-            $inventory = Products::getProductInfo($store_id, $product_id);
+            $inventory = Products::getProductInfo($store_id, $product_id, ['*']);
             return view('shopkeeper.inventory.edit', compact('inventory', 'categories'));
         } else {
             abort(404);
@@ -650,7 +650,7 @@ class HomeController extends Controller
             $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
             $item_arr = [];
             foreach ($items as $item) {
-                $product = Products::getProductInfo(Auth::id(), $item->product_id);
+                $product = Products::getProductInfo(Auth::id(), $item->product_id, ['*']);
                 $item['product'] = $product;
                 $item_arr[] = $item;
             }

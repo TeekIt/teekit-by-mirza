@@ -128,7 +128,7 @@ class Orders extends Model
             // Calling the products relation
             $items = $order->order_items;
             $item_arr = [];
-            foreach ($items as $item) $item_arr[] = Products::getProductInfo($order->seller_id, $item->product_id);
+            foreach ($items as $item) $item_arr[] = Products::getProductInfo($order->seller_id, $item->product_id, ['*']);
 
             $order['items'] = $item_arr;
             $data[] = $order;
@@ -137,18 +137,13 @@ class Orders extends Model
         return ['orders' => $data, 'pagination' => $pagination];
     }
 
-    public static function getRecentOrderByBuyerId(int $limit, int $buyer_id, int|null $seller_id = null): object
+    public static function getRecentOrderByBuyerId(int $buyer_id, int|null $prducts_limit = null, int|null $seller_id = null): object
     {
-        // return self::with('products')
-        //     ->where('user_id', $buyer_id)
-        //     ->when($seller_id, function ($query) use ($seller_id) {
-        //         $query->where('seller_id', $seller_id);
-        //     })
-        //     ->orderBy('created_at', $order_by)
-        //     ->limit($limit)
-        //     ->get();
-
-        return self::with(['products' => fn ($query) => $query->take($limit)])
+        return self::with([
+            'products' => function ($query) use ($prducts_limit) {
+                if($prducts_limit !== null) $query->take($prducts_limit);
+            }
+        ])
             ->when($seller_id, fn ($query) => $query->where('seller_id', $seller_id))
             ->where('user_id', $buyer_id)
             ->latest()

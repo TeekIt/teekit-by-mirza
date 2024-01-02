@@ -50,7 +50,7 @@ class Qty extends Model
         $pagination = $quantities->toArray();
         if (!$quantities->isEmpty()) {
             $products_data = [];
-            foreach ($quantities as $single_index) $products_data[] = Products::getProductInfo($single_index->users_id, $single_index->products_id);
+            foreach ($quantities as $single_index) $products_data[] = Products::getProductInfo($single_index->users_id, $single_index->products_id, ['*']);
             unset($pagination['data']);
             return ['data' => $products_data, 'pagination' => $pagination];
         } else {

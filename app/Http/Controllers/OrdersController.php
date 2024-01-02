@@ -63,8 +63,8 @@ class OrdersController extends Controller
     {
         try {
             $validate = Validator::make($request->all(), [
-                'limit' => 'required|integer',
-                'seller_id' => 'integer'
+                'prducts_limit' => 'required|integer',
+                'seller_id' => 'required|integer'
             ]);
             if ($validate->fails()) {
                 return JsonResponseCustom::getApiResponse(
@@ -74,20 +74,10 @@ class OrdersController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            // dd(Orders::getProductsByBuyerId('desc', $request->limit, Auth::id(), $request->seller_id));
-            $order = Orders::getRecentOrderByBuyerId($request->limit, Auth::id(), $request->seller_id);
-            // dd($order->products);
-            // $recent_orders_prods_ids = DB::table('orders')
-            //     ->select('orders.id', 'order_items.product_id')
-            //     ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-            //     ->where('orders.user_id', '=', Auth::id())
-            //     ->where('orders.seller_id', '=', $request->store_id)
-            //     ->orderByDesc('id')
-            //     ->limit(2)
-            //     ->get();
+            $order = Orders::getRecentOrderByBuyerId(Auth::id(), $request->prducts_limit, $request->seller_id);
             if (!empty($order)) {
                 $recent_orders_prods_data = [];
-                foreach ($order->products as $product) $recent_orders_prods_data[] = Products::getProductInfo($request->seller_id, $product->id);
+                foreach ($order->products as $product) $recent_orders_prods_data[] = Products::getProductInfo($request->seller_id, $product->id, ['*']);
                 return JsonResponseCustom::getApiResponse(
                     $recent_orders_prods_data,
                     true,
@@ -431,7 +421,7 @@ class OrdersController extends Controller
                     $total_items = $total_items + $order_item['qty'];
                     $order_total = $order_total + ($order_item['price'] * $order_item['qty']);
                 }
-                $seller = User::getUserByID($seller_id);
+                $seller = User::getUserByID($seller_id, ['business_phone', 'lat', 'lon']);
                 /* 
                 * Adding amount into seller wallet 
                 */

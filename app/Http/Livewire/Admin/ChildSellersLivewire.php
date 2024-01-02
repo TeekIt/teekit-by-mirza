@@ -59,7 +59,7 @@ class ChildSellersLivewire extends Component
 
     public function renderInfoModal($id)
     {
-        $data = User::getUserByID($id);
+        $data = User::getUserByID($id, ['*']);
         $this->name = $data->name;
         $this->email = $data->email;
         $this->phone = $data->phone;

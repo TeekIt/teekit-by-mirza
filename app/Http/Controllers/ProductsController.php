@@ -459,10 +459,8 @@ class ProductsController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $product = Products::getProductInfo($request->seller_id, $request->product_id);
+            $product = Products::getProductInfo($request->seller_id, $request->product_id, ['*']);
             if (!empty($product)) {
-                $product->qty = $product->quantities[0]->qty;
-                unset($product->quantities);
                 return JsonResponseCustom::getApiResponse(
                     $product,
                     true,

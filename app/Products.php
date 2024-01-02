@@ -64,6 +64,11 @@ class Products extends Model
     {
         return $this->hasMany(Qty::class);
     }
+
+    public function qty(): HasMany
+    {
+        return $this->quantities();
+    }
     /**
      * Validators
      */
@@ -144,20 +149,27 @@ class Products extends Model
             ->paginate(20);
     }
 
-    public static function getProductInfo(int $seller_id, int $product_id): object
+    public static function getProductInfo(int $seller_id, int $product_id, array $columns): object
     {
-        return self::with([
-            'quantities as qty' => function ($query) use ($seller_id) {
+        $product = self::select($columns)
+        ->with([
+            'quantities' => function ($query) use ($seller_id) {
                 $query->where('users_id', $seller_id);
             },
-            'images',
-            'category'
+            'images:id,product_id,product_image',
+            'category:id,category_name,category_image'
         ])
             ->whereHas('quantities', function ($query) use ($seller_id) {
                 $query->where('users_id', $seller_id);
             })
             ->where('id', $product_id)
             ->first();
+
+        $product->qty = $product->quantities[0]->qty;
+        $product->store = User::getUserByID($seller_id, ['business_name', 'business_hours']);
+        unset($product->quantities);
+
+        return $product;
     }
 
     public static function getOnlyProductDetailsById(int $product_id): object
