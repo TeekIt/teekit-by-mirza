@@ -89,10 +89,24 @@ class Products extends Model
     /**
      * Helpers
      */
-    public static function searchProducts(string $product_name, ?array $store_ids, ?int $category_id, ?int $store_id, ?string $brand, ?float $min_price, ?float $max_price, ?float $min_weight, ?float $max_weight): object
-    {
+    public static function searchProducts(
+        string $product_name,
+        ?array $store_ids,
+        ?int $category_id,
+        ?int $store_id,
+        ?string $brand,
+        ?float $min_price,
+        ?float $max_price,
+        ?float $min_weight,
+        ?float $max_weight
+    ): object {
         return self::search($product_name)
-            ->query(fn ($query) => $query->with(['store', 'quantities', 'images', 'category']))
+            ->query(fn ($query) => $query->with([
+                'store:id,business_name,business_hours,full_address,country,state,city,lat,lon',
+                'qty:id,products_id,qty',
+                'images:id,product_id,product_image',
+                'category:id,category_name,category_image'
+            ]))
             ->where('status', 1)
             ->when($store_ids, function ($query) use ($store_ids) {
                 return $query->where_in('user_id', $store_ids['ids']);
@@ -124,9 +138,9 @@ class Products extends Model
     public static function getAllProducts(): object
     {
         return self::with([
-            'quantities',
-            'images',
-            'category'
+            'qty:id,products_id,qty',
+            'images:id,product_id,product_image',
+            'category:id,category_name,category_image'
         ])
             ->whereHas('store', function ($query) {
                 $query->where('is_active', 1);
@@ -137,13 +151,13 @@ class Products extends Model
     public static function getProductsInfoBySellerId(int $seller_id): object
     {
         return self::with([
-            'quantities' => function ($query) use ($seller_id) {
-                $query->where('users_id', $seller_id);
+            'qty' => function ($query) use ($seller_id) {
+                $query->select('id', 'products_id', 'qty')->where('users_id', $seller_id);
             },
-            'images',
-            'category'
+            'images:id,product_id,product_image',
+            'category:id,category_name,category_image'
         ])
-            ->whereHas('quantities', function ($query) use ($seller_id) {
+            ->whereHas('qty', function ($query) use ($seller_id) {
                 $query->where('users_id', $seller_id);
             })
             ->paginate(20);
@@ -152,22 +166,22 @@ class Products extends Model
     public static function getProductInfo(int $seller_id, int $product_id, array $columns): object
     {
         $product = self::select($columns)
-        ->with([
-            'quantities' => function ($query) use ($seller_id) {
-                $query->where('users_id', $seller_id);
-            },
-            'images:id,product_id,product_image',
-            'category:id,category_name,category_image'
-        ])
-            ->whereHas('quantities', function ($query) use ($seller_id) {
+            ->with([
+                'qty' => function ($query) use ($seller_id) {
+                    $query->select('id', 'products_id', 'qty')->where('users_id', $seller_id);
+                },
+                'images:id,product_id,product_image',
+                'category:id,category_name,category_image'
+            ])
+            ->whereHas('qty', function ($query) use ($seller_id) {
                 $query->where('users_id', $seller_id);
             })
             ->where('id', $product_id)
             ->first();
 
-        $product->qty = $product->quantities[0]->qty;
-        $product->store = User::getUserByID($seller_id, ['business_name', 'business_hours']);
-        unset($product->quantities);
+        // $product->qty = $product->quantities[0]->qty;
+        $product->store = User::getUserByID($seller_id, ['id', 'business_name', 'business_hours', 'full_address', 'country', 'state', 'city', 'lat', 'lon']);
+        // unset($product->quantities);
 
         return $product;
     }

@@ -5,8 +5,7 @@ namespace App\Services;
 final class JsonResponseCustom
 {
     public static function getApiResponse($data, $status, $message, $http_code)
-    { 
-        // dd($message);
+    {
         return response()->json([
             'data' => $data,
             'status' => $status,

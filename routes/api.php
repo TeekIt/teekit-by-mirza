@@ -37,13 +37,6 @@ Route::get('/', function () {
 });
 /*
 |--------------------------------------------------------------------------
-| Registration, confirmations and verification
-|--------------------------------------------------------------------------
-*/
-Route::post('password/email', [ForgotPasswordController::class, 'getResetToken']);
-Route::post('password/reset', [ResetPasswordController::class, 'reset']);
-/*
-|--------------------------------------------------------------------------
 | Authentication API Routes
 |--------------------------------------------------------------------------
 */
@@ -63,6 +56,13 @@ Route::prefix('auth')->group(function () {
     Route::get('get_user/{user_id}', [AuthController::class, 'getUserDetails']);
     Route::post('user/delete', [AuthController::class, 'deleteUser']);
 });
+/*
+|--------------------------------------------------------------------------
+| Registration, confirmations and verification
+|--------------------------------------------------------------------------
+*/
+Route::post('password/email', [ForgotPasswordController::class, 'getResetToken']);
+Route::post('password/reset', [ResetPasswordController::class, 'reset']);
 /*
 |--------------------------------------------------------------------------
 | Qty API Routes
@@ -91,44 +91,12 @@ Route::prefix('category')->group(function () {
 });
 /*
 |--------------------------------------------------------------------------
-| Page API Routes
-|--------------------------------------------------------------------------
-*/
-Route::get('page', [PagesController::class, 'getPage']);
-/*
-|--------------------------------------------------------------------------
-| Seller API Routes
+| Seller API Routes Without JWT Authentication
 |--------------------------------------------------------------------------
 */
 Route::prefix('sellers')->group(function () {
     Route::get('/', [UsersController::class, 'sellers']);
     Route::get('{seller_id}/{product_name}', [AuthController::class, 'searchSellerProducts']);
-});
-/*
-|--------------------------------------------------------------------------
-| Products API Routes Without JWT Authentication
-|--------------------------------------------------------------------------
-*/
-Route::prefix('product')->group(function () {
-    Route::get('all', [ProductsController::class, 'all']);
-    Route::post('search', [ProductsController::class, 'search']);
-    Route::get('view', [ProductsController::class, 'view']);
-    Route::post('view/bulk', [ProductsController::class, 'bulkView']);
-    Route::get('seller', [ProductsController::class, 'sellerProducts']);
-    Route::get('sortbyprice', [ProductsController::class, 'sortByPrice']);
-    Route::get('sortByLocation', [ProductsController::class, 'sortByLocation']);
-    Route::post('recheck_products', [OrdersController::class, 'recheckProducts']);
-    Route::get('featured/{store_id}', [ProductsController::class, 'featuredProducts']);
-    Route::get('drop-qty-column', [ProductsController::class, 'dropProductsTableQtyColumn']);
-});
-/*
-|--------------------------------------------------------------------------
-| Driver API Routes Without JWT Authentication
-|--------------------------------------------------------------------------
-*/
-Route::prefix('driver')->group(function () {
-    Route::post('register', [DriverController::class, 'registerDriver']);
-    Route::post('login', [DriverController::class, 'loginDriver']);
 });
 /*
 |--------------------------------------------------------------------------
@@ -157,6 +125,19 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('ratings/add', [RattingsController::class, 'add']);
         Route::post('ratings/update', [RattingsController::class, 'update']);
         Route::get('ratings/delete/{ratting_id}', [RattingsController::class, 'delete']);
+
+        Route::withoutMiddleware(['jwt.verify'])->group(function () {
+            Route::get('all', [ProductsController::class, 'all']);
+            Route::post('search', [ProductsController::class, 'search']);
+            Route::get('view', [ProductsController::class, 'view']);
+            Route::post('view/bulk', [ProductsController::class, 'bulkView']);
+            Route::get('seller', [ProductsController::class, 'sellerProducts']);
+            Route::get('sortbyprice', [ProductsController::class, 'sortByPrice']);
+            Route::get('sortByLocation', [ProductsController::class, 'sortByLocation']);
+            Route::post('recheck_products', [OrdersController::class, 'recheckProducts']);
+            Route::get('featured/{store_id}', [ProductsController::class, 'featuredProducts']);
+            Route::get('drop-qty-column', [ProductsController::class, 'dropProductsTableQtyColumn']);
+        });
     });
 
     Route::prefix('withdrawal')->group(function () {
@@ -188,6 +169,11 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::get('all-withdrawals', [DriverController::class, 'driverAllWithdrawalRequests']);
         Route::post('check_verification_code/{order_id}', [DriverController::class, 'checkVerificationCode']);
         Route::post('driver_failed_to_enter_code/{order_id}', [DriverController::class, 'driverFailedToEnterCode']);
+
+        Route::withoutMiddleware('jwt.verify')->group(function () {
+            Route::post('register', [DriverController::class, 'registerDriver']);
+            Route::post('login', [DriverController::class, 'loginDriver']);
+        });
     });
 
     Route::prefix('promocodes')->group(function () {
@@ -209,6 +195,12 @@ Route::middleware(['jwt.verify'])->group(function () {
 
     Route::get('keys', [AuthController::class, 'keys']);
 });
+/*
+|--------------------------------------------------------------------------
+| Page API Routes
+|--------------------------------------------------------------------------
+*/
+Route::get('page', [PagesController::class, 'getPage']);
 /*
 |--------------------------------------------------------------------------
 | Random API Routes

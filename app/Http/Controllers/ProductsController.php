@@ -294,9 +294,20 @@ class ProductsController extends Controller
      * @author Mirza Abdullah Izhar
      * @version 1.0.0
      */
-    public function all()
+    public function all(Request $request)
     {
         try {
+            $validate = Validator::make($request->all(), [
+                'page' => 'required|integer'
+            ]);
+            if ($validate->fails()) {
+                return JsonResponseCustom::getApiResponse(
+                    [],
+                    false,
+                    $validate->errors(),
+                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
+                );
+            }
             $pagination = Products::getAllProducts()->toArray();
             $data = $pagination['data'];
             unset($pagination['data']);
@@ -442,7 +453,6 @@ class ProductsController extends Controller
     /**
      * View product w.r.t ID
      * @author Mirza Abdullah Izhar
-     * @version 1.2.0
      */
     public function view(Request $request)
     {
@@ -870,7 +880,7 @@ class ProductsController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $pagination = Cache::rememberForever('sellerProducts' . $request->seller_id . $request->page, function () use ($request) {
+            $pagination = Cache::remember('sellerProducts' . $request->seller_id . $request->page, now()->addDay(), function () use ($request) {
                 return Products::getProductsInfoBySellerId($request->seller_id)->toArray();
             });
             $data = $pagination['data'];
