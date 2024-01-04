@@ -1,7 +1,7 @@
-@php
-    use Illuminate\Support\Str;
-@endphp
 <div class="container-xxl flex-grow-1 container-p-y">
+    @php
+        use Illuminate\Support\Str;
+    @endphp
     <div class="container pt-4">
         @if (session()->has('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">

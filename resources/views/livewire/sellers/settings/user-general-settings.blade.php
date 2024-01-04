@@ -1,23 +1,37 @@
 <div>
+    @php
+        use Illuminate\Support\Str;
+    @endphp
     <div class="content">
-        @if (session()->has('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>Error!</strong>
-                {{ session()->get('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session()->has('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Success!</strong>
-                {{ session()->get('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        {{-- <form action="http://127.0.0.1:8000/settings/location_update" method="POST" enctype="multipart/form-data"> --}}
-
-        <!-- Google Map Modal - Begins -->
+        <div class="container pt-4">
+            @if (session()->has('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Error!</strong>
+                    {{ session()->get('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            @if (session()->has('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong>Success!</strong>
+                    {{ session()->get('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            {{-- For Laravel Generated Errors --}}
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Error!</strong>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+        </div>
+        <!-- Google Map Modal -->
         <div wire:ignore.self class="modal hide" id="map_modal">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
@@ -28,51 +42,84 @@
                     </div>
                     <!-- Modal body -->
                     <div class="modal-body">
-                        <form wire:submit.prevent="updateLocation" method="POST">
+                        <form action="{{ route('seller.settings.update.location') }}" method="POST">
+                            @csrf
                             <div class="p-3">
                                 <div class="col-md-12 my-2">
                                     <label for="full_address">Address 1</label>
-                                    <input type="text" class="form-control" wire:model.defer="full_address" id="modal_address" />
+                                    <input type="text" class="form-control" name="full_address" id="modal_address" value="{{ old('full_address') }}" />
+                                    <small class="text-danger">
+                                        @error('full_address')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_unit_address">Address 2 (optional)</label>
-                                    <input type="text" class="form-control" placeholder="Apartment, unit, suite, or floor#" wire:model.defer="unit_address" id="modal_unit_address">
+                                    <input type="text" class="form-control" placeholder="Apartment, unit, suite, or floor#" name="unit_address" id="modal_unit_address" value="{{ old('unit_address') }}">
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_postcode">Postcode</label>
-                                    <input type="text" class="form-control" wire:model.defer="postcode" id="modal_postcode" />
+                                    <input type="text" class="form-control" name="postcode" id="modal_postcode" value="{{ old('postcode') }}" />
+                                    <small class="text-danger">
+                                        @error('postcode')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_country">Country</label>
-                                    <input tyep="text" class="form-control" wire:model.defer="country" id="modal_country" />
+                                    <input type="text" class="form-control" name="country" id="modal_country" value="{{ old('country') }}" />
+                                    <small class="text-danger">
+                                        @error('country')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_state">State/Province</label>
-                                    <input tyep="text" class="form-control" wire:model.defer="state" id="modal_state" />
+                                    <input type="text" class="form-control" name="state" id="modal_state" value="{{ old('state') }}" />
+                                    <small class="text-danger">
+                                        @error('state')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_city">City</label>
-                                    <input type="text" class="form-control" wire:model.defer="city" id="modal_city" />
+                                    <input type="text" class="form-control" name="city" id="modal_city" value="{{ old('city') }}" />
+                                    <small class="text-danger">
+                                        @error('city')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
                                 {{-- Google Maps --}}
-                                <div class="col-md-12 my-2">
+                                <div class="col-md-12 my-2" wire:ignore>
                                     <div style="min-height: 300px;" id="map-canvas"></div>
                                 </div>
                                 <div class="row my-2">
                                     <div class="col-md-6">
                                         <label for="modal_lat">Lat</label>
-                                        <input type="text" class="form-control" wire:model.defer="lat" id="modal_lat" />
+                                        <input type="text" class="form-control" name="lat" id="modal_lat" value="{{ old('lat') }}" />
+                                        <small class="text-danger">
+                                            @error('lat')
+                                                {{ $message }}
+                                            @enderror
+                                        </small>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="modal_long">Long</label>
-                                        <input type="text" class="form-control" wire:model.defer="lon" id="modal_long" />
+                                        <input type="text" class="form-control" name="lon" id="modal_long" value="{{ old('lon') }}" />
+                                        <small class="text-danger">
+                                            @error('lon')
+                                                {{ $message }}
+                                            @enderror
+                                        </small>
                                     </div>
                                 </div>
-                                <button type="submit" class="d-no mt-3 btn btn-submit btn-block btn-outline-primary" wire:loading.class="btn-dark" wire:loading.class.remove="btn-submit" wire:loading.attr="disabled">
-                                    <span wire:loading.remove>Update</span>
-                                    <span wire:loading>
-                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    </span>
+                                <button type="submit" class="d-no mt-3 btn btn-submit btn-block btn-outline-primary">
+                                    Update
                                 </button>
                             </div>
                         </form>
@@ -84,8 +131,6 @@
                 </div>
             </div>
         </div>
-        <!-- Google Map Modal - Ends -->
-
         <!-- Edit Modal -->
         <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" style="display: none;" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -170,7 +215,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Content Header (Page header) -->
         <div class="content-header">
             <div class="container-fluid">
@@ -219,7 +263,7 @@
                                                         <div class="col-md-4">
                                                             <div class="form-group">
                                                                 <label>
-                                                                    <img class="img img-fluid img-thumbnail" src="{{ config('constants.BUCKET') . $user->user_img }}" alt="No Image Uploaded">
+                                                                    {{-- <img class="img img-fluid img-thumbnail" src="{{ config('constants.BUCKET') . $user->user_img }}" alt="No Image Uploaded"> --}}
                                                                 </label>
                                                             </div>
                                                         </div>
@@ -253,7 +297,7 @@
                                                             <div class="col-lg-4"></div>
                                                             <div class="col-lg-8">
                                                                 <div class="text-center">
-                                                                    <a style="background: #ffcf42;color:black;font-weight: 600" class="col-lg-12 w-100 pb-2 border-0 btn btn-secondary rounded-pill" data-bs-toggle="modal" data-bs-target="#editUserModal" onclick="event.preventDefault();">&nbsp;Edit&nbsp;</a>
+                                                                    <a style="background: #ffcf42;color:black;font-weight: 600" class="col-lg-12 w-100 pb-2 border-0 btn btn-secondary rounded-pill" data-bs-toggle="modal" data-bs-target="#editUserModal" onclick="event.preventDefault();">Edit Profile</a>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -265,10 +309,38 @@
                                                                     </div>
                                                                     <div class="col-md-8 my-2">
                                                                         <div class="form-group">
-                                                                            <i class="fas fa-map-marked-alt text-primary fa-2x mt-2"></i>
-                                                                            <span class="mx-3 mt-2">
-                                                                                {{ $user->full_address }}, {{ $user->city }}, {{ $user->state }}, {{ $user->country }}, {{ $user->postcode }}
-                                                                            </span>
+                                                                            <table class="w-100">
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <input type="text" value="{{ Str::limit($user->full_address, 50) }}" class="form-control w-100" disabled  title="{{ $user->full_address }}"/>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <input type="text" value="{{ $user->unit_address }}" class="form-control w-100" disabled />
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <input type="text" value="{{ $user->postcode }}" class="form-control w-100" disabled />
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <input type="text" value="{{ $user->country }}" class="form-control w-100" disabled />
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <input type="text" value="{{ $user->state }}" class="form-control w-100" disabled />
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <input type="text" value="{{ $user->city }}" class="form-control w-100" disabled />
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -343,7 +415,8 @@
         </div>
     </div>
     <!-- /.row -->
-</div><!-- /.container-fluid -->
+</div>
+<!-- /.container-fluid -->
 <div class="container-fluid">
     <div class="row">
         <div class="offset-md-2 col-md-8 pl-4 pr-4 pb-4">

@@ -29,6 +29,7 @@ class UserGeneralSettings extends Component
         $new_password,
         $full_address,
         $unit_address,
+        $postcode,
         $country,
         $state,
         $city,
@@ -42,46 +43,12 @@ class UserGeneralSettings extends Component
     protected $rules = [
         'old_password' => 'required|min:8',
         'new_password' => 'required|min:8',
-        'Image' => 'required',
-        'full_address' => 'required|string',
-        'unit_address' => 'string',
-        'country' => 'required|string',
-        'state' => 'required|string',
-        'city' => 'required|string',
-        'lat' => 'required|numeric',
-        'lon' => 'required|numeric'
+        'Image' => 'required'
     ];
 
     public function mount()
     {
         $this->user_id = auth()->id();
-    }
-
-    public function updateLocation()
-    {
-        dd($this->full_address);
-        $this->validate();
-        try {
-            $updated = User::updateStoreLocation(
-                $this->user_id, 
-                $this->full_address,
-                $this->unit_address,
-                $this->country,
-                $this->state,
-                $this->city,
-                $this->lat,
-                $this->lon
-            );
-            dd($updated);
-            sleep(1);
-                if ($updated) {
-                    session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-                } else {
-                    session()->flash('error', config('constants.UPDATION_FAILED'));
-                }
-        } catch (Exception $error) {
-            session()->flash('error', $error);
-        }
     }
 
     public function updateImage()

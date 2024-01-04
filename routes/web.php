@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PromoCodesController;
 use App\Http\Controllers\StuartDeliveryController;
+use App\Http\Controllers\UsersController;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
@@ -96,8 +97,11 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
     });
 
+    Route::prefix('settings')->group(function () {
+        Route::get('/general', UserGeneralSettings::class)->name('seller.settings.general');
+        Route::post('/update-location', [UsersController::class, 'updateStoreLocation'])->name('seller.settings.update.location');
+    });
     Route::get('orders', OrdersLivewire::class)->name('seller.orders');
-    Route::get('/settings/general', UserGeneralSettings::class)->name('seller.settings.general');
 });
 /*
 |--------------------------------------------------------------------------

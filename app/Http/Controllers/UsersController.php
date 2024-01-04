@@ -9,10 +9,55 @@ use Throwable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use App\Services\JsonResponseCustom;
-use Illuminate\Support\Facades\App;
+use App\Services\WebResponseCustom;
+use Illuminate\Support\Facades\Auth;
 
 class UsersController extends Controller
 {
+    public function updateStoreLocation(Request $request)
+    {
+        try {
+            $validate = Validator::make($request->all(), [
+                'full_address' => 'required|string',
+                'unit_address' => 'nullable|string',
+                'postcode' => 'required|string',
+                'country' => 'required|string',
+                'state' => 'required|string',
+                'city' => 'required|string',
+                'lat' => 'required|numeric',
+                'lon' => 'required|numeric'
+            ]);
+            if ($validate->fails()) return WebResponseCustom::getValidationResponseRedirectBack($validate);
+
+            $updated = User::updateStoreLocation(
+                Auth::id(),
+                $request->full_address,
+                $request->unit_address,
+                $request->country,
+                $request->state,
+                $request->city,
+                $request->postcode,
+                $request->lat,
+                $request->lon
+            );
+            if ($updated) {
+                return WebResponseCustom::getResponseRedirectBack(
+                    config('constants.SUCCESS_STATUS'),
+                    config('constants.UPDATION_SUCCESS')
+                );
+            }
+            return WebResponseCustom::getResponseRedirectBack(
+                config('constants.ERROR_STATUS'),
+                config('constants.UPDATION_FAILED')
+            );
+        } catch (Throwable $error) {
+            report($error);
+            return WebResponseCustom::getResponseRedirectBack(
+                config('constants.ERROR_STATUS'),
+                $error->getMessage()
+            );
+        }
+    }
     /**
      * It will fetch the curved distance between 2 points
      * Google distance matrix API is consumed
@@ -98,7 +143,7 @@ class UsersController extends Controller
             });
             $pagination = $users->toArray();
             unset($pagination['data']);
-            
+
             $data = GoogleMap::findDistanceByMakingChunks($request, $users, 25);
             if (empty($data)) {
                 return JsonResponseCustom::getApiResponse(

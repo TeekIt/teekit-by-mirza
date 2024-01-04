@@ -170,6 +170,7 @@ class User extends Authenticatable implements JWTSubject
         string $country,
         string $state,
         string $city,
+        string $postcode,
         string $lat,
         string $lon
     ) {
@@ -179,10 +180,10 @@ class User extends Authenticatable implements JWTSubject
         $user->country = $country;
         $user->state = $state;
         $user->city = $city;
+        $user->postcode = $postcode;
         $user->lat = $lat;
         $user->lon = $lon;
         return $user->save();
-        // return self::where('id', '=', $user_id)->update(['is_active' => $status]);
     }
 
     public static function uploadImg(object $request)
