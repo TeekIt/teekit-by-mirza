@@ -464,19 +464,6 @@ class HomeController extends Controller
         return view('shopkeeper.settings.payment', compact('payment_settings'));
     }
     /**
-     * Display's store general settings
-     * @author Huzaifa Haleem
-     * @version 1.0.0
-     */
-    public function generalSettings()
-    {
-        $user = User::find(Auth::id());
-        $business_hours = $user->business_hours;
-        $address = $user->address_1;
-        $business_location = $user->business_location;
-        return view('shopkeeper.settings.general', compact('business_hours', 'address', 'business_location'));
-    }
-    /**
      * Update's business hours of a store
      * @author Mirza Abdullah Izhar
      * @version 1.1.0

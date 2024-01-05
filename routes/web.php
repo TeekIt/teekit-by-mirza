@@ -54,7 +54,6 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 */
 Route::prefix('settings')->group(function () {
     Route::post('/user_info/update', [HomeController::class, 'userInfoUpdate'])->name('admin.userinfo.update');
-    Route::get('/general', [HomeController::class, 'generalSettings']);
     Route::get('/payment', [HomeController::class, 'paymentSettings']);
     Route::post('/payment/update', [HomeController::class, 'paymentSettingsUpdate'])->name('payment_settings_update');
     Route::post('/user_img/update', [HomeController::class, 'userImgUpdate'])->name('user_img_update');
