@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Categories;
+use App\Qty;
 use App\Services\GoogleMap;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -83,28 +84,34 @@ class CategoriesController extends Controller
      * List all categories w.r.t store ID or without store ID
      * @version 1.2.0
      */
-    public function all()
+    public function all(Request $request)
     {
         try {
-            if (request()->has('store_id'))
-                $data =  Categories::getAllCategoriesByStoreId(request()->store_id);
-            else
-                $data = Cache::rememberForever('allCategories', function () {
-                    return Categories::allCategories();
-                });
-
-            if (!empty($data)) {
+            $validate = Validator::make($request->all(), [
+                'store_id' => 'integer',
+            ]);
+            if ($validate->fails()) {
                 return JsonResponseCustom::getApiResponse(
-                    $data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    config('constants.HTTP_OK')
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    $validate->errors(),
+                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
+
+            if ($request->store_id)
+                $data =  Categories::getAllCategoriesByStoreId($request->store_id);
+            else
+                $data = Cache::rememberForever('allCategories', fn () => Categories::allCategories());
+            /* 
+            * Just creating this variable so we don't have to call the "isEmpty()" function again & again  
+            * Which will obviouly reduce the API response speed
+            */
+            $data_is_empty = $data->isEmpty();
             return JsonResponseCustom::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
+                ($data_is_empty) ? [] : $data,
+                ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                ($data_is_empty) ? config('constants.NO_RECORD') : '',
                 config('constants.HTTP_OK')
             );
         } catch (Throwable $error) {
@@ -136,28 +143,22 @@ class CategoriesController extends Controller
                 );
             }
             if ($request->store_id)
-                $data = Categories::getProductsByStoreId($request->category_id, $request->store_id);
+                $data = Qty::getProductsByGivenIds($request->category_id, $request->store_id);
             else
                 $data = Categories::getProducts($request->category_id);
-            if (!empty($data)) {
-                return JsonResponseCustom::getApiResponseExtention(
-                    $data['data'],
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $data['pagination'],
-                    config('constants.HTTP_OK')
-                );
-            } else {
-                return JsonResponseCustom::getApiResponseExtention(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    config('constants.NO_RECORD'),
-                    'pagination',
-                    [],
-                    config('constants.HTTP_OK')
-                );
-            }
+            /* 
+            * Just creating this variable so we don't have to call the "empty()" function again & again  
+            * Which will obviouly reduce the API response speed
+            */
+            $data_is_empty = empty($data);
+            return JsonResponseCustom::getApiResponseExtention(
+                ($data_is_empty) ? [] : $data['data'],
+                ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                ($data_is_empty) ? config('constants.NO_RECORD') : '',
+                'pagination',
+                ($data_is_empty) ? [] : $data['pagination'],
+                config('constants.HTTP_OK')
+            );
         } catch (Throwable $error) {
             report($error);
             return JsonResponseCustom::getApiResponse(
@@ -192,22 +193,18 @@ class CategoriesController extends Controller
             });
             $pagination = $stores->toArray();
             unset($pagination['data']);
-
             $data = GoogleMap::findDistanceByMakingChunks($request, $stores, 25);
-            if (empty($data)) {
-                return JsonResponseCustom::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    config('constants.NO_RECORD'),
-                    config('constants.HTTP_OK')
-                );
-            }
+            /* 
+            * Just creating this variable so we don't have to call the "empty()" function again & again  
+            * Which will obviouly reduce the API response speed
+            */
+            $data_is_empty = empty($data);
             return JsonResponseCustom::getApiResponseExtention(
-                $data,
-                config('constants.TRUE_STATUS'),
-                '',
+                ($data_is_empty) ? [] : $data,
+                ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                ($data_is_empty) ? config('constants.NO_RECORD') : '',
                 'pagination',
-                $pagination,
+                ($data_is_empty) ? [] : $pagination,
                 config('constants.HTTP_OK')
             );
         } catch (Throwable $error) {

@@ -9,7 +9,7 @@ final class JsonResponseCustom
         return response()->json([
             'data' => $data,
             'status' => $status,
-            'message' => $message
+            'message' => ($http_code == 500) ? $message->getMessage() : $message
         ], $http_code);
     }
 
@@ -18,12 +18,12 @@ final class JsonResponseCustom
         return response()->json([
             'data' => $data,
             'status' => $status,
-            'message' => $message,
+            'message' => ($http_code == 500) ? $message->getMessage() : $message,
             $extra_key => $extra_key_data
         ], $http_code);
     }
 
-    public static function getWebResponse($message, $status)
+    public static function getWebResponse($status, $message)
     {
         ($status) ? flash($message)->success() : flash($message)->error();
     }

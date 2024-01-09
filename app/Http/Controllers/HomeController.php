@@ -18,6 +18,7 @@ use App\Services\TwilioSmsService;
 use App\User;
 use App\VerificationCodes;
 use App\WithdrawalRequests;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Laracasts\Flash\Flash;
 use Stripe;
 use Throwable;
 
@@ -60,7 +62,7 @@ class HomeController extends Controller
             $total_sales = Orders::query()->where('payment_status', '=', 'paid')->where('seller_id', '=', Auth::id())->sum('order_total');
             $all_orders = Orders::where('seller_id', Auth::id())
                 ->whereNotNull('order_status')
-                ->orderby(\DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3
+                ->orderby(DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3
                  when order_status = "onTheWay" then 4 when order_status = "delivered" then 5 end'))
                 ->paginate(5);
             return view('shopkeeper.child_dashboard', compact('user', 'pending_orders', 'total_products', 'total_orders', 'total_sales', 'all_orders'));
@@ -73,7 +75,7 @@ class HomeController extends Controller
             $total_sales = Orders::query()->where('payment_status', '=', 'paid')->where('seller_id', '=', Auth::id())->sum('order_total');
             $all_orders = Orders::where('seller_id', \auth()->id())
                 ->whereNotNull('order_status')
-                ->orderby(\DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3
+                ->orderby(DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3
                  when order_status = "onTheWay" then 4 when order_status = "delivered" then 5 end'))
                 ->paginate(5);
             return view('shopkeeper.dashboard', compact('user', 'pending_orders', 'total_products', 'total_orders', 'total_sales', 'all_orders'));
@@ -81,59 +83,6 @@ class HomeController extends Controller
             return $this->adminHome();
         }
     }
-    /**
-     * It will show the inventory
-     * @version 1.1.0
-     */
-    // public function inventory(Request $request)
-    // {
-    //     if (Gate::allows('seller') || Gate::allows('child_seller')) {
-    //         if (Gate::allows('child_seller')) {
-    //             $child_seller_id = Auth::id();
-    //             $qty = Qty::where('users_id', $child_seller_id)->first();
-    //             $child_seller = User::where('id', $child_seller_id)->first();
-    //             $parent_seller_id = $child_seller->parent_store_id;
-    //             $featured = Products::query()->where('user_id', $parent_seller_id)->where('featured', '=', 1)->orderBy('id', 'DESC')->get();
-    //             if (!empty($qty)) {
-    //                 $inventory = Products::where('user_id', $parent_seller_id)
-    //                     ->with([
-    //                         'quantities' => function ($q) use ($child_seller_id) {
-    //                             $q->where('users_id', $child_seller_id);
-    //                         }
-    //                     ]);
-    //             } else {
-    //                 $inventory = Products::with('quantity')->where('user_id', $parent_seller_id);
-    //             }
-    //         }
-    //         //if not child seller then this condition will run for parent store
-    //         else {
-    //             $parent_seller_id = Auth::id();
-    //             $inventory = Products::query()->where('user_id', '=', $parent_seller_id)->orderBy('id', 'DESC');
-    //             $featured = Products::query()->where('user_id', '=', $parent_seller_id)->where('featured', '=', 1)->orderBy('id', 'DESC')->get();
-    //         }
-    //         //searching product by name and category
-    //         if ($request->search) $inventory = $inventory->where('product_name', 'LIKE', "%{$request->search}%");
-    //         if ($request->category) $inventory = $inventory->where('category_id', '=', $request->category);
-    //         $categories = Categories::all();
-    //         Gate::allows('child_seller') ? $inventory = $inventory->paginate(20) : $inventory = $inventory->paginate(9);
-    //         $inventory_p = $inventory;
-    //         $inventories = $inventory;
-    //         $featured_products = [];
-    //         if (Gate::allows('seller')) {
-    //             $featured_products = [];
-    //             $inventories = [];
-    //             foreach ($inventory as $in) {
-    //                 $inventories[] = Products::getProductInfo($in->id);
-    //             }
-    //         }
-    //         foreach ($featured as $in) {
-    //             $featured_products[] = Products::getProductInfo($in->id);
-    //         }
-    //         return view('shopkeeper.inventory.list', compact('inventories', 'featured_products', 'inventory_p', 'categories'));
-    //     } else {
-    //         abort(404);
-    //     }
-    // }
     /**
      * It will redirect us to
      * edit inventory page
@@ -149,7 +98,7 @@ class HomeController extends Controller
                 abort(404);
             }
             $categories = Categories::all();
-            $inventory = Products::getProductInfoWithQty($product_id, $store_id);
+            $inventory = Products::getProductInfo($store_id, $product_id, ['*']);
             return view('shopkeeper.inventory.edit', compact('inventory', 'categories'));
         } else {
             abort(404);
@@ -162,13 +111,9 @@ class HomeController extends Controller
      */
     public function inventoryAdd(Request $request)
     {
-        if (Gate::allows('seller')) {
-            $categories = Categories::all();
-            $inventory = new Products();
-            return view('shopkeeper.inventory.add', compact('inventory', 'categories'));
-        } else {
-            abort(404);
-        }
+        $categories = Categories::all();
+        $inventory = new Products();
+        return view('shopkeeper.inventory.add', compact('inventory', 'categories'));
     }
     /**
      * It will redirect us to add
@@ -187,109 +132,109 @@ class HomeController extends Controller
      * It will delete the product image
      * @version 1.0.0
      */
-    public function deleteImg($image_id)
-    {
-        if (Gate::allows('seller')) {
-            productImages::find($image_id)->delete();
-            return redirect()->back();
-        } else {
-            abort(404);
-        }
-    }
+    // public function deleteImg($image_id)
+    // {
+    //     if (Gate::allows('seller')) {
+    //         productImages::find($image_id)->delete();
+    //         return redirect()->back();
+    //     } else {
+    //         abort(404);
+    //     }
+    // }
     /**
      * Disable's a single product
      * @author Huzaifa Haleem
      * @version 1.1.0
      */
-    public function inventoryDisable($product_id)
-    {
-        $product = Products::find($product_id);
-        $product->status = 0;
-        // $product->qty = 0;
-        $product->save();
-        flash('Product Disabled Successfully')->success();
-        return Redirect::back();
-    }
+    // public function inventoryDisable($product_id)
+    // {
+    //     $product = Products::find($product_id);
+    //     $product->status = 0;
+    //     // $product->qty = 0;
+    //     $product->save();
+    //     flash('Product Disabled Successfully')->success();
+    //     return Redirect::back();
+    // }
     /**
      * Enable's a single product
      * @author Huzaifa Haleem
      * @version 1.1.0
      */
-    public function inventoryEnable($product_id)
-    {
-        $product = Products::find($product_id);
-        $product->status = 1;
-        $product->save();
-        flash('Product Enabled Successfully')->success();
-        return Redirect::back();
-    }
-    /**
-     * Enable's all products of logged-in user
-     * @author Mirza Abdullah Izhar
-     * @version 1.1.0
-     */
-    public function inventoryEnableAll(Request $request)
-    {
-        DB::table('products')
-            ->where('user_id', Auth::id())
-            ->update(['status' => 1]);
-        flash('All Products Enabled Successfully')->success();
-        return Redirect::back();
-    }
-    /**
-     * Disable's all products of logged-in user
-     * @author Mirza Abdullah Izhar
-     * @version 1.1.0
-     */
-    public function inventoryDisableAll(Request $request)
-    {
-        DB::table('products')
-            ->where('user_id', Auth::id())
-            ->update(['status' => 0]);
-        flash('All Products Disabled Successfully')->success();
-        return Redirect::back();
-    }
-    /**
-     * Feature the given product
-     * @author Mirza Abdullah Izhar
-     * @version 1.1.0
-     */
-    public function markAsFeatured(Request $request)
-    {
-        if (Gate::allows('seller')) {
-            $count = DB::table('products')
-                ->select()
-                ->where('user_id', Auth::id())
-                ->where('featured', 1)
-                ->count();
-            if ($count >= 6) {
-                flash('You Can Mark Maximum 6 Products As Featured')->success();
-            } else {
-                DB::table('products')
-                    ->where('id', $request->product_id)
-                    ->update(['featured' => 1]);
-                flash('Marked As Featured, Successfully')->success();
-            }
-            return Redirect::back();
-        } else {
-            abort(404);
-        }
-    }
-    /**
-     * Remove the given product from featured list
-     * @author Mirza Abdullah Izhar
-     * @version 1.1.0
-     */
-    public function removeFromFeatured(Request $request)
-    {
-        if (Gate::allows('seller')) {
-            DB::table('products')
-                ->where('id', $request->product_id)
-                ->update(['featured' => 0]);
-            flash('Removed From Featured, Successfully')->success();
-        }
-        return Redirect::back();
-    }
+    // public function inventoryEnable($product_id)
+    // {
+    //     $product = Products::find($product_id);
+    //     $product->status = 1;
+    //     $product->save();
+    //     flash('Product Enabled Successfully')->success();
+    //     return Redirect::back();
+    // }
+    // /**
+    //  * Enable's all products of logged-in user
+    //  * @author Mirza Abdullah Izhar
+    //  * @version 1.1.0
+    //  */
+    // public function inventoryEnableAll(Request $request)
+    // {
+    //     DB::table('products')
+    //         ->where('user_id', Auth::id())
+    //         ->update(['status' => 1]);
+    //     flash('All Products Enabled Successfully')->success();
+    //     return Redirect::back();
+    // }
+    // /**
+    //  * Disable's all products of logged-in user
+    //  * @author Mirza Abdullah Izhar
+    //  * @version 1.1.0
+    //  */
+    // public function inventoryDisableAll(Request $request)
+    // {
+    //     DB::table('products')
+    //         ->where('user_id', Auth::id())
+    //         ->update(['status' => 0]);
+    //     flash('All Products Disabled Successfully')->success();
+    //     return Redirect::back();
+    // }
+    // /**
+    //  * Feature the given product
+    //  * @author Mirza Abdullah Izhar
+    //  * @version 1.1.0
+    //  */
+    // public function markAsFeatured(Request $request)
+    // {
+    //     if (Gate::allows('seller')) {
+    //         $count = DB::table('products')
+    //             ->select()
+    //             ->where('user_id', Auth::id())
+    //             ->where('featured', 1)
+    //             ->count();
+    //         if ($count >= 6) {
+    //             flash('You Can Mark Maximum 6 Products As Featured')->success();
+    //         } else {
+    //             DB::table('products')
+    //                 ->where('id', $request->product_id)
+    //                 ->update(['featured' => 1]);
+    //             flash('Marked As Featured, Successfully')->success();
+    //         }
+    //         return Redirect::back();
+    //     } else {
+    //         abort(404);
+    //     }
+    // }
+    // /**
+    //  * Remove the given product from featured list
+    //  * @author Mirza Abdullah Izhar
+    //  * @version 1.1.0
+    //  */
+    // public function removeFromFeatured(Request $request)
+    // {
+    //     if (Gate::allows('seller')) {
+    //         DB::table('products')
+    //             ->where('id', $request->product_id)
+    //             ->update(['featured' => 0]);
+    //         flash('Removed From Featured, Successfully')->success();
+    //     }
+    //     return Redirect::back();
+    // }
     /**
      * Inserts a single store product
      * @author Mirza Abdullah Izhar
@@ -355,7 +300,7 @@ class HomeController extends Controller
                 $product->save();
                 $product_id = $product->id;
                 $product_quantity = $request->qty;
-                $this->addProductQty($product_id, $user_id, $product_quantity);
+                Qty::addProductQty($user_id, $product_id, $$data['category_id'], $product_quantity);
                 if ($request->hasFile('gallery')) {
                     $images = $request->file('gallery');
                     foreach ($images as $image) {
@@ -519,19 +464,6 @@ class HomeController extends Controller
         return view('shopkeeper.settings.payment', compact('payment_settings'));
     }
     /**
-     * Display's store general settings
-     * @author Huzaifa Haleem
-     * @version 1.0.0
-     */
-    public function generalSettings()
-    {
-        $user = User::find(Auth::id());
-        $business_hours = $user->business_hours;
-        $address = $user->address_1;
-        $business_location = $user->business_location;
-        return view('shopkeeper.settings.general', compact('business_hours', 'address', 'business_location'));
-    }
-    /**
      * Update's business hours of a store
      * @author Mirza Abdullah Izhar
      * @version 1.1.0
@@ -557,48 +489,114 @@ class HomeController extends Controller
      * @author Huzaifa Haleem
      * @version 1.0.0
      */
-    public function locationUpdate(Request $request)
-    {
-        $data = $request->Address;
-        $location = $request->location_text;
-        $user = User::find(Auth::id());
-        $user->business_location = json_encode($data);
-        $user->address_1 = $location;
-        $user->lat = $data['lat'];
-        $user->lon = $data['long'];
-        $user->save();
-        flash('Location Updated');
-        return redirect()->back();
-    }
+    // public function locationUpdate(Request $request)
+    // {
+    //     dd($request->all());
+    //     $data = $request->Address;
+    //     $location = $request->location_text;
+    //     $user = User::find(Auth::id());
+    //     $user->business_location = json_encode($data);
+    //     $user->address_1 = $location;
+    //     $user->lat = $data['lat'];
+    //     $user->lon = $data['long'];
+    //     $user->save();
+    //     flash('Location Updated');
+    //     return redirect()->back();
+    // }
+
+    // public function locationUpdate(Request $request)
+    // {
+    //     // Validate the incoming data
+    //     $request->validate([
+    //         'Address' => 'required|array',
+    //         'location_text' => 'required|string',
+    //         'Address.lat' => 'required|numeric',
+    //         'Address.long' => 'required|numeric',
+    //     ]);
+
+    //     $data = $request->input('Address');
+    //     $location = $request->input('location_text');
+
+    //     $user = User::find(Auth::id());
+
+    //     if ($user) {
+    //         $user->business_location = json_encode($data);
+    //         $user->address_1 = $location;
+    //         $user->lat = $data['lat'];
+    //         $user->lon = $data['long'];
+
+    //         if ($user->save()) {
+    //             session()->flash('success', 'Location Updated');
+    //         } else {
+    //             session()->flash('error', 'Failed to update location. Please try again.');
+    //         }
+    //     } else {
+    //         session()->flash('error', 'User not found.');
+    //     }
+
+    //     return redirect()->back();
+    // }
+
+    // public function locationUpdate(Request $request)
+    // {
+    //     try {
+    //         $request->validate([
+    //             'Address' => 'required|array',
+    //             'location_text' => 'required|string',
+    //             'Address.lat' => 'required|numeric',
+    //             'Address.long' => 'required|numeric',
+    //         ]);
+    //         $data = $request->input('Address');
+    //         $location = $request->input('location_text');
+    //         $user = User::find(Auth::id());
+    //         if ($user) {
+    //             $user->business_location = json_encode($data);
+    //             $user->address_1 = $location;
+    //             $user->lat = $data['lat'];
+    //             $user->lon = $data['long'];
+    //             if ($user->update()) {
+    //                 session()->flash('success', 'Location Updated');
+    //             } else {
+    //                 session()->flash('error', 'Failed to update location. Please try again.');
+    //             }
+    //         } else {
+    //             session()->flash('error', 'User not found.');
+    //         }
+    //         return redirect()->back();
+    //     } catch (Exception $error) {
+    //         session()->flash('error', $error);
+    //     }
+    // }
+
     /**
      * Update's user password
      * @author Mirza Abdullah Izhar
      * @version 1.0.0
      */
-    public function passwordUpdate(Request $request)
-    {
-        $validate = Validator::make($request->all(), [
-            'old_password' => 'required|string|min:8',
-            'new_password' => 'required|string|min:8'
-        ]);
-        if ($validate->fails()) {
-            flash('Password must be 8 characters long.')->error();
-            return Redirect::back();
-        }
+    // public function passwordUpdate(Request $request)
+    // {
+    //     $validate = Validator::make($request->all(), [
+    //         'old_password' => 'required|string|min:8',
+    //         'new_password' => 'required|string|min:8'
+    //     ]);
+    //     if ($validate->fails()) {
+    //         flash('Password must be 8 characters long.')->error();
+    //         return Redirect::back();
+    //     }
 
-        $old_password = $request->old_password;
-        $new_password = $request->new_password;
+    //     $old_password = $request->old_password;
+    //     $new_password = $request->new_password;
 
-        $user = User::find(Auth::id());
-        if (Hash::check($old_password, $user->password)) {
-            $user->password = Hash::make($new_password);
-            $user->save();
-            flash('Your password has been updated successfully.')->success();
-        } else {
-            flash('Your old password is incorrect.')->error();
-        }
-        return redirect()->back();
-    }
+    //     $user = User::find(Auth::id());
+    //     if (Hash::check($old_password, $user->password)) {
+    //         $user->password = Hash::make($new_password);
+    //         $user->save();
+    //         flash('Your password has been updated successfully.')->success();
+    //     } else {
+    //         flash('Your old password is incorrect.')->error();
+    //     }
+    //     return redirect()->back();
+    // }
     /**
      * Update's payment settings
      * @author Huzaifa Haleem
@@ -624,15 +622,8 @@ class HomeController extends Controller
      */
     public function orders(Request $request)
     {
-        //        $inventory = Products::query()->where('user_id','=',Auth::id())->paginate(9);
-        //        $inventory_p = $inventory;
-        //        $inventories = [];
-        //        foreach ($inventory as $in){
-        //            $inventories[] = Products::getProductInfo($in->id);
-        //        }
         $return_arr = [];
-        // $orders = Orders::query()->where('seller_id', '=', Auth::id())->where('payment_status', '!=', 'hidden')->orderByDesc('id');
-        $orders = Orders::query()->where('seller_id', '=', Auth::id())->orderByDesc('id');
+        $orders = Orders::where('seller_id', '=', Auth::id())->orderByDesc('id');
         if ($request->search) {
             $order = Orders::find($request->search);
             $order->is_viewed = 1;
@@ -643,11 +634,10 @@ class HomeController extends Controller
         $orders_p = $orders;
 
         foreach ($orders as $order) {
-            //$order_items = [];
             $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
             $item_arr = [];
             foreach ($items as $item) {
-                $product = (new ProductsController())->getProductInfo($item->product_id);
+                $product = Products::getProductInfo(Auth::id(), $item->product_id, ['*']);
                 $item['product'] = $product;
                 $item_arr[] = $item;
             }
@@ -656,19 +646,6 @@ class HomeController extends Controller
         }
         $orders = $return_arr;
         return view('shopkeeper.orders.list', compact('orders', 'orders_p'));
-    }
-    /**
-     * Since our qty has now it's separate migration,
-     * this will help us add qty with given details to qty table
-     * @version 1.0.0
-     */
-    public function addProductQty($product_id, $user_id, $product_quantity)
-    {
-        $quantity = new Qty();
-        $quantity->products_id = $product_id;
-        $quantity->users_id = $user_id;
-        $quantity->qty = $product_quantity;
-        $quantity->save();
     }
     /**
      * Convert's CSV file to JSON
@@ -764,57 +741,19 @@ class HomeController extends Controller
                 $product->length = $importData[17];
                 $product->save();
 
-                //this function will add qty to it's particular table
+                //this function will add qty to it's parti;cular table
                 $product_id = (int)$product->id;
                 $product_quantity = ($importData[3] == "") ? 0 : $importData[3];
-                $this->addProductQty($product_id, $user_id, $product_quantity);
+                Qty::addProductQty($user_id, $product_id, $product->category_id, $product_quantity);
+
                 $product_images = new productImages();
                 $product_images->product_id = (int)$product->id;
                 $product_images->product_image = $importData[18];
                 $product_images->save();
-
                 $j++;
             }
         }
         flash('Your Bulk Products Have Been Imported Successfully!');
-        // if ($request->hasFile('file')) {
-        //     $import_data = json_decode($this->csvToJson($request->file('file')), true);
-        //     foreach ($import_data as $p) {
-        //         if (isset($p['images'])) {
-        //             $images = explode(',', $p['images']);
-        //             unset($p['images']);
-        //         }
-        //         if (is_array($p))
-        //             $ppt = array_keys($p);
-        //         $product = new Products();
-        //         print_r($product);
-        //         exit;
-        //         foreach ($ppt as $t) {
-        //             if ($t == 'colors') {
-        //                 $colors = explode(',', $p[$t]);
-        //                 $product->$t = json_encode(array_fill_keys($colors, true));
-        //             } elseif (($t == 'bike' && $p[$t] == null) || ($t == 'van' && $p[$t] == null)) {
-        //                 $product->$t = 0;
-        //             } else {
-        //                 $product->$t = $p[$t];
-        //             }
-        //         }
-
-        //         $product->user_id = $user_id;
-        //         $product->save();
-        //         $p_id = $product->id;
-        //         if (isset($images)) {
-        //             foreach ($images as $image) {
-        //                 $product_images = new productImages();
-        //                 $product_images->product_id = (int)$p_id;
-        //                 $product_images->product_image = $image;
-        //                 $product_images->save();
-        //             }
-        //         }
-        //     }
-
-        //     flash('Importing Complete');
-        // }
         return redirect()->back();
     }
     /**
@@ -822,17 +761,17 @@ class HomeController extends Controller
      * @author Huzaifa Haleem
      * @version 1.0.0
      */
-    public function changeOrderStatus($order_id)
-    {
-        Orders::where('id', '=', $order_id)->update(['order_status' => 'ready', 'is_viewed' => 1]);
-        $order = Orders::find($order_id);
-        $user = $order->user;
-        if ($order->type == 'self-pickup') {
-            Mail::to($user->email)
-                ->send(new OrderIsReadyMail($order));
-        }
-        return Redirect::back();
-    }
+    // public function changeOrderStatus($order_id)
+    // {
+    //     Orders::where('id', '=', $order_id)->update(['order_status' => 'ready', 'is_viewed' => 1]);
+    //     $order = Orders::find($order_id);
+    //     $user = $order->user;
+    //     if ($order->type == 'self-pickup') {
+    //         Mail::to($user->email)
+    //             ->send(new OrderIsReadyMail($order));
+    //     }
+    //     return Redirect::back();
+    // }
     /**
      * Change's order status to "delivered"
      * @author Mirza Abdullah Izhar
@@ -933,7 +872,7 @@ class HomeController extends Controller
                 $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = (new ProductsController())->getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($item->product_id);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
@@ -974,7 +913,7 @@ class HomeController extends Controller
                 $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = (new ProductsController())->getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($item->product_id);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
@@ -1218,7 +1157,7 @@ class HomeController extends Controller
                 $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = (new ProductsController())->getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($item->product_id);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
@@ -1259,7 +1198,7 @@ class HomeController extends Controller
                 $items = OrderItems::query()->where('order_id', '=', $order->order_id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = (new ProductsController())->getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($item->product_id);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
@@ -1301,7 +1240,7 @@ class HomeController extends Controller
                 $items = OrderItems::query()->where('order_id', '=', $order->order_id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = (new ProductsController())->getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($item->product_id);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
@@ -1494,8 +1433,7 @@ class HomeController extends Controller
             Your order from " . $order->store->name . " has successfully been delivered.
             If you have experienced any issues with your order, please contact us via email at:
             admin@teekit.co.uk";
-        $sms = new TwilioSmsService();
-        $sms->sendSms($order->user->phone, $message);
+        TwilioSmsService::sendSms($order->user->phone, $message);
         Mail::to([$order->user->email])
             ->send(new OrderIsCompletedMail('user'));
         Mail::to([$order->delivery_boy->email])
@@ -1509,29 +1447,29 @@ class HomeController extends Controller
      * @throws \Twilio\Exceptions\ConfigurationException
      * It will change the order status to canceled
      */
-    public function cancelOrder($order_id)
-    {
-        $order = Orders::findOrFail($order_id);
-        $order->load('user');
-        $order->load('store');
-        // dd($order->transaction_id);
-        Stripe\Stripe::setApiKey(config('app.STRIPE_SECRET'));
-        Stripe\Refund::create(['charge' => $order->transaction_id]);
-        $order->order_status = 'cancelled';
-        $order->save();
-        $message = "Hello " . $order->user->name . " .
-            Your order from " . $order->store->name . " was unsuccessful.
-            Unfortunately " . $order->store->name . " is unable to complete your order. But don't worry 
-            you have not been charged.
-            If you need any kinda of assistance, please contact us via email at:
-            admin@teekit.co.uk";
-        $sms = new TwilioSmsService();
-        $sms->sendSms($order->user->phone, $message);
-        Mail::to([$order->user->email])
-            ->send(new OrderIsCanceledMail($order));
-        flash('Order is successfully cancelled')->success();
-        return back();
-    }
+    // public function cancelOrder($order_id)
+    // {
+    //     $order = Orders::findOrFail($order_id);
+    //     $order->load('user');
+    //     $order->load('store');
+    //     // dd($order->transaction_id);
+    //     Stripe\Stripe::setApiKey(config('app.STRIPE_SECRET'));
+    //     Stripe\Refund::create(['charge' => $order->transaction_id]);
+    //     $order->order_status = 'cancelled';
+    //     $order->save();
+    //     $message = "Hello " . $order->user->name . " .
+    //         Your order from " . $order->store->name . " was unsuccessful.
+    //         Unfortunately " . $order->store->name . " is unable to complete your order. But don't worry 
+    //         you have not been charged.
+    //         If you need any kinda of assistance, please contact us via email at:
+    //         admin@teekit.co.uk";
+    //     $sms = new TwilioSmsService();
+    //     TwilioSmsService::sendSms($order->user->phone, $message);
+    //     Mail::to([$order->user->email])
+    //         ->send(new OrderIsCanceledMail($order));
+    //     flash('Order is successfully cancelled')->success();
+    //     return back();
+    // }
     /**
      * It will remove a single product from the given order
      * @version 1.0.0
@@ -1572,7 +1510,6 @@ class HomeController extends Controller
             return response()->json([
                 'errors' => $validatedData->errors()
             ], 200);
-            exit;
         }
         $phone = substr($request->phone, 0, 3);
         $business_phone = substr($request->business_phone, 0, 3);

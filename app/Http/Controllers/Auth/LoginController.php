@@ -8,7 +8,6 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Laracasts\Flash\Flash;
-use App\Role;
 
 class LoginController extends Controller
 {
@@ -45,7 +44,7 @@ class LoginController extends Controller
      * It will log the user in
      * @version 1.3.0
      */
-    public function login(\Illuminate\Http\Request $request)
+    public function login(Request $request)
     {
         $this->validateLogin($request);
         // If the class is using the ThrottlesLogins trait, we can automatically throttle
@@ -67,16 +66,16 @@ class LoginController extends Controller
                     return redirect()
                         ->route('login')
                         ->withInput($request->only($this->username(), 'remember'))
-                        ->withErrors(['active' => 'You Cannot Access Private Pages']);
+                        ->withErrors(['active' => 'WARNING! You cannot access private pages.']);
                 }
             } else {
                 // Increment the failed login attempts and redirect back to the
                 // login form with an error message.
                 $this->incrementLoginAttempts($request);
                 if ($user->email_verified_at == null) {
-                    Flash::message('Email not verified, verify your email first.');
+                    Flash::message('Email not verified, please verify your email first.');
                 } else {
-                    Flash::message('You are not Activated, kindly contact admin.');
+                    Flash::message('Your account is not activated yet, kindly contact the admin.');
                 }
 
                 return redirect()
@@ -97,15 +96,10 @@ class LoginController extends Controller
      * it will throw a flash message on incorrect/invalid credentials
      * @version 1.0.0
      */
-    protected function invalidCreds(Request $request)
+    protected function invalidCreds()
     {
         throw ValidationException::withMessages([
             flash('Login failed! Incorrect email or password.')->error(),
         ]);
     }
-    //    public function sendFailedLoginResponse(Request $request)
-    //    {
-    //        print_r($request->all());die;
-    //        return redirect()->route('login'); //just an available path to test
-    //    }
 }

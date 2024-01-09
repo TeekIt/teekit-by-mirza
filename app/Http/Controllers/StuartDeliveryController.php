@@ -135,17 +135,17 @@ class StuartDeliveryController extends Controller
                 Orders::where('id', $request->order_id)->update([
                     'order_status' => 'stuartDelivery'
                 ]);
-                JsonResponseCustom::getWebResponse(config('constants.STUART_DELIVERY_SUCCESS'), config('constants.TRUE_STATUS'));
+                JsonResponseCustom::getWebResponse(config('constants.TRUE_STATUS'), config('constants.STUART_DELIVERY_SUCCESS'));
                 return Redirect::back();
             } else {
                 $message = $data['message'];
                 if ($data['error'] == 'JOB_DISTANCE_NOT_ALLOWED') $message = $message . " " . $transport_type;
-                JsonResponseCustom::getWebResponse($message, config('constants.FALSE_STATUS'));
+                JsonResponseCustom::getWebResponse(config('constants.FALSE_STATUS'), $message);
                 return Redirect::back();
             }
         } catch (Throwable $error) {
             report($error);
-            JsonResponseCustom::getWebResponse($data['message'], config('constants.FALSE_STATUS'));
+            JsonResponseCustom::getWebResponse(config('constants.FALSE_STATUS'), $data['message']);
             return Redirect::back();
         }
     }

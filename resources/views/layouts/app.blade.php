@@ -2,7 +2,6 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    {{-- @include('layouts.admin.header-links') --}}
     @include('layouts.header-links')
     @livewireStyles
 </head>

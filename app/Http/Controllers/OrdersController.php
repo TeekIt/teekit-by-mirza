@@ -6,6 +6,7 @@ use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Qty;
+use App\Services\JsonResponseCustom;
 use App\User;
 use App\Services\TwilioSmsService;
 use App\VerificationCodes;
@@ -56,46 +57,48 @@ class OrdersController extends Controller
         }
     }
     /**
-     * List 2 products from recent orders of a customer
-     * w.r.t Store & Customer ID
      * @author Mirza Abdullah Izhar
-     * @version 1.0.0
      */
-    public function recentOrders(Request $request)
+    public function productsOfRecentOrder(Request $request)
     {
         try {
-            $recent_orders_prods_ids = DB::table('orders')
-                ->select('orders.id', 'order_items.product_id')
-                ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-                ->where('orders.user_id', '=', Auth::id())
-                ->where('orders.seller_id', '=', $request->store_id)
-                ->orderByDesc('id')
-                ->limit(2)
-                ->get();
-            if (!$recent_orders_prods_ids->isEmpty()) {
-                $recent_orders_prods_data = [];
-                foreach ($recent_orders_prods_ids as $product_id) {
-                    $recent_orders_prods_data[] = (new ProductsController())->getProductInfo($product_id->product_id);
-                }
-                return response()->json([
-                    'data' => $recent_orders_prods_data,
-                    'status' => true,
-                    'message' => ''
-                ], 200);
-            } else {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => config('constants.NO_RECORD')
-                ], 200);
+            $validate = Validator::make($request->all(), [
+                'prducts_limit' => 'required|integer',
+                'seller_id' => 'required|integer'
+            ]);
+            if ($validate->fails()) {
+                return JsonResponseCustom::getApiResponse(
+                    [],
+                    false,
+                    $validate->errors(),
+                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
+                );
             }
+            $order = Orders::getRecentOrderByBuyerId(Auth::id(), $request->prducts_limit, $request->seller_id);
+            if (!empty($order)) {
+                $recent_order_prods_data = [];
+                foreach ($order->products as $product) $recent_order_prods_data[] = Products::getProductInfo($request->seller_id, $product->id, ['*']);
+                return JsonResponseCustom::getApiResponse(
+                    $recent_order_prods_data,
+                    true,
+                    '',
+                    config('constants.HTTP_OK')
+                );
+            }
+            return JsonResponseCustom::getApiResponse(
+                [],
+                false,
+                config('constants.NO_RECORD'),
+                config('constants.HTTP_OK')
+            );
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 200);
+            return JsonResponseCustom::getApiResponse(
+                [],
+                false,
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
@@ -392,13 +395,6 @@ class OrdersController extends Controller
             }
             $grouped_seller = [];
             foreach ($request->items as $item) {
-                // $product_id = $item['product_id'];
-                // $qty = $item['qty'];
-                // $user_choice = $item['user_choice'];
-                // $product_price = (new ProductsController())->getProductPrice($item['product_id']);
-                // $product_seller_id = (new ProductsController())->getProductSellerID($item['product_id']);
-                // $product_volumn = (new ProductsController())->getProductVolumn($item['product_id']);
-                // $product_weight = (new ProductsController())->getProductWeight($item['product_id']);
                 $temp = [];
                 $temp['product_id'] = $item['product_id'];
                 $temp['qty'] = $item['qty'];
@@ -425,7 +421,7 @@ class OrdersController extends Controller
                     $total_items = $total_items + $order_item['qty'];
                     $order_total = $order_total + ($order_item['price'] * $order_item['qty']);
                 }
-                $seller = User::getUserByID($seller_id);
+                $seller = User::getUserByID($seller_id, ['business_phone', 'lat', 'lon']);
                 /* 
                 * Adding amount into seller wallet 
                 */
@@ -476,22 +472,21 @@ class OrdersController extends Controller
                     }
                     if (url()->current() == 'https://app.teekit.co.uk/api/orders/new' || url()->current() == 'https://teekitapi.com/api/orders/new') {
                         // For sending SMS notification for "New Order"
-                        $sms = new TwilioSmsService();
                         $message_for_admin = "A new order #" . $order_id . " has been received. Please check TeekIt's platform, or SignIn here now:https://app.teekit.co.uk/login";
                         $message_for_customer = "Thanks for your order. Your order has been accepted by the store. Please quote verification code: " . $verification_code . " on delivery. TeekIt";
 
-                        $sms->sendSms($request->phone_number, $message_for_customer);
-                        // $sms->sendSms('+923362451199', $message_for_customer); //Rameesha Number
-                        // $sms->sendSms('+923002986281', $message_for_customer); //Fahad Number
+                        TwilioSmsService::sendSms($request->phone_number, $message_for_customer);
+                        // TwilioSmsService::sendSms('+923362451199', $message_for_customer); //Rameesha Number
+                        // TwilioSmsService::sendSms('+923002986281', $message_for_customer); //Fahad Number
 
                         // To restrict "New Order" SMS notifications only for UK numbers
                         if (strlen($seller->business_phone) == 13 && str_contains($seller->business_phone, '+44')) {
-                            $sms->sendSms($seller->business_phone, $message_for_admin);
+                            TwilioSmsService::sendSms($seller->business_phone, $message_for_admin);
                         }
-                        $sms->sendSms('+447976621849', $message_for_admin); //Azim Number
-                        $sms->sendSms('+447490020063', $message_for_admin); //Eesa Number
-                        $sms->sendSms('+447817332090', $message_for_admin); //Junaid Number
-                        $sms->sendSms('+923170155625', $message_for_admin); //Mirza Number
+                        TwilioSmsService::sendSms('+447976621849', $message_for_admin); //Azim Number
+                        TwilioSmsService::sendSms('+447490020063', $message_for_admin); //Eesa Number
+                        TwilioSmsService::sendSms('+447817332090', $message_for_admin); //Junaid Number
+                        TwilioSmsService::sendSms('+923170155625', $message_for_admin); //Mirza Number
                     }
                     $verification_codes = new VerificationCodes();
                     $verification_codes->order_id = $order_id;

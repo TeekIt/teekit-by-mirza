@@ -32,6 +32,6 @@ class OrderIsCompletedMail extends Mailable
     {
         $userType = $this->userType;
         return $this->view('emails.order_is_completed', compact('userType'))
-            ->subject("Your order is successfully completed.");
+            ->subject("Your Order Has Been Completed Successfully");
     }
 }

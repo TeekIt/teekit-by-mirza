@@ -27,8 +27,9 @@
                         <div class="icon">
                             <i class="ion ion-bag"></i>
                         </div>
-                        <a href="{{route('orders')}}" class="small-box-footer">More info <i
-                                class="fas fa-arrow-circle-right"></i></a>
+                        <a href="{{route('orders')}}" class="small-box-footer">
+                            More info <i class="fas fa-arrow-circle-right"></i>
+                        </a>
                     </div>
                 </div>
                 <!-- ./col -->
@@ -42,8 +43,9 @@
                         <div class="icon">
                             <i class="ion ion-stats-bars fas fa-status-bar"></i>
                         </div>
-                        <a href="{{route('orders')}}" class="small-box-footer">More info <i
-                                class="fas fa-arrow-circle-right"></i></a>
+                        <a href="{{route('orders')}}" class="small-box-footer">
+                            More info <i class="fas fa-arrow-circle-right"></i>
+                        </a>
                     </div>
                 </div>
                 <!-- ./col -->
@@ -57,8 +59,9 @@
                         <div class="icon">
                             <i class="ion ion-person-add"></i>
                         </div>
-                        <a href="{{route('inventory')}}" class="small-box-footer">More info <i
-                                class="fas fa-arrow-circle-right"></i></a>
+                        <a href="{{route('seller.inventory')}}" class="small-box-footer">
+                            More info<i class="fas fa-arrow-circle-right"></i>
+                        </a>
                     </div>
                 </div>
                 <!-- ./col -->
@@ -69,8 +72,9 @@
                             <h3>£{{$total_sales}}</h3>
                             <p>Total Sales</p>
                         </div>
-                        <a href="{{route('orders')}}" class="small-box-footer">More info <i
-                                class="fas fa-arrow-circle-right"></i></a>
+                        <a href="{{route('orders')}}" class="small-box-footer">
+                            More info <i class="fas fa-arrow-circle-right"></i>
+                        </a>
                         <div class="icon">
                             <i class="ion ion-pie-graph"></i>
                         </div>

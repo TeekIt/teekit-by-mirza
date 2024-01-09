@@ -38,7 +38,7 @@
                     <div class="card">
                         <div class="card-body p-2 pl-5 pr-5 pb-5">
                             <div class="p-2 mb-2">Order #{{$order->id}} @if($order->order_status=='pending')
-                                <a href="{{route('accept_order',['order_id'=>$order->id])}}" class=" d-block btn btn-warning float-right">Click when preparing order</a>
+                                <a href="{{route('accept_order',['order_id'=>$order->id])}}" class="d-block btn btn-warning float-right">Click when preparing order</a>
                                 <a href="{{route('cancel_order',['order_id'=>$order->id])}}" onclick="cancelOrder(event)" class=" d-block btn btn-danger float-right" style="margin-right: 20px">Cancel Order</a>
                                 @else
                                 @if(!empty($order->delivery_boy_id))
@@ -116,7 +116,6 @@
 
                             <div class="card-text">
                                 <div class="row">
-
                                     <div class="col-md-6 text-lg">
                                         <p>
                                             <b>Placed on:</b> {{$order->created_at}} <b> Order Total: </b> £{{$order->order_total}}

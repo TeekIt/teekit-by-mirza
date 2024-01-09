@@ -20,7 +20,7 @@ class StoreRegisterMail extends Mailable
      * @param $html
      * @param $subject
      */
-    public function __construct($html,$subject)
+    public function __construct($html, $subject)
     {
         $this->html = $html;
         $this->subject = $subject;
@@ -34,7 +34,7 @@ class StoreRegisterMail extends Mailable
     public function build()
     {
         $html = $this->html;
-        return $this->view('emails.general',compact('html'))
+        return $this->view('emails.general', compact('html'))
             ->subject($this->subject);
     }
 }

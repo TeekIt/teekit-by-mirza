@@ -22,11 +22,13 @@ return [
     'UN_ARCHIVED_SUCCESS' => 'Data unarchived successfully.',
     'DELETION_SUCCESS' => 'Data deleted successfully.',
     'LOGIN_SUCCESS' => 'You have Logged in Successfully.',
-    'REGISTER_SUCCESS' => 'You have Registered  Successfully.',
+    'REGISTER_SUCCESS' => 'You have Registered Successfully.',
     'DRIVER_REGISTERATION_MSG' => 'You have registered successfully. We have sent you a verification email please verify.',
     'DATA_INSERTION_SUCCESS' => 'Data Inserted Successfully.',
     'DATA_UPDATED_SUCCESS' => 'Data Updated Successfully.',
+    'ORDER_CANCELLATION_SUCCESS' => 'Your order has been cancelled successfully.',
     'SUCCESS_CODE' => 1,
+    'SUCCESS_STATUS' => 'success',
     'TRUE_STATUS' => true,
     'STUART_DELIVERY_SUCCESS' => 'Stuart Delivery Has Been Initiated Successfully, You Can Please Check The Status By Clicking The "Check Status" Button',
     'COMPLETED' => 'Completed',
@@ -38,6 +40,7 @@ return [
     'VERIFICATION_SUCCESS' => 'Verification Successful.',
     'CACHE_REMOVED_SUCCESSFULLY' => 'All Cached data of your App has been removed successfully.',
     'WITHDRAWAL_REQUEST_SUBMITTED' => 'Withdrawal request is successfully submitted.',
+    'PRODUCT_REMOVED_SUCCESSFULLY' => 'Product has been removed successfully.',
     /*
     |--------------------------------------------------------------------------
     | Failure Constants
@@ -50,8 +53,10 @@ return [
     'UN_ARCHIVED_FAILED' => 'Failed to unarchive data.',
     'DELETION_FAILED' => 'Failed to delete data.',
     'INVALID_DATA' => 'You have entered invalid or too long data.',
+    'ORDER_CANCELLATION_FAILED' => 'Sorry! We are facing an error in cancelling your order.',
     'FAILED_CODE' => 0,
     'FALSE_STATUS' => false,
+    'ERROR_STATUS' => 'error',
     'STATUS_CHANGING_FAILED' => 'Failed to change the activation status.',
     'INVALID_REFERRAL' => 'Invalid referral code.',
     'REFERRAL_CAN_BE_USED_ONCE' => 'Referral code can be used only once.',
@@ -72,6 +77,8 @@ return [
     'MAX_LIMIT' => 'Promo code usage has reached its maximum limit.',
     'DATA_ALREADY_EXISTS' => 'Data already exists against id:- ',
     'CACHE_REMOVED_FAILED' => 'Sorry due to some issue your cahce can not be removed.',
+    'QTY_SHOULD_NOT_BE_GREATER' => 'You cannot enter quantity more then your stock.',
+    'PRODUCT_REMOVED_FAILED' => 'There is an error while removing the product.',
     /*
     |--------------------------------------------------------------------------
     | Digital Ocean Bucket
@@ -102,18 +109,26 @@ return [
     |--------------------------------------------------------------------------
     */
     'STRIPE_LIVE_API_KEY' => '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:',
+    'STRIPE_LIVE_PUBLISH_KEY' => 'pk_live_51IY9sYIiDDGv1gaVD23fTmgGwOdmPwFKvCP64BrGQPQngITPSBBOclUe6sz8vyN18Kli1iKq2JfeR754kkdbSm5T00u0M4kL0H',
     /*
     |--------------------------------------------------------------------------
     | Stripe Test Cridentials Key
     |--------------------------------------------------------------------------
     */
     'STRIPE_TEST_API_KEY' => 'sk_test_51IY9sYIiDDGv1gaVKsxU0EXr96lHcCvwXHwYAdN81Cqrj1TBL4HErJpczWJpYFIQ1qbCOQxnxIM3UfsBtWC2MKeD00QRkUKg6q:',
+    'STRIPE_TEST_PUBLISH_KEY' => 'pk_test_51IY9sYIiDDGv1gaVP2DSlWvT0tnrFstp62txvamB1icDpBjwXy1KtrZmiWLFjrxHmxlMrTyWbnnBWNMblbNMizwS004MoCvzJB',
     /*
     |--------------------------------------------------------------------------
     | Admin Email
     |--------------------------------------------------------------------------
     */
     'ADMIN_EMAIL' => 'admin@teekit.co.uk',
+    /*
+    |--------------------------------------------------------------------------
+    | Site URL
+    |--------------------------------------------------------------------------
+    */
+    'LIVE_SITE_URL' => 'https://app.teekit.co.uk/',
     /*
     |--------------------------------------------------------------------------
     | HTTP Status Codes

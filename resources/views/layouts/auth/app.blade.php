@@ -5,13 +5,13 @@
     @include('layouts.header-links')
 </head>
 
-<body class="hold-transition" style="background: url('/bg.png')">
+<body class="hold-transition" style="background: url('bg_imgs/bg.webp')">
     <div class="wrapper">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-light bg-white">
             <div class="container-fluid">
                 <a class="navbar-brand" target="_blank" href="https://teekit.co.uk/">
-                    <img style=" max-height: 50px;" src="{{ asset('res/res/img/logo.png') }}" alt="TeekIt Logo">
+                    <img style="max-height: 50px;" src="{{ asset('icons/logo.webp') }}" alt="TeekIt Logo">
                 </a>
                 <!-- Toggle Button For Mobiles - Begins -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -68,7 +68,7 @@
             <div class="row mtd" style="margin-top: 20vh">
                 <div class="col-md-8">
                     <img style="max-height: 540px;margin: 0 auto;display: block;width: auto;max-width: 500px;height: 100%;width: 100%;object-fit: contain;"
-                        src="{{ asset('bike.png') }}">
+                        src="{{ asset('bg_imgs/bike.webp') }}">
                 </div>
                 <div class="col-md-4">
                     @yield('content')

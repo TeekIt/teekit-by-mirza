@@ -9,13 +9,15 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PromoCodesController;
-use App\Http\Controllers\QtyController;
 use App\Http\Controllers\StuartDeliveryController;
+use App\Http\Controllers\UsersController;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
+use App\Http\Livewire\Sellers\OrdersLivewire;
 use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -38,6 +40,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Auth::routes();
+Route::get('auth/verify', [AuthController::class, 'verify']);
 /*
 |--------------------------------------------------------------------------
 | Home Routes
@@ -46,45 +49,16 @@ Auth::routes();
 Route::get('/', [HomeController::class, 'index'])->name('home');
 /*
 |--------------------------------------------------------------------------
-| Inventory Routes
-|--------------------------------------------------------------------------
-*/
-Route::prefix('inventory')->group(function () {
-    // Route::get('/', [HomeController::class, 'inventory'])->name('inventory');
-
-    Route::middleware('auth')->group(function () {
-        Route::get('/', InventoryLivewire::class)->name('inventory');
-    });
-
-    // Route::get('/admin/test/sellers/parent', ParentSellersLiveWire::class)->name('admin.sellers.test.parent');
-    Route::get('/edit/{product_id}', [HomeController::class, 'inventoryEdit']);
-    Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
-    Route::get('/add', [HomeController::class, 'inventoryAdd']);
-    Route::get('/add_bulk', [HomeController::class, 'inventoryAddBulk']);
-    Route::post('/add', [HomeController::class, 'inventoryAddDB'])->name('add_inventory');
-    Route::get('/image/delete/{image_id}', [HomeController::class, 'deleteImg']);
-    Route::post('/update/{product_id}', [HomeController::class, 'inventoryUpdate'])->name('update_inventory');
-    Route::get('/disable/{product_id}', [HomeController::class, 'inventoryDisable'])->name('inventory_disable');
-    Route::get('/enable/{product_id}', [HomeController::class, 'inventoryEnable'])->name('inventory_enable');
-    Route::get('/enable_all', [HomeController::class, 'inventoryEnableAll'])->name('enable_all');
-    Route::get('/disable_all', [HomeController::class, 'inventoryDisableAll'])->name('disable_all');
-    Route::get('/feature/add/{product_id}', [HomeController::class, 'markAsFeatured'])->name('markAsFeatured');
-    Route::get('/feature/remove/{product_id}', [HomeController::class, 'removeFromFeatured'])->name('removeFromFeatured');
-});
-/*
-|--------------------------------------------------------------------------
 | User Settings Routes
 |--------------------------------------------------------------------------
 */
 Route::prefix('settings')->group(function () {
     Route::post('/user_info/update', [HomeController::class, 'userInfoUpdate'])->name('admin.userinfo.update');
-    Route::get('/general', [HomeController::class, 'generalSettings']);
-    Route::get('/usergeneral', UserGeneralSettings::class)->name('usergeneral');;
     Route::get('/payment', [HomeController::class, 'paymentSettings']);
     Route::post('/payment/update', [HomeController::class, 'paymentSettingsUpdate'])->name('payment_settings_update');
     Route::post('/user_img/update', [HomeController::class, 'userImgUpdate'])->name('user_img_update');
     Route::post('/time_update', [HomeController::class, 'timeUpdate'])->name('time_update');
-    Route::post('/location_update', [HomeController::class, 'locationUpdate'])->name('location_update');
+    // Route::post('/location_update', [HomeController::class, 'locationUpdate'])->name('location_update');
     Route::post('/password/update', [HomeController::class, 'passwordUpdate'])->name('password_update');
     Route::get('/change_settings/{setting_name}/{value}', [HomeController::class, 'changeSettings'])->name('change_settings')->where(['setting_name' => '^[a-z_]*$', 'value' => '[0-9]+']);
 });
@@ -109,6 +83,25 @@ Route::prefix('orders')->group(function () {
     Route::get('/{order_id}/remove/{item_id}/product/{product_price}/{product_qty}', [HomeController::class, 'removeProductFromOrder'])->name('remove_order_product');
     Route::get('/verify/{order_id}', [HomeController::class, 'clickToVerify'])->name('verify_order');
 });
+
+Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function () {
+    Route::prefix('inventory')->group(function () {
+        Route::get('/', InventoryLivewire::class)->name('seller.inventory');
+        Route::get('/add', [HomeController::class, 'inventoryAdd'])->name('seller.inventory.add.single');
+        Route::post('/add', [HomeController::class, 'inventoryAddDB'])->name('seller.add_inventory');
+        Route::get('/add_bulk', [HomeController::class, 'inventoryAddBulk'])->name('seller.inventory.add.bulk');
+        Route::get('/edit/{product_id}', [HomeController::class, 'inventoryEdit'])->name('seller.inventory.edit');
+        Route::post('/update/{product_id}', [HomeController::class, 'inventoryUpdate'])->name('seller.update_inventory');
+        Route::get('/image/delete/{image_id}', [HomeController::class, 'seller.deleteImg']);
+        // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
+    });
+
+    Route::prefix('settings')->group(function () {
+        Route::get('/general', UserGeneralSettings::class)->name('seller.settings.general');
+        Route::post('/update-location', [UsersController::class, 'updateStoreLocation'])->name('seller.settings.update.location');
+    });
+    Route::get('orders', OrdersLivewire::class)->name('seller.orders');
+});
 /*
 |--------------------------------------------------------------------------
 | Withdrawal Routes
@@ -117,8 +110,6 @@ Route::prefix('orders')->group(function () {
 Route::get('/withdrawals', [HomeController::class, 'withdrawals'])->name('withdrawals');
 Route::post('/withdrawals', [HomeController::class, 'withdrawalsRequest'])->name('withdraw_request');
 Route::get('/withdrawals-drivers', [HomeController::class, 'withdrawalDrivers'])->name('withdrawals.drivers');
-
-Route::get('auth/verify', [AuthController::class, 'verify']);
 /*
 |--------------------------------------------------------------------------
 | Admin Routes

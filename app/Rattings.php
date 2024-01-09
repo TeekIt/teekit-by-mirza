@@ -2,14 +2,14 @@
 
 namespace App;
 
-use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\UsersController;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
 
 class Rattings extends Model
 {
-    public static function validator(Request $request)
+    public static function validator(Request $request): object
     {
         return Validator::make($request->all(), [
             'ratting' => 'required',
@@ -17,7 +17,7 @@ class Rattings extends Model
         ]);
     }
 
-    public static function updateValidator(Request $request)
+    public static function updateValidator(Request $request): object
     {
         return Validator::make($request->all(), [
             'ratting' => 'required',
@@ -28,14 +28,14 @@ class Rattings extends Model
     /**
      * Helpers
      */
-    public static function getRatting(int $product_id)
+    public static function getRatting(int $product_id): array
     {
         $raw_ratting = Rattings::where('product_id', '=', $product_id);
         $average = $raw_ratting->avg('ratting');
         $all_raw = $raw_ratting->get();
         $all = [];
         foreach ($all_raw as $aw) {
-            $aw->user = (new AuthController)->get_user($aw->user_id);
+            $aw->user = UsersController::getSellerInfo(User::find($aw->user_id));
             $all[] = $aw;
         }
         return ['average' => $average, 'all' => $all];

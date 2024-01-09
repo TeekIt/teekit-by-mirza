@@ -12,18 +12,19 @@ class Qty extends Model
      * @var string
      */
     protected $guarded = [];
+    
     protected $table = 'qty';
     /**
      * Relations
      */
-    public function products()
+    public function store()
     {
-        return $this->belongTo(Products::class);
+        return $this->belongsTo(User::class, 'users_id');
     }
 
     public function product()
     {
-        return $this->belongsTo(Products::class, 'users_id');
+        return $this->belongsTo(Products::class, 'products_id');
     }
     /**
      * Helpers
@@ -40,6 +41,22 @@ class Qty extends Model
     //     }
     //     return true;
     // }
+
+    public static function getProductsByGivenIds(int $category_id, int $store_id)
+    {
+        $quantities = Qty::where('users_id', $store_id)
+            ->where('category_id', $category_id)
+            ->paginate(10);
+        $pagination = $quantities->toArray();
+        if (!$quantities->isEmpty()) {
+            $products_data = [];
+            foreach ($quantities as $single_index) $products_data[] = Products::getProductInfo($single_index->users_id, $single_index->products_id, ['*']);
+            unset($pagination['data']);
+            return ['data' => $products_data, 'pagination' => $pagination];
+        } else {
+            return [];
+        }
+    }
 
     public static function subtractProductQty(int $user_id, int $product_id, int $product_quantity)
     {
@@ -58,15 +75,23 @@ class Qty extends Model
 
     public static function updateChildProductQty(array $quantity)
     {
-        // dd($quantity);
-        // We have to use updateOrInsert() here
         return Qty::updateOrCreate(
             ['users_id' => $quantity['child_seller_id'], 'products_id' => $quantity['prod_id']],
             ['qty' => $quantity['qty']]
         );
-        // return Qty::where('id', $quantity['qty_id'])
-        //     ->update([
-        //         'qty' => $quantity['qty']
-        //     ]);
+    }
+    /**
+     * Since our qty has now it's separate migration,
+     * this will help us add qty with given details to qty table
+     * @author Muhammad Abdullah Mirza
+     */
+    public static function addProductQty(int $user_id, int $product_id, int $category_id, int $product_quantity)
+    {
+        $quantity = new Qty();
+        $quantity->users_id = $user_id;
+        $quantity->products_id = $product_id;
+        $quantity->category_id = $category_id;
+        $quantity->qty = $product_quantity;
+        return $quantity->save();
     }
 }

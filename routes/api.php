@@ -37,14 +37,6 @@ Route::get('/', function () {
 });
 /*
 |--------------------------------------------------------------------------
-| Registration, confirmations and verification
-|--------------------------------------------------------------------------
-*/
-
-Route::post('password/email', [ForgotPasswordController::class, 'getResetToken']);
-Route::post('password/reset', [ResetPasswordController::class, 'reset']);
-/*
-|--------------------------------------------------------------------------
 | Authentication API Routes
 |--------------------------------------------------------------------------
 */
@@ -59,11 +51,18 @@ Route::prefix('auth')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('update', [AuthController::class, 'updateUser']);
     Route::post('updateStatus', [AuthController::class, 'updateStatus']);
-    Route::get('me', [AuthController::class, 'me']);
+    Route::get('me', [AuthController::class, 'me']); /////////////////////////////////////////////////////////////////////////////////////////////////
     Route::get('delivery_boys', [AuthController::class, 'deliveryBoys']);
     Route::get('get_user/{user_id}', [AuthController::class, 'getUserDetails']);
     Route::post('user/delete', [AuthController::class, 'deleteUser']);
 });
+/*
+|--------------------------------------------------------------------------
+| Registration, confirmations and verification
+|--------------------------------------------------------------------------
+*/
+Route::post('password/email', [ForgotPasswordController::class, 'getResetToken']);
+Route::post('password/reset', [ResetPasswordController::class, 'reset']);
 /*
 |--------------------------------------------------------------------------
 | Qty API Routes
@@ -86,48 +85,18 @@ Route::prefix('qty')->group(function () {
 Route::prefix('category')->group(function () {
     Route::post('add', [CategoriesController::class, 'add']);
     Route::post('update/{product_id}', [CategoriesController::class, 'update']);
-    Route::get('all', [CategoriesController::class, 'all']);
     Route::get('view/{category_id}', [CategoriesController::class, 'products']);
     Route::get('get-stores-by-category/{category_id}', [CategoriesController::class, 'stores']);
+    Route::get('all', [CategoriesController::class, 'all']);
 });
 /*
 |--------------------------------------------------------------------------
-| Page API Routes
+| Seller API Routes Without JWT Authentication
 |--------------------------------------------------------------------------
 */
-Route::get('page', [PagesController::class, 'getPage']);
-/*
-|--------------------------------------------------------------------------
-| Seller API Routes
-|--------------------------------------------------------------------------
-*/
-Route::get('sellers', [UsersController::class, 'sellers']);
-Route::get('sellers/{seller_id}/{product_name}', [AuthController::class, 'searchSellerProducts']);
-/*
-|--------------------------------------------------------------------------
-| Products API Routes Without JWT Authentication
-|--------------------------------------------------------------------------
-*/
-Route::prefix('product')->group(function () {
-    Route::post('search', [ProductsController::class, 'search']);
-    Route::get('all', [ProductsController::class, 'all']);
-    Route::get('view/{product_id}', [ProductsController::class, 'view']);
-    Route::post('view/bulk', [ProductsController::class, 'bulkView']);
-    Route::get('seller/{seller_id}', [ProductsController::class, 'sellerProducts']);
-    Route::get('sortbyprice', [ProductsController::class, 'sortByPrice']);
-    Route::get('sortByLocation', [ProductsController::class, 'sortByLocation']);
-    Route::post('recheck_products', [OrdersController::class, 'recheckProducts']);
-    Route::get('featured/{store_id}', [ProductsController::class, 'featuredProducts']);
-    Route::get('drop-qty-column', [ProductsController::class, 'dropProductsTableQtyColumn']);
-});
-/*
-|--------------------------------------------------------------------------
-| Driver API Routes Without JWT Authentication
-|--------------------------------------------------------------------------
-*/
-Route::prefix('driver')->group(function () {
-    Route::post('/register', [DriverController::class, 'registerDriver']);
-    Route::post('/login', [DriverController::class, 'loginDriver']);
+Route::prefix('sellers')->group(function () {
+    Route::get('/', [UsersController::class, 'sellers']);
+    Route::get('{seller_id}/{product_name}', [AuthController::class, 'searchSellerProducts']);
 });
 /*
 |--------------------------------------------------------------------------
@@ -135,7 +104,7 @@ Route::prefix('driver')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('notifications')->group(function () {
-    Route::get('', [NotificationsController::class, 'getNotifications']);
+    Route::get('/', [NotificationsController::class, 'getNotifications']);
     Route::post('save_token', [NotificationsController::class, 'saveToken']);
     Route::get('delete/{notification_id}', [NotificationsController::class, 'deleteNotification']);
     Route::post('send_test', [NotificationsController::class, 'notificationSendTest']);
@@ -156,6 +125,19 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('ratings/add', [RattingsController::class, 'add']);
         Route::post('ratings/update', [RattingsController::class, 'update']);
         Route::get('ratings/delete/{ratting_id}', [RattingsController::class, 'delete']);
+
+        Route::withoutMiddleware(['jwt.verify'])->group(function () {
+            Route::get('all', [ProductsController::class, 'all']);
+            Route::post('search', [ProductsController::class, 'search']);
+            Route::get('view', [ProductsController::class, 'view']);
+            Route::post('view/bulk', [ProductsController::class, 'bulkView']);
+            Route::get('seller', [ProductsController::class, 'sellerProducts']);
+            Route::get('sortbyprice', [ProductsController::class, 'sortByPrice']);
+            Route::get('sortByLocation', [ProductsController::class, 'sortByLocation']);
+            Route::post('recheck_products', [OrdersController::class, 'recheckProducts']);
+            Route::get('featured/{store_id}', [ProductsController::class, 'featuredProducts']);
+            Route::get('drop-qty-column', [ProductsController::class, 'dropProductsTableQtyColumn']);
+        });
     });
 
     Route::prefix('withdrawal')->group(function () {
@@ -164,7 +146,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     });
 
     Route::prefix('orders')->group(function () {
-        Route::get('', [OrdersController::class, 'index']);
+        Route::get('/', [OrdersController::class, 'index']);
         Route::post('new', [OrdersController::class, 'new']);
         Route::get('seller', [OrdersController::class, 'sellerOrders']);
         Route::get('delivery_boy_orders/{delivery_boy_id}', [OrdersController::class, 'deliveryBoyOrders']);
@@ -173,33 +155,38 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::get('update_assign', [OrdersController::class, 'updateAssign']);
         Route::post('customer_cancel_order', [OrdersController::class, 'customerCancelOrder']);
         Route::post('update', [OrdersController::class, 'updateOrder']);
-        Route::post('/estimated-time/{id}', [OrdersController::class, 'storeEstimatedTime']);
-        Route::get('/get-order-details/{id}', [OrdersController::class, 'getOrderDetailsTwo']);
-        Route::get('/recent_orders/{store_id}', [OrdersController::class, 'recentOrders']);
+        Route::post('estimated-time/{id}', [OrdersController::class, 'storeEstimatedTime']);
+        Route::get('get-order-details/{id}', [OrdersController::class, 'getOrderDetailsTwo']);
+        Route::get('products-of-recent-order', [OrdersController::class, 'productsOfRecentOrder']);
     });
 
     Route::prefix('driver')->group(function () {
-        Route::get('/info/{id}', [DriverController::class, 'info']);
-        Route::post('/add-lat-lon', [DriverController::class, 'addLatLon']);
-        Route::get('/withdrawable-balance', [DriverController::class, 'getWithdrawalBalance']);
-        Route::get('/request-withdrawal-balance', [DriverController::class, 'submitWithdrawal']);
-        Route::post('/bank-details', [DriverController::class, 'submitBankAccountDetails']);
-        Route::get('/all-withdrawals', [DriverController::class, 'driverAllWithdrawalRequests']);
-        Route::post('/check_verification_code/{order_id}', [DriverController::class, 'checkVerificationCode']);
-        Route::post('/driver_failed_to_enter_code/{order_id}', [DriverController::class, 'driverFailedToEnterCode']);
+        Route::get('info/{id}', [DriverController::class, 'info']);
+        Route::post('add-lat-lon', [DriverController::class, 'addLatLon']);
+        Route::get('withdrawable-balance', [DriverController::class, 'getWithdrawalBalance']);
+        Route::get('request-withdrawal-balance', [DriverController::class, 'submitWithdrawal']);
+        Route::post('bank-details', [DriverController::class, 'submitBankAccountDetails']);
+        Route::get('all-withdrawals', [DriverController::class, 'driverAllWithdrawalRequests']);
+        Route::post('check_verification_code/{order_id}', [DriverController::class, 'checkVerificationCode']);
+        Route::post('driver_failed_to_enter_code/{order_id}', [DriverController::class, 'driverFailedToEnterCode']);
+
+        Route::withoutMiddleware('jwt.verify')->group(function () {
+            Route::post('register', [DriverController::class, 'registerDriver']);
+            Route::post('login', [DriverController::class, 'loginDriver']);
+        });
     });
 
     Route::prefix('promocodes')->group(function () {
-        Route::post('/validate', [PromoCodesController::class, 'promocodesValidate']);
-        Route::post('/fetch_promocode_info', [PromoCodesController::class, 'fetchPromocodeInfo']);
-        Route::get('/all', [PromoCodesController::class, 'allPromocodes']);
+        Route::post('validate', [PromoCodesController::class, 'promocodesValidate']);
+        Route::post('fetch_promocode_info', [PromoCodesController::class, 'fetchPromocodeInfo']);
+        Route::get('all', [PromoCodesController::class, 'allPromocodes']);
     });
 
     Route::prefix('referral')->group(function () {
-        Route::post('/validate', [ReferralCodeRelationController::class, 'validateReferral']);
-        Route::get('/insert', [ReferralCodeRelationController::class, 'insertReferrals']);
-        Route::get('/details_by_id/{referral_relation_id}', [ReferralCodeRelationController::class, 'fetchReferralRelationDetails']);
-        Route::post('/update/referral_usable/status', [ReferralCodeRelationController::class, 'updateReferralStatus']);
+        Route::post('validate', [ReferralCodeRelationController::class, 'validateReferral']);
+        Route::get('insert', [ReferralCodeRelationController::class, 'insertReferrals']);
+        Route::get('details_by_id/{referral_relation_id}', [ReferralCodeRelationController::class, 'fetchReferralRelationDetails']);
+        Route::post('update/referral_usable/status', [ReferralCodeRelationController::class, 'updateReferralStatus']);
     });
 
     Route::prefix('wallet')->group(function () {
@@ -210,49 +197,15 @@ Route::middleware(['jwt.verify'])->group(function () {
 });
 /*
 |--------------------------------------------------------------------------
+| Page API Routes
+|--------------------------------------------------------------------------
+*/
+Route::get('page', [PagesController::class, 'getPage']);
+/*
+|--------------------------------------------------------------------------
 | Random API Routes
 |--------------------------------------------------------------------------
 */
-// Stripe Live API's
-// Route::get('payment_intent', function () {
-//     $ch = curl_init();
-//     $amount = $_REQUEST['amount'];
-//     $currency = $_REQUEST['currency'];
-//     $headers[] = 'Content-Type: application/x-www-form-urlencoded';
-//     curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
-//     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-//     curl_setopt($ch, CURLOPT_POST, 1);
-//     curl_setopt($ch, CURLOPT_POSTFIELDS, "amount=$amount&currency=$currency&metadata[integration_check]=accept_a_payment");
-//     curl_setopt($ch, CURLOPT_USERPWD, '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' . ':' . '');
-//     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-//     $result = curl_exec($ch);
-//     if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
-
-//     curl_close($ch);
-//     return response()->json(json_decode($result), 200);
-// });
-
-// Stripe Test API's
-// Route::get('payment_intent/test', function () {
-//     // $ch = curl_init();
-//     // $amount = $_REQUEST['amount'];
-//     // $currency = $_REQUEST['currency'];
-//     // $headers[] = 'Content-Type: application/x-www-form-urlencoded';
-//     // curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
-//     // curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-//     // curl_setopt($ch, CURLOPT_POST, 1);
-//     // curl_setopt($ch, CURLOPT_POSTFIELDS, "amount=$amount&currency=$currency&metadata[integration_check]=accept_a_payment");
-//     // curl_setopt($ch, CURLOPT_USERPWD, 'sk_test_51IY9sYIiDDGv1gaVKsxU0EXr96lHcCvwXHwYAdN81Cqrj1TBL4HErJpczWJpYFIQ1qbCOQxnxIM3UfsBtWC2MKeD00QRkUKg6q' . ':' . '');
-//     // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-//     // $result = curl_exec($ch);
-//     // if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
-
-//     // curl_close($ch);
-//     // return response()->json(json_decode($result), 200);
-// });
-
 Route::get('payment_intent', [StripeServices::class, 'createPaymentIntent']);
 Route::get('payment_intent/request_incremental_authorization_support', [StripeServices::class, 'requestIncrementalAuthorizationSupport']);
 Route::get('payment_intent/perform_incremental_authorization', [StripeServices::class, 'performIncrementalAuthorization']);
