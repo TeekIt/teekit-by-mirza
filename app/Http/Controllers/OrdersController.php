@@ -23,7 +23,7 @@ class OrdersController extends Controller
      * @author Huzaifa Haleem
      * @version 1.1.0
      */
-    public function index(Request $request)
+    public function showBuyerOrders(Request $request)
     {
         try {
             $orders = Orders::select('id')->where('user_id', '=', Auth::id())->orderByDesc('id');
@@ -656,7 +656,7 @@ class OrdersController extends Controller
         $temp = [];
         $order = Orders::find($order_id);
         $temp['order'] = $order;
-        $temp['order_items'] = OrderItems::query()->with('products.user')->where('order_id', '=', $order_id)->get();
+        $temp['order_items'] = OrderItems::with('products.store')->where('order_id', '=', $order_id)->get();
         return $temp;
     }
     /**

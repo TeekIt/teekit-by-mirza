@@ -146,7 +146,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     });
 
     Route::prefix('orders')->group(function () {
-        Route::get('/', [OrdersController::class, 'index']);
+        Route::get('/', [OrdersController::class, 'showBuyerOrders']);
         Route::post('new', [OrdersController::class, 'new']);
         Route::get('seller', [OrdersController::class, 'sellerOrders']);
         Route::get('delivery_boy_orders/{delivery_boy_id}', [OrdersController::class, 'deliveryBoyOrders']);
