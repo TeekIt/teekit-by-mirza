@@ -3,10 +3,8 @@
 namespace App\Http\Livewire\Sellers;
 
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Auth;
 use App\Products;
 use App\Qty;
-use App\User;
 use Exception;
 use Livewire\Component;
 use App\Categories;
@@ -27,11 +25,11 @@ class InventoryLivewire extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    public function toggleAllProducts($status)
+    public function toggleProduct($id, $status)
     {
         try {
             /* Perform some operation */
-            $updated = Products::toggleAllProducts($status);
+            $updated = Products::toggleProduct($id, $status);
             /* Operation finished */
             sleep(1);
             if ($updated) {
@@ -48,19 +46,15 @@ class InventoryLivewire extends Component
         }
     }
 
-    public function toggleProduct($id, $status)
+    public function toggleAllProducts($status)
     {
         try {
             /* Perform some operation */
-            $updated = Products::toggleProduct($id, $status);
+            $updated = Products::toggleAllProducts($status);
             /* Operation finished */
             sleep(1);
             if ($updated) {
-                if ($status == 0) {
-                    session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-                } else {
-                    session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-                }
+                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
@@ -135,22 +129,17 @@ class InventoryLivewire extends Component
     public function render()
     {
         $categories = Categories::allCategories();
+        $featured = [];
         $this->category_id = ($this->category_id == 0) ? null : $this->category_id;
         if (Gate::allows('seller')) {
             $data = Products::getParentSellerProductsDescForView(auth()->id(), $this->search, $this->category_id);
             $featured = $this->getFeaturedProducts($data);
         } elseif (Gate::allows('child_seller')) {
-            $featured = [];
             /*
             1st scenario when a child store will come he will have parent products with "0" Qty
             2nd after entering the Qty for each product a child store can see his own entered Qty 
              */
             $data = Products::getChildSellerProductsForView(auth()->id(), $this->search, $this->category_id);
-            // $data = $returned_array['data'];
-            // $this->owner = $returned_array['owner'];
-            // dd($data);
-            
-            // $this->quantity = $this->populateQuantityArray($data, $this->owner);
             $this->quantity = $this->populateQuantityArray($data);
         }
         return view('livewire.sellers.inventory-livewire', ['data' => $data, 'categories' => $categories, 'featured_products' => $featured]);

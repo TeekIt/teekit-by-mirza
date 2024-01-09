@@ -2,25 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <meta content="ie=edge" http-equiv="x-ua-compatible">
-    <link rel="icon" href="{{ asset('res/res/img/logo.png') }}" type="image/svg+xml" />
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Laravel') }}</title>
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <!-- Font Awesome Icons -->
-    <link href="{{ asset('res/plugins/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
-    <!-- Theme style - Bootstrap 4 Css-->
-    <link href="{{ asset('res/dist/css/adminlte.min.css') }}" rel="stylesheet">
-    <!-- Bootstrap 5 Css -->
-    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <link href="{{ asset('bootstrap5/css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('res/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    @include('layouts.header-links')
     @yield('styles')
 </head>
 
@@ -59,8 +41,8 @@
     <!-- REQUIRED SCRIPTS -->
     <!-- jQuery -->
     <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script>
-    {{-- <!-- Bootstrap 4 -->
-    <script src="{{ asset('res/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script> --}}
+    <!-- Bootstrap 4 -->
+    <script src="{{ asset('res/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <!-- Bootstrap 5 -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
         integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
@@ -301,7 +283,6 @@
             scrollbar: true
         });
     </script>
-
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script>

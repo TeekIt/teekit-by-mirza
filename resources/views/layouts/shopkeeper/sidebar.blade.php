@@ -10,7 +10,6 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <!-- Sidebar user panel (optional) -->
-
         <!-- Sidebar Menu -->
         <nav class="mt-5">
             <ul class="nav nav-pills nav-sidebar flex-column" data-accordion="false" data-widget="treeview"
@@ -26,7 +25,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @if (request()->is('inventory')) active @endif" href="{{route('inventory')}}">
+                    <a class="nav-link @if (request()->is('seller/inventory')) active @endif" href="{{route('seller.inventory')}}">
                         <i class="nav-icon fa fa-truck"></i>
                         <p class="ml-2">
                             Inventory
@@ -38,6 +37,14 @@
                         <i class="nav-icon fas fa-clipboard-list"></i>
                         <p class="ml-2">
                             Orders
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('seller/orders') ? 'active' : '' }}" href="{{route('seller.orders')}}">
+                        <i class="nav-icon fas fa-clipboard-list"></i>
+                        <p class="ml-2">
+                            Orders Test
                         </p>
                     </a>
                 </li>
@@ -59,21 +66,15 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{route('usergeneral')}}" class="nav-link">
+                            <a href="{{route('seller.settings.general')}}" class="nav-link">
                                 <i class="fas fa-gears nav-icon"></i>
-                                <p>User General Settings</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/settings/general" class="nav-link">
-                                <i class="fas fa-gears nav-icon"></i>
-                                <p>General Settings</p>
+                                <p>General</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/settings/payment" class="nav-link">
                                 <i class="fas fa-money nav-icon"></i>
-                                <p>Payment Settings</p>
+                                <p>Payment</p>
                             </a>
                         </li>
                     </ul>

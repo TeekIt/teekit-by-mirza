@@ -330,6 +330,7 @@ class QtyController extends Controller
                     $data[] = [
                         'users_id' => $request->child_store,
                         'products_id' => $item['products_id'],
+                        'category_id' => $item['category_id'],
                         'qty' => $item['qty'],
                         'created_at' => Carbon::now()
                     ];

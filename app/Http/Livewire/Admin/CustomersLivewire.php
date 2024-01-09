@@ -58,7 +58,7 @@ class CustomersLivewire extends Component
 
     public function renderInfoModal($id)
     {
-        $data = User::getUserByID($id);
+        $data = User::getUserByID($id, ['*']);
         $this->name = $data->name;
         $this->l_name = $data->l_name;
         $this->email = $data->email;

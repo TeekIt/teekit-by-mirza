@@ -9,9 +9,55 @@ use Throwable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use App\Services\JsonResponseCustom;
+use App\Services\WebResponseCustom;
+use Illuminate\Support\Facades\Auth;
 
 class UsersController extends Controller
 {
+    public function updateStoreLocation(Request $request)
+    {
+        try {
+            $validate = Validator::make($request->all(), [
+                'full_address' => 'required|string',
+                'unit_address' => 'nullable|string',
+                'postcode' => 'required|string',
+                'country' => 'required|string',
+                'state' => 'required|string',
+                'city' => 'required|string',
+                'lat' => 'required|numeric',
+                'lon' => 'required|numeric'
+            ]);
+            if ($validate->fails()) return WebResponseCustom::getValidationResponseRedirectBack($validate);
+
+            $updated = User::updateStoreLocation(
+                Auth::id(),
+                $request->full_address,
+                $request->unit_address,
+                $request->country,
+                $request->state,
+                $request->city,
+                $request->postcode,
+                $request->lat,
+                $request->lon
+            );
+            if ($updated) {
+                return WebResponseCustom::getResponseRedirectBack(
+                    config('constants.SUCCESS_STATUS'),
+                    config('constants.UPDATION_SUCCESS')
+                );
+            }
+            return WebResponseCustom::getResponseRedirectBack(
+                config('constants.ERROR_STATUS'),
+                config('constants.UPDATION_FAILED')
+            );
+        } catch (Throwable $error) {
+            report($error);
+            return WebResponseCustom::getResponseRedirectBack(
+                config('constants.ERROR_STATUS'),
+                $error->getMessage()
+            );
+        }
+    }
     /**
      * It will fetch the curved distance between 2 points
      * Google distance matrix API is consumed
@@ -46,10 +92,17 @@ class UsersController extends Controller
             'id' => $seller_info->id,
             'name' => $seller_info->name,
             'email' => $seller_info->email,
-            'address_1' => $seller_info->address_1,
             'business_name' => $seller_info->business_name,
-            'business_location' => $seller_info->business_location,
             'business_hours' => $seller_info->business_hours,
+            'full_address' => $seller_info->full_address,
+            'unit_address' => $seller_info->unit_address,
+            'country' => $seller_info->country,
+            'state' => $seller_info->state,
+            'city' => $seller_info->city,
+            'postcode' => $seller_info->postcode,
+            // 'business_location' => $seller_info->business_location,
+            'lat' => $seller_info->lat,
+            'lon' => $seller_info->lon,
             'user_img' => $seller_info->user_img,
             'pending_withdraw' => $seller_info->pending_withdraw,
             'total_withdraw' => $seller_info->total_withdraw,
@@ -90,7 +143,7 @@ class UsersController extends Controller
             });
             $pagination = $users->toArray();
             unset($pagination['data']);
-            
+
             $data = GoogleMap::findDistanceByMakingChunks($request, $users, 25);
             if (empty($data)) {
                 return JsonResponseCustom::getApiResponse(
@@ -109,13 +162,6 @@ class UsersController extends Controller
                 $pagination,
                 config('constants.HTTP_OK')
             );
-            // foreach ($users as $user) {
-            //     // dd($user);
-            //     // $result = $this->getDistanceBetweenPoints($user->lat, $user->lon, $request->query('lat'), $request->query('lon'));
-            //     $result = $this->getDistanceForMultipleDestinations($request->query('lat'), $request->query('lon'), $destinationCoordinates);
-            //     dd($result);
-            //     if ($result['distance'] <= 5) $data[] = self::getSellerInfo($user, $result);
-            // }
         } catch (Throwable $error) {
             report($error);
             return JsonResponseCustom::getApiResponse(

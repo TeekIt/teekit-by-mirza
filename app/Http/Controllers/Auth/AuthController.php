@@ -366,15 +366,6 @@ class AuthController extends Controller
     //     }
     //     return $data_info;
     // }
-    /**
-     * It will get user via given id
-     * @author Mirza Abdullah Izhar
-     * @version 1.1.0
-     */
-    public function get_user($user_id)
-    {
-        return UsersController::getSellerInfo(User::find($user_id));
-    }
 
     protected function authenticated($request, $user, $token)
     {
@@ -483,7 +474,7 @@ class AuthController extends Controller
             $pagination = $products->toArray();
             if (!$products->isEmpty()) {
                 foreach ($products as $product) {
-                    $data[] = (new ProductsController())->getProductInfo($product->id);
+                    $data[] = Products::getProductInfo($product->id);
                 }
                 unset($pagination['data']);
                 return response()->json([
