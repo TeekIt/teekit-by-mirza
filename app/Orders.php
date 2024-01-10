@@ -55,7 +55,7 @@ class Orders extends Model
 
     public static function replaceWithAlternativePrice(int $order_id, float $current_prod_price, float $alternative_prod_price)
     {
-        $order = Orders::find($order_id);
+        $order = self::find($order_id);
         $order->order_total = ($order->order_total - $current_prod_price) + $alternative_prod_price;
         return $order->save();
     }
@@ -91,50 +91,36 @@ class Orders extends Model
 
     public static function checkTotalOrders(int $user_id)
     {
-        return Orders::where('user_id', $user_id)->count();
+        return self::where('user_id', $user_id)->count();
     }
 
     public static function updateOrderStatus(int $id, string $status)
     {
-        return Orders::where('id', $id)->update([
+        return self::where('id', $id)->update([
             'order_status' => $status
         ]);
     }
 
     public static function isViewed(int $id)
     {
-        $order = Orders::find($id);
+        $order = self::find($id);
         $order->is_viewed = 1;
         $order->save();
         return $order;
     }
 
-    public static function getOrdersForView(int $id = null, int $seller_id)
+    public static function getOrdersForView(int|null $id = null, int $seller_id, string $order_by)
     {
         // First we will update the "is_viewed" column if the order is searched by ID
         if ($id) static::isViewed($id);
         // Now we will fetch the required data
-        $orders = Orders::with('order_items')
+        return self::with(['order_items', 'products.category'])
             ->when($id, function ($query) use ($id) {
                 return $query->where('id', '=', $id);
             })
             ->where('seller_id', '=', $seller_id)
-            ->orderByDesc('id');
-
-        $orders = $orders->paginate(8);
-        $pagination = $orders;
-
-        foreach ($orders as $order) {
-            // Calling the products relation
-            $items = $order->order_items;
-            $item_arr = [];
-            foreach ($items as $item) $item_arr[] = Products::getProductInfo($order->seller_id, $item->product_id, ['*']);
-
-            $order['items'] = $item_arr;
-            $data[] = $order;
-        }
-
-        return ['orders' => $data, 'pagination' => $pagination];
+            ->orderBy('created_at', $order_by)
+            ->paginate(10);
     }
 
     public static function getRecentOrderByBuyerId(int $buyer_id, int|null $prducts_limit = null, int|null $seller_id = null): object
@@ -148,25 +134,10 @@ class Orders extends Model
             ->where('user_id', $buyer_id)
             ->latest()
             ->first();
-
-        // DB::table('orders')
-        //     ->select('orders.id', 'order_items.product_id')
-        //     ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-        //     ->where('orders.user_id', '=', Auth::id())
-        //     ->where('orders.seller_id', '=', $request->store_id)
-        //     ->orderByDesc('id')
-        //     ->limit(2)
-        //     ->get();
-        // if (!$recent_orders_prods_ids->isEmpty()) {
-        //     $recent_orders_prods_data = [];
-        //     foreach ($recent_orders_prods_ids as $product_id) {
-        //         $recent_orders_prods_data[] = Products::getProductInfo($request->store_id, $product_id->product_id);
-        //     }
-        // }
     }
 
     public static function getOrderById(int $id)
     {
-        return Orders::with(['order_items', 'user', 'store', 'delivery_boy'])->where('id', $id)->first();
+        return self::with(['order_items', 'user', 'store', 'delivery_boy'])->where('id', $id)->first();
     }
 }

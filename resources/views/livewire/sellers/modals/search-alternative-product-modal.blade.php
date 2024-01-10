@@ -88,7 +88,7 @@
                         </tr>
                         <tr>
                             <td class="text-site-primary"><b>Available QTY:</b></td>
-                            <td>{{ $product_details->quantity->qty }}</td>
+                            <td>{{ $product_details->qty[0]->qty }}</td>
                         </tr>
                         <tr>
                             <td class="text-site-primary"><b>Price:</b></td>

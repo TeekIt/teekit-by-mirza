@@ -100,6 +100,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         Route::get('/general', UserGeneralSettings::class)->name('seller.settings.general');
         Route::post('/update-location', [UsersController::class, 'updateStoreLocation'])->name('seller.settings.update.location');
     });
+    
     Route::get('orders', OrdersLivewire::class)->name('seller.orders');
 });
 /*

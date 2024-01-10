@@ -23,6 +23,7 @@ class SearchAlternativeProductModal extends Component
         $receiver_name,
         $phone_number,
         $selected_qty,
+        $seller_id,
         $search = '';
 
     protected $paginationTheme = 'bootstrap';
@@ -49,6 +50,7 @@ class SearchAlternativeProductModal extends Component
         $this->current_prod_qty = $current_prod_qty;
         $this->receiver_name = $receiver_name;
         $this->phone_number = $phone_number;
+        $this->seller_id = Auth::id();
     }
 
     public function resetChildModal()
@@ -92,7 +94,7 @@ class SearchAlternativeProductModal extends Component
     {
         try {
             /* Perform some operation */
-            $this->product_details = Products::getProductInfo($product_id);
+            $this->product_details = Products::getProductInfo($this->seller_id, $product_id, ['*']);
             /* Operation finished */
         } catch (Exception $error) {
             report($error);
@@ -105,7 +107,8 @@ class SearchAlternativeProductModal extends Component
         $this->validate();
         try {
             /* Perform some operation */
-            if ($alternative_product['quantity']['qty'] < $this->selected_qty) {
+            dd($alternative_product);
+            if ($alternative_product['qty'][0]['qty'] < $this->selected_qty) {
                 return session()->flash('qty_should_not_be_greater', config('constants.QTY_SHOULD_NOT_BE_GREATER'));
             } else {
                 $current_product = Products::getOnlyProductDetailsById($this->current_prod_id);
@@ -133,7 +136,7 @@ class SearchAlternativeProductModal extends Component
 
     public function render()
     {
-        $products = Products::getProductsForSAPModal(Auth::id(), $this->search);
+        $products = Products::getProductsForSAPModal($this->seller_id, $this->search);
         return view('livewire.sellers.modals.search-alternative-product-modal', compact('products'));
     }
 }

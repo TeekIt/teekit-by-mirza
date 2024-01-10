@@ -3,13 +3,10 @@
 namespace App\Http\Livewire\Sellers;
 
 use App\Drivers;
-use App\Mail\OrderIsReadyMail;
 use App\OrderItems;
 use App\Orders;
-use App\Products;
 use App\Services\EmailManagement;
 use App\Services\StripeServices;
-use App\Services\TwilioSmsService;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -68,20 +65,20 @@ class OrdersLivewire extends Component
     public function renderInfoModal($id)
     {
         $data = Drivers::getUserByID($id);
-        $this->name = $data->name;
-        $this->l_name = $data->l_name;
-        $this->email = $data->email;
-        $this->phone = $data->phone;
-        $this->address_1 = $data->address_1;
-        $this->lat = $data->lat;
-        $this->lon = $data->lon;
-        $this->user_img = $data->user_img;
-        $this->last_login = $data->last_login;
-        $this->email_verified_at = $data->email_verified_at;
-        $this->pending_withdraw = $data->pending_withdraw;
-        $this->total_withdraw = $data->total_withdraw;
-        $this->is_online = $data->is_online;
-        $this->application_fee = $data->application_fee;
+        // $this->name = $data->name;
+        // $this->l_name = $data->l_name;
+        // $this->email = $data->email;
+        // $this->phone = $data->phone;
+        // $this->address_1 = $data->address_1;
+        // $this->lat = $data->lat;
+        // $this->lon = $data->lon;
+        // $this->user_img = $data->user_img;
+        // $this->last_login = $data->last_login;
+        // $this->email_verified_at = $data->email_verified_at;
+        // $this->pending_withdraw = $data->pending_withdraw;
+        // $this->total_withdraw = $data->total_withdraw;
+        // $this->is_online = $data->is_online;
+        // $this->application_fee = $data->application_fee;
     }
 
     public function renderSAPModal($order_id, $current_prod_id, $current_prod_qty, $receiver_name, $phone_number)
@@ -191,7 +188,7 @@ class OrdersLivewire extends Component
 
     public function render()
     {
-        $data = Orders::getOrdersForView(null, $this->seller_id);
+        $data = Orders::getOrdersForView(null, $this->seller_id, 'desc');
         return view('livewire.sellers.orders-livewire', compact('data'));
     }
 }

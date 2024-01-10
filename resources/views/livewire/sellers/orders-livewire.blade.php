@@ -183,13 +183,11 @@
         </div> --}}
         </div>
         <!-- /Content Header -->
-        {{-- @dd($data['orders']) --}}
 
         <!-- Main Content -->
         <div class="container">
-            @forelse ($data['orders'] as $order)
-                {{-- @dd($order) --}}
-
+            @forelse ($data as $order)
+            {{-- @dd($order) --}}
                 <!-- Single Order Content -->
                 <div class="col-md-12 p-4 pr-4">
                     <div class="card">
@@ -260,7 +258,7 @@
                             </div>
                             <!-- /Order Header -->
                             <div class="card-text">
-                                @foreach ($order->items as $index => $item)
+                                @foreach ($order->products as $index => $item)
                                     <!-- Order Items -->
                                     <div class="row mb-2">
                                         <div class="col-md-2">
@@ -480,7 +478,7 @@
 
             <div class="row">
                 <div class="col-md-12">
-                    {{-- {{ $orders_p->links() }} --}}
+                    {{ $data->links() }}
                 </div>
             </div>
 
@@ -540,13 +538,4 @@
             </div>
         @endif
     {{-- @endif --}}
-
-    {{-- @push('scripts')
-        <script>
-            Livewire.on('resetChildComponentProperties', function() {
-                Livewire.emit('resetChildModal');
-                // console.log('Child method called');
-            });
-        </script>
-    @endpush --}}
 </div>
