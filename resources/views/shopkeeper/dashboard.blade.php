@@ -27,7 +27,7 @@
                         <div class="icon">
                             <i class="ion ion-bag"></i>
                         </div>
-                        <a href="{{route('orders')}}" class="small-box-footer">
+                        <a href="{{route('seller.orders')}}" class="small-box-footer">
                             More info <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
@@ -42,7 +42,7 @@
                         <div class="icon">
                             <i class="ion ion-stats-bars fas fa-status-bar"></i>
                         </div>
-                        <a href="{{route('orders')}}" class="small-box-footer">
+                        <a href="{{route('seller.orders')}}" class="small-box-footer">
                             More info <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
@@ -71,7 +71,7 @@
                             <h3>£{{$total_sales}}</h3>
                             <p>Total Sales</p>
                         </div>
-                        <a href="{{route('orders')}}" class="small-box-footer">
+                        <a href="{{route('seller.orders')}}" class="small-box-footer">
                             More info <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
@@ -140,7 +140,7 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <a href="{{route('orders',['search'=>$order->id])}}" class="btn btn-primary">
+                                                <a href="{{route('seller.orders',['search'=>$order->id])}}" class="btn btn-primary">
                                                     View
                                                 </a>
                                             </td>
