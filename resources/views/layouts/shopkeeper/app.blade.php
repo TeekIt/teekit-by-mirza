@@ -38,7 +38,6 @@
         <source src="{{ asset('audio/TeekItNotificationMusic (mp3cut.net).mp3') }}" type="audio/mp3">
     </audio>
 
-    <!-- REQUIRED SCRIPTS -->
     <!-- jQuery -->
     <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script>
     <!-- Bootstrap 4 -->
@@ -57,10 +56,6 @@
     <style>
         .modal-dialog-custom {
             max-width: 700px;
-        }
-
-        .ratting span {
-            color: wj
         }
 
         table tr:first-of-type td {
@@ -233,14 +228,6 @@
             z-index: 1100 !important;
         }
 
-        /*input.form-control{*/
-        /*    border: 0;*/
-        /*    border-bottom: 1px solid;*/
-        /*    border-radius: 0;*/
-        /*    color: #8aa7d7;*/
-        /*    border-color: #3663ae;*/
-        /*    padding-left: 3px;*/
-        /*}*/
         input.form-control,
         select.form-control {
             border: 0;
@@ -261,11 +248,9 @@
         }
     </style>
 
-    <!-- Source: //cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css  -->
-    <link rel="stylesheet" href="{{ asset('res/dist/css/jquery.timepicker.min.css') }}">
-    <!-- Source: //cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js  -->
-    <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script>
-    <script>
+    {{-- <link rel="stylesheet" href="{{ asset('res/dist/css/jquery.timepicker.min.css') }}"> --}}
+    {{-- <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script> --}}
+    {{-- <script>
         $('.stimepicker').timepicker({
             timeFormat: 'h:mm p',
             interval: 30,
@@ -282,9 +267,8 @@
             dropdown: true,
             scrollbar: true
         });
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    </script> --}}
+    {{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> --}}
     <script>
         var total_orders = 0;
         /**
@@ -429,34 +413,34 @@
          */
         $('#business_hours_modal').modal('show');
 
-        function closed(day) {
-            let listOfClasses = document.getElementById("time[" + day + "][open]").className;
-            if (listOfClasses.search("disabled-input-field") < 0) {
-                // To disable the input fields
-                document.getElementById("time[" + day + "][open]").value = null;
-                document.getElementById("time[" + day + "][close]").value = null;
-                // To disable the input fields
-                document.getElementById("time[" + day + "][open]").classList.add('disabled-input-field');
-                document.getElementById("time[" + day + "][close]").classList.add('disabled-input-field');
-                // To remove the required attribute from the input fields 
-                document.getElementById("time[" + day + "][open]").required = false;
-                document.getElementById("time[" + day + "][close]").required = false;
-            } else {
-                // To enable the input fields
-                document.getElementById("time[" + day + "][open]").classList.remove('disabled-input-field');
-                document.getElementById("time[" + day + "][close]").classList.remove('disabled-input-field');
-                // To add the required attribute from the input fields 
-                document.getElementById("time[" + day + "][open]").required = true;
-                document.getElementById("time[" + day + "][close]").required = true;
-            }
-        }
+        // function closed(day) {
+        //     let listOfClasses = document.getElementById("time[" + day + "][open]").className;
+        //     if (listOfClasses.search("disabled-input-field") < 0) {
+        //         // To disable the input fields
+        //         document.getElementById("time[" + day + "][open]").value = null;
+        //         document.getElementById("time[" + day + "][close]").value = null;
+        //         // To disable the input fields
+        //         document.getElementById("time[" + day + "][open]").classList.add('disabled-input-field');
+        //         document.getElementById("time[" + day + "][close]").classList.add('disabled-input-field');
+        //         // To remove the required attribute from the input fields 
+        //         document.getElementById("time[" + day + "][open]").required = false;
+        //         document.getElementById("time[" + day + "][close]").required = false;
+        //     } else {
+        //         // To enable the input fields
+        //         document.getElementById("time[" + day + "][open]").classList.remove('disabled-input-field');
+        //         document.getElementById("time[" + day + "][close]").classList.remove('disabled-input-field');
+        //         // To add the required attribute from the input fields 
+        //         document.getElementById("time[" + day + "][open]").required = true;
+        //         document.getElementById("time[" + day + "][close]").required = true;
+        //     }
+        // }
     </script>
     <script src="{{ asset('res/plugins/select2/js/select2.min.js') }}"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    {{-- <script src="https://code.jquery.com/jquery-3.5.1.js"></script> --}}
+    {{-- <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script> --}}
+    {{-- <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script> --}}
     @yield('scripts')
 </body>
 

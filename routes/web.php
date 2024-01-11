@@ -75,7 +75,6 @@ Route::post('/importProducts', [HomeController::class, 'importProducts'])->name(
 |--------------------------------------------------------------------------
 */
 Route::prefix('orders')->group(function () {
-    Route::get('/', [HomeController::class, 'orders'])->name('orders');
     Route::get('/ready_state/{order_id}', [HomeController::class, 'changeOrderStatus'])->name('accept_order');
     Route::get('/mark_as_delivered/{order_id}', [HomeController::class, 'markAsDelivered'])->name('mark_as_delivered');
     Route::get('/mark_as_completed/{order_id}', [HomeController::class, 'markAsCompleted'])->name('mark_as_completed');

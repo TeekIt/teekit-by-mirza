@@ -1,9 +1,6 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
-
-use App\Http\Controllers\ProductsController;
 use App\Products;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
@@ -21,7 +18,6 @@ use Illuminate\Http\Request;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
@@ -67,7 +63,6 @@ class AuthController extends Controller
                 'postcode' => $request->postal_code,
                 'is_active' => ($request->get('role') == 'buyer') ? 1 : 0,
                 'role_id' => 3,
-                // 'vehicle_type' => $request->has('vehicle_type') ? $request->vehicle_type : null
                 'referral_code' => Str::uuid(),
             ]);
             if ($User) {
@@ -335,37 +330,6 @@ class AuthController extends Controller
             'message' =>  config('constants.LOGIN_SUCCESS')
         ], 200);
     }
-    // /**
-    //  * Fetch seller/store information w.r.t ID
-    //  * If seller/store have distance it will return distance
-    //  * @author Mirza Abdullah Izhar
-    //  * @version 2.1.0
-    //  */
-    // public function getSellerInfo($seller_info, $result = null)
-    // {
-    //     $user = $seller_info;
-    //     if (!$user) return null;
-    //     $data_info = array(
-    //         'id' => $user->id,
-    //         'name' => $user->name,
-    //         'email' => $user->email,
-    //         'address_1' => $user->address_1,
-    //         'business_name' => $user->business_name,
-    //         'business_location' => $user->business_location,
-    //         'business_hours' => $user->business_hours,
-    //         'user_img' => $user->user_img,
-    //         'pending_withdraw' => $user->pending_withdraw,
-    //         'total_withdraw' => $user->total_withdraw,
-    //         'parent_store_id' => $user->parent_store_id,
-    //         'is_online' => $user->is_online,
-    //         'roles' => ($user->role_id == 2) ? ['sellers'] : ['child_sellers']
-    //     );
-    //     if (!is_null($result)) {
-    //         $data_info['distance'] = $result['distance'];
-    //         $data_info['duration'] = $result['duration'];
-    //     }
-    //     return $data_info;
-    // }
 
     protected function authenticated($request, $user, $token)
     {
@@ -567,17 +531,6 @@ class AuthController extends Controller
     public function deleteUser(Request $request)
     {
         try {
-            // $validatedData = Validator::make($request->all(), [
-            //     'user_id' => 'required|integer'
-            // ]);
-            // if ($validatedData->fails()) {
-            //     return response()->json([
-            //         'data' => [],
-            //         'status' => false,
-            //         'message' => $validatedData->errors()
-            //     ], 422);
-            // }
-            // $user = User::find($request->user_id);
             $user = User::find(Auth::id());
             if (!empty($user)) {
                 DB::table('deleted_users')->insert([
@@ -753,53 +706,4 @@ class AuthController extends Controller
             ], 500);
         }
     }
-
-    // public function getDistanceBetweenPointsNew($destination_lat, $destination_lon, $origin_lat, $origin_lon)
-    // {
-    //     $destination_address = $destination_lat . ',' . $destination_lon;
-    //     $origing_address = $origin_lat . ',' . $origin_lon;
-    //     /* Rameesha's URL */
-    //     $url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" . urlencode($origing_address) . "&destinations=" . urlencode($destination_address) . "&mode=driving&key=AIzaSyD_7jrpEkUDW7pxLBm91Z0K-U9Q5gK-10U";
-
-    //     $results = json_decode(file_get_contents($url), true);  
-    //     $meters = explode(' ', $results['rows'][0]['elements'][0]['distance']['value']);
-    //     $distanceInMiles = (double)$meters[0] * 0.000621;
-
-    //     $durationInSeconds = explode(' ', $results['rows'][0]['elements'][0]['duration']['value']);
-    //     $durationInMinutes = round((int)$durationInSeconds[0] / 60); 
-    //     return ['distance' => $distanceInMiles, 'duration' => $durationInMinutes];
-    // }
-
-    // public function getDistanceBetweenPointsNew($latitude1, $longitude1, $latitude2, $longitude2)
-    // {
-    //     $address1 = $latitude1 . ',' . $longitude1;
-    //     $address2 = $latitude2 . ',' . $longitude2;
-
-    //     /* Old URL */
-    //     // $url = "https://maps.googleapis.com/maps/api/directions/json?origin=" . urlencode($address1) . "&destination=" . urlencode($address2) . "&transit_routing_preference=fewer_transfers&departure_time=" . time() . "&key=AIzaSyBFDmGYlVksc--o1jpEXf9jVQrhwmGPxkM";
-
-    //     /* Rameesha's URL */
-    //     $url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" . urlencode($address1) . "&destinations=" . urlencode($address2) . "&mode=driving&key=AIzaSyD_7jrpEkUDW7pxLBm91Z0K-U9Q5gK-10U";
-
-    //     $query = file_get_contents($url);
-    //     $results = json_decode($query, true);
-    //     // dd($results);
-    //     /* Old Variables */
-    //     // $distanceString = explode(' ', $results['routes'][0]['legs'][0]['distance']['text']);
-    //     // $distanceInMiles = (Double)$distanceString[0] * 0.621371;
-    //     /* New Variables */
-    //     $distanceString = explode(' ', $results['rows'][0]['elements'][0]['distance']['text']);
-    //     // dd($results);
-    //     // $distanceInMiles = (float)$distanceString[0] * 0.621371;
-
-    //     /* Old Variables */
-    //     // $durationInSeconds = $results['routes'][0]['legs'][0]['duration']['value'];
-    //     // $durationInMinutes = round($durationInSeconds / 60);
-    //     /* New Variables */
-    //     $durationInMinutes = explode(' ', $results['rows'][0]['elements'][0]['duration']['text']);
-    //     // $durationInMinutes = round($durationInSeconds / 60);
-
-    //     // return ['distance' => $distanceInMiles, 'duration' => $durationInMinutes];
-    //     return ['distance' => $distanceString, 'duration' => $durationInMinutes];
-    // }
 }

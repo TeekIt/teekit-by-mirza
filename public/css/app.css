@@ -3,6 +3,10 @@ body {
     color: #444444;
 }
 
+.main-pages-bg-img{
+    background: url('../bg_imgs/bg.webp')
+}
+
 table tr:first-of-type td {
     border-top: 0;
 }

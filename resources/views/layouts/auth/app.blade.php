@@ -5,7 +5,7 @@
     @include('layouts.header-links')
 </head>
 
-<body class="hold-transition" style="background: url('bg_imgs/bg.webp')">
+<body class="hold-transition main-pages-bg-img">
     <div class="wrapper">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-light bg-white">

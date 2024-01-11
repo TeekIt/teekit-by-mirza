@@ -6,7 +6,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h1 class="m-0 text-dark text-center">Dashboard</h1>
+                    <h1 class="text-dark text-center fs-1">Dashboard</h1>
                 </div><!-- /.col -->
             </div><!-- /.row -->
         </div><!-- /.container-fluid -->
@@ -17,7 +17,7 @@
     <div class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-lg-3 col-6">
+                <div class="col-12 col-md-6">
                     <!-- small box -->
                     <div class="small-box bg-info">
                         <div class="inner">
@@ -32,8 +32,7 @@
                         </a>
                     </div>
                 </div>
-                <!-- ./col -->
-                <div class="col-lg-3 col-6">
+                <div class="col-12 col-md-6">
                     <!-- small box -->
                     <div class="small-box bg-success">
                         <div class="inner">
@@ -48,8 +47,9 @@
                         </a>
                     </div>
                 </div>
-                <!-- ./col -->
-                <div class="col-lg-3 col-6">
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-6">
                     <!-- small box -->
                     <div class="small-box bg-warning">
                         <div class="inner">
@@ -60,12 +60,11 @@
                             <i class="ion ion-person-add"></i>
                         </div>
                         <a href="{{route('seller.inventory')}}" class="small-box-footer">
-                            More info<i class="fas fa-arrow-circle-right"></i>
+                            More info <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
                 </div>
-                <!-- ./col -->
-                <div class="col-lg-3 col-6">
+                <div class="col-12 col-md-6">
                     <!-- small box -->
                     <div class="small-box bg-danger">
                         <div class="inner">
@@ -75,15 +74,11 @@
                         <a href="{{route('orders')}}" class="small-box-footer">
                             More info <i class="fas fa-arrow-circle-right"></i>
                         </a>
-                        <div class="icon">
-                            <i class="ion ion-pie-graph"></i>
-                        </div>
                     </div>
                 </div>
-                <!-- ./col -->
             </div>
             <div class="row">
-                <div class="col-lg-6 col-md-6">
+                <div class="col-12 col-lg-6">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -113,43 +108,48 @@
                             </div>
                         </div>
                         <!-- /.card-header -->
-                        <div class="card-body p-0">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Order No</th>
-                                        <th>Status</th>
-                                        <th>View</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($all_orders as $key => $order)
-                                    <tr>
-                                        <td>{{$all_orders->firstItem() + $key}}</td>
-                                        <td>{{$order->id}}</td>
-                                        <td>
-                                            @if($order->order_status == 'pending')
-                                            <span class="badge bg-danger">Pending</span>
-                                            @elseif($order->order_status == 'accepted')
-                                            <span class="badge bg-info">Accepted</span>
-                                            <!-- @elseif($order->order_status == 'assigned')
-                                            <span class="badge bg-warning">Assigned</span> -->
-                                            @elseif($order->order_status == 'ready')
-                                            <span class="badge bg-purple">Ready</span>
-                                            @elseif($order->order_status == 'onTheWay')
-                                            <span class="badge bg-primary">On the Way</span>
-                                            @else
-                                            <span class="badge bg-success">Delivered</span>
-                                            @endif
-                                        </td>
-                                        <td><a href="{{route('orders',['search'=>$order->id])}}"
-                                                class="btn btn-primary">View</a></td>
-                                    </tr>
-                                    @empty
-                                    @endforelse
-                                </tbody>
-                            </table>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Order No</th>
+                                            <th>Status</th>
+                                            <th>View</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($all_orders as $key => $order)
+                                        <tr>
+                                            <td>{{$all_orders->firstItem() + $key}}</td>
+                                            <td>{{$order->id}}</td>
+                                            <td>
+                                                @if($order->order_status == 'pending')
+                                                <span class="badge bg-danger">Pending</span>
+                                                @elseif($order->order_status == 'accepted')
+                                                <span class="badge bg-info">Accepted</span>
+                                                <!-- @elseif($order->order_status == 'assigned')
+                                                <span class="badge bg-warning">Assigned</span> -->
+                                                @elseif($order->order_status == 'ready')
+                                                <span class="badge bg-purple">Ready</span>
+                                                @elseif($order->order_status == 'onTheWay')
+                                                <span class="badge bg-primary">On the Way</span>
+                                                @else
+                                                <span class="badge bg-success">Delivered</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <a href="{{route('orders',['search'=>$order->id])}}" class="btn btn-primary">
+                                                    View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
                             <div class="d-flex justify-content-center" style="padding-top: 10px;">
                                 {{$all_orders->links()}}
                             </div>
@@ -158,7 +158,7 @@
                     </div>
                 </div>
                 <!-- User Info Card -->
-                <div class="col-lg-6 col-md-6">
+                <div class="col-12 col-lg-6">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -166,41 +166,43 @@
                                     <h3 class="card-title"><strong>User Info</strong></h3>
                                 </div>
                                 <div class="col-md-7">
-                                    <label class=" float-right">
-                                        <a href="" data-bs-toggle="modal" data-bs-target="#editUserModal{{$user[0]->id}}"
-                                            class="   float-left pr-3"><img class="img-size-16"
-                                                src="/res/res/img/edit.png"></a>
+                                    <label class="float-right">
+                                        <a href="#" data-bs-toggle="modal" data-bs-target="#editUserModal{{$user[0]->id}}" class="float-left pr-3">
+                                            <img class="img-size-16" src="/res/res/img/edit.png">
+                                        </a>
                                     </label>
                                 </div>
                             </div>
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body p-0">
-                            <table class="table table-striped">
-                                <tbody>
-                                    <tr>
-                                        <th>Name</th>
-                                        <td>{{$user[0]->name}} {{$user[0]->l_name}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Business Name</th>
-                                        <td>{{$user[0]->business_name}} </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Email</th>
-                                        <td>{{$user[0]->email}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Phone</th>
-                                        <td>{{$user[0]->phone}}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Company Phone</th>
-                                        <td>{{$user[0]->business_phone}}</td>
-                                    </tr>
-
-                                </tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <tbody>
+                                        <tr>
+                                            <th>Name</th>
+                                            <td>{{$user[0]->name}} {{$user[0]->l_name}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Business Name</th>
+                                            <td>{{$user[0]->business_name}} </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Email</th>
+                                            <td>{{$user[0]->email}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Phone</th>
+                                            <td>{{$user[0]->phone}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Company Phone</th>
+                                            <td>{{$user[0]->business_phone}}</td>
+                                        </tr>
+    
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                         <!-- /.card-body -->
                     </div>

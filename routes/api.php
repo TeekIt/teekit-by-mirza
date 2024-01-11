@@ -17,6 +17,7 @@ use App\Http\Controllers\RattingsController;
 use App\Http\Controllers\ReferralCodeRelationController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WithdrawalRequestsController;
+use App\Products;
 use App\Services\JsonResponseCustom;
 use App\Services\StripeServices;
 use Illuminate\Support\Facades\Cache;
@@ -31,6 +32,24 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+Route::get('products', function () {
+    try {
+        return response()->json([
+            'data' => Products::all(),
+            'status' => true,
+            'message' => ''
+        ], 200);
+    } catch (Throwable $error) {
+        report($error);
+        return JsonResponseCustom::getApiResponse(
+            [],
+            false,
+            $error,
+            config('constants.HTTP_SERVER_ERROR')
+        );
+    }
+});
 
 Route::get('/', function () {
     return 'Teek it API Routes Are Working Fine :)';

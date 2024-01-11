@@ -620,33 +620,33 @@ class HomeController extends Controller
      * It will showorders
      * @version 1.0.0
      */
-    public function orders(Request $request)
-    {
-        $return_arr = [];
-        $orders = Orders::where('seller_id', '=', Auth::id())->orderByDesc('id');
-        if ($request->search) {
-            $order = Orders::find($request->search);
-            $order->is_viewed = 1;
-            $order->save();
-            $orders = $orders->where('id', '=', $request->search);
-        }
-        $orders = $orders->paginate(10);
-        $orders_p = $orders;
+    // public function orders(Request $request)
+    // {
+    //     $return_arr = [];
+    //     $orders = Orders::where('seller_id', '=', Auth::id())->orderByDesc('id');
+    //     if ($request->search) {
+    //         $order = Orders::find($request->search);
+    //         $order->is_viewed = 1;
+    //         $order->save();
+    //         $orders = $orders->where('id', '=', $request->search);
+    //     }
+    //     $orders = $orders->paginate(10);
+    //     $orders_p = $orders;
 
-        foreach ($orders as $order) {
-            $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
-            $item_arr = [];
-            foreach ($items as $item) {
-                $product = Products::getProductInfo(Auth::id(), $item->product_id, ['*']);
-                $item['product'] = $product;
-                $item_arr[] = $item;
-            }
-            $order['items'] = $item_arr;
-            $return_arr[] = $order;
-        }
-        $orders = $return_arr;
-        return view('shopkeeper.orders.list', compact('orders', 'orders_p'));
-    }
+    //     foreach ($orders as $order) {
+    //         $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
+    //         $item_arr = [];
+    //         foreach ($items as $item) {
+    //             $product = Products::getProductInfo(Auth::id(), $item->product_id, ['*']);
+    //             $item['product'] = $product;
+    //             $item_arr[] = $item;
+    //         }
+    //         $order['items'] = $item_arr;
+    //         $return_arr[] = $order;
+    //     }
+    //     $orders = $return_arr;
+    //     return view('shopkeeper.orders.list', compact('orders', 'orders_p'));
+    // }
     /**
      * Convert's CSV file to JSON
      * @author Huzaifa Haleem

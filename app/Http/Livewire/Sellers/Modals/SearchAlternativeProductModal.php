@@ -11,6 +11,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 /* Search Alternative Product shortly known as "SAP" */
+
 class SearchAlternativeProductModal extends Component
 {
     use WithPagination;
@@ -94,7 +95,7 @@ class SearchAlternativeProductModal extends Component
     {
         try {
             /* Perform some operation */
-            $this->product_details = Products::getProductInfo($this->seller_id, $product_id, ['*']);
+            $this->product_details = Products::getProductInfo($this->seller_id, $product_id, ['id','category_id','product_name','sku','price','feature_img']);
             /* Operation finished */
         } catch (Exception $error) {
             report($error);
@@ -107,7 +108,6 @@ class SearchAlternativeProductModal extends Component
         $this->validate();
         try {
             /* Perform some operation */
-            dd($alternative_product);
             if ($alternative_product['qty'][0]['qty'] < $this->selected_qty) {
                 return session()->flash('qty_should_not_be_greater', config('constants.QTY_SHOULD_NOT_BE_GREATER'));
             } else {

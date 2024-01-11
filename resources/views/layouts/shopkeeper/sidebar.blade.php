@@ -1,21 +1,19 @@
-<aside class="main-sidebar sidebar-dark-primary" style=" overflow: initial; ">
+<aside class="main-sidebar sidebar-dark-primary" style="overflow: initial;">
     <!-- Brand Logo -->
-    <a class="nav-link nav-sidebar-arrow" onclick="jQuery('.navbar-nav>.nav-item>.nav-link').click();"> <img
-            alt="" src="{{ asset('res/res/img/arrow.png') }}"></a>
+    <a class="nav-link nav-sidebar-arrow" onclick="jQuery('.navbar-nav>.nav-item>.nav-link').click();"> 
+        <img src="{{ asset('res/res/img/arrow.png') }}">
+    </a>
     <a class="brand-link" href="/" style="display:block;opacity: 1">
-        <img alt="AdminLTE Logo" class="brand-image" src="{{ asset('res/res/img/logo.png') }}"
-            style="display: block; opacity: 1">
+        <img alt="AdminLTE Logo" class="brand-image" src="{{ asset('res/res/img/logo.png') }}" style="display: block; opacity: 1">
     </a>
 
     <!-- Sidebar -->
     <div class="sidebar">
-        <!-- Sidebar user panel (optional) -->
         <!-- Sidebar Menu -->
         <nav class="mt-5">
             <ul class="nav nav-pills nav-sidebar flex-column" data-accordion="false" data-widget="treeview"
                 role="menu">
-                <!-- Add icons to the links using the .nav-icon class
-                 with font-awesome or any other icon font library -->
+                <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('/') ? 'active' : '' }} " href="/">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -33,18 +31,10 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('orders') ? 'active' : '' }}" href="/orders">
-                        <i class="nav-icon fas fa-clipboard-list"></i>
-                        <p class="ml-2">
-                            Orders
-                        </p>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link {{ request()->is('seller/orders') ? 'active' : '' }}" href="{{route('seller.orders')}}">
                         <i class="nav-icon fas fa-clipboard-list"></i>
                         <p class="ml-2">
-                            Orders Test
+                            Orders
                         </p>
                     </a>
                 </li>
