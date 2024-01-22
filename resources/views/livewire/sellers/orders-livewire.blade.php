@@ -155,9 +155,26 @@
                                 <p class="fw-bold">Customer Name: {{ $receiver_name }}</p>
                                 <p class="fw-bold">Customer Contact: {{ $phone_number }}</p>
                             </div>
+                            <div class=" d-flex justify-content-center">
+                            <div class="d-flex justify-content-center col-8 col-sm-6">
+                                  <select class="form-select" aria-label="Default select example">
+                                    <option value="1">Search Alternative</option>
+                                    <option value="2">Remove Product</option>
+                                    <option value="3">Cancel</option>
+                                  </select>
+                            </div>
+                            </div>
                         @endif
                     </div>
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-site-primary" wire:click="" wire:target="" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled">
+                            <span wire:target="" wire:loading.remove="">
+                                Select
+                            </span>
+                            <span wire:target="" wire:loading="">
+                                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                            </span>
+                        </button>
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetModal">
                             Cancel
                         </button>
