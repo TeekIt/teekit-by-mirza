@@ -7,6 +7,7 @@ use App\OrderItems;
 use App\Orders;
 use App\Services\EmailManagement;
 use App\Services\StripeServices;
+use App\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -23,8 +24,9 @@ class OrdersLivewire extends Component
         $receiver_name,
         $phone_number,
         $order_item,
+        $nearby_stores,
         $search = '';
-    
+
     protected $paginationTheme = 'bootstrap';
 
     protected $listeners = [
@@ -47,7 +49,8 @@ class OrdersLivewire extends Component
             'current_prod_qty',
             'receiver_name',
             'phone_number',
-            'order_item'
+            'order_item',
+            'nearby_stores'
         ]);
     }
 
@@ -89,6 +92,17 @@ class OrdersLivewire extends Component
         $this->current_prod_qty = $current_prod_qty;
         $this->receiver_name = $receiver_name;
         $this->phone_number = $phone_number;
+    }
+
+    public function renderSTOSModal()
+    {
+        $this->nearby_stores = User::getParentAndChildSellers()->toArray();
+        // dd($this->nearby_stores);
+    }
+
+    public function sendItemToAnOtherStore()
+    {
+        dd('sending');
     }
 
     public function renderRemoveItemModal($order_item)

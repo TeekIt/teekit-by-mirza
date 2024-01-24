@@ -129,6 +129,7 @@ class UsersController extends Controller
             $validate = Validator::make($request->query(), [
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
+                'city' => 'required|string'
             ]);
             if ($validate->fails()) {
                 return JsonResponseCustom::getApiResponse(
@@ -138,8 +139,8 @@ class UsersController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $users = Cache::remember('sellers', now()->addDay(), function () {
-                return User::getParentAndChildSellers();
+            $users = Cache::remember('sellers' . $request->city, now()->addDay(), function () use ($request) {
+                return User::getParentAndChildSellers($request->city);
             });
             $pagination = $users->toArray();
             unset($pagination['data']);

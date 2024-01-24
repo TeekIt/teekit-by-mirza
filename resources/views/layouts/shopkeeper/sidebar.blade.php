@@ -32,7 +32,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('seller/orders') ? 'active' : '' }}" href="{{route('seller.orders')}}">
-                        <i class="nav-icon fas fa-clipboard-list"></i>
+                        <i class="nav-icon fas fa-cart-arrow-down"></i>
                         <p class="ml-2">
                             Orders
                         </p>
@@ -40,15 +40,15 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('withdrawals') ? 'active' : '' }}" href="/withdrawals">
-                        <i class="nav-icon fas fa-clipboard-list"></i>
+                        <i class="nav-icon fas fa-dollar-sign"></i>
                         <p class="ml-2">
                             Withdrawals
                         </p>
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link ">
-                        <i class="nav-icon fas fa-user-secret"></i>
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-cogs"></i>
                         <p>
                             Settings
                             <i class="fas fa-angle-left right"></i>
