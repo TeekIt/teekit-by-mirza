@@ -173,12 +173,14 @@ class CategoriesController extends Controller
      * It will get the stores w.r.t category id 
      * @version 1.0.0
      */
-    public function stores(Request $request, $category_id)
+    public function stores(Request $request)
     {
         try {
             $validate = Validator::make($request->query(), [
+                'category_id' => 'required|integer',
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
+                'page' => 'required|numeric'
             ]);
             if ($validate->fails()) {
                 return JsonResponseCustom::getApiResponse(
@@ -188,15 +190,15 @@ class CategoriesController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $stores = Cache::remember('get-stores-by-category' . $category_id, now()->addDay(), function () use ($category_id) {
-                return Categories::stores($category_id);
+            $stores = Cache::remember('get-stores-by-category' . $request->category_id . $request->page, now()->addDay(), function () use ($request) {
+                return Categories::stores($request->category_id);
             });
             $pagination = $stores->toArray();
             unset($pagination['data']);
-            $data = GoogleMap::findDistanceByMakingChunks($request, $stores, 25);
+            $data = GoogleMap::findDistanceByMakingChunks($request->lat, $request->lon, $stores, 25);
             /* 
             * Just creating this variable so we don't have to call the "empty()" function again & again  
-            * Which will obviouly reduce the API response speed
+            * Because it will increase the API response time
             */
             $data_is_empty = empty($data);
             return JsonResponseCustom::getApiResponseExtention(

@@ -87,7 +87,6 @@ class UsersController extends Controller
      */
     public static function getSellerInfo(Object $seller_info, array $map_api_result = null)
     {
-        if (!$seller_info) return null;
         $data = array(
             'id' => $seller_info->id,
             'name' => $seller_info->name,
@@ -100,7 +99,6 @@ class UsersController extends Controller
             'state' => $seller_info->state,
             'city' => $seller_info->city,
             'postcode' => $seller_info->postcode,
-            // 'business_location' => $seller_info->business_location,
             'lat' => $seller_info->lat,
             'lon' => $seller_info->lon,
             'user_img' => $seller_info->user_img,
@@ -129,7 +127,8 @@ class UsersController extends Controller
             $validate = Validator::make($request->query(), [
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
-                'city' => 'required|string'
+                'city' => 'required|string',
+                'page' => 'required|numeric'
             ]);
             if ($validate->fails()) {
                 return JsonResponseCustom::getApiResponse(
@@ -139,13 +138,14 @@ class UsersController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $users = Cache::remember('sellers' . $request->city, now()->addDay(), function () use ($request) {
+            $users = Cache::remember('sellers' . $request->city . $request->page, now()->addDay(), function () use ($request) {
                 return User::getParentAndChildSellers($request->city);
             });
             $pagination = $users->toArray();
             unset($pagination['data']);
-
-            $data = GoogleMap::findDistanceByMakingChunks($request, $users, 25);
+            
+            if (!$users->isEmpty()) $data = GoogleMap::findDistanceByMakingChunks($request->lat, $request->lon, $users, 25);
+         
             if (empty($data)) {
                 return JsonResponseCustom::getApiResponse(
                     [],

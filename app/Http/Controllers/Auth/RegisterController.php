@@ -83,8 +83,6 @@ class RegisterController extends Controller
             ], 200);
         }
         $data = $request->toArray();
-        // $data['business_location']['lat'] = $data['lat'];
-        // $data['business_location']['lon'] = $data['lon'];
         $business_hours = '{
             "time": {
                 "Monday": {

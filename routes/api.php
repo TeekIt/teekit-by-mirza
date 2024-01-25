@@ -105,7 +105,7 @@ Route::prefix('category')->group(function () {
     Route::post('add', [CategoriesController::class, 'add']);
     Route::post('update/{product_id}', [CategoriesController::class, 'update']);
     Route::get('view/{category_id}', [CategoriesController::class, 'products']);
-    Route::get('get-stores-by-category/{category_id}', [CategoriesController::class, 'stores']);
+    Route::get('get-stores-by-category', [CategoriesController::class, 'stores']);
     Route::get('all', [CategoriesController::class, 'all']);
 });
 /*

@@ -145,7 +145,7 @@
                     <div class="text-center">
                         <h2>PLEASE SELECT A STORE</h2>
                         <div class="d-flex justify-content-center">
-                            @if (empty($nearby_stores))
+                            @if (empty($nearby_sellers))
                                 <div class="col-6">
                                     <div class="spinner-border" role="status"></div>
                                 </div>
@@ -153,7 +153,7 @@
                                 <div class="col-6">
                                     <select class="form-select form-select-lg">
                                         <option value="" selected>Stores list</option>
-                                        @foreach ($nearby_stores['data'] as $single_index)
+                                        @foreach ($nearby_sellers as $single_index)
                                             <option value="{{ $single_index['business_name'] }}">{{ $single_index['business_name'] }}</option>
                                         @endforeach
                                     </select>

@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Http\Controllers\UsersController;
+use App\Http\Resources\SellerCollectionResource;
+use App\Http\Resources\SellerResource;
 use Illuminate\Http\Request;
 
 final class GoogleMap
@@ -10,37 +12,35 @@ final class GoogleMap
     // Sending Multiple requests to Google Matrix at a time
     public static function getDistanceForMultipleDestinations(float $origin_lat, float $origin_lon, array $destinations, int $miles)
     {
-        // dd($destinations);
         $origing_address = $origin_lat . ',' . $origin_lon;
         $destinations_addresses = implode('|', $destinations['users_coordinates']);
-        // dd($destinations_addresses);
         $url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" . urlencode($origing_address) . "&destinations=" . urlencode($destinations_addresses) . "&mode=driving&key=AIzaSyD_7jrpEkUDW7pxLBm91Z0K-U9Q5gK-10U";
         // dd($url);
         $results = json_decode(file_get_contents($url), true);
         // dd($results);
-        $distanceData = [];
+        $distance_data = [];
         $user_data = [];
         foreach ($results['rows'] as $row) {
             foreach ($row['elements'] as $key => $element) {
                 $meters = explode(' ', $element['distance']['value']);
-                $distanceInMiles = (float)$meters[0] * 0.000621;
+                $distance_in_miles = (float)$meters[0] * 0.000621;
 
-                $durationInSeconds = explode(' ', $element['duration']['value']);
-                $durationInMinutes = round((int)$durationInSeconds[0] / 60);
-                if ($distanceInMiles <= $miles) {
-                    $distanceData = [
+                $duration_in_seconds = explode(' ', $element['duration']['value']);
+                $duration_in_minutes = round((int)$duration_in_seconds[0] / 60);
+                if ($distance_in_miles <= $miles) {
+                    $distance_data = [
                         // 'store_id' => $destinations['users'][$key]->id,
-                        'distance' => $distanceInMiles,
-                        'duration' => $durationInMinutes
+                        'distance' => $distance_in_miles,
+                        'duration' => $duration_in_minutes
                     ];
-                    $user_data[] = UsersController::getSellerInfo($destinations['users'][$key], $distanceData);
+                    $user_data[] = UsersController::getSellerInfo($destinations['users'][$key], $distance_data);
                 }
             }
         }
         return $user_data;
     }
 
-    public static function findDistanceByMakingChunks(Request $request, object $users, int $chunk_size)
+    public static function findDistanceByMakingChunks(float $lat, float $lon, object $users, int $chunk_size)
     {
         $data = [];
         $destination_data = [];
@@ -65,7 +65,7 @@ final class GoogleMap
             $destination_data['users'] = $destination_users_data;
             $destination_data['users_coordinates'] = $destination_users_coordinates;
 
-            $temp = self::getDistanceForMultipleDestinations($request->query('lat'), $request->query('lon'), $destination_data, 5);
+            $temp = self::getDistanceForMultipleDestinations($lat, $lon, $destination_data, 5);
             if (!empty($temp)) $data = $temp;
             $offset += $current_chunk_size;
             $remaining_users -= $current_chunk_size;

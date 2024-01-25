@@ -6,6 +6,7 @@ use App\Drivers;
 use App\OrderItems;
 use App\Orders;
 use App\Services\EmailManagement;
+use App\Services\GoogleMap;
 use App\Services\StripeServices;
 use App\User;
 use Exception;
@@ -16,6 +17,7 @@ use Livewire\WithPagination;
 class OrdersLivewire extends Component
 {
     use WithPagination;
+
     public
         $seller_id,
         $order_id,
@@ -24,7 +26,7 @@ class OrdersLivewire extends Component
         $receiver_name,
         $phone_number,
         $order_item,
-        $nearby_stores,
+        $nearby_sellers,
         $search = '';
 
     protected $paginationTheme = 'bootstrap';
@@ -50,7 +52,7 @@ class OrdersLivewire extends Component
             'receiver_name',
             'phone_number',
             'order_item',
-            'nearby_stores'
+            'nearby_sellers'
         ]);
     }
 
@@ -96,8 +98,8 @@ class OrdersLivewire extends Component
 
     public function renderSTOSModal()
     {
-        $this->nearby_stores = User::getParentAndChildSellers()->toArray();
-        // dd($this->nearby_stores);
+        $sellers = User::getParentAndChildSellers(Auth::user()->city);
+        $this->nearby_sellers = GoogleMap::findDistanceByMakingChunks(Auth::user()->lat, Auth::user()->lon, $sellers, 25);
     }
 
     public function sendItemToAnOtherStore()
