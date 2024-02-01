@@ -3,9 +3,6 @@
 namespace App\Services;
 
 use App\Http\Controllers\UsersController;
-use App\Http\Resources\SellerCollectionResource;
-use App\Http\Resources\SellerResource;
-use Illuminate\Http\Request;
 
 final class GoogleMap
 {

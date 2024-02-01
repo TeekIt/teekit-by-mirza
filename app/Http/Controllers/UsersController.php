@@ -138,13 +138,11 @@ class UsersController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $users = Cache::remember('sellers' . $request->city . $request->page, now()->addDay(), function () use ($request) {
-                return User::getParentAndChildSellers($request->city);
-            });
-            $pagination = $users->toArray();
+            $sellers = User::getParentAndChildSellers($request->city);
+            $pagination = $sellers->toArray();
             unset($pagination['data']);
             
-            if (!$users->isEmpty()) $data = GoogleMap::findDistanceByMakingChunks($request->lat, $request->lon, $users, 25);
+            if (!$sellers->isEmpty()) $data = GoogleMap::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
          
             if (empty($data)) {
                 return JsonResponseCustom::getApiResponse(
