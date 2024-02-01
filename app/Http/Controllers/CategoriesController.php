@@ -180,7 +180,8 @@ class CategoriesController extends Controller
                 'category_id' => 'required|integer',
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
-                'page' => 'required|numeric'
+                'city' => 'required|string'
+                // 'page' => 'required|numeric'
             ]);
             if ($validate->fails()) {
                 return JsonResponseCustom::getApiResponse(
@@ -190,23 +191,34 @@ class CategoriesController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $stores = Cache::remember('get-stores-by-category' . $request->category_id . $request->page, now()->addDay(), function () use ($request) {
-                return Categories::stores($request->category_id);
+
+            $stores = Cache::remember('get-stores-by-category'. $request->category_id . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
+                return Qty::getSellersByGivenParams($request->category_id, $request->city);
             });
-            $pagination = $stores->toArray();
-            unset($pagination['data']);
+
+            // $stores = Categories::stores($request->category_id, $request->city);
+            // $pagination = $stores->toArray();
+            // unset($pagination['data']);
+
             $data = GoogleMap::findDistanceByMakingChunks($request->lat, $request->lon, $stores, 25);
             /* 
             * Just creating this variable so we don't have to call the "empty()" function again & again  
             * Because it will increase the API response time
             */
             $data_is_empty = empty($data);
-            return JsonResponseCustom::getApiResponseExtention(
+            // return JsonResponseCustom::getApiResponseExtention(
+            //     ($data_is_empty) ? [] : $data,
+            //     ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            //     ($data_is_empty) ? config('constants.NO_RECORD') : '',
+            //     'pagination',
+            //     ($data_is_empty) ? [] : $pagination,
+            //     config('constants.HTTP_OK')
+            // );
+
+            return JsonResponseCustom::getApiResponse(
                 ($data_is_empty) ? [] : $data,
                 ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
                 ($data_is_empty) ? config('constants.NO_RECORD') : '',
-                'pagination',
-                ($data_is_empty) ? [] : $pagination,
                 config('constants.HTTP_OK')
             );
         } catch (Throwable $error) {
