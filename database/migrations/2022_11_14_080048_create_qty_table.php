@@ -22,6 +22,7 @@ class CreateQtyTable extends Migration
             $table->unsignedBigInteger('category_id');
             // $table->foreign('category_id')->references('id')->on('categories');
             $table->integer('qty');
+            $table->index(['users_id', 'products_id', 'category_id', 'qty']);
             $table->timestamps();
         });
     }
