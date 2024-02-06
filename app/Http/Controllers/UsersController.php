@@ -127,7 +127,7 @@ class UsersController extends Controller
             $validate = Validator::make($request->query(), [
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
-                'city' => 'required|string',
+                'state' => 'required|string',
                 'page' => 'required|numeric'
             ]);
             if ($validate->fails()) {
@@ -138,7 +138,7 @@ class UsersController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $sellers = User::getParentAndChildSellers($request->city);
+            $sellers = User::getParentAndChildSellers($request->state);
             $pagination = $sellers->toArray();
             unset($pagination['data']);
             
