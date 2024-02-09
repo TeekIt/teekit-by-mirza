@@ -125,6 +125,7 @@ class OrdersLivewire extends Component
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3RlZWtpdHN0YWdpbmcuc2hvcC9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTY5MjgxNzg4NiwiZXhwIjoxNzI4ODE3ODg2LCJuYmYiOjE2OTI4MTc4ODYsImp0aSI6ImVFNG9HNFA2NVNDYXB0aGQiLCJzdWIiOjQ4MiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSIsIm5hbWUiOiJBemltIiwicm9sZXMiOltdfQ.skCx-1m6NB8XaJjyBypI92X0j-Rm5GaPo7ahr1LqB3Y'
             ])
+                ->acceptJson()
                 ->post(request()->schemeAndHttpHost() . '/api/orders/new', [
                     'items' => [
                         [
