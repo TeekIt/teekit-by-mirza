@@ -42,7 +42,7 @@ class Qty extends Model
     //     return true;
     // }
 
-    public static function getSellersByGivenParams(int $category_id, string $city): object
+    public static function getSellersByGivenParams(int $category_id, string $state): object
     {
         return self::select([
             'users.id',
@@ -70,7 +70,7 @@ class Qty extends Model
         ->where('qty.category_id', '=', $category_id)
         ->where('products.status', '=', 1) // Products should be live
         ->where('users.is_active', '=', 1) // Sellers should be active
-        ->where('users.city', '=', $city)
+        ->where('users.state', '=', $state)
         ->distinct() // Use distinct to select only unique stores
         ->get();
     }

@@ -46,9 +46,9 @@ class Orders extends Model
     /**
      * Helpers
      */
-    public static function subFromOrderTotal(array $order_item, float $prod_total_price)
+    public static function subFromOrderTotal(int $order_id, float $prod_total_price)
     {
-        $order = self::find($order_item['order_id']);
+        $order = self::find($order_id);
         $order->order_total = $order->order_total - $prod_total_price;
         return $order->save();
     }

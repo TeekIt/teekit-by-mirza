@@ -241,7 +241,18 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
 
-    public static function getParentAndChildSellers(string $state): object
+    public static function getParentAndChildSellersByCity(string $city): object
+    {
+        return self::where('is_active', 1)
+            ->whereNotNull('lat')
+            ->whereNotNull('lon')
+            ->where('city', $city)
+            ->whereIn('role_id', [2, 5])
+            ->orderBy('business_name', 'asc')
+            ->paginate(10);
+    }
+
+    public static function getParentAndChildSellersByState(string $state): object
     {
         return self::where('is_active', 1)
             ->whereNotNull('lat')

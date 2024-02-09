@@ -150,8 +150,8 @@
                                     <div class="spinner-border" role="status"></div>
                                 </div>
                             @else
-                                <div class="col-6">
-                                    <select class="form-select form-select-lg">
+                                <div class="col-6 border border-danger">
+                                    <select class="form-select form-select-lg" wire:model="selected_nearby_seller">
                                         <option value="" selected>Stores list</option>
                                         @foreach ($nearby_sellers as $single_index)
                                             <option value="{{ $single_index['business_name'] }}">{{ $single_index['business_name'] }}</option>
@@ -160,6 +160,11 @@
                                 </div>
                             @endif
                         </div>
+                        <small class="text-danger">
+                            @error('selected_nearby_seller')
+                                {{ $message }}
+                            @enderror
+                        </small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -383,7 +388,7 @@
                                                                 Remove Product
                                                             </button>
                                                         @elseif ($order->order_items[$index]->user_choice === 3)
-                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#sendToOtherStoresModal" wire:click="renderSTOSModal({{ $order->order_items[$index] }})">
+                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#sendToOtherStoresModal" wire:click="renderSTOSModal({{ $order }}, {{ $order->order_items[$index] }})">
                                                                 <i class="fas fa-paper-plane"></i>
                                                                 Send To Other Stores
                                                             </button>

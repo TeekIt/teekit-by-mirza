@@ -24,8 +24,8 @@ class UsersController extends Controller
                 'country' => 'required|string',
                 'state' => 'required|string',
                 'city' => 'required|string',
-                'lat' => 'required|numeric',
-                'lon' => 'required|numeric'
+                'lat' => 'required|numeric|between:-90,90',
+                'lon' => 'required|numeric|between:-180,180'
             ]);
             if ($validate->fails()) return WebResponseCustom::getValidationResponseRedirectBack($validate);
 
@@ -124,21 +124,16 @@ class UsersController extends Controller
     public function sellers(Request $request)
     {
         try {
-            $validate = Validator::make($request->query(), [
+            $validated_data = Validator::make($request->query(), [
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
                 'state' => 'required|string',
                 'page' => 'required|numeric'
             ]);
-            if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            if ($validated_data->fails()) {
+                return JsonResponseCustom::getApiValidationFailedResponse($validated_data->errors());
             }
-            $sellers = User::getParentAndChildSellers($request->state);
+            $sellers = User::getParentAndChildSellersByState($request->state);
             $pagination = $sellers->toArray();
             unset($pagination['data']);
             

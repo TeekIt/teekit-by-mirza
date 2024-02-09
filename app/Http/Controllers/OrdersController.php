@@ -10,6 +10,7 @@ use App\Services\JsonResponseCustom;
 use App\User;
 use App\Services\TwilioSmsService;
 use App\VerificationCodes;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -356,42 +357,31 @@ class OrdersController extends Controller
         try {
             if ($request->has('type')) {
                 if ($request->type == 'delivery') {
-                    $validatedData = Validator::make($request->all(), [
-                        'lat' => 'required',
-                        'lon' => 'required',
-                        'receiver_name' => 'required',
+                    $validated_data = Validator::make($request->all(), [
+                        'items' => 'required|array',
+                        'lat' => 'required|numeric|between:-90,90',
+                        'lon' => 'required|numeric|between:-180,180',
+                        'receiver_name' => 'required|regex:/^[A-Za-z\s]+$/',
                         'phone_number' => 'required|string|min:13|max:13',
-                        'address' => 'required',
-                        'house_no' => 'required',
-                        'delivery_charges' => 'required',
-                        'service_charges' => 'required',
+                        'address' => 'required|string',
+                        'house_no' => 'required|integer',
+                        'delivery_charges' => 'required|numeric',
+                        'service_charges' => 'required|numeric',
                         'device' => 'sometimes'
                     ]);
-                    if ($validatedData->fails()) {
-                        return response()->json([
-                            'data' => [],
-                            'status' => false,
-                            'message' => $validatedData->errors()
-                        ], 422);
+                    if ($validated_data->fails()) {
+                        return JsonResponseCustom::getApiValidationFailedResponse($validated_data->errors());
                     }
                 } elseif ($request->type == 'self-pickup') {
-                    $validatedData = Validator::make($request->all(), [
+                    $validated_data = Validator::make($request->all(), [
                         'phone_number' => 'string|min:13|max:13'
                     ]);
-                    if ($validatedData->fails()) {
-                        return response()->json([
-                            'data' => [],
-                            'status' => false,
-                            'message' => $validatedData->errors()
-                        ], 422);
+                    if ($validated_data->fails()) {
+                        return JsonResponseCustom::getApiValidationFailedResponse($validated_data->errors());
                     }
                 }
             } else {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => 'The type field is required.'
-                ], 422);
+                return JsonResponseCustom::getApiValidationFailedResponse(json_decode('{"type": ["The type field is required."]}'));
             }
             $grouped_seller = [];
             foreach ($request->items as $item) {
@@ -400,7 +390,7 @@ class OrdersController extends Controller
                 $temp['qty'] = $item['qty'];
                 $temp['user_choice'] = $item['user_choice'];
                 $temp['price'] = Products::getProductPrice($item['product_id']);
-                $product = Products::getOnlyProductDetailsById($item['product_id']); 
+                $product = Products::getOnlyProductDetailsById($item['product_id']);
                 $temp['seller_id'] = $product->user_id;
                 $temp['volumn'] = $product->height * $product->width * $product->length;
                 $temp['weight'] = $product->weight;
@@ -505,7 +495,7 @@ class OrdersController extends Controller
                 }
                 $count++;
             }
-            if($request->wallet_flag == 1) User::deductFromWallet($user_id, $request->wallet_deduction_amount);
+            if ($request->wallet_flag == 1) User::deductFromWallet($user_id, $request->wallet_deduction_amount);
             return response()->json([
                 'data' => $this->getOrdersFromIds($order_arr),
                 'status' => true,

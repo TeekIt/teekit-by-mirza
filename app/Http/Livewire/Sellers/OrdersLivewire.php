@@ -11,6 +11,7 @@ use App\Services\StripeServices;
 use App\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -25,8 +26,10 @@ class OrdersLivewire extends Component
         $current_prod_qty,
         $receiver_name,
         $phone_number,
+        $order,
         $order_item,
         $nearby_sellers,
+        $selected_nearby_seller,
         $search = '';
 
     protected $paginationTheme = 'bootstrap';
@@ -96,15 +99,75 @@ class OrdersLivewire extends Component
         $this->phone_number = $phone_number;
     }
 
-    public function renderSTOSModal()
+    public function renderSTOSModal($order, $order_item)
     {
-        $sellers = User::getParentAndChildSellers(Auth::user()->city);
+        $this->order = $order;
+        $this->order_item = $order_item;
+        $sellers = User::getParentAndChildSellersByCity(Auth::user()->city);
         $this->nearby_sellers = GoogleMap::findDistanceByMakingChunks(Auth::user()->lat, Auth::user()->lon, $sellers, 25);
     }
 
     public function sendItemToAnOtherStore()
     {
-        dd('sending');
+        $this->validate([
+            'selected_nearby_seller' => 'required|string'
+        ]);
+        // dd($this->selected_nearby_seller);
+        try {
+            /* Perform some operation */
+            $prod_total_price = $this->order_item['product_price'] * $this->order_item['product_qty'];
+            /* Send this product to another store */
+            $selected_seller = User::getStoreByBusinessName($this->selected_nearby_seller);
+            dd(request()->schemeAndHttpHost());
+            dd($this->order);
+            dd($selected_seller);
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3RlZWtpdHN0YWdpbmcuc2hvcC9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTY5MjgxNzg4NiwiZXhwIjoxNzI4ODE3ODg2LCJuYmYiOjE2OTI4MTc4ODYsImp0aSI6ImVFNG9HNFA2NVNDYXB0aGQiLCJzdWIiOjQ4MiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSIsIm5hbWUiOiJBemltIiwicm9sZXMiOltdfQ.skCx-1m6NB8XaJjyBypI92X0j-Rm5GaPo7ahr1LqB3Y'
+            ])
+                ->post(request()->schemeAndHttpHost() . '/api/orders/new', [
+                    'items' => [
+                        [
+                            'product_id' => '23990',
+                            'qty' => '2',
+                            'user_choice' => '1',
+                        ]
+                    ],
+                    'type' => 'delivery',
+                    'receiver_name' => 'Kalsey Test',
+                    'phone_number' => '+447976620000',
+                    'address' => '1 Waldegrave Rd, London W5 3HT, UK',
+                    'house_no' => '135A',
+                    'description' => '',
+                    'delivery_charges' => '30',
+                    'service_charges' => '32',
+                    'payment_status' => 'paid',
+                    'lat' => '51.51552780',
+                    'lon' => '-0.29122390',
+                    'device' => 'Android',
+                    'offloading' => '1',
+                    'offloading_charges' => '5',
+                ]);
+
+            dd($response->body());
+
+
+            // /* Remove the item from current order items */
+            // $removed = OrderItems::removeItem($this->order_item['id']);
+            // /* Subtract the total price of this product/order item from the current order's total */
+            // $subtracted = Orders::subFromOrderTotal($this->order_item['order_id'], $prod_total_price);
+
+            /* Operation finished */
+            sleep(1);
+            if ($updated) {
+                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.UPDATION_FAILED'));
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error);
+        }
     }
 
     public function renderRemoveItemModal($order_item)
@@ -181,8 +244,8 @@ class OrdersLivewire extends Component
         try {
             /* Perform some operation */
             $prod_total_price = $this->order_item['product_price'] * $this->order_item['product_qty'];
-            $removed = OrderItems::removeItem($this->order_item);
-            $updated = Orders::subFromOrderTotal($this->order_item, $prod_total_price);
+            $removed = OrderItems::removeItem($this->order_item['id']);
+            $updated = Orders::subFromOrderTotal($this->order_item['order_id'], $prod_total_price);
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'removeItemFromOrderModel']);

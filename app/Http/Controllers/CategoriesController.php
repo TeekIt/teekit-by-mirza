@@ -180,7 +180,7 @@ class CategoriesController extends Controller
                 'category_id' => 'required|integer',
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
-                'city' => 'required|string'
+                'state' => 'required|string'
                 // 'page' => 'required|numeric'
             ]);
             if ($validate->fails()) {
@@ -193,7 +193,7 @@ class CategoriesController extends Controller
             }
 
             $stores = Cache::remember('get-stores-by-category'. $request->category_id . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
-                return Qty::getSellersByGivenParams($request->category_id, $request->city);
+                return Qty::getSellersByGivenParams($request->category_id, $request->state);
             });
 
             // $stores = Categories::stores($request->category_id, $request->city);
