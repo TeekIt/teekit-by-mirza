@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Services\ImageManipulation;
+use App\Services\ImageServices;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
@@ -95,7 +95,7 @@ class Drivers extends Authenticatable implements JWTSubject
 
     public static function addImg(object $driver, object $request, string $img_key_name)
     {
-        $driver->profile_img = ImageManipulation::uploadImg($request, $img_key_name, $driver->id);
+        $driver->profile_img = ImageServices::uploadImg($request, $img_key_name, $driver->id);
         $driver->save();
         return $driver;
     }

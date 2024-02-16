@@ -18,7 +18,7 @@ use App\Http\Controllers\ReferralCodeRelationController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WithdrawalRequestsController;
 use App\Products;
-use App\Services\JsonResponseCustom;
+use App\Services\JsonResponseServices;
 use App\Services\StripeServices;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
@@ -42,7 +42,7 @@ Route::get('products', function () {
         ], 200);
     } catch (Throwable $error) {
         report($error);
-        return JsonResponseCustom::getApiResponse(
+        return JsonResponseServices::getApiResponse(
             [],
             false,
             $error,

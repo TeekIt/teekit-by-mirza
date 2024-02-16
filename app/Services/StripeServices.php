@@ -39,7 +39,7 @@ final class StripeServices
         if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
 
         curl_close($ch);
-        return JsonResponseCustom::getApiResponse(
+        return JsonResponseServices::getApiResponse(
             json_decode($data),
             true,
             '',
@@ -70,7 +70,7 @@ final class StripeServices
         if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
 
         curl_close($ch);
-        return JsonResponseCustom::getApiResponse(
+        return JsonResponseServices::getApiResponse(
             json_decode($data),
             true,
             '',
@@ -97,7 +97,7 @@ final class StripeServices
         if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
 
         curl_close($ch);
-        return JsonResponseCustom::getApiResponse(
+        return JsonResponseServices::getApiResponse(
             json_decode($data),
             true,
             '',
@@ -124,7 +124,7 @@ final class StripeServices
         if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
 
         curl_close($ch);
-        return JsonResponseCustom::getApiResponse(
+        return JsonResponseServices::getApiResponse(
             json_decode($data),
             true,
             '',
@@ -134,7 +134,7 @@ final class StripeServices
 
     public static function refundCustomer(Orders $order)
     {
-        $api_key = (url('/') === config('constants.LIVE_SITE_URL')) ? static::getLiveApiKey() : static::getTestApiKey();
+        $api_key = (url('/') === config('constants.LIVE_DASHBOARD_URL')) ? static::getLiveApiKey() : static::getTestApiKey();
         Stripe::setApiKey($api_key);
         Refund::create([
             // 'charge' => $order->transaction_id,

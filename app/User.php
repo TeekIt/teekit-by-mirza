@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Services\EmailManagement;
+use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
@@ -173,7 +173,7 @@ class User extends Authenticatable implements JWTSubject
         string $postcode,
         string $lat,
         string $lon
-    ) {
+    ): object {
         $user = self::find($user_id);
         $user->full_address = $full_address;
         if (!is_null($unit_address)) $user->unit_address = $unit_address;
@@ -327,7 +327,7 @@ class User extends Authenticatable implements JWTSubject
         self::where('id', '=', $user_id)->update(['is_active' => $status]);
         if ($status == 1) {
             $user = self::findOrFail($user_id);
-            EmailManagement::sendStoreApprovedMail($user);
+            EmailServices::sendStoreApprovedMail($user);
         }
         return true;
     }

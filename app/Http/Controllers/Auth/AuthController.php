@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use JWTAuth;
 use Jenssegers\Agent\Agent;
 use App\Models\JwtToken;
-use App\Services\JsonResponseCustom;
+use App\Services\JsonResponseServices;
 use Illuminate\Http\Request;
 use App\User;
 use Illuminate\Support\Facades\Hash;
@@ -494,7 +494,7 @@ class AuthController extends Controller
     public function getUserDetails($user_id)
     {
         $data = User::getUserInfo($user_id);
-        return JsonResponseCustom::getApiResponse(
+        return JsonResponseServices::getApiResponse(
             (empty($data)) ? [] : $data,
             (empty($data)) ? false : true,
             (empty($data)) ? config('constants.NO_RECORD') : '',

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-final class JsonResponseCustom
+final class JsonResponseServices
 {
     public static function getApiValidationFailedResponse($errors)
     {

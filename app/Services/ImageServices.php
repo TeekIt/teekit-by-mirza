@@ -2,11 +2,10 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
-final class ImageManipulation
+final class ImageServices
 {
     public static function uploadImg(object $request, string $img_key_name, string $id)
     {

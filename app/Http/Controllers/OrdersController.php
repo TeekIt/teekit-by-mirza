@@ -6,11 +6,13 @@ use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Qty;
-use App\Services\JsonResponseCustom;
+use App\Services\DriverFairServices;
+use App\Services\GoogleMapServices;
+use App\Services\JsonResponseServices;
 use App\User;
 use App\Services\TwilioSmsService;
+use App\Services\VerificationCodeServices;
 use App\VerificationCodes;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +24,6 @@ class OrdersController extends Controller
     /**
      * List orders w.r.t Seller ID
      * @author Huzaifa Haleem
-     * @version 1.1.0
      */
     public function showBuyerOrders(Request $request)
     {
@@ -35,26 +36,29 @@ class OrdersController extends Controller
                 $order_data = [];
                 foreach ($orders as $order) $order_data[] = $this->getOrderDetails($order->id);
                 unset($pagination['data']);
-                return response()->json([
-                    'data' => $order_data,
-                    'status' => true,
-                    'message' => '',
-                    'pagination' => $pagination
-                ], 200);
-            } else {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => config('constants.NO_RECORD')
-                ], 200);
+                JsonResponseServices::getApiResponseExtention(
+                    $order_data,
+                    config('constants.TRUE_STATUS'),
+                    '',
+                    'pagination',
+                    $pagination,
+                    config('constants.HTTP_OK')
+                );
             }
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                config('constants.NO_RECORD'),
+                config('constants.HTTP_OK')
+            );
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
@@ -63,30 +67,25 @@ class OrdersController extends Controller
     public function productsOfRecentOrder(Request $request)
     {
         try {
-            $validate = Validator::make($request->all(), [
+            $validated_data = Validator::make($request->all(), [
                 'prducts_limit' => 'required|integer',
                 'seller_id' => 'required|integer'
             ]);
-            if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
-                    [],
-                    false,
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->error());
             }
             $order = Orders::getRecentOrderByBuyerId(Auth::id(), $request->prducts_limit, $request->seller_id);
             if (!empty($order)) {
                 $recent_order_prods_data = [];
                 foreach ($order->products as $product) $recent_order_prods_data[] = Products::getProductInfo($request->seller_id, $product->id, ['*']);
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     $recent_order_prods_data,
                     true,
                     '',
                     config('constants.HTTP_OK')
                 );
             }
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 config('constants.NO_RECORD'),
@@ -94,7 +93,7 @@ class OrdersController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 $error,
@@ -106,13 +105,12 @@ class OrdersController extends Controller
      * List all ready or delivered orders
      * for a specific delivery boy
      * @author Huzaifa Haleem
-     * @version 1.1.1
      */
     public function sellerOrders(Request $request)
     {
         $lat = \auth()->user()->lat;
         $lon = \auth()->user()->lon;
-        $orders = array();
+        $orders = [];
         if ($request->has('order_status') && $request->order_status == 'delivered') {
             $orders = Orders::query();
             $orders = $orders->where('order_status', '=', 'delivered');
@@ -237,11 +235,11 @@ class OrdersController extends Controller
      * List all (assigned,complete,pending_approval,cancelled) orders
      * for a specific delivery boy
      * @author Huzaifa Haleem
-     * @version 1.1.1
      */
     public function deliveryBoyOrders(Request $request, $delivery_boy_id)
-    {   //delivery_status:assigned,complete,pending_approval,cancelled
-        $orders = Orders::query()->select('id')->where('delivery_boy_id', '=', $delivery_boy_id)
+    {
+        //delivery_status:assigned,complete,pending_approval,cancelled
+        $orders = Orders::select('id')->where('delivery_boy_id', '=', $delivery_boy_id)
             ->where('delivery_status', '=', $request->delivery_status)
             ->where('type', '=', 'delivery')
             ->paginate();
@@ -269,7 +267,6 @@ class OrdersController extends Controller
     /**
      * Assigns an order to a specific delivery boy
      * @author Huzaifa Haleem
-     * @version 1.1.0
      */
     public function assignOrder(Request $request)
     {
@@ -324,7 +321,6 @@ class OrdersController extends Controller
     /**
      * A delivery boy can cancel a specific order through this function
      * @author Mirza Abdullah Izhar
-     * @version 1.0.0
      */
     public function cancelOrder(Request $request)
     {
@@ -370,18 +366,18 @@ class OrdersController extends Controller
                         'device' => 'sometimes'
                     ]);
                     if ($validated_data->fails()) {
-                        return JsonResponseCustom::getApiValidationFailedResponse($validated_data->errors());
+                        return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
                     }
                 } elseif ($request->type == 'self-pickup') {
                     $validated_data = Validator::make($request->all(), [
                         'phone_number' => 'string|min:13|max:13'
                     ]);
                     if ($validated_data->fails()) {
-                        return JsonResponseCustom::getApiValidationFailedResponse($validated_data->errors());
+                        return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
                     }
                 }
             } else {
-                return JsonResponseCustom::getApiValidationFailedResponse(json_decode('{"type": ["The type field is required."]}'));
+                return JsonResponseServices::getApiValidationFailedResponse(json_decode('{"type": ["The type field is required."]}'));
             }
             $grouped_seller = [];
             foreach ($request->items as $item) {
@@ -416,18 +412,14 @@ class OrdersController extends Controller
                 * Adding amount into seller wallet 
                 */
                 User::addIntoWallet($seller_id, $order_total);
-                // $seller_money = $seller->pending_withdraw;
-                // $seller->pending_withdraw = $order_total + $seller_money;
-                // $seller->save();
-                // dd($order_total);
                 if ($request->type == 'delivery') {
                     $customer_lat = $request->lat;
                     $customer_lon = $request->lon;
                     $store_lat = $seller->lat;
                     $store_lon = $seller->lon;
-                    $distance = $this->getDistanceBetweenPoints($customer_lat, $customer_lon, $store_lat, $store_lon);
                     // $distance = $this->calculateDistance($customer_lat, $customer_lon, $store_lat, $store_lon);
-                    $driver_charges = $this->calculateDriverFair2($total_weight, $total_volumn, $distance);
+                    $distance = GoogleMapServices::getDistanceInMiles($store_lat, $store_lon, $customer_lat, $customer_lon);
+                    $driver_charges = DriverFairServices::calculateDriverFair2($total_weight, $total_volumn, $distance);
                 }
                 $new_order = new Orders();
                 $new_order->user_id = $user_id;
@@ -455,13 +447,9 @@ class OrdersController extends Controller
                 $new_order->save();
                 $order_id = $new_order->id;
                 if ($request->type == 'delivery') {
-                    $verification_code = '';
-                    while (strlen($verification_code) < 6) {
-                        $rand_number = rand(0, time());
-                        $verification_code = $verification_code . substr($rand_number, 0, 1);
-                    }
-                    if (url()->current() == 'https://app.teekit.co.uk/api/orders/new' || url()->current() == 'https://teekitapi.com/api/orders/new') {
-                        // For sending SMS notification for "New Order"
+                    $verification_code = VerificationCodeServices::generateCode();
+                    if (url()->current() == config('constants.LIVE_DASHBOARD_URL') . '/api/orders/new' || url()->current() == config('constants.APIS_DOMAIN_URL') . '/api/orders/new') {
+                        // Msg for sending SMS notification of this "New Order"
                         $message_for_admin = "A new order #" . $order_id . " has been received. Please check TeekIt's platform, or SignIn here now:https://app.teekit.co.uk/login";
                         $message_for_customer = "Thanks for your order. Your order has been accepted by the store. Please quote verification code: " . $verification_code . " on delivery. TeekIt";
 
@@ -478,42 +466,34 @@ class OrdersController extends Controller
                         TwilioSmsService::sendSms('+447817332090', $message_for_admin); //Junaid Number
                         TwilioSmsService::sendSms('+923170155625', $message_for_admin); //Mirza Number
                     }
-                    $verification_codes = new VerificationCodes();
-                    $verification_codes->order_id = $order_id;
-                    $verification_codes->code = '{"code": "' . $verification_code . '", "driver_failed_to_enter_code": "NULL"}';
-                    $verification_codes->save();
+                    VerificationCodes::insertVerificationCode($order_id, $verification_code);
                 }
                 $order_arr[] = $order_id;
                 foreach ($order as $order_item) {
-                    $new_order_item = new OrderItems();
-                    $new_order_item->order_id = $order_id;
-                    $new_order_item->product_id = $order_item['product_id'];
-                    $new_order_item->product_price = $order_item['price'];
-                    $new_order_item->product_qty = $order_item['qty'];
-                    $new_order_item->user_choice = $order_item['user_choice'];
-                    $new_order_item->save();
+                    OrderItems::insertOrderItem($order_id, $order_item['product_id'], $order_item['price'], $order_item['qty'], $order_item['user_choice']);
                 }
                 $count++;
             }
             if ($request->wallet_flag == 1) User::deductFromWallet($user_id, $request->wallet_deduction_amount);
-            return response()->json([
-                'data' => $this->getOrdersFromIds($order_arr),
-                'status' => true,
-                'message' => 'Order added successfully.'
-            ], 200);
+            return JsonResponseServices::getApiResponse(
+                $this->getOrdersFromIds($order_arr),
+                config('constants.TRUE_STATUS'),
+                config('constants.ORDER_PLACED_SUCCESSFULLY'),
+                config('constants.HTTP_OK')
+            );
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
      * Cancel's a customer order
      * @author Mirza Abdullah Izhar
-     * @version 1.0.0
      */
     public function customerCancelOrder(Request $request)
     {
@@ -579,7 +559,6 @@ class OrdersController extends Controller
     /**
      * Update's the order
      * @author Mirza Abdullah Izhar
-     * @version 1.0.0
      */
     public function updateOrder(Request $request)
     {
@@ -616,9 +595,8 @@ class OrdersController extends Controller
             $order->save();
             $count++;
         }
-        $return_data = $this->getOrdersFromIds($order_arr);
         return response()->json([
-            'data' => $return_data,
+            'data' => $this->getOrdersFromIds($order_arr),
             'status' => true,
             'message' => 'Order Added Successfully'
         ], 200);
@@ -626,20 +604,16 @@ class OrdersController extends Controller
     /**
      * It is used to fetch the information of multiple orders w.r.t their ID's
      * @author Huzaif Haleem
-     * @version 1.0.0
      */
     public function getOrdersFromIds($ids)
     {
         $raw_data = [];
-        foreach ($ids as $order_id) {
-            $raw_data[] = $this->getOrderDetails($order_id);
-        }
+        foreach ($ids as $order_id) $raw_data[] = $this->getOrderDetails($order_id);
         return $raw_data;
     }
     /**
      * It is used to fetch the information of a single order w.r.t it's ID
      * @author Huzaifa Haleem
-     * @version 1.0.0
      */
     public function getOrderDetails($order_id)
     {
@@ -650,50 +624,46 @@ class OrdersController extends Controller
         return $temp;
     }
     /**
-     * It will get order details via
-     * given id
-     * @version 1.0.0
+     * It will get order details via given id
      */
     public function getOrderDetailsTwo(Request $request)
     {
         try {
-            $validate = Validator::make($request->route()->parameters(), [
+            $validated_data = Validator::make($request->route()->parameters(), [
                 'id' => 'required|integer'
             ]);
-            if ($validate->fails()) {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => $validate->errors()
-                ], 422);
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->error());
             }
-            if (!Orders::where('id', $request->id)->exists()) {
-                return response()->json([
-                    'date' => [],
-                    'status' => false,
-                    'message' => config('constants.NO_RECORD')
-                ], 200);
+            if (!Orders::checkIfOrderExists($request->id)) {
+                return JsonResponseServices::getApiResponse(
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    config('constants.NO_RECORD'),
+                    config('constants.HTTP_OK')
+                );
             }
             $order = Orders::with(['user', 'delivery_boy', 'store', 'order_items', 'order_items.products'])
                 ->where('id', $request->id)->first();
-            return response()->json([
-                'data' => $order,
-                'status' => true,
-                'message' => ""
-            ], 200);
+            return JsonResponseServices::getApiResponse(
+                $order,
+                config('constants.TRUE_STATUS'),
+                "",
+                config('constants.HTTP_OK')
+            );
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
      * It will store the estimated time
      * Of an order provided via id
-     * @version 1.0.0
      */
     public function storeEstimatedTime($id)
     {
@@ -702,50 +672,6 @@ class OrdersController extends Controller
         $order->save();
         return $order->toArray();
     }
-    // public function getDistanceBetweenPoints($destination_lat, $destination_lon, $origin_lat, $origin_lon)
-    // {
-    //     $destination_address = $destination_lat . ',' . $destination_lon;
-    //     $origing_address = $origin_lat . ',' . $origin_lon;
-    //     /* Rameesha's URL */
-    //     $url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" . urlencode($origing_address) . "&destinations=" . urlencode($destination_address) . "&mode=driving&key=AIzaSyD_7jrpEkUDW7pxLBm91Z0K-U9Q5gK-10U";
-
-    //     $results = json_decode(file_get_contents($url), true);
-    //     $meters = explode(' ', $results['rows'][0]['elements'][0]['distance']['value']);
-    //     $distanceInMiles = (float)$meters[0] * 0.000621;
-
-    //     $durationInSeconds = explode(' ', $results['rows'][0]['elements'][0]['duration']['value']);
-    //     $durationInMinutes = round((int)$durationInSeconds[0] / 60);
-    //     return ['distance' => $distanceInMiles, 'duration' => $durationInMinutes];
-    // }
-
-    // public function getDistanceBetweenPoints($latitude1, $longitude1, $latitude2, $longitude2)
-    public function getDistanceBetweenPoints($destination_lat, $destination_lon, $origin_lat, $origin_lon)
-    {
-        // $address1 = $latitude1 . ',' . $longitude1;
-        // $address2 = $latitude2 . ',' . $longitude2;
-
-        // $url = "https://maps.googleapis.com/maps/api/directions/json?origin=" . urlencode($address1) . "&destination=" . urlencode($address2) . "&transit_routing_preference=fewer_transfers&key=AIzaSyBFDmGYlVksc--o1jpEXf9jVQrhwmGPxkM";
-
-        $destination_address = $destination_lat . ',' . $destination_lon;
-        $origing_address = $origin_lat . ',' . $origin_lon;
-        // Google Distance Matrix
-        // $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$latitude1.",".$longitude1."&destinations=".$latitude2.",".$longitude2."&mode=driving&key=AIzaSyBFDmGYlVksc--o1jpEXf9jVQrhwmGPxkM";
-
-        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" . urlencode($origing_address) . "&destinations=" . urlencode($destination_address) . "&mode=driving&key=AIzaSyD_7jrpEkUDW7pxLBm91Z0K-U9Q5gK-10U";
-
-        // $query = file_get_contents($url);
-        // $results = json_decode($query, true);
-        // $distanceString = explode(' ', $results['routes'][0]['legs'][0]['distance']['text']);
-
-        $results = json_decode(file_get_contents($url), true);
-        $meters = $results['rows'][0]['elements'][0]['distance']['value'];
-        $distanceInMiles = $meters * 0.000621;
-
-        // $miles = (int)$distanceString[0] * 0.621371;
-        // return $miles > 1 ? $miles : 1;
-        return (float) $distanceInMiles;
-    }
-
     /**
      * This function will return back store open/close & product qty status
      * Along with this information it will also send store_id & product_id
@@ -756,31 +682,27 @@ class OrdersController extends Controller
     public function recheckProducts(Request $request)
     {
         try {
-            $validatedData = Validator::make($request->all(), [
+            $validated_data = Validator::make($request->all(), [
                 'items' => 'required|array',
                 'day' => 'required|string',
                 'time' => 'required|string'
             ]);
-            if ($validatedData->fails()) {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => $validatedData->errors()
-                ], 422);
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->error());
             }
             $i = 0;
             foreach ($request->items as $item) {
-                $open_time = User::query()->select('business_hours->time->' . $request->day . '->open as open')
+                $open_time = User::select('business_hours->time->' . $request->day . '->open as open')
                     ->where('id', '=', $item['store_id'])
                     ->where('is_active', '=', 1)
                     ->get();
 
-                $close_time = User::query()->select('business_hours->time->' . $request->day . '->close as close')
+                $close_time = User::select('business_hours->time->' . $request->day . '->close as close')
                     ->where('id', '=', $item['store_id'])
                     ->where('is_active', '=', 1)
                     ->get();
 
-                $qty = Products::query()->select('qty')
+                $qty = Products::select('qty')
                     ->where('id', '=', $item['product_id'])
                     ->where('user_id', '=', $item['store_id'])
                     ->where('status', '=', 1)
@@ -792,102 +714,46 @@ class OrdersController extends Controller
                 $order_data[$i]['qty'] = (isset($qty[0]->qty)) ? $qty[0]->qty : NULL;
                 $i++;
             }
-            return response()->json([
-                'data' => $order_data,
-                'status' => true,
-                'message' => ''
-            ], 200);
+            return JsonResponseServices::getApiResponse(
+                $order_data,
+                config('constants.TRUE_STATUS'),
+                '',
+                config('constants.HTTP_OK')
+            );
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
      * It will calculate the total distance between client & store location & then
      * It will return the total distance in Miles
      * @author Mirza Abdullah Izhar
-     * @version 1.0.0
      */
-    function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo)
-    {
-        $long1 = deg2rad($longitudeFrom);
-        $long2 = deg2rad($longitudeTo);
-        $lat1 = deg2rad($latitudeFrom);
-        $lat2 = deg2rad($latitudeTo);
-
-        //Haversine Formula
-        $dlong = $long2 - $long1;
-        $dlati = $lat2 - $lat1;
-        $val = pow(sin($dlati / 2), 2) + cos($lat1) * cos($lat2) * pow(sin($dlong / 2), 2);
-        $res = 2 * asin(sqrt($val));
-
-        //Radius of Earth in Miles
-        $radius = 3958.8;
-
-        //$miles = round($res*$radius);
-        $miles = $res * $radius;
-
-        return ($miles);
-    }
-    /**
-     * It will calculate the fair for a driver
-     * @author Huzaifa Haleem
-     * @version 1.0.0
-     */
-    // public function calculateDriverFair($order, $store)
+    // public function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo)
     // {
-    //     $childOrders = Orders::where('delivery_boy_id', $order->delivery_boy_id)
-    //         ->where('id', '!=', $order->id)
-    //         ->where('order_status', 'onTheWay')->get();
-    //     if (count($childOrders) > 0) {
-    //         foreach ($childOrders as $childOrder) {
-    //             $childOrder->update(['parent_id' => $order->id]);
-    //         }
-    //     }
-    //     $driver = User::find($order->delivery_boy_id);
-    //     $driver_money = $driver->pending_withdraw;
-    //     $fair_per_mile = 1.50;
-    //     $pickup = 1.50;
-    //     $drop_off = 1.10;
-    //     $fee = 0.20;
-    //     if (is_null($order->parent_id)) {
-    //         $distance = $this->getDistanceBetweenPoints($order->lat, $order->lon, $store->lat, $store->lon);
-    //         $totalFair = ($distance * $fair_per_mile) + $pickup + $drop_off;
-    //         $teekitCharges = $totalFair * $fee;
-    //         $driver->pending_withdraw = ($totalFair - $teekitCharges) + $driver_money;
-    //         $driver->save();
-    //         $order->driver_charges = $totalFair - $fee;
-    //         $order->driver_traveled_km = (round(($distance * 1.609344), 2));
-    //         $order->save();
-    //     } else {
-    //         $oldOrder = Orders::find($order->parent_id);
-    //         $distance = $this->getDistanceBetweenPoints($order->lat, $order->lon, $oldOrder->lat, $oldOrder->lon);
-    //         $pickup_val = $oldOrder->seller_id == $order->seller_id ? 0.0 : $pickup;
-    //         $totalFair = ($distance * $fair_per_mile) + $drop_off + $pickup_val;
-    //         $teekitCharges = $totalFair * $fee;
-    //         $driver->pending_withdraw = ($totalFair - $teekitCharges) + $driver_money;
-    //         $driver->save();
-    //     }
+    //     $long1 = deg2rad($longitudeFrom);
+    //     $long2 = deg2rad($longitudeTo);
+    //     $lat1 = deg2rad($latitudeFrom);
+    //     $lat2 = deg2rad($latitudeTo);
+
+    //     //Haversine Formula
+    //     $dlong = $long2 - $long1;
+    //     $dlati = $lat2 - $lat1;
+    //     $val = pow(sin($dlati / 2), 2) + cos($lat1) * cos($lat2) * pow(sin($dlong / 2), 2);
+    //     $res = 2 * asin(sqrt($val));
+
+    //     //Radius of Earth in Miles
+    //     $radius = 3958.8;
+
+    //     //$miles = round($res*$radius);
+    //     $miles = $res * $radius;
+
+    //     return ($miles);
     // }
-    /**
-     * It will calculate the fair for a driver
-     * The formulas used inside this function are pre-defined by Eesa & Team
-     * @author Mirza Abdullah Izhar
-     * @version 1.0.0
-     */
-    public function calculateDriverFair2($total_weight, $total_volumn, $distance)
-    {
-        // 38cm*38cm*38cm = 54,872cm
-        if ($total_weight <= 12 || $total_volumn <= 54872) {
-            // Calculate fair for Bike driver
-            return round((2.6 + (1.5 * $distance)) * 0.75);
-        } else {
-            // Calculate fair for Car/Van driver
-            return round(((2.6 + (1.75 * $distance)) + ((($total_weight - 12) / 15) * ($distance / 4))) * 0.8);
-        }
-    }
 }

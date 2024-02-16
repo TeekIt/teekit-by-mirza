@@ -6,8 +6,8 @@ use App\Drivers;
 use App\DriverDocuments;
 use App\Http\Controllers\Controller;
 use App\Orders;
-use App\Services\EmailManagement;
-use App\Services\JsonResponseCustom;
+use App\Services\EmailServices;
+use App\Services\JsonResponseServices;
 use App\User;
 use App\VerificationCodes;
 use App\WithdrawalRequests;
@@ -286,16 +286,16 @@ class DriverController extends Controller
             // Now upload driver documents
             DriverDocuments::add($request, $drivers->id);
             // Send verification email
-            EmailManagement::sendDriverAccVerificationMail($drivers);
+            EmailServices::sendDriverAccVerificationMail($drivers);
             if ($drivers) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.TRUE_STATUS'),
                     config('constants.DRIVER_REGISTERATION_MSG'),
                     config('constants.HTTP_OK')
                 );
             }
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 config('constants.REGISTER_FAILED'),
@@ -303,7 +303,7 @@ class DriverController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,

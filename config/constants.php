@@ -41,6 +41,7 @@ return [
     'CACHE_REMOVED_SUCCESSFULLY' => 'All Cached data of your App has been removed successfully.',
     'WITHDRAWAL_REQUEST_SUBMITTED' => 'Withdrawal request is successfully submitted.',
     'PRODUCT_REMOVED_SUCCESSFULLY' => 'Product has been removed successfully.',
+    'ORDER_PLACED_SUCCESSFULLY' => 'Your order has been placed successfully.',
     /*
     |--------------------------------------------------------------------------
     | Failure Constants
@@ -125,10 +126,11 @@ return [
     'ADMIN_EMAIL' => 'admin@teekit.co.uk',
     /*
     |--------------------------------------------------------------------------
-    | Site URL
+    | Teek it URL's
     |--------------------------------------------------------------------------
     */
-    'LIVE_SITE_URL' => 'https://app.teekit.co.uk/',
+    'LIVE_DASHBOARD_URL' => 'https://app.teekit.co.uk',
+    'APIS_DOMAIN_URL' => 'https://teekitapi.com',
     /*
     |--------------------------------------------------------------------------
     | HTTP Status Codes

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\User;
 use App\Http\Controllers\Controller;
-use App\Services\EmailManagement;
+use App\Services\EmailServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -149,7 +149,7 @@ class RegisterController extends Controller
         }
 
         // 2: parent store
-        ($user->role_id === 2) ? EmailManagement::sendNewParentStoreMail($user) : EmailManagement::sendNewChildStoreMail($user, $request->input('parent_store'));
+        ($user->role_id === 2) ? EmailServices::sendNewParentStoreMail($user) : EmailServices::sendNewChildStoreMail($user, $request->input('parent_store'));
 
         // $admin_users = Role::with('users')->where('name', 'superadmin')->first();
         // $store_link = $FRONTEND_URL . '/customer/' . $user->id . '/details';

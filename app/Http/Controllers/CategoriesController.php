@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Categories;
 use App\Qty;
-use App\Services\GoogleMap;
+use App\Services\GoogleMapServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
-use App\Services\JsonResponseCustom;
+use App\Services\JsonResponseServices;
 use Illuminate\Support\Facades\Cache;
 
 class CategoriesController extends Controller
@@ -23,7 +23,7 @@ class CategoriesController extends Controller
         try {
             $validate = Categories::validator($request);
             if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     $validate->errors(),
@@ -31,7 +31,7 @@ class CategoriesController extends Controller
                 );
             }
             $category = Categories::add($request);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 $category,
                 config('constants.TRUE_STATUS'),
                 config('constants.DATA_INSERTION_SUCCESS'),
@@ -39,7 +39,7 @@ class CategoriesController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,
@@ -56,7 +56,7 @@ class CategoriesController extends Controller
         try {
             $validate = Categories::validator($request);
             if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     $validate->messages(),
@@ -64,7 +64,7 @@ class CategoriesController extends Controller
                 );
             }
             $category = Categories::updateCategory($request, $category_id);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 $category,
                 config('constants.TRUE_STATUS'),
                 config('constants.DATA_UPDATED_SUCCESS'),
@@ -72,7 +72,7 @@ class CategoriesController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,
@@ -91,7 +91,7 @@ class CategoriesController extends Controller
                 'store_id' => 'integer',
             ]);
             if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     $validate->errors(),
@@ -108,7 +108,7 @@ class CategoriesController extends Controller
             * Which will obviouly reduce the API response speed
             */
             $data_is_empty = $data->isEmpty();
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 ($data_is_empty) ? [] : $data,
                 ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
                 ($data_is_empty) ? config('constants.NO_RECORD') : '',
@@ -116,7 +116,7 @@ class CategoriesController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,
@@ -135,7 +135,7 @@ class CategoriesController extends Controller
                 'category_id' => 'required|integer',
             ]);
             if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     $validate->errors(),
@@ -151,7 +151,7 @@ class CategoriesController extends Controller
             * Which will obviouly reduce the API response speed
             */
             $data_is_empty = empty($data);
-            return JsonResponseCustom::getApiResponseExtention(
+            return JsonResponseServices::getApiResponseExtention(
                 ($data_is_empty) ? [] : $data['data'],
                 ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
                 ($data_is_empty) ? config('constants.NO_RECORD') : '',
@@ -161,7 +161,7 @@ class CategoriesController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,
@@ -184,7 +184,7 @@ class CategoriesController extends Controller
                 // 'page' => 'required|numeric'
             ]);
             if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     $validate->errors(),
@@ -200,13 +200,13 @@ class CategoriesController extends Controller
             // $pagination = $stores->toArray();
             // unset($pagination['data']);
 
-            $data = GoogleMap::findDistanceByMakingChunks($request->lat, $request->lon, $stores, 25);
+            $data = GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $stores, 25);
             /* 
             * Just creating this variable so we don't have to call the "empty()" function again & again  
             * Because it will increase the API response time
             */
             $data_is_empty = empty($data);
-            // return JsonResponseCustom::getApiResponseExtention(
+            // return JsonResponseServices::getApiResponseExtention(
             //     ($data_is_empty) ? [] : $data,
             //     ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
             //     ($data_is_empty) ? config('constants.NO_RECORD') : '',
@@ -215,7 +215,7 @@ class CategoriesController extends Controller
             //     config('constants.HTTP_OK')
             // );
 
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 ($data_is_empty) ? [] : $data,
                 ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
                 ($data_is_empty) ? config('constants.NO_RECORD') : '',
@@ -223,7 +223,7 @@ class CategoriesController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,

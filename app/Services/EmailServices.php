@@ -11,7 +11,7 @@ use App\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 
-final class EmailManagement
+final class EmailServices
 {
     public static function getVerificationLink($verification_code)
     {

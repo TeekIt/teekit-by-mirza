@@ -5,8 +5,8 @@ namespace App\Http\Livewire\Sellers;
 use App\Drivers;
 use App\OrderItems;
 use App\Orders;
-use App\Services\EmailManagement;
-use App\Services\GoogleMap;
+use App\Services\EmailServices;
+use App\Services\GoogleMapServices;
 use App\Services\StripeServices;
 use App\User;
 use Exception;
@@ -104,7 +104,7 @@ class OrdersLivewire extends Component
         $this->order = $order;
         $this->order_item = $order_item;
         $sellers = User::getParentAndChildSellersByCity(Auth::user()->city);
-        $this->nearby_sellers = GoogleMap::findDistanceByMakingChunks(Auth::user()->lat, Auth::user()->lon, $sellers, 25);
+        $this->nearby_sellers = GoogleMapServices::findDistanceByMakingChunks(Auth::user()->lat, Auth::user()->lon, $sellers, 25);
     }
 
     public function sendItemToAnOtherStore()
@@ -118,15 +118,17 @@ class OrdersLivewire extends Component
             $prod_total_price = $this->order_item['product_price'] * $this->order_item['product_qty'];
             /* Send this product to another store */
             $selected_seller = User::getStoreByBusinessName($this->selected_nearby_seller);
-            dd(request()->schemeAndHttpHost());
-            dd($this->order);
-            dd($selected_seller);
+            // dd(request()->schemeAndHttpHost());
+            // dd($this->order);
+            dd($this->order_item);
+
+            Orders::createOrderForOtherStore($selected_seller->id, $this->order, $this->order_item);
 
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3RlZWtpdHN0YWdpbmcuc2hvcC9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTY5MjgxNzg4NiwiZXhwIjoxNzI4ODE3ODg2LCJuYmYiOjE2OTI4MTc4ODYsImp0aSI6ImVFNG9HNFA2NVNDYXB0aGQiLCJzdWIiOjQ4MiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSIsIm5hbWUiOiJBemltIiwicm9sZXMiOltdfQ.skCx-1m6NB8XaJjyBypI92X0j-Rm5GaPo7ahr1LqB3Y'
             ])
                 ->acceptJson()
-                ->post(request()->schemeAndHttpHost() . '/api/orders/new', [
+                ->post('http://127.0.0.1:8000' . '/api/orders/new', [
                     'items' => [
                         [
                             'product_id' => '23990',
@@ -138,7 +140,7 @@ class OrdersLivewire extends Component
                     'receiver_name' => 'Kalsey Test',
                     'phone_number' => '+447976620000',
                     'address' => '1 Waldegrave Rd, London W5 3HT, UK',
-                    'house_no' => '135A',
+                    'house_no' => '135',
                     'description' => '',
                     'delivery_charges' => '30',
                     'service_charges' => '32',
@@ -151,6 +153,29 @@ class OrdersLivewire extends Component
                 ]);
 
             dd($response->body());
+
+            /* cURL Request */
+            // $curl = curl_init();
+
+            // curl_setopt_array($curl, array(
+            //     CURLOPT_URL => 'http://127.0.0.1:8000/api/orders/new',
+            //     CURLOPT_RETURNTRANSFER => true,
+            //     CURLOPT_ENCODING => '',
+            //     CURLOPT_MAXREDIRS => 10,
+            //     CURLOPT_TIMEOUT => 0,
+            //     CURLOPT_FOLLOWLOCATION => true,
+            //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            //     CURLOPT_CUSTOMREQUEST => 'POST',
+            //     CURLOPT_POSTFIELDS => array('items[1][product_id]' => '23990', 'items[1][qty]' => '2', 'items[1][user_choice]' => '1', 'type' => 'delivery', 'receiver_name' => 'Kalsey Test', 'phone_number' => '+447976620000', 'address' => '1 Waldegrave Rd, London W5 3HT, UK', 'house_no' => '135', 'description' => '', 'delivery_charges' => '30', 'service_charges' => '32', 'payment_status' => 'paid', 'lat' => '51.51552780', 'lon' => '-0.29122390', 'device' => 'Android', 'offloading' => '1', 'offloading_charges' => '5'),
+            //     CURLOPT_HTTPHEADER => array(
+            //         'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3RlZWtpdHN0YWdpbmcuc2hvcC9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTY5MjgxNzg4NiwiZXhwIjoxNzI4ODE3ODg2LCJuYmYiOjE2OTI4MTc4ODYsImp0aSI6ImVFNG9HNFA2NVNDYXB0aGQiLCJzdWIiOjQ4MiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSIsIm5hbWUiOiJBemltIiwicm9sZXMiOltdfQ.skCx-1m6NB8XaJjyBypI92X0j-Rm5GaPo7ahr1LqB3Y'
+            //     ),
+            // ));
+
+            // $response = curl_exec($curl);
+
+            // curl_close($curl);
+            // dd($response);
 
 
             // /* Remove the item from current order items */
@@ -190,7 +215,7 @@ class OrdersLivewire extends Component
             $updated = Orders::updateOrderStatus($order['id'], 'ready');
             if ($order['type'] == 'self-pickup') {
                 $order_details = Orders::getOrderById($order['id']);
-                EmailManagement::sendPickupYourOrderMail($order_details);
+                EmailServices::sendPickupYourOrderMail($order_details);
             }
             /* Operation finished */
             sleep(1);
@@ -223,7 +248,7 @@ class OrdersLivewire extends Component
             admin@teekit.co.uk";
 
             // TwilioSmsService::sendSms($order_details->user->phone, $message);
-            // EmailManagement::sendOrderHasBeenCancelledMail($order_details);
+            // EmailServices::sendOrderHasBeenCancelledMail($order_details);
 
             /* Operation finished */
             sleep(1);

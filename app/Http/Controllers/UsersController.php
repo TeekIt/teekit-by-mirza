@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\GoogleMap;
+use App\Services\GoogleMapServices;
 use App\User;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
-use App\Services\JsonResponseCustom;
-use App\Services\WebResponseCustom;
+use App\Services\JsonResponseServices;
+use App\Services\WebResponseServices;
 use Illuminate\Support\Facades\Auth;
 
 class UsersController extends Controller
@@ -27,7 +26,7 @@ class UsersController extends Controller
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180'
             ]);
-            if ($validate->fails()) return WebResponseCustom::getValidationResponseRedirectBack($validate);
+            if ($validate->fails()) return WebResponseServices::getValidationResponseRedirectBack($validate);
 
             $updated = User::updateStoreLocation(
                 Auth::id(),
@@ -41,43 +40,22 @@ class UsersController extends Controller
                 $request->lon
             );
             if ($updated) {
-                return WebResponseCustom::getResponseRedirectBack(
+                return WebResponseServices::getResponseRedirectBack(
                     config('constants.SUCCESS_STATUS'),
                     config('constants.UPDATION_SUCCESS')
                 );
             }
-            return WebResponseCustom::getResponseRedirectBack(
+            return WebResponseServices::getResponseRedirectBack(
                 config('constants.ERROR_STATUS'),
                 config('constants.UPDATION_FAILED')
             );
         } catch (Throwable $error) {
             report($error);
-            return WebResponseCustom::getResponseRedirectBack(
+            return WebResponseServices::getResponseRedirectBack(
                 config('constants.ERROR_STATUS'),
                 $error->getMessage()
             );
         }
-    }
-    /**
-     * It will fetch the curved distance between 2 points
-     * Google distance matrix API is consumed
-     * @author Mirza Abdullah Izhar
-     * @version 2.3.0
-     */
-    public function getDistanceBetweenPoints($destination_lat, $destination_lon, $origin_lat, $origin_lon)
-    {
-        $origing_address = $origin_lat . ',' . $origin_lon;
-        $destination_address = $destination_lat . ',' . $destination_lon;
-        /* Rameesha's URL */
-        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" . urlencode($origing_address) . "&destinations=" . urlencode($destination_address) . "&mode=driving&key=AIzaSyD_7jrpEkUDW7pxLBm91Z0K-U9Q5gK-10U";
-        // dd($url);
-        $results = json_decode(file_get_contents($url), true);
-        $meters = explode(' ', $results['rows'][0]['elements'][0]['distance']['value']);
-        $distanceInMiles = (float)$meters[0] * 0.000621;
-
-        $durationInSeconds = explode(' ', $results['rows'][0]['elements'][0]['duration']['value']);
-        $durationInMinutes = round((int)$durationInSeconds[0] / 60);
-        return ['distance' => $distanceInMiles, 'duration' => $durationInMinutes];
     }
     /**
      * Fetch seller/store information w.r.t ID
@@ -131,16 +109,16 @@ class UsersController extends Controller
                 'page' => 'required|numeric'
             ]);
             if ($validated_data->fails()) {
-                return JsonResponseCustom::getApiValidationFailedResponse($validated_data->errors());
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
             $sellers = User::getParentAndChildSellersByState($request->state);
             $pagination = $sellers->toArray();
             unset($pagination['data']);
             
-            if (!$sellers->isEmpty()) $data = GoogleMap::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
+            if (!$sellers->isEmpty()) $data = GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
          
             if (empty($data)) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     config('constants.NO_STORES_FOUND'),
@@ -148,7 +126,7 @@ class UsersController extends Controller
                 );
             }
 
-            return JsonResponseCustom::getApiResponseExtention(
+            return JsonResponseServices::getApiResponseExtention(
                 $data,
                 config('constants.TRUE_STATUS'),
                 '',
@@ -158,7 +136,7 @@ class UsersController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,

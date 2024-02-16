@@ -4,14 +4,57 @@ namespace App\Services;
 
 use App\Http\Controllers\UsersController;
 
-final class GoogleMap
+final class GoogleMapServices
 {
-    // Sending Multiple requests to Google Matrix at a time
+    /* Rameesha's URL */
+    protected const GOOGLE_DISTANCEMATRIX_API_URL = 'https://maps.googleapis.com/maps/api/distancematrix/json';
+
+    protected const GOOGLE_DISTANCEMATRIX_API_KEY = 'AIzaSyD_7jrpEkUDW7pxLBm91Z0K-U9Q5gK-10U';
+
+    protected static function generateUrl($origing_address, $destination_address)
+    {
+        return self::GOOGLE_DISTANCEMATRIX_API_URL . '?units=imperial&origins=' . urlencode($origing_address) . '&destinations=' . urlencode($destination_address) . '&mode=driving&key=' . self::GOOGLE_DISTANCEMATRIX_API_KEY;
+    }
+    /**
+     * It will fetch the curved distance between 2 points
+     * Google distance matrix API is consumed
+     * @author Mirza Abdullah Izhar
+     */
+    public static function getDistanceInArray(float $origin_lat, float $origin_lon, float $destination_lat, float $destination_lon)
+    {
+        $origing_address = $origin_lat . ',' . $origin_lon;
+        $destination_address = $destination_lat . ',' . $destination_lon;
+
+        $url = self::generateUrl($origing_address, $destination_address);
+        $results = json_decode(file_get_contents($url), true);
+        $meters = explode(' ', $results['rows'][0]['elements'][0]['distance']['value']);
+        $distanceInMiles = (float)$meters[0] * 0.000621;
+
+        $durationInSeconds = explode(' ', $results['rows'][0]['elements'][0]['duration']['value']);
+        $durationInMinutes = round((int)$durationInSeconds[0] / 60);
+        return ['distance' => $distanceInMiles, 'duration' => $durationInMinutes];
+    }
+
+    public static function getDistanceInMiles(float $origin_lat, float $origin_lon, float $destination_lat, float $destination_lon)
+    {
+        $origing_address = $origin_lat . ',' . $origin_lon;
+        $destination_address = $destination_lat . ',' . $destination_lon;
+
+        $url = self::generateUrl($origing_address, $destination_address);
+        $results = json_decode(file_get_contents($url), true);
+        $meters = $results['rows'][0]['elements'][0]['distance']['value'];
+        $distanceInMiles = $meters * 0.000621;
+
+        return (float) $distanceInMiles;
+    }
+    /* 
+     * Sending Multiple requests to Google Matrix at a time 
+     */
     public static function getDistanceForMultipleDestinations(float $origin_lat, float $origin_lon, array $destinations, int $miles)
     {
         $origing_address = $origin_lat . ',' . $origin_lon;
         $destinations_addresses = implode('|', $destinations['users_coordinates']);
-        $url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=" . urlencode($origing_address) . "&destinations=" . urlencode($destinations_addresses) . "&mode=driving&key=AIzaSyD_7jrpEkUDW7pxLBm91Z0K-U9Q5gK-10U";
+        $url = self::generateUrl($origing_address, $destinations_addresses);
         // dd($url);
         $results = json_decode(file_get_contents($url), true);
         // dd($results);

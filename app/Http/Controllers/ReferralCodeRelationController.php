@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ReferralCodeRelation;
 use App\Orders;
-use App\Services\JsonResponseCustom;
+use App\Services\JsonResponseServices;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +29,7 @@ class ReferralCodeRelationController extends Controller
                 'referral_code' => 'required|uuid'
             ]);
             if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     $validate->errors(),
@@ -38,7 +38,7 @@ class ReferralCodeRelationController extends Controller
             }
             $is_verified = User::verifyReferralCode($request->user_id, $request->referral_code);
             if (!$is_verified) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     config('constants.INVALID_REFERRAL'),
@@ -48,7 +48,7 @@ class ReferralCodeRelationController extends Controller
 
             $using_referral_first_time = ReferralCodeRelation::usingReferalFirstTime($request->user_id);
             if (!$using_referral_first_time) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     config('constants.REFERRAL_CAN_BE_USED_ONCE'),
@@ -59,14 +59,14 @@ class ReferralCodeRelationController extends Controller
             if (Orders::checkTotalOrders($request->user_id) === 0) {
                 ReferralCodeRelation::insertReferralRelation($is_verified->id, $request->user_id);
                 User::addIntoWallet($request->user_id, $this->amount);
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     ['discount' => $this->amount],
                     config('constants.TRUE_STATUS'),
                     config('constants.VALID_REFERRAL'),
                     config('constants.HTTP_OK')
                 );
             } else {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     config('constants.REFERRALS_ARE_ONLY_FOR_FIRST_ORDER'),
@@ -75,7 +75,7 @@ class ReferralCodeRelationController extends Controller
             }
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,
@@ -94,7 +94,7 @@ class ReferralCodeRelationController extends Controller
                 $buyer_obj->referral_code = Str::uuid();
                 $buyer_obj->save();
             }
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.TRUE_STATUS'),
                 config('constants.INSERTION_SUCCESS'),
@@ -102,7 +102,7 @@ class ReferralCodeRelationController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,
@@ -118,7 +118,7 @@ class ReferralCodeRelationController extends Controller
         try {
             $referral_reltaion_details = ReferralCodeRelation::getReferralRelationDetails($referral_relation_id);
             if ($referral_reltaion_details->isEmpty()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     config('constants.NO_RECORD'),
@@ -128,7 +128,7 @@ class ReferralCodeRelationController extends Controller
             $data = User::getUserInfo($referral_reltaion_details[0]->referredByUser->id);
             $data['referral_useable'] = $referral_reltaion_details[0]->referral_useable;
             $data['referral_relation_id'] = $referral_reltaion_details[0]->id;
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 $data,
                 config('constants.TRUE_STATUS'),
                 '',
@@ -136,7 +136,7 @@ class ReferralCodeRelationController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,
@@ -155,7 +155,7 @@ class ReferralCodeRelationController extends Controller
                 'referral_useable' => 'required|integer'
             ]);
             if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
                     $validate->errors(),
@@ -168,7 +168,7 @@ class ReferralCodeRelationController extends Controller
                 $referral_reltaion_details = ReferralCodeRelation::getReferralRelationDetails($request->referral_relation_id);
                 User::addIntoWallet($referral_reltaion_details[0]->referredByUser->id, $this->amount);
             }
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 ($updated) ? config('constants.TRUE_STATUS') : config('constants.FALSE_STATUS'),
                 ($updated) ? config('constants.UPDATION_SUCCESS') : config('constants.UPDATION_FAILED'),
@@ -176,7 +176,7 @@ class ReferralCodeRelationController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,
