@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Orders;
 use Stripe\Refund;
 use Stripe\Stripe;
+use Stripe\StripeClient;
 
 final class StripeServices
 {
@@ -135,11 +136,23 @@ final class StripeServices
     public static function refundCustomer(Orders $order)
     {
         $api_key = (url('/') === config('constants.LIVE_DASHBOARD_URL')) ? static::getLiveApiKey() : static::getTestApiKey();
-        Stripe::setApiKey($api_key);
-        Refund::create([
-            // 'charge' => $order->transaction_id,
-            'payment_intent' => $order->payment_intent,
-            'reason' => 'requested_by_customer'
+        // Stripe::setApiKey($api_key);
+        // Refund::create([
+        //     // 'charge' => $order->transaction_id,
+        //     'payment_intent' => $order->payment_intent,
+        //     'reason' => 'requested_by_customer'
+        // ]);
+
+        $stripe = new StripeClient($api_key); //new \Stripe\StripeClient($api_key);
+        // $stripe->refunds->create([
+        //     'payment_intent' => $order->payment_intent,
+        //     'reason' => 'requested_by_customer'
+        // ]);
+
+        $stripe->refunds->create([
+           'payment_intent' => 'pi_1GszsK2eZvKYlo2CfhZyoZLp',
+           'reason' => 'requested_by_customer' 
         ]);
+        // $stripe->refunds->create(['charge' => 'ch_1NirD82eZvKYlo2CIvbtLWuY']);
     }
 }

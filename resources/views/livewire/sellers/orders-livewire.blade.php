@@ -238,32 +238,39 @@
         </div>
     </div>
     <!-- Content Header -->
-    <div class="row">
-        <div class="col-12 col-sm-6 col-md-5 col-xl-6">
-            <h4 class="py-4 my-1">Orders</h4>
-        </div>
-        <div class="col-12 col-sm-6 col-md-5 col-xl-5">
-            <div class="input-group py-4 my-2">
-                <input type="text" wire:model.debounce.500ms="search" class="form-control py-3" placeholder="Search by order#">
-                <button class="btn btn-site-primary px-4" type="button"><i class='fas fa-search'></i></button>
+    <form wire:submit.prevent="render">
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-8 py-4 my-2">
+                <input type="number" wire:model.defer="search" class="form-control" placeholder="Search by order#">
+            </div>
+            <div class="col-12 col-sm-12 col-md-4 d-flex">
+                <button type="submit" class="btn btn-site-primary my-4 p-1 w-100 mx-1" wire:target="search" wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary" wire:loading.attr="disabled" title="Search">
+                    <span class='fas fa-search' wire:target="search" wire:loading.remove></span>
+                    <span wire:target="search" wire:loading>
+                        <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                    </span>
+                </button>
+                <button type="button" class="btn btn-primary my-4 p-1 w-100 mx-1" wire:click="resetThisPage" wire:target="resetThisPage" wire:loading.class="btn-dark" wire:loading.class.remove="btn-primary" wire:loading.attr="disabled" title="Reset Orders">
+                    <span class="fas fa-sync" wire:target="resetThisPage" wire:loading.remove></span>
+                    <span wire:target="resetThisPage" wire:loading>
+                        <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                    </span>
+                </button>
             </div>
         </div>
-        {{-- <div class="col-12 col-md-2 col-xl-1">
-            <button type="button" class="btn btn-danger my-3 py-3 w-100" title="Delete selected data" onclick="delUsers()">
-                <i class="fas fa-trash-alt"></i>
-            </button>
-        </div> --}}
-    </div>
+    </form>
     <!-- /Content Header -->
 
     <!-- Main Content -->
     <div class="container">
+        <div class="col-12">
+            <h4 class="py-4 my-1">Orders</h4>
+        </div>
         @forelse ($data as $order)
-            {{-- @dd($order) --}}
             <!-- Single Order Content -->
-            <div class="col-md-12 p-4 pr-4">
+            <div class="col-12 p-2">
                 <div class="card">
-                    <div class="card-body p-2 pl-5 pr-5 pb-5">
+                    <div class="card-body py-1 px-2">
                         <!-- Order Header -->
                         <div class="p-2 mb-2">
                             <table class="table table-striped table-responsive-sm">
@@ -553,11 +560,13 @@
             @endforeach --}}
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                {{ $data->links() }}
+        @if (!empty($data))
+            <div class="row">
+                <div class="col-md-12">
+                    {{ $data->links() }}
+                </div>
             </div>
-        </div>
+        @endif
 
     </div>
     <!-- /Main Content -->

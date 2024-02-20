@@ -10,10 +10,12 @@ use App\Services\GoogleMapServices;
 use App\Services\StripeServices;
 use App\User;
 use Exception;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Livewire\Component;
 use Livewire\WithPagination;
+use stdClass;
 
 class OrdersLivewire extends Component
 {
@@ -30,7 +32,7 @@ class OrdersLivewire extends Component
         $order_item,
         $nearby_sellers,
         $selected_nearby_seller,
-        $search = '';
+        $search;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -55,7 +57,9 @@ class OrdersLivewire extends Component
             'receiver_name',
             'phone_number',
             'order_item',
-            'nearby_sellers'
+            'nearby_sellers',
+            'selected_nearby_seller',
+            'search'
         ]);
     }
 
@@ -192,7 +196,7 @@ class OrdersLivewire extends Component
             }
         } catch (Exception $error) {
             report($error);
-            session()->flash('error', $error);
+            session()->flash('error', $error->getMessage());
         }
     }
 
@@ -226,7 +230,7 @@ class OrdersLivewire extends Component
             }
         } catch (Exception $error) {
             report($error);
-            session()->flash('error', $error);
+            session()->flash('error', $error->getMessage());
         }
     }
 
@@ -235,8 +239,8 @@ class OrdersLivewire extends Component
         try {
             /* Perform some operation */
             $order_details = Orders::getOrderById($order['id']);
-            dd($order_details);
-            Orders::updateOrderStatus($order['id'], 'cancelled');
+            // dd($order_details);
+            // Orders::updateOrderStatus($order['id'], 'cancelled');
             StripeServices::refundCustomer($order_details);
 
 
@@ -261,7 +265,7 @@ class OrdersLivewire extends Component
             // }
         } catch (Exception $error) {
             report($error);
-            session()->flash('error', $error);
+            session()->flash('error', $error->getMessage());
         }
     }
 
@@ -282,18 +286,33 @@ class OrdersLivewire extends Component
             }
         } catch (Exception $error) {
             report($error);
-            session()->flash('error', $error);
+            session()->flash('error', $error->getMessage());
         }
     }
 
-    public function updatingSearch()
+    public function resetThisPage()
     {
+        $this->resetModal();
         $this->resetPage();
+    }
+
+    public function isSearchByIdSet()
+    {
+        $searched_order_id = (int)$this->search;
+        if ($searched_order_id != 0) $this->resetPage();
+        return $searched_order_id;
     }
 
     public function render()
     {
-        $data = Orders::getOrdersForView(null, $this->seller_id, 'desc');
-        return view('livewire.sellers.orders-livewire', compact('data'));
+        try {
+            $data = Orders::getOrdersForView($this->isSearchByIdSet(), $this->seller_id, 'desc');
+            return view('livewire.sellers.orders-livewire', compact('data'));
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error->getMessage());
+            $data = [];
+            return view('livewire.sellers.orders-livewire', compact('data'));
+        }
     }
 }

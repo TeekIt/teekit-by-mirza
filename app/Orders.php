@@ -113,7 +113,7 @@ class Orders extends Model
 
     public static function isViewed(int $order_id): object
     {
-        $order = self::find($order_id);
+        $order = self::findOrFail($order_id);
         $order->is_viewed = 1;
         $order->save();
         return $order;
@@ -121,9 +121,9 @@ class Orders extends Model
 
     public static function getOrdersForView(int|null $order_id = null, int $seller_id, string $order_by): object
     {
-        // First we will update the "is_viewed" column if the order is searched by ID
+        /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($order_id) static::isViewed($order_id);
-        // Now we will fetch the required data
+        /* Now we will fetch the required data */
         return self::with(['order_items', 'products.category'])
             ->when($order_id, function ($query) use ($order_id) {
                 return $query->where('id', '=', $order_id);
