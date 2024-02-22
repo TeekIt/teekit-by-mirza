@@ -212,7 +212,7 @@ Route::middleware(['jwt.verify'])->group(function () {
         // Route::post('/update', [WalletController::class, 'update']);
     });
 
-    Route::get('keys', [AuthController::class, 'keys']);
+    // Route::get('keys', [AuthController::class, 'keys']);
 });
 /*
 |--------------------------------------------------------------------------
