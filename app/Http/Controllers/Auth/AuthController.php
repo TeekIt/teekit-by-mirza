@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Crypt;
-use JWTAuth;
 use Jenssegers\Agent\Agent;
 use App\Models\JwtToken;
 use App\Services\JsonResponseServices;
@@ -24,6 +23,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Throwable;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -146,9 +146,6 @@ class AuthController extends Controller
                 'message' => $validate->errors()
             ], 422);
         }
-
-        $token = $request->token;
-
         $verification_token = Crypt::decrypt($request->token);
 
         $user = User::where('email', $verification_token)->first();
@@ -225,14 +222,11 @@ class AuthController extends Controller
 
     /**
      *  It will Get the authenticated User.
-     * @version 1.0.0
-     * @return \Illuminate\Http\JsonResponse
      */
     public function me()
     {
-        $user = JWTAuth::user();
-        $user = User::find($user->id);
-        $data_info = array(
+        $user = JWTAuth::user();   
+        $data = array(
             'id' => $user->id,
             'name' => $user->name,
             'l_name' => $user->l_name,
@@ -254,11 +248,12 @@ class AuthController extends Controller
             'roles' => $user->role()->pluck('name'),
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
         );
-        return response()->json([
-            'data' => $data_info,
-            'status' => true,
-            'message' => config('constants.DATA_UPDATED_SUCCESS')
-        ], 200);
+        return JsonResponseServices::getApiResponse(
+            $data,
+            config('constants.TRUE_STATUS'),
+            '',
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * It will Log the user out
@@ -421,49 +416,7 @@ class AuthController extends Controller
         $response = $this->me();
         return $response;
     }
-    /**
-     * Search products w.r.t Seller/Store 'id' & Product Name
-     * @author Mirza Abdullah Izhar
-     * @version 1.4.0
-     */
-    public function searchSellerProducts($seller_id, $product_name)
-    {
-        try {
-            $user = User::find($seller_id);
-            $data = [];
-            $article = Products::search($product_name)
-                ->where('user_id', $user->id)
-                ->where('status', 1);
-            $products = $article->paginate(20);
-            $pagination = $products->toArray();
-            if (!$products->isEmpty()) {
-                foreach ($products as $product) {
-                    $data[] = Products::getProductInfo($product->id);
-                }
-                unset($pagination['data']);
-                return response()->json([
-                    'data' => $data,
-                    'status' => true,
-                    'message' => '',
-                    'pagination' => $pagination
-                ], 200);
-            } else {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => config('constants.NO_RECORD')
-                ], 200);
-            }
-        } catch (Throwable $error) {
-            report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
-        }
-    }
-
+    
     public function deliveryBoys()
     {
         try {
@@ -567,19 +520,15 @@ class AuthController extends Controller
     public function registerGoogle(Request $request)
     {
         try {
-            $validator = \Validator::make($request->all(), [
+            $validated_data = Validator::make($request->all(), [
                 'name' => 'required|string',
                 'l_name' => 'required|string',
                 'email' => 'required|string|email|max:255|unique:users',
                 'role' => 'required|string|max:255',
 
             ]);
-            if ($validator->fails()) {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => $validator->errors()
-                ], 422);
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
             $user = User::create([
                 'name' => $request->name,
@@ -644,7 +593,7 @@ class AuthController extends Controller
     public function loginGoogle(Request $request)
     {
         try {
-            $validator = \Validator::make($request->all(), [
+            $validator = Validator::make($request->all(), [
                 'email' => 'required|string|email|max:255',
             ]);
             if ($validator->fails()) {

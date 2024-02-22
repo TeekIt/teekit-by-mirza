@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Products;
 use App\Services\GoogleMapServices;
 use App\User;
 use Illuminate\Support\Facades\Validator;
@@ -13,6 +14,41 @@ use Illuminate\Support\Facades\Auth;
 
 class UsersController extends Controller
 {
+    /**
+     * Fetch seller information w.r.t ID
+     * @author Mirza Abdullah Izhar
+     * @version 2.1.0
+     */
+    public static function getSellerInfo(object $seller_info, array $map_api_result = null)
+    {
+        $data = array(
+            'id' => $seller_info->id,
+            'name' => $seller_info->name,
+            'email' => $seller_info->email,
+            'business_name' => $seller_info->business_name,
+            'business_hours' => $seller_info->business_hours,
+            'full_address' => $seller_info->full_address,
+            'unit_address' => $seller_info->unit_address,
+            'country' => $seller_info->country,
+            'state' => $seller_info->state,
+            'city' => $seller_info->city,
+            'postcode' => $seller_info->postcode,
+            'lat' => $seller_info->lat,
+            'lon' => $seller_info->lon,
+            'user_img' => $seller_info->user_img,
+            'pending_withdraw' => $seller_info->pending_withdraw,
+            'total_withdraw' => $seller_info->total_withdraw,
+            'parent_store_id' => $seller_info->parent_store_id,
+            'is_online' => $seller_info->is_online,
+            'roles' => ($seller_info->role_id == 2) ? ['sellers'] : ['child_sellers']
+        );
+        if (!empty($map_api_result)) {
+            $data['distance'] = $map_api_result['distance'];
+            $data['duration'] = $map_api_result['duration'];
+        }
+        return $data;
+    }
+
     public function updateStoreLocation(Request $request)
     {
         try {
@@ -58,41 +94,6 @@ class UsersController extends Controller
         }
     }
     /**
-     * Fetch seller/store information w.r.t ID
-     * If seller/store have distance it will return distance
-     * @author Mirza Abdullah Izhar
-     * @version 2.1.0
-     */
-    public static function getSellerInfo(Object $seller_info, array $map_api_result = null)
-    {
-        $data = array(
-            'id' => $seller_info->id,
-            'name' => $seller_info->name,
-            'email' => $seller_info->email,
-            'business_name' => $seller_info->business_name,
-            'business_hours' => $seller_info->business_hours,
-            'full_address' => $seller_info->full_address,
-            'unit_address' => $seller_info->unit_address,
-            'country' => $seller_info->country,
-            'state' => $seller_info->state,
-            'city' => $seller_info->city,
-            'postcode' => $seller_info->postcode,
-            'lat' => $seller_info->lat,
-            'lon' => $seller_info->lon,
-            'user_img' => $seller_info->user_img,
-            'pending_withdraw' => $seller_info->pending_withdraw,
-            'total_withdraw' => $seller_info->total_withdraw,
-            'parent_store_id' => $seller_info->parent_store_id,
-            'is_online' => $seller_info->is_online,
-            'roles' => ($seller_info->role_id == 2) ? ['sellers'] : ['child_sellers']
-        );
-        if (!empty($map_api_result)) {
-            $data['distance'] = $map_api_result['distance'];
-            $data['duration'] = $map_api_result['duration'];
-        }
-        return $data;
-    }
-    /**
      * Listing of all Sellers/Stores within 5 miles
      * @param lat mandatory
      * @param lon mandatory
@@ -132,6 +133,51 @@ class UsersController extends Controller
                 '',
                 'pagination',
                 $pagination,
+                config('constants.HTTP_OK')
+            );
+        } catch (Throwable $error) {
+            report($error);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
+        }
+    }
+    /**
+     * Search products w.r.t Seller/Store 'id' & Product Name
+     * @author Mirza Abdullah Izhar
+     * @version 1.4.0
+     */
+    public function searchSellerProducts($seller_id, $product_name)
+    {
+        try {
+            $data = [];
+            $article = Products::search($product_name)
+                ->where('user_id', $seller_id)
+                ->where('status', 1);
+            $products = $article->paginate(20);
+            $pagination = $products->toArray();
+            if (!$products->isEmpty()) {
+                foreach ($products as $product) {
+                    $data[] = Products::getProductInfo($product->id);
+                }
+                unset($pagination['data']);
+                return JsonResponseServices::getApiResponseExtention(
+                    $data,
+                    config('constants.TRUE_STATUS'),
+                    '',
+                    'pagination',
+                    $pagination,
+                    config('constants.HTTP_OK')
+                );
+            }
+
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                config('constants.NO_RECORD'),
                 config('constants.HTTP_OK')
             );
         } catch (Throwable $error) {

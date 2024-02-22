@@ -15,7 +15,6 @@ use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PromoCodesController;
 use App\Http\Controllers\RattingsController;
 use App\Http\Controllers\ReferralCodeRelationController;
-use App\Http\Controllers\WalletController;
 use App\Http\Controllers\WithdrawalRequestsController;
 use App\Products;
 use App\Services\JsonResponseServices;
@@ -70,7 +69,7 @@ Route::prefix('auth')->group(function () {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('update', [AuthController::class, 'updateUser']);
     Route::post('updateStatus', [AuthController::class, 'updateStatus']);
-    Route::get('me', [AuthController::class, 'me']); /////////////////////////////////////////////////////////////////////////////////////////////////
+    Route::get('me', [AuthController::class, 'me']); 
     Route::get('delivery_boys', [AuthController::class, 'deliveryBoys']);
     Route::get('get_user/{user_id}', [AuthController::class, 'getUserDetails']);
     Route::post('user/delete', [AuthController::class, 'deleteUser']);
@@ -115,7 +114,7 @@ Route::prefix('category')->group(function () {
 */
 Route::prefix('sellers')->group(function () {
     Route::get('/', [UsersController::class, 'sellers']);
-    Route::get('{seller_id}/{product_name}', [AuthController::class, 'searchSellerProducts']);
+    Route::get('{seller_id}/{product_name}', [UsersController::class, 'searchSellerProducts']);
 });
 /*
 |--------------------------------------------------------------------------
@@ -141,9 +140,12 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('update_price_qty/bulk', [ProductsController::class, 'updatePriceAndQtyBulk']);
         Route::get('delete/{product_id}', [ProductsController::class, 'delete']);
         Route::get('delete_image/{image_id}/{product_id}', [ProductsController::class, 'deleteImage']);
-        Route::post('ratings/add', [RattingsController::class, 'add']);
-        Route::post('ratings/update', [RattingsController::class, 'update']);
-        Route::get('ratings/delete/{ratting_id}', [RattingsController::class, 'delete']);
+
+        Route::prefix('ratings')->group(function () {
+            Route::post('add', [RattingsController::class, 'add']);
+            Route::post('update', [RattingsController::class, 'update']);
+            Route::get('delete/{ratting_id}', [RattingsController::class, 'delete']);
+        });
 
         Route::withoutMiddleware(['jwt.verify'])->group(function () {
             Route::get('all', [ProductsController::class, 'all']);
@@ -153,7 +155,7 @@ Route::middleware(['jwt.verify'])->group(function () {
             Route::get('seller', [ProductsController::class, 'sellerProducts']);
             Route::get('sortbyprice', [ProductsController::class, 'sortByPrice']);
             Route::get('sortByLocation', [ProductsController::class, 'sortByLocation']);
-            Route::post('recheck_products', [OrdersController::class, 'recheckProducts']);
+            Route::post('recheck_products', [ProductsController::class, 'recheckProducts']);
             Route::get('featured/{store_id}', [ProductsController::class, 'featuredProducts']);
             Route::get('drop-qty-column', [ProductsController::class, 'dropProductsTableQtyColumn']);
         });

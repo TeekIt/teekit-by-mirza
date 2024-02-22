@@ -673,64 +673,6 @@ class OrdersController extends Controller
         return $order->toArray();
     }
     /**
-     * This function will return back store open/close & product qty status
-     * Along with this information it will also send store_id & product_id
-     * If the store is active & product is live
-     * @author Mirza Abdullah Izhar
-     * @version 1.1.0
-     */
-    public function recheckProducts(Request $request)
-    {
-        try {
-            $validated_data = Validator::make($request->all(), [
-                'items' => 'required|array',
-                'day' => 'required|string',
-                'time' => 'required|string'
-            ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->error());
-            }
-            $i = 0;
-            foreach ($request->items as $item) {
-                $open_time = User::select('business_hours->time->' . $request->day . '->open as open')
-                    ->where('id', '=', $item['store_id'])
-                    ->where('is_active', '=', 1)
-                    ->get();
-
-                $close_time = User::select('business_hours->time->' . $request->day . '->close as close')
-                    ->where('id', '=', $item['store_id'])
-                    ->where('is_active', '=', 1)
-                    ->get();
-
-                $qty = Products::select('qty')
-                    ->where('id', '=', $item['product_id'])
-                    ->where('user_id', '=', $item['store_id'])
-                    ->where('status', '=', 1)
-                    ->get();
-
-                $order_data[$i]['store_id'] = $item['store_id'];
-                $order_data[$i]['product_id'] = $item['product_id'];
-                $order_data[$i]['closed'] = (strtotime($request->time) >= strtotime($open_time[0]->open) && strtotime($request->time) <= strtotime($close_time[0]->close)) ? "No" : "Yes";
-                $order_data[$i]['qty'] = (isset($qty[0]->qty)) ? $qty[0]->qty : NULL;
-                $i++;
-            }
-            return JsonResponseServices::getApiResponse(
-                $order_data,
-                config('constants.TRUE_STATUS'),
-                '',
-                config('constants.HTTP_OK')
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
-        }
-    }
-    /**
      * It will calculate the total distance between client & store location & then
      * It will return the total distance in Miles
      * @author Mirza Abdullah Izhar
