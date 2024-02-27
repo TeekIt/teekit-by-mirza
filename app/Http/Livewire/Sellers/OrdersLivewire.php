@@ -36,7 +36,7 @@ class OrdersLivewire extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    protected $listeners = [
+    protected $listeners = [ 
         'alternativeProductIncluded' => 'render',
         'callParentResetModal' => 'resetModal'
     ];

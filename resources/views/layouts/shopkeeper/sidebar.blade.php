@@ -23,7 +23,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @if (request()->is('seller/inventory')) active @endif" href="{{route('seller.inventory')}}">
+                    <a class="nav-link {{ request()->routeIs('seller.inventory') ? 'active' : '' }}" href="{{route('seller.inventory')}}">
                         <i class="nav-icon fa fa-truck"></i>
                         <p class="ml-2">
                             Inventory
@@ -31,7 +31,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('seller/orders') ? 'active' : '' }}" href="{{route('seller.orders')}}">
+                    <a class="nav-link {{ request()->routeIs('seller.orders') ? 'active' : '' }}" href="{{route('seller.orders')}}">
                         <i class="nav-icon fas fa-cart-arrow-down"></i>
                         <p class="ml-2">
                             Orders
@@ -39,10 +39,18 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('withdrawals') ? 'active' : '' }}" href="/withdrawals">
+                    <a class="nav-link {{ request()->routeIs('withdrawals') ? 'active' : '' }}" href="{{route('withdrawals')}}">
                         <i class="nav-icon fas fa-dollar-sign"></i>
                         <p class="ml-2">
                             Withdrawals
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('sellers.withdrawal') ? 'active' : '' }}" href="{{ route('sellers.withdrawal') }}">
+                        <i class="nav-icon fas fa-dollar-sign"></i>
+                        <p class="ml-2">
+                            Withdrawals livewire
                         </p>
                     </a>
                 </li>
@@ -56,13 +64,13 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{route('seller.settings.general')}}" class="nav-link">
+                            <a href="{{route('seller.settings.general')}}" class="nav-link ">
                                 <i class="fas fa-gears nav-icon"></i>
                                 <p>General</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/settings/payment" class="nav-link">
+                            <a href="{{route('setting.payment')}}" class="nav-link ">
                                 <i class="fas fa-money nav-icon"></i>
                                 <p>Payment</p>
                             </a>

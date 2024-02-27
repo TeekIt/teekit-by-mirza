@@ -379,4 +379,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return self::where('id', $user_id)->decrement('pending_withdraw', $amount);
     }
+
+    public static function  getSellerID(): int
+    {
+        return auth()->user()->id;
+    }
 }
