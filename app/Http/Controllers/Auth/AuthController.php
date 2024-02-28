@@ -1,7 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
 
-use App\Products;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\UsersController;
@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Crypt;
 use Jenssegers\Agent\Agent;
 use App\Models\JwtToken;
+use App\Services\EmailServices;
 use App\Services\JsonResponseServices;
 use Illuminate\Http\Request;
 use App\User;
@@ -19,7 +20,6 @@ use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Throwable;
@@ -39,65 +39,49 @@ class AuthController extends Controller
     /**
      * Register For Mobile App
      * @author Huzaifa Haleem
-     * @version 1.9.0
      */
     public function register(Request $request)
     {
         try {
-            $validate = User::validator($request);
-            if ($validate->fails()) {
-                $response = array('data' => $validate->messages(), 'status' => false, 'message' => config('constants.VALIDATION_ERROR'));
-                return response()->json($response, 400);
-            }
-            $User = User::create([
-                'name' => $request->name,
-                'l_name' => $request->l_name,
-                'phone' => $request->phone,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'business_name' => $request->business_name,
-                'business_location' => $request->business_location,
-                'lat' => json_decode($request->business_location)->lat,
-                'lon' => json_decode($request->business_location)->lon,
-                'seller_id' => $request->seller_id,
-                'postcode' => $request->postal_code,
-                'is_active' => ($request->get('role') == 'buyer') ? 1 : 0,
-                'role_id' => 3,
-                'referral_code' => Str::uuid(),
+            $validated_data = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8|max:50',
+                'role' => 'required|string|max:255',
+                'address_1' => 'required|string',
             ]);
-            if ($User) {
-                if ($request->hasFile('user_img')) {
-                    $User->user_img = User::uploadImg($request);
-                    $User->save();
-                }
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
 
-            $account_verification_link = url('/') . '/auth/verify?token=' . Crypt::encrypt($User->email);
-            $html = '<html>
-            Congratulations ' . $User->name . '!<br><br>
-            You have successfully registered on ' . env('APP_NAME') . '.
-            <br>
-            There is just one more step to go. Click on the link below to verify your account so you can start purchasing products on TeekIT today!  <br><br>
-                <a href="' . $account_verification_link . '">Verify</a> OR Copy This in your Browser
-                ' . $account_verification_link . '
-            <br><br><br>
-            For more information please visit https://teekit.co.uk/
-            If you have any further inquiries please email admin@teekit.co.uk
-            </html>';
+            $user = User::createBuyer(
+                $request->name,
+                $request->l_name,
+                $request->email,
+                $request->password,
+                $request->phone,
+                $request->address_1,
+                $request->postcode,
+                1,
+                Str::uuid()
+            );
 
-            Mail::send('emails.general', ["html" => $html], function ($message) use ($request, $User) {
-                $message->to($request->email, $User->name)
-                    ->subject(env('APP_NAME') . ': Account Verification');
-            });
-            $response = array('status' => true, 'role' => $request->role, 'message' => 'You have registered succesfully! We have sent a verification link to your email address. Please click on the link to activate your account.');
-            return response()->json($response, 200);
+            EmailServices::sendBuyerAccVerificationMail($user);
+            
+            return response()->json([
+                'status' => config('constants.TRUE_STATUS'),
+                'role' => $request->role,
+                'message' => 'You have registered succesfully! We have sent a verification link to your email address. Please click on the link to activate your account.'
+            ], config('constants.HTTP_OK'));
+
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
@@ -123,11 +107,12 @@ class AuthController extends Controller
             return $this->respondWithToken($token);
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
 
@@ -225,7 +210,7 @@ class AuthController extends Controller
      */
     public function me()
     {
-        $user = JWTAuth::user();   
+        $user = JWTAuth::user();
         $data = array(
             'id' => $user->id,
             'name' => $user->name,
@@ -416,7 +401,7 @@ class AuthController extends Controller
         $response = $this->me();
         return $response;
     }
-    
+
     public function deliveryBoys()
     {
         try {
@@ -432,11 +417,12 @@ class AuthController extends Controller
             ], 200);
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
@@ -469,11 +455,12 @@ class AuthController extends Controller
             ], 200);
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
@@ -506,11 +493,12 @@ class AuthController extends Controller
             ], 200);
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
@@ -579,11 +567,12 @@ class AuthController extends Controller
             ], 200);
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
@@ -648,11 +637,12 @@ class AuthController extends Controller
             ], 200);
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
 }

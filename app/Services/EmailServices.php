@@ -18,6 +18,28 @@ final class EmailServices
         return url('/') . '/auth/verify?token=' . $verification_code;
     }
 
+    public static function sendBuyerAccVerificationMail(User $user)
+    {
+        $verification_code = Crypt::encrypt($user->email);
+        $account_verification_link = self::getVerificationLink($verification_code);
+
+        $html = '<html>
+            Congratulations ' . $user->name . '!<br><br>
+            You have successfully registered on ' . env('APP_NAME') . '.
+            <br>
+            There is just one more step to go. Click on the link below to verify your account so you can start purchasing products on TeekIT today!  <br><br>
+                <a href="' . $account_verification_link . '">Verify</a> OR Copy This in your Browser
+                ' . $account_verification_link . '
+            <br><br><br>
+            For more information please visit https://teekit.co.uk/
+            If you have any further inquiries please email "' . env('ADMIN_EMAIL') . '"
+            </html>';
+
+        Mail::send('emails.general', ["html" => $html], function ($message) use ($user) {
+            $message->to($user->email, $user->name)->subject(env('APP_NAME') . ': Account Verification');
+        });
+    }
+
     public static function sendNewChildStoreMail(User $user, $parent_store)
     {
         $verification_code = Crypt::encrypt($user->email);

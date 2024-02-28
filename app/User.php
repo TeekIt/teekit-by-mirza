@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -185,17 +186,29 @@ class User extends Authenticatable implements JWTSubject
         return $user->save();
     }
 
-    public static function uploadImg(object $request)
-    {
-        $file = $request->file('user_img');
-        $filename = uniqid($request->name . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
-        Storage::disk('spaces')->put($filename, File::get($file));
-        if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
-            info("file is store successfully : " . $filename);
-        } else {
-            info("file is not found :- " . $filename);
-        }
-        return $filename;
+    public static function createBuyer(
+        string $name,
+        string $l_name,
+        string $email,
+        string $password,
+        string $phone,
+        string $address,
+        string $postcode,
+        int $is_active,
+        string $referral_code
+    ): object {
+        return self::create([
+            'name' => $name,
+            'l_name' => $l_name,
+            'email' => $email,
+            'password' => Hash::make($password),
+            'phone' => $phone,
+            'full_address' => $address,
+            'postcode' => $postcode,
+            'is_active' => $is_active,
+            'role_id' => 3,
+            'referral_code' => $referral_code
+        ]);
     }
 
     public static function createStore(
