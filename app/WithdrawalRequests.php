@@ -6,6 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class WithdrawalRequests extends Model
 {
+    protected $fillable = [
+        'user_id', // Add 'user_id' to the fillable array
+        'amount',
+        'status',
+        'bank_detail',
+    ];
+    
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -15,9 +22,9 @@ class WithdrawalRequests extends Model
         return $this->belongsTo('App\Role');
     }
 
-    public static function getWithdrawalResquests(int $user_id ,string $search = null ,int $amount = null ,string $created_at = null)
+    public static function getWithdrawalResquests(int $user_id, string $search = null, int $amount = null, string $created_at = null)
     {
-        return self::select('id', 'amount', 'status', 'transaction_id', 'created_at')->where('user_id', $user_id)            
+        return self::select('id', 'amount', 'status', 'transaction_id', 'created_at')->where('user_id', $user_id)
             ->when($search, function ($query, $search) {
                 return $query->where('status', $search);
             })
@@ -27,5 +34,14 @@ class WithdrawalRequests extends Model
             ->when($created_at, function ($query, $created_at) {
                 return $query->whereDate('created_at', $created_at);
             });
+    }
+    public static function  createwithdrawalRequest(int $user_id, int $amount, string $status , string $bank_details)
+    {
+        return self::create([
+            'user_id' => $user_id,
+            'amount' => $amount,
+            'status' => $status,
+            'bank_detail' => $bank_details,
+        ]);
     }
 }
