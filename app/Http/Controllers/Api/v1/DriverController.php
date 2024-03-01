@@ -171,7 +171,7 @@ class DriverController extends Controller
      */
     public function checkVerificationCode(Request $request)
     {
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'order_id' => 'required|integer',
             'verification_code' => 'required|min:6|max:6',
             'delivery_boy_id' => 'required|integer'

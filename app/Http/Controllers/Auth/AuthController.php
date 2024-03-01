@@ -512,8 +512,7 @@ class AuthController extends Controller
                 'name' => 'required|string',
                 'l_name' => 'required|string',
                 'email' => 'required|string|email|max:255|unique:users',
-                'role' => 'required|string|max:255',
-
+                'role' => 'required|string|max:255'
             ]);
             if ($validated_data->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());

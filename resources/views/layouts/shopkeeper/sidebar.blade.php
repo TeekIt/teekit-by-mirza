@@ -47,7 +47,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('sellers.withdrawal') ? 'active' : '' }}" href="{{ route('sellers.withdrawal') }}">
+                    <a class="nav-link {{ request()->routeIs('seller.withdrawal') ? 'active' : '' }}" href="{{ route('seller.withdrawal') }}">
                         <i class="nav-icon fas fa-dollar-sign"></i>
                         <p class="ml-2">
                             Withdrawals livewire

@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Categories;
-use App\Mail\OrderIsCanceledMail;
 use App\Mail\OrderIsCompletedMail;
-use App\Mail\OrderIsReadyMail;
 use App\Mail\StoreRegisterMail;
 use App\OrderItems;
 use App\Orders;
@@ -25,12 +23,10 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Laracasts\Flash\Flash;
 use Stripe;
 use Throwable;
 
@@ -1336,10 +1332,6 @@ class HomeController extends Controller
                 flash('Request Sent')->success();
             }
             return Redirect::back();
-            //            $user_id = Auth::id();
-            //            $return_data = WithdrawalRequests::query()->where('user_id','=',$user_id)->get();
-            //            $transactions =$return_data;
-            //            return view('shopkeeper.withdrawal', compact('transactions'));
         }
         if (Gate::allows('superadmin')) {
             $with = WithdrawalRequests::find($request->id);

@@ -101,13 +101,16 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         Route::get('/image/delete/{image_id}', [HomeController::class, 'seller.deleteImg']);
         // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
     });
+    
+    Route::get('/orders', OrdersLivewire::class)->name('seller.orders');
+
+    Route::get('/withdrawal', WithdrawalLivewire::class)->name('seller.withdrawal');
 
     Route::prefix('settings')->group(function () {
         Route::get('/general', UserGeneralSettings::class)->name('seller.settings.general');
         Route::post('/update-location', [UsersController::class, 'updateStoreLocation'])->name('seller.settings.update.location');
     });
 
-    Route::get('orders', OrdersLivewire::class)->name('seller.orders');
 });
 /*
 |--------------------------------------------------------------------------
@@ -117,7 +120,6 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
 Route::get('/withdrawals', [HomeController::class, 'withdrawals'])->name('withdrawals');
 Route::post('/withdrawals', [HomeController::class, 'withdrawalsRequest'])->name('withdraw_request');
 Route::get('/withdrawals-drivers', [HomeController::class, 'withdrawalDrivers'])->name('withdrawals.drivers');
-Route::get('sellers/withdrawal', WithdrawalLivewire::class)->name('sellers.withdrawal');
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
