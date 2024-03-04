@@ -45,7 +45,7 @@
                                             <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                                         </span>
                                     </button>
-                                    <button type="button" class="btn btn-primary p-1 w-100 mx-1" wire:click="resetThisPage" wire:target="resetThisPage" wire:loading.class="btn-dark" wire:loading.class.remove="btn-primary" wire:loading.attr="disabled" title="Reset Orders">
+                                    <button type="button" class="btn btn-primary p-1 w-100 mx-1" wire:click="resetThisPage" wire:target="resetThisPage" wire:loading.class="btn-dark" wire:loading.class.remove="btn-primary" wire:loading.attr="disabled" title="Reset Withdrawal Requests">
                                         <span class="fas fa-sync" wire:target="resetThisPage" wire:loading.remove=""></span>
                                         <span wire:target="resetThisPage" wire:loading="">
                                             <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
@@ -65,7 +65,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-lg-12 col-sm-12 col-md-12">
-                        <h4 class="">Withdrawals Request</h4>
+                        <h4 class="py-4 my-1">Withdrawal Requests</h4>
                     </div>
                 </div><!-- /.row -->
             </div><!-- /.container-fluid -->
@@ -136,7 +136,7 @@
                     <div class="col-md-12">
                         <div class="row">
                             <div class="col-md-12">
-                                <table class="table  table-hover table-responsive-sm border-bottom">
+                                <table class="table table-hover table-responsive-sm border-bottom">
                                     <thead>
                                         <tr class="bg-primary text-white">
                                             <th scope="col">#</th>
@@ -156,14 +156,14 @@
                                                 @elseif($single_index->status == 'Pending')
                                                     <td><span class="bg-warning py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
                                                 @elseif($single_index->status == 'Cancelled')
-                                                    <td><span class="bg-danger  py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
+                                                    <td><span class="bg-danger py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
                                                 @endif
                                                 <td>{{ $single_index->transaction_id }}</td>
                                                 <td>{{ $single_index->created_at }}</td>
                                             </tr>
                                         @empty
                                             <td colspan="5">
-                                                No Record Founds
+                                                No Records Found
                                             </td>
                                         @endforelse
                                     </tbody>

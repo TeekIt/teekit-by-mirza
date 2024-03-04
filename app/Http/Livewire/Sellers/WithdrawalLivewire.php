@@ -90,7 +90,6 @@ class WithdrawalLivewire extends Component
             $this->dispatchBrowserEvent('close-modal', ['id' => 'requestWithdrawModal']);
         }
     }
-    
 
     public function render()
     {

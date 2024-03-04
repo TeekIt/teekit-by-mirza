@@ -34,13 +34,8 @@
                                                 <th scope="col">Operation</th>
                                             </tr>
                                         </thead>
-                                        <?php
-                                        $total = 0;
-                                        ?>
-                                        @foreach ($transactions as $transaction)
-                                            <?php
-                                            $total = 1;
-                                            ?>
+                                        <tbody>
+                                            @forelse ($transactions as $transaction)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $transaction->user->name }}</td>
@@ -98,7 +93,7 @@
                                                                 <div class="row">
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
-                                                                            <label for="">
+                                                                            <label>
                                                                                 Transaction ID
                                                                             </label>
                                                                             <input type="text" value="{{ $transaction->transaction_id }}" name="t_id" class="form-control">
@@ -107,13 +102,19 @@
                                                                     {{ csrf_field() }}
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
-                                                                            <label for="">
+                                                                            <label>
                                                                                 Status
                                                                             </label>
-                                                                            <select name="status" id="" class="form-control">
-                                                                                <option @if ($transaction->status == 'Pending') SELECTED @endif value="Pending">Pending</option>
-                                                                                <option @if ($transaction->status == 'Cancelled') SELECTED @endif value="Cancelled">Cancelled</option>
-                                                                                <option @if ($transaction->status == 'Completed') SELECTED @endif value="Completed">Completed</option>
+                                                                            <select name="status" class="form-control">
+                                                                                <option @if ($transaction->status == 'Pending') SELECTED @endif value="Pending">
+                                                                                    Pending
+                                                                                </option>
+                                                                                <option @if ($transaction->status == 'Cancelled') SELECTED @endif value="Cancelled">
+                                                                                    Cancelled
+                                                                                </option>
+                                                                                <option @if ($transaction->status == 'Completed') SELECTED @endif value="Completed">
+                                                                                    Completed
+                                                                                </option>
                                                                             </select>
                                                                         </div>
                                                                     </div>
@@ -128,12 +129,12 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        @endforeach
-                                        @if ($total == 0)
+                                            @empty
                                             <tr class="bg-secondary-light">
-                                                <td colspan="5">There is No data</td>
+                                                <td colspan="7">No Records Found</td>
                                             </tr>
-                                        @endif
+                                            @endforelse
+                                        </tbody>
                                     </table>
                                 </div>
                             </div>
