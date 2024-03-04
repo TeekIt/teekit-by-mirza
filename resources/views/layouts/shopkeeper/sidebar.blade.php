@@ -34,7 +34,15 @@
                     <a class="nav-link {{ request()->routeIs('seller.orders') ? 'active' : '' }}" href="{{route('seller.orders')}}">
                         <i class="nav-icon fas fa-cart-arrow-down"></i>
                         <p class="ml-2">
-                            Orders
+                           My Orders
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('seller.my-orders') ? 'active' : '' }}" href="{{route('seller.my-orders')}}">
+                        <i class="nav-icon fas fa-cart-plus"></i>
+                        <p class="ml-2">
+                            Orders From Sellers
                         </p>
                     </a>
                 </li>
