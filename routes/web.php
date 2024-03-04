@@ -118,7 +118,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
 |--------------------------------------------------------------------------
 */
 Route::controller(HomeController::class)->group(function () {
-    Route::get('/withdrawals', 'withdrawals')->name('withdrawal');
+    Route::get('/withdrawals', 'withdrawals')->name('withdrawals');
     Route::post('/withdrawals', 'withdrawalsRequest')->name('withdrawal_request');
     Route::get('/withdrawals-drivers', 'withdrawalDrivers')->name('withdrawals.drivers');
 });
