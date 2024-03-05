@@ -17,7 +17,7 @@
 
                                         <div class="row">
                                             <div class="col-12 col-md-10">
-                                                <button class="btn btn-warning" title="Hold your order">
+                                                <button class="btn btn-warning" title="Hold the order">
                                                     <span>
                                                         Hold
                                                     </span>
@@ -27,7 +27,7 @@
                                                     </span> --}}
                                                 </button>
 
-                                                <button class="btn btn-success" title="Accept your order">
+                                                <button class="btn btn-success" title="Accept the order">
                                                     <span>
                                                         Accept
                                                     </span>
@@ -37,7 +37,7 @@
                                                     </span> --}}
                                                 </button>
 
-                                                <button class="btn btn-danger" title="Reject your order">
+                                                <button class="btn btn-danger" title="Reject the order">
                                                     <span>
                                                         Reject
                                                     </span>
@@ -47,9 +47,10 @@
                                                     </span> --}}
                                                 </button>
                                             </div>
-                                            <div class="col-12 col-md-2 py-4">
-                                                <p class="fs-3">5:00</p>
+                                            <div class="col-12 col-md-2 mt-md-1 mt-4">
+                                                <p class="fs-3 fw-bold">5:00</p>
                                             </div>
+
                                         </div>
                                     </td>
 
