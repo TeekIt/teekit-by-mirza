@@ -13,12 +13,12 @@
                         <table class="table table-striped table-responsive-sm">
                             <thead>
                                 <tr class="col-12">
-                                    <td colspan="4 col-12">
+                                    <td colspan="6 col-12">
 
-                                        <div class="row">
+                                        <div class="row ">
                                             <div class="col-12 col-md-10">
-                                                <button class="btn btn-warning" title="Hold the order">
-                                                    <span>
+                                                <button class="btn btn-warning col-3 col-md-2" title="Hold the order">
+                                                    <span wire:target="" wire:loading.remove>
                                                         Hold
                                                     </span>
                                                     {{-- <span>
@@ -27,18 +27,18 @@
                                                     </span> --}}
                                                 </button>
 
-                                                <button class="btn btn-success" title="Accept the order">
-                                                    <span>
+                                                <button class="btn btn-success col-4 col-md-2" title="Accept the order">
+                                                    <span wire:target="" wire:loading.remove>
                                                         Accept
-                                                    </span>
+                                                    </span>    
                                                     {{-- <span>
                                                         <span class="spinner-border spinner-border-sm text-light"
                                                             role="status" aria-hidden="true"></span>
                                                     </span> --}}
                                                 </button>
 
-                                                <button class="btn btn-danger" title="Reject the order">
-                                                    <span>
+                                                <button class="btn btn-danger col-3 col-md-2" title="Reject the order">
+                                                    <span wire:target="" wire:loading.remove>
                                                         Reject
                                                     </span>
                                                     {{-- <span>
