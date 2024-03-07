@@ -11,7 +11,6 @@ class WithdrawalLivewire extends Component
 {
     use WithPagination;
 
-
     public
         $search,
         $amount,
@@ -23,18 +22,18 @@ class WithdrawalLivewire extends Component
     protected $paginationTheme = 'bootstrap';
     
     protected $rules = [
-        'amount' => 'numeric|between:0,999999.99', // You can specify numeric rules
+        'amount' => 'numeric|between:0,999999.99'
     ];
-
-    public function updatedAmount($value)
-    {
-        $this->validateOnly('amount'); // For validation
-    }
 
     public function mount()
     {
         $this->seller_id = User::getSellerID();
         $this->resetAllPaginators();
+    }
+
+    public function updatedAmount($value)
+    {
+        $this->validateOnly('amount');
     }
 
     public function resetAllErrors()
@@ -90,9 +89,7 @@ class WithdrawalLivewire extends Component
             session()->flash('error', 'Amount Withdrawal Field');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'requestWithdrawModal']);
         }
-       
     }
-    
 
     public function render()
     {

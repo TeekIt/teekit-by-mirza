@@ -14,6 +14,7 @@ use App\Http\Controllers\UsersController;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
+use App\Http\Livewire\Sellers\OrdersFromOtherSellers;
 use App\Http\Livewire\Sellers\OrdersLivewire;
 use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
@@ -101,23 +102,28 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         Route::get('/image/delete/{image_id}', [HomeController::class, 'seller.deleteImg']);
         // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
     });
+    
+    Route::get('/my-orders', OrdersLivewire::class)->name('seller.orders');
+    Route::get('/order-from-other-sellers', OrdersFromOtherSellers::class)->name('seller.orders.from.others');
+
+    Route::get('/withdrawal', WithdrawalLivewire::class)->name('seller.withdrawal');
 
     Route::prefix('settings')->group(function () {
         Route::get('/general', UserGeneralSettings::class)->name('seller.settings.general');
         Route::post('/update-location', [UsersController::class, 'updateStoreLocation'])->name('seller.settings.update.location');
     });
 
-    Route::get('orders', OrdersLivewire::class)->name('seller.orders');
 });
 /*
 |--------------------------------------------------------------------------
 | Withdrawal Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/withdrawals', [HomeController::class, 'withdrawals'])->name('withdrawals');
-Route::post('/withdrawals', [HomeController::class, 'withdrawalsRequest'])->name('withdraw_request');
-Route::get('/withdrawals-drivers', [HomeController::class, 'withdrawalDrivers'])->name('withdrawals.drivers');
-Route::get('sellers/withdrawal', WithdrawalLivewire::class)->name('sellers.withdrawal');
+Route::controller(HomeController::class)->group(function () {
+    Route::get('/withdrawals', 'withdrawals')->name('withdrawals');
+    Route::post('/withdrawals', 'withdrawalsRequest')->name('withdrawal_request');
+    Route::get('/withdrawals-drivers', 'withdrawalDrivers')->name('withdrawals.drivers');
+});
 /*
 |--------------------------------------------------------------------------
 | Admin Routes

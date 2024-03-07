@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Storage;
 
 final class ImageServices
 {
-    public static function uploadImg(object $request, string $img_key_name, string $id)
+    public static function uploadImg(object $request, string $img_key_name, int $id)
     {
         $file = $request->file($img_key_name);
         // Creating a unique file name

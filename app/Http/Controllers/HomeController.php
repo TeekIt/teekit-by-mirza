@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Categories;
-use App\Mail\OrderIsCanceledMail;
 use App\Mail\OrderIsCompletedMail;
-use App\Mail\OrderIsReadyMail;
 use App\Mail\StoreRegisterMail;
 use App\OrderItems;
 use App\Orders;
@@ -25,12 +23,10 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Laracasts\Flash\Flash;
 use Stripe;
 use Throwable;
 
@@ -1277,12 +1273,12 @@ class HomeController extends Controller
      */
     public function withdrawals()
     {
-        if (Gate::allows('seller') || Gate::allows('child_seller')) {
-            $user_id = Auth::id();
-            $return_data = WithdrawalRequests::query()->where('user_id', '=', $user_id)->get();
-            $transactions = $return_data;
-            return view('shopkeeper.withdrawal', compact('transactions'));
-        }
+        // if (Gate::allows('seller') || Gate::allows('child_seller')) {
+        //     $user_id = Auth::id();
+        //     $return_data = WithdrawalRequests::query()->where('user_id', '=', $user_id)->get();
+        //     $transactions = $return_data;
+        //     return view('shopkeeper.withdrawal', compact('transactions'));
+        // }
         if (Gate::allows('superadmin')) {
             $user_id = Auth::id();
             $return_data = WithdrawalRequests::has('user.seller')->get();
@@ -1314,33 +1310,29 @@ class HomeController extends Controller
      */
     public function withdrawalsRequest(Request $request)
     {
-        if (Gate::allows('seller')) {
-            if (auth()->user()->pending_withdraw < $request->amount) {
-                flash('Please Choose Correct Value')->error();
-            } else {
-                $user = User::find(\auth()->id());
-                $user->pending_withdraw = $user->pending_withdraw - $request->amount;
-                $user->total_withdraw = $user->total_withdraw + $request->amount;
-                $with = new WithdrawalRequests();
-                $with->user_id = \auth()->id();
-                $with->amount = $request->amount;
-                $with->status = 'Pending';
-                if (empty($user->bank_details)) {
-                    flash('Update Bank Info')->error();
-                    return Redirect::back();
-                }
-                $with->bank_detail = $user->bank_details;
-                $with->save();
-                $user->save();
+        // if (Gate::allows('seller')) {
+        //     if (auth()->user()->pending_withdraw < $request->amount) {
+        //         flash('Please Choose Correct Value')->error();
+        //     } else {
+        //         $user = User::find(\auth()->id());
+        //         $user->pending_withdraw = $user->pending_withdraw - $request->amount;
+        //         $user->total_withdraw = $user->total_withdraw + $request->amount;
+        //         $with = new WithdrawalRequests();
+        //         $with->user_id = \auth()->id();
+        //         $with->amount = $request->amount;
+        //         $with->status = 'Pending';
+        //         if (empty($user->bank_details)) {
+        //             flash('Update Bank Info')->error();
+        //             return Redirect::back();
+        //         }
+        //         $with->bank_detail = $user->bank_details;
+        //         $with->save();
+        //         $user->save();
 
-                flash('Request Sent')->success();
-            }
-            return Redirect::back();
-            //            $user_id = Auth::id();
-            //            $return_data = WithdrawalRequests::query()->where('user_id','=',$user_id)->get();
-            //            $transactions =$return_data;
-            //            return view('shopkeeper.withdrawal', compact('transactions'));
-        }
+        //         flash('Request Sent')->success();
+        //     }
+        //     return Redirect::back();
+        // }
         if (Gate::allows('superadmin')) {
             $with = WithdrawalRequests::find($request->id);
             $with->status = $request->status;

@@ -4,7 +4,7 @@ namespace App\Services;
 
 final class VerificationCodeServices
 {
-    public static function generateCode(): string
+    public static function generateCode()
     {
         $verification_code = '';
         while (strlen($verification_code) < 6) {

@@ -95,10 +95,7 @@ class UsersController extends Controller
     }
     /**
      * Listing of all Sellers/Stores within 5 miles
-     * @param lat mandatory
-     * @param lon mandatory
      * @author Mirza Abdullah Izhar
-     * @version 2.1.0
      */
     public function sellers(Request $request)
     {

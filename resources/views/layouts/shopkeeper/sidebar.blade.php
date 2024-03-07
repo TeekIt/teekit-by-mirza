@@ -34,23 +34,23 @@
                     <a class="nav-link {{ request()->routeIs('seller.orders') ? 'active' : '' }}" href="{{route('seller.orders')}}">
                         <i class="nav-icon fas fa-cart-arrow-down"></i>
                         <p class="ml-2">
-                            Orders
+                           My Orders
                         </p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('withdrawals') ? 'active' : '' }}" href="{{route('withdrawals')}}">
+                    <a class="nav-link {{ request()->routeIs('seller.orders.from.others') ? 'active' : '' }}" href="{{route('seller.orders.from.others')}}">
+                        <i class="nav-icon fas fa-luggage-cart"></i>
+                        <p class="ml-2">
+                            Orders From Others
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('seller.withdrawal') ? 'active' : '' }}" href="{{ route('seller.withdrawal') }}">
                         <i class="nav-icon fas fa-dollar-sign"></i>
                         <p class="ml-2">
                             Withdrawals
-                        </p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('sellers.withdrawal') ? 'active' : '' }}" href="{{ route('sellers.withdrawal') }}">
-                        <i class="nav-icon fas fa-dollar-sign"></i>
-                        <p class="ml-2">
-                            Withdrawals livewire
                         </p>
                     </a>
                 </li>
