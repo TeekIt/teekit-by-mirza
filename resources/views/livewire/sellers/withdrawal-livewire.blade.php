@@ -13,6 +13,29 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+    {{-- ************************************ Request Withdrawal Model ************************************ --}}
+    <div class="modal fade" id="requestWithdrawModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form wire:submit.prevent="withdrawRequest" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Request Withdrawal</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="number" class="form-control" placeholder="Enter amount" wire:model.defer="amount" max="{{ auth()->user()->pending_withdraw }}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Request Now</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="content">
         <div class="content-header">
             <div class="container pt-4">
@@ -110,69 +133,41 @@
                 </div>
                 <div class="row">
                     <div class="col-md-12">
-                        <!-- Modal -->
-                        <div class="modal fade" id="requestWithdrawModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <form wire:submit.prevent="withdrawRequest" method="post">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLabel">Request Withdraw</h5>
-                                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="number" class="form-control" placeholder="Enter amount" wire:model.defer="amount" max="{{ auth()->user()->pending_withdraw }}">
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-primary">Request Now</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
+                        <table class="table table-hover table-responsive-sm border-bottom">
+                            <thead>
+                                <tr class="bg-primary text-white">
+                                    <th scope="col">#</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Transaction ID</th>
+                                    <th scope="col">Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($data as $single_index)
+                                    <tr>
+                                        <td>{{ $single_index->id }}</td>
+                                        <td>{{ $single_index->amount }}</td>
+                                        @if ($single_index->status == 'Completed')
+                                            <td><span class="bg-success py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
+                                        @elseif($single_index->status == 'Pending')
+                                            <td><span class="bg-warning py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
+                                        @elseif($single_index->status == 'Cancelled')
+                                            <td><span class="bg-danger py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
+                                        @endif
+                                        <td>{{ $single_index->transaction_id }}</td>
+                                        <td>{{ $single_index->created_at }}</td>
+                                    </tr>
+                                @empty
+                                    <td colspan="5">
+                                        No Records Found
+                                    </td>
+                                @endforelse
+                            </tbody>
+                        </table>
                         <div class="row">
                             <div class="col-md-12">
-                                <table class="table table-hover table-responsive-sm border-bottom">
-                                    <thead>
-                                        <tr class="bg-primary text-white">
-                                            <th scope="col">#</th>
-                                            <th scope="col">Amount</th>
-                                            <th scope="col">Status</th>
-                                            <th scope="col">Transaction ID</th>
-                                            <th scope="col">Created At</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse ($data as $single_index)
-                                            <tr>
-                                                <td>{{ $single_index->id }}</td>
-                                                <td>{{ $single_index->amount }}</td>
-                                                @if ($single_index->status == 'Completed')
-                                                    <td><span class="bg-success py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
-                                                @elseif($single_index->status == 'Pending')
-                                                    <td><span class="bg-warning py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
-                                                @elseif($single_index->status == 'Cancelled')
-                                                    <td><span class="bg-danger py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
-                                                @endif
-                                                <td>{{ $single_index->transaction_id }}</td>
-                                                <td>{{ $single_index->created_at }}</td>
-                                            </tr>
-                                        @empty
-                                            <td colspan="5">
-                                                No Records Found
-                                            </td>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        {{ $data->links() }}
-                                    </div>
-                                </div>
+                                {{ $data->links() }}
                             </div>
                         </div>
                     </div>

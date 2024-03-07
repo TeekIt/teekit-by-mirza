@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Livewire\WithPagination;
 use stdClass;
+
 class OrdersFromOtherSellers extends Component
 {
     public function render()

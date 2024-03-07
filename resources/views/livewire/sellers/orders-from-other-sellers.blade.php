@@ -2,7 +2,7 @@
     <!-- Main Content -->
     <div class="container">
         <div class="col-12">
-            <h4 class="py-4 my-1">Orders</h4>
+            <h4 class="py-4 my-1">Orders From Other Sellers</h4>
         </div>
         <!-- Single Order Content -->
         <div class="col-12 p-2">
@@ -14,8 +14,7 @@
                             <thead>
                                 <tr class="col-12">
                                     <td colspan="6 col-12">
-
-                                        <div class="row ">
+                                        <div class="row">
                                             <div class="col-12 col-md-10">
                                                 <button class="btn btn-warning col-3 col-md-2" title="Hold the order">
                                                     <span wire:target="" wire:loading.remove>
@@ -53,7 +52,6 @@
 
                                         </div>
                                     </td>
-
                                 </tr>
                             </thead>
                             <tbody>

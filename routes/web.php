@@ -103,8 +103,8 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
     });
     
-    Route::get('/orders', OrdersLivewire::class)->name('seller.orders');
-    Route::get('/my-orders', OrdersFromOtherSellers::class)->name('seller.my-orders');
+    Route::get('/my-orders', OrdersLivewire::class)->name('seller.orders');
+    Route::get('/order-from-other-sellers', OrdersFromOtherSellers::class)->name('seller.orders.from.others');
 
     Route::get('/withdrawal', WithdrawalLivewire::class)->name('seller.withdrawal');
 
