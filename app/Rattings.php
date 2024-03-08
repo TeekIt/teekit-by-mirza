@@ -30,7 +30,7 @@ class Rattings extends Model
      */
     public static function getRatting(int $product_id): array
     {
-        $raw_ratting = Rattings::where('product_id', '=', $product_id);
+        $raw_ratting = self::where('product_id', '=', $product_id);
         $average = $raw_ratting->avg('ratting');
         $all_raw = $raw_ratting->get();
         $all = [];

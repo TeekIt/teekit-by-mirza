@@ -72,7 +72,7 @@ class Drivers extends Authenticatable implements JWTSubject
      */
     public static function add(object $request)
     {
-        return Drivers::create([
+        return self::create([
             'f_name' => $request->f_name,
             'l_name' => $request->l_name,
             'email' => $request->email,
@@ -102,7 +102,7 @@ class Drivers extends Authenticatable implements JWTSubject
 
     public static function getDrivers(string $search = '')
     {
-        return Drivers::where('f_name', 'like', '%' . $search . '%')
+        return self::where('f_name', 'like', '%' . $search . '%')
             ->orderBy('f_name', 'asc')
             ->paginate(9);
     }
@@ -110,7 +110,7 @@ class Drivers extends Authenticatable implements JWTSubject
     public function adminDriversDel(Request $request)
     {
         for ($i = 0; $i < count($request->drivers); $i++) {
-            Drivers::where('id', '=', $request->drivers[$i])->delete();
+            self::where('id', '=', $request->drivers[$i])->delete();
             DriverDocuments::where('driver_id', '=', $request->drivers[$i])->delete();
         }
         return response("Drivers Deleted Successfully");

@@ -1,4 +1,20 @@
 <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="container pt-4">
+        @if (session()->has('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong>
+                {{ session()->get('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        @if (session()->has('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Success!</strong>
+                {{ session()->get('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+    </div>
     <!-- Main Content -->
     <div class="container">
         <div class="col-12">
@@ -49,7 +65,6 @@
                                             <div class="col-12 col-md-2 mt-md-1 mt-4">
                                                 <p class="fs-3 fw-bold">5:00</p>
                                             </div>
-
                                         </div>
                                     </td>
                                 </tr>
@@ -64,7 +79,7 @@
 
                                 <tr>
                                     <td><b>Placed At</b></td>
-                                    <td>2024-01-09 13:58:49 </td>
+                                    <td>2024-01-09 13:58:49</td>
                                     <td><b>Order Type</b></td>
                                     <td><span class="badge badge-info">delivery</span></td>
                                 </tr>
