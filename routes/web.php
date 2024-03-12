@@ -15,6 +15,7 @@ use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
 use App\Http\Livewire\Sellers\OrdersFromOtherSellers;
+use App\Http\Livewire\Sellers\OrdersFromOtherSellersLivewire;
 use App\Http\Livewire\Sellers\OrdersLivewire;
 use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
@@ -104,7 +105,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
     });
     
     Route::get('/my-orders', OrdersLivewire::class)->name('seller.orders');
-    Route::get('/order-from-other-sellers', OrdersFromOtherSellers::class)->name('seller.orders.from.others');
+    Route::get('/order-from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
 
     Route::get('/withdrawal', WithdrawalLivewire::class)->name('seller.withdrawal');
 

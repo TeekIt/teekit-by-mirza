@@ -4,9 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use QtySeeder;
-use Database\Seeders\ReferralCodeRelationSeeder;
-use App\Database\Seeders\DriverSeeder;
-use Database\Seeders\DriverDocumentsSeeder;
+use DriverDocumentsSeeder;
+use DriverSeeder;
 
 class DatabaseSeeder extends Seeder
 {

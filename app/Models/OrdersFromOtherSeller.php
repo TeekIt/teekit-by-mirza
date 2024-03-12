@@ -2,8 +2,12 @@
 
 namespace App\Models;
 
+use App\OrderItems;
+use App\Products;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrdersFromOtherSeller extends Model
@@ -14,7 +18,22 @@ class OrdersFromOtherSeller extends Model
     /**
      * Relations
      */
-    // 
+    // public function order_items(): HasMany
+    // {
+    //     return $this->hasMany(OrderItems::class, 'order_id');
+    // }
+
+    public function products(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Products::class,
+            OrderItems::class,
+            'order_id',
+            'id',
+            'id',
+            'product_id'
+        );
+    }
 
     /**
      * Helpers
@@ -66,5 +85,13 @@ class OrdersFromOtherSeller extends Model
         $model->offloading_charges = $offloading_charges;
         $model->save();
         return $model;
+    }
+
+    public static function getOrdersFromOtherSellersForView(array $columns, int $seller_id, string $order_by): object
+    {
+        return self::select([$columns])->with(['products.category'])
+            ->where('seller_id', '=', $seller_id)
+            ->orderBy('created_at', $order_by)
+            ->get();
     }
 }

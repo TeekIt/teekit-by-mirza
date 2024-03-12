@@ -42,7 +42,7 @@ return new class extends Migration
             $table->tinyInteger('offloading')->nullable()->comment('0: No, 1: Yes');
             $table->double('offloading_charges', 10, 2)->nullable();
             $table->time('estimated_time')->nullable();
-            $table->tinyInteger('is_viewed')->default(0);
+            $table->tinyInteger('is_viewed')->default(0)->comment('0: No, 1: Yes');
             $table->tinyInteger('accepted')->default(0)->comment('0: No, 1: Yes');
             $table->tinyInteger('times_rejected')->default(0);
             $table->timestamps();

@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Sellers;
 
 use Livewire\Component;
 use App\Drivers;
+use App\Models\OrdersFromOtherSeller;
 use App\OrderItems;
 use App\Orders;
 use App\Services\EmailServices;
@@ -19,9 +20,23 @@ use stdClass;
 
 class OrdersFromOtherSellers extends Component
 {
+    public $seller_id;
+
+    public function mount()
+    {
+        $this->seller_id = Auth::id();
+    }
+
     public function render()
     {
-        return view('livewire.sellers.orders-from-other-sellers');
+        $data = OrdersFromOtherSeller::getOrdersFromOtherSellersForView(
+            [
+            'customer_id',
+            'seller_id'
+            ],
+            $this->seller_id
+        );
+        return view('livewire.sellers.orders-from-other-sellers', ['data' => $data]);
     }
 }
 
