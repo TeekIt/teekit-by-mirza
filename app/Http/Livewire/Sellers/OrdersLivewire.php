@@ -44,7 +44,7 @@ class OrdersLivewire extends Component
 
     public function mount()
     {
-        $this->seller_id = Auth::id();
+        $this->seller_id = auth()->id();
         $this->resetAllPaginators();
     }
 
@@ -108,8 +108,8 @@ class OrdersLivewire extends Component
     {
         $this->order = $order;
         $this->order_item = $order_item;
-        $sellers = User::getParentAndChildSellersByCity(Auth::user()->city);
-        $this->nearby_sellers = GoogleMapServices::findDistanceByMakingChunks(Auth::user()->lat, Auth::user()->lon, $sellers, 25);
+        $sellers = User::getParentAndChildSellersByCity(auth()->user()->city);
+        $this->nearby_sellers = GoogleMapServices::findDistanceByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellers, 25);
     }
 
     public function sendItemToAnOtherStore()

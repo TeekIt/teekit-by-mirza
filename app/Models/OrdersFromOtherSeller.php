@@ -89,7 +89,7 @@ class OrdersFromOtherSeller extends Model
 
     public static function getOrdersFromOtherSellersForView(array $columns, int $seller_id, string $order_by): object
     {
-        return self::select([$columns])->with(['products.category'])
+        return self::select($columns)->with(['products.category'])
             ->where('seller_id', '=', $seller_id)
             ->orderBy('created_at', $order_by)
             ->get();

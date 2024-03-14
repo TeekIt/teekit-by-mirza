@@ -20,7 +20,9 @@ class DatabaseSeeder extends Seeder
             QtySeeder::class,
             ReferralCodeRelationSeeder::class,
             DriverSeeder::class,
-            DriverDocumentsSeeder::class
+            DriverDocumentsSeeder::class,
+            OrdersFromOtherSellerSeeder::class,
+            OrderItemsSeeder::class
         ]);
     }
 }

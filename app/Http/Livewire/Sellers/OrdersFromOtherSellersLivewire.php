@@ -16,20 +16,21 @@ class OrdersFromOtherSellersLivewire extends Component
 
     public function render()
     {
-        dd('i am working');
         $data = OrdersFromOtherSeller::getOrdersFromOtherSellersForView(
             [
-            'customer_id',
-            'seller_id',
-            'order_total',
-            'type',
-            'payment_status',
-            'order_status',
-            'created_at'
+                'id',
+                'customer_id',
+                'seller_id',
+                'order_total',
+                'type',
+                'payment_status',
+                'order_status',
+                'created_at'
             ],
             $this->seller_id,
             'desc'
         );
+        dd($data);
         return view('livewire.sellers.orders-from-other-sellers-livewire', ['data' => $data]);
     }
 }

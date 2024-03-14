@@ -17,7 +17,10 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('customer_id');
             $table->unsignedBigInteger('seller_id');
-            $table->float('order_total', 8, 2);
+            $table->unsignedBigInteger('product_id');
+            $table->float('product_price');
+            $table->integer('product_qty');
+            $table->float('order_total');
             $table->tinyInteger('total_items');
             $table->decimal('customer_lat', 11, 8)->nullable();
             $table->decimal('customer_lon', 11, 8)->nullable();
@@ -49,8 +52,9 @@ return new class extends Migration
             $table->softDeletes();
 
             // Add foreign key constraints
-            // $table->foreign('user_id')->references('id')->on('users');
+            // $table->foreign('customer_id')->references('id')->on('users');
             // $table->foreign('seller_id')->references('id')->on('users');
+            // $table->foreign('product_id')->references('id')->on('products');
             // $table->foreign('driver_id')->references('id')->on('drivers');
         });
     }
