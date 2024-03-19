@@ -34,21 +34,29 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('jwt.verify', ['except' => ['login', 'register', 'verify', 'searchSellerProducts', 'loginGoogle', 'registerGoogle']]);
+        $this->middleware('jwt.verify', ['except' => [
+            'loginBuyer',
+            'registerBuyer',
+            'verify',
+            'searchSellerProducts',
+            'loginBuyerFromGoogle',
+            'registerBuyerFromGoogle'
+        ]]);
     }
     /**
      * Register For Mobile App
      * @author Huzaifa Haleem
      */
-    public function register(Request $request)
+    public function registerBuyer(Request $request)
     {
         try {
             $validated_data = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
+                'l_name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|max:50',
-                'role' => 'required|string|max:255',
-                'address_1' => 'required|string',
+                'phone' => 'required|string|max:13',
+                'role' => 'required|string|max:5'
             ]);
             if ($validated_data->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
@@ -60,20 +68,17 @@ class AuthController extends Controller
                 $request->email,
                 $request->password,
                 $request->phone,
-                $request->address_1,
-                $request->postcode,
                 1,
                 Str::uuid()
             );
 
             EmailServices::sendBuyerAccVerificationMail($user);
-            
+
             return response()->json([
                 'status' => config('constants.TRUE_STATUS'),
                 'role' => $request->role,
                 'message' => 'You have registered succesfully! We have sent a verification link to your email address. Please click on the link to activate your account.'
             ], config('constants.HTTP_OK'));
-
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(
@@ -89,19 +94,19 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
+    public function loginBuyer(Request $request)
     {
         try {
             $credentials = $request->only('email', 'password');
             if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['data' => [], 'status' => false, 'message' => config('constants.INVALID_CREDENTIALS')], 401);
+                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.INVALID_CREDENTIALS')], 401);
             }
             $user = JWTAuth::user();
             if ($user->email_verified_at == null) {
-                return response()->json(['data' => [], 'status' => false, 'message' => config('constants.EMAIL_NOT_VERIFIED')], 401);
+                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.EMAIL_NOT_VERIFIED')], 401);
             }
             if ($user->is_active == 0) {
-                return response()->json(['data' => [], 'status' => false, 'message' => config('constants.ACCOUNT_DEACTIVATED')], 401);
+                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.ACCOUNT_DEACTIVATED')], 401);
             }
             $this->authenticated($request, $user, $token);
             return $this->respondWithToken($token);
@@ -505,14 +510,14 @@ class AuthController extends Controller
      * Google register
      * @version 1.0.0
      */
-    public function registerGoogle(Request $request)
+    public function registerBuyerFromGoogle(Request $request)
     {
         try {
             $validated_data = Validator::make($request->all(), [
                 'name' => 'required|string',
                 'l_name' => 'required|string',
                 'email' => 'required|string|email|max:255|unique:users',
-                'role' => 'required|string|max:255'
+                'role' => 'required|string|max:5'
             ]);
             if ($validated_data->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
@@ -578,7 +583,7 @@ class AuthController extends Controller
      * Google login via email
      * @version 1.0.0
      */
-    public function loginGoogle(Request $request)
+    public function loginBuyerFromGoogle(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
