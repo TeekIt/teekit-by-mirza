@@ -55,8 +55,7 @@ class AuthController extends Controller
                 'l_name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|max:50',
-                'phone' => 'required|string|max:13',
-                'role' => 'required|string|max:5'
+                'phone' => 'required|string|max:13'
             ]);
             if ($validated_data->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
@@ -76,7 +75,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => config('constants.TRUE_STATUS'),
-                'role' => $request->role,
+                'role' => 'buyer',
                 'message' => 'You have registered succesfully! We have sent a verification link to your email address. Please click on the link to activate your account.'
             ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
