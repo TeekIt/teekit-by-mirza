@@ -30,7 +30,7 @@ class CreateProductsTable extends Migration
             $table->json('colors')->nullable();
             $table->string('bike')->nullable();
             $table->string('van')->nullable();
-            $table->string('feature_img')->nullable();
+            $table->text('feature_img')->nullable();
             $table->timestamps();
         });
     }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\JsonResponseCustom;
+use App\Services\JsonResponseServices;
 use App\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -21,7 +21,7 @@ class WalletController extends Controller
     //             'updated_amount' => 'required|numeric'
     //         ]);
     //         if ($validate->fails()) {
-    //             return JsonResponseCustom::getApiResponse(
+    //             return JsonResponseServices::getApiResponse(
     //                 [],
     //                 config('constants.FALSE_STATUS'),
     //                 $validate->errors(),
@@ -29,7 +29,7 @@ class WalletController extends Controller
     //             );
     //         }
     //         $updated = User::updateWallet($request->user_id, $request->updated_amount);
-    //         return JsonResponseCustom::getApiResponse(
+    //         return JsonResponseServices::getApiResponse(
     //             [],
     //             ($updated) ? config('constants.TRUE_STATUS') : config('constants.FALSE_STATUS'),
     //             ($updated) ? config('constants.UPDATION_SUCCESS') : config('constants.UPDATION_FAILED'),
@@ -37,7 +37,7 @@ class WalletController extends Controller
     //         );
     //     } catch (Throwable $error) {
     //         report($error);
-    //         return JsonResponseCustom::getApiResponse(
+    //         return JsonResponseServices::getApiResponse(
     //             [],
     //             config('constants.FALSE_STATUS'),
     //             $error,

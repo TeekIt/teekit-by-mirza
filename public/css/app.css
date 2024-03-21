@@ -3,6 +3,10 @@ body {
     color: #444444;
 }
 
+.main-pages-bg-img{
+    background: url('../bg_imgs/bg.webp')
+}
+
 table tr:first-of-type td {
     border-top: 0;
 }
@@ -97,6 +101,11 @@ nav.main-header a {
     color: #3a4b83;
 }
 
+.btn-site-primary {
+    background-color: #3a4b83 !important;
+    border: none !important;
+    color: white !important;
+}
 
 .card-body {
     padding: 5px 5px;
@@ -370,7 +379,7 @@ a:hover {
 .login-btn {
     display: block;
     width: 100%;
-    margin-top: 15px !important;
+    margin-top: 17px !important;
     background: #3663ae;
     border: 0;
     border-radius: 0;

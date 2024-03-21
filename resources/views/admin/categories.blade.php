@@ -10,10 +10,11 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h1 class="m-0 text-dark text-center">Categories</h1>
+                    <h1 class="text-dark text-center fs-1">Categories</h1>
                     <div class="container">
-                        <a href="" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                            class=" d-block text-right float-right btn btn-primary">Add Category</a>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal" class="d-block text-right float-right btn btn-primary">
+                            Add Category
+                        </a>
                     </div>
                 </div><!-- /.col -->
             </div><!-- /.row -->

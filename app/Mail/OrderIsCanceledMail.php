@@ -32,6 +32,6 @@ class OrderIsCanceledMail extends Mailable
     {
         $order = $this->order;
         return $this->view('emails.order_is_canceled', compact('order'))
-            ->subject("Your order is Successfully canceled.");
+            ->subject("Your Order Has Been Cancelled");
     }
 }

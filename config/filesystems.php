@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DRIVER', 'local'),
+    'default' => env('FILESYSTEM_DISK', 'local'),
 
     /*
     |--------------------------------------------------------------------------
@@ -79,7 +79,6 @@ return [
             'bucket' => env('DO_SPACES_BUCKET'),
             'visibility' => 'public',
         ],
-
     ],
 
 ];

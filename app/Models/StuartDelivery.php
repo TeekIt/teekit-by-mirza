@@ -12,4 +12,12 @@ class StuartDelivery extends Model
         'order_id',
         'job_id'
     ];
+    /**
+     * Relations
+     */
+    // 
+
+    /**
+     * Helpers
+     */
 }

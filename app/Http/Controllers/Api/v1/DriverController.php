@@ -5,23 +5,15 @@ namespace App\Http\Controllers\Api\v1;
 use App\Drivers;
 use App\DriverDocuments;
 use App\Http\Controllers\Controller;
-use App\Mail\StoreRegisterMail;
 use App\Orders;
-use App\Services\EmailManagement;
-use App\Services\ImageManipulation;
-use App\Services\JsonResponseCustom;
+use App\Services\EmailServices;
+use App\Services\JsonResponseServices;
 use App\User;
 use App\VerificationCodes;
 use App\WithdrawalRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -179,7 +171,7 @@ class DriverController extends Controller
      */
     public function checkVerificationCode(Request $request)
     {
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'order_id' => 'required|integer',
             'verification_code' => 'required|min:6|max:6',
             'delivery_boy_id' => 'required|integer'
@@ -294,16 +286,16 @@ class DriverController extends Controller
             // Now upload driver documents
             DriverDocuments::add($request, $drivers->id);
             // Send verification email
-            EmailManagement::sendDriverAccVerificationMail($drivers);
+            EmailServices::sendDriverAccVerificationMail($drivers);
             if ($drivers) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.TRUE_STATUS'),
                     config('constants.DRIVER_REGISTERATION_MSG'),
                     config('constants.HTTP_OK')
                 );
             }
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 config('constants.REGISTER_FAILED'),
@@ -311,7 +303,7 @@ class DriverController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,

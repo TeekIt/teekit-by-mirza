@@ -125,16 +125,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Stripe Key
-    |--------------------------------------------------------------------------
-    */
-    // 'STRIPE_PUBLISH_KEY' => 'pk_live_51IY9sYIiDDGv1gaVD23fTmgGwOdmPwFKvCP64BrGQPQngITPSBBOclUe6sz8vyN18Kli1iKq2JfeR754kkdbSm5T00u0M4kL0H',
-    // 'STRIPE_SECRET' => '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',
-    // 'STRIPE_PUBLISH_KEY' => 'pk_test_51IY9sYIiDDGv1gaVP2DSlWvT0tnrFstp62txvamB1icDpBjwXy1KtrZmiWLFjrxHmxlMrTyWbnnBWNMblbNMizwS004MoCvzJB',
-    // 'STRIPE_SECRET' => 'sk_test_51IY9sYIiDDGv1gaVKsxU0EXr96lHcCvwXHwYAdN81Cqrj1TBL4HErJpczWJpYFIQ1qbCOQxnxIM3UfsBtWC2MKeD00QRkUKg6q',
-
-    /*
-    |--------------------------------------------------------------------------
     | Twilio Key
     |--------------------------------------------------------------------------
     */
@@ -245,10 +235,8 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-        //'Entrust'   => Zizaco\Entrust\EntrustFacade::class,
         'JWTAuth'   => Tymon\JWTAuth\Facades\JWTAuth::class,
         'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
-        'DataTables' => Yajra\DataTables\Facades\DataTables::class,
         'Agent' => Jenssegers\Agent\Facades\Agent::class
     ],
 

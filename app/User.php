@@ -2,17 +2,19 @@
 
 namespace App;
 
-use Illuminate\Support\Facades\Mail;
-use App\Mail\StoreRegisterMail;
+use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
-use Validator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -23,30 +25,38 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'email_verified_at',
-        'is_active',
         'name',
         'l_name',
         'email',
         'password',
         'phone',
-        'address_1',
-        'address_2',
-        'postal_code',
         'business_name',
         'business_phone',
-        'business_location',
         'business_hours',
-        'settings',
-        'bank_details',
-        'user_img',
-        'postal_code',
-        'vehicle_type',
+        'full_address',
+        'unit_address',
+        'country',
+        'state',
+        'city',
+        'postcode',
         'lat',
         'lon',
+        'bank_details',
+        'settings',
+        'user_img',
+        'is_active',
+        'is_online',
+        'remember_token',
         'role_id',
+        'pending_withdraw',
+        'total_withdraw',
         'parent_store_id',
-        'referral_code'
+        'vehicle_type',
+        'application_fee',
+        'temp_code',
+        'referral_code',
+        'last_login',
+        'email_verified_at'
     ];
     /**
      * The attributes that should be hidden for arrays.
@@ -89,145 +99,227 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Relations
      */
-    public function roles()
+    public function roles(): BelongsToMany
     {
         return $this->belongsToMany('App\Role', 'role_user');
     }
 
-    public function role()
+    public function role(): BelongsTo
     {
         return $this->belongsTo('App\Role');
     }
 
-    public function seller()
+    public function seller(): BelongsToMany
     {
         return $this->belongsToMany('App\Role', 'role_user')->wherePivot('role_id', 2);
     }
 
-    public function driver()
-    {
-        return $this->belongsToMany('App\Models\Role', 'role_user')->where('name', 'delivery_boy');
-    }
+    // public function driver(): BelongsToMany
+    // {
+    //     return $this->belongsToMany('App\Models\Role', 'role_user')->where('name', 'delivery_boy');
+    // }
 
-    public function orders()
+    public function orders(): HasMany
     {
         return $this->hasMany('App\Orders');
     }
 
-    public function referralRelations()
+    public function referralRelations(): HasOne
     {
         return $this->hasOne(ReferralCodeRelation::class, 'user_id');
     }
 
-    public function products()
+    public function products(): HasMany
     {
         return $this->hasMany(Products::class);
     }
-
     /**
      * Validators
      */
-    public static function validator(Request $request)
+    public static function validator(Request $request): object
     {
         return Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'l_name' => '',
-            'postal_code' => '',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|max:50',
             'business_name' => 'string|max:255',
             'business_location' => 'string|max:255',
-            'role' => 'required|string|max:255',
-            'address_1' => '',
-            'address_2' => '',
+            // 'role' => 'required|string|max:255',
+            'address_1' => 'required|string',
         ]);
     }
 
-    public static function updateValidator(Request $request)
+    public static function updateValidator(Request $request): object
     {
         return Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'l_name' => '',
-            'postal_code' => '',
-            'business_name' => '',
-            'business_location' => '',
             'user_img' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'address_1' => '',
-            'address_2' => ''
+            'address_1' => 'required|string'
         ]);
     }
     /**
      * Helpers
      */
-    public static function uploadImg(object $request)
-    {
-        $file = $request->file('user_img');
-        $filename = uniqid($request->name . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
-        Storage::disk('spaces')->put($filename, File::get($file));
-        if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
-            info("file is store successfully : " . $filename);
-        } else {
-            info("file is not found :- " . $filename);
-        }
-        return $filename;
+    public static function updateStoreLocation(
+        int $user_id,
+        string $full_address,
+        string|null $unit_address,
+        string $country,
+        string $state,
+        string $city,
+        string $postcode,
+        string $lat,
+        string $lon
+    ): object {
+        $user = self::find($user_id);
+        $user->full_address = $full_address;
+        if (!is_null($unit_address)) $user->unit_address = $unit_address;
+        $user->country = $country;
+        $user->state = $state;
+        $user->city = $city;
+        $user->postcode = $postcode;
+        $user->lat = $lat;
+        $user->lon = $lon;
+        return $user->save();
     }
 
-    public static function getParentAndChildSellers()
+    public static function createBuyer(
+        string $name,
+        string $l_name,
+        string $email,
+        string $password,
+        string $phone,
+        int $is_active,
+        string $referral_code
+    ): object {
+        return self::create([
+            'name' => $name,
+            'l_name' => $l_name,
+            'email' => $email,
+            'password' => Hash::make($password),
+            'phone' => $phone,
+            'country' => 'NA',
+            'state' => 'NA',
+            'city' => 'NA', 
+            'is_active' => $is_active,
+            'role_id' => 3,
+            'referral_code' => $referral_code
+        ]);
+    }
+
+    public static function createStore(
+        string $name,
+        string $email,
+        string $password,
+        string $phone,
+        string $address,
+        string|null $unit_address,
+        string $postcode,
+        string $country,
+        string $state,
+        string $city,
+        string $business_name,
+        string $business_phone,
+        float $lat,
+        float $lon,
+        string $business_hours,
+        int $role_id,
+        int|null $parent_store_id = null
+    ): object {
+        return self::create([
+            'name' => $name,
+            'email' => $email,
+            'password' => Hash::make($password),
+            'phone' => '+44' . $phone,
+            'business_name' => $business_name,
+            'business_phone' => '+44' . $business_phone,
+            'business_hours' => $business_hours,
+            'full_address' => $address,
+            'unit_address' => $unit_address,
+            'country' => $country,
+            'state' => $state,
+            'city' => $city,
+            'postcode' => $postcode,
+            'lat' => $lat,
+            'lon' => $lon,
+            'settings' => '{"notification_music": 1}',
+            'is_active' => 0,
+            'role_id' => $role_id,
+            'parent_store_id' => $parent_store_id
+        ]);
+    }
+
+    public static function getParentAndChildSellersByCity(string $city): object
     {
-        return User::where('is_active', 1)
+        return self::where('is_active', 1)
             ->whereNotNull('lat')
             ->whereNotNull('lon')
+            ->where('city', $city)
             ->whereIn('role_id', [2, 5])
             ->orderBy('business_name', 'asc')
             ->paginate(10);
     }
 
-    public static function getParentSellers(string $search = '')
+    public static function getParentAndChildSellersByState(string $state): object
     {
-        return User::where('business_name', 'like', '%' . $search . '%')
+        return self::where('is_active', 1)
+            ->whereNotNull('lat')
+            ->whereNotNull('lon')
+            ->where('state', $state)
+            ->whereIn('role_id', [2, 5])
+            ->orderBy('business_name', 'asc')
+            ->paginate(10);
+    }
+
+    public static function getParentSellersSpecificColumns(array $columns): object
+    {
+        return self::select($columns)
+            ->where('role_id', 2)
+            ->get();
+    }
+
+    public static function getParentSellers(string $search = ''): object
+    {
+        return self::where('business_name', 'like', '%' . $search . '%')
             ->where('role_id', 2)
             ->orderBy('business_name', 'asc')
             ->paginate(9);
     }
 
-    public static function getChildSellers(string $search = '')
+    public static function getChildSellers(string $search = ''): object
     {
-        return User::where('business_name', 'like', '%' . $search . '%')
+        return self::where('business_name', 'like', '%' . $search . '%')
             ->where('role_id', 5)
             ->orderBy('business_name', 'asc')
             ->paginate(9);
     }
 
-    public static function getCustomers(string $search = '')
+    public static function getCustomers(string $search = ''): object
     {
-        return User::where('name', 'like', '%' .  $search . '%')
+        return self::where('name', 'like', '%' .  $search . '%')
             ->where('role_id', 3)
             ->orderByDesc('created_at')
             ->paginate(9);
     }
 
-    // This function will be removed once we have inserted referrals against all customers on our production
-    public static function getBuyers(string $search = '')
+    public static function getBuyersWithReferralCode(): object
     {
-        return User::where('name', 'like', '%' .  $search . '%')
-            ->where('role_id', 3)
-            ->orderByDesc('created_at')
-            ->get();
+        return self::whereNotNull('referral_code')->paginate(10);
     }
 
-    public static function getBuyersWithReferralCode()
+    public static function getStoreByBusinessName(string $business_name): object
     {
-        return User::whereNotNull('referral_code')->paginate(10);
+        return self::where('business_name', $business_name)->first();
     }
 
-    public static function getUserByID(int $user_id)
+    public static function getUserByID(int $user_id, array $columns): object
     {
-        return User::find($user_id);
+        return self::select($columns)->find($user_id);
     }
 
-    public function nearbyUsers($user_lat, $user_lon, $radius)
+    public function nearbyUsers($user_lat, $user_lon, $radius): object
     {
-        return User::selectRaw("*, (  3961 * acos( cos( radians(" . $user_lat . ") ) *
+        return self::selectRaw("*, (  3961 * acos( cos( radians(" . $user_lat . ") ) *
                                 cos( radians(users.lat) ) *
                                 cos( radians(users.lon) - radians(" . $user_lon . ") ) +
                                 sin( radians(" . $user_lat . ") ) *
@@ -238,44 +330,29 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function sendStoreApprovedEmail(object $user)
+    public static function activeOrBlockStore(int $user_id, int $status): bool
     {
-        $html = '<html>
-            Hi, ' . $user->name . '<br><br>
-            Thank you for registering on ' . env('APP_NAME') . '.
-            <br>
-            Your store has been approved. Please login to your
-            <a href="' . url('/') . '">Store</a> to manage it.
-            <br><br><br>
-                     </html>';
-        $subject = url('/') . ': Account Approved!';
-        Mail::to($user->email)
-            ->send(new StoreRegisterMail($html, $subject));
-    }
-
-    public static function activeOrBlockStore(int $user_id, int $status)
-    {
-        User::where('id', '=', $user_id)->update(['is_active' => $status]);
+        self::where('id', '=', $user_id)->update(['is_active' => $status]);
         if ($status == 1) {
-            $user = User::findOrFail($user_id);
-            static::sendStoreApprovedEmail($user);
+            $user = self::findOrFail($user_id);
+            EmailServices::sendStoreApprovedMail($user);
         }
         return true;
     }
 
-    public static function activeOrBlockCustomer(int $user_id, int $status)
+    public static function activeOrBlockCustomer(int $user_id, int $status): int
     {
-        return User::where('id', '=', $user_id)->update(['is_active' => $status]);
+        return self::where('id', '=', $user_id)->update(['is_active' => $status]);
     }
 
-    public static function getUserRole(int $user_id)
+    public static function getUserRole(int $user_id): int
     {
-        return  User::where('id', $user_id)->pluck('role_id');
+        return  self::where('id', $user_id)->pluck('role_id');
     }
 
-    public static function getUserInfo(int $user_id)
+    public static function getUserInfo(int $user_id): array|null
     {
-        $user = User::with('referralRelations')->where('id', $user_id)->first();
+        $user = self::with('referralRelations')->where('id', $user_id)->first();
         if ($user) {
             return array(
                 'id' => $user->id,
@@ -298,29 +375,22 @@ class User extends Authenticatable implements JWTSubject
 
     public static function verifyReferralCode(int $user_id, string $referral_code)
     {
-        $data = User::where('id', '!=', $user_id)
-        ->where('referral_code', $referral_code)->first();
+        $data = User::where('id', '!=', $user_id)->where('referral_code', $referral_code)->first();
         return (is_null($data)) ? false :  $data;
     }
 
-    // public static function updateWalletAndStatus(int $status, float $bonus, int $user_id)
-    // {
-    //     $user = User::find($user_id);
-    //     if ($user) {
-    //         $user->pending_withdraw += $bonus;
-    //         // $user->referral_useable = $status;
-    //         $user->save();
-    //     }
-    //     return $user;
-    // }
-
     public static function addIntoWallet(int $user_id, float $amount)
     {
-        return User::where('id', $user_id)->increment('pending_withdraw', $amount);
+        return self::where('id', $user_id)->increment('pending_withdraw', $amount);
     }
 
     public static function deductFromWallet(int $user_id, float $amount)
     {
-        return User::where('id', $user_id)->decrement('pending_withdraw', $amount);
+        return self::where('id', $user_id)->decrement('pending_withdraw', $amount);
+    }
+
+    public static function  getSellerID(): int
+    {
+        return auth()->user()->id;
     }
 }

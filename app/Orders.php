@@ -2,37 +2,69 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Orders extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['*'];
     /**
      * Relations
      */
-    public function order_items()
+    public function order_items(): HasMany
     {
         return $this->hasMany(OrderItems::class, 'order_id');
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function delivery_boy()
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'seller_id');
+    }
+
+    public function delivery_boy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'delivery_boy_id');
     }
 
-    public function store()
+    public function products(): HasManyThrough
     {
-        return $this->belongsTo(User::class, 'seller_id');
+        return $this->hasManyThrough(
+            Products::class,
+            OrderItems::class,
+            'order_id',
+            'id',
+            'id',
+            'product_id'
+        );
     }
     /**
      * Helpers
      */
-    public static function fetchTransportType(int $order_id = null)
+    public static function subFromOrderTotal(int $order_id, float $prod_total_price): bool
+    {
+        $order = self::find($order_id);
+        $order->order_total = $order->order_total - $prod_total_price;
+        return $order->save();
+    }
+
+    public static function replaceWithAlternativePrice(int $order_id, float $current_prod_price, float $alternative_prod_price): bool
+    {
+        $order = self::find($order_id);
+        $order->order_total = ($order->order_total - $current_prod_price) + $alternative_prod_price;
+        return $order->save();
+    }
+
+    public static function fetchTransportType(int $order_id = null): string
     {
         $transposrt_type = [];
         $product_ids = OrderItems::where('order_id', '=', $order_id)->pluck('product_id');
@@ -61,15 +93,60 @@ class Orders extends Model
             return "bike";
     }
 
-    public static function checkTotalOrders(int $user_id)
+    public static function checkIfOrderExists(int $order_id): bool
     {
-        return Orders::where('user_id', $user_id)->count();
+        return self::where('id', $order_id)->exists();
     }
 
-    public static function updateOrderStatus(int $id, string $status)
+    public static function checkTotalOrders(int $user_id): int
     {
-        return Orders::where('id', $id)->update([
+        return self::where('user_id', $user_id)->count();
+    }
+
+    public static function updateOrderStatus(int $order_id, string $status): int
+    {
+        return self::where('id', $order_id)->update([
             'order_status' => $status
         ]);
+    }
+
+    public static function isViewed(int $order_id): object
+    {
+        $order = self::findOrFail($order_id);
+        $order->is_viewed = 1;
+        $order->save();
+        return $order;
+    }
+
+    public static function getOrdersForView(int|null $order_id = null, int $seller_id, string $order_by): object
+    {
+        /* First we will update the "is_viewed" column if the order is searched by ID */
+        if ($order_id) static::isViewed($order_id);
+        /* Now we will fetch the required data */
+        return self::with(['order_items', 'products.category'])
+            ->when($order_id, function ($query) use ($order_id) {
+                return $query->where('id', '=', $order_id);
+            })
+            ->where('seller_id', '=', $seller_id)
+            ->orderBy('created_at', $order_by)
+            ->paginate(10);
+    }
+
+    public static function getRecentOrderByBuyerId(int $buyer_id, int|null $prducts_limit = null, int|null $seller_id = null): object
+    {
+        return self::with([
+            'products' => function ($query) use ($prducts_limit) {
+                if ($prducts_limit !== null) $query->take($prducts_limit);
+            }
+        ])
+            ->when($seller_id, fn ($query) => $query->where('seller_id', $seller_id))
+            ->where('user_id', $buyer_id)
+            ->latest()
+            ->first();
+    }
+
+    public static function getOrderById(int $order_id): object
+    {
+        return self::with(['order_items', 'user', 'store', 'delivery_boy'])->where('id', $order_id)->first();
     }
 }

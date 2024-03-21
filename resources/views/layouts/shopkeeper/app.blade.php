@@ -2,25 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <meta content="ie=edge" http-equiv="x-ua-compatible">
-    <link rel="icon" href="{{ asset('res/res/img/logo.png') }}" type="image/svg+xml" />
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Laravel') }}</title>
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <!-- Font Awesome Icons -->
-    <link href="{{ asset('res/plugins/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
-    <!-- Theme style - Bootstrap 4 Css-->
-    <link href="{{ asset('res/dist/css/adminlte.min.css') }}" rel="stylesheet">
-    <!-- Bootstrap 5 Css -->
-    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <link href="{{ asset('bootstrap5/css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('res/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    @include('layouts.header-links')
     @yield('styles')
 </head>
 
@@ -56,11 +38,10 @@
         <source src="{{ asset('audio/TeekItNotificationMusic (mp3cut.net).mp3') }}" type="audio/mp3">
     </audio>
 
-    <!-- REQUIRED SCRIPTS -->
     <!-- jQuery -->
     <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script>
-    {{-- <!-- Bootstrap 4 -->
-    <script src="{{ asset('res/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script> --}}
+    <!-- Bootstrap 4 -->
+    <script src="{{ asset('res/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <!-- Bootstrap 5 -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
         integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
@@ -75,10 +56,6 @@
     <style>
         .modal-dialog-custom {
             max-width: 700px;
-        }
-
-        .ratting span {
-            color: wj
         }
 
         table tr:first-of-type td {
@@ -251,14 +228,6 @@
             z-index: 1100 !important;
         }
 
-        /*input.form-control{*/
-        /*    border: 0;*/
-        /*    border-bottom: 1px solid;*/
-        /*    border-radius: 0;*/
-        /*    color: #8aa7d7;*/
-        /*    border-color: #3663ae;*/
-        /*    padding-left: 3px;*/
-        /*}*/
         input.form-control,
         select.form-control {
             border: 0;
@@ -279,11 +248,9 @@
         }
     </style>
 
-    <!-- Source: //cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css  -->
-    <link rel="stylesheet" href="{{ asset('res/dist/css/jquery.timepicker.min.css') }}">
-    <!-- Source: //cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js  -->
-    <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script>
-    <script>
+    {{-- <link rel="stylesheet" href="{{ asset('res/dist/css/jquery.timepicker.min.css') }}"> --}}
+    {{-- <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script> --}}
+    {{-- <script>
         $('.stimepicker').timepicker({
             timeFormat: 'h:mm p',
             interval: 30,
@@ -300,10 +267,8 @@
             dropdown: true,
             scrollbar: true
         });
-    </script>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    </script> --}}
+    {{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> --}}
     <script>
         var total_orders = 0;
         /**
@@ -448,34 +413,34 @@
          */
         $('#business_hours_modal').modal('show');
 
-        function closed(day) {
-            let listOfClasses = document.getElementById("time[" + day + "][open]").className;
-            if (listOfClasses.search("disabled-input-field") < 0) {
-                // To disable the input fields
-                document.getElementById("time[" + day + "][open]").value = null;
-                document.getElementById("time[" + day + "][close]").value = null;
-                // To disable the input fields
-                document.getElementById("time[" + day + "][open]").classList.add('disabled-input-field');
-                document.getElementById("time[" + day + "][close]").classList.add('disabled-input-field');
-                // To remove the required attribute from the input fields 
-                document.getElementById("time[" + day + "][open]").required = false;
-                document.getElementById("time[" + day + "][close]").required = false;
-            } else {
-                // To enable the input fields
-                document.getElementById("time[" + day + "][open]").classList.remove('disabled-input-field');
-                document.getElementById("time[" + day + "][close]").classList.remove('disabled-input-field');
-                // To add the required attribute from the input fields 
-                document.getElementById("time[" + day + "][open]").required = true;
-                document.getElementById("time[" + day + "][close]").required = true;
-            }
-        }
+        // function closed(day) {
+        //     let listOfClasses = document.getElementById("time[" + day + "][open]").className;
+        //     if (listOfClasses.search("disabled-input-field") < 0) {
+        //         // To disable the input fields
+        //         document.getElementById("time[" + day + "][open]").value = null;
+        //         document.getElementById("time[" + day + "][close]").value = null;
+        //         // To disable the input fields
+        //         document.getElementById("time[" + day + "][open]").classList.add('disabled-input-field');
+        //         document.getElementById("time[" + day + "][close]").classList.add('disabled-input-field');
+        //         // To remove the required attribute from the input fields 
+        //         document.getElementById("time[" + day + "][open]").required = false;
+        //         document.getElementById("time[" + day + "][close]").required = false;
+        //     } else {
+        //         // To enable the input fields
+        //         document.getElementById("time[" + day + "][open]").classList.remove('disabled-input-field');
+        //         document.getElementById("time[" + day + "][close]").classList.remove('disabled-input-field');
+        //         // To add the required attribute from the input fields 
+        //         document.getElementById("time[" + day + "][open]").required = true;
+        //         document.getElementById("time[" + day + "][close]").required = true;
+        //     }
+        // }
     </script>
     <script src="{{ asset('res/plugins/select2/js/select2.min.js') }}"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    {{-- <script src="https://code.jquery.com/jquery-3.5.1.js"></script> --}}
+    {{-- <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script> --}}
+    {{-- <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script> --}}
     @yield('scripts')
 </body>
 

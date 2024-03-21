@@ -5,13 +5,13 @@
     @include('layouts.header-links')
 </head>
 
-<body class="hold-transition" style="background: url('/bg.png')">
+<body class="hold-transition main-pages-bg-img">
     <div class="wrapper">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-light bg-white">
             <div class="container-fluid">
                 <a class="navbar-brand" target="_blank" href="https://teekit.co.uk/">
-                    <img style=" max-height: 50px;" src="{{ asset('res/res/img/logo.png') }}" alt="TeekIt Logo">
+                    <img style="max-height: 50px;" src="{{ asset('icons/logo.webp') }}" alt="TeekIt Logo">
                 </a>
                 <!-- Toggle Button For Mobiles - Begins -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -22,10 +22,10 @@
                 </button>
                 <!-- Toggle Button For Mobiles - Ends -->
                 <div class="collapse navbar-collapse" id="navbarSupportedContent" aria-current="true" role="navigation">
-                    <form class="e my-2 my-lg-0 ml-auto w-lg-50" style="min-width: 45vw;" method="POST"
+                    <form class="my-2 my-lg-0 ml-auto w-lg-50" style="min-width: 45vw;" method="POST"
                         action="{{ route('login') }}">
                         <div class="row">
-                            <div class="col-md-5">
+                            <div class="col-md-5 mt-3">
                                 {{ csrf_field() }}
                                 <div class="form-group">
                                     <input class="form-control mr-sm-2" type="email" required autocomplete="off"
@@ -36,7 +36,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-5 mt-3">
                                 <div class="form-group">
                                     <input class="form-control mr-sm-2" type="password" autocomplete="off"
                                         placeholder="Password" name="password" required>
@@ -68,7 +68,7 @@
             <div class="row mtd" style="margin-top: 20vh">
                 <div class="col-md-8">
                     <img style="max-height: 540px;margin: 0 auto;display: block;width: auto;max-width: 500px;height: 100%;width: 100%;object-fit: contain;"
-                        src="{{ asset('bike.png') }}">
+                        src="{{ asset('bg_imgs/bike.webp') }}">
                 </div>
                 <div class="col-md-4">
                     @yield('content')

@@ -3,9 +3,8 @@
 namespace App\Helpers;
 
 use App\Models\PromoCodesUsageLimit;
-use App\Services\JsonResponseCustom;
+use App\Services\JsonResponseServices;
 use App\User;
-use Illuminate\Http\Request;
 
 class PromoCodeHelpers
 {
@@ -30,14 +29,14 @@ class PromoCodeHelpers
             $data[0]['promo_code'] = $promo_codes[0];
             $store_data = static::ifPromoCodeBelongsToStore($promo_code_data);
             $data[1]['store'] = ($store_data) ? ($store_data) : (NULL);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 $data,
                 true,
                 config('constants.VALID_PROMOCODE'),
                 config('constants.HTTP_OK')
             );
         } else {
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 config('constants.MAX_LIMIT'),
