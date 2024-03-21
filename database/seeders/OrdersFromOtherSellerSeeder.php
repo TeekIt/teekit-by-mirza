@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\OrdersFromOtherSeller;
 use Illuminate\Database\Seeder;
 
-class OrdersFromOtherSellersSeeder extends Seeder
+class OrdersFromOtherSellerSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,6 +14,6 @@ class OrdersFromOtherSellersSeeder extends Seeder
      */
     public function run()
     {
-        //
+        OrdersFromOtherSeller::factory()->count(5)->create();
     }
 }

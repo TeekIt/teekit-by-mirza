@@ -9,18 +9,21 @@ class PromoCodesUsageLimit extends Model
 {
     use HasFactory;
     protected $table = 'promo_codes_usage_limit';
-    /*
-    |--------------------------------------------------------------------------
-    | Custom Helper Functions
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * Relations
+     */
+    // 
+
+    /**
+     * Helpers
+     */
 
     /**
      * function will return boolean values i.e 1 = true, 0 = false
      */
     public static function promoCodeUsageLimit(object $promo_code_data, int $user_id)
     {
-        $usage_limit_data = PromoCodesUsageLimit::where('promo_code_id', $promo_code_data->id)
+        $usage_limit_data = self::where('promo_code_id', $promo_code_data->id)
             ->where('user_id', $user_id)
             ->first();
         $status = 0;
@@ -40,7 +43,7 @@ class PromoCodesUsageLimit extends Model
 
     public static function promoCodeTotalUsedByUser(int $user_id, int $promo_code_id)
     {
-        return PromoCodesUsageLimit::where('promo_code_id', $promo_code_id)
+        return self::where('promo_code_id', $promo_code_id)
             ->where('user_id', $user_id)
             ->first();
     }

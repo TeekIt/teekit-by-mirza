@@ -21,7 +21,7 @@ use Throwable;
 
 class OrdersController extends Controller
 {
-     /**
+    /**
      * Inserts a newly arrived order
      * @author Mirza Abdullah Izhar
      */
@@ -30,31 +30,34 @@ class OrdersController extends Controller
         try {
             if ($request->has('type')) {
                 if ($request->type == 'delivery') {
-                    $validated_data = Validator::make($request->all(), [
+                    $rules = [
+                        'type' => 'required|string',
                         'items' => 'required|array',
                         'lat' => 'required|numeric|between:-90,90',
                         'lon' => 'required|numeric|between:-180,180',
                         'receiver_name' => 'required|regex:/^[A-Za-z\s]+$/',
                         'phone_number' => 'required|string|min:13|max:13',
                         'address' => 'required|string',
-                        'house_no' => 'required|integer',
+                        'house_no' => 'required|string',
                         'delivery_charges' => 'required|numeric',
                         'service_charges' => 'required|numeric',
-                        'device' => 'sometimes'
-                    ]);
-                    if ($validated_data->fails()) {
-                        return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
-                    }
+                        'device' => 'sometimes',
+                        // 'seller_id' => 'required|integer'
+                    ];
                 } elseif ($request->type == 'self-pickup') {
-                    $validated_data = Validator::make($request->all(), [
-                        'phone_number' => 'string|min:13|max:13'
-                    ]);
-                    if ($validated_data->fails()) {
-                        return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
-                    }
+                    $rules = [
+                        'type' => 'required|string',
+                        'phone_number' => 'string|min:13|max:13',
+                        // 'seller_id' => 'required|integer'
+                    ];
                 }
             } else {
                 return JsonResponseServices::getApiValidationFailedResponse(json_decode('{"type": ["The type field is required."]}'));
+            }
+
+            $validated_data = Validator::make($request->all(), $rules);
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
             $grouped_seller = [];
             foreach ($request->items as $item) {
@@ -65,6 +68,7 @@ class OrdersController extends Controller
                 $temp['price'] = Products::getProductPrice($item['product_id']);
                 $product = Products::getOnlyProductDetailsById($item['product_id']);
                 $temp['seller_id'] = $product->user_id;
+                // $temp['seller_id'] = $request->seller_id;
                 $temp['volumn'] = $product->height * $product->width * $product->length;
                 $temp['weight'] = $product->weight;
                 $grouped_seller[$temp['seller_id']][] = $temp;
@@ -72,7 +76,7 @@ class OrdersController extends Controller
             }
             $count = 0;
             $order_arr = [];
-            $user_id = auth()->id();
+            $customer_id = auth()->id();
             foreach ($grouped_seller as $seller_id => $order) {
                 $total_weight = 0;
                 $total_volumn = 0;
@@ -89,6 +93,10 @@ class OrdersController extends Controller
                 * Adding amount into seller wallet 
                 */
                 User::addIntoWallet($seller_id, $order_total);
+                $new_order = new Orders();
+                $new_order->user_id = $customer_id;
+                $new_order->order_total = $order_total;
+                $new_order->total_items = $total_items;
                 if ($request->type == 'delivery') {
                     $customer_lat = $request->lat;
                     $customer_lon = $request->lon;
@@ -97,15 +105,8 @@ class OrdersController extends Controller
                     // $distance = $this->calculateDistance($customer_lat, $customer_lon, $store_lat, $store_lon);
                     $distance = GoogleMapServices::getDistanceInMiles($store_lat, $store_lon, $customer_lat, $customer_lon);
                     $driver_charges = DriverFairServices::calculateDriverFair2($total_weight, $total_volumn, $distance);
-                }
-                $new_order = new Orders();
-                $new_order->user_id = $user_id;
-                $new_order->order_total = $order_total;
-                $new_order->total_items = $total_items;
-                $new_order->lat = ($request->type == 'delivery') ? $customer_lat : NULL;
-                $new_order->lon = ($request->type == 'delivery') ? $customer_lon : NULL;
-                $new_order->type = $request->type;
-                if ($request->type == 'delivery') {
+                    $new_order->lat = $customer_lat;
+                    $new_order->lon = $customer_lon;
                     $new_order->receiver_name = $request->receiver_name;
                     $new_order->phone_number = $request->phone_number;
                     $new_order->address = $request->address;
@@ -115,6 +116,7 @@ class OrdersController extends Controller
                     $new_order->delivery_charges = $request->delivery_charges;
                     $new_order->service_charges = $request->service_charges;
                 }
+                $new_order->type = $request->type;
                 $new_order->description = $request->description;
                 $new_order->payment_status = $request->payment_status ?? "hidden";
                 $new_order->seller_id = $seller_id;
@@ -151,7 +153,7 @@ class OrdersController extends Controller
                 }
                 $count++;
             }
-            if ($request->wallet_flag == 1) User::deductFromWallet($user_id, $request->wallet_deduction_amount);
+            if ($request->wallet_flag == 1) User::deductFromWallet($customer_id, $request->wallet_deduction_amount);
             return JsonResponseServices::getApiResponse(
                 $this->getOrdersFromIds($order_arr),
                 config('constants.TRUE_STATUS'),

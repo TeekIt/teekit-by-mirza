@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Orders extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['*'];
     /**
      * Relations
@@ -47,10 +50,6 @@ class Orders extends Model
     /**
      * Helpers
      */
-    public static function createOrderForOtherStore(int $seller_id, array $order, array $order_item){
-
-    }
-
     public static function subFromOrderTotal(int $order_id, float $prod_total_price): bool
     {
         $order = self::find($order_id);

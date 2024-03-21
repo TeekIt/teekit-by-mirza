@@ -60,11 +60,11 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
-    Route::post('register', 'register');
-    Route::post('register_google', 'registerGoogle');
+    Route::post('register', 'registerBuyer');
+    Route::post('register_google', 'registerBuyerFromGoogle');
+    Route::post('login', 'loginBuyer');
+    Route::post('login_google', 'loginBuyerFromGoogle');
     Route::get('verify', 'verify');
-    Route::post('login', 'login');
-    Route::post('login_google', 'loginGoogle');
     Route::post('change-password', 'changePassword');
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');

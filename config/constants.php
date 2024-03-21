@@ -42,6 +42,7 @@ return [
     'WITHDRAWAL_REQUEST_SUBMITTED' => 'Withdrawal request is successfully submitted.',
     'PRODUCT_REMOVED_SUCCESSFULLY' => 'Product has been removed successfully.',
     'ORDER_PLACED_SUCCESSFULLY' => 'Your order has been placed successfully.',
+    'SENT_TO_OTHER_STORE_SUCCESS' => 'Your order has been sent to other store.',
     /*
     |--------------------------------------------------------------------------
     | Failure Constants
@@ -80,6 +81,7 @@ return [
     'CACHE_REMOVED_FAILED' => 'Sorry due to some issue your cahce can not be removed.',
     'QTY_SHOULD_NOT_BE_GREATER' => 'You cannot enter quantity more then your stock.',
     'PRODUCT_REMOVED_FAILED' => 'There is an error while removing the product.',
+    'SENT_TO_OTHER_STORE_FAILED' => 'Due to some error your order cannot be sent to other store.',
     /*
     |--------------------------------------------------------------------------
     | Digital Ocean Bucket
@@ -146,5 +148,5 @@ return [
     'HTTP_UNPROCESSABLE_REQUEST' => 422,
     'HTTP_RESOURCE_EXHAUSTED' => 429,
     'HTTP_SERVICE_UNAVAILABLE' => 503,
-    'HTTP_GATEWAY_TIMEOUT' => 504,
+    'HTTP_GATEWAY_TIMEOUT' => 504
 ];

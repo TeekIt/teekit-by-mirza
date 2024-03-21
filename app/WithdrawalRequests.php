@@ -17,6 +17,7 @@ class WithdrawalRequests extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+    
     public function role()
     {
         return $this->belongsTo('App\Role');

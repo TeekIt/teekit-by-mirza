@@ -4,9 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use QtySeeder;
-use Database\Seeders\ReferralCodeRelationSeeder;
-use App\Database\Seeders\DriverSeeder;
-use Database\Seeders\DriverDocumentsSeeder;
+use DriverDocumentsSeeder;
+use DriverSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,7 +20,9 @@ class DatabaseSeeder extends Seeder
             QtySeeder::class,
             ReferralCodeRelationSeeder::class,
             DriverSeeder::class,
-            DriverDocumentsSeeder::class
+            DriverDocumentsSeeder::class,
+            OrdersFromOtherSellerSeeder::class,
+            OrderItemsSeeder::class
         ]);
     }
 }

@@ -34,21 +34,28 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('jwt.verify', ['except' => ['login', 'register', 'verify', 'searchSellerProducts', 'loginGoogle', 'registerGoogle']]);
+        $this->middleware('jwt.verify', ['except' => [
+            'loginBuyer',
+            'registerBuyer',
+            'verify',
+            'searchSellerProducts',
+            'loginBuyerFromGoogle',
+            'registerBuyerFromGoogle'
+        ]]);
     }
     /**
      * Register For Mobile App
      * @author Huzaifa Haleem
      */
-    public function register(Request $request)
+    public function registerBuyer(Request $request)
     {
         try {
             $validated_data = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
+                'l_name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|max:50',
-                'role' => 'required|string|max:255',
-                'address_1' => 'required|string',
+                'phone' => 'required|string|max:13'
             ]);
             if ($validated_data->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
@@ -60,20 +67,17 @@ class AuthController extends Controller
                 $request->email,
                 $request->password,
                 $request->phone,
-                $request->address_1,
-                $request->postcode,
                 1,
                 Str::uuid()
             );
 
             EmailServices::sendBuyerAccVerificationMail($user);
-            
+
             return response()->json([
                 'status' => config('constants.TRUE_STATUS'),
-                'role' => $request->role,
+                'role' => 'buyer',
                 'message' => 'You have registered succesfully! We have sent a verification link to your email address. Please click on the link to activate your account.'
             ], config('constants.HTTP_OK'));
-
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(
@@ -89,19 +93,19 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
+    public function loginBuyer(Request $request)
     {
         try {
             $credentials = $request->only('email', 'password');
             if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['data' => [], 'status' => false, 'message' => config('constants.INVALID_CREDENTIALS')], 401);
+                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.INVALID_CREDENTIALS')], 401);
             }
             $user = JWTAuth::user();
             if ($user->email_verified_at == null) {
-                return response()->json(['data' => [], 'status' => false, 'message' => config('constants.EMAIL_NOT_VERIFIED')], 401);
+                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.EMAIL_NOT_VERIFIED')], 401);
             }
             if ($user->is_active == 0) {
-                return response()->json(['data' => [], 'status' => false, 'message' => config('constants.ACCOUNT_DEACTIVATED')], 401);
+                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.ACCOUNT_DEACTIVATED')], 401);
             }
             $this->authenticated($request, $user, $token);
             return $this->respondWithToken($token);
@@ -127,14 +131,13 @@ class AuthController extends Controller
             }
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' => $validate->errors()
             ], 422);
         }
         $verification_token = Crypt::decrypt($request->token);
 
         $user = User::where('email', $verification_token)->first();
-        $email_verified_at = Carbon::now();
 
         if ($user) {
             if ($user->email_verified_at != null) {
@@ -142,11 +145,11 @@ class AuthController extends Controller
                 return;
                 return response()->json([
                     'data' => [],
-                    'status' => false,
+                    'status' => config('constants.FALSE_STATUS'),
                     'message' => 'Account Already verified'
-                ], 200);
+                ], config('constants.HTTP_OK'));
             }
-            $user->email_verified_at = $email_verified_at;
+            $user->email_verified_at = Carbon::now();
             $user->is_active = 1;
             $user->save();
 
@@ -155,16 +158,16 @@ class AuthController extends Controller
 
             return response()->json([
                 'data' => [],
-                'status' => true,
+                'status' => config('constants.TRUE_STATUS'),
                 'message' => 'Account successfully verified'
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } else {
             echo "Invalid verification token";
             return;
 
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' => 'Invalid verification token'
             ], 401);
         }
@@ -182,7 +185,7 @@ class AuthController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' =>  $validate->errors()
             ], 422);
         }
@@ -193,13 +196,13 @@ class AuthController extends Controller
             $User->save();
             return response()->json([
                 'data' => [],
-                'status' => true,
+                'status' => config('constants.TRUE_STATUS'),
                 'message' =>  'Password changed successfully.'
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } else {
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' =>  'User not found.'
             ], 404);
         }
@@ -252,9 +255,9 @@ class AuthController extends Controller
         JWTAuth::parseToken()->invalidate();
         return response()->json([
             'data' => [],
-            'status' => true,
+            'status' => config('constants.TRUE_STATUS'),
             'message' =>  'Successfully logged out.'
-        ], 200);
+        ], config('constants.HTTP_OK'));
     }
     /**
      * It will Refresh a token.
@@ -306,9 +309,9 @@ class AuthController extends Controller
         );
         return response()->json([
             'data' => $data_info,
-            'status' => true,
+            'status' => config('constants.TRUE_STATUS'),
             'message' =>  config('constants.LOGIN_SUCCESS')
-        ], 200);
+        ], config('constants.HTTP_OK'));
     }
 
     protected function authenticated($request, $user, $token)
@@ -349,7 +352,7 @@ class AuthController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' => $validate->messages()
             ], 422);
         }
@@ -379,11 +382,11 @@ class AuthController extends Controller
             $User->save();
             $response = $this->me();
             return $response;
-            //return response()->json($response, 200);
+            //return response()->json($response, config('constants.HTTP_OK'));
         } else {
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' => 'User not found.'
             ], 404);
         }
@@ -412,9 +415,9 @@ class AuthController extends Controller
             }
             return response()->json([
                 'data' => $data,
-                'status' => true,
+                'status' => config('constants.TRUE_STATUS'),
                 'message' => ''
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(
@@ -435,7 +438,7 @@ class AuthController extends Controller
         $data = User::getUserInfo($user_id);
         return JsonResponseServices::getApiResponse(
             (empty($data)) ? [] : $data,
-            (empty($data)) ? false : true,
+            (empty($data)) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
             (empty($data)) ? config('constants.NO_RECORD') : '',
             (empty($data)) ? config('constants.HTTP_UNPROCESSABLE_REQUEST') : config('constants.HTTP_OK')
         );
@@ -447,12 +450,11 @@ class AuthController extends Controller
     public function keys()
     {
         try {
-            $keys = Keys::all();
             return response()->json([
-                'data' => $keys,
-                'status' => true,
+                'data' => Keys::all(),
+                'status' => config('constants.TRUE_STATUS'),
                 'message' => ''
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(
@@ -482,15 +484,15 @@ class AuthController extends Controller
                 $user->delete();
                 return response()->json([
                     'data' => [],
-                    'status' => true,
+                    'status' => config('constants.TRUE_STATUS'),
                     'message' => config('constants.ITEM_DELETED'),
-                ], 200);
+                ], config('constants.HTTP_OK'));
             }
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' => config('constants.NO_RECORD')
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(
@@ -505,14 +507,14 @@ class AuthController extends Controller
      * Google register
      * @version 1.0.0
      */
-    public function registerGoogle(Request $request)
+    public function registerBuyerFromGoogle(Request $request)
     {
         try {
             $validated_data = Validator::make($request->all(), [
                 'name' => 'required|string',
                 'l_name' => 'required|string',
                 'email' => 'required|string|email|max:255|unique:users',
-                'role' => 'required|string|max:255'
+                'role' => 'required|string|max:5'
             ]);
             if ($validated_data->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
@@ -561,9 +563,9 @@ class AuthController extends Controller
                     'token_type' => 'bearer',
                     'expires_in' => JWTAuth::factory()->getTTL() * 60,
                 ],
-                'status' => true,
+                'status' => config('constants.TRUE_STATUS'),
                 'message' => config('constants.REGISTER_SUCCESS'),
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(
@@ -578,7 +580,7 @@ class AuthController extends Controller
      * Google login via email
      * @version 1.0.0
      */
-    public function loginGoogle(Request $request)
+    public function loginBuyerFromGoogle(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -587,7 +589,7 @@ class AuthController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'data' => [],
-                    'status' => false,
+                    'status' => config('constants.FALSE_STATUS'),
                     'message' => $validator->errors()
                 ], 422);
             }
@@ -595,7 +597,7 @@ class AuthController extends Controller
             if (!$user) {
                 return response()->json([
                     'data' => [],
-                    'status' => false,
+                    'status' => config('constants.FALSE_STATUS'),
                     'message' =>  config('constants.INVALID_CREDENTIALS')
                 ], 401);
             }
@@ -631,9 +633,9 @@ class AuthController extends Controller
                     'token_type' => 'bearer',
                     'expires_in' => JWTAuth::factory()->getTTL() * 60,
                 ],
-                'status' => true,
+                'status' => config('constants.TRUE_STATUS'),
                 'message' =>   config('constants.LOGIN_SUCCESS'),
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(

@@ -281,7 +281,7 @@ class Products extends Model
     public static function getProductPrice(int $product_id): float
     {
         $product = self::find($product_id);
-        if ($product->discount_percentage > 0) return $product->discount_percentage * 1.2;
+        // return ($product->discount_percentage > 0) ? $product->discount_percentage * 1.2 : $product->price * 1.2;
         return $product->price * 1.2;
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Sellers;
 
 use App\Drivers;
+use App\Models\OrdersFromOtherSeller;
 use App\OrderItems;
 use App\Orders;
 use App\Services\EmailServices;
@@ -43,7 +44,7 @@ class OrdersLivewire extends Component
 
     public function mount()
     {
-        $this->seller_id = Auth::id();
+        $this->seller_id = auth()->id();
         $this->resetAllPaginators();
     }
 
@@ -107,8 +108,8 @@ class OrdersLivewire extends Component
     {
         $this->order = $order;
         $this->order_item = $order_item;
-        $sellers = User::getParentAndChildSellersByCity(Auth::user()->city);
-        $this->nearby_sellers = GoogleMapServices::findDistanceByMakingChunks(Auth::user()->lat, Auth::user()->lon, $sellers, 25);
+        $sellers = User::getParentAndChildSellersByCity(auth()->user()->city);
+        $this->nearby_sellers = GoogleMapServices::findDistanceByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellers, 25);
     }
 
     public function sendItemToAnOtherStore()
@@ -120,79 +121,54 @@ class OrdersLivewire extends Component
         try {
             /* Perform some operation */
             $prod_total_price = $this->order_item['product_price'] * $this->order_item['product_qty'];
-            /* Send this product to another store */
             $selected_seller = User::getStoreByBusinessName($this->selected_nearby_seller);
-            // dd(request()->schemeAndHttpHost());
             // dd($this->order);
-            dd($this->order_item);
+            // dd($this->order_item);
+            
+            /* Send this product to another store */
+            $order_from_other_seller = OrdersFromOtherSeller::insertOrderFromOtherSeller(
+                $this->order['user_id'],
+                $selected_seller->id,
+                $this->order['order_total'],
+                $this->order['total_items'],
+                isset($this->order['lat']) ? (float) $this->order['lat'] : null,
+                isset($this->order['lon']) ? (float) $this->order['lon'] : null,
+                $this->order['receiver_name'],
+                $this->order['phone_number'],
+                $this->order['address'],
+                $this->order['house_no'],
+                $this->order['flat'],
+                $this->order['driver_charges'],
+                $this->order['delivery_charges'],
+                $this->order['service_charges'],
+                $this->order['device'],
+                $this->order['type'],
+                $this->order['description'],
+                $this->order['payment_status'],
+                $this->order['offloading'],
+                $this->order['offloading_charges']
+            );
 
-            Orders::createOrderForOtherStore($this->order, $this->order_item, $selected_seller->id);
+            OrderItems::insertOrderItem(
+                $order_from_other_seller->id, 
+                $this->order_item['product_id'], 
+                $this->order_item['product_price'], 
+                $this->order_item['product_qty'], 
+                $this->order_item['user_choice']
+            );
 
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3RlZWtpdHN0YWdpbmcuc2hvcC9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTY5MjgxNzg4NiwiZXhwIjoxNzI4ODE3ODg2LCJuYmYiOjE2OTI4MTc4ODYsImp0aSI6ImVFNG9HNFA2NVNDYXB0aGQiLCJzdWIiOjQ4MiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSIsIm5hbWUiOiJBemltIiwicm9sZXMiOltdfQ.skCx-1m6NB8XaJjyBypI92X0j-Rm5GaPo7ahr1LqB3Y'
-            ])
-                ->acceptJson()
-                ->post('http://127.0.0.1:8000' . '/api/orders/new', [
-                    'items' => [
-                        [
-                            'product_id' => '23990',
-                            'qty' => '2',
-                            'user_choice' => '1',
-                        ]
-                    ],
-                    'type' => 'delivery',
-                    'receiver_name' => 'Kalsey Test',
-                    'phone_number' => '+447976620000',
-                    'address' => '1 Waldegrave Rd, London W5 3HT, UK',
-                    'house_no' => '135',
-                    'description' => '',
-                    'delivery_charges' => '30',
-                    'service_charges' => '32',
-                    'payment_status' => 'paid',
-                    'lat' => '51.51552780',
-                    'lon' => '-0.29122390',
-                    'device' => 'Android',
-                    'offloading' => '1',
-                    'offloading_charges' => '5',
-                ]);
-
-            dd($response->body());
-
-            /* cURL Request */
-            // $curl = curl_init();
-
-            // curl_setopt_array($curl, array(
-            //     CURLOPT_URL => 'http://127.0.0.1:8000/api/orders/new',
-            //     CURLOPT_RETURNTRANSFER => true,
-            //     CURLOPT_ENCODING => '',
-            //     CURLOPT_MAXREDIRS => 10,
-            //     CURLOPT_TIMEOUT => 0,
-            //     CURLOPT_FOLLOWLOCATION => true,
-            //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            //     CURLOPT_CUSTOMREQUEST => 'POST',
-            //     CURLOPT_POSTFIELDS => array('items[1][product_id]' => '23990', 'items[1][qty]' => '2', 'items[1][user_choice]' => '1', 'type' => 'delivery', 'receiver_name' => 'Kalsey Test', 'phone_number' => '+447976620000', 'address' => '1 Waldegrave Rd, London W5 3HT, UK', 'house_no' => '135', 'description' => '', 'delivery_charges' => '30', 'service_charges' => '32', 'payment_status' => 'paid', 'lat' => '51.51552780', 'lon' => '-0.29122390', 'device' => 'Android', 'offloading' => '1', 'offloading_charges' => '5'),
-            //     CURLOPT_HTTPHEADER => array(
-            //         'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3RlZWtpdHN0YWdpbmcuc2hvcC9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTY5MjgxNzg4NiwiZXhwIjoxNzI4ODE3ODg2LCJuYmYiOjE2OTI4MTc4ODYsImp0aSI6ImVFNG9HNFA2NVNDYXB0aGQiLCJzdWIiOjQ4MiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSIsIm5hbWUiOiJBemltIiwicm9sZXMiOltdfQ.skCx-1m6NB8XaJjyBypI92X0j-Rm5GaPo7ahr1LqB3Y'
-            //     ),
-            // ));
-
-            // $response = curl_exec($curl);
-
-            // curl_close($curl);
-            // dd($response);
-
-
-            // /* Remove the item from current order items */
+            // // /* Remove the item from current order items */
             // $removed = OrderItems::removeItem($this->order_item['id']);
-            // /* Subtract the total price of this product/order item from the current order's total */
+            // // /* Subtract the total price of this product/order_item from the current order's total */
             // $subtracted = Orders::subFromOrderTotal($this->order_item['order_id'], $prod_total_price);
+            // // dd($order_from_other_seller);
 
             /* Operation finished */
             sleep(1);
-            if ($updated) {
-                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            if (true) {
+                session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
             } else {
-                session()->flash('error', config('constants.UPDATION_FAILED'));
+                session()->flash('error', config('constants.SENT_TO_OTHER_STORE_FAILED'));
             }
         } catch (Exception $error) {
             report($error);

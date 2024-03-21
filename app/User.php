@@ -9,15 +9,12 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Str;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -37,11 +34,11 @@ class User extends Authenticatable implements JWTSubject
         'business_phone',
         'business_hours',
         'full_address',
-        'unit_address', // Consider removing it if not needed
+        'unit_address',
         'country',
         'state',
         'city',
-        'postcode', // Consider removing it if not needed
+        'postcode',
         'lat',
         'lon',
         'bank_details',
@@ -192,8 +189,6 @@ class User extends Authenticatable implements JWTSubject
         string $email,
         string $password,
         string $phone,
-        string $address,
-        string $postcode,
         int $is_active,
         string $referral_code
     ): object {
@@ -203,8 +198,9 @@ class User extends Authenticatable implements JWTSubject
             'email' => $email,
             'password' => Hash::make($password),
             'phone' => $phone,
-            'full_address' => $address,
-            'postcode' => $postcode,
+            'country' => 'NA',
+            'state' => 'NA',
+            'city' => 'NA', 
             'is_active' => $is_active,
             'role_id' => 3,
             'referral_code' => $referral_code
