@@ -2,8 +2,17 @@
 
 namespace App\Services;
 
-final class JsonResponseCustom
+final class JsonResponseServices
 {
+    public static function getApiValidationFailedResponse($errors)
+    {
+        return response()->json([
+            'data' => [],
+            'status' => config('constants.FALSE_STATUS'),
+            'message' => $errors,
+        ], config('constants.HTTP_UNPROCESSABLE_REQUEST'));
+    }
+
     public static function getApiResponse($data, $status, $message, $http_code)
     {
         return response()->json([

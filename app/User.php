@@ -2,22 +2,19 @@
 
 namespace App;
 
-use App\Services\EmailManagement;
+use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Arr;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -37,11 +34,11 @@ class User extends Authenticatable implements JWTSubject
         'business_phone',
         'business_hours',
         'full_address',
-        'unit_address', // Consider removing it if not needed
+        'unit_address',
         'country',
         'state',
         'city',
-        'postcode', // Consider removing it if not needed
+        'postcode',
         'lat',
         'lon',
         'bank_details',
@@ -173,7 +170,7 @@ class User extends Authenticatable implements JWTSubject
         string $postcode,
         string $lat,
         string $lon
-    ) {
+    ): object {
         $user = self::find($user_id);
         $user->full_address = $full_address;
         if (!is_null($unit_address)) $user->unit_address = $unit_address;
@@ -186,17 +183,28 @@ class User extends Authenticatable implements JWTSubject
         return $user->save();
     }
 
-    public static function uploadImg(object $request)
-    {
-        $file = $request->file('user_img');
-        $filename = uniqid($request->name . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
-        Storage::disk('spaces')->put($filename, File::get($file));
-        if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
-            info("file is store successfully : " . $filename);
-        } else {
-            info("file is not found :- " . $filename);
-        }
-        return $filename;
+    public static function createBuyer(
+        string $name,
+        string $l_name,
+        string $email,
+        string $password,
+        string $phone,
+        int $is_active,
+        string $referral_code
+    ): object {
+        return self::create([
+            'name' => $name,
+            'l_name' => $l_name,
+            'email' => $email,
+            'password' => Hash::make($password),
+            'phone' => $phone,
+            'country' => 'NA',
+            'state' => 'NA',
+            'city' => 'NA', 
+            'is_active' => $is_active,
+            'role_id' => 3,
+            'referral_code' => $referral_code
+        ]);
     }
 
     public static function createStore(
@@ -241,11 +249,23 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
 
-    public static function getParentAndChildSellers(): object
+    public static function getParentAndChildSellersByCity(string $city): object
     {
         return self::where('is_active', 1)
             ->whereNotNull('lat')
             ->whereNotNull('lon')
+            ->where('city', $city)
+            ->whereIn('role_id', [2, 5])
+            ->orderBy('business_name', 'asc')
+            ->paginate(10);
+    }
+
+    public static function getParentAndChildSellersByState(string $state): object
+    {
+        return self::where('is_active', 1)
+            ->whereNotNull('lat')
+            ->whereNotNull('lon')
+            ->where('state', $state)
             ->whereIn('role_id', [2, 5])
             ->orderBy('business_name', 'asc')
             ->paginate(10);
@@ -315,7 +335,7 @@ class User extends Authenticatable implements JWTSubject
         self::where('id', '=', $user_id)->update(['is_active' => $status]);
         if ($status == 1) {
             $user = self::findOrFail($user_id);
-            EmailManagement::sendStoreApprovedMail($user);
+            EmailServices::sendStoreApprovedMail($user);
         }
         return true;
     }
@@ -367,5 +387,10 @@ class User extends Authenticatable implements JWTSubject
     public static function deductFromWallet(int $user_id, float $amount)
     {
         return self::where('id', $user_id)->decrement('pending_withdraw', $amount);
+    }
+
+    public static function  getSellerID(): int
+    {
+        return auth()->user()->id;
     }
 }

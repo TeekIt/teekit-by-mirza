@@ -99,22 +99,41 @@ class Categories extends Model
         }
     }
 
-    public static function stores(int $category_id)
-    {
-        // Get IDs of both parent and child stores from the Qty table
-        $store_ids = Qty::select('users_id')
-            ->distinct()
-            ->join('products', 'qty.products_id', '=', 'products.id')
-            ->where('qty', '>', 0) // Products Should Be In Stock
-            ->where('products.status', '=', 1) // Products Should Be Live
-            ->where('qty.category_id', '=', $category_id)
-            ->pluck('users_id');
+    // public static function stores(int $category_id, string $city)
+    // {
+    //     // Get IDs of both parent and child stores from the Qty table
+    //     // $store_ids = Qty::select('users_id')
+    //     //     ->distinct()
+    //     //     ->join('products', 'qty.products_id', '=', 'products.id')
+    //     //     ->where('qty', '>', 0) // Products Should Be In Stock
+    //     //     ->where('products.status', '=', 1) // Products Should Be Live
+    //     //     ->where('qty.category_id', '=', $category_id)
+    //     //     ->pluck('users_id');
 
-        // Get active parent and child stores that have products in the specified category
-        return User::whereIn('id', $store_ids)
-        ->where('is_active', '=', 1) 
-        ->paginate(10);
-    }
+    //     // // Get active parent and child stores that have products in the specified category
+    //     // return User::whereIn('id', $store_ids)
+    //     // ->where('is_active', '=', 1) 
+    //     // ->paginate(10);
+
+    //     // $sellers = User::join('qty', 'qty.category_id', '=', 'products.category_id')
+    //     // ->join('products', 'products.id', '=', 'qty.products_id')
+    //     // ->where('qty.qty', '>', 0) // Products Should Be In Stock
+    //     // ->where('products.status', '=', 1) // Products Should Be Live
+    //     // ->paginate(10);
+
+    //    return  Qty::select('users.*')
+    //     ->join('users', 'users.id', '=', 'qty.users_id')
+    //     ->join('products', 'products.id', '=', 'qty.products_id')
+    //     ->where('qty.qty', '>', 0) // Products should be in stock
+    //     ->where('qty.category_id', '=', $category_id)
+    //     ->where('products.status', '=', 1) // Products should be live
+    //     ->where('users.is_active', '=', 1) // Sellers should be active
+    //     ->where('users.city', '=', $city)
+    //     ->distinct() // Use distinct to select only unique stores
+    //     ->paginate(10);
+
+    //     // return $sellers;
+    // }
 
     public static function allCategories()
     {

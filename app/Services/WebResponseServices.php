@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-final class WebResponseCustom
+final class WebResponseServices
 {
     public static function getValidationResponseRedirectBack($errors)
     {

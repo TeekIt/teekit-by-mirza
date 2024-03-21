@@ -32,19 +32,52 @@ class Qty extends Model
     // public static function updateProductQty(int $product_id, int $user_id, int $product_quantity)
     // {
     //     if (!empty($user_id)) {
-    //         Qty::where('products_id', $product_id)
+    //         self::where('products_id', $product_id)
     //             ->where('users_id', $user_id)
     //             ->update(['qty' => $product_quantity]);
     //     } else if (empty($user_id)) {
-    //         Qty::where('products_id', $product_id)
+    //         self::where('products_id', $product_id)
     //             ->decrement(['qty' => $product_quantity]);
     //     }
     //     return true;
     // }
 
+    public static function getSellersByGivenParams(int $category_id, string $state): object
+    {
+        return self::select([
+            'users.id',
+            'users.name',
+            'users.email',
+            'users.business_name',
+            'users.business_hours',
+            'users.full_address',
+            'users.unit_address',
+            'users.country',
+            'users.state',
+            'users.city',
+            'users.lat',
+            'users.lon',
+            'users.user_img',
+            'users.pending_withdraw',
+            'users.total_withdraw',
+            'users.parent_store_id',
+            'users.is_online',
+            'users.role_id'
+        ])
+        ->join('users', 'users.id', '=', 'qty.users_id')
+        ->join('products', 'products.id', '=', 'qty.products_id')
+        ->where('qty.qty', '>', 0) // Products should be in stock
+        ->where('qty.category_id', '=', $category_id)
+        ->where('products.status', '=', 1) // Products should be live
+        ->where('users.is_active', '=', 1) // Sellers should be active
+        ->where('users.state', '=', $state)
+        ->distinct() // Use distinct to select only unique stores
+        ->get();
+    }
+
     public static function getProductsByGivenIds(int $category_id, int $store_id)
     {
-        $quantities = Qty::where('users_id', $store_id)
+        $quantities = self::where('users_id', $store_id)
             ->where('category_id', $category_id)
             ->paginate(10);
         $pagination = $quantities->toArray();
@@ -60,14 +93,14 @@ class Qty extends Model
 
     public static function subtractProductQty(int $user_id, int $product_id, int $product_quantity)
     {
-        return Qty::where('users_id', $user_id)
+        return self::where('users_id', $user_id)
             ->where('products_id', $product_id)
             ->decrement('qty', $product_quantity);
     }
 
     public static function getChildSellerProducts(int $user_id)
     {
-        return Qty::where('qty.users_id', $user_id)
+        return self::where('qty.users_id', $user_id)
             ->join('products as prod', 'prod.id', 'qty.products_id')
             ->select('prod.*')
             ->paginate(20);
@@ -75,7 +108,7 @@ class Qty extends Model
 
     public static function updateChildProductQty(array $quantity)
     {
-        return Qty::updateOrCreate(
+        return self::updateOrCreate(
             ['users_id' => $quantity['child_seller_id'], 'products_id' => $quantity['prod_id']],
             ['qty' => $quantity['qty']]
         );

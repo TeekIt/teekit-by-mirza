@@ -41,6 +41,8 @@ return [
     'CACHE_REMOVED_SUCCESSFULLY' => 'All Cached data of your App has been removed successfully.',
     'WITHDRAWAL_REQUEST_SUBMITTED' => 'Withdrawal request is successfully submitted.',
     'PRODUCT_REMOVED_SUCCESSFULLY' => 'Product has been removed successfully.',
+    'ORDER_PLACED_SUCCESSFULLY' => 'Your order has been placed successfully.',
+    'SENT_TO_OTHER_STORE_SUCCESS' => 'Your order has been sent to other store.',
     /*
     |--------------------------------------------------------------------------
     | Failure Constants
@@ -79,6 +81,7 @@ return [
     'CACHE_REMOVED_FAILED' => 'Sorry due to some issue your cahce can not be removed.',
     'QTY_SHOULD_NOT_BE_GREATER' => 'You cannot enter quantity more then your stock.',
     'PRODUCT_REMOVED_FAILED' => 'There is an error while removing the product.',
+    'SENT_TO_OTHER_STORE_FAILED' => 'Due to some error your order cannot be sent to other store.',
     /*
     |--------------------------------------------------------------------------
     | Digital Ocean Bucket
@@ -115,8 +118,11 @@ return [
     | Stripe Test Cridentials Key
     |--------------------------------------------------------------------------
     */
-    'STRIPE_TEST_API_KEY' => 'sk_test_51IY9sYIiDDGv1gaVKsxU0EXr96lHcCvwXHwYAdN81Cqrj1TBL4HErJpczWJpYFIQ1qbCOQxnxIM3UfsBtWC2MKeD00QRkUKg6q:',
+    'STRIPE_TEST_API_KEY' => 'sk_test_51IY9sYIiDDGv1gaVKsxU0EXr96lHcCvwXHwYAdN81Cqrj1TBL4HErJpczWJpYFIQ1qbCOQxnxIM3UfsBtWC2MKeD00QRkUKg6q',
     'STRIPE_TEST_PUBLISH_KEY' => 'pk_test_51IY9sYIiDDGv1gaVP2DSlWvT0tnrFstp62txvamB1icDpBjwXy1KtrZmiWLFjrxHmxlMrTyWbnnBWNMblbNMizwS004MoCvzJB',
+    
+    // 'STRIPE_TEST_API_KEY' => 'sk_test_51NptY4CylpdtM0O1DXkFnB0rdcUzDqoT3CEqiKacNPLMA8G73ueF3J5ikmzZwjw2XQyyDgiRMz1bsK1nlMN8OObn00OFpcxlpS',
+    // 'STRIPE_TEST_PUBLISH_KEY' => 'pk_test_51NptY4CylpdtM0O1zKdbFYLsLQpnZ43xYAutCHLB5lj6YewFBwUbGcwOB7GwCVW2023Oy7S5Hn5NOxdPHJ5U7e3T00mHwVbMsw',
     /*
     |--------------------------------------------------------------------------
     | Admin Email
@@ -125,10 +131,11 @@ return [
     'ADMIN_EMAIL' => 'admin@teekit.co.uk',
     /*
     |--------------------------------------------------------------------------
-    | Site URL
+    | Teek it URL's
     |--------------------------------------------------------------------------
     */
-    'LIVE_SITE_URL' => 'https://app.teekit.co.uk/',
+    'LIVE_DASHBOARD_URL' => 'https://app.teekit.co.uk',
+    'APIS_DOMAIN_URL' => 'https://teekitapi.com',
     /*
     |--------------------------------------------------------------------------
     | HTTP Status Codes
@@ -141,5 +148,5 @@ return [
     'HTTP_UNPROCESSABLE_REQUEST' => 422,
     'HTTP_RESOURCE_EXHAUSTED' => 429,
     'HTTP_SERVICE_UNAVAILABLE' => 503,
-    'HTTP_GATEWAY_TIMEOUT' => 504,
+    'HTTP_GATEWAY_TIMEOUT' => 504
 ];

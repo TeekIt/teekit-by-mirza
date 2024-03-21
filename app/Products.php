@@ -278,10 +278,10 @@ class Products extends Model
         return $product[0]->volumn;
     }
 
-    public static function getProductPrice(int $product_id)
+    public static function getProductPrice(int $product_id): float
     {
         $product = self::find($product_id);
-        if ($product->discount_percentage > 0) return $product->discount_percentage * 1.2;
+        // return ($product->discount_percentage > 0) ? $product->discount_percentage * 1.2 : $product->price * 1.2;
         return $product->price * 1.2;
     }
 
@@ -301,7 +301,7 @@ class Products extends Model
         return self::whereHas('store', function ($query) {
             $query->where('is_active', 1);
         })->where('status', 1)
-            ->paginate();
+            ->paginate(10);
     }
 
     public static function getProductsByLocation(object $request): object
@@ -318,7 +318,9 @@ class Products extends Model
         $ids = explode(',', $request->ids);
         return self::query()->whereIn('id', $ids)->paginate();
     }
-    // SAP == Search Alternative Product
+    /**
+     * SAP == Search Alternative Product
+     */
     public static function getProductsForSAPModal(int $seller_id, string $search = ''): object
     {
         if (!empty($search)) $search = str_replace(' ', '%', $search);
@@ -332,7 +334,7 @@ class Products extends Model
             ->simplePaginate(5, ['*'], 'sap_products_page');
     }
 
-    public static function markAsFeatured(int $id, int $status)
+    public static function markAsFeatured(int $id, int $status): int
     {
         return self::where('id', $id)
             ->where('user_id', Auth::id())
@@ -341,7 +343,7 @@ class Products extends Model
             ]);
     }
 
-    public static function toggleProduct(int $id, int $status)
+    public static function toggleProduct(int $id, int $status): int
     {
         return self::where('id', $id)
             ->where('user_id', Auth::id())
@@ -350,7 +352,7 @@ class Products extends Model
             ]);
     }
 
-    public static function toggleAllProducts(int $status)
+    public static function toggleAllProducts(int $status): int
     {
         return self::where('user_id', Auth::id())
             ->update([

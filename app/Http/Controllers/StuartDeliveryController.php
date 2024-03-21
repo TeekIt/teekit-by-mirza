@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redirect;
 use Throwable;
-use App\Services\JsonResponseCustom;
+use App\Services\JsonResponseServices;
 use Illuminate\Support\Carbon;
 
 class StuartDeliveryController extends Controller
@@ -135,17 +135,17 @@ class StuartDeliveryController extends Controller
                 Orders::where('id', $request->order_id)->update([
                     'order_status' => 'stuartDelivery'
                 ]);
-                JsonResponseCustom::getWebResponse(config('constants.TRUE_STATUS'), config('constants.STUART_DELIVERY_SUCCESS'));
+                JsonResponseServices::getWebResponse(config('constants.TRUE_STATUS'), config('constants.STUART_DELIVERY_SUCCESS'));
                 return Redirect::back();
             } else {
                 $message = $data['message'];
                 if ($data['error'] == 'JOB_DISTANCE_NOT_ALLOWED') $message = $message . " " . $transport_type;
-                JsonResponseCustom::getWebResponse(config('constants.FALSE_STATUS'), $message);
+                JsonResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $message);
                 return Redirect::back();
             }
         } catch (Throwable $error) {
             report($error);
-            JsonResponseCustom::getWebResponse(config('constants.FALSE_STATUS'), $data['message']);
+            JsonResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $data['message']);
             return Redirect::back();
         }
     }
@@ -163,14 +163,14 @@ class StuartDeliveryController extends Controller
 
             if ($data['status'] == 'finished') {
                 Orders::updateOrderStatus($request->order_id, 'complete');
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.TRUE_STATUS'),
                     config('constants.COMPLETED'),
                     config('constants.HTTP_OK')
                 );
             }
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 $data,
                 config('constants.TRUE_STATUS'),
                 '',
@@ -178,7 +178,7 @@ class StuartDeliveryController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 $error,

@@ -9,6 +9,12 @@ class JwtToken extends Model
     protected $table = 'jwt_tokens';
 
     protected $fillable = [
-        'user_id','token','browser','platform','device','desktop','phone',
+        'user_id',
+        'token',
+        'browser',
+        'platform',
+        'device',
+        'desktop',
+        'phone'
     ];
 }

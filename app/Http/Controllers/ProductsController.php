@@ -19,7 +19,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Stripe\Product;
 use Throwable;
-use App\Services\JsonResponseCustom;
+use App\Services\JsonResponseServices;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 
@@ -67,7 +67,7 @@ class ProductsController extends Controller
     {
         $validate = Products::validator($request);
         if ($validate->fails()) {
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 $validate->errors(),
@@ -110,7 +110,7 @@ class ProductsController extends Controller
             }
         }
         $product =  Products::getProductInfo($product->id);
-        return JsonResponseCustom::getApiResponse(
+        return JsonResponseServices::getApiResponse(
             $product,
             true,
             config('constants.DATA_INSERTION_SUCCESS'),
@@ -131,7 +131,7 @@ class ProductsController extends Controller
                 'store_id' => 'required|integer'
             ]);
             if ($validatedData->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     false,
                     $validatedData->errors(),
@@ -206,7 +206,7 @@ class ProductsController extends Controller
                 $product_images->save();
                 $j++;
             }
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 config('constants.DATA_INSERTION_SUCCESS'),
@@ -214,7 +214,7 @@ class ProductsController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 $error,
@@ -231,7 +231,7 @@ class ProductsController extends Controller
     {
         $validate = Products::validator($request);
         if ($validate->fails()) {
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 $validate->errors(),
@@ -241,7 +241,7 @@ class ProductsController extends Controller
         $user_id = Auth::id();
         $product = Products::find($id);
         if (empty($product)) {
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 config('constants.NO_RECORD'),
@@ -282,7 +282,7 @@ class ProductsController extends Controller
         $product_quantity = $request->qty;
         $this->updateProductQty($product_id, $user_id, $product_quantity);
         $product =  Products::getProductInfo($product->id);
-        return JsonResponseCustom::getApiResponse(
+        return JsonResponseServices::getApiResponse(
             $product,
             true,
             config('constants.DATA_UPDATED_SUCCESS'),
@@ -301,7 +301,7 @@ class ProductsController extends Controller
                 'page' => 'required|integer'
             ]);
             if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     false,
                     $validate->errors(),
@@ -312,7 +312,7 @@ class ProductsController extends Controller
             $data = $pagination['data'];
             unset($pagination['data']);
             if (!empty($data)) {
-                return JsonResponseCustom::getApiResponseExtention(
+                return JsonResponseServices::getApiResponseExtention(
                     $data,
                     true,
                     '',
@@ -321,7 +321,7 @@ class ProductsController extends Controller
                     config('constants.HTTP_OK')
                 );
             }
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 config('constants.NO_RECORD'),
@@ -329,7 +329,7 @@ class ProductsController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 $error,
@@ -352,7 +352,7 @@ class ProductsController extends Controller
                 $products_data[] = Products::getProductInfo($product->id);
             }
             unset($pagination['data']);
-            return JsonResponseCustom::getApiResponseExtention(
+            return JsonResponseServices::getApiResponseExtention(
                 $products_data,
                 true,
                 '',
@@ -361,7 +361,7 @@ class ProductsController extends Controller
                 config('constants.HTTP_OK')
             );
         } else {
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 config('constants.NO_RECORD'),
@@ -385,7 +385,7 @@ class ProductsController extends Controller
                 }
 
                 unset($pagination['data']);
-                return JsonResponseCustom::getApiResponseExtention(
+                return JsonResponseServices::getApiResponseExtention(
                     $products_data,
                     true,
                     '',
@@ -394,7 +394,7 @@ class ProductsController extends Controller
                     config('constants.HTTP_OK')
                 );
             } else {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     false,
                     config('constants.NO_RECORD'),
@@ -403,7 +403,7 @@ class ProductsController extends Controller
             }
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 $error,
@@ -435,18 +435,76 @@ class ProductsController extends Controller
                 $products_data[] = $t;
             }
             unset($pagination['data']);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 $products_data,
                 true,
                 '',
                 config('constants.HTTP_OK')
             );
         } else {
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 config('constants.NO_RECORD'),
                 config('constants.HTTP_OK')
+            );
+        }
+    }
+    /**
+     * This function will return back store open/close & product qty status
+     * Along with this information it will also send store_id & product_id
+     * If the store is active & product is live
+     * @author Mirza Abdullah Izhar
+     * @version 1.1.0
+     */
+    public function recheckProducts(Request $request)
+    {
+        try {
+            $validated_data = Validator::make($request->all(), [
+                'items' => 'required|array',
+                'day' => 'required|string',
+                'time' => 'required|string'
+            ]);
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->error());
+            }
+            $i = 0;
+            foreach ($request->items as $item) {
+                $open_time = User::select('business_hours->time->' . $request->day . '->open as open')
+                    ->where('id', '=', $item['store_id'])
+                    ->where('is_active', '=', 1)
+                    ->get();
+
+                $close_time = User::select('business_hours->time->' . $request->day . '->close as close')
+                    ->where('id', '=', $item['store_id'])
+                    ->where('is_active', '=', 1)
+                    ->get();
+
+                $qty = Products::select('qty')
+                    ->where('id', '=', $item['product_id'])
+                    ->where('user_id', '=', $item['store_id'])
+                    ->where('status', '=', 1)
+                    ->get();
+
+                $order_data[$i]['store_id'] = $item['store_id'];
+                $order_data[$i]['product_id'] = $item['product_id'];
+                $order_data[$i]['closed'] = (strtotime($request->time) >= strtotime($open_time[0]->open) && strtotime($request->time) <= strtotime($close_time[0]->close)) ? "No" : "Yes";
+                $order_data[$i]['qty'] = (isset($qty[0]->qty)) ? $qty[0]->qty : NULL;
+                $i++;
+            }
+            return JsonResponseServices::getApiResponse(
+                $order_data,
+                config('constants.TRUE_STATUS'),
+                '',
+                config('constants.HTTP_OK')
+            );
+        } catch (Throwable $error) {
+            report($error);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
             );
         }
     }
@@ -462,7 +520,7 @@ class ProductsController extends Controller
                 'product_id' => 'required|integer'
             ]);
             if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     false,
                     $validate->errors(),
@@ -471,14 +529,14 @@ class ProductsController extends Controller
             }
             $product = Products::getProductInfo($request->seller_id, $request->product_id, ['*']);
             if (!empty($product)) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     $product,
                     true,
                     '',
                     config('constants.HTTP_OK')
                 );
             }
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 config('constants.NO_RECORD'),
@@ -486,7 +544,7 @@ class ProductsController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 $error,
@@ -532,7 +590,7 @@ class ProductsController extends Controller
                     $products_data[] = $data;
                 }
                 unset($pagination['data']);
-                return JsonResponseCustom::getApiResponseExtention(
+                return JsonResponseServices::getApiResponseExtention(
                     $products_data,
                     true,
                     '',
@@ -541,7 +599,7 @@ class ProductsController extends Controller
                     config('constants.HTTP_OK')
                 );
             } else {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     false,
                     config('constants.NO_RECORD'),
@@ -550,7 +608,7 @@ class ProductsController extends Controller
             }
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 $error,
@@ -634,7 +692,7 @@ class ProductsController extends Controller
                 'product_name' => 'required|string',
             ]);
             if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     false,
                     $validate->errors(),
@@ -662,7 +720,7 @@ class ProductsController extends Controller
             $data = $pagination['data'];
             unset($pagination['data']);
             if (!$products->isEmpty()) {
-                return JsonResponseCustom::getApiResponseExtention(
+                return JsonResponseServices::getApiResponseExtention(
                     $data,
                     true,
                     '',
@@ -671,7 +729,7 @@ class ProductsController extends Controller
                     config('constants.HTTP_OK')
                 );
             }
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 config('constants.NO_RECORD'),
@@ -679,7 +737,7 @@ class ProductsController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 $error,
@@ -799,7 +857,7 @@ class ProductsController extends Controller
                 'store_id' => 'required',
             ]);
             if ($validator->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     false,
                     $validator->errors(),
@@ -843,7 +901,7 @@ class ProductsController extends Controller
                 }
 
                 fclose($file);
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     true,
                     config('constants.DATA_UPDATED_SUCCESS'),
@@ -852,7 +910,7 @@ class ProductsController extends Controller
             }
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 $error,
@@ -873,7 +931,7 @@ class ProductsController extends Controller
                 'page' => 'required|integer'
             ]);
             if ($validate->fails()) {
-                return JsonResponseCustom::getApiResponse(
+                return JsonResponseServices::getApiResponse(
                     [],
                     false,
                     $validate->errors(),
@@ -886,7 +944,7 @@ class ProductsController extends Controller
             $data = $pagination['data'];
             unset($pagination['data']);
             if (!empty($data)) {
-                return JsonResponseCustom::getApiResponseExtention(
+                return JsonResponseServices::getApiResponseExtention(
                     $data,
                     true,
                     '',
@@ -895,7 +953,7 @@ class ProductsController extends Controller
                     config('constants.HTTP_OK')
                 );
             }
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 config('constants.NO_RECORD'),
@@ -903,7 +961,7 @@ class ProductsController extends Controller
             );
         } catch (Throwable $error) {
             report($error);
-            return JsonResponseCustom::getApiResponse(
+            return JsonResponseServices::getApiResponse(
                 [],
                 false,
                 $error,

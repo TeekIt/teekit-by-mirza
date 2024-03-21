@@ -25,13 +25,13 @@ class ReferralCodeRelation extends Model
      */
     public static function usingReferalFirstTime(int $user_id)
     {
-        $data = ReferralCodeRelation::where('user_id', $user_id)->first();
+        $data = self::where('user_id', $user_id)->first();
         return (is_null($data)) ? true :  false;
     }
 
     public static function insertReferralRelation(int $referred_by, int $user_id)
     {
-        return ReferralCodeRelation::create([
+        return self::create([
             'referred_by' => $referred_by,
             'user_id'   => $user_id
         ]);
@@ -39,11 +39,11 @@ class ReferralCodeRelation extends Model
 
     public static function getReferralRelationDetails(int $referral_relation_id)
     {
-        return ReferralCodeRelation::with('referredByUser')->where('id', $referral_relation_id)->get();
+        return self::with('referredByUser')->where('id', $referral_relation_id)->get();
     }
 
     public static function updateReferralRelationStatus(int $referral_relation_id, int $referral_useable)
     {
-        return ReferralCodeRelation::where('id', $referral_relation_id)->update(['referral_useable' => $referral_useable]);
+        return self::where('id', $referral_relation_id)->update(['referral_useable' => $referral_useable]);
     }
 }

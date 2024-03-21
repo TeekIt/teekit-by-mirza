@@ -23,7 +23,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @if (request()->is('seller/inventory')) active @endif" href="{{route('seller.inventory')}}">
+                    <a class="nav-link {{ request()->routeIs('seller.inventory') ? 'active' : '' }}" href="{{route('seller.inventory')}}">
                         <i class="nav-icon fa fa-truck"></i>
                         <p class="ml-2">
                             Inventory
@@ -31,24 +31,32 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('seller/orders') ? 'active' : '' }}" href="{{route('seller.orders')}}">
-                        <i class="nav-icon fas fa-clipboard-list"></i>
+                    <a class="nav-link {{ request()->routeIs('seller.orders') ? 'active' : '' }}" href="{{route('seller.orders')}}">
+                        <i class="nav-icon fas fa-cart-arrow-down"></i>
                         <p class="ml-2">
-                            Orders
+                           My Orders
                         </p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('withdrawals') ? 'active' : '' }}" href="/withdrawals">
-                        <i class="nav-icon fas fa-clipboard-list"></i>
+                    <a class="nav-link {{ request()->routeIs('seller.orders.from.others') ? 'active' : '' }}" href="{{route('seller.orders.from.others')}}">
+                        <i class="nav-icon fas fa-luggage-cart"></i>
+                        <p class="ml-2">
+                            Orders From Others
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('seller.withdrawal') ? 'active' : '' }}" href="{{ route('seller.withdrawal') }}">
+                        <i class="nav-icon fas fa-dollar-sign"></i>
                         <p class="ml-2">
                             Withdrawals
                         </p>
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link ">
-                        <i class="nav-icon fas fa-user-secret"></i>
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-cogs"></i>
                         <p>
                             Settings
                             <i class="fas fa-angle-left right"></i>
@@ -56,13 +64,13 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{route('seller.settings.general')}}" class="nav-link">
+                            <a href="{{route('seller.settings.general')}}" class="nav-link ">
                                 <i class="fas fa-gears nav-icon"></i>
                                 <p>General</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/settings/payment" class="nav-link">
+                            <a href="{{route('setting.payment')}}" class="nav-link ">
                                 <i class="fas fa-money nav-icon"></i>
                                 <p>Payment</p>
                             </a>

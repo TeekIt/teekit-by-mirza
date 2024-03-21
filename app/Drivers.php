@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Services\ImageManipulation;
+use App\Services\ImageServices;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
@@ -72,7 +72,7 @@ class Drivers extends Authenticatable implements JWTSubject
      */
     public static function add(object $request)
     {
-        return Drivers::create([
+        return self::create([
             'f_name' => $request->f_name,
             'l_name' => $request->l_name,
             'email' => $request->email,
@@ -95,14 +95,14 @@ class Drivers extends Authenticatable implements JWTSubject
 
     public static function addImg(object $driver, object $request, string $img_key_name)
     {
-        $driver->profile_img = ImageManipulation::uploadImg($request, $img_key_name, $driver->id);
+        $driver->profile_img = ImageServices::uploadImg($request, $img_key_name, $driver->id);
         $driver->save();
         return $driver;
     }
 
     public static function getDrivers(string $search = '')
     {
-        return Drivers::where('f_name', 'like', '%' . $search . '%')
+        return self::where('f_name', 'like', '%' . $search . '%')
             ->orderBy('f_name', 'asc')
             ->paginate(9);
     }
@@ -110,7 +110,7 @@ class Drivers extends Authenticatable implements JWTSubject
     public function adminDriversDel(Request $request)
     {
         for ($i = 0; $i < count($request->drivers); $i++) {
-            Drivers::where('id', '=', $request->drivers[$i])->delete();
+            self::where('id', '=', $request->drivers[$i])->delete();
             DriverDocuments::where('driver_id', '=', $request->drivers[$i])->delete();
         }
         return response("Drivers Deleted Successfully");

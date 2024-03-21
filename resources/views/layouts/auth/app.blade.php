@@ -22,10 +22,10 @@
                 </button>
                 <!-- Toggle Button For Mobiles - Ends -->
                 <div class="collapse navbar-collapse" id="navbarSupportedContent" aria-current="true" role="navigation">
-                    <form class="e my-2 my-lg-0 ml-auto w-lg-50" style="min-width: 45vw;" method="POST"
+                    <form class="my-2 my-lg-0 ml-auto w-lg-50" style="min-width: 45vw;" method="POST"
                         action="{{ route('login') }}">
                         <div class="row">
-                            <div class="col-md-5">
+                            <div class="col-md-5 mt-3">
                                 {{ csrf_field() }}
                                 <div class="form-group">
                                     <input class="form-control mr-sm-2" type="email" required autocomplete="off"
@@ -36,7 +36,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-5 mt-3">
                                 <div class="form-group">
                                     <input class="form-control mr-sm-2" type="password" autocomplete="off"
                                         placeholder="Password" name="password" required>

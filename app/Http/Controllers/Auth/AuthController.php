@@ -1,7 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
 
-use App\Products;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\UsersController;
@@ -10,20 +10,20 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Crypt;
-use JWTAuth;
 use Jenssegers\Agent\Agent;
 use App\Models\JwtToken;
-use App\Services\JsonResponseCustom;
+use App\Services\EmailServices;
+use App\Services\JsonResponseServices;
 use Illuminate\Http\Request;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Throwable;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -34,70 +34,58 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('jwt.verify', ['except' => ['login', 'register', 'verify', 'searchSellerProducts', 'loginGoogle', 'registerGoogle']]);
+        $this->middleware('jwt.verify', ['except' => [
+            'loginBuyer',
+            'registerBuyer',
+            'verify',
+            'searchSellerProducts',
+            'loginBuyerFromGoogle',
+            'registerBuyerFromGoogle'
+        ]]);
     }
     /**
      * Register For Mobile App
      * @author Huzaifa Haleem
-     * @version 1.9.0
      */
-    public function register(Request $request)
+    public function registerBuyer(Request $request)
     {
         try {
-            $validate = User::validator($request);
-            if ($validate->fails()) {
-                $response = array('data' => $validate->messages(), 'status' => false, 'message' => config('constants.VALIDATION_ERROR'));
-                return response()->json($response, 400);
-            }
-            $User = User::create([
-                'name' => $request->name,
-                'l_name' => $request->l_name,
-                'phone' => $request->phone,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'business_name' => $request->business_name,
-                'business_location' => $request->business_location,
-                'lat' => json_decode($request->business_location)->lat,
-                'lon' => json_decode($request->business_location)->lon,
-                'seller_id' => $request->seller_id,
-                'postcode' => $request->postal_code,
-                'is_active' => ($request->get('role') == 'buyer') ? 1 : 0,
-                'role_id' => 3,
-                'referral_code' => Str::uuid(),
+            $validated_data = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'l_name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8|max:50',
+                'phone' => 'required|string|max:13'
             ]);
-            if ($User) {
-                if ($request->hasFile('user_img')) {
-                    $User->user_img = User::uploadImg($request);
-                    $User->save();
-                }
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
 
-            $account_verification_link = url('/') . '/auth/verify?token=' . Crypt::encrypt($User->email);
-            $html = '<html>
-            Congratulations ' . $User->name . '!<br><br>
-            You have successfully registered on ' . env('APP_NAME') . '.
-            <br>
-            There is just one more step to go. Click on the link below to verify your account so you can start purchasing products on TeekIT today!  <br><br>
-                <a href="' . $account_verification_link . '">Verify</a> OR Copy This in your Browser
-                ' . $account_verification_link . '
-            <br><br><br>
-            For more information please visit https://teekit.co.uk/
-            If you have any further inquiries please email admin@teekit.co.uk
-            </html>';
+            $user = User::createBuyer(
+                $request->name,
+                $request->l_name,
+                $request->email,
+                $request->password,
+                $request->phone,
+                1,
+                Str::uuid()
+            );
 
-            Mail::send('emails.general', ["html" => $html], function ($message) use ($request, $User) {
-                $message->to($request->email, $User->name)
-                    ->subject(env('APP_NAME') . ': Account Verification');
-            });
-            $response = array('status' => true, 'role' => $request->role, 'message' => 'You have registered succesfully! We have sent a verification link to your email address. Please click on the link to activate your account.');
-            return response()->json($response, 200);
+            EmailServices::sendBuyerAccVerificationMail($user);
+
+            return response()->json([
+                'status' => config('constants.TRUE_STATUS'),
+                'role' => 'buyer',
+                'message' => 'You have registered succesfully! We have sent a verification link to your email address. Please click on the link to activate your account.'
+            ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
@@ -105,29 +93,30 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
+    public function loginBuyer(Request $request)
     {
         try {
             $credentials = $request->only('email', 'password');
             if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['data' => [], 'status' => false, 'message' => config('constants.INVALID_CREDENTIALS')], 401);
+                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.INVALID_CREDENTIALS')], 401);
             }
             $user = JWTAuth::user();
             if ($user->email_verified_at == null) {
-                return response()->json(['data' => [], 'status' => false, 'message' => config('constants.EMAIL_NOT_VERIFIED')], 401);
+                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.EMAIL_NOT_VERIFIED')], 401);
             }
             if ($user->is_active == 0) {
-                return response()->json(['data' => [], 'status' => false, 'message' => config('constants.ACCOUNT_DEACTIVATED')], 401);
+                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.ACCOUNT_DEACTIVATED')], 401);
             }
             $this->authenticated($request, $user, $token);
             return $this->respondWithToken($token);
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
 
@@ -142,17 +131,13 @@ class AuthController extends Controller
             }
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' => $validate->errors()
             ], 422);
         }
-
-        $token = $request->token;
-
         $verification_token = Crypt::decrypt($request->token);
 
         $user = User::where('email', $verification_token)->first();
-        $email_verified_at = Carbon::now();
 
         if ($user) {
             if ($user->email_verified_at != null) {
@@ -160,11 +145,11 @@ class AuthController extends Controller
                 return;
                 return response()->json([
                     'data' => [],
-                    'status' => false,
+                    'status' => config('constants.FALSE_STATUS'),
                     'message' => 'Account Already verified'
-                ], 200);
+                ], config('constants.HTTP_OK'));
             }
-            $user->email_verified_at = $email_verified_at;
+            $user->email_verified_at = Carbon::now();
             $user->is_active = 1;
             $user->save();
 
@@ -173,16 +158,16 @@ class AuthController extends Controller
 
             return response()->json([
                 'data' => [],
-                'status' => true,
+                'status' => config('constants.TRUE_STATUS'),
                 'message' => 'Account successfully verified'
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } else {
             echo "Invalid verification token";
             return;
 
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' => 'Invalid verification token'
             ], 401);
         }
@@ -200,7 +185,7 @@ class AuthController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' =>  $validate->errors()
             ], 422);
         }
@@ -211,13 +196,13 @@ class AuthController extends Controller
             $User->save();
             return response()->json([
                 'data' => [],
-                'status' => true,
+                'status' => config('constants.TRUE_STATUS'),
                 'message' =>  'Password changed successfully.'
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } else {
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' =>  'User not found.'
             ], 404);
         }
@@ -225,14 +210,11 @@ class AuthController extends Controller
 
     /**
      *  It will Get the authenticated User.
-     * @version 1.0.0
-     * @return \Illuminate\Http\JsonResponse
      */
     public function me()
     {
         $user = JWTAuth::user();
-        $user = User::find($user->id);
-        $data_info = array(
+        $data = array(
             'id' => $user->id,
             'name' => $user->name,
             'l_name' => $user->l_name,
@@ -254,11 +236,12 @@ class AuthController extends Controller
             'roles' => $user->role()->pluck('name'),
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
         );
-        return response()->json([
-            'data' => $data_info,
-            'status' => true,
-            'message' => config('constants.DATA_UPDATED_SUCCESS')
-        ], 200);
+        return JsonResponseServices::getApiResponse(
+            $data,
+            config('constants.TRUE_STATUS'),
+            '',
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * It will Log the user out
@@ -272,9 +255,9 @@ class AuthController extends Controller
         JWTAuth::parseToken()->invalidate();
         return response()->json([
             'data' => [],
-            'status' => true,
+            'status' => config('constants.TRUE_STATUS'),
             'message' =>  'Successfully logged out.'
-        ], 200);
+        ], config('constants.HTTP_OK'));
     }
     /**
      * It will Refresh a token.
@@ -326,9 +309,9 @@ class AuthController extends Controller
         );
         return response()->json([
             'data' => $data_info,
-            'status' => true,
+            'status' => config('constants.TRUE_STATUS'),
             'message' =>  config('constants.LOGIN_SUCCESS')
-        ], 200);
+        ], config('constants.HTTP_OK'));
     }
 
     protected function authenticated($request, $user, $token)
@@ -369,7 +352,7 @@ class AuthController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' => $validate->messages()
             ], 422);
         }
@@ -399,11 +382,11 @@ class AuthController extends Controller
             $User->save();
             $response = $this->me();
             return $response;
-            //return response()->json($response, 200);
+            //return response()->json($response, config('constants.HTTP_OK'));
         } else {
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' => 'User not found.'
             ], 404);
         }
@@ -421,48 +404,6 @@ class AuthController extends Controller
         $response = $this->me();
         return $response;
     }
-    /**
-     * Search products w.r.t Seller/Store 'id' & Product Name
-     * @author Mirza Abdullah Izhar
-     * @version 1.4.0
-     */
-    public function searchSellerProducts($seller_id, $product_name)
-    {
-        try {
-            $user = User::find($seller_id);
-            $data = [];
-            $article = Products::search($product_name)
-                ->where('user_id', $user->id)
-                ->where('status', 1);
-            $products = $article->paginate(20);
-            $pagination = $products->toArray();
-            if (!$products->isEmpty()) {
-                foreach ($products as $product) {
-                    $data[] = Products::getProductInfo($product->id);
-                }
-                unset($pagination['data']);
-                return response()->json([
-                    'data' => $data,
-                    'status' => true,
-                    'message' => '',
-                    'pagination' => $pagination
-                ], 200);
-            } else {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => config('constants.NO_RECORD')
-                ], 200);
-            }
-        } catch (Throwable $error) {
-            report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
-        }
-    }
 
     public function deliveryBoys()
     {
@@ -474,16 +415,17 @@ class AuthController extends Controller
             }
             return response()->json([
                 'data' => $data,
-                'status' => true,
+                'status' => config('constants.TRUE_STATUS'),
                 'message' => ''
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
@@ -494,9 +436,9 @@ class AuthController extends Controller
     public function getUserDetails($user_id)
     {
         $data = User::getUserInfo($user_id);
-        return JsonResponseCustom::getApiResponse(
+        return JsonResponseServices::getApiResponse(
             (empty($data)) ? [] : $data,
-            (empty($data)) ? false : true,
+            (empty($data)) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
             (empty($data)) ? config('constants.NO_RECORD') : '',
             (empty($data)) ? config('constants.HTTP_UNPROCESSABLE_REQUEST') : config('constants.HTTP_OK')
         );
@@ -508,19 +450,19 @@ class AuthController extends Controller
     public function keys()
     {
         try {
-            $keys = Keys::all();
             return response()->json([
-                'data' => $keys,
-                'status' => true,
+                'data' => Keys::all(),
+                'status' => config('constants.TRUE_STATUS'),
                 'message' => ''
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
@@ -542,44 +484,40 @@ class AuthController extends Controller
                 $user->delete();
                 return response()->json([
                     'data' => [],
-                    'status' => true,
+                    'status' => config('constants.TRUE_STATUS'),
                     'message' => config('constants.ITEM_DELETED'),
-                ], 200);
+                ], config('constants.HTTP_OK'));
             }
             return response()->json([
                 'data' => [],
-                'status' => false,
+                'status' => config('constants.FALSE_STATUS'),
                 'message' => config('constants.NO_RECORD')
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
      * Google register
      * @version 1.0.0
      */
-    public function registerGoogle(Request $request)
+    public function registerBuyerFromGoogle(Request $request)
     {
         try {
-            $validator = \Validator::make($request->all(), [
+            $validated_data = Validator::make($request->all(), [
                 'name' => 'required|string',
                 'l_name' => 'required|string',
                 'email' => 'required|string|email|max:255|unique:users',
-                'role' => 'required|string|max:255',
-
+                'role' => 'required|string|max:5'
             ]);
-            if ($validator->fails()) {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => $validator->errors()
-                ], 422);
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
             $user = User::create([
                 'name' => $request->name,
@@ -625,32 +563,33 @@ class AuthController extends Controller
                     'token_type' => 'bearer',
                     'expires_in' => JWTAuth::factory()->getTTL() * 60,
                 ],
-                'status' => true,
+                'status' => config('constants.TRUE_STATUS'),
                 'message' => config('constants.REGISTER_SUCCESS'),
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
     /**
      * Google login via email
      * @version 1.0.0
      */
-    public function loginGoogle(Request $request)
+    public function loginBuyerFromGoogle(Request $request)
     {
         try {
-            $validator = \Validator::make($request->all(), [
+            $validator = Validator::make($request->all(), [
                 'email' => 'required|string|email|max:255',
             ]);
             if ($validator->fails()) {
                 return response()->json([
                     'data' => [],
-                    'status' => false,
+                    'status' => config('constants.FALSE_STATUS'),
                     'message' => $validator->errors()
                 ], 422);
             }
@@ -658,7 +597,7 @@ class AuthController extends Controller
             if (!$user) {
                 return response()->json([
                     'data' => [],
-                    'status' => false,
+                    'status' => config('constants.FALSE_STATUS'),
                     'message' =>  config('constants.INVALID_CREDENTIALS')
                 ], 401);
             }
@@ -694,16 +633,17 @@ class AuthController extends Controller
                     'token_type' => 'bearer',
                     'expires_in' => JWTAuth::factory()->getTTL() * 60,
                 ],
-                'status' => true,
+                'status' => config('constants.TRUE_STATUS'),
                 'message' =>   config('constants.LOGIN_SUCCESS'),
-            ], 200);
+            ], config('constants.HTTP_OK'));
         } catch (Throwable $error) {
             report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $error,
+                config('constants.HTTP_SERVER_ERROR')
+            );
         }
     }
 }
