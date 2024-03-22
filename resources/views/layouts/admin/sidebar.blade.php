@@ -83,19 +83,19 @@
                           <p class="ml-2"> Customers </p>
                       </a>
                   </li>
-                  <li class="nav-item">
+                  {{-- <li class="nav-item">
                       <a class="nav-link {{ request()->is('drivers') ? 'active' : '' }}" href="/drivers">
                           <i class="nav-icon fas fa-biking"></i>
                           <p class="ml-2">
                               Drivers
                           </p>
                       </a>
-                  </li>
+                  </li> --}}
                   <li class="nav-item">
-                      <a href="{{ route('admin.test.drivers') }}" class="nav-link @if (request()->is('admin/drivers')) active @endif">
+                      <a href="{{ route('admin.test.drivers') }}" class="nav-link {{ request()->routeIs('admin.test.drivers') ? 'active' : '' }}">
                           <i class="nav-icon fas fa-biking"></i>
                           <p class="ml-2">
-                              Test Drivers
+                              Drivers
                           </p>
                       </a>
                   </li>

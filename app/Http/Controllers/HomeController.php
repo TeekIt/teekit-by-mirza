@@ -1137,7 +1137,7 @@ class HomeController extends Controller
     {
         if (Gate::allows('superadmin')) {
             $return_arr = [];
-            $orders = Orders::query()->where('payment_status', '!=', 'hidden')->orderByDesc('id');
+            $orders = Orders::where('payment_status', '!=', 'hidden')->orderByDesc('id');
             if ($request->search) {
                 $orders = $orders->where('id', '=', $request->search);
             }
@@ -1150,10 +1150,10 @@ class HomeController extends Controller
             $orders = $orders->paginate(10);
             $orders_p = $orders;
             foreach ($orders as $order) {
-                $items = OrderItems::query()->where('order_id', '=', $order->id)->get();
+                $items = OrderItems::where('order_id', '=', $order->id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = Products::getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($order->seller_id, $item->product_id, ['*']);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
@@ -1175,9 +1175,7 @@ class HomeController extends Controller
     {
         if (Gate::allows('superadmin')) {
             $return_arr = [];
-            $verified_orders = VerificationCodes::query()
-                ->where('code->driver_failed_to_enter_code', '=', 'No')
-                ->orderByDesc('id');
+            $verified_orders = VerificationCodes::where('code->driver_failed_to_enter_code', '=', 'No')->orderByDesc('id');
             // if ($request->search) {
             //     $orders = $orders->where('id', '=', $request->search);
             // }
@@ -1190,11 +1188,11 @@ class HomeController extends Controller
             $verified_orders = $verified_orders->paginate(10);
             $orders_p = $verified_orders;
             foreach ($verified_orders as $order) {
-                $order_details = Orders::query()->where('id', '=', $order->order_id)->first();
-                $items = OrderItems::query()->where('order_id', '=', $order->order_id)->get();
+                $order_details = Orders::where('id', '=', $order->order_id)->first();
+                $items = OrderItems::where('order_id', '=', $order->order_id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = Products::getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($order_details->seller_id, $item->product_id, ['*']);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
@@ -1236,7 +1234,7 @@ class HomeController extends Controller
                 $items = OrderItems::query()->where('order_id', '=', $order->order_id)->get();
                 $item_arr = [];
                 foreach ($items as $item) {
-                    $product = Products::getProductInfo($item->product_id);
+                    $product = Products::getProductInfo($order_details->seller_id, $item->product_id, ['*']);
                     $item['product'] = $product;
                     $item_arr[] = $item;
                 }
