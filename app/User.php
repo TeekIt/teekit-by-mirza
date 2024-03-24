@@ -345,7 +345,7 @@ class User extends Authenticatable implements JWTSubject
         return self::where('id', '=', $user_id)->update(['is_active' => $status]);
     }
 
-    public static function getUserRole(int $user_id): int
+    public static function getUserRole(int $user_id): object
     {
         return  self::where('id', $user_id)->pluck('role_id');
     }
