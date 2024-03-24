@@ -38,14 +38,14 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('seller.orders.from.others') ? 'active' : '' }}" href="{{route('seller.orders.from.others')}}">
                         <i class="nav-icon fas fa-luggage-cart"></i>
                         <p class="ml-2">
                             Orders From Others
                         </p>
                     </a>
-                </li>
+                </li> --}}
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('seller.withdrawal') ? 'active' : '' }}" href="{{ route('seller.withdrawal') }}">
                         <i class="nav-icon fas fa-dollar-sign"></i>

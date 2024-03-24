@@ -52,10 +52,10 @@
                 <a type="button" href="{{ route('seller.inventory.add.single') }}" class="btn btn-primary my-4 py-3 w-100 mx-1 px-0 " title="Add New">
                     <span class="fas fa-plus"></span>
                 </a>
-                <a type="button" href="{{ route('seller.inventory.add.bulk') }}" class="btn btn-primary my-4 py-3 w-100 mx-1 px-0" title="Add Bulk">
+                {{-- <a type="button" href="{{ route('seller.inventory.add.bulk') }}" class="btn btn-primary my-4 py-3 w-100 mx-1 px-0" title="Add Bulk">
                     <span class="fas fa-plus"></span>
                     <span class="fas fa-boxes"></span>
-                </a>
+                </a> --}}
             @endif
         </div>
     </div>

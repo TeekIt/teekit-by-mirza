@@ -37,14 +37,14 @@ class ProductsController extends Controller
     //             'ALTER TABLE products DROP qty'
     //         );
     //         return response()->json([
-    //             'status' => true,
+    //             'status' => config('constants.TRUE_STATUS'),
     //             'message' => 'Column dropped successfully'
     //         ], 200);
     //     } catch (Throwable $error) {
     //         report($error);
     //         return response()->json([
     //             'data' => [],
-    //             'status' => false,
+    //             'status' => config('constants.FALSE_STATUS'),
     //             'message' => $error
     //         ], 500);
     //     }
@@ -69,7 +69,7 @@ class ProductsController extends Controller
         if ($validate->fails()) {
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 $validate->errors(),
                 config('constants.HTTP_UNPROCESSABLE_REQUEST')
             );
@@ -112,7 +112,7 @@ class ProductsController extends Controller
         $product =  Products::getProductInfo($product->id);
         return JsonResponseServices::getApiResponse(
             $product,
-            true,
+            config('constants.TRUE_STATUS'),
             config('constants.DATA_INSERTION_SUCCESS'),
             config('constants.HTTP_OK')
         );
@@ -133,7 +133,7 @@ class ProductsController extends Controller
             if ($validatedData->fails()) {
                 return JsonResponseServices::getApiResponse(
                     [],
-                    false,
+                    config('constants.FALSE_STATUS'),
                     $validatedData->errors(),
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
@@ -208,7 +208,7 @@ class ProductsController extends Controller
             }
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 config('constants.DATA_INSERTION_SUCCESS'),
                 config('constants.HTTP_OK')
             );
@@ -216,7 +216,7 @@ class ProductsController extends Controller
             report($error);
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 $error,
                 config('constants.HTTP_SERVER_ERROR')
             );
@@ -233,7 +233,7 @@ class ProductsController extends Controller
         if ($validate->fails()) {
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 $validate->errors(),
                 config('constants.HTTP_UNPROCESSABLE_REQUEST')
             );
@@ -243,7 +243,7 @@ class ProductsController extends Controller
         if (empty($product)) {
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 config('constants.NO_RECORD'),
                 config('constants.HTTP_INVALID_ARGUMENTS')
             );
@@ -284,7 +284,7 @@ class ProductsController extends Controller
         $product =  Products::getProductInfo($product->id);
         return JsonResponseServices::getApiResponse(
             $product,
-            true,
+            config('constants.TRUE_STATUS'),
             config('constants.DATA_UPDATED_SUCCESS'),
             config('constants.HTTP_OK')
         );
@@ -303,7 +303,7 @@ class ProductsController extends Controller
             if ($validate->fails()) {
                 return JsonResponseServices::getApiResponse(
                     [],
-                    false,
+                    config('constants.FALSE_STATUS'),
                     $validate->errors(),
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
@@ -314,7 +314,7 @@ class ProductsController extends Controller
             if (!empty($data)) {
                 return JsonResponseServices::getApiResponseExtention(
                     $data,
-                    true,
+                    config('constants.TRUE_STATUS'),
                     '',
                     'pagination',
                     $pagination,
@@ -323,7 +323,7 @@ class ProductsController extends Controller
             }
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 config('constants.NO_RECORD'),
                 config('constants.HTTP_OK')
             );
@@ -331,7 +331,7 @@ class ProductsController extends Controller
             report($error);
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 $error,
                 config('constants.HTTP_SERVER_ERROR')
             );
@@ -354,7 +354,7 @@ class ProductsController extends Controller
             unset($pagination['data']);
             return JsonResponseServices::getApiResponseExtention(
                 $products_data,
-                true,
+                config('constants.TRUE_STATUS'),
                 '',
                 'pagination',
                 $pagination,
@@ -363,7 +363,7 @@ class ProductsController extends Controller
         } else {
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 config('constants.NO_RECORD'),
                 config('constants.HTTP_OK')
             );
@@ -387,7 +387,7 @@ class ProductsController extends Controller
                 unset($pagination['data']);
                 return JsonResponseServices::getApiResponseExtention(
                     $products_data,
-                    true,
+                    config('constants.TRUE_STATUS'),
                     '',
                     'pagination',
                     $pagination,
@@ -396,7 +396,7 @@ class ProductsController extends Controller
             } else {
                 return JsonResponseServices::getApiResponse(
                     [],
-                    false,
+                    config('constants.FALSE_STATUS'),
                     config('constants.NO_RECORD'),
                     config('constants.HTTP_OK')
                 );
@@ -405,7 +405,7 @@ class ProductsController extends Controller
             report($error);
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 $error,
                 config('constants.HTTP_SERVER_ERROR')
             );
@@ -437,14 +437,14 @@ class ProductsController extends Controller
             unset($pagination['data']);
             return JsonResponseServices::getApiResponse(
                 $products_data,
-                true,
+                config('constants.TRUE_STATUS'),
                 '',
                 config('constants.HTTP_OK')
             );
         } else {
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 config('constants.NO_RECORD'),
                 config('constants.HTTP_OK')
             );
@@ -522,7 +522,7 @@ class ProductsController extends Controller
             if ($validate->fails()) {
                 return JsonResponseServices::getApiResponse(
                     [],
-                    false,
+                    config('constants.FALSE_STATUS'),
                     $validate->errors(),
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
@@ -531,14 +531,14 @@ class ProductsController extends Controller
             if (!empty($product)) {
                 return JsonResponseServices::getApiResponse(
                     $product,
-                    true,
+                    config('constants.TRUE_STATUS'),
                     '',
                     config('constants.HTTP_OK')
                 );
             }
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 config('constants.NO_RECORD'),
                 config('constants.HTTP_OK')
             );
@@ -546,7 +546,7 @@ class ProductsController extends Controller
             report($error);
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 $error,
                 config('constants.HTTP_SERVER_ERROR')
             );
@@ -592,7 +592,7 @@ class ProductsController extends Controller
                 unset($pagination['data']);
                 return JsonResponseServices::getApiResponseExtention(
                     $products_data,
-                    true,
+                    config('constants.TRUE_STATUS'),
                     '',
                     'pagination',
                     $pagination,
@@ -601,7 +601,7 @@ class ProductsController extends Controller
             } else {
                 return JsonResponseServices::getApiResponse(
                     [],
-                    false,
+                    config('constants.FALSE_STATUS'),
                     config('constants.NO_RECORD'),
                     config('constants.HTTP_OK')
                 );
@@ -610,7 +610,7 @@ class ProductsController extends Controller
             report($error);
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 $error,
                 config('constants.HTTP_SERVER_ERROR')
             );
@@ -694,7 +694,7 @@ class ProductsController extends Controller
             if ($validate->fails()) {
                 return JsonResponseServices::getApiResponse(
                     [],
-                    false,
+                    config('constants.FALSE_STATUS'),
                     $validate->errors(),
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
@@ -722,7 +722,7 @@ class ProductsController extends Controller
             if (!$products->isEmpty()) {
                 return JsonResponseServices::getApiResponseExtention(
                     $data,
-                    true,
+                    config('constants.TRUE_STATUS'),
                     '',
                     'pagination',
                     $pagination,
@@ -731,7 +731,7 @@ class ProductsController extends Controller
             }
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 config('constants.NO_RECORD'),
                 config('constants.HTTP_OK')
             );
@@ -739,7 +739,7 @@ class ProductsController extends Controller
             report($error);
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 $error,
                 config('constants.HTTP_SERVER_ERROR')
             );
@@ -807,7 +807,7 @@ class ProductsController extends Controller
     //         if ($validator->fails()) {
     //             return response()->json([
     //                 'data' => $validator->errors(),
-    //                 'status' => false,
+    //                 'status' => config('constants.FALSE_STATUS'),
     //                 'message' => ""
     //             ], 422);
     //         }
@@ -834,7 +834,7 @@ class ProductsController extends Controller
     //             fclose($file);
     //             return response()->json([
     //                 'data' => [],
-    //                 'status' => true,
+    //                 'status' => config('constants.TRUE_STATUS'),
     //                 'message' =>  config('constants.DATA_UPDATED_SUCCESS'),
     //             ], 200);
     //         }
@@ -842,7 +842,7 @@ class ProductsController extends Controller
     //         report($error);
     //         return response()->json([
     //             'data' => [],
-    //             'status' => false,
+    //             'status' => config('constants.FALSE_STATUS'),
     //             'message' => $error
     //         ], 500);
     //     }
@@ -859,7 +859,7 @@ class ProductsController extends Controller
             if ($validator->fails()) {
                 return JsonResponseServices::getApiResponse(
                     [],
-                    false,
+                    config('constants.FALSE_STATUS'),
                     $validator->errors(),
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
@@ -903,7 +903,7 @@ class ProductsController extends Controller
                 fclose($file);
                 return JsonResponseServices::getApiResponse(
                     [],
-                    true,
+                    config('constants.TRUE_STATUS'),
                     config('constants.DATA_UPDATED_SUCCESS'),
                     config('constants.HTTP_OK')
                 );
@@ -912,7 +912,7 @@ class ProductsController extends Controller
             report($error);
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 $error,
                 config('constants.HTTP_SERVER_ERROR')
             );
@@ -921,7 +921,6 @@ class ProductsController extends Controller
     /**
      * Listing of all products w.r.t Seller/Store 'id'
      * @author Mirza Abdullah Izhar
-     * @version 1.2.0
      */
     public function sellerProducts(Request $request)
     {
@@ -933,7 +932,7 @@ class ProductsController extends Controller
             if ($validate->fails()) {
                 return JsonResponseServices::getApiResponse(
                     [],
-                    false,
+                    config('constants.FALSE_STATUS'),
                     $validate->errors(),
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
@@ -946,7 +945,7 @@ class ProductsController extends Controller
             if (!empty($data)) {
                 return JsonResponseServices::getApiResponseExtention(
                     $data,
-                    true,
+                    config('constants.TRUE_STATUS'),
                     '',
                     'pagination',
                     $pagination,
@@ -955,7 +954,7 @@ class ProductsController extends Controller
             }
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 config('constants.NO_RECORD'),
                 config('constants.HTTP_OK')
             );
@@ -963,7 +962,7 @@ class ProductsController extends Controller
             report($error);
             return JsonResponseServices::getApiResponse(
                 [],
-                false,
+                config('constants.FALSE_STATUS'),
                 $error,
                 config('constants.HTTP_SERVER_ERROR')
             );

@@ -395,9 +395,13 @@
                                                                 Remove Product
                                                             </button>
                                                         @elseif ($order->order_items[$index]->user_choice === 3)
-                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#sendToOtherStoresModal" wire:click="renderSTOSModal({{ $order }}, {{ $order->order_items[$index] }})">
+                                                            {{-- <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#sendToOtherStoresModal" wire:click="renderSTOSModal({{ $order }}, {{ $order->order_items[$index] }})">
                                                                 <i class="fas fa-paper-plane"></i>
                                                                 Send To Other Stores
+                                                            </button> --}}
+                                                            <button type="button" class="btn btn-site-primary" disabled>
+                                                                <i class="fas fa-paper-plane"></i>
+                                                                Send To Other Stores (Feature Underdevelopment)
                                                             </button>
                                                         @elseif ($order->order_items[$index]->user_choice === 4)
                                                             <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#showCustomerContactModel" wire:click="renderCustomerContactModel('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
