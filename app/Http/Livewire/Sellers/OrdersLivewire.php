@@ -120,7 +120,7 @@ class OrdersLivewire extends Component
         // dd($this->selected_nearby_seller);
         try {
             /* Perform some operation */
-            $prod_total_price = $this->order_item['product_price'] * $this->order_item['product_qty'];
+            $order_total_price = $this->order_item['product_price'] * $this->order_item['product_qty'];
             $selected_seller = User::getStoreByBusinessName($this->selected_nearby_seller);
             // dd($this->order);
             // dd($this->order_item);
@@ -129,8 +129,10 @@ class OrdersLivewire extends Component
             $order_from_other_seller = OrdersFromOtherSeller::insertOrderFromOtherSeller(
                 $this->order['user_id'],
                 $selected_seller->id,
-                $this->order['order_total'],
-                $this->order['total_items'],
+                $this->order_item['product_id'],
+                $this->order_item['product_price'],
+                $this->order_item['product_qty'],
+                $order_total_price,
                 isset($this->order['lat']) ? (float) $this->order['lat'] : null,
                 isset($this->order['lon']) ? (float) $this->order['lon'] : null,
                 $this->order['receiver_name'],
@@ -149,13 +151,17 @@ class OrdersLivewire extends Component
                 $this->order['offloading_charges']
             );
 
-            OrderItems::insertOrderItem(
-                $order_from_other_seller->id, 
-                $this->order_item['product_id'], 
-                $this->order_item['product_price'], 
-                $this->order_item['product_qty'], 
-                $this->order_item['user_choice']
-            );
+            // $this->order_item['product_id'], 
+            //     $this->order_item['product_price'], 
+            //     $this->order_item['product_qty'], 
+
+            // OrderItems::insertOrderItem(
+            //     $order_from_other_seller->id, 
+            //     $this->order_item['product_id'], 
+            //     $this->order_item['product_price'], 
+            //     $this->order_item['product_qty'], 
+            //     $this->order_item['user_choice']
+            // );
 
             // // /* Remove the item from current order items */
             // $removed = OrderItems::removeItem($this->order_item['id']);

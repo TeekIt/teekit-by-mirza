@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use App\OrderItems;
+use App\Orders;
 use App\Products;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrdersFromOtherSeller extends Model
@@ -18,21 +19,14 @@ class OrdersFromOtherSeller extends Model
     /**
      * Relations
      */
-    public function orderItems(): HasMany
-    {
-        return $this->hasMany(OrderItems::class, 'order_id');
-    }
+    // public function orderItems(): HasMany
+    // {
+    //     return $this->hasMany(OrderItems::class, 'order_id');
+    // }
 
-    public function products(): HasManyThrough
+    public function product(): BelongsTo
     {
-        return $this->hasManyThrough(
-            Products::class,
-            OrderItems::class,
-            'order_id',
-            'id',
-            'id',
-            'product_id'
-        );
+        return $this->belongsTo(Products::class);
     }
 
     /**
@@ -41,6 +35,9 @@ class OrdersFromOtherSeller extends Model
     public static function insertOrderFromOtherSeller(
         int $customer_id,
         int $seller_id,
+        int $product_id,
+        float $product_price,
+        int $product_qty,
         float $order_total,
         int $total_items,
         ?float $customer_lat = null, // Optional parameter with default null
@@ -63,6 +60,9 @@ class OrdersFromOtherSeller extends Model
         $model = new OrdersFromOtherSeller();
         $model->customer_id = $customer_id;
         $model->seller_id = $seller_id;
+        $model->product_id = $product_id;
+        $model->product_price = $product_price;
+        $model->product_qty = $product_qty;
         $model->order_total = $order_total;
         $model->total_items = $total_items;
         if ($type == 'delivery') {
@@ -89,7 +89,7 @@ class OrdersFromOtherSeller extends Model
 
     public static function getOrdersFromOtherSellersForView(array $columns, int $seller_id, string $order_by): object
     {
-        return self::select($columns)->with(['products.category'])
+        return self::select($columns)->with(['product.category'])
             ->where('seller_id', '=', $seller_id)
             ->orderBy('created_at', $order_by)
             ->get();
