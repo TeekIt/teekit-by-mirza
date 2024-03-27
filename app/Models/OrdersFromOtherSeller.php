@@ -18,10 +18,10 @@ class OrdersFromOtherSeller extends Model
     /**
      * Relations
      */
-    // public function order_items(): HasMany
-    // {
-    //     return $this->hasMany(OrderItems::class, 'order_id');
-    // }
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItems::class, 'order_id');
+    }
 
     public function products(): HasManyThrough
     {

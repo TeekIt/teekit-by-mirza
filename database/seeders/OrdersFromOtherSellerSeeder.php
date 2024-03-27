@@ -14,6 +14,6 @@ class OrdersFromOtherSellerSeeder extends Seeder
      */
     public function run()
     {
-        OrdersFromOtherSeller::factory()->count(5)->create();
+        OrdersFromOtherSeller::factory()->count(5)->hasOrderItems(1)->create();
     }
 }

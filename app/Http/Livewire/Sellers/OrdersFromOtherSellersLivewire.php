@@ -30,7 +30,7 @@ class OrdersFromOtherSellersLivewire extends Component
             $this->seller_id,
             'desc'
         );
-        dd($data);
+        // dd($data);
         return view('livewire.sellers.orders-from-other-sellers-livewire', ['data' => $data]);
     }
 }

@@ -28,7 +28,8 @@
                             <i class="ion ion-bag"></i>
                         </div>
                         <a href="{{route('seller.orders')}}" class="small-box-footer">
-                            More info <i class="fas fa-arrow-circle-right"></i>
+                            More info 
+                            <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
                 </div>
@@ -43,7 +44,8 @@
                             <i class="ion ion-stats-bars fas fa-status-bar"></i>
                         </div>
                         <a href="{{route('seller.orders')}}" class="small-box-footer">
-                            More info <i class="fas fa-arrow-circle-right"></i>
+                            More info 
+                            <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
                 </div>
@@ -60,7 +62,8 @@
                             <i class="ion ion-person-add"></i>
                         </div>
                         <a href="{{route('seller.inventory')}}" class="small-box-footer">
-                            More info <i class="fas fa-arrow-circle-right"></i>
+                            More info 
+                            <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
                 </div>
@@ -72,7 +75,8 @@
                             <p>Total Sales</p>
                         </div>
                         <a href="{{route('seller.orders')}}" class="small-box-footer">
-                            More info <i class="fas fa-arrow-circle-right"></i>
+                            More info 
+                            <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>
                 </div>
