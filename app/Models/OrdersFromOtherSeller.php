@@ -19,16 +19,10 @@ class OrdersFromOtherSeller extends Model
     /**
      * Relations
      */
-    // public function orderItems(): HasMany
-    // {
-    //     return $this->hasMany(OrderItems::class, 'order_id');
-    // }
-
     public function product(): BelongsTo
     {
         return $this->belongsTo(Products::class);
     }
-
     /**
      * Helpers
      */

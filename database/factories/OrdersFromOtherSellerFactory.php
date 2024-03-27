@@ -20,7 +20,8 @@ class OrdersFromOtherSellerFactory extends Factory
     {
         return [
             'customer_id' => User::inRandomOrder()->where('role_id', 3)->first()->id, // Generate random customer ID
-            'seller_id' => User::inRandomOrder()->whereIn('role_id', [2, 5])->first()->id, // Generate random seller ID
+            // 'seller_id' => User::inRandomOrder()->whereIn('role_id', [2, 5])->first()->id, // Generate random seller ID
+            'seller_id' => 419, // Generate random seller ID
             'product_id' => Products::inRandomOrder()->first()->id,
             'product_price' => Products::inRandomOrder()->first()->price,
             'product_qty' => fake()->numberBetween(1, 10),
