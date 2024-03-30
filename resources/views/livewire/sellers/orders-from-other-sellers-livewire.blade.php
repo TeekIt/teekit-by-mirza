@@ -20,7 +20,7 @@
         <div class="col-12">
             <h4 class="py-4 my-1">Orders From Other Sellers 2</h4>
         </div>
-        @forelse ($data as $order)
+        @forelse ($data as $order_from_other_seller)
             <!-- Single Order Content -->
             <div class="col-12 p-2">
                 <div class="card">
@@ -34,7 +34,7 @@
                                             <div class="row">
                                                 <div class="col-12 col-md-10">
                                                     <button class="btn btn-warning col-3 col-md-2" title="Hold the order">
-                                                        <span wire:target="" wire:loading.remove>
+                                                        <span onclick="timerManager.holdThisTimer({{ $order_from_other_seller->id }})">
                                                             Hold
                                                         </span>
                                                         {{-- <span>
@@ -64,14 +64,13 @@
                                                     </button>
                                                 </div>
                                                 <div class="col-12 col-md-2 mt-md-1 mt-4">
-                                                    {{-- @dd($order->created_at->diffInMinutes(\Carbon\Carbon::now())) --}}
-                                                    @if ($order->created_at->diffInDays(\Carbon\Carbon::now()) > 2)
+                                                    @if ($order_from_other_seller->created_at->diffInDays(\Carbon\Carbon::now()) > 2)
                                                         <p class="fs-3 fw-bold text-danger">
                                                             Time Over...
                                                         </p>
                                                     @else
-                                                        <p class="fs-3 fw-bold timer" id={{ $order->id }}>
-                                                            {{-- 02:00 --}}
+                                                        <p class="fs-3 fw-bold timer" id={{ $order_from_other_seller->id }}>
+                                                            {{-- Timer will render here --}}
                                                         </p>
                                                     @endif
                                                 </div>
@@ -82,23 +81,23 @@
                                 <tbody>
                                     <tr>
                                         <td><b>Order#</b></td>
-                                        <td>{{ $order->id }}</td>
+                                        <td>{{ $order_from_other_seller->id }}</td>
                                         <td><b>Order Status</b></td>
-                                        <td><span class="badge badge-warning">{{ $order->order_status }}</span></td>
+                                        <td><span class="badge badge-warning">{{ $order_from_other_seller->order_status }}</span></td>
                                     </tr>
 
                                     <tr>
                                         <td><b>Placed At</b></td>
-                                        <td>{{ $order->created_at }}</td>
+                                        <td>{{ $order_from_other_seller->created_at }}</td>
                                         <td><b>Order Type</b></td>
-                                        <td><span class="badge badge-info">{{ $order->type }}</span></td>
+                                        <td><span class="badge badge-info">{{ $order_from_other_seller->type }}</span></td>
                                     </tr>
 
                                     <tr>
                                         <td><b>Order Total</b></td>
-                                        <td>£{{ $order->order_total }}</td>
+                                        <td>£{{ $order_from_other_seller->order_total }}</td>
                                         <td><b>Payment Status</b></td>
-                                        <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
+                                        <td><span class="badge badge-primary">{{ $order_from_other_seller->payment_status }}</span></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -109,10 +108,10 @@
                             <div class="row mb-2">
                                 <div class="col-md-2">
                                     <span class="img-container">
-                                        @if (str_contains($order->product->feature_img, 'https://'))
-                                            <img class="d-block m-auto" src="{{ $order->product->feature_img }}">
+                                        @if (str_contains($order_from_other_seller->product->feature_img, 'https://'))
+                                            <img class="d-block m-auto" src="{{ $order_from_other_seller->product->feature_img }}">
                                         @else
-                                            <img class="d-block m-auto" src="{{ config('constants.BUCKET') . $order->product->feature_img }}">
+                                            <img class="d-block m-auto" src="{{ config('constants.BUCKET') . $order_from_other_seller->product->feature_img }}">
                                         @endif
                                     </span>
                                 </div>
@@ -120,27 +119,27 @@
                                     <table class="table">
                                         <tr>
                                             <td class="col-4 text-site-primary"><b>Product Id: Remove in production</b></td>
-                                            <td class="col-8">{{ $order->product_id }}</td>
+                                            <td class="col-8">{{ $order_from_other_seller->product_id }}</td>
                                         </tr>
                                         <tr>
                                             <td class="col-4 text-site-primary"><b>Product Name:</b></td>
-                                            <td class="col-8">{{ $order->product->product_name }}</td>
+                                            <td class="col-8">{{ $order_from_other_seller->product->product_name }}</td>
                                         </tr>
                                         <tr>
                                             <td class="col-4 text-site-primary"><b>Category:</b></td>
-                                            <td class="col-8">{{ $order->product->category->category_name }}</td>
+                                            <td class="col-8">{{ $order_from_other_seller->product->category->category_name }}</td>
                                         </tr>
                                         <tr>
                                             <td class="col-4 text-site-primary"><b>SKU:</b></td>
-                                            <td class="col-8">{{ $order->product->sku }}</td>
+                                            <td class="col-8">{{ $order_from_other_seller->product->sku }}</td>
                                         </tr>
                                         <tr>
                                             <td class="col-4 text-site-primary"><b>QTY:</b></td>
-                                            <td class="col-8">{{ $order->product_qty }}</td>
+                                            <td class="col-8">{{ $order_from_other_seller->product_qty }}</td>
                                         </tr>
                                         <tr>
                                             <td class="col-4 text-site-primary"><b>Price:</b></td>
-                                            <td class="col-8">£{{ $order->product_price }}</td>
+                                            <td class="col-8">£{{ $order_from_other_seller->product_price }}</td>
                                         </tr>
                                     </table>
                                 </div>
@@ -167,61 +166,84 @@
 
     </div>
     <script>
-        var initialMinutes = 2;
-        var initialSeconds = 10;
-        const updateTimers = () => {
-            let timerElements = document.querySelectorAll('.timer');
+        class TimerManager {
+            constructor(initialMinutes, initialSeconds, holdingMinutes = 0, holdingSeconds = 0) {
+                this.initialMinutes = initialMinutes;
+                this.initialSeconds = initialSeconds;
 
-            timerElements.forEach(function(timerElement) {
+                this.holdingMinutes = holdingMinutes;
+                this.holdingSeconds = holdingSeconds;
+            }
 
-                let timerEelementId = timerElement.getAttribute('id');
-                let localStorageValue = localStorage.getItem(timerEelementId);
+            holdThisTimer = (id) => {
+                alert("holder called")
+                localStorage.setItem(id, this.holdingMinutes + ':' + this.holdingSeconds);
+            }
 
-                if (localStorageValue !== null) {
-                    var minutes = localStorageValue.split(':')[0];
-                    var seconds = localStorageValue.split(':')[1];
-                } else {
-                    var minutes = initialMinutes;
-                    var seconds = initialSeconds;
-                }
-                // Decrement seconds
-                seconds--;
-                // Adjust minutes if seconds reach 0
-                if (seconds < 0) {
-                    seconds = 59;
-                    minutes--;
-                    minutes = (minutes === -1) ? 0 : minutes;
-                }
-                // Update timer display
-                if (seconds > 0 && minutes > 0) {
-                    timerElement.textContent = padZero(minutes) + ':' + padZero(seconds);
-                    setLocalStorage(timerEelementId, minutes + ':' + seconds);
-                } else {
-                    timerElement.textContent = '00:00';
-                    setLocalStorage(timerEelementId, '00:00');
-                }
-            });
+            padZero = (num) => {
+                return (num < 10 ? '0' : '') + num;
+            }
+
+            setLocalStorage = (key, value) => {
+                localStorage.setItem(key, value);
+            }
+
+            getTimerElements = () => {
+                return document.querySelectorAll('.timer');
+            }
+
+            updateTimers = () => {
+                let timerElements = this.getTimerElements();
+
+                timerElements.forEach(timerElement => {
+                    let timerElementId = timerElement.getAttribute('id');
+                    let localStorageValue = localStorage.getItem(timerElementId);
+                    let minutes, seconds;
+
+                    if (localStorageValue !== null) {
+                        [minutes, seconds] = localStorageValue.split(':').map(Number);
+                    } else {
+                        minutes = this.initialMinutes;
+                        seconds = this.initialSeconds;
+                    }
+
+                    seconds--;
+
+                    if (seconds < 0) {
+                        seconds = 59;
+                        minutes--;
+                    }
+
+                    if (minutes > 0 || (minutes === 0 && seconds > 0)) {
+                        timerElement.textContent = this.padZero(minutes) + ':' + this.padZero(seconds);
+                        this.setLocalStorage(timerElementId, `${minutes}:${seconds}`);
+                    } else {
+                        timerElement.textContent = '00:00';
+                        this.setLocalStorage(timerElementId, '00:00');
+                    }
+                });
+            }
+
+            start = () => {
+                this.updateTimers();
+                setInterval(() => this.updateTimers(), 1000);
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    let timerElements = this.getTimerElements();
+                    timerElements.forEach(timerElement => {
+                        let timerKey = timerElement.getAttribute('id');
+                        let timerValue = localStorage.getItem(timerKey);
+                        if (timerValue !== null) {
+                            timerElement.textContent = timerValue;
+                        }
+                    });
+                });
+            }
         }
 
-        // Function to pad single digit numbers with leading zeros
-        const padZero = (num) => (num < 10 ? '0' : '') + num;
-
-        const setLocalStorage = (key, value) => localStorage.setItem(key, value);
-
-        // Update timers every second
-        setInterval(updateTimers, 1000);
-
-        // Load timer state from local storage for each timer
-        document.addEventListener('DOMContentLoaded', function() {
-            let timerElements = document.querySelectorAll('.timer');
-
-            timerElements.forEach(function(timerElement) {
-                let timerKey = timerElement.getAttribute('id');
-                let timerValue = localStorage.getItem(timerKey);
-                if (timerValue !== null) {
-                    timerElement.textContent = timerValue;
-                }
-            });
-        });
+        //Params: minutes, seconds, holdingMinutes, holdingSeconds
+        const timerManager = new TimerManager(1, 1, 5, 59);
+        timerManager.start();
     </script>
+
 </div>

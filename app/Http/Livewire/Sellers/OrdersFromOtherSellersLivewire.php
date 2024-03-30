@@ -7,7 +7,10 @@ use Livewire\Component;
 
 class OrdersFromOtherSellersLivewire extends Component
 {
-    public $seller_id;
+    public
+        $seller_id,
+        $initialMinutes,
+        $initialSeconds;
 
     public function mount()
     {
