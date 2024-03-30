@@ -65,13 +65,13 @@
                                                 </div>
                                                 <div class="col-12 col-md-2 mt-md-1 mt-4">
                                                     {{-- @dd($order->created_at->diffInMinutes(\Carbon\Carbon::now())) --}}
-                                                    @if ($order->created_at->diffInMinutes(\Carbon\Carbon::now()) > 1)
+                                                    @if ($order->created_at->diffInDays(\Carbon\Carbon::now()) > 2)
                                                         <p class="fs-3 fw-bold text-danger">
                                                             Time Over...
                                                         </p>
                                                     @else
-                                                        <p class="fs-3 fw-bold timer">
-                                                            01:00
+                                                        <p class="fs-3 fw-bold timer" id={{ $order->id }}>
+                                                            {{-- 02:00 --}}
                                                         </p>
                                                     @endif
                                                 </div>
@@ -167,32 +167,61 @@
 
     </div>
     <script>
+        var initialMinutes = 2;
+        var initialSeconds = 10;
         const updateTimers = () => {
-            var timerElements = document.querySelectorAll('.timer');
+            let timerElements = document.querySelectorAll('.timer');
 
             timerElements.forEach(function(timerElement) {
-                var timeParts = timerElement.textContent.split(':');
-                var minutes = parseInt(timeParts[0]);
-                var seconds = parseInt(timeParts[1]);
 
+                let timerEelementId = timerElement.getAttribute('id');
+                let localStorageValue = localStorage.getItem(timerEelementId);
+
+                if (localStorageValue !== null) {
+                    var minutes = localStorageValue.split(':')[0];
+                    var seconds = localStorageValue.split(':')[1];
+                } else {
+                    var minutes = initialMinutes;
+                    var seconds = initialSeconds;
+                }
                 // Decrement seconds
                 seconds--;
-
                 // Adjust minutes if seconds reach 0
                 if (seconds < 0) {
-                    minutes--;
                     seconds = 59;
+                    minutes--;
+                    minutes = (minutes === -1) ? 0 : minutes;
                 }
-
                 // Update timer display
-                timerElement.textContent = padZero(minutes) + ':' + padZero(seconds);
+                if (seconds > 0 && minutes > 0) {
+                    timerElement.textContent = padZero(minutes) + ':' + padZero(seconds);
+                    setLocalStorage(timerEelementId, minutes + ':' + seconds);
+                } else {
+                    timerElement.textContent = '00:00';
+                    setLocalStorage(timerEelementId, '00:00');
+                }
             });
         }
 
         // Function to pad single digit numbers with leading zeros
         const padZero = (num) => (num < 10 ? '0' : '') + num;
 
+        const setLocalStorage = (key, value) => localStorage.setItem(key, value);
+
         // Update timers every second
         setInterval(updateTimers, 1000);
+
+        // Load timer state from local storage for each timer
+        document.addEventListener('DOMContentLoaded', function() {
+            let timerElements = document.querySelectorAll('.timer');
+
+            timerElements.forEach(function(timerElement) {
+                let timerKey = timerElement.getAttribute('id');
+                let timerValue = localStorage.getItem(timerKey);
+                if (timerValue !== null) {
+                    timerElement.textContent = timerValue;
+                }
+            });
+        });
     </script>
 </div>
