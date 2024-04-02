@@ -1,4 +1,5 @@
 <div class="container-xxl flex-grow-1 container-p-y">
+    {{-- <div class="container-xxl flex-grow-1 container-p-y" wire:poll.60000ms="moveToAnotherStore"> --}}
     <div class="container pt-4">
         @if (session()->has('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -22,7 +23,7 @@
         </div>
         @forelse ($data as $order_from_other_seller)
             <!-- Single Order Content -->
-            <div class="col-12 p-2">
+            <div class="col-12 p-2" wire:poll.1000ms="moveToAnotherStore({{ $order_from_other_seller->id }})">
                 <div class="card">
                     <div class="card-body py-1 px-2">
                         <!-- Order Header -->
@@ -64,7 +65,7 @@
                                                     </button>
                                                 </div>
                                                 <div class="col-12 col-md-2 mt-md-1 mt-4">
-                                                    @if ($order_from_other_seller->created_at->diffInDays(\Carbon\Carbon::now()) > 2)
+                                                    @if ($order_from_other_seller->created_at->diffInMinutes(\Carbon\Carbon::now()) > 2)
                                                         <p class="fs-3 fw-bold text-danger">
                                                             Time Over...
                                                         </p>
@@ -168,11 +169,13 @@
     <script>
         class TimerManager {
             constructor(initialMinutes, initialSeconds, holdingMinutes = 0, holdingSeconds = 0) {
+
                 this.initialMinutes = initialMinutes;
                 this.initialSeconds = initialSeconds;
 
                 this.holdingMinutes = holdingMinutes;
                 this.holdingSeconds = holdingSeconds;
+                
             }
 
             holdThisTimer = (id) => {
@@ -215,7 +218,8 @@
                     }
 
                     if (minutes > 0 || (minutes === 0 && seconds > 0)) {
-                        timerElement.textContent = this.padZero(minutes) + ':' + this.padZero(seconds);
+                        let digitalTime = this.padZero(minutes) + ':' + this.padZero(seconds);
+                        timerElement.textContent = digitalTime;
                         this.setLocalStorage(timerElementId, `${minutes}:${seconds}`);
                     } else {
                         timerElement.textContent = '00:00';
@@ -242,7 +246,7 @@
         }
 
         //Params: minutes, seconds, holdingMinutes, holdingSeconds
-        const timerManager = new TimerManager(1, 1, 5, 59);
+        const timerManager = new TimerManager(2, 00, 5, 59);
         timerManager.start();
     </script>
 
