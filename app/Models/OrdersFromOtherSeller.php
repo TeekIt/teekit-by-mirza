@@ -26,9 +26,13 @@ class OrdersFromOtherSeller extends Model
     /**
      * Helpers
      */
-    public static function updateSellerId(int $id, int $seller_id): int
+    public static function moveToAnotherSeller(int $id, int $seller_id): int
     {
-        return self::where('id', '=', $id)->update(['seller_id' => $seller_id]);
+        return self::where('id', '=', $id)->update([
+            'seller_id' => $seller_id,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
     }
 
     public static function insertOrderFromOtherSeller(

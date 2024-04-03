@@ -1,5 +1,4 @@
 <div class="container-xxl flex-grow-1 container-p-y">
-    {{-- <div class="container-xxl flex-grow-1 container-p-y" wire:poll.60000ms="moveToAnotherStore"> --}}
     <div class="container pt-4">
         @if (session()->has('error'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -23,7 +22,8 @@
         </div>
         @forelse ($data as $order_from_other_seller)
             <!-- Single Order Content -->
-            <div class="col-12 p-2" wire:poll.1000ms="moveToAnotherStore({{ $order_from_other_seller->id }})">
+            <div class="col-12 p-2" wire:poll.1000ms="moveToAnotherSeller({{ $order_from_other_seller->id }}, '{{ $order_from_other_seller->created_at }}')">
+                {{-- <div class="col-12 p-2" > --}}
                 <div class="card">
                     <div class="card-body py-1 px-2">
                         <!-- Order Header -->
