@@ -26,6 +26,11 @@ class OrdersFromOtherSeller extends Model
     /**
      * Helpers
      */
+    public static function incrementTimesRejected(int $id): int
+    {
+        return self::where('id', '=', $id)->increment('times_rejected');
+    }
+
     public static function moveToAnotherSeller(int $id, int $seller_id): int
     {
         return self::where('id', '=', $id)->update([
@@ -35,7 +40,7 @@ class OrdersFromOtherSeller extends Model
         ]);
     }
 
-    public static function insertOrderFromOtherSeller(
+    public static function insertInfo(
         int $customer_id,
         int $seller_id,
         int $product_id,
@@ -90,7 +95,7 @@ class OrdersFromOtherSeller extends Model
         return $model;
     }
 
-    public static function getOrdersFromOtherSellersForView(array $columns, int $seller_id, string $order_by): object
+    public static function getForView(array $columns, int $seller_id, string $order_by): object
     {
         return self::select($columns)->with(['product.category'])
             ->where('seller_id', '=', $seller_id)

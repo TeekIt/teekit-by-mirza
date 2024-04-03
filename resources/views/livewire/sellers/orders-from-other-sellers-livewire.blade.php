@@ -22,7 +22,7 @@
         </div>
         @forelse ($data as $order_from_other_seller)
             <!-- Single Order Content -->
-            <div class="col-12 p-2" wire:poll.1000ms="moveToAnotherSeller({{ $order_from_other_seller->id }}, '{{ $order_from_other_seller->created_at }}')">
+            <div class="col-12 p-2" wire:poll.1000ms="moveToAnotherSeller({{ $order_from_other_seller->id }}, {{ $order_from_other_seller->customer_lat }}, {{ $order_from_other_seller->customer_lon }}, '{{ $order_from_other_seller->created_at }}')">
                 {{-- <div class="col-12 p-2" > --}}
                 <div class="card">
                     <div class="card-body py-1 px-2">
