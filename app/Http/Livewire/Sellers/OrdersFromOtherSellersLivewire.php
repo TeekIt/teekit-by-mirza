@@ -58,9 +58,9 @@ class OrdersFromOtherSellersLivewire extends Component
 
             /* Operation finished */
             if ($moved) {
-                session()->flash('success', 'Order#' . $order_id . 'has been moved to another seller.');
+                session()->flash('success', 'Order#' . $order_id . ' has been moved to another seller.');
             } else {
-                session()->flash('error', 'Soon Order#' . $order_id . 'will be moved to another seller.');
+                session()->flash('warning', 'Soon Order#' . $order_id . ' will be moved to another seller.');
             }
         } catch (Exception $error) {
             report($error);

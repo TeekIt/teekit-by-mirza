@@ -14,11 +14,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
+        @if (session()->has('warning'))
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong class="text-danger">Warning!</strong>
+                {{ session()->get('warning') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
     </div>
     <!-- Main Content -->
     <div class="container">
         <div class="col-12">
-            <h4 class="py-4 my-1">Orders From Other Sellers 2</h4>
+            <h4 class="py-4 my-1">Orders From Other Sellers</h4>
         </div>
         @forelse ($data as $order_from_other_seller)
             <!-- Single Order Content -->
@@ -31,7 +38,7 @@
                             <table class="table table-striped table-responsive-sm">
                                 <thead>
                                     <tr class="col-12">
-                                        <td colspan="6 col-12">
+                                        <td colspan="6">
                                             <div class="row">
                                                 <div class="col-12 col-md-10">
                                                     <button class="btn btn-warning col-3 col-md-2" title="Hold the order">
@@ -175,7 +182,7 @@
 
                 this.holdingMinutes = holdingMinutes;
                 this.holdingSeconds = holdingSeconds;
-                
+
             }
 
             holdThisTimer = (id) => {
