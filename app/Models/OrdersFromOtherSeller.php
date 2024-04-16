@@ -5,10 +5,10 @@ namespace App\Models;
 use App\OrderItems;
 use App\Orders;
 use App\Products;
+use App\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrdersFromOtherSeller extends Model
@@ -19,6 +19,16 @@ class OrdersFromOtherSeller extends Model
     /**
      * Relations
      */
+    public function seller(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'seller_id');
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Products::class);
@@ -26,6 +36,24 @@ class OrdersFromOtherSeller extends Model
     /**
      * Helpers
      */
+    public static function updateOrderStatus(int $id, string $status): int
+    {
+        return self::where('id', '=', $id)->update(['order_status' => $status]);
+    }
+
+    public static function isViewed(int $id): object
+    {
+        $order = self::findOrFail($id);
+        $order->is_viewed = 1;
+        $order->save();
+        return $order;
+    }
+
+    public static function orderAccepted(int $id): int
+    {
+        return self::where('id', '=', $id)->update(['accepted' => 1]);
+    }
+
     public static function incrementTimesRejected(int $id): int
     {
         return self::where('id', '=', $id)->increment('times_rejected');
@@ -93,6 +121,11 @@ class OrdersFromOtherSeller extends Model
         $model->offloading_charges = $offloading_charges;
         $model->save();
         return $model;
+    }
+
+    public static function getById(array $columns, int $id): object
+    {
+        return self::select($columns)->with(['product.category', 'seller', 'customer'])->where('id', '=', $id)->first();
     }
 
     public static function getForView(array $columns, int $seller_id, string $order_by): object

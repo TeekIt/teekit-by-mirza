@@ -38,7 +38,7 @@ class OrdersFromOtherSellerFactory extends Factory
             'flat' => fake()->optional()->word, // Random apartment number (nullable)
             'description' => 'Some description', // Generate random description (nullable)
             'payment_status' => fake()->randomElement(['paid', 'hidden']), // Random payment status
-            'order_status' => fake()->randomElement(['pending', 'accepted', 'ready']), // Random order status
+            'order_status' => 'pending', // Random order status
             'payment_intent' => null, // Set payment intent as null
             'driver_id' => null, // Set driver ID as null
             'driver_traveled_km' => 0.00, // Default driver traveled distance
