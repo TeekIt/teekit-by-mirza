@@ -16,11 +16,16 @@ use App\Http\Controllers\PromoCodesController;
 use App\Http\Controllers\RattingsController;
 use App\Http\Controllers\ReferralCodeRelationController;
 use App\Http\Controllers\WithdrawalRequestsController;
-use App\Products;
-use App\Services\JsonResponseServices;
 use App\Services\StripeServices;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+
+/* 
+Tasks:
+1) Make the product import perfect 
+2) Add staurt delivery to sellers dashboard
+3) Export the app as an desktop application
+*/
 
 /*
 |--------------------------------------------------------------------------
@@ -33,27 +38,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('products', function () {
-    try {
-        return response()->json([
-            'data' => Products::all(),
-            'status' => true,
-            'message' => ''
-        ], 200);
-    } catch (Throwable $error) {
-        report($error);
-        return JsonResponseServices::getApiResponse(
-            [],
-            false,
-            $error,
-            config('constants.HTTP_SERVER_ERROR')
-        );
-    }
-});
-
-Route::get('/', function () {
-    return 'Teek it API Routes Are Working Fine :)';
-});
+Route::get('/', fn () =>  'Teek it API Routes Are Working Fine :)');
 /*
 |--------------------------------------------------------------------------
 | Authentication API Routes
