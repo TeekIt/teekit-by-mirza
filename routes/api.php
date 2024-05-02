@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 /* 
 Tasks:
-1) Make the product import perfect 
+1) Make the product import perfect (Done)
 2) Add staurt delivery to sellers dashboard
 3) Export the app as an desktop application
 */
@@ -73,13 +73,10 @@ Route::post('password/reset', [ResetPasswordController::class, 'reset']);
 |--------------------------------------------------------------------------
 */
 Route::prefix('qty')->controller(QtyController::class)->group(function () {
-    Route::get('product/{store_id}', 'getByStoreId');
     Route::get('product/{store_id}/{prod_id}', 'getById');
     Route::post('update/{prod_id}', 'updateById');
-    Route::post('insert_parent_qty_to_child', 'insertParentQtyToChild')->middleware('jwt.verify');
-    Route::get('all', 'all');
+    // Route::post('insert_parent_qty_to_child', 'insertParentQtyToChild')->middleware('jwt.verify');
     // Route::get('multi-curl', 'QtyController@multiCURL');
-    // Route::get('shifting-qty', 'QtyController@shiftQtyInProductsToQtyTable');
 });
 /*
 |--------------------------------------------------------------------------
@@ -138,7 +135,6 @@ Route::middleware(['jwt.verify'])->group(function () {
                 Route::get('sortByLocation', 'sortByLocation');
                 Route::post('recheck_products', 'recheckProducts');
                 Route::get('featured/{store_id}', 'featuredProducts');
-                // Route::get('drop-qty-column', 'dropProductsTableQtyColumn');
             });
         });
 
