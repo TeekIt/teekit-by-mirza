@@ -55,9 +55,7 @@ final class GoogleMapServices
         $origing_address = $origin_lat . ',' . $origin_lon;
         $destinations_addresses = implode('|', $destinations['users_coordinates']);
         $url = self::generateUrl($origing_address, $destinations_addresses);
-        // dd($url);
         $results = json_decode(file_get_contents($url), true);
-        // dd($results);
         $distance_data = [];
         $user_data = [];
         foreach ($results['rows'] as $row) {

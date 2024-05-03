@@ -31,7 +31,6 @@ class OrderIsReadyMail extends Mailable
     public function build()
     {
         $order = $this->order;
-        return $this->view('emails.order_is_ready', compact('order'))
-            ->subject("Your Order Is Ready To Pickup");
+        return $this->view('emails.order_is_ready', compact('order'))->subject("Your Order Is Ready To Be Pickup");
     }
 }

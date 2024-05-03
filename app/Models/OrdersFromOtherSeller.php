@@ -5,10 +5,10 @@ namespace App\Models;
 use App\OrderItems;
 use App\Orders;
 use App\Products;
+use App\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrdersFromOtherSeller extends Model
@@ -19,20 +19,56 @@ class OrdersFromOtherSeller extends Model
     /**
      * Relations
      */
-    // public function orderItems(): HasMany
-    // {
-    //     return $this->hasMany(OrderItems::class, 'order_id');
-    // }
+    public function seller(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'seller_id');
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
 
     public function product(): BelongsTo
     {
         return $this->belongsTo(Products::class);
     }
-
     /**
      * Helpers
      */
-    public static function insertOrderFromOtherSeller(
+    public static function updateOrderStatus(int $id, string $status): int
+    {
+        return self::where('id', '=', $id)->update(['order_status' => $status]);
+    }
+
+    public static function isViewed(int $id): object
+    {
+        $order = self::findOrFail($id);
+        $order->is_viewed = 1;
+        $order->save();
+        return $order;
+    }
+
+    public static function orderAccepted(int $id): int
+    {
+        return self::where('id', '=', $id)->update(['accepted' => 1]);
+    }
+
+    public static function incrementTimesRejected(int $id): int
+    {
+        return self::where('id', '=', $id)->increment('times_rejected');
+    }
+
+    public static function moveToAnotherSeller(int $id, int $seller_id): int
+    {
+        return self::where('id', '=', $id)->update([
+            'seller_id' => $seller_id,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+    }
+
+    public static function insertInfo(
         int $customer_id,
         int $seller_id,
         int $product_id,
@@ -87,7 +123,12 @@ class OrdersFromOtherSeller extends Model
         return $model;
     }
 
-    public static function getOrdersFromOtherSellersForView(array $columns, int $seller_id, string $order_by): object
+    public static function getById(array $columns, int $id): object
+    {
+        return self::select($columns)->with(['product.category', 'seller', 'customer'])->where('id', '=', $id)->first();
+    }
+
+    public static function getForView(array $columns, int $seller_id, string $order_by): object
     {
         return self::select($columns)->with(['product.category'])
             ->where('seller_id', '=', $seller_id)

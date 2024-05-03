@@ -16,11 +16,16 @@ use App\Http\Controllers\PromoCodesController;
 use App\Http\Controllers\RattingsController;
 use App\Http\Controllers\ReferralCodeRelationController;
 use App\Http\Controllers\WithdrawalRequestsController;
-use App\Products;
-use App\Services\JsonResponseServices;
 use App\Services\StripeServices;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+
+/* 
+Tasks:
+1) Make the product import perfect (Done)
+2) Add staurt delivery to sellers dashboard
+3) Export the app as an desktop application
+*/
 
 /*
 |--------------------------------------------------------------------------
@@ -33,27 +38,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('products', function () {
-    try {
-        return response()->json([
-            'data' => Products::all(),
-            'status' => true,
-            'message' => ''
-        ], 200);
-    } catch (Throwable $error) {
-        report($error);
-        return JsonResponseServices::getApiResponse(
-            [],
-            false,
-            $error,
-            config('constants.HTTP_SERVER_ERROR')
-        );
-    }
-});
-
-Route::get('/', function () {
-    return 'Teek it API Routes Are Working Fine :)';
-});
+Route::get('/', fn () =>  'Teek it API Routes Are Working Fine :)');
 /*
 |--------------------------------------------------------------------------
 | Authentication API Routes
@@ -88,13 +73,10 @@ Route::post('password/reset', [ResetPasswordController::class, 'reset']);
 |--------------------------------------------------------------------------
 */
 Route::prefix('qty')->controller(QtyController::class)->group(function () {
-    Route::get('product/{store_id}', 'getByStoreId');
     Route::get('product/{store_id}/{prod_id}', 'getById');
     Route::post('update/{prod_id}', 'updateById');
-    Route::post('insert_parent_qty_to_child', 'insertParentQtyToChild')->middleware('jwt.verify');
-    Route::get('all', 'all');
+    // Route::post('insert_parent_qty_to_child', 'insertParentQtyToChild')->middleware('jwt.verify');
     // Route::get('multi-curl', 'QtyController@multiCURL');
-    // Route::get('shifting-qty', 'QtyController@shiftQtyInProductsToQtyTable');
 });
 /*
 |--------------------------------------------------------------------------
@@ -153,7 +135,6 @@ Route::middleware(['jwt.verify'])->group(function () {
                 Route::get('sortByLocation', 'sortByLocation');
                 Route::post('recheck_products', 'recheckProducts');
                 Route::get('featured/{store_id}', 'featuredProducts');
-                // Route::get('drop-qty-column', 'dropProductsTableQtyColumn');
             });
         });
 
@@ -230,15 +211,15 @@ Route::get('page', [PagesController::class, 'getPage']);
 |--------------------------------------------------------------------------
 */
 Route::controller(StripeServices::class)->group(function () {
-    Route::post('payment_intent', 'createPaymentIntent');
-    Route::post('payment_intent/request_incremental_authorization_support', 'requestIncrementalAuthorizationSupport');
-    Route::post('payment_intent/perform_incremental_authorization', 'performIncrementalAuthorization');
-    Route::post('payment_intent/capture', 'capturePaymentIntent');
+    Route::get('payment_intent', 'createPaymentIntent');
+    Route::get('payment_intent/request_incremental_authorization_support', 'requestIncrementalAuthorizationSupport');
+    Route::get('payment_intent/perform_incremental_authorization', 'performIncrementalAuthorization');
+    Route::get('payment_intent/capture', 'capturePaymentIntent');
 
-    Route::post('payment_intent/test', 'createPaymentIntent');
-    Route::post('payment_intent/test/request_incremental_authorization_support', 'requestIncrementalAuthorizationSupport');
-    Route::post('payment_intent/test/perform_incremental_authorization', 'performIncrementalAuthorization');
-    Route::post('payment_intent/test/capture', 'capturePaymentIntent');
+    Route::get('payment_intent/test', 'createPaymentIntent');
+    Route::get('payment_intent/test/request_incremental_authorization_support', 'requestIncrementalAuthorizationSupport');
+    Route::get('payment_intent/test/perform_incremental_authorization', 'performIncrementalAuthorization');
+    Route::get('payment_intent/test/capture', 'capturePaymentIntent');
 });
 
 Route::get('time', function () {

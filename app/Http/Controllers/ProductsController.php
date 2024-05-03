@@ -2,54 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Categories;
 use App\productImages;
 use App\Products;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-use App\Orders;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\User;
 use App\Qty;
-use App\Rattings;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
-use Stripe\Product;
 use Throwable;
 use App\Services\JsonResponseServices;
-use Exception;
 use Illuminate\Support\Facades\Cache;
 
 class ProductsController extends Controller
 {
-    /**
-     * one time use method to drop
-     * qty column from products table
-     * @version 1.0.0
-     */
-    // public function dropProductsTableQtyColumn()
-    // {
-    //     try {
-    //         DB::statement(
-    //             'ALTER TABLE products DROP qty'
-    //         );
-    //         return response()->json([
-    //             'status' => config('constants.TRUE_STATUS'),
-    //             'message' => 'Column dropped successfully'
-    //         ], 200);
-    //     } catch (Throwable $error) {
-    //         report($error);
-    //         return response()->json([
-    //             'data' => [],
-    //             'status' => config('constants.FALSE_STATUS'),
-    //             'message' => $error
-    //         ], 500);
-    //     }
-    // }
-
     /**
      * This will help us to update the qty with the given details
      * @version 1.0.0
@@ -90,16 +59,15 @@ class ProductsController extends Controller
         //this function will add qty to it's particular table
         $product_id = $product->id;
         $product_quantity = $request->qty;
-        Qty::addProductQty($user_id, $product_id, $product->category_id, $product_quantity);
+        Qty::add($user_id, $product_id, $product->category_id, $product_quantity);
         if ($request->hasFile('images')) {
             $images = $request->file('images');
             foreach ($images as $image) {
                 $file = $image;
                 $filename = uniqid($user_id . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension(); //create unique file name..
                 Storage::disk('user_public')->put($filename, File::get($file));
-                if (Storage::disk('user_public')->exists($filename)) {  // check file exists in directory or not
+                if (Storage::disk('user_public')->exists($filename)) {
                     info("file is store successfully : " . $filename);
-                    // $filename = "/user_imgs/" . $filename;
                 } else {
                     info("file is not found :- " . $filename);
                 }
@@ -109,7 +77,7 @@ class ProductsController extends Controller
                 $product_images->save();
             }
         }
-        $product =  Products::getProductInfo($product->id);
+        $product = Products::getProductInfo($user_id, $product->id, ['*']);
         return JsonResponseServices::getApiResponse(
             $product,
             config('constants.TRUE_STATUS'),
@@ -128,7 +96,7 @@ class ProductsController extends Controller
         try {
             $validatedData = Validator::make($request->all(), [
                 'file' => 'required|file',
-                'store_id' => 'required|integer'
+                'seller_id' => 'required|integer'
             ]);
             if ($validatedData->fails()) {
                 return JsonResponseServices::getApiResponse(
@@ -138,21 +106,14 @@ class ProductsController extends Controller
                     config('constants.HTTP_UNPROCESSABLE_REQUEST')
                 );
             }
-            $user_id = $request->store_id;
+            $seller_id = $request->seller_id;
             $file = $request->file('file');
             $filename = $file->getClientOriginalName();
-            // $extension = $file->getClientOriginalExtension(); //Get extension of uploaded file
-            // $tempPath = $file->getRealPath();
-            // $fileSize = $file->getSize(); //Get size of uploaded file in bytes
-
-            //Check for file extension and size
-            // $this->checkUploadedFileProperties($extension, $fileSize);
-
             //Where uploaded file will be stored on the server
             $location = public_path('upload/csv');
             // Upload file
             $file->move($location, $filename);
-            // In case the uploaded file path is to be stored in the database
+            // Making filepath
             $filepath = $location . "/" . $filename;
             // Reading file
             $file = fopen($filepath, "r");
@@ -167,14 +128,14 @@ class ProductsController extends Controller
                     $i++;
                     continue;
                 }
-                for ($c = 0; $c < $num; $c++) $importData_arr[$i][] = $filedata[$c];
+                for ($row = 0; $row < $num; $row++) $importData_arr[$i][] = $filedata[$row];
                 $i++;
             }
-            fclose($file); //Close after reading
-            $j = 0;
+            fclose($file);
+
             foreach ($importData_arr as $importData) {
                 $product = new Products();
-                $product->user_id = $user_id;
+                $product->user_id = $seller_id;
                 $product->category_id = $importData[0];
                 $product->product_name = $importData[1];
                 $product->sku = $importData[2];
@@ -194,17 +155,11 @@ class ProductsController extends Controller
                 $product->width = $importData[16];
                 $product->length = $importData[17];
                 $product->save();
-
-                //This function will add qty to it's particular table
-                $product_id = (int)$product->id;
+                /* This snippet will add qty to it's particular table */
                 $product_quantity = ($importData[3] == "") ? 0 : $importData[3];
-                Qty::addProductQty($user_id, $product_id, $product->category_id, $product_quantity);
-
-                $product_images = new productImages();
-                $product_images->product_id = (int)$product->id;
-                $product_images->product_image = $importData[18];
-                $product_images->save();
-                $j++;
+                Qty::add($seller_id, (int)$product->id, $product->category_id, $product_quantity);
+                /* The following will add product image to it's particular table */
+                productImages::add((int)$product->id, $importData[18]);
             }
             return JsonResponseServices::getApiResponse(
                 [],
@@ -281,7 +236,7 @@ class ProductsController extends Controller
         $product_id = $product->id;
         $product_quantity = $request->qty;
         $this->updateProductQty($product_id, $user_id, $product_quantity);
-        $product =  Products::getProductInfo($product->id);
+        $product = Products::getProductInfo($user_id, $product->id, ['*']);
         return JsonResponseServices::getApiResponse(
             $product,
             config('constants.TRUE_STATUS'),
@@ -376,7 +331,7 @@ class ProductsController extends Controller
     public function sortByPrice()
     {
         try {
-            $products = Products::query()->paginate()->sortBy('price');
+            $products = Products::paginate()->sortBy('price');
             $pagination = $products->toArray();
             if (!$products->isEmpty()) {
                 $products_data = [];
@@ -557,11 +512,10 @@ class ProductsController extends Controller
      * @author Huzaifa Haleem
      * @version 1.0.0
      */
-    public function delete($product_id)
-    {
-        Products::find($product_id)->delete();
-        return $this->all();
-    }
+    // public function delete($product_id)
+    // {
+    //     return Products::find($product_id)->delete();
+    // }
     /**
      * It will delete the image of the given product
      * @author Huzaifa Haleem

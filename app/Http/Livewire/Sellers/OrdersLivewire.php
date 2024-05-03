@@ -126,7 +126,7 @@ class OrdersLivewire extends Component
             // dd($this->order_item);
             
             /* Send this product to another store */
-            $order_from_other_seller = OrdersFromOtherSeller::insertOrderFromOtherSeller(
+            $order_from_other_seller = OrdersFromOtherSeller::insertInfo(
                 $this->order['user_id'],
                 $selected_seller->id,
                 $this->order_item['product_id'],

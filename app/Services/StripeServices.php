@@ -11,12 +11,12 @@ final class StripeServices
 {
     public static function getLiveApiKey()
     {
-        return config('constants.STRIPE_LIVE_API_KEY');
+        return env('STRIPE_LIVE_API_KEY');
     }
 
     public static function getTestApiKey()
     {
-        return config('constants.STRIPE_TEST_API_KEY');
+        return env('STRIPE_TEST_API_KEY');
     }
 
     public static function createPaymentIntent()
@@ -42,7 +42,7 @@ final class StripeServices
         curl_close($ch);
         return JsonResponseServices::getApiResponse(
             json_decode($data),
-            true,
+            config('constants.TRUE_STATUS'),
             '',
             config('constants.HTTP_OK')
         );
@@ -59,7 +59,7 @@ final class StripeServices
             'payment_method_options[card][request_incremental_authorization_support]' => 'true',
         ];
         $api_key = (request()->getPathInfo() === '/api/payment_intent/test/request_incremental_authorization_support') ? static::getTestApiKey() : static::getLiveApiKey();
-
+        
         curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
@@ -73,7 +73,7 @@ final class StripeServices
         curl_close($ch);
         return JsonResponseServices::getApiResponse(
             json_decode($data),
-            true,
+            config('constants.TRUE_STATUS'),
             '',
             config('constants.HTTP_OK')
         );
@@ -100,7 +100,7 @@ final class StripeServices
         curl_close($ch);
         return JsonResponseServices::getApiResponse(
             json_decode($data),
-            true,
+            config('constants.TRUE_STATUS'),
             '',
             config('constants.HTTP_OK')
         );
@@ -127,7 +127,7 @@ final class StripeServices
         curl_close($ch);
         return JsonResponseServices::getApiResponse(
             json_decode($data),
-            true,
+            config('constants.TRUE_STATUS'),
             '',
             config('constants.HTTP_OK')
         );

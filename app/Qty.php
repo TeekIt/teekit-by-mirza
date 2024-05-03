@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class Qty extends Model
 {
@@ -17,12 +19,12 @@ class Qty extends Model
     /**
      * Relations
      */
-    public function store()
+    public function store(): BelongsTo
     {
         return $this->belongsTo(User::class, 'users_id');
     }
 
-    public function product()
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Products::class, 'products_id');
     }
@@ -75,7 +77,7 @@ class Qty extends Model
         ->get();
     }
 
-    public static function getProductsByGivenIds(int $category_id, int $store_id)
+    public static function getProductsByGivenIds(int $category_id, int $store_id): array
     {
         $quantities = self::where('users_id', $store_id)
             ->where('category_id', $category_id)
@@ -91,14 +93,14 @@ class Qty extends Model
         }
     }
 
-    public static function subtractProductQty(int $user_id, int $product_id, int $product_quantity)
+    public static function subtractProductQty(int $user_id, int $product_id, int $product_quantity): int
     {
         return self::where('users_id', $user_id)
             ->where('products_id', $product_id)
             ->decrement('qty', $product_quantity);
     }
 
-    public static function getChildSellerProducts(int $user_id)
+    public static function getChildSellerProducts(int $user_id): LengthAwarePaginator
     {
         return self::where('qty.users_id', $user_id)
             ->join('products as prod', 'prod.id', 'qty.products_id')
@@ -106,7 +108,7 @@ class Qty extends Model
             ->paginate(20);
     }
 
-    public static function updateChildProductQty(array $quantity)
+    public static function updateChildProductQty(array $quantity): Qty
     {
         return self::updateOrCreate(
             ['users_id' => $quantity['child_seller_id'], 'products_id' => $quantity['prod_id']],
@@ -118,7 +120,7 @@ class Qty extends Model
      * this will help us add qty with given details to qty table
      * @author Muhammad Abdullah Mirza
      */
-    public static function addProductQty(int $user_id, int $product_id, int $category_id, int $product_quantity)
+    public static function add(int $user_id, int $product_id, int $category_id, int $product_quantity): bool
     {
         $quantity = new Qty();
         $quantity->users_id = $user_id;

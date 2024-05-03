@@ -6,6 +6,7 @@ use App\Drivers;
 use App\Mail\OrderIsCanceledMail;
 use App\Mail\OrderIsReadyMail;
 use App\Mail\StoreRegisterMail;
+use App\Models\OrdersFromOtherSeller;
 use App\Orders;
 use App\User;
 use Illuminate\Support\Facades\Crypt;
@@ -132,6 +133,11 @@ final class EmailServices
     public static function sendPickupYourOrderMail(Orders $order)
     {
         Mail::to($order->user->email)->send(new OrderIsReadyMail($order));
+    }
+
+    public static function sendPickupYourOrderFromOtherSellerMail(OrdersFromOtherSeller $order)
+    {
+        Mail::to($order->seller->email)->send(new OrderIsReadyMail($order));
     }
 
     public static function sendOrderHasBeenCancelledMail(Orders $order)

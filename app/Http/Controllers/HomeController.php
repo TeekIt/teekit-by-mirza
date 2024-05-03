@@ -296,7 +296,7 @@ class HomeController extends Controller
                 $product->save();
                 $product_id = $product->id;
                 $product_quantity = $request->qty;
-                Qty::addProductQty($user_id, $product_id, $$data['category_id'], $product_quantity);
+                Qty::add($user_id, $product_id, $data['category_id'], $product_quantity);
                 if ($request->hasFile('gallery')) {
                     $images = $request->file('gallery');
                     foreach ($images as $image) {
@@ -740,12 +740,8 @@ class HomeController extends Controller
                 //this function will add qty to it's parti;cular table
                 $product_id = (int)$product->id;
                 $product_quantity = ($importData[3] == "") ? 0 : $importData[3];
-                Qty::addProductQty($user_id, $product_id, $product->category_id, $product_quantity);
-
-                $product_images = new productImages();
-                $product_images->product_id = (int)$product->id;
-                $product_images->product_image = $importData[18];
-                $product_images->save();
+                Qty::add($user_id, $product_id, $product->category_id, $product_quantity);
+                productImages::add((int)$product->id, $importData[18]);
                 $j++;
             }
         }
