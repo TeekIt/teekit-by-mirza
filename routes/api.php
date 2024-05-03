@@ -211,15 +211,15 @@ Route::get('page', [PagesController::class, 'getPage']);
 |--------------------------------------------------------------------------
 */
 Route::controller(StripeServices::class)->group(function () {
-    Route::post('payment_intent', 'createPaymentIntent');
-    Route::post('payment_intent/request_incremental_authorization_support', 'requestIncrementalAuthorizationSupport');
-    Route::post('payment_intent/perform_incremental_authorization', 'performIncrementalAuthorization');
-    Route::post('payment_intent/capture', 'capturePaymentIntent');
+    Route::get('payment_intent', 'createPaymentIntent');
+    Route::get('payment_intent/request_incremental_authorization_support', 'requestIncrementalAuthorizationSupport');
+    Route::get('payment_intent/perform_incremental_authorization', 'performIncrementalAuthorization');
+    Route::get('payment_intent/capture', 'capturePaymentIntent');
 
-    Route::post('payment_intent/test', 'createPaymentIntent');
-    Route::post('payment_intent/test/request_incremental_authorization_support', 'requestIncrementalAuthorizationSupport');
-    Route::post('payment_intent/test/perform_incremental_authorization', 'performIncrementalAuthorization');
-    Route::post('payment_intent/test/capture', 'capturePaymentIntent');
+    Route::get('payment_intent/test', 'createPaymentIntent');
+    Route::get('payment_intent/test/request_incremental_authorization_support', 'requestIncrementalAuthorizationSupport');
+    Route::get('payment_intent/test/perform_incremental_authorization', 'performIncrementalAuthorization');
+    Route::get('payment_intent/test/capture', 'capturePaymentIntent');
 });
 
 Route::get('time', function () {
