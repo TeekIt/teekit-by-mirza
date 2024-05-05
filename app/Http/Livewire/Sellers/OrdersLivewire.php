@@ -9,6 +9,7 @@ use App\Orders;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
 use App\Services\StripeServices;
+use App\Services\StuartDeliveryServices;
 use App\User;
 use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -33,11 +34,12 @@ class OrdersLivewire extends Component
         $order_item,
         $nearby_sellers,
         $selected_nearby_seller,
-        $search;
+        $search,
+        $custom_order_id;
 
     protected $paginationTheme = 'bootstrap';
 
-    protected $listeners = [ 
+    protected $listeners = [
         'alternativeProductIncluded' => 'render',
         'callParentResetModal' => 'resetModal'
     ];
@@ -60,7 +62,8 @@ class OrdersLivewire extends Component
             'order_item',
             'nearby_sellers',
             'selected_nearby_seller',
-            'search'
+            'search',
+            'custom_order_id'
         ]);
     }
 
@@ -75,23 +78,9 @@ class OrdersLivewire extends Component
         $this->resetPage('sap_products_page');
     }
 
-    public function renderInfoModal($id)
+    public function renderStuartModal($order_id)
     {
-        $data = Drivers::getUserByID($id);
-        // $this->name = $data->name;
-        // $this->l_name = $data->l_name;
-        // $this->email = $data->email;
-        // $this->phone = $data->phone;
-        // $this->address_1 = $data->address_1;
-        // $this->lat = $data->lat;
-        // $this->lon = $data->lon;
-        // $this->user_img = $data->user_img;
-        // $this->last_login = $data->last_login;
-        // $this->email_verified_at = $data->email_verified_at;
-        // $this->pending_withdraw = $data->pending_withdraw;
-        // $this->total_withdraw = $data->total_withdraw;
-        // $this->is_online = $data->is_online;
-        // $this->application_fee = $data->application_fee;
+        $this->order_id = $order_id;
     }
 
     public function renderSAPModal($order_id, $current_prod_id, $current_prod_qty, $receiver_name, $phone_number)
@@ -112,6 +101,36 @@ class OrdersLivewire extends Component
         $this->nearby_sellers = GoogleMapServices::findDistanceByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellers, 25);
     }
 
+    public function renderRemoveItemModal($order_item)
+    {
+        $this->order_item = $order_item;
+    }
+
+    public function renderCustomerContactModal($receiver_name, $phone_number)
+    {
+        $this->receiver_name = $receiver_name;
+        $this->phone_number = $phone_number;
+    }
+
+    public function assignToStuartDriver()
+    {
+        try {
+            /* Perform some operation */
+            $stuart_message = StuartDeliveryServices::stuartJobCreationLivewire($this->order_id, $this->custom_order_id);
+            /* Operation finished */
+            sleep(1);
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'stuartModal']);
+            if ($stuart_message === 'JobCreated') {
+                session()->flash('success', config('constants.STUART_DELIVERY_SUCCESS'));
+            } else {
+                session()->flash('error', $stuart_message);
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
+    }
+
     public function sendItemToAnOtherStore()
     {
         $this->validate([
@@ -124,7 +143,7 @@ class OrdersLivewire extends Component
             $selected_seller = User::getStoreByBusinessName($this->selected_nearby_seller);
             // dd($this->order);
             // dd($this->order_item);
-            
+
             /* Send this product to another store */
             $order_from_other_seller = OrdersFromOtherSeller::insertInfo(
                 $this->order['user_id'],
@@ -151,18 +170,6 @@ class OrdersLivewire extends Component
                 $this->order['offloading_charges']
             );
 
-            // $this->order_item['product_id'], 
-            //     $this->order_item['product_price'], 
-            //     $this->order_item['product_qty'], 
-
-            // OrderItems::insertOrderItem(
-            //     $order_from_other_seller->id, 
-            //     $this->order_item['product_id'], 
-            //     $this->order_item['product_price'], 
-            //     $this->order_item['product_qty'], 
-            //     $this->order_item['user_choice']
-            // );
-
             // // /* Remove the item from current order items */
             // $removed = OrderItems::removeItem($this->order_item['id']);
             // // /* Subtract the total price of this product/order_item from the current order's total */
@@ -182,22 +189,34 @@ class OrdersLivewire extends Component
         }
     }
 
-    public function renderRemoveItemModal($order_item)
+    public function orderIsAccepted($order)
     {
-        $this->order_item = $order_item;
-    }
-
-    public function renderCustomerContactModel($receiver_name, $phone_number)
-    {
-        $this->receiver_name = $receiver_name;
-        $this->phone_number = $phone_number;
+        try {
+            /* Perform some operation */
+            Orders::isViewed($order['id']);
+            $updated = Orders::updateOrderStatus($order['id'], 'accepted');
+            if ($order['type'] == 'self-pickup') {
+                $order_details = Orders::getOrderById($order['id']);
+                EmailServices::sendPickupYourOrderMail($order_details);
+            }
+            /* Operation finished */
+            sleep(1);
+            if ($updated) {
+                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.UPDATION_FAILED'));
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
     }
 
     public function orderIsReady($order)
     {
         try {
             /* Perform some operation */
-            Orders::isViewed($order['id']);
+            // Orders::isViewed($order['id']);
             $updated = Orders::updateOrderStatus($order['id'], 'ready');
             if ($order['type'] == 'self-pickup') {
                 $order_details = Orders::getOrderById($order['id']);

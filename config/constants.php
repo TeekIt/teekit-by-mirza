@@ -30,7 +30,7 @@ return [
     'SUCCESS_CODE' => 1,
     'SUCCESS_STATUS' => 'success',
     'TRUE_STATUS' => true,
-    'STUART_DELIVERY_SUCCESS' => 'Stuart Delivery Has Been Initiated Successfully, You Can Please Check The Status By Clicking The "Check Status" Button',
+    'STUART_DELIVERY_SUCCESS' => 'Stuart delivery has been initiated successfully, You can please check the status by clicking the "Check Status" button',
     'COMPLETED' => 'Completed',
     'VALID_REFERRAL' => 'Valid referral code.',
     'ORDER_ASSIGNED' => 'Assigned.',
