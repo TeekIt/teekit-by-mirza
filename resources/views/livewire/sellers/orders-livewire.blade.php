@@ -318,11 +318,11 @@
                                     <tr>
                                         <td colspan="4">
                                             @if ($order->order_status === 'pending')
-                                                <button class="btn btn-warning" wire:click="orderIsAccepted({{ $order }})" wire:target="orderIsAccepted({{ $order }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Click here when preparing order">
-                                                    <span wire:target="orderIsAccepted({{ $order }})" wire:loading.remove>
+                                                <button class="btn btn-warning" wire:click="orderIsAccepted({{ $order->id }})" wire:target="orderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Click here when preparing order">
+                                                    <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading.remove>
                                                         Accept Order
                                                     </span>
-                                                    <span wire:target="orderIsAccepted({{ $order }})" wire:loading>
+                                                    <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading>
                                                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                                                     </span>
                                                 </button>
@@ -337,23 +337,59 @@
                                                 </button>
                                             @endif
 
-                                            @if ($order->order_status === 'accepted')
-                                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#stuartModal" wire:click="renderStuartModal({{ $order->id }})" wire:target="renderStuartModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to Stuart delivery boy">
-                                                    <span wire:target="renderStuartModal({{ $order->id }})" wire:loading.remove>
-                                                        Assign To Stuart Delivery
-                                                    </span>
-                                                    <span wire:target="renderStuartModal({{ $order->id }})" wire:loading>
-                                                        <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
-                                                    </span>
-                                                </button>
-                                                {{-- 
-                                                <a data-bs-toggle="modal" data-bs-target="#stuartModal{{ $order->id }}"
-                                                    class="d-block btn btn-warning float-left mx-1">Assign To Stuart</a> --}}
+                                            @if ($order->type === 'delivery')
+                                                @if ($order->order_status === 'accepted')
+                                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#stuartModal" wire:click="renderStuartModal({{ $order->id }})" wire:target="renderStuartModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to Stuart delivery boy">
+                                                        <span wire:target="renderStuartModal({{ $order->id }})" wire:loading.remove>
+                                                            Assign To Stuart Delivery
+                                                        </span>
+                                                        <span wire:target="renderStuartModal({{ $order->id }})" wire:loading>
+                                                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                                        </span>
+                                                    </button>
+                                                @endif
+
+                                                @if ($order->order_status === 'stuartDelivery')
+                                                    <div class="alert alert-primary" role="alert">
+                                                        <p>
+                                                            Stuart delivery is on the way..!!
+                                                        </p>
+                                                    </div>
+                                                @endif
+
+                                                @if ($order->delivery_boy_id != '')
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deliveryBoyDetailsModal" title="View delivery boy details">
+                                                        Delivery Boy Details
+                                                    </button>
+                                                @endif
                                             @endif
 
-                                            @if ($order->delivery_boy_id != '')
-                                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deliveryBoyDetailsModal" title="View delivery boy details">
-                                                    Delivery Boy Details
+                                            @if ($order->type === 'self-pickup')
+                                                @if ($order->order_status === 'accepted')
+                                                    <div class="alert alert-primary" role="alert">
+                                                        <p>
+                                                            A {{ $order->type }} email has been sent to the customer
+                                                        </p>
+                                                        <hr>
+                                                        <h4 class="alert-heading">IMPORTANT NOTE!</h4>
+                                                        <p class="mb-0">
+                                                            This is a <b>{{ $order->type }}</b> order therefore only press the <b>complete button</b> when the customer has collected the order
+                                                        </p>
+                                                    </div>
+                                                    <button class="btn btn-success" wire:click="orderIsCompleted({{ $order->id }})" wire:target="orderIsCompleted({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Mark as completed">
+                                                        <span wire:target="orderIsCompleted({{ $order->id }})" wire:loading.remove>
+                                                            Complete Order
+                                                        </span>
+                                                        <span wire:target="orderIsCompleted({{ $order->id }})" wire:loading>
+                                                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                                        </span>
+                                                    </button>
+                                                @endif
+                                            @endif
+
+                                            @if ($order->order_status == 'complete')
+                                                <button class="btn btn-success" disabled title="This order has been completed">
+                                                    Order Completed
                                                 </button>
                                             @endif
 

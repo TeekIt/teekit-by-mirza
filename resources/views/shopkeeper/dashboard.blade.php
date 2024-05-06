@@ -82,7 +82,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-lg-6">
+                <div class="col-12 col-xl-6">
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
@@ -133,8 +133,6 @@
                                                 <span class="badge bg-danger">Pending</span>
                                                 @elseif($order->order_status == 'accepted')
                                                 <span class="badge bg-info">Accepted</span>
-                                                <!-- @elseif($order->order_status == 'assigned')
-                                                <span class="badge bg-warning">Assigned</span> -->
                                                 @elseif($order->order_status == 'ready')
                                                 <span class="badge bg-purple">Ready</span>
                                                 @elseif($order->order_status == 'onTheWay')
@@ -150,6 +148,11 @@
                                             </td>
                                         </tr>
                                         @empty
+                                        <tr>
+                                            <td colspan="4">
+                                                You don't have any orders yet...!
+                                            </td>
+                                        </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -162,21 +165,10 @@
                     </div>
                 </div>
                 <!-- User Info Card -->
-                <div class="col-12 col-lg-6">
+                <div class="col-12 col-xl-6">
                     <div class="card">
                         <div class="card-header">
-                            <div class="row">
-                                <div class="col-md-5">
-                                    <h3 class="card-title"><strong>User Info</strong></h3>
-                                </div>
-                                <div class="col-md-7">
-                                    <label class="float-right">
-                                        <a href="#" data-bs-toggle="modal" data-bs-target="#editUserModal{{$user[0]->id}}" class="float-left pr-3">
-                                            <img class="img-size-16" src="/res/res/img/edit.png">
-                                        </a>
-                                    </label>
-                                </div>
-                            </div>
+                            <h3 class="card-title"><strong>Seller Info</strong></h3>
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body p-0">
@@ -215,91 +207,6 @@
         </div><!-- /.container-fluid -->
     </div>
     <!-- /.content -->
-    <!-- action="{{route('admin.userinfo.update',['id'=>$user[0]->id])}}" -->
-    <div class="modal fade" id="editUserModal{{$user[0]->id}}" tabindex="-1" role="dialog"
-        aria-labelledby="exampleModalLabel" style="display: none;" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <form id="user_info" onsubmit="return false" enctype="multipart/form-data">
-                    {{csrf_field()}}
-                    <div class="modal-header">
-                        <h5 class="modal-title display-center" id="exampleModalLabel">
-                            <h5 class="modal-title" id="exampleModalLabel">
-                                Update User Info
-                            </h5>
-                        </h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="form-group">
-
-                            <input type="hidden" id="id" class="form-control" value="{{$user[0]->id}}">
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="">Name</label>
-                                    <input type="text" name="name" id="name"
-                                        class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}"
-                                        value="{{$user[0]->name}}">
-                                    @if ($errors->has('name'))
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $errors->first('name') }}</strong>
-                                    </span>
-                                    @endif
-                                    <p id="name" class="text-danger name error"></p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="">Business Name</label>
-                                    <input type="text" name="business_name" id="business_name" class="form-control"
-                                        value="{{$user[0]->business_name}}">
-                                    <p id="business_name" class="text-danger business_name error"></p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="">Phone</label>
-                                    <div class="row ">
-                                        <span class="input-group-text">+44</span>
-                                        <div class="col-md-8">
-                                            <input type="tel" class="form-control" id="phone" name="phone"
-                                                value="{{$user[0]->phone}}">
-                                            <p id="phone" class="text-danger phone error"></p>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="">Business Phone</label>
-                                    <div class="row ">
-                                        <span class="input-group-text">+44</span>
-                                        <div class="col-md-8">
-                                            <input type="text" class="form-control" id="business_phone"
-                                                name="business_phone" value="{{$user[0]->business_phone}}">
-                                        </div>
-                                    </div>
-                                    <p id="business_phone" class="text-danger business_phone error"></p>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer hidden ">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" id="user_info_update" onclick="userInfoUpdate()"
-                            class="btn btn-primary">Save
-                            changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
 <?php if (json_decode($user[0]->business_hours)->submitted == null) { ?>
 <!-- Set Store Hours Modal - Begins -->

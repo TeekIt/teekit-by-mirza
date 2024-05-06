@@ -84,14 +84,14 @@ final class StuartDeliveryServices {
             $order_details = Orders::getOrderById($order_id);
             $transport_type = Orders::fetchTransportType($order_id);
             $access_token = (url('/') == 'https://app.teekit.co.uk') ? static::stuartProductionAccessToken() : static::stuartSandboxAccessToken();
-
+            // dd(Carbon::now()->addMinutes(10));
             $job = [
                 'job' => [
                     'pickup_at' => Carbon::now()->addMinutes(10),
                     'assignment_code' => $order_id,
                     'pickups' => [
                         [
-                            'address' => $order_details->store->address_1,
+                            'address' => $order_details->store->full_address,
                             'comment' => 'Please come at the pickup point as early as possible. Also call us to confirm the order package type.',
                             'contact' => [
                                 'firstname' => $order_details->store->name,
@@ -130,15 +130,15 @@ final class StuartDeliveryServices {
                 Orders::updateOrderStatus($order_id, 'stuartDelivery');
                 return 'JobCreated';
             } else {
-                $message = $data['message'];
+                $message = $data['error'] . ': ' . $data['message'];
                 if ($data['error'] == 'JOB_DISTANCE_NOT_ALLOWED') $message = $message . " " . $transport_type;
                 // JsonResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $message);
-                return $message;
+                return 'StuartErrorA: ' . $message;
             }
         } catch (Throwable $error) {
             report($error);
             // JsonResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $data['message']);
-            return $data['message'];
+            return 'StuartErrorB: ' . $data['error'] . ': ' . $data['message'];
         }
     }
 }

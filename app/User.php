@@ -170,7 +170,7 @@ class User extends Authenticatable implements JWTSubject
         string $postcode,
         string $lat,
         string $lon
-    ): object {
+    ): bool {
         $user = self::find($user_id);
         $user->full_address = $full_address;
         if (!is_null($unit_address)) $user->unit_address = $unit_address;

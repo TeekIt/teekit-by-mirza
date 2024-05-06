@@ -189,14 +189,13 @@ class OrdersLivewire extends Component
         }
     }
 
-    public function orderIsAccepted($order)
+    public function orderIsAccepted($id)
     {
         try {
             /* Perform some operation */
-            Orders::isViewed($order['id']);
-            $updated = Orders::updateOrderStatus($order['id'], 'accepted');
-            if ($order['type'] == 'self-pickup') {
-                $order_details = Orders::getOrderById($order['id']);
+            $order_details = Orders::isViewed($id);
+            $updated = Orders::updateOrderStatus($id, 'accepted');
+            if ($order_details->type == 'self-pickup') {
                 EmailServices::sendPickupYourOrderMail($order_details);
             }
             /* Operation finished */
@@ -212,16 +211,33 @@ class OrdersLivewire extends Component
         }
     }
 
-    public function orderIsReady($order)
+    // public function orderIsReady($order)
+    // {
+    //     try {
+    //         /* Perform some operation */
+    //         $updated = Orders::updateOrderStatus($order['id'], 'ready');
+    //         if ($order['type'] == 'self-pickup') {
+    //             $order_details = Orders::getOrderById($order['id']);
+    //             EmailServices::sendPickupYourOrderMail($order_details);
+    //         }
+    //         /* Operation finished */
+    //         sleep(1);
+    //         if ($updated) {
+    //             session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+    //         } else {
+    //             session()->flash('error', config('constants.UPDATION_FAILED'));
+    //         }
+    //     } catch (Exception $error) {
+    //         report($error);
+    //         session()->flash('error', $error->getMessage());
+    //     }
+    // }
+
+    public function orderIsCompleted($id)
     {
         try {
             /* Perform some operation */
-            // Orders::isViewed($order['id']);
-            $updated = Orders::updateOrderStatus($order['id'], 'ready');
-            if ($order['type'] == 'self-pickup') {
-                $order_details = Orders::getOrderById($order['id']);
-                EmailServices::sendPickupYourOrderMail($order_details);
-            }
+            $updated = Orders::updateOrderStatus($id, 'complete');
             /* Operation finished */
             sleep(1);
             if ($updated) {
@@ -307,7 +323,11 @@ class OrdersLivewire extends Component
     public function render()
     {
         try {
-            $data = Orders::getOrdersForView($this->isSearchByIdSet(), $this->seller_id, 'desc');
+            $data = Orders::getOrdersForView(
+                order_by: 'desc',
+                seller_id: $this->seller_id,
+                order_id: $this->isSearchByIdSet(),
+            );
             return view('livewire.sellers.orders-livewire', compact('data'));
         } catch (Exception $error) {
             report($error);
