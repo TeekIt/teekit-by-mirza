@@ -312,9 +312,9 @@ class User extends Authenticatable implements JWTSubject
         return self::where('business_name', $business_name)->first();
     }
 
-    public static function getUserByID(int $user_id, array $columns): object
+    public static function getUserByID(int $id, array $columns): object
     {
-        return self::select($columns)->find($user_id);
+        return self::select($columns)->find($id);
     }
 
     public function nearbyUsers($user_lat, $user_lon, $radius): object

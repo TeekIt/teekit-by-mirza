@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 /* 
 Tasks:
 1) Make the product import perfect (Done)
-2) Add staurt delivery to sellers dashboard
+2) Add staurt delivery to sellers dashboard (Done)
 3) Export the app as an desktop application
 */
 

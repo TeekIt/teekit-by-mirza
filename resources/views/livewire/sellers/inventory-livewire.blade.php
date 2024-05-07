@@ -96,7 +96,7 @@
                                                     </li>
                                                 @endif
                                                 <li>
-                                                    <a href="/inventory/edit/{{ $inventory->id }}" title="Edit Product">
+                                                    <a href="{{ route('seller.inventory.edit', ['product_id' => $inventory->id]) }}" title="Edit Product">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
                                                 </li>
@@ -170,7 +170,7 @@
                                                     </li>
                                                 @endif
                                                 <li>
-                                                    <a href="/inventory/edit/{{ $inventory->id }}" title="Edit Product">
+                                                    <a href="{{ route('seller.inventory.edit', ['product_id' => $inventory->id]) }}" title="Edit Product">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
                                                 </li>

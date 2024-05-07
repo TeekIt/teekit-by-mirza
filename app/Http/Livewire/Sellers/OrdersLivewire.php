@@ -2,7 +2,6 @@
 
 namespace App\Http\Livewire\Sellers;
 
-use App\Drivers;
 use App\Models\OrdersFromOtherSeller;
 use App\OrderItems;
 use App\Orders;
@@ -12,12 +11,9 @@ use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
 use App\User;
 use Exception;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Request;
 use Livewire\Component;
 use Livewire\WithPagination;
-use stdClass;
 
 class OrdersLivewire extends Component
 {
@@ -35,7 +31,8 @@ class OrdersLivewire extends Component
         $nearby_sellers,
         $selected_nearby_seller,
         $search,
-        $custom_order_id;
+        $custom_order_id,
+        $request_order_id;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -44,9 +41,10 @@ class OrdersLivewire extends Component
         'callParentResetModal' => 'resetModal'
     ];
 
-    public function mount()
+    public function mount(Request $request)
     {
         $this->seller_id = auth()->id();
+        $this->request_order_id = $request->request_order_id;
         $this->resetAllPaginators();
     }
 
@@ -63,7 +61,7 @@ class OrdersLivewire extends Component
             'nearby_sellers',
             'selected_nearby_seller',
             'search',
-            'custom_order_id'
+            'custom_order_id',
         ]);
     }
 
@@ -311,11 +309,19 @@ class OrdersLivewire extends Component
     {
         $this->resetModal();
         $this->resetPage();
+        $this->reset([
+            'request_order_id'
+        ]);
     }
 
     public function isSearchByIdSet()
     {
-        $searched_order_id = (int)$this->search;
+        if ($this->search) {
+            $searched_order_id = (int)$this->search;
+            $this->request_order_id = (int)$this->search;
+        } else {
+            $searched_order_id = $this->request_order_id;
+        }
         if ($searched_order_id != 0) $this->resetPage();
         return $searched_order_id;
     }

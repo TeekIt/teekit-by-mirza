@@ -290,7 +290,7 @@
                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                     </span>
                 </button>
-                <button type="button" class="btn btn-primary my-4 p-1 w-100 mx-1" wire:click="resetThisPage" wire:target="resetThisPage" wire:loading.class="btn-dark" wire:loading.class.remove="btn-primary" wire:loading.attr="disabled" title="Reset Orders">
+                <button type="button" class="btn btn-primary my-4 p-1 w-100 mx-1" wire:click="resetThisPage" wire:target="resetThisPage" wire:loading.class="btn-dark" wire:loading.class.remove="btn-primary" wire:loading.attr="disabled" title="Reset orders page">
                     <span class="fas fa-sync" wire:target="resetThisPage" wire:loading.remove></span>
                     <span wire:target="resetThisPage" wire:loading>
                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>

@@ -50,12 +50,11 @@ class HomeController extends Controller
     public function index()
     {
         if (Gate::allows('child_seller')) {
-            $child_store = User::where('id', Auth::id())->first();
-            $user = User::query()->where('id', '=', Auth::id())->get();
-            $pending_orders = Orders::query()->where('order_status', '=', 'pending')->where('seller_id', '=', Auth::id())->count();
-            $total_orders = Orders::query()->where('payment_status', '!=', 'hidden')->where('seller_id', '=', Auth::id())->count();
-            $total_products = Products::query()->where('user_id', '=', Auth::id())->count();
-            $total_sales = Orders::query()->where('payment_status', '=', 'paid')->where('seller_id', '=', Auth::id())->sum('order_total');
+            $user = User::where('id', '=', Auth::id())->get();
+            $pending_orders = Orders::where('order_status', '=', 'pending')->where('seller_id', '=', Auth::id())->count();
+            $total_orders = Orders::where('payment_status', '!=', 'hidden')->where('seller_id', '=', Auth::id())->count();
+            $total_products = Products::where('user_id', '=', Auth::id())->count();
+            $total_sales = Orders::where('payment_status', '=', 'paid')->where('seller_id', '=', Auth::id())->sum('order_total');
             $all_orders = Orders::where('seller_id', Auth::id())
                 ->whereNotNull('order_status')
                 ->orderby(DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3
@@ -64,11 +63,11 @@ class HomeController extends Controller
             return view('shopkeeper.child_dashboard', compact('user', 'pending_orders', 'total_products', 'total_orders', 'total_sales', 'all_orders'));
         }
         if (Gate::allows('seller')) {
-            $user = User::query()->where('id', '=', Auth::id())->get();
-            $pending_orders = Orders::query()->where('order_status', '=', 'pending')->where('seller_id', '=', Auth::id())->count();
-            $total_orders = Orders::query()->where('payment_status', '!=', 'hidden')->where('seller_id', '=', Auth::id())->count();
-            $total_products = Products::query()->where('user_id', '=', Auth::id())->count();
-            $total_sales = Orders::query()->where('payment_status', '=', 'paid')->where('seller_id', '=', Auth::id())->sum('order_total');
+            $user = User::where('id', '=', Auth::id())->get();
+            $pending_orders = Orders::where('order_status', '=', 'pending')->where('seller_id', '=', Auth::id())->count();
+            $total_orders = Orders::where('payment_status', '!=', 'hidden')->where('seller_id', '=', Auth::id())->count();
+            $total_products = Products::where('user_id', '=', Auth::id())->count();
+            $total_sales = Orders::where('payment_status', '=', 'paid')->where('seller_id', '=', Auth::id())->sum('order_total');
             $all_orders = Orders::where('seller_id', \auth()->id())
                 ->whereNotNull('order_status')
                 ->orderby(DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3

@@ -14,9 +14,9 @@ use App\Http\Controllers\UsersController;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
-use App\Http\Livewire\Sellers\OrdersFromOtherSellers;
 use App\Http\Livewire\Sellers\OrdersFromOtherSellersLivewire;
 use App\Http\Livewire\Sellers\OrdersLivewire;
+use App\Http\Livewire\Sellers\SellerDashboardLivewire;
 use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
 use Illuminate\Support\Facades\Route;
@@ -93,6 +93,8 @@ Route::prefix('orders')->group(function () {
 });
 
 Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function () {
+    Route::get('/dashboard', SellerDashboardLivewire::class)->name('seller.dashboard');
+
     Route::prefix('inventory')->group(function () {
         Route::get('/', InventoryLivewire::class)->name('seller.inventory');
         Route::get('/add', [HomeController::class, 'inventoryAdd'])->name('seller.inventory.add.single');
@@ -103,9 +105,11 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         Route::get('/image/delete/{image_id}', [HomeController::class, 'seller.deleteImg']);
         // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
     });
-    
-    Route::get('/my-orders', OrdersLivewire::class)->name('seller.orders');
-    Route::get('/order-from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
+
+    Route::prefix('orders')->group(function () {
+        Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
+        Route::get('/{request_order_id?}', OrdersLivewire::class)->name('seller.orders');
+    });
 
     Route::get('/withdrawal', WithdrawalLivewire::class)->name('seller.withdrawal');
 
@@ -113,7 +117,6 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         Route::get('/general', UserGeneralSettings::class)->name('seller.settings.general');
         Route::post('/update-location', [UsersController::class, 'updateStoreLocation'])->name('seller.settings.update.location');
     });
-
 });
 /*
 |--------------------------------------------------------------------------
