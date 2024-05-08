@@ -427,7 +427,7 @@
                         <div class="card-text">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <form action="{{ route('time_update') }}" method="POST" enctype="multipart/form-data">
+                                    <form action="{{ route('seller.update.required.info') }}" method="POST" enctype="multipart/form-data">
                                         {{ csrf_field() }}
                                         <div class="row form-inline">
                                             <div class="col-md-2 col-2">

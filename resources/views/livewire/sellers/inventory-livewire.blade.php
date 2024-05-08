@@ -49,10 +49,10 @@
                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                     </span>
                 </button>
-                <a type="button" href="{{ route('seller.inventory.add.single') }}" class="btn btn-primary my-4 py-3 w-100 mx-1 px-0 " title="Add New">
+                <a type="button" href="{{ route('seller.add.single.inventory.form') }}" class="btn btn-primary my-4 py-3 w-100 mx-1 px-0 " title="Add New">
                     <span class="fas fa-plus"></span>
                 </a>
-                {{-- <a type="button" href="{{ route('seller.inventory.add.bulk') }}" class="btn btn-primary my-4 py-3 w-100 mx-1 px-0" title="Add Bulk">
+                {{-- <a type="button" href="{{ route('seller.add.bulk.inventory') }}" class="btn btn-primary my-4 py-3 w-100 mx-1 px-0" title="Add Bulk">
                     <span class="fas fa-plus"></span>
                     <span class="fas fa-boxes"></span>
                 </a> --}}
@@ -96,7 +96,7 @@
                                                     </li>
                                                 @endif
                                                 <li>
-                                                    <a href="{{ route('seller.inventory.edit', ['product_id' => $inventory->id]) }}" title="Edit Product">
+                                                    <a href="{{ route('seller.edit.inventory.form', ['product_id' => $inventory->id]) }}" title="Edit Product">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
                                                 </li>
@@ -170,7 +170,7 @@
                                                     </li>
                                                 @endif
                                                 <li>
-                                                    <a href="{{ route('seller.inventory.edit', ['product_id' => $inventory->id]) }}" title="Edit Product">
+                                                    <a href="{{ route('seller.edit.inventory.form', ['product_id' => $inventory->id]) }}" title="Edit Product">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
                                                 </li>

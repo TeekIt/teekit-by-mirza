@@ -15,18 +15,10 @@
                 role="menu">
                 <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('/') ? 'active' : '' }} " href="/">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p class="ml-2">
-                            Dashboard
-                        </p>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('seller.dashboard') ? 'active' : '' }}" href="{{ route('seller.dashboard') }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p class="ml-2">
-                            Livewire Dashboard
+                            Dashboard
                         </p>
                     </a>
                 </li>

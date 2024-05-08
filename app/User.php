@@ -55,8 +55,9 @@ class User extends Authenticatable implements JWTSubject
         'application_fee',
         'temp_code',
         'referral_code',
+        'stripe_account_id',
         'last_login',
-        'email_verified_at'
+        'email_verified_at',
     ];
     /**
      * The attributes that should be hidden for arrays.
@@ -160,6 +161,14 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Helpers
      */
+    public static function updateInfo(int $id, array $hours = [], string $stripe_account_id = null): bool
+    {
+        $user = self::findOrFail($id);
+        if (!empty($hours)) $user->business_hours = json_encode($hours);
+        if (!is_null($stripe_account_id)) $user->stripe_account_id = $stripe_account_id;
+        return $user->save();
+    }
+
     public static function updateStoreLocation(
         int $user_id,
         string $full_address,
@@ -171,7 +180,7 @@ class User extends Authenticatable implements JWTSubject
         string $lat,
         string $lon
     ): bool {
-        $user = self::find($user_id);
+        $user = self::findOrFail($user_id);
         $user->full_address = $full_address;
         if (!is_null($unit_address)) $user->unit_address = $unit_address;
         $user->country = $country;
@@ -200,7 +209,7 @@ class User extends Authenticatable implements JWTSubject
             'phone' => $phone,
             'country' => 'NA',
             'state' => 'NA',
-            'city' => 'NA', 
+            'city' => 'NA',
             'is_active' => $is_active,
             'role_id' => 3,
             'referral_code' => $referral_code
@@ -389,7 +398,7 @@ class User extends Authenticatable implements JWTSubject
         return self::where('id', $user_id)->decrement('pending_withdraw', $amount);
     }
 
-    public static function  getSellerID(): int
+    public static function getSellerID(): int
     {
         return auth()->user()->id;
     }

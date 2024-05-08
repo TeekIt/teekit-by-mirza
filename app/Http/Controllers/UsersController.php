@@ -15,6 +15,39 @@ use Illuminate\Support\Facades\Auth;
 class UsersController extends Controller
 {
     /**
+     * @author Mirza Abdullah Izhar
+     */
+    public function updateSellerRequiredInfo(Request $request)
+    {
+        $request->validate([
+            'stripe_account_id' => 'required|string',
+            'time' => 'required|array',
+        ]);
+
+        $time = $request->time;
+        foreach ($time as $key => $value) {
+            if (!in_array("on", $time[$key])) $time[$key] += ["closed" => null];
+        }
+        $business_hours['time'] = $time;
+        $business_hours['submitted'] = "yes";
+
+        $updated = User::updateInfo(
+            auth()->id(),
+            $business_hours,
+            $request->stripe_account_id
+        );
+        if ($updated) {
+            return WebResponseServices::getResponseRedirectBack(
+                config('constants.SUCCESS_STATUS'),
+                config('constants.UPDATION_SUCCESS')
+            );
+        }
+        return WebResponseServices::getResponseRedirectBack(
+            config('constants.ERROR_STATUS'),
+            config('constants.UPDATION_FAILED')
+        );
+    }
+    /**
      * Fetch seller information w.r.t ID
      * @author Mirza Abdullah Izhar
      * @version 2.1.0
@@ -112,9 +145,9 @@ class UsersController extends Controller
             $sellers = User::getParentAndChildSellersByState($request->state);
             $pagination = $sellers->toArray();
             unset($pagination['data']);
-            
+
             if (!$sellers->isEmpty()) $data = GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
-         
+
             if (empty($data)) {
                 return JsonResponseServices::getApiResponse(
                     [],
@@ -158,7 +191,7 @@ class UsersController extends Controller
             $pagination = $products->toArray();
             if (!$products->isEmpty()) {
                 foreach ($products as $product) {
-                    $data[] = Products::getProductInfo($product->id);
+                    $data[] = Products::getProductInfo($seller_id, $product->id, ['*']);
                 }
                 unset($pagination['data']);
                 return JsonResponseServices::getApiResponseExtention(

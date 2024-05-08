@@ -32,7 +32,7 @@
                                     <div class="card-text">
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <form action="{{ route('update_inventory', $inventory->id) }}" method="POST" enctype="multipart/form-data">
+                                                <form action="{{ route('seller.edit.inventory', $inventory->id) }}" method="POST" enctype="multipart/form-data">
                                                     {{ csrf_field() }}
                                                     <div class="row">
                                                         <div class="col-md-6">
@@ -63,13 +63,14 @@
                                                         <div class="col-md-6">
                                                             <div class="form-group">
                                                                 <label class="text-left d-block">Stock *</label>
-                                                                <input type="number" class="form-control" name="qty" placeholder="Stock*" required value="{{ $inventory->quantity->qty }}">
+                                                                <input type="number" class="form-control" name="qty" placeholder="Stock*" required value="{{ $inventory->qty[0]->qty }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <div class="form-group">
-                                                                <label class="text-left d-block">Price <span class="text-secondary">(Excluding
-                                                                        VAT)</span></label>
+                                                                <label class="text-left d-block">
+                                                                    Price <span class="text-secondary">(Excluding VAT)</span>
+                                                                </label>
                                                                 <input type="number" step="0.01" class="form-control" name="price" placeholder="Price*" required value="{{ $inventory->price }}">
                                                             </div>
                                                         </div>
@@ -111,11 +112,11 @@
                                                             </div>
                                                         </div>
                                                         <!-- <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label class="text-left d-block">Size</label>
-                                                                        <input type="text" class="form-control" name="size" placeholder="Size" value="{{ $inventory->size }}">
-                                                                    </div>
-                                                                </div> -->
+                                                                        <div class="form-group">
+                                                                            <label class="text-left d-block">Size</label>
+                                                                            <input type="text" class="form-control" name="size" placeholder="Size" value="{{ $inventory->size }}">
+                                                                        </div>
+                                                                    </div> -->
                                                         <div class="col-md-6">
                                                             <div class="form-group">
                                                                 <label class="text-left d-block">Status</label>

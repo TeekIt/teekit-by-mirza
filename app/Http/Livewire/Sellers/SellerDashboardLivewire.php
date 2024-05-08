@@ -23,7 +23,7 @@ class SellerDashboardLivewire extends Component
     {
         $this->seller_id = auth()->id();
     }
-     /* 
+    /* 
     * Helpers
     */
     // 
@@ -32,7 +32,7 @@ class SellerDashboardLivewire extends Component
     * CRUD Methods
     */
     // 
-    
+
     public function render()
     {
         $seller = User::getUserByID(id: $this->seller_id, columns: ['*']);

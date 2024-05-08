@@ -35,7 +35,7 @@
                                                 <h4 class="text-center text-primary">Add Product</h4>
                                             </div>
                                             <div class="col-md-12">
-                                                <form action="{{ route('seller.add_inventory') }}" method="POST" enctype="multipart/form-data">
+                                                <form action="{{ route('seller.add.single.inventory') }}" method="POST" enctype="multipart/form-data">
                                                     {{ csrf_field() }}
                                                     <div class="row">
                                                         <div class="col-md-6">

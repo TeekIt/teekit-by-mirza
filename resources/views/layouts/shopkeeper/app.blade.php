@@ -27,9 +27,8 @@
             </div>
             @yield('content')
         </div>
-        <!-- /.content -->
     </div>
-    <!-- /.content-wrapper -->
+    <!-- content-wrapper -->
 
     <audio id="new_order_notification1">
         <source src="{{ asset('audio/TeekItaa.mp4') }}" type="audio/mp4">
@@ -54,10 +53,6 @@
     <script src="{{ asset('res/dist/js/adminlte.min.js') }}"></script>
 
     <style>
-        .modal-dialog-custom {
-            max-width: 700px;
-        }
-
         table tr:first-of-type td {
             border-top: 0;
         }
@@ -247,28 +242,7 @@
             color: #8aa7d7 !important;
         }
     </style>
-
-    {{-- <link rel="stylesheet" href="{{ asset('res/dist/css/jquery.timepicker.min.css') }}"> --}}
-    {{-- <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script> --}}
-    {{-- <script>
-        $('.stimepicker').timepicker({
-            timeFormat: 'h:mm p',
-            interval: 30,
-            startTime: '10:00',
-            dynamic: true,
-            dropdown: true,
-            scrollbar: true
-        });
-        $('.etimepicker').timepicker({
-            timeFormat: 'h:mm p',
-            interval: 30,
-            startTime: '10:00',
-            dynamic: true,
-            dropdown: true,
-            scrollbar: true
-        });
-    </script> --}}
-    {{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> --}}
+    
     <script>
         var total_orders = 0;
         /**
@@ -408,39 +382,10 @@
                 }
             });
         }
-        /**
-         * Code for business hours form
-         */
-        $('#business_hours_modal').modal('show');
-
-        // function closed(day) {
-        //     let listOfClasses = document.getElementById("time[" + day + "][open]").className;
-        //     if (listOfClasses.search("disabled-input-field") < 0) {
-        //         // To disable the input fields
-        //         document.getElementById("time[" + day + "][open]").value = null;
-        //         document.getElementById("time[" + day + "][close]").value = null;
-        //         // To disable the input fields
-        //         document.getElementById("time[" + day + "][open]").classList.add('disabled-input-field');
-        //         document.getElementById("time[" + day + "][close]").classList.add('disabled-input-field');
-        //         // To remove the required attribute from the input fields 
-        //         document.getElementById("time[" + day + "][open]").required = false;
-        //         document.getElementById("time[" + day + "][close]").required = false;
-        //     } else {
-        //         // To enable the input fields
-        //         document.getElementById("time[" + day + "][open]").classList.remove('disabled-input-field');
-        //         document.getElementById("time[" + day + "][close]").classList.remove('disabled-input-field');
-        //         // To add the required attribute from the input fields 
-        //         document.getElementById("time[" + day + "][open]").required = true;
-        //         document.getElementById("time[" + day + "][close]").required = true;
-        //     }
-        // }
     </script>
     <script src="{{ asset('res/plugins/select2/js/select2.min.js') }}"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    {{-- <script src="https://code.jquery.com/jquery-3.5.1.js"></script> --}}
-    {{-- <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script> --}}
-    {{-- <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script> --}}
     @yield('scripts')
 </body>
 
