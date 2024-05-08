@@ -113,14 +113,14 @@
             });
         }
 
-        function selectAll() {
+        const selectAll = () => {
             var checkboxes = document.querySelectorAll('.select-checkbox');
             for (var i = 0; i < checkboxes.length; i++) {
                 checkboxes[i].checked = true;
             }
         }
 
-        function delUsers() {
+        const delUsers = () => {
             var checkboxes = document.querySelectorAll('.select-checkbox');
             var users = [];
             var x = 0;
@@ -156,7 +156,7 @@
             }
         }
 
-        function delDrivers() {
+        const delDrivers = () => {
             var checkboxes = document.querySelectorAll('.select-checkbox');
             var drivers = [];
             var x = 0;
@@ -192,7 +192,7 @@
             }
         }
 
-        function delOrders() {
+        const delOrders = () => {
             var checkboxes = document.querySelectorAll('.select-checkbox');
             var orders = [];
             var x = 0;
@@ -228,7 +228,7 @@
             }
         }
 
-        function delPromoCodes() {
+        const delPromoCodes = () => {
             var checkboxes = document.querySelectorAll('.select-checkbox');
             var promocodes = [];
             var x = 0;
@@ -264,7 +264,7 @@
             }
         }
 
-        function updateStoreInfo() {
+        const updateStoreInfo = () => {
             var form = document.forms.namedItem("user_form");
             var formdata = new FormData(form);
             $.ajax({
@@ -303,25 +303,6 @@
                         }
                     }
                 }
-            });
-        }
-
-        function disableAll(ev) {
-            alert('Am runin bro');
-            return;
-            ev.preventDefault();
-            var urlToRedirect = ev.currentTarget.getAttribute(
-                'href'
-            ); //use currentTarget because the click may be on the nested i tag and not a tag causing the href to be empty
-            Swal.fire({
-                title: 'Warning!',
-                text: 'Are you sure you want to disable all the products of your store?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes'
-            }).then((result) => {
-                if (result.isConfirmed)
-                    $("#DisableAll").click();
             });
         }
     </script>
