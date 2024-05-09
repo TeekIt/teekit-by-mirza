@@ -73,7 +73,8 @@ class UsersController extends Controller
             'total_withdraw' => $seller_info->total_withdraw,
             'parent_store_id' => $seller_info->parent_store_id,
             'is_online' => $seller_info->is_online,
-            'roles' => ($seller_info->role_id == 2) ? ['sellers'] : ['child_sellers']
+            'roles' => ($seller_info->role_id == 2) ? ['sellers'] : ['child_sellers'],
+            'stripe_account_id' => $seller_info->stripe_account_id,
         );
         if (!empty($map_api_result)) {
             $data['distance'] = $map_api_result['distance'];
