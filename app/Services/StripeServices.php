@@ -21,23 +21,23 @@ final class StripeServices
 
     public static function createPaymentIntent()
     {
-        $ch = curl_init();
-        $query_params = [
+        $curl = curl_init();
+        $form_data = [
             'amount' => $_REQUEST['amount'],
             'currency' => $_REQUEST['currency']
         ];
         $api_key = (request()->getPathInfo() === '/api/payment_intent/test') ? static::getTestApiKey() : static::getLiveApiKey();
 
-        curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($query_params));
-        curl_setopt($ch, CURLOPT_USERPWD, $api_key);
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($form_data));
+        curl_setopt($curl, CURLOPT_USERPWD, $api_key);
 
-        $data = curl_exec($ch);
-        if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
+        $data = curl_exec($curl);
+        if (curl_errno($curl)) echo 'Error:' . curl_error($curl);
 
-        curl_close($ch);
+        curl_close($curl);
         return JsonResponseServices::getApiResponse(
             json_decode($data),
             config('constants.TRUE_STATUS'),
@@ -48,8 +48,8 @@ final class StripeServices
 
     public static function requestIncrementalAuthorizationSupport()
     {
-        $ch = curl_init();
-        $query_params = [
+        $curl = curl_init();
+        $form_data = [
             'amount' => $_REQUEST['amount'],
             'currency' => $_REQUEST['currency'],
             'payment_method_types[]' => 'card',
@@ -59,16 +59,16 @@ final class StripeServices
         ];
         $api_key = (request()->getPathInfo() === '/api/payment_intent/test/request_incremental_authorization_support') ? static::getTestApiKey() : static::getLiveApiKey();
         
-        curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($query_params));
-        curl_setopt($ch, CURLOPT_USERPWD, $api_key);
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($form_data));
+        curl_setopt($curl, CURLOPT_USERPWD, $api_key);
 
-        $data = curl_exec($ch);
-        if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
+        $data = curl_exec($curl);
+        if (curl_errno($curl)) echo 'Error:' . curl_error($curl);
 
-        curl_close($ch);
+        curl_close($curl);
         return JsonResponseServices::getApiResponse(
             json_decode($data),
             config('constants.TRUE_STATUS'),
@@ -79,23 +79,23 @@ final class StripeServices
 
     public static function performIncrementalAuthorization()
     {
-        $ch = curl_init();
+        $curl = curl_init();
         $payment_intent_id = $_REQUEST['payment_intent_id'];
-        $query_params = [
+        $form_data = [
             'amount' => $_REQUEST['amount']
         ];
         $api_key = (request()->getPathInfo() === '/api/payment_intent/test/perform_incremental_authorization') ? static::getTestApiKey() : static::getLiveApiKey();
 
-        curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $payment_intent_id . '/increment_authorization');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($query_params));
-        curl_setopt($ch, CURLOPT_USERPWD, $api_key);
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $payment_intent_id . '/increment_authorization');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($form_data));
+        curl_setopt($curl, CURLOPT_USERPWD, $api_key);
 
-        $data = curl_exec($ch);
-        if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
+        $data = curl_exec($curl);
+        if (curl_errno($curl)) echo 'Error:' . curl_error($curl);
 
-        curl_close($ch);
+        curl_close($curl);
         return JsonResponseServices::getApiResponse(
             json_decode($data),
             config('constants.TRUE_STATUS'),
@@ -106,23 +106,23 @@ final class StripeServices
 
     public static function capturePaymentIntent()
     {
-        $ch = curl_init();
+        $curl = curl_init();
         $payment_intent_id = $_REQUEST['payment_intent_id'];
-        $query_params = [
+        $form_data = [
             'amount_to_capture' => $_REQUEST['amount']
         ];
         $api_key = (request()->getPathInfo() === '/api/payment_intent/test/capture') ? static::getTestApiKey() : static::getLiveApiKey();
 
-        curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $payment_intent_id . '/capture');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($query_params));
-        curl_setopt($ch, CURLOPT_USERPWD, $api_key);
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $payment_intent_id . '/capture');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($form_data));
+        curl_setopt($curl, CURLOPT_USERPWD, $api_key);
 
-        $data = curl_exec($ch);
-        if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
+        $data = curl_exec($curl);
+        if (curl_errno($curl)) echo 'Error:' . curl_error($curl);
 
-        curl_close($ch);
+        curl_close($curl);
         return JsonResponseServices::getApiResponse(
             json_decode($data),
             config('constants.TRUE_STATUS'),

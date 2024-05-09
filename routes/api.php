@@ -26,7 +26,7 @@ Tasks:
 2) Add staurt delivery to sellers dashboard (Done)
 3) Export the app as an desktop application
 4) Resolve database relations problem
-5) Add new stripe params 
+5) Add new stripe params (Done)
 */
 
 /*
