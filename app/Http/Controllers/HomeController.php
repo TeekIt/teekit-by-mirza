@@ -49,32 +49,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if (Gate::allows('child_seller')) {
-            $child_store = User::where('id', Auth::id())->first();
-            $user = User::query()->where('id', '=', Auth::id())->get();
-            $pending_orders = Orders::query()->where('order_status', '=', 'pending')->where('seller_id', '=', Auth::id())->count();
-            $total_orders = Orders::query()->where('payment_status', '!=', 'hidden')->where('seller_id', '=', Auth::id())->count();
-            $total_products = Products::query()->where('user_id', '=', Auth::id())->count();
-            $total_sales = Orders::query()->where('payment_status', '=', 'paid')->where('seller_id', '=', Auth::id())->sum('order_total');
-            $all_orders = Orders::where('seller_id', Auth::id())
-                ->whereNotNull('order_status')
-                ->orderby(DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3
-                 when order_status = "onTheWay" then 4 when order_status = "delivered" then 5 end'))
-                ->paginate(5);
-            return view('shopkeeper.child_dashboard', compact('user', 'pending_orders', 'total_products', 'total_orders', 'total_sales', 'all_orders'));
-        }
-        if (Gate::allows('seller')) {
-            $user = User::query()->where('id', '=', Auth::id())->get();
-            $pending_orders = Orders::query()->where('order_status', '=', 'pending')->where('seller_id', '=', Auth::id())->count();
-            $total_orders = Orders::query()->where('payment_status', '!=', 'hidden')->where('seller_id', '=', Auth::id())->count();
-            $total_products = Products::query()->where('user_id', '=', Auth::id())->count();
-            $total_sales = Orders::query()->where('payment_status', '=', 'paid')->where('seller_id', '=', Auth::id())->sum('order_total');
-            $all_orders = Orders::where('seller_id', \auth()->id())
-                ->whereNotNull('order_status')
-                ->orderby(DB::raw('case when is_viewed = 0 then 0 when order_status = "pending" then 1 when order_status = "ready" then 2 when order_status = "assigned" then 3
-                 when order_status = "onTheWay" then 4 when order_status = "delivered" then 5 end'))
-                ->paginate(5);
-            return view('shopkeeper.dashboard', compact('user', 'pending_orders', 'total_products', 'total_orders', 'total_sales', 'all_orders'));
+        if (Gate::allows('seller') || Gate::allows('child_seller')) {
+            return redirect()->route('seller.dashboard');
         } else {
             return $this->adminHome();
         }
@@ -96,8 +72,6 @@ class HomeController extends Controller
             $categories = Categories::all();
             $inventory = Products::getProductInfo($store_id, $product_id, ['*']);
             return view('shopkeeper.inventory.edit', compact('inventory', 'categories'));
-        } else {
-            abort(404);
         }
     }
     /**
@@ -447,7 +421,7 @@ class HomeController extends Controller
     public function changeSettings(Request $request)
     {
         User::where('id', '=', Auth::id())->update(['settings->' . $request->setting_name => $request->value]);
-        return \redirect()->route('home');
+        return redirect()->route('home');
     }
     /**
      * Display's payment view
@@ -458,27 +432,6 @@ class HomeController extends Controller
     {
         $payment_settings = User::find(Auth::id())->bank_details;
         return view('shopkeeper.settings.payment', compact('payment_settings'));
-    }
-    /**
-     * Update's business hours of a store
-     * @author Mirza Abdullah Izhar
-     * @version 1.1.0
-     */
-    public function timeUpdate(Request $request)
-    {
-        $time = $request->time;
-        foreach ($time as $key => $value) {
-            if (!in_array("on", $time[$key]))
-                $time[$key] += ["closed" => null];
-        }
-        $data['time'] = $time;
-        $data['submitted'] = "yes";
-        $user = User::find(Auth::id());
-        $user->business_hours = json_encode($data);
-        $user->save();
-        sleep(1);
-        session()->flash('success', 'Business Hours Updated');
-        return redirect()->back();
     }
     /**
      * Update's user location

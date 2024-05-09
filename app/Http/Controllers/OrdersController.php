@@ -149,7 +149,7 @@ class OrdersController extends Controller
                 }
                 $order_arr[] = $order_id;
                 foreach ($order as $order_item) {
-                    OrderItems::insertOrderItem($order_id, $order_item['product_id'], $order_item['price'], $order_item['qty'], $order_item['user_choice']);
+                    OrderItems::insertInfo($order_id, $order_item['product_id'], $order_item['price'], $order_item['qty'], $order_item['user_choice']);
                 }
                 $count++;
             }

@@ -32,7 +32,7 @@ class OrderItems extends Model
     /**
      * Helpers
      */
-    public static function insertOrderItem(int $order_id, int $product_id, float $product_price, int $qty, int $user_choice): OrderItems
+    public static function insertInfo(int $order_id, int $product_id, float $product_price, int $qty, int $user_choice): OrderItems
     {
         return self::create([
             'order_id' => $order_id,

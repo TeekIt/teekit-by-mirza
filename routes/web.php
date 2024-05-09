@@ -14,24 +14,13 @@ use App\Http\Controllers\UsersController;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
-use App\Http\Livewire\Sellers\OrdersFromOtherSellers;
 use App\Http\Livewire\Sellers\OrdersFromOtherSellersLivewire;
 use App\Http\Livewire\Sellers\OrdersLivewire;
+use App\Http\Livewire\Sellers\SellerDashboardLivewire;
 use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
 /*
 |--------------------------------------------------------------------------
 | For Adding Default Authentication Routes:-
@@ -41,43 +30,36 @@ use Illuminate\Support\Facades\Auth;
 |   * Confirming a user's email address 'Auth\VerificationController'
 |--------------------------------------------------------------------------
 */
-
 Auth::routes();
+
 Route::get('auth/verify', [AuthController::class, 'verify']);
 /*
 |--------------------------------------------------------------------------
 | Home Routes
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
 /*
 |--------------------------------------------------------------------------
 | User Settings Routes
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('settings')->group(function () {
     Route::post('/user_info/update', [HomeController::class, 'userInfoUpdate'])->name('admin.userinfo.update');
     Route::get('/payment', [HomeController::class, 'paymentSettings'])->name('setting.payment');
     Route::post('/payment/update', [HomeController::class, 'paymentSettingsUpdate'])->name('payment_settings_update');
     Route::post('/user_img/update', [HomeController::class, 'userImgUpdate'])->name('user_img_update');
-    Route::post('/time_update', [HomeController::class, 'timeUpdate'])->name('time_update');
     // Route::post('/location_update', [HomeController::class, 'locationUpdate'])->name('location_update');
     Route::post('/password/update', [HomeController::class, 'passwordUpdate'])->name('password_update');
     Route::get('/change_settings/{setting_name}/{value}', [HomeController::class, 'changeSettings'])->name('change_settings')->where(['setting_name' => '^[a-z_]*$', 'value' => '[0-9]+']);
 });
-
 /*
 |--------------------------------------------------------------------------
 | Imp/Exp Products Routes
 |--------------------------------------------------------------------------
 */
-
 Route::get('/exportProducts', [ProductsController::class, 'exportProducts'])->name('exportProducts');
 Route::post('/importProducts', [HomeController::class, 'importProducts'])->name('importProducts');
-
 /*
 |--------------------------------------------------------------------------
 | Orders Routes
@@ -93,27 +75,33 @@ Route::prefix('orders')->group(function () {
 });
 
 Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function () {
+    Route::get('/dashboard', SellerDashboardLivewire::class)->name('seller.dashboard');
+
     Route::prefix('inventory')->group(function () {
         Route::get('/', InventoryLivewire::class)->name('seller.inventory');
-        Route::get('/add', [HomeController::class, 'inventoryAdd'])->name('seller.inventory.add.single');
-        Route::post('/add', [HomeController::class, 'inventoryAddDB'])->name('seller.add_inventory');
-        Route::get('/add_bulk', [HomeController::class, 'inventoryAddBulk'])->name('seller.inventory.add.bulk');
-        Route::get('/edit/{product_id}', [HomeController::class, 'inventoryEdit'])->name('seller.inventory.edit');
-        Route::post('/update/{product_id}', [HomeController::class, 'inventoryUpdate'])->name('seller.update_inventory');
-        Route::get('/image/delete/{image_id}', [HomeController::class, 'seller.deleteImg']);
+        Route::controller(HomeController::class)->group(function () {
+            Route::get('/add', 'inventoryAdd')->name('seller.add.single.inventory.form');
+            Route::post('/add', 'inventoryAddDB')->name('seller.add.single.inventory');
+            Route::get('/add_bulk', 'inventoryAddBulk')->name('seller.add.bulk.inventory');
+            Route::get('/edit/{product_id}', 'inventoryEdit')->name('seller.edit.inventory.form');
+            Route::post('/update/{product_id}', 'inventoryUpdate')->name('seller.edit.inventory');
+            // Route::get('/image/delete/{image_id}', 'deleteImg')->name('seller.deleteImg');
+        });
         // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
     });
-    
-    Route::get('/my-orders', OrdersLivewire::class)->name('seller.orders');
-    Route::get('/order-from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
+
+    Route::prefix('orders')->group(function () {
+        Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
+        Route::get('/{request_order_id?}', OrdersLivewire::class)->name('seller.orders');
+    });
 
     Route::get('/withdrawal', WithdrawalLivewire::class)->name('seller.withdrawal');
 
     Route::prefix('settings')->group(function () {
         Route::get('/general', UserGeneralSettings::class)->name('seller.settings.general');
         Route::post('/update-location', [UsersController::class, 'updateStoreLocation'])->name('seller.settings.update.location');
+        Route::post('/update-required-info', [UsersController::class, 'updateSellerRequiredInfo'])->name('seller.update.required.info');
     });
-
 });
 /*
 |--------------------------------------------------------------------------
@@ -122,7 +110,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
 */
 Route::controller(HomeController::class)->group(function () {
     Route::get('/withdrawals', 'withdrawals')->name('withdrawals');
-    Route::post('/withdrawals', 'withdrawalsRequest')->name('withdrawal_request');
+    Route::post('/withdrawals', 'withdrawalsRequest')->name('withdrawal.request');
     Route::get('/withdrawals-drivers', 'withdrawalDrivers')->name('withdrawals.drivers');
 });
 /*
@@ -171,7 +159,6 @@ Route::get('/users_del', [HomeController::class, 'adminUsersDel'])->name('admin.
 Route::post('/store_info/update', [HomeController::class, 'updateStoreInfo'])->name('admin.image.update');
 Route::post('/stuart/job/creation/', [StuartDeliveryController::class, 'stuartJobCreation'])->name('stuart.job.creation');
 Route::post('/stuart/job/status', [StuartDeliveryController::class, 'stuartJobStatus'])->name('stuart.job.status');
-
 /*
 |--------------------------------------------------------------------------
 | Total Orders Count Route

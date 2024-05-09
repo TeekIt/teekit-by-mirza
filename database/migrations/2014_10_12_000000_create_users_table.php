@@ -13,29 +13,6 @@ class CreateUsersTable extends Migration
      */
     public function up()
     {
-        // Schema::create('users', function (Blueprint $table) {
-        //     $table->increments('id');
-        //     $table->string('name');
-        //     $table->string('l_name')->nullable()->default(null);
-        //     $table->string('email')->unique();
-        //     $table->string('password');
-        //     $table->string('phone')->nullable()->default(null);
-        //     $table->string('address_1')->nullable()->default(null);
-        //     $table->string('address_2')->nullable()->default(null);
-        //     $table->string('postal_code')->nullable()->default(null);
-        //     $table->string('business_name')->nullable()->default(null);
-        //     $table->string('business_phone')->nullable()->default(null);
-        //     $table->json('business_location')->nullable()->default(null);
-        //     $table->json('business_hours')->nullable()->default(null);
-        //     $table->json('bank_details')->nullable()->default(null);
-        //     $table->text('user_img')->nullable()->default(NULL);
-        //     $table->datetime('last_login')->nullable();
-        //     $table->timestamp('email_verified_at')->nullable();
-        //     $table->boolean('is_active')->default(0);
-        //     $table->rememberToken();
-        //     $table->timestamps();
-        // });
-
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100); //modified
@@ -51,7 +28,7 @@ class CreateUsersTable extends Migration
             $table->string('country', 70)->index()->nullable(); //new
             $table->string('state', 70)->index()->nullable(); //new
             $table->string('city', 70)->index()->nullable(); //new
-            $table->string('postcode', 11)->index()->nullable(); //do we need it ??
+            $table->string('postcode', 11)->index()->nullable(); 
             $table->decimal('lat', 11, 8)->index()->nullable(); //modified
             $table->decimal('lon', 11, 8)->index()->nullable(); //modified
             $table->json('bank_details')->nullable();
@@ -68,6 +45,7 @@ class CreateUsersTable extends Migration
             $table->double('application_fee', 8, 2)->default(0.00);
             $table->string('temp_code', 6)->nullable();
             $table->string('referral_code')->index()->nullable(); //modified
+            $table->string('stripe_account_id')->nullable();
             $table->timestamp('last_login')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();

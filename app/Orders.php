@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -116,6 +117,21 @@ class Orders extends Model
         $order->is_viewed = 1;
         $order->save();
         return $order;
+    }
+
+    public static function getTotalSalesBySellerId(int $seller_id): float
+    {
+        return self::where('payment_status', '=', 'paid')->where('seller_id', '=', $seller_id)->sum('order_total');
+    }
+
+    public static function getTotalOrdersBySellerId(int $seller_id): Collection
+    {
+        return self::where('payment_status', '!=', 'hidden')->where('seller_id', '=', $seller_id)->get();
+    }
+
+    public static function getOrdersByStatusWhereSellerId(int $seller_id, string $status): Collection
+    {
+        return self::where('order_status', '=', $status)->where('seller_id', '=', $seller_id)->get();
     }
 
     public static function getOrdersForView(int|null $order_id = null, int $seller_id, string $order_by): object

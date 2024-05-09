@@ -26,7 +26,6 @@ final class StripeServices
             'amount' => $_REQUEST['amount'],
             'currency' => $_REQUEST['currency']
         ];
-        // $headers[] = 'Content-Type: application/x-www-form-urlencoded';
         $api_key = (request()->getPathInfo() === '/api/payment_intent/test') ? static::getTestApiKey() : static::getLiveApiKey();
 
         curl_setopt($ch, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
@@ -34,7 +33,6 @@ final class StripeServices
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($query_params));
         curl_setopt($ch, CURLOPT_USERPWD, $api_key);
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         $data = curl_exec($ch);
         if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
@@ -57,6 +55,7 @@ final class StripeServices
             'payment_method_types[]' => 'card',
             'capture_method' => 'manual',
             'payment_method_options[card][request_incremental_authorization_support]' => 'true',
+	    'transfer_data' => ['destination' => 'acct_1N1rrrIjHZHlX00M'],
         ];
         $api_key = (request()->getPathInfo() === '/api/payment_intent/test/request_incremental_authorization_support') ? static::getTestApiKey() : static::getLiveApiKey();
         
@@ -65,7 +64,6 @@ final class StripeServices
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($query_params));
         curl_setopt($ch, CURLOPT_USERPWD, $api_key);
-        // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         $data = curl_exec($ch);
         if (curl_errno($ch)) echo 'Error:' . curl_error($ch);
