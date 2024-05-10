@@ -15,10 +15,10 @@ class CreateStuartDeliveriesTable extends Migration
     {
         Schema::create('stuart_deliveries', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('order_id');
-            // $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('order_id')->constrained(table:'orders')->cascadeOnDelete();
             $table->bigInteger('job_id')->comment('Stuart Job id');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

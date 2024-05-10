@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DeviceToken;
-use App\notifications;
 use Illuminate\Http\Request;
-use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -14,59 +11,6 @@ use Throwable;
 
 class NotificationsController extends Controller
 {
-    /**
-     * it will fetch all the notifications
-     * @version 1.0.0
-     */
-    public function getNotifications()
-    {
-        $notifications = notifications::query()->where('user_id', '=', Auth::id())->get();
-        if ($notifications->count() <= 0) {
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => 'No New Notifications'
-            ], 200);
-        } else {
-            return response()->json([
-                'data' => $notifications,
-                'status' => true,
-                'message' => 'User Notifications'
-            ], 200);
-        }
-    }
-    /**
-     * it will delete the notification via 
-     * given id
-     * @version 1.0.0
-     */
-    public function deleteNotification($notification_id)
-    {
-        try {
-            $notification = notifications::find($notification_id);
-            if (!empty($notification)) {
-                $notification->delete();
-                return response()->json([
-                    'data' => [],
-                    'status' => true,
-                    'message' => config('constants.ITEM_DELETED'),
-                ], 200);
-            } else {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => config('constants.NO_RECORD')
-                ], 200);
-            }
-        } catch (Throwable $error) {
-            report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
-        }
-    }
     /**
      * Returns notification form view
      * @author Mirza Abdullah Izhar
@@ -89,7 +33,10 @@ class NotificationsController extends Controller
     {
         try {
             if (Gate::allows('superadmin')) {
-                $validatedData = notifications::validator($request);
+                $validatedData = Validator::make($request->all(), [
+                    'title' => 'required|string',
+                    'body' => 'required|string'
+                ]);                
                 if ($validatedData->fails()) {
                     flash('Error in sending notification because a required field is missing or invalid data.')->error();
                     return Redirect::back()->withInput($request->input());
@@ -134,7 +81,10 @@ class NotificationsController extends Controller
     public function notificationSendTest(Request $request)
     {
         try {
-            $validatedData = notifications::validator($request);
+            $validatedData = Validator::make($request->all(), [
+                'title' => 'required|string',
+                'body' => 'required|string'
+            ]);
             if ($validatedData->fails()) {
                 return response()->json([
                     'data' => $validatedData->errors(),

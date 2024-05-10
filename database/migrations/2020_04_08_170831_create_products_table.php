@@ -15,23 +15,28 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('user_id');
-            $table->integer('category_id');
+            $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained(table:'categories')->cascadeOnDelete();
             $table->string('product_name');
             $table->string('sku');
-            $table->string('price');
+            $table->float('price');
+            $table->tinyInteger('featured')->default(0)->comment('0:not_featured, 1:featured');
             $table->string('discount_percentage');
-            $table->string('dimension')->nullable();
             $table->string('weight')->nullable();
             $table->string('brand')->nullable();
             $table->string('size')->nullable();
             $table->string('status')->nullable();
             $table->string('contact');
             $table->json('colors')->nullable();
-            $table->string('bike')->nullable();
-            $table->string('van')->nullable();
+            $table->tinyInteger('bike')->nullable();
+            $table->tinyInteger('car')->nullable();
+            $table->tinyInteger('van')->nullable();
             $table->text('feature_img')->nullable();
+            $table->float('height')->nullable();
+            $table->float('width')->nullable();
+            $table->float('length')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

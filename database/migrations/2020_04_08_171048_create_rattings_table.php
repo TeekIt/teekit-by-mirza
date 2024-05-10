@@ -15,10 +15,11 @@ class CreateRattingsTable extends Migration
     {
         Schema::create('rattings', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('product_id');
-            $table->integer('user_id');
-            $table->string('ratting');
+            $table->foreignId('product_id')->constrained(table:'products')->cascadeOnDelete();
+            $table->foreignId('customer_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->float('ratting');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

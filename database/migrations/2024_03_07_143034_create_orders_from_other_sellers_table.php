@@ -15,9 +15,9 @@ return new class extends Migration
     {
         Schema::create('orders_from_other_sellers', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('customer_id');
-            $table->unsignedBigInteger('seller_id');
-            $table->unsignedBigInteger('product_id');
+            $table->foreignId('customer_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained(table:'products')->cascadeOnDelete();
             $table->float('product_price');
             $table->integer('product_qty');
             $table->float('order_total');
@@ -36,7 +36,7 @@ return new class extends Migration
             $table->enum('order_status', ['pending', 'accepted', 'ready', 'stuartDelivery', 'onTheWay', 'delivered', 'complete', 'cancelled'])->default('pending');
             $table->enum('delivery_status', ['assigned', 'complete', 'pending_approval', 'cancelled'])->nullable();
             $table->text('payment_intent')->nullable();
-            $table->unsignedInteger('driver_id')->nullable();
+            $table->foreignId('driver_id')->constrained(table:'drivers')->cascadeOnDelete();
             $table->double('driver_traveled_km', 8, 2)->default(0.00);
             $table->double('driver_charges', 8, 2)->default(0.00);
             $table->tinyInteger('driver_charges_cleared')->default(0);

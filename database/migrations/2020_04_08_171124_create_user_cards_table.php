@@ -15,7 +15,7 @@ class CreateUserCardsTable extends Migration
     {
         Schema::create('user_cards', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('user_id');
+            $table->foreignId('user_id')->constrained(table:'users')->cascadeOnDelete();
             $table->string('card_placeholder_name');
             $table->string('card_number');
             $table->string('cvv');

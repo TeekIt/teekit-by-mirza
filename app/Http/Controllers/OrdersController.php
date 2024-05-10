@@ -42,13 +42,13 @@ class OrdersController extends Controller
                         'delivery_charges' => 'required|numeric',
                         'service_charges' => 'required|numeric',
                         'device' => 'sometimes',
-                        // 'seller_id' => 'required|integer'
+                        'payment_intent_id' => 'required|string',
                     ];
                 } elseif ($request->type == 'self-pickup') {
                     $rules = [
                         'type' => 'required|string',
                         'phone_number' => 'string|min:13|max:13',
-                        // 'seller_id' => 'required|integer'
+                        'payment_intent_id' => 'required|string',
                     ];
                 }
             } else {

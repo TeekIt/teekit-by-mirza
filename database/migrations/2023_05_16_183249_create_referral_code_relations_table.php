@@ -14,15 +14,14 @@ class CreateReferralCodeRelationsTable extends Migration
     public function up()
     {
         Schema::create('referral_code_relations', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('referred_by')->nullable();
-            $table->unsignedBigInteger('user_id');          
-            // $table->foreign('referred_by')->references('id')->on('users')->onDelete('cascade');  
-            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->bigIncrements('id');
+            $table->foreignId('referred_by')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained(table:'users')->cascadeOnDelete();
             $table->tinyInteger('referral_useable')
             ->default(1)
             ->comment('0: Referral cannot be used by the user, 1: Can be used by the user');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
