@@ -52,13 +52,13 @@ final class StripeServices
         $form_data = [
             'amount' => $_REQUEST['amount'],
             'currency' => $_REQUEST['currency'],
-            'payment_method_types[]' => 'card',
+            'payment_method_types[]' => 'card_present',
             'capture_method' => 'manual',
-            'payment_method_options[card][request_incremental_authorization_support]' => 'true',
-	    'transfer_data' => ['destination' => 'acct_1N1rrrIjHZHlX00M'],
+            'payment_method_options[card_present][request_incremental_authorization_support]' => 'true',
+            'transfer_data' => ['destination' => 'acct_1N1rrrIjHZHlX00M'],
         ];
         $api_key = (request()->getPathInfo() === '/api/payment_intent/test/request_incremental_authorization_support') ? static::getTestApiKey() : static::getLiveApiKey();
-        
+
         curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
@@ -148,8 +148,8 @@ final class StripeServices
         // ]);
 
         return $stripe->refunds->create([
-           'payment_intent' => 'pi_3OmYstIiDDGv1gaV2F5Xeu5t',
-           'reason' => 'requested_by_customer' 
+            'payment_intent' => 'pi_3OmYstIiDDGv1gaV2F5Xeu5t',
+            'reason' => 'requested_by_customer'
         ]);
         // $stripe->refunds->create(['charge' => 'ch_1NirD82eZvKYlo2CIvbtLWuY']);
     }
