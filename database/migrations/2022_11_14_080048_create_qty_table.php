@@ -16,7 +16,7 @@ class CreateQtyTable extends Migration
         Schema::create('qty', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
-            $table->foreignId('products_id')->constrained(table:'products')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained(table:'products')->cascadeOnDelete();
             $table->foreignId('category_id')->constrained(table:'categories')->cascadeOnDelete();
             $table->integer('qty');
             $table->index(['users_id', 'products_id', 'category_id', 'qty']);

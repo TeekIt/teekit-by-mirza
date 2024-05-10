@@ -15,8 +15,8 @@ class CreateOrdersTable extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('customer_id');
-            $table->unsignedBigInteger('seller_id');
+            $table->foreignId('customer_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
             $table->float('order_total');
             $table->tinyInteger('total_items');
             $table->decimal('customer_lat', 11, 8)->nullable();
