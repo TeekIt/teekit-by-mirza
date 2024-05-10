@@ -9,16 +9,12 @@
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
-    @if (Route::current()->uri === 'login')
-        @include('javascript.signup-js')
+    @php
+        $google_map_routes = ['login', 'seller/settings/general'];
+    @endphp
+    @if (in_array(Route::current()->uri, $google_map_routes))
         @include('javascript.google-map-js')
     @endif
-
-    @if (Route::current()->uri === 'seller/settings/general')
-        @include('javascript.google-map-js')
-    @endif
-
-    @include('jquery.control-modals-jquery')
 
     <script !src="">
         $('.stimepicker').timepicker({
