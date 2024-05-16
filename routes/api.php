@@ -25,9 +25,9 @@ Tasks:
 1) Make the product import perfect (Done)
 2) Add staurt delivery to sellers dashboard (Done)
 3) Export the app as an desktop application (Done)
-4) Resolve database relations problem
+4) Resolve database relations problem (Done)
 5) Add new stripe params (Done)
-6) Add stipe payment_intent_id into the orders API
+6) Add stipe payment_intent_id into the orders API (Done)
 */
 
 /*
