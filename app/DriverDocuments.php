@@ -3,12 +3,13 @@
 namespace App;
 
 use App\Services\ImageServices;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DriverDocuments extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
      /**
      * The attributes that are mass assignable.
      *

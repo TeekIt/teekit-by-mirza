@@ -22,10 +22,10 @@ class CreateProductsTable extends Migration
             $table->float('price');
             $table->tinyInteger('featured')->default(0)->comment('0:not_featured, 1:featured');
             $table->string('discount_percentage');
-            $table->string('weight')->nullable();
+            $table->float('weight')->nullable();
             $table->string('brand')->nullable();
             $table->string('size')->nullable();
-            $table->string('status')->nullable();
+            $table->enum('status', [0, 1])->comment('0: disable, 1: enable')->nullable();
             $table->string('contact');
             $table->json('colors')->nullable();
             $table->tinyInteger('bike')->nullable();
@@ -37,6 +37,16 @@ class CreateProductsTable extends Migration
             $table->float('length')->nullable();
             $table->timestamps();
             $table->softDeletes();
+            /**
+             * Indexes
+             */
+            $table->index('seller_id');
+            $table->index('category_id');
+            $table->index('sku');
+            $table->fullText('product_name');
+            $table->index('brand');
+            $table->index('price');
+            $table->index('weight');
         });
     }
 
@@ -48,6 +58,5 @@ class CreateProductsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('products');
-        
     }
 }

@@ -5,10 +5,11 @@ namespace App;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrderItems extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'order_id',
@@ -32,7 +33,7 @@ class OrderItems extends Model
     /**
      * Helpers
      */
-    public static function insertInfo(int $order_id, int $product_id, float $product_price, int $qty, int $user_choice): OrderItems
+    public static function add(int $order_id, int $product_id, float $product_price, int $qty, int $user_choice): OrderItems
     {
         return self::create([
             'order_id' => $order_id,

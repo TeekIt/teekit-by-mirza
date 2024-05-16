@@ -22,6 +22,11 @@ class CreateWithdrawalRequestsTable extends Migration
             $table->string('transaction_id')->default(0);
             $table->timestamps();
             $table->softDeletes();
+            /**
+             * Indexes
+             */
+            $table->index('user_id');
+            $table->index('amount');
         });
     }
 

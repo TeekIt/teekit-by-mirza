@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class Orders extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = ['*'];
     /**
@@ -22,19 +24,14 @@ class Orders extends Model
         return $this->hasMany(OrderItems::class, 'order_id');
     }
 
-    public function user(): BelongsTo
+    public function customer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'customer_id');
     }
 
     public function store(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id');
-    }
-
-    public function delivery_boy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'delivery_boy_id');
     }
 
     public function products(): HasManyThrough
@@ -99,9 +96,9 @@ class Orders extends Model
         return self::where('id', $order_id)->exists();
     }
 
-    public static function checkTotalOrders(int $user_id): int
+    public static function checkTotalOrders(int $customer_id): int
     {
-        return self::where('user_id', $user_id)->count();
+        return self::where('customer_id', $customer_id)->count();
     }
 
     public static function updateOrderStatus(int $order_id, string $status): int
@@ -134,7 +131,7 @@ class Orders extends Model
         return self::where('order_status', '=', $status)->where('seller_id', '=', $seller_id)->get();
     }
 
-    public static function getOrdersForView(int|null $order_id = null, int $seller_id, string $order_by): object
+    public static function getOrdersForView(int|null $order_id = null, int $seller_id, string $order_by): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($order_id) static::isViewed($order_id);
@@ -148,7 +145,7 @@ class Orders extends Model
             ->paginate(10);
     }
 
-    public static function getRecentOrderByBuyerId(int $buyer_id, int|null $prducts_limit = null, int|null $seller_id = null): object
+    public static function getRecentOrderByBuyerId(int $customer_id, int|null $prducts_limit = null, int|null $seller_id = null): ?Orders
     {
         return self::with([
             'products' => function ($query) use ($prducts_limit) {
@@ -156,13 +153,13 @@ class Orders extends Model
             }
         ])
             ->when($seller_id, fn ($query) => $query->where('seller_id', $seller_id))
-            ->where('user_id', $buyer_id)
+            ->where('customer_id', $customer_id)
             ->latest()
             ->first();
     }
 
-    public static function getOrderById(int $order_id): object
+    public static function getOrderById(int $order_id): ?Orders
     {
-        return self::with(['order_items', 'user', 'store', 'delivery_boy'])->where('id', $order_id)->first();
+        return self::with(['order_items', 'customer', 'store'])->where('id', $order_id)->first();
     }
 }

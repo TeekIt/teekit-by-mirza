@@ -20,6 +20,11 @@ class CreateRattingsTable extends Migration
             $table->float('ratting');
             $table->timestamps();
             $table->softDeletes();
+            /**
+             * Indexes
+             */
+            $table->index('product_id');
+            $table->index('customer_id');
         });
     }
 

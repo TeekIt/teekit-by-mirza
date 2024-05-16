@@ -183,7 +183,7 @@ class DriverController extends Controller
                 'message' => config('constants.MISSING_OR_INVALID_DATA')
             ], 422);
         } else {
-            $verification_codes = VerificationCodes::query()->select('code->code as verification_code')
+            $verification_codes = VerificationCodes::select('code->code as verification_code')
                 ->where('order_id', '=', $request->order_id)
                 ->get();
             $saved_code = $verification_codes[0]->verification_code;
@@ -224,7 +224,7 @@ class DriverController extends Controller
      */
     public function driverFailedToEnterCode(Request $request)
     {
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'order_id' => 'required|int'
         ]);
         if ($validator->fails()) {
@@ -326,7 +326,7 @@ class DriverController extends Controller
      */
     protected function loginDriver(Request $request)
     {
-        $validatedData = \Validator::make($request->all(), [
+        $validatedData = Validator::make($request->all(), [
             'email' => 'required|string|email|max:80',
             'password' => 'required|string|min:8|max:50'
         ]);

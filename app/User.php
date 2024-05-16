@@ -4,6 +4,7 @@ namespace App;
 
 use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use Notifiable, SoftDeletes;
+    use Notifiable, HasFactory, SoftDeletes;
     /**
      * The attributes that are mass assignable.
      *

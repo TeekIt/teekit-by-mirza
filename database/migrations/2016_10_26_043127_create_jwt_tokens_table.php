@@ -24,7 +24,9 @@ class CreateJwtTokensTable extends Migration
             $table->boolean('phone')->default('0');
             $table->timestamps();
             $table->softDeletes();
-
+            /**
+             * Indexes
+             */
             $table->index('user_id');
         });
     }

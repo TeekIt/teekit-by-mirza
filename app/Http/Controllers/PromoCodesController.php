@@ -7,7 +7,6 @@ use App\Models\PromoCodesUsageLimit;
 use App\Orders;
 use App\PromoCodes;
 use App\Role;
-use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
@@ -196,7 +195,7 @@ class PromoCodesController extends Controller
                      * Promo code is only valid for a specific order#
                      */
                     if (!empty($promo_codes[0]->order_number)) {
-                        $user_orders_count = Orders::where('user_id', '=', $request->user_id)->count();
+                        $user_orders_count = Orders::where('customer_id', '=', $request->user_id)->count();
                         if ($promo_codes[0]->order_number == $user_orders_count + 1) {
                             if (!empty($promo_code_data->usage_limit)) return PromoCodeHelpers::checkUsageLimit($promo_codes, $promo_code_data, $request);
                         } else {
@@ -278,7 +277,7 @@ class PromoCodesController extends Controller
                      * Promo code is only valid for a specific order#
                      */
                     if (!empty($promo_codes[0]->order_number)) {
-                        $user_orders_count = Orders::where('user_id', '=', $request->user_id)->count();
+                        $user_orders_count = Orders::where('customer_id', '=', $request->user_id)->count();
                         if ($promo_codes[0]->order_number == $user_orders_count + 1) {
                             $data[0]['promo_code'] = $promo_codes[0];
                             $data[1]['promo_codes_usage_limit'] = ($promo_codes[0]->usage_limit) ? PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->user_id, $promo_codes[0]->id) : null;

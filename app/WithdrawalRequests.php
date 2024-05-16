@@ -2,23 +2,29 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Testing\Fluent\Concerns\Has;
 
 class WithdrawalRequests extends Model
 {
+    use HasFactory, SoftDeletes;
+
     protected $fillable = [
-        'user_id', // Add 'user_id' to the fillable array
+        'user_id',
         'amount',
         'status',
         'bank_detail',
     ];
     
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
     
-    public function role()
+    public function role(): BelongsTo
     {
         return $this->belongsTo('App\Role');
     }
@@ -36,7 +42,8 @@ class WithdrawalRequests extends Model
                 return $query->whereDate('created_at', $created_at);
             });
     }
-    public static function  createwithdrawalRequest(int $user_id, int $amount, string $status , string $bank_details)
+
+    public static function add(int $user_id, int $amount, string $status , string $bank_details): WithdrawalRequests
     {
         return self::create([
             'user_id' => $user_id,

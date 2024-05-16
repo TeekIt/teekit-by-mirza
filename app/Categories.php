@@ -2,16 +2,18 @@
 
 namespace App;
 
-use App\Http\Controllers\ProductsController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
-use Validator;
 use App\Products;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Validator;
 
 class Categories extends Model
 {
+    use HasFactory, SoftDeletes;
     /**
      * Relations
      */
@@ -65,7 +67,7 @@ class Categories extends Model
 
     public static function updateCategory(object $request, $category_id)
     {
-        $category = Categories::find($category_id);
+        $category = self::find($category_id);
         $category->category_name = $request->category_name;
         if ($request->hasFile('category_image'))
             $category->category_image = static::uploadImg($request, $category->category_name);
@@ -77,7 +79,7 @@ class Categories extends Model
 
     public static function getAllCategoriesByStoreId(int $store_id)
     {
-        return  Categories::select('id as category_id', 'category_name', 'category_image', 'created_at', 'updated_at')
+        return  self::select('id as category_id', 'category_name', 'category_image', 'created_at', 'updated_at')
             ->whereHas('qty', function ($query) use ($store_id) {
                 $query->where('users_id', $store_id);
             })->get();
@@ -137,6 +139,6 @@ class Categories extends Model
 
     public static function allCategories()
     {
-        return Categories::all();
+        return self::all();
     }
 }

@@ -23,6 +23,10 @@ class CreateUserCardsTable extends Migration
             $table->timestamp('last_time_charge_date')->nullable();
             $table->string('last_time_charge_amount')->nullable();
             $table->timestamps();
+            /**
+             * Indexes
+             */
+            $table->index('user_id');
         });
     }
 

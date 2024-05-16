@@ -36,6 +36,11 @@ class CreateDriversTable extends Migration
             $table->tinyInteger('is_active')->default(0);
             $table->timestamps();
             $table->softDeletes();
+            /**
+             * Indexes
+             */
+            $table->index('email');
+            $table->index('phone');
         });
     }
 

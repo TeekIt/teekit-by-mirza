@@ -32,8 +32,8 @@ class CreateOrdersTable extends Migration
             $table->enum('payment_status', ['paid, hidden']);
             $table->enum('order_status', ['pending', 'accepted', 'ready', 'stuartDelivery', 'onTheWay', 'delivered', 'complete', 'cancelled'])->default('pending');
             $table->enum('delivery_status', ['assigned', 'pending_approval', 'complete', 'cancelled'])->nullable();
-            $table->text('payment_intent_id')->nullable();
-            $table->unsignedInteger('driver_id')->nullable();
+            $table->string('payment_intent_id')->nullable();
+            $table->foreignId('driver_id')->nullable()->constrained(table: 'drivers')->cascadeOnDelete();
             $table->double('driver_traveled_km', 8, 2)->default(0.00);
             $table->double('driver_charges', 8, 2)->default(0.00);
             $table->tinyInteger('driver_charges_cleared')->default(0);
@@ -44,6 +44,15 @@ class CreateOrdersTable extends Migration
             $table->tinyInteger('is_viewed')->default(0)->comment('0: No, 1: Yes');
             $table->timestamps();
             $table->softDeletes();
+            /**
+             * Indexes
+             */
+            $table->index('customer_id');
+            $table->index('seller_id');
+            $table->index('order_status');
+            $table->index('delivery_status');
+            $table->index('payment_intent_id');
+            $table->index('driver_id');
         });
     }
 

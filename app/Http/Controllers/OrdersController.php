@@ -145,11 +145,11 @@ class OrdersController extends Controller
                         TwilioSmsService::sendSms('+447817332090', $message_for_admin); //Junaid Number
                         TwilioSmsService::sendSms('+923170155625', $message_for_admin); //Mirza Number
                     }
-                    VerificationCodes::insertVerificationCode($order_id, $verification_code);
+                    VerificationCodes::add($order_id, $verification_code);
                 }
                 $order_arr[] = $order_id;
                 foreach ($order as $order_item) {
-                    OrderItems::insertInfo($order_id, $order_item['product_id'], $order_item['price'], $order_item['qty'], $order_item['user_choice']);
+                    OrderItems::add($order_id, $order_item['product_id'], $order_item['price'], $order_item['qty'], $order_item['user_choice']);
                 }
                 $count++;
             }

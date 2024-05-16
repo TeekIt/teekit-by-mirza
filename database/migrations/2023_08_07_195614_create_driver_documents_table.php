@@ -20,6 +20,10 @@ class CreateDriverDocumentsTable extends Migration
             $table->text('back_img');       
             $table->timestamps();
             $table->softDeletes();
+            /**
+             * Indexes
+             */
+            $table->index('driver_id');
         });
     }
 

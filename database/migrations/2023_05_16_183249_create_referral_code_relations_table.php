@@ -17,11 +17,16 @@ class CreateReferralCodeRelationsTable extends Migration
             $table->bigIncrements('id');
             $table->foreignId('referred_by')->constrained(table:'users')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained(table:'users')->cascadeOnDelete();
-            $table->tinyInteger('referral_useable')
+            $table->enum('referral_useable', [0, 1])
             ->default(1)
             ->comment('0: Referral cannot be used by the user, 1: Can be used by the user');
             $table->timestamps();
             $table->softDeletes();
+            /**
+             * Indexes
+             */
+            $table->index('referred_by');
+            $table->index('user_id');
         });
     }
 

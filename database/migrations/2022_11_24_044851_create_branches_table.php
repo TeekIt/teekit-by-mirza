@@ -15,10 +15,15 @@ class CreateBranchesTable extends Migration
     {
         Schema::create('branches', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('parent_seller_id')->constrained(table:'products')->cascadeOnDelete();
-            $table->foreignId('child_seller_id')->constrained(table:'products')->cascadeOnDelete();
+            $table->foreignId('parent_seller_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('child_seller_id')->constrained(table:'users')->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();
+            /**
+             * Indexes
+             */
+            $table->index('parent_seller_id');
+            $table->index('child_seller_id');
         });
     }
 
