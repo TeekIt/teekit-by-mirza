@@ -16,15 +16,14 @@
         @elseif(Auth::user()->role_id == 2 || Auth::user()->role_id == 5)
             @include('layouts.shopkeeper.navbar')
             @include('layouts.shopkeeper.sidebar')
+            <x-seller-business-hours-modal/>
         @endif
-        <!-- Content Wrapper. Contains page content -->
+        
         <div class="content-wrapper">
             <!-- Livewire component will render here by default -->
             {{ $slot }}
         </div>
-        <!-- /.content -->
     </div>
-    <!-- /.content-wrapper -->
     @include('layouts.scripts')
     @livewireScripts
 </body>

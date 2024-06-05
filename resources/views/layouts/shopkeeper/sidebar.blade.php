@@ -15,7 +15,7 @@
                 role="menu">
                 <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('/') ? 'active' : '' }} " href="/">
+                    <a class="nav-link {{ request()->routeIs('seller.dashboard') ? 'active' : '' }}" href="{{ route('seller.dashboard') }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p class="ml-2">
                             Dashboard
@@ -23,7 +23,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('seller.inventory') ? 'active' : '' }}" href="{{route('seller.inventory')}}">
+                    <a class="nav-link {{ request()->routeIs('seller.inventory') ? 'active' : '' }}" href="{{ route('seller.inventory') }}">
                         <i class="nav-icon fa fa-truck"></i>
                         <p class="ml-2">
                             Inventory
@@ -31,7 +31,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('seller.orders') ? 'active' : '' }}" href="{{route('seller.orders')}}">
+                    <a class="nav-link {{ request()->routeIs('seller.orders') ? 'active' : '' }}" href="{{ route('seller.orders') }}">
                         <i class="nav-icon fas fa-cart-arrow-down"></i>
                         <p class="ml-2">
                            My Orders
@@ -39,7 +39,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('seller.orders.from.others') ? 'active' : '' }}" href="{{route('seller.orders.from.others')}}">
+                    <a class="nav-link {{ request()->routeIs('seller.orders.from.others') ? 'active' : '' }}" href="{{ route('seller.orders.from.others') }}">
                         <i class="nav-icon fas fa-luggage-cart"></i>
                         <p class="ml-2">
                             Orders From Others

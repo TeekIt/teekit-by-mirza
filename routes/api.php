@@ -23,8 +23,11 @@ use Illuminate\Support\Facades\Route;
 /* 
 Tasks:
 1) Make the product import perfect (Done)
-2) Add staurt delivery to sellers dashboard
-3) Export the app as an desktop application
+2) Add staurt delivery to sellers dashboard (Done)
+3) Export the app as an desktop application (Done)
+4) Resolve database relations problem
+5) Add new stripe params (Done)
+6) Add stipe payment_intent_id into the orders API
 */
 
 /*
@@ -37,8 +40,7 @@ Tasks:
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::get('/', fn () =>  'Teek it API Routes Are Working Fine :)');
+Route::get('/', fn () =>  'Teek it API Routes Are Working Fine 😃');
 /*
 |--------------------------------------------------------------------------
 | Authentication API Routes

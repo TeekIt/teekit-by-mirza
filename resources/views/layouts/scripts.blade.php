@@ -1,5 +1,6 @@
     <!-- jQuery -->
     <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script>
     <!-- Bootstrap 5 -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
@@ -8,35 +9,37 @@
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
-    @if (Route::current()->uri === 'login')
-        @include('javascript.signup-js')
+    @php
+        $google_map_routes = ['login', 'seller/settings/general'];
+    @endphp
+    @if (in_array(Route::current()->uri, $google_map_routes))
         @include('javascript.google-map-js')
     @endif
 
-    @if (Route::current()->uri === 'seller/settings/general')
-        <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script>
-        @include('javascript.seller-general-settings-js')
-        @include('javascript.google-map-js')
-    @endif
+    <script !src="">
+        $('.stimepicker').timepicker({
+            timeFormat: 'h:mm p',
+            interval: 30,
+            startTime: '10:00',
+            dynamic: true,
+            dropdown: true,
+            scrollbar: true
+        });
 
-    @include('jquery.control-modals-jquery')
+        $('.etimepicker').timepicker({
+            timeFormat: 'h:mm p',
+            interval: 30,
+            startTime: '10:00',
+            dynamic: true,
+            dropdown: true,
+            scrollbar: true
+        });
+    </script>
 
     <script>
-        window.addEventListener('close-modal', event => $('#' + event.detail.id).modal('hide'));
-
-        window.addEventListener('show-modal', event => $('#' + event.detail.id).modal('show'));
-
-        function checkbox() {
-            $("#chkSelect").change(function() {
-                if ($(this).is(":checked")) {
-                    $("#content").show();
-                } else {
-                    $("#content").hide();
-                }
-            });
-        }
-
-        // *********************************************************************** //
+        /* 
+         * General jQuery
+         */
         gpt_box = jQuery('.change-height');
 
         max = jQuery(gpt_box[0]).height();
@@ -46,22 +49,74 @@
                 max = jQuery(value).height();
             }
         });
+
         jQuery.each(gpt_box, function(index, value) {
             jQuery(value).height(max);
         });
-        $('.row.mb-2 h1.m-0.text-dark.text-center')
-        .text($('.row.mb-2 h1.m-0.text-dark.text-center')
-        .text()
-        .replace('Admin Dashboard', ''));
 
-        function selectAll() {
+        $('.row.mb-2 h1.m-0.text-dark.text-center')
+            .text($('.row.mb-2 h1.m-0.text-dark.text-center')
+                .text()
+                .replace('Admin Dashboard', ''));
+        /* 
+         * JavaScript Event Listeners
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            /* 
+             * Listening to Livewire events in JavaScript 
+             */
+            Livewire.hook('component.initialized', (component) => {
+                $('#businessHoursModal').modal('show')
+            })
+        });
+
+        window.addEventListener('close-modal', event => $('#' + event.detail.id).modal('hide'));
+
+        window.addEventListener('show-modal', event => $('#' + event.detail.id).modal('show'));
+        /* 
+         * General JavaScript Methods
+         */
+        const closed = (day) => {
+            let listOfClasses = document.getElementById("time[" + day + "][open]").className;
+            console.log(listOfClasses.search("disabled-input-field"));
+            if (listOfClasses.search("disabled-input-field") < 0) {
+                // To disable the input fields
+                document.getElementById("time[" + day + "][open]").value = null;
+                document.getElementById("time[" + day + "][close]").value = null;
+                // To disable the input fields
+                document.getElementById("time[" + day + "][open]").classList.add('disabled-input-field');
+                document.getElementById("time[" + day + "][close]").classList.add('disabled-input-field');
+                // To remove the required attribute from the input fields
+                document.getElementById("time[" + day + "][open]").required = false;
+                document.getElementById("time[" + day + "][close]").required = false;
+            } else {
+                // To enable the input fields
+                document.getElementById("time[" + day + "][open]").classList.remove('disabled-input-field');
+                document.getElementById("time[" + day + "][close]").classList.remove('disabled-input-field');
+                // To add the required attribute from the input fields
+                document.getElementById("time[" + day + "][open]").required = true;
+                document.getElementById("time[" + day + "][close]").required = true;
+            }
+        }
+
+        const checkbox = () => {
+            $("#chkSelect").change(function() {
+                if ($(this).is(":checked")) {
+                    $("#content").show();
+                } else {
+                    $("#content").hide();
+                }
+            });
+        }
+
+        const selectAll = () => {
             var checkboxes = document.querySelectorAll('.select-checkbox');
             for (var i = 0; i < checkboxes.length; i++) {
                 checkboxes[i].checked = true;
             }
         }
 
-        function delUsers() {
+        const delUsers = () => {
             var checkboxes = document.querySelectorAll('.select-checkbox');
             var users = [];
             var x = 0;
@@ -97,7 +152,7 @@
             }
         }
 
-        function delDrivers() {
+        const delDrivers = () => {
             var checkboxes = document.querySelectorAll('.select-checkbox');
             var drivers = [];
             var x = 0;
@@ -133,7 +188,7 @@
             }
         }
 
-        function delOrders() {
+        const delOrders = () => {
             var checkboxes = document.querySelectorAll('.select-checkbox');
             var orders = [];
             var x = 0;
@@ -169,7 +224,7 @@
             }
         }
 
-        function delPromoCodes() {
+        const delPromoCodes = () => {
             var checkboxes = document.querySelectorAll('.select-checkbox');
             var promocodes = [];
             var x = 0;
@@ -205,7 +260,7 @@
             }
         }
 
-        function updateStoreInfo() {
+        const updateStoreInfo = () => {
             var form = document.forms.namedItem("user_form");
             var formdata = new FormData(form);
             $.ajax({
@@ -244,25 +299,6 @@
                         }
                     }
                 }
-            });
-        }
-
-        function disableAll(ev) {
-            alert('Am runin bro');
-            return;
-            ev.preventDefault();
-            var urlToRedirect = ev.currentTarget.getAttribute(
-                'href'
-            ); //use currentTarget because the click may be on the nested i tag and not a tag causing the href to be empty
-            Swal.fire({
-                title: 'Warning!',
-                text: 'Are you sure you want to disable all the products of your store?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes'
-            }).then((result) => {
-                if (result.isConfirmed)
-                    $("#DisableAll").click();
             });
         }
     </script>

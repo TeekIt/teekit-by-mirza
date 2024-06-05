@@ -15,8 +15,8 @@
             </div>
         @endif
     </div>
-    {{-- ************************************ Delivery Boy Details Model ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="deliveryBoyDetailsModal" tabindex="-1" aria-labelledby="deliveryBoyDetailsModalLabel" aria-hidden="true">
+    {{-- ************************************ Delivery Boy Details Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="deliveryBoyDetailsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -77,8 +77,8 @@
             </div>
         </div>
     </div>
-    {{-- ************************************ Search Alternative Product Model ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="searchAlternativeProductModal" tabindex="-1" aria-labelledby="searchAlternativeProductModalLabel" aria-hidden="true">
+    {{-- ************************************ Search Alternative Product Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="searchAlternativeProductModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -102,8 +102,8 @@
             </div>
         </div>
     </div>
-    {{-- ************************************ Remove Product From Order Model ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="removeItemFromOrderModel" tabindex="-1" aria-labelledby="removeItemFromOrderModelLabel" aria-hidden="true">
+    {{-- ************************************ Remove Product From Order Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="removeItemFromOrderModel" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -133,8 +133,8 @@
             </div>
         </div>
     </div>
-    {{-- ************************************ Search From Other Stores Model ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="sendToOtherStoresModal" tabindex="-1" aria-labelledby="sendToOtherStoresModalLabel" aria-hidden="true">
+    {{-- ************************************ Search From Other Stores Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="sendToOtherStoresModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -191,8 +191,8 @@
             </div>
         </div>
     </div>
-    {{-- ************************************ Show Customer Contact Model ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="showCustomerContactModel" tabindex="-1" aria-labelledby="showCustomerContactModelLabel" aria-hidden="true">
+    {{-- ************************************ Show Customer Contact Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="showCustomerContactModel" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -237,6 +237,46 @@
             </div>
         </div>
     </div>
+    {{-- ************************************ Stuart Delivery Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="stuartModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form wire:submit.prevent="assignToStuartDriver">
+                    {{ csrf_field() }}
+                    <div class="modal-header">
+                        <h5 class="modal-title display-center">Add Custom Order Id</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Order #</label>
+                                    <input type="text" wire:model.defer="custom_order_id" placeholder="Enter custom order id or leave blank..." class="form-control" autofocus>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer hidden">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" wire:click="resetModal">
+                            Close
+                        </button>
+                        <button type="submit" class="btn btn-warning" wire:target="assignToStuartDriver" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Automatically assign this order to a Stuart delivery boy">
+                            <span wire:target="assignToStuartDriver" wire:loading.remove>
+                                Assign
+                            </span>
+                            <span wire:target="assignToStuartDriver" wire:loading>
+                                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Content Header -->
     <form wire:submit.prevent="render">
         <div class="row">
@@ -250,7 +290,7 @@
                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                     </span>
                 </button>
-                <button type="button" class="btn btn-primary my-4 p-1 w-100 mx-1" wire:click="resetThisPage" wire:target="resetThisPage" wire:loading.class="btn-dark" wire:loading.class.remove="btn-primary" wire:loading.attr="disabled" title="Reset Orders">
+                <button type="button" class="btn btn-primary my-4 p-1 w-100 mx-1" wire:click="resetThisPage" wire:target="resetThisPage" wire:loading.class="btn-dark" wire:loading.class.remove="btn-primary" wire:loading.attr="disabled" title="Reset orders page">
                     <span class="fas fa-sync" wire:target="resetThisPage" wire:loading.remove></span>
                     <span wire:target="resetThisPage" wire:loading>
                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
@@ -277,29 +317,79 @@
                                 <thead>
                                     <tr>
                                         <td colspan="4">
-                                            @if ($order->order_status == 'pending')
-                                                <button class="btn btn-warning" wire:click="orderIsReady({{ $order }}, {{ $order->id }})" wire:target="orderIsReady({{ $order }}, {{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Click here when preparing order">
-                                                    <span wire:target="orderIsReady({{ $order }}, {{ $order->id }})" wire:loading.remove>
-                                                        Preparing Order
+                                            @if ($order->order_status === 'pending')
+                                                <button class="btn btn-warning" wire:click="orderIsAccepted({{ $order->id }})" wire:target="orderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Click here when preparing order">
+                                                    <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading.remove>
+                                                        Accept Order
                                                     </span>
-                                                    <span wire:target="orderIsReady({{ $order }}, {{ $order->id }})" wire:loading>
+                                                    <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading>
                                                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                                                     </span>
                                                 </button>
 
-                                                <button class="btn btn-danger" wire:click="cancelOrder({{ $order }}, {{ $order->id }})" wire:target="cancelOrder({{ $order }}, {{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Cancel the whole order">
-                                                    <span wire:target="cancelOrder({{ $order }}, {{ $order->id }})" wire:loading.remove>
+                                                <button class="btn btn-danger" wire:click="cancelOrder({{ $order }})" wire:target="cancelOrder({{ $order }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Cancel the whole order">
+                                                    <span wire:target="cancelOrder({{ $order }})" wire:loading.remove>
                                                         Cancel Order
                                                     </span>
-                                                    <span wire:target="cancelOrder({{ $order }}, {{ $order->id }})" wire:loading>
+                                                    <span wire:target="cancelOrder({{ $order }})" wire:loading>
                                                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                                                     </span>
                                                 </button>
                                             @endif
 
-                                            @if ($order->delivery_boy_id != '')
-                                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deliveryBoyDetailsModal" title="View delivery boy details">
-                                                    Delivery Boy Details
+                                            @if ($order->type === 'delivery')
+                                                @if ($order->order_status === 'accepted')
+                                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#stuartModal" wire:click="renderStuartModal({{ $order->id }})" wire:target="renderStuartModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to Stuart delivery boy">
+                                                        <span wire:target="renderStuartModal({{ $order->id }})" wire:loading.remove>
+                                                            Assign To Stuart Delivery
+                                                        </span>
+                                                        <span wire:target="renderStuartModal({{ $order->id }})" wire:loading>
+                                                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                                        </span>
+                                                    </button>
+                                                @endif
+
+                                                @if ($order->order_status === 'stuartDelivery')
+                                                    <div class="alert alert-primary" role="alert">
+                                                        <p>
+                                                            Stuart delivery is on the way..!!
+                                                        </p>
+                                                    </div>
+                                                @endif
+
+                                                @if ($order->delivery_boy_id != '')
+                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deliveryBoyDetailsModal" title="View delivery boy details">
+                                                        Delivery Boy Details
+                                                    </button>
+                                                @endif
+                                            @endif
+
+                                            @if ($order->type === 'self-pickup')
+                                                @if ($order->order_status === 'accepted')
+                                                    <div class="alert alert-primary" role="alert">
+                                                        <p>
+                                                            A {{ $order->type }} email has been sent to the customer
+                                                        </p>
+                                                        <hr>
+                                                        <h4 class="alert-heading">IMPORTANT NOTE!</h4>
+                                                        <p class="mb-0">
+                                                            This is a <b>{{ $order->type }}</b> order therefore only press the <b>complete button</b> when the customer has collected the order
+                                                        </p>
+                                                    </div>
+                                                    <button class="btn btn-success" wire:click="orderIsCompleted({{ $order->id }})" wire:target="orderIsCompleted({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Mark as completed">
+                                                        <span wire:target="orderIsCompleted({{ $order->id }})" wire:loading.remove>
+                                                            Complete Order
+                                                        </span>
+                                                        <span wire:target="orderIsCompleted({{ $order->id }})" wire:loading>
+                                                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                                        </span>
+                                                    </button>
+                                                @endif
+                                            @endif
+
+                                            @if ($order->order_status == 'complete')
+                                                <button class="btn btn-success" disabled title="This order has been completed">
+                                                    Order Completed
                                                 </button>
                                             @endif
 
@@ -404,7 +494,7 @@
                                                                 Send To Other Stores (Feature Underdevelopment)
                                                             </button>
                                                         @elseif ($order->order_items[$index]->user_choice === 4)
-                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#showCustomerContactModel" wire:click="renderCustomerContactModel('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
+                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#showCustomerContactModel" wire:click="renderCustomerContactModal('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
                                                                 <i class="fas fa-phone-alt"></i>
                                                                 Call The Customer
                                                             </button>
