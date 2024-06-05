@@ -12,9 +12,9 @@ final class TwilioSmsService
      */
     public static function sendSms($receiverNumber, $message)
     {
-        $sid = config("app.TWILIO_SID");
-        $token = config("app.TWILIO_TOKEN");
-        $fromNumber = config("app.TWILIO_FROM");
+        $sid = env('TWILIO_SID');
+        $token = env('TWILIO_TOKEN');
+        $fromNumber = env('TWILIO_FROM');
         
         $client = new Client($sid, $token);
         $client->messages->create($receiverNumber, [

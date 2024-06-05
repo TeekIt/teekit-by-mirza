@@ -68,7 +68,6 @@ class OrdersController extends Controller
                 $temp['price'] = Products::getProductPrice($item['product_id']);
                 $product = Products::getOnlyProductDetailsById($item['product_id']);
                 $temp['seller_id'] = $product->user_id;
-                // $temp['seller_id'] = $request->seller_id;
                 $temp['volumn'] = $product->height * $product->width * $product->length;
                 $temp['weight'] = $product->weight;
                 $grouped_seller[$temp['seller_id']][] = $temp;
@@ -145,6 +144,7 @@ class OrdersController extends Controller
                         TwilioSmsService::sendSms('+447817332090', $message_for_admin); //Junaid Number
                         TwilioSmsService::sendSms('+923170155625', $message_for_admin); //Mirza Number
                     }
+                    
                     VerificationCodes::insertVerificationCode($order_id, $verification_code);
                 }
                 $order_arr[] = $order_id;
