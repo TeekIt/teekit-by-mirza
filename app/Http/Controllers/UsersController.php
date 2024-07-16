@@ -144,8 +144,8 @@ class UsersController extends Controller
                 return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
             $sellers = User::getParentAndChildSellersByState($request->state);
-            $pagination = $sellers->toArray();
-            unset($pagination['data']);
+            // $pagination = $sellers->toArray();
+            // unset($pagination['data']);
 
             if (!$sellers->isEmpty()) $data = GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
 
@@ -158,13 +158,20 @@ class UsersController extends Controller
                 );
             }
 
-            return JsonResponseServices::getApiResponseExtention(
+            // return JsonResponseServices::getApiResponseExtention(
+            //     $data,
+            //     config('constants.TRUE_STATUS'),
+            //     '',
+            //     'pagination',
+            //     $pagination,
+            //     config('constants.HTTP_OK')
+            // );
+
+            return JsonResponseServices::getApiResponse(
                 $data,
                 config('constants.TRUE_STATUS'),
                 '',
-                'pagination',
-                $pagination,
-                config('constants.HTTP_OK')
+                config('constants.HTTP_OK'),
             );
         } catch (Throwable $error) {
             report($error);

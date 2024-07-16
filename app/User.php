@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -258,7 +259,7 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
 
-    public static function getParentAndChildSellersByCity(string $city): object
+    public static function getParentAndChildSellersByCity(string $city): LengthAwarePaginator
     {
         return self::where('is_active', 1)
             ->whereNotNull('lat')
@@ -277,7 +278,7 @@ class User extends Authenticatable implements JWTSubject
             ->where('state', $state)
             ->whereIn('role_id', [2, 5])
             ->orderBy('business_name', 'asc')
-            ->paginate(10);
+            ->get();
     }
 
     public static function getParentSellersSpecificColumns(array $columns): object
@@ -287,7 +288,7 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function getParentSellers(string $search = ''): object
+    public static function getParentSellers(string $search = ''): LengthAwarePaginator
     {
         return self::where('business_name', 'like', '%' . $search . '%')
             ->where('role_id', 2)
@@ -295,7 +296,7 @@ class User extends Authenticatable implements JWTSubject
             ->paginate(9);
     }
 
-    public static function getChildSellers(string $search = ''): object
+    public static function getChildSellers(string $search = ''): LengthAwarePaginator
     {
         return self::where('business_name', 'like', '%' . $search . '%')
             ->where('role_id', 5)
@@ -303,7 +304,7 @@ class User extends Authenticatable implements JWTSubject
             ->paginate(9);
     }
 
-    public static function getCustomers(string $search = ''): object
+    public static function getCustomers(string $search = ''): LengthAwarePaginator
     {
         return self::where('name', 'like', '%' .  $search . '%')
             ->where('role_id', 3)
@@ -311,7 +312,7 @@ class User extends Authenticatable implements JWTSubject
             ->paginate(9);
     }
 
-    public static function getBuyersWithReferralCode(): object
+    public static function getBuyersWithReferralCode(): LengthAwarePaginator
     {
         return self::whereNotNull('referral_code')->paginate(10);
     }
