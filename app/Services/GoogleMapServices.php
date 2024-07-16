@@ -18,7 +18,7 @@ final class GoogleMapServices
     /**
      * It will fetch the curved distance between 2 points
      * Google distance matrix API is consumed
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public static function getDistanceInArray(float $origin_lat, float $origin_lon, float $destination_lat, float $destination_lon)
     {
@@ -47,8 +47,8 @@ final class GoogleMapServices
 
         return (float) $distanceInMiles;
     }
-    /* 
-     * Sending Multiple requests to Google Matrix at a time 
+    /*
+     * Sending Multiple requests to Google Matrix at a time
      */
     public static function getDistanceForMultipleDestinations(float $origin_lat, float $origin_lon, array $destinations, int $miles)
     {
@@ -89,7 +89,7 @@ final class GoogleMapServices
         $offset = 0;
         $inner_loop_index = 0;
         while ($remaining_users > 0) {
-            // The min() function will return the minimum value of both variables 
+            // The min() function will return the minimum value of both variables
             $current_chunk_size = min($chunk_size, $remaining_users);
             // $offset === index number of the array, $current_chunk_size === size limit of the returned slice
             $current_users = $users->slice($offset, $current_chunk_size);

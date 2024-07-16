@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 class UsersController extends Controller
 {
     /**
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public function updateSellerRequiredInfo(Request $request)
     {
@@ -49,7 +49,7 @@ class UsersController extends Controller
     }
     /**
      * Fetch seller information w.r.t ID
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 2.1.0
      */
     public static function getSellerInfo(object $seller_info, array $map_api_result = null)
@@ -129,7 +129,7 @@ class UsersController extends Controller
     }
     /**
      * Listing of all Sellers/Stores within 5 miles
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public function sellers(Request $request)
     {
@@ -178,7 +178,7 @@ class UsersController extends Controller
     }
     /**
      * Search products w.r.t Seller/Store 'id' & Product Name
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.4.0
      */
     public function searchSellerProducts($seller_id, $product_name)

@@ -31,7 +31,7 @@ final class StuartDeliveryServices
     }
     /**
      * It will get a fresh token for hitting Stuart delivery API
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @author Muhammad Abdullah Mirza
      */
     public static function stuartSandboxAccessToken()
@@ -91,7 +91,7 @@ final class StuartDeliveryServices
     }
     /**
      * Creates a stuart delivery job for a livewire component
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public static function stuartJobCreationLivewire($order_id, $custom_order_id = null)
     {

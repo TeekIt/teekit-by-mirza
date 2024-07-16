@@ -181,7 +181,7 @@ class Products extends Model
             ->first();
 
         // $product->qty = $product->quantities[0]->qty;
-        $product->store = User::getUserByID($seller_id, ['id', 'business_name', 'business_hours', 'full_address', 'country', 'state', 'city', 'lat', 'lon']);
+        $product->store = User::getUserByID($seller_id, ['id', 'business_name', 'business_hours', 'full_address', 'country', 'state', 'city', 'lat', 'lon', 'user_img']);
         // unset($product->quantities);
 
         return $product;

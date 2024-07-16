@@ -343,7 +343,7 @@ class AuthController extends Controller
     /**
      * It will update user details
      * via given id
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.1.0
      */
     public function updateUser(Request $request)
@@ -393,7 +393,7 @@ class AuthController extends Controller
     }
     /**
      * It will update user status
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.1.0
      */
     public function updateStatus(Request $request)
@@ -430,7 +430,7 @@ class AuthController extends Controller
     }
     /**
      * Get user details w.r.t 'id'
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.4.0
      */
     public function getUserDetails($user_id)

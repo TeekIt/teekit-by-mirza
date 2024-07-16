@@ -21,7 +21,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class DriverController extends Controller
 {
     /**
-     * It will fetch & show the driver's 
+     * It will fetch & show the driver's
      * info
      * @version 1.0.0
      */
@@ -42,7 +42,7 @@ class DriverController extends Controller
     }
 
     /**
-     * It will add driver location 
+     * It will add driver location
      * @version 1.0.0
      */
     public function addLatLon(Request $request)
@@ -56,7 +56,7 @@ class DriverController extends Controller
             ->update($data);
     }
     /**
-     * It will submit driver's withdrawl 
+     * It will submit driver's withdrawl
      * @version 1.0.0
      */
     public function submitWithdrawal(Request $request)
@@ -88,7 +88,7 @@ class DriverController extends Controller
         ], 200);
     }
     /**
-     * It will fetch & show the driver's 
+     * It will fetch & show the driver's
      * Withdrawal balance
      * @author Huzaifa Haleem
      * @version 1.0.0
@@ -103,7 +103,7 @@ class DriverController extends Controller
         ], 200);
     }
     /**
-     * It will submit driver's bank account details 
+     * It will submit driver's bank account details
      * @version 1.0.0
      */
     public function submitBankAccountDetails(Request $request)
@@ -131,7 +131,7 @@ class DriverController extends Controller
         ], 200);
     }
     /**
-     * It will show drivers withdrawl requests 
+     * It will show drivers withdrawl requests
      * @version 1.0.0
      */
     public function driverAllWithdrawalRequests()
@@ -166,7 +166,7 @@ class DriverController extends Controller
      * By the driver is correct or not
      * If it is correct then the 'order_status' & 'delivery_status'
      * Will be marked as 'complete'
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.1.0
      */
     public function checkVerificationCode(Request $request)
@@ -215,11 +215,11 @@ class DriverController extends Controller
         }
     }
     /**
-     * If the driver does not have the verfication code 
-     * Then this function will be used to 
+     * If the driver does not have the verfication code
+     * Then this function will be used to
      * Update 'code->driver_failed_to_enter_code' column &
      * It will mark the 'delivery_status' as 'complete'
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function driverFailedToEnterCode(Request $request)
@@ -250,7 +250,7 @@ class DriverController extends Controller
     }
     /**
      * Driver signUp
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function registerDriver(Request $request)
