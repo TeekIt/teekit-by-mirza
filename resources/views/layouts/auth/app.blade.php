@@ -9,9 +9,9 @@
     <div class="wrapper">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-light bg-white">
-            <div class="container-fluid">
+            <div class="container">
                 <a class="navbar-brand" target="_blank" href="https://teekit.co.uk/">
-                    <img style="max-height: 50px;" src="{{ asset('icons/logo.webp') }}" alt="TeekIt Logo">
+                    <img style="max-height: 50px;" src="{{ asset('images/icons/logo.webp') }}" alt="TeekIt Logo">
                 </a>
                 <!-- Toggle Button For Mobiles - Begins -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -32,24 +32,25 @@
                                         name="email" placeholder="Email" aria-label="email"
                                         value="{{ old('email') }}">
                                     <label for="checkauto">
-                                        <input name="remember" id="checkauto" type="checkbox"> Keep me Logged in
+                                        <input name="remember" id="checkauto" type="checkbox"> Keep me logged in
                                     </label>
                                 </div>
                             </div>
                             <div class="col-md-5 mt-3">
                                 <div class="form-group">
-                                    <input class="form-control mr-sm-2" type="password" autocomplete="off"
-                                        placeholder="Password" name="password" required>
+                                    <input class="form-control mr-sm-2" type="password" autocomplete="off" placeholder="Password" name="password" required>
                                     <p>
-                                        <a class="text-dark" href="{{ route('password.request') }}">Forgot
-                                            Password?</a>
+                                        <a class="text-dark" href="{{ route('password.request') }}">
+                                            Forgot Password?
+                                        </a>
                                     </p>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="form-group">
-                                    <button class="btn btn-outline-primary my-2 my-sm-0 login-btn"
-                                        type="submit">Login</button>
+                                    <button class="btn btn-outline-primary my-2 my-sm-0 login-btn"type="submit">
+                                        Login
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -66,11 +67,10 @@
                 </div>
             @endif
             <div class="row mtd" style="margin-top: 20vh">
-                <div class="col-md-8">
-                    <img style="max-height: 540px;margin: 0 auto;display: block;width: auto;max-width: 500px;height: 100%;width: 100%;object-fit: contain;"
-                        src="{{ asset('bg_imgs/bike.webp') }}">
+                <div class="col-md-6 col-lg-8">
+                    <img src="{{ asset('images/backgrounds/bike.webp') }}" class="bg-img">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6 col-lg-4">
                     @yield('content')
                 </div>
             </div>
@@ -80,5 +80,17 @@
     <!-- /.content-wrapper -->
     @include('layouts.scripts')
 </body>
+
+<style>
+    .bg-img {
+        max-height: 540px;
+        margin: 0 auto;
+        display: block;
+        max-width: 500px;
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+    }
+</style>
 
 </html>
