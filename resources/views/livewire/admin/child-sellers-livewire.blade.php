@@ -70,7 +70,7 @@
                                         <td>
                                             <img src=@if ($user_img) "{{ config('constants.BUCKET') . $user_img }}"
                                             @else
-                                            "{{ asset('/icons/store_logo.png') }}" @endif width="150px">
+                                            "{{ asset('images/icons/store_logo.png') }}" @endif width="150px">
                                         </td>
                                     </tr>
                                     <tr>
@@ -132,7 +132,7 @@
                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
                     <div class="card custom-card text-white custom-card-has-bg" @if ($single_index->user_img) style="background-image:url('{{ config('constants.BUCKET') . $single_index->user_img }}');"
                         @else
-                        style="background-image:url('{{ asset('/icons/store_logo.png') }}');" @endif>
+                        style="background-image:url('{{ asset('images/icons/store_logo.png') }}');" @endif>
                         <div class="card-img-overlay custom-card-img-overlay d-flex flex-column">
                             <div class="card-body custom-card-body">
                                 <div class="form-check">
