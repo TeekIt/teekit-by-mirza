@@ -9,7 +9,7 @@
     <div class="wrapper">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-light bg-white">
-            <div class="container-fluid">
+            <div class="container">
                 <a class="navbar-brand" target="_blank" href="https://teekit.co.uk/">
                     <img style="max-height: 50px;" src="{{ asset('images/icons/logo.webp') }}" alt="TeekIt Logo">
                 </a>
@@ -67,10 +67,10 @@
                 </div>
             @endif
             <div class="row mtd" style="margin-top: 20vh">
-                <div class="col-md-8">
-                    <img src="{{ asset('bg_imgs/bike.webp') }}" class="bg-img">
+                <div class="col-md-6 col-lg-8">
+                    <img src="{{ asset('images/backgrounds/bike.webp') }}" class="bg-img">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6 col-lg-4">
                     @yield('content')
                 </div>
             </div>
@@ -86,7 +86,6 @@
         max-height: 540px;
         margin: 0 auto;
         display: block;
-        width: auto;
         max-width: 500px;
         height: 100%;
         width: 100%;
