@@ -19,8 +19,12 @@ class UsersController extends Controller
      */
     public function updateSellerRequiredInfo(Request $request)
     {
+        // $request->validate([
+        //     'stripe_account_id' => 'required|string',
+        //     'time' => 'required|array',
+        // ]);
+
         $request->validate([
-            'stripe_account_id' => 'required|string',
             'time' => 'required|array',
         ]);
 
@@ -31,10 +35,14 @@ class UsersController extends Controller
         $business_hours['time'] = $time;
         $business_hours['submitted'] = "yes";
 
+        // $updated = User::updateInfo(
+        //     auth()->id(),
+        //     $business_hours,
+        //     $request->stripe_account_id
+        // );
         $updated = User::updateInfo(
             auth()->id(),
             $business_hours,
-            $request->stripe_account_id
         );
         if ($updated) {
             return WebResponseServices::getResponseRedirectBack(

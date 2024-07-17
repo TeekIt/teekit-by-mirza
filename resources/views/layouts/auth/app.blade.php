@@ -48,7 +48,7 @@
                             </div>
                             <div class="col-md-2">
                                 <div class="form-group">
-                                    <button class="btn btn-outline-primary my-2 my-sm-0 login-btn"type="submit">
+                                    <button class="btn btn-outline-primary my-2 my-sm-0 login-btn" type="submit">
                                         Login
                                     </button>
                                 </div>
