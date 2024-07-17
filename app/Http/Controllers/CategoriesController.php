@@ -15,7 +15,7 @@ class CategoriesController extends Controller
 {
     /**
      * Insert's new categories
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.1.0
      */
     public function add(Request $request)
@@ -103,8 +103,8 @@ class CategoriesController extends Controller
                 $data =  Categories::getAllCategoriesByStoreId($request->store_id);
             else
                 $data = Cache::rememberForever('allCategories', fn () => Categories::allCategories());
-            /* 
-            * Just creating this variable so we don't have to call the "isEmpty()" function again & again  
+            /*
+            * Just creating this variable so we don't have to call the "isEmpty()" function again & again
             * Which will obviouly reduce the API response speed
             */
             $data_is_empty = $data->isEmpty();
@@ -125,7 +125,7 @@ class CategoriesController extends Controller
         }
     }
     /**
-     * It will get the products of a specific category 
+     * It will get the products of a specific category
      * @version 1.9.0
      */
     public function products(Request $request)
@@ -146,8 +146,8 @@ class CategoriesController extends Controller
                 $data = Qty::getProductsByGivenIds($request->category_id, $request->store_id);
             else
                 $data = Categories::getProducts($request->category_id);
-            /* 
-            * Just creating this variable so we don't have to call the "empty()" function again & again  
+            /*
+            * Just creating this variable so we don't have to call the "empty()" function again & again
             * Which will obviouly reduce the API response speed
             */
             $data_is_empty = empty($data);
@@ -170,7 +170,7 @@ class CategoriesController extends Controller
         }
     }
     /**
-     * It will get the stores w.r.t category id 
+     * It will get the stores w.r.t category id
      * @version 1.0.0
      */
     public function stores(Request $request)
@@ -201,8 +201,8 @@ class CategoriesController extends Controller
             // unset($pagination['data']);
 
             $data = GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $stores, 25);
-            /* 
-            * Just creating this variable so we don't have to call the "empty()" function again & again  
+            /*
+            * Just creating this variable so we don't have to call the "empty()" function again & again
             * Because it will increase the API response time
             */
             $data_is_empty = empty($data);

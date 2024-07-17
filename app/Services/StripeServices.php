@@ -52,10 +52,10 @@ final class StripeServices
         $form_data = [
             'amount' => $_REQUEST['amount'],
             'currency' => $_REQUEST['currency'],
-            'payment_method_types[]' => 'card_present',
+            'payment_method_types[]' => 'card',
             'capture_method' => 'manual',
             'payment_method_options[card_present][request_incremental_authorization_support]' => 'true',
-            'transfer_data' => ['destination' => 'acct_1N1rrrIjHZHlX00M'],
+            'transfer_data' => ['destination' => $_REQUEST['stripe_account_id']],
         ];
         $api_key = (request()->getPathInfo() === '/api/payment_intent/test/request_incremental_authorization_support') ? static::getTestApiKey() : static::getLiveApiKey();
 

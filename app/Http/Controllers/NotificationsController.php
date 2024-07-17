@@ -36,7 +36,7 @@ class NotificationsController extends Controller
         }
     }
     /**
-     * it will delete the notification via 
+     * it will delete the notification via
      * given id
      * @version 1.0.0
      */
@@ -69,7 +69,7 @@ class NotificationsController extends Controller
     }
     /**
      * Returns notification form view
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function notificationHome(Request $request)
@@ -82,7 +82,7 @@ class NotificationsController extends Controller
     }
     /**
      * It will send notifications
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.1.0
      */
     public function notificationSend(Request $request)
@@ -128,7 +128,7 @@ class NotificationsController extends Controller
     }
     /**
      * Test send notifications firebase API
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function notificationSendTest(Request $request)
@@ -188,7 +188,7 @@ class NotificationsController extends Controller
     }
     /**
      * It will save/update device token of every user
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function saveToken(Request $request)

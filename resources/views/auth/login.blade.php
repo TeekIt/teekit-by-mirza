@@ -117,7 +117,7 @@
                     <div class="form-group row mb-0">
                         <div class="col-md-12">
                             <button class="btn btn-outline-primary my-2 my-sm-0 signup-btn" type="submit" id="signup" onclick="signUp()">
-                                Sign up
+                                Sign Up
                             </button>
                         </div>
                     </div>

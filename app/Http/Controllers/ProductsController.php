@@ -246,7 +246,7 @@ class ProductsController extends Controller
     }
     /**
      * All products listing
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function all(Request $request)
@@ -293,8 +293,8 @@ class ProductsController extends Controller
         }
     }
     /**
-     *View products in bulk with array of given ids
-     * @version 1.0.0
+     * View products in bulk with array of given ids
+     * @author Muhammad Abdullah Mirza
      */
     public function bulkView(Request $request)
     {
@@ -409,7 +409,7 @@ class ProductsController extends Controller
      * This function will return back store open/close & product qty status
      * Along with this information it will also send store_id & product_id
      * If the store is active & product is live
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.1.0
      */
     public function recheckProducts(Request $request)
@@ -465,7 +465,7 @@ class ProductsController extends Controller
     }
     /**
      * View product w.r.t ID
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public function view(Request $request)
     {
@@ -528,7 +528,7 @@ class ProductsController extends Controller
     }
     /**
      * It list the featured products
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function featuredProducts(Request $request)
@@ -636,7 +636,7 @@ class ProductsController extends Controller
     }
     /**
      * It searches all products with w.r.t all given filters
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.7.0
      */
     public function search(Request $request)
@@ -748,7 +748,7 @@ class ProductsController extends Controller
     }
     /**
      * Update product price from csv file w.r.t their SKU and store_id
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      *
      */
     // public function updatePriceBulk(Request $request, $delimiter = ',', $filename = '')
@@ -874,7 +874,7 @@ class ProductsController extends Controller
     }
     /**
      * Listing of all products w.r.t Seller/Store 'id'
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public function sellerProducts(Request $request)
     {

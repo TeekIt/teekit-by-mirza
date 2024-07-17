@@ -15,7 +15,7 @@ class StuartDeliveryController extends Controller
 {
     /**
      * It will get a fresh token for hitting Stuart delivery API
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function stuartSandboxAccessToken()
@@ -77,7 +77,7 @@ class StuartDeliveryController extends Controller
     }
     /**
      * Creates a stuart delivery job
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function stuartJobCreation(Request $request)
@@ -151,7 +151,7 @@ class StuartDeliveryController extends Controller
     }
     /**
      * It will check the current status of a Stuart job
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function stuartJobStatus(Request $request)
