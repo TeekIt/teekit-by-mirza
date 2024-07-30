@@ -41,7 +41,7 @@
     </script>
 
     <script>
-        async function checkNotificationPermission() {
+        const checkNotificationPermission = async () => {
             if (!("Notification" in window)) {
                 console.log("This browser does not support desktop notification");
                 return false;
@@ -51,26 +51,29 @@
                 return true;
             } else if (Notification.permission !== "denied") {
                 const permission = await Notification.requestPermission();
-                console.log("Waiting for permission");
                 return permission === "granted";
             }
 
             return false;
         }
 
-        async function sendNotification(title, options = {}) {
+        const sendNotification = async (title, options = {}) => {
             const hasPermission = await checkNotificationPermission();
             console.log(hasPermission);
             if (hasPermission) {
-                new Notification(title, options);
+                const notification = new Notification(title, options);
+                notification.addEventListener('click', () => {
+                    window.open('https://teekitstaging.shop/seller/orders', '_blank');
+                });
             } else {
-                console.log("No notifications permission :(");
+                console.log("Please allow notifications for TeeIt :(");
             }
         }
 
-        // Usage
+        // Call the function
         sendNotification("My First notification", {
             body: "This is a notification from your web app.",
+            icon: "../../../public//teekit.png"
         });
         /*
          * General jQuery
