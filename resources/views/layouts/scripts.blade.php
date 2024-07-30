@@ -59,7 +59,6 @@
 
         const sendNotification = async (title, options = {}) => {
             const hasPermission = await checkNotificationPermission();
-            console.log(hasPermission);
             if (hasPermission) {
                 const notification = new Notification(title, options);
                 notification.addEventListener('click', () => {
@@ -73,7 +72,7 @@
         // Call the function
         sendNotification("My First notification", {
             body: "This is a notification from your web app.",
-            icon: "../../../public/teekit.png"
+            icon: "https://app.teekit.co.uk/teekit.png"
         });
         /*
          * General jQuery
