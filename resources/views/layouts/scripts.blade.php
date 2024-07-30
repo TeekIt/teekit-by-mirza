@@ -2,8 +2,12 @@
     <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script>
     <!-- Bootstrap 5 -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
+    </script>
     <!-- AdminLTE App -->
     <script src="{{ asset('res/dist/js/adminlte.min.js') }}"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
@@ -37,7 +41,38 @@
     </script>
 
     <script>
-        /* 
+        async function checkNotificationPermission() {
+            if (!("Notification" in window)) {
+                console.log("This browser does not support desktop notification");
+                return false;
+            }
+
+            if (Notification.permission === "granted") {
+                return true;
+            } else if (Notification.permission !== "denied") {
+                const permission = await Notification.requestPermission();
+                console.log("Waiting for permission");
+                return permission === "granted";
+            }
+
+            return false;
+        }
+
+        async function sendNotification(title, options = {}) {
+            const hasPermission = await checkNotificationPermission();
+            console.log(hasPermission);
+            if (hasPermission) {
+                new Notification(title, options);
+            } else {
+                console.log("No notifications permission :(");
+            }
+        }
+
+        // Usage
+        sendNotification("My First notification", {
+            body: "This is a notification from your web app.",
+        });
+        /*
          * General jQuery
          */
         gpt_box = jQuery('.change-height');
@@ -58,12 +93,12 @@
             .text($('.row.mb-2 h1.m-0.text-dark.text-center')
                 .text()
                 .replace('Admin Dashboard', ''));
-        /* 
+        /*
          * JavaScript Event Listeners
          */
         document.addEventListener("DOMContentLoaded", () => {
-            /* 
-             * Listening to Livewire events in JavaScript 
+            /*
+             * Listening to Livewire events in JavaScript
              */
             Livewire.hook('component.initialized', (component) => {
                 $('#businessHoursModal').modal('show')
@@ -73,7 +108,7 @@
         window.addEventListener('close-modal', event => $('#' + event.detail.id).modal('hide'));
 
         window.addEventListener('show-modal', event => $('#' + event.detail.id).modal('show'));
-        /* 
+        /*
          * General JavaScript Methods
          */
         const closed = (day) => {
