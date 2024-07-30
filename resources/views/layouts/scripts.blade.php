@@ -73,7 +73,7 @@
         // Call the function
         sendNotification("My First notification", {
             body: "This is a notification from your web app.",
-            icon: "../../../public//teekit.png"
+            icon: "../../../public/teekit.png"
         });
         /*
          * General jQuery
