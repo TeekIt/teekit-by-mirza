@@ -18,12 +18,18 @@
             @include('layouts.shopkeeper.sidebar')
             <x-seller-business-hours-modal/>
         @endif
-        
+
         <div class="content-wrapper">
             <!-- Livewire component will render here by default -->
             {{ $slot }}
         </div>
     </div>
+    <audio id="newOrderNotification1">
+        <source src="{{ asset('audio/TeekItaa.mp4') }}" type="audio/mp4">
+    </audio>
+    <audio id="newOrderNotification2" loop>
+        <source src="{{ asset('audio/TeekItNotificationMusic (mp3cut.net).mp3') }}" type="audio/mp3">
+    </audio>
     @include('layouts.scripts')
     @livewireScripts
 </body>
