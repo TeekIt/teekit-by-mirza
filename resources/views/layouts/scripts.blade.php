@@ -81,6 +81,7 @@
         class SellerOrders {
 
             currentOrdersData = {};
+            /* Set milliseconds */
             callContinueCountingAfter = 2000;
 
             startCounting() {
