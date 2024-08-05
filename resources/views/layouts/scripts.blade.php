@@ -93,7 +93,6 @@
                     },
                     success: (data) => {
                         this.currentOrdersData = data;
-                        console.log(this.currentOrdersData);
                         this.continueCounting();
                     },
                     error: (jqXHR, textStatus, errorThrown) => {
@@ -119,11 +118,6 @@
                             desktopNotifications.sendNotification();
 
                             document.getElementById('newOrderNotification1').play();
-                            Swal.fire(
-                                'New Order Alert!!',
-                                'Please prepare the order soon',
-                                'success'
-                            )
                             /**
                              * This timeout method is used to play 'newOrderNotification2' music
                              * just after 1sec of the arrival of a new order so that the user can
@@ -131,6 +125,12 @@
                              */
                             if (JSON.parse(newOrdersData.user_settings[0].settings).notification_music == 1)
                                 document.getElementById('newOrderNotification2').play()
+
+                            Swal.fire(
+                                'New Order Alert!!',
+                                'Please prepare the order soon',
+                                'success'
+                            )
                         }
 
                         this.currentOrdersData = newOrdersData;
@@ -150,7 +150,7 @@
         /*
          * General jQuery
          */
-         $(window).mouseover(function() {
+        $(window).mouseover(function() {
             document.getElementById('newOrderNotification2').pause();
         });
 
