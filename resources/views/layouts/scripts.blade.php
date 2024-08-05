@@ -71,7 +71,7 @@
                 if (hasPermission) {
                     const notification = new Notification(this.title, this.options);
                     notification.addEventListener('click', () => {
-                        window.open('https://teekitstaging.shop/seller/orders', '_blank');
+                        window.open('https://app.teekit.co.uk/seller/orders', '_blank');
                     });
                 }
             }
