@@ -143,6 +143,7 @@
             }
 
         }
+
         const sellerOrders = new SellerOrders();
         sellerOrders.startCounting();
 

@@ -27,7 +27,7 @@
     <audio id="newOrderNotification1">
         <source src="{{ asset('audio/TeekItaa.mp4') }}" type="audio/mp4">
     </audio>
-    <audio id="newOrderNotification2" loop>
+    <audio id="newOrderNotification2">
         <source src="{{ asset('audio/TeekItNotificationMusic (mp3cut.net).mp3') }}" type="audio/mp3">
     </audio>
     @include('layouts.scripts')
