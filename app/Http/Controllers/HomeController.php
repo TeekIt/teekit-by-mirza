@@ -1325,18 +1325,14 @@ class HomeController extends Controller
      * It will show the order count
      * @version 1.0.0
      */
-    public function myOrderCount()
+    public function countSellerOrders()
     {
-        if (Gate::allows('superadmin')) {
-            //$pending_orders = Orders::query()->where('order_status','=','ready')->where('seller_id','=',Auth::id())->count();
-            //$total_products = Orders::query()->where('payment_status','!=','hidden')->where('seller_id','=',Auth::id())->count();
-            $total_orders = Orders::query()->where('seller_id', '=', Auth::id())->count();
-            $user_settings = User::select('settings')->where('id', '=', Auth::id())->get();
-            //$total_sales = Orders::query()->where('payment_status','=','paid')->where('seller_id','=',Auth::id())->sum('order_total');
-            //return $this->inventory();
-            $response = array('total_orders' => $total_orders, 'user_settings' => $user_settings);
-            return response()->json($response);
-        }
+        $total_orders = Orders::where('seller_id', '=', Auth::id())->where('payment_status', '=', 'paid')->count();
+        $user_settings = User::select('settings')->where('id', '=', Auth::id())->get();
+        return response()->json([
+            'total_orders' => $total_orders,
+            'user_settings' => $user_settings
+        ]);
     }
     /**
      * It will show complete orders

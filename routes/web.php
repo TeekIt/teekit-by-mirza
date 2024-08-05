@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Auth;
 |   * Confirming a user's email address 'Auth\VerificationController'
 |--------------------------------------------------------------------------
 */
+
 Auth::routes();
 
 Route::get('auth/verify', [AuthController::class, 'verify']);
@@ -75,6 +76,7 @@ Route::prefix('orders')->group(function () {
 });
 
 Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function () {
+
     Route::get('/dashboard', SellerDashboardLivewire::class)->name('seller.dashboard');
 
     Route::prefix('inventory')->group(function () {
@@ -92,6 +94,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
 
     Route::prefix('orders')->group(function () {
         Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
+        Route::get('/count', [HomeController::class, 'countSellerOrders'])->name('seller.orders.count');
         Route::get('/{request_order_id?}', OrdersLivewire::class)->name('seller.orders');
     });
 
@@ -159,9 +162,3 @@ Route::get('/users_del', [HomeController::class, 'adminUsersDel'])->name('admin.
 Route::post('/store_info/update', [HomeController::class, 'updateStoreInfo'])->name('admin.image.update');
 Route::post('/stuart/job/creation/', [StuartDeliveryController::class, 'stuartJobCreation'])->name('stuart.job.creation');
 Route::post('/stuart/job/status', [StuartDeliveryController::class, 'stuartJobStatus'])->name('stuart.job.status');
-/*
-|--------------------------------------------------------------------------
-| Total Orders Count Route
-|--------------------------------------------------------------------------
-*/
-Route::get('/my_order_count', [HomeController::class, 'myOrderCount'])->name('my_order_count');

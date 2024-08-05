@@ -30,13 +30,6 @@
     </div>
     <!-- content-wrapper -->
 
-    <audio id="new_order_notification1">
-        <source src="{{ asset('audio/TeekItaa.mp4') }}" type="audio/mp4">
-    </audio>
-    <audio id="new_order_notification2" loop>
-        <source src="{{ asset('audio/TeekItNotificationMusic (mp3cut.net).mp3') }}" type="audio/mp3">
-    </audio>
-
     <!-- jQuery -->
     <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script>
     <!-- Bootstrap 4 -->
@@ -242,53 +235,8 @@
             color: #8aa7d7 !important;
         }
     </style>
-    
+
     <script>
-        var total_orders = 0;
-        /**
-         * This AJAX call will run automatically
-         * on each page load & after its completion
-         * it will trigger myOrderCount() function
-         */
-        $.ajax({
-            url: "/my_order_count",
-            success: function(data) {
-                total_orders = data;
-                myOrderCount();
-            }
-        });
-
-        function myOrderCount() {
-            $.ajax({
-                url: "/my_order_count",
-                success: function(new_orders) {
-                    if (new_orders.total_orders > total_orders) {
-                        document.getElementById('new_order_notification1').play();
-                        Swal.fire(
-                            'New Order Alert!!',
-                            'Please prepare the Order.',
-                            'success'
-                        )
-                        /**
-                         * This timeout method is used to play 'new_order_notification2' music 
-                         * just after 1sec of the arrival of a new order so that the user can 
-                         * clearly listen 'new_order_notification1' sound
-                         */
-                        if (JSON.parse(new_orders.user_settings[0].settings).notification_music == 1)
-                            setTimeout(function() {
-                                document.getElementById('new_order_notification2').play();
-                            }, 1000);
-                    }
-                    total_orders = new_orders.total_orders;
-                    setTimeout(myOrderCount, 2000);
-                }
-            });
-        }
-
-        $(window).mouseover(function() {
-            document.getElementById('new_order_notification2').pause();
-        });
-
         $(document).ready(function() {
             $(".updateQty").on('submit', (function(e) {
                 e.preventDefault();
