@@ -82,7 +82,7 @@
 
             currentOrdersData = {};
             /* Set milliseconds */
-            callContinueCountingAfter = 2000;
+            callContinueCountingAfter = 5000;
 
             startCounting() {
                 $.ajax({
