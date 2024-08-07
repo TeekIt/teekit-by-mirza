@@ -40,7 +40,7 @@ class RegisterController extends Controller
     {
         $this->middleware('guest');
     }
-
+    
     /**
      * Get a validator for an incoming registration request.
      *
@@ -62,9 +62,9 @@ class RegisterController extends Controller
             'state' => 'required|string',
             'city' => 'required|string'
         ];
-    
+
         if ($data['checked_value'] != 0) $rules['parent_store'] = 'required|exists:users,business_name';
-    
+
         return Validator::make($data, $rules);
     }
 
@@ -148,7 +148,7 @@ class RegisterController extends Controller
             echo "User Created";
         }
 
-        // 2: parent store
+        /* 2: Parent store */
         ($user->role_id === 2) ? EmailServices::sendNewParentStoreMail($user) : EmailServices::sendNewChildStoreMail($user, $request->input('parent_store'));
 
         // $admin_users = Role::with('users')->where('name', 'superadmin')->first();

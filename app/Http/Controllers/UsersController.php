@@ -42,7 +42,7 @@ class UsersController extends Controller
         // );
         $updated = User::updateInfo(
             auth()->id(),
-            $business_hours,
+            hours: $business_hours,
         );
         if ($updated) {
             return WebResponseServices::getResponseRedirectBack(

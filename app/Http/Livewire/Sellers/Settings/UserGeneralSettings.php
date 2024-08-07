@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Sellers\Settings;
 
 use App\Products;
+use App\Services\ImageServices;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -19,7 +20,6 @@ class UserGeneralSettings extends Component
     public
         $user_id,
         $name,
-        $Name,
         $l_name,
         $email,
         $business_name,
@@ -35,15 +35,13 @@ class UserGeneralSettings extends Component
         $city,
         $lat,
         $lon,
-        $image,
-        $Image,
-        $search = '',
+        $user_img,
+        $image_to_upload,
         $filename;
 
     protected $rules = [
         'old_password' => 'required|min:8',
         'new_password' => 'required|min:8',
-        'Image' => 'required'
     ];
 
     public function mount()
@@ -51,28 +49,45 @@ class UserGeneralSettings extends Component
         $this->user_id = auth()->id();
     }
 
+    public function resetModal()
+    {
+        $this->resetAllErrors();
+        $this->reset([
+            'order_id',
+            'current_prod_id',
+            'current_prod_qty',
+            'receiver_name',
+            'phone_number',
+            'order_item',
+            'nearby_sellers',
+            'selected_nearby_seller',
+            'search',
+            'custom_order_id',
+        ]);
+    }
+
+    public function resetAllErrors()
+    {
+        $this->resetErrorBag();
+        $this->resetValidation();
+    }
+
     public function updateImage()
     {
+        $this->validate([
+            'image_to_upload' => 'required|image|max:800',
+        ]);
         try {
-            $User = auth()->user();
-            $filename = null;
-            if ($this->Image) {
-
-                $filename = uniqid($User->id . '_' . $User->name . '_') . '.' . $this->Image->getClientOriginalExtension();
-
-                Storage::disk('spaces')->put($filename, $this->Image->get());
-
-                if (Storage::disk('spaces')->exists($filename)) {
-                    info("File is stored successfully: " . $filename);
-                } else {
-                    info("File is not found: " . $filename);
-                }
-            }
-
-            $User->user_img = $filename;
-            $User->save();
+            /* Perform some operation */
+            $filename = ImageServices::uploadLivewireImg($this->image_to_upload, $this->user_id);
+            if ($filename) User::updateInfo($this->user_id, user_img: $filename);
+            /* Operation finished */
             sleep(1);
-            session()->flash('success', 'Image updated successfully.');
+            if ($filename) {
+                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.UPDATION_FAILED'));
+            }
         } catch (Exception $error) {
             session()->flash('error', $error);
         }
@@ -140,13 +155,13 @@ class UserGeneralSettings extends Component
 
     public function passwordUpdate()
     {
+        $this->validate();
         try {
-            $old_password = $this->old_password;
-            $new_password = $this->new_password;
+            /* Perform some operation */
             $user = User::find($this->user_id);
-            if (Hash::check($old_password, $user->password)) {
-                $user->password = Hash::make($new_password);
-                $updated = $user->save();
+            if (Hash::check($this->old_password, $user->password)) {
+                $updated = User::updateInfo($user->id, password: $this->new_password);
+                /* Operation finished */
                 sleep(1);
                 if ($updated) {
                     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -163,16 +178,29 @@ class UserGeneralSettings extends Component
 
     public function update()
     {
+        $this->validate([
+            'name' => 'required|string|max:80',
+            'email' => 'required|string|email|max:80|unique:users',
+            'phone' => 'required|string|min:10|max:10',
+            'business_name' => 'required|string|max:80|unique:users,business_name',
+            'business_phone' => 'required|string|min:10|max:10',
+        ]);
         try {
             /* Perform some operation */
             $updated = User::where('id', $this->user_id)
                 ->update([
                     'name' => $this->name,
                     'email' => $this->email,
-                    'business_name' => $this->business_name,
                     'phone' => $this->phone,
-                    'l_name' => $this->l_name
+                    'business_name' => $this->business_name,
+                    'business_phone' => $this->business_phone,
                 ]);
+
+            // User::updateInfo(
+            //     $this->user_id,
+            //     name:
+            // );
+
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'editUserModal']);
@@ -195,6 +223,7 @@ class UserGeneralSettings extends Component
         $this->business_name = $user->business_name;
         $this->business_phone = $user->business_phone;
         $this->phone = $user->phone;
+        $this->user_img = $user->user_img;
         return $user;
     }
 
