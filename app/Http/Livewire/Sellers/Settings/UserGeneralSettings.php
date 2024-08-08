@@ -20,7 +20,7 @@ class UserGeneralSettings extends Component
     public
         $user_id,
         $name,
-        $l_name,
+        // $l_name,
         $email,
         $business_name,
         $business_phone,
@@ -36,13 +36,7 @@ class UserGeneralSettings extends Component
         $lat,
         $lon,
         $user_img,
-        $image_to_upload,
-        $filename;
-
-    protected $rules = [
-        'old_password' => 'required|min:8',
-        'new_password' => 'required|min:8',
-    ];
+        $image_to_upload;
 
     public function mount()
     {
@@ -53,16 +47,23 @@ class UserGeneralSettings extends Component
     {
         $this->resetAllErrors();
         $this->reset([
-            'order_id',
-            'current_prod_id',
-            'current_prod_qty',
-            'receiver_name',
-            'phone_number',
-            'order_item',
-            'nearby_sellers',
-            'selected_nearby_seller',
-            'search',
-            'custom_order_id',
+            'name',
+            'email',
+            'business_name',
+            'business_phone',
+            'phone',
+            'old_password',
+            'new_password',
+            'full_address',
+            'unit_address',
+            'postcode',
+            'country',
+            'state',
+            'city',
+            'lat',
+            'lon',
+            'user_img',
+            'image_to_upload',
         ]);
     }
 
@@ -82,6 +83,7 @@ class UserGeneralSettings extends Component
             $filename = ImageServices::uploadLivewireImg($this->image_to_upload, $this->user_id);
             if ($filename) User::updateInfo($this->user_id, user_img: $filename);
             /* Operation finished */
+            $this->resetModal();
             sleep(1);
             if ($filename) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -95,11 +97,10 @@ class UserGeneralSettings extends Component
 
     public function exportProducts()
     {
-        $user_id = Auth::id();
-        $products = Products::getParentSellerProductsAsc($user_id);
+        $products = Products::getParentSellerProductsAsc($this->user_id);
         $all_products = [];
         foreach ($products as $product) {
-            $pt = json_decode(json_encode(Products::getProductInfo($product->id)->toArray()));
+            $pt = json_decode(json_encode(Products::getProductInfo($this->user_id, $product->id, ['*'])->toArray()));
             unset($pt->category);
             unset($pt->ratting);
             unset($pt->id);
@@ -143,7 +144,7 @@ class UserGeneralSettings extends Component
                 $firstLineKeys = array_flip($firstLineKeys);
             }
 
-            // Using array_merge is important to maintain the order of keys according to the first element
+            /* Using array_merge is important to maintain the order of keys according to the first element */
             // $line = array_map('strval', $line);
             fputcsv($f, array_merge($firstLineKeys, $line));
         }
@@ -155,13 +156,17 @@ class UserGeneralSettings extends Component
 
     public function passwordUpdate()
     {
-        $this->validate();
+        $this->validate([
+            'old_password' => 'required|min:8',
+            'new_password' => 'required|min:8',
+        ]);
         try {
             /* Perform some operation */
             $user = User::find($this->user_id);
             if (Hash::check($this->old_password, $user->password)) {
                 $updated = User::updateInfo($user->id, password: $this->new_password);
                 /* Operation finished */
+                $this->resetModal();
                 sleep(1);
                 if ($updated) {
                     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -218,7 +223,7 @@ class UserGeneralSettings extends Component
     {
         $user = User::find($this->user_id);
         $this->name = $user->name;
-        $this->l_name = $user->l_name;
+        // $this->l_name = $user->l_name;
         $this->email = $user->email;
         $this->business_name = $user->business_name;
         $this->business_phone = $user->business_phone;

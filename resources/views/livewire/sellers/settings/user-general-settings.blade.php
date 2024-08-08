@@ -442,25 +442,53 @@
                                                         </div>
                                                         <div class="col-lg-8">
                                                             <div class="text-center">
-                                                                <button
+                                                                <button type="submit"
                                                                     class="col-12 px-5 py-2 border-0 rounded-pill cstm-edit-btn"
-                                                                    wire:click="passwordUpdate"
-                                                                    type="submit">Update</button>
+                                                                    wire:loading.class="btn-dark"
+                                                                    wire:loading.class.remove="cstm-edit-btn"
+                                                                    wire:loading.attr="disabled"
+                                                                    wire:click="passwordUpdate">
+                                                                    <span wire:loading.remove
+                                                                        wire:target="passwordUpdate">Update</span>
+                                                                    <span wire:loading wire:target="passwordUpdate">
+                                                                        <span
+                                                                            class="spinner-border spinner-border-sm text-light"
+                                                                            role="status" aria-hidden="true">
+                                                                        </span>
+                                                                    </span>
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    {{-- Export --}}
+                                                    {{-- Export product --}}
                                                     <div class="row my-2">
                                                         <label class="col-lg-4">
                                                             Export Products
                                                         </label>
                                                         <div class="col-lg-8">
                                                             <div class="text-center">
-                                                                <a wire:click="exportProducts"
+                                                                {{-- <a wire:click="exportProducts"
                                                                     class="col-12 px-5 py-2 border-0 rounded-pill cstm-edit-btn"
                                                                     type="submit">
                                                                     Export
-                                                                </a>
+                                                                </a> --}}
+
+                                                                <button type="submit"
+                                                                    class="col-12 px-5 py-2 border-0 rounded-pill cstm-edit-btn"
+                                                                    wire:loading.class="btn-dark"
+                                                                    wire:loading.class.remove="cstm-edit-btn"
+                                                                    wire:loading.attr="disabled"
+                                                                    wire:click="exportProducts">
+                                                                    <span wire:loading.remove
+                                                                        wire:target="exportProducts">Export</span>
+                                                                    <span wire:loading wire:target="exportProducts">
+                                                                        <span
+                                                                            class="spinner-border spinner-border-sm text-light"
+                                                                            role="status" aria-hidden="true">
+                                                                        </span>
+                                                                    </span>
+                                                                </button>
+
                                                             </div>
                                                         </div>
                                                     </div>
