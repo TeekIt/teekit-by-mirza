@@ -165,22 +165,23 @@ class User extends Authenticatable implements JWTSubject
     public static function updateInfo(
         int $id,
         string $name = null,
+        string $l_name = null,
         string $email = null,
         string $phone = null,
         string $business_name = null,
-        int $business_phone = null,
+        string $business_phone = null,
         string $password = null,
         array $hours = [],
         string $user_img = null,
         string $stripe_account_id = null
     ): bool {
         $user = self::findOrFail($id);
-        // 'name' => $this->name,
-        //             'l_name' => $this->l_name,
-        //             'email' => $this->email,
-        //             'phone' => $this->phone,
-        //             'business_name' => $this->business_name,
-        //             'business_phone' => $this->business_phone,
+        if (!is_null($name)) $user->name = $name;
+        if (!is_null($l_name)) $user->l_name = $l_name;
+        if (!is_null($email)) $user->email = $email;
+        if (!is_null($phone)) $user->phone = '+44' . $phone;
+        if (!is_null($business_name)) $user->business_name = $business_name;
+        if (!is_null($business_phone)) $user->business_phone = '+44' . $business_phone;
         if (!is_null($password)) $user->password = Hash::make($password);
         if (!empty($hours)) $user->business_hours = json_encode($hours);
         if (!is_null($user_img)) $user->user_img = $user_img;

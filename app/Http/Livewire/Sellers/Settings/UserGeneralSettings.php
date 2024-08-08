@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Sellers\Settings;
 
 use App\Products;
+use App\Services\CsvFileServices;
 use App\Services\ImageServices;
 use App\User;
 use Illuminate\Support\Facades\Auth;
@@ -27,14 +28,14 @@ class UserGeneralSettings extends Component
         $phone,
         $old_password,
         $new_password,
-        $full_address,
-        $unit_address,
-        $postcode,
-        $country,
-        $state,
-        $city,
-        $lat,
-        $lon,
+        // $full_address,
+        // $unit_address,
+        // $postcode,
+        // $country,
+        // $state,
+        // $city,
+        // $lat,
+        // $lon,
         $user_img,
         $image_to_upload;
 
@@ -54,14 +55,14 @@ class UserGeneralSettings extends Component
             'phone',
             'old_password',
             'new_password',
-            'full_address',
-            'unit_address',
-            'postcode',
-            'country',
-            'state',
-            'city',
-            'lat',
-            'lon',
+            // 'full_address',
+            // 'unit_address',
+            // 'postcode',
+            // 'country',
+            // 'state',
+            // 'city',
+            // 'lat',
+            // 'lon',
             'user_img',
             'image_to_upload',
         ]);
@@ -95,64 +96,15 @@ class UserGeneralSettings extends Component
         }
     }
 
-    public function exportProducts()
-    {
-        $products = Products::getParentSellerProductsAsc($this->user_id);
-        $all_products = [];
-        foreach ($products as $product) {
-            $pt = json_decode(json_encode(Products::getProductInfo($this->user_id, $product->id, ['*'])->toArray()));
-            unset($pt->category);
-            unset($pt->ratting);
-            unset($pt->id);
-            unset($pt->user_id);
-            unset($pt->created_at);
-            unset($pt->updated_at);
-            $temp_img = [];
-            if (isset($pt->images)) {
-                foreach ($pt->images as $img) $temp_img[] = $img->product_image;
-            }
-            $pt->images = implode(',', $temp_img);
-            $all_products[] = $pt;
-        }
-        $destinationPath = public_path() . "/upload/csv/";
-        if (!is_dir($destinationPath)) {
-            mkdir($destinationPath, 0777, true);
-        }
-        $file = time() . '_export.csv';
-        return  $this->jsonToCsv(json_encode($all_products), $destinationPath . $file, true);
-    }
-
-    public function jsonToCsv($json, $csvFilePath = false, $boolOutputFile = false)
-    {
-        if (empty($json)) {
-            die("The JSON string is empty!");
-        }
-
-        if (is_array($json) === false) {
-            $json = json_decode($json, true);
-        }
-
-        $strTempFile = public_path() . "/upload/csv/" . 'csvOutput' . date("U") . ".csv";
-        $f = fopen($strTempFile, "w+");
-        $csvFilePath = $strTempFile;
-        $firstLineKeys = false;
-
-        foreach ($json as $line) {
-            if (empty($firstLineKeys)) {
-                $firstLineKeys = array_keys($line);
-                fputcsv($f, array_map('strval', $firstLineKeys));
-                $firstLineKeys = array_flip($firstLineKeys);
-            }
-
-            /* Using array_merge is important to maintain the order of keys according to the first element */
-            // $line = array_map('strval', $line);
-            fputcsv($f, array_merge($firstLineKeys, $line));
-        }
-
-        fclose($f);
-
-        return response()->download($csvFilePath, null, ['Content-Type' => 'text/csv'])->deleteFileAfterSend();
-    }
+    /*
+    * Please do not remove the following method
+    * As we may require this in the future
+    */
+    // public function exportProducts()
+    // {
+    //     $products = Products::getParentSellerProductsAsc($this->user_id);
+    //     CsvFileServices::exportAsCsv($products, $this->user_id);
+    // }
 
     public function passwordUpdate()
     {
@@ -181,34 +133,116 @@ class UserGeneralSettings extends Component
         }
     }
 
-    public function update()
+    public function updateName()
     {
         $this->validate([
             'name' => 'required|string|max:80',
-            'email' => 'required|string|email|max:80|unique:users',
-            'phone' => 'required|string|min:10|max:10',
+        ]);
+        try {
+            /* Perform some operation */
+            $updated = User::updateInfo(
+                $this->user_id,
+                name: $this->name
+            );
+            /* Operation finished */
+            $this->resetModal();
+            sleep(1);
+            if ($updated) {
+                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.UPDATION_FAILED'));
+            }
+        } catch (Exception $error) {
+            session()->flash('error', $error);
+        }
+    }
+
+    public function updateBusinessName()
+    {
+        $this->validate([
             'business_name' => 'required|string|max:80|unique:users,business_name',
+        ]);
+        try {
+            /* Perform some operation */
+            $updated = User::updateInfo(
+                $this->user_id,
+                business_name: $this->business_name
+            );
+            /* Operation finished */
+            $this->resetModal();
+            sleep(1);
+            if ($updated) {
+                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.UPDATION_FAILED'));
+            }
+        } catch (Exception $error) {
+            session()->flash('error', $error);
+        }
+    }
+
+    public function updateEmail()
+    {
+        $this->validate([
+            'email' => 'required|email|max:80|unique:users',
+        ]);
+        try {
+            /* Perform some operation */
+            $updated = User::updateInfo(
+                $this->user_id,
+                email: $this->email
+            );
+            /* Operation finished */
+            $this->resetModal();
+            sleep(1);
+            if ($updated) {
+                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.UPDATION_FAILED'));
+            }
+        } catch (Exception $error) {
+            session()->flash('error', $error);
+        }
+    }
+
+    public function updateBusinessPhone()
+    {
+        $this->validate([
             'business_phone' => 'required|string|min:10|max:10',
         ]);
         try {
             /* Perform some operation */
-            $updated = User::where('id', $this->user_id)
-                ->update([
-                    'name' => $this->name,
-                    'email' => $this->email,
-                    'phone' => $this->phone,
-                    'business_name' => $this->business_name,
-                    'business_phone' => $this->business_phone,
-                ]);
-
-            // User::updateInfo(
-            //     $this->user_id,
-            //     name:
-            // );
-
+            $updated = User::updateInfo(
+                $this->user_id,
+                business_phone: $this->business_phone
+            );
             /* Operation finished */
+            $this->resetModal();
             sleep(1);
-            $this->dispatchBrowserEvent('close-modal', ['id' => 'editUserModal']);
+            if ($updated) {
+                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.UPDATION_FAILED'));
+            }
+        } catch (Exception $error) {
+            session()->flash('error', $error);
+        }
+    }
+
+    public function updatePhone()
+    {
+        $this->validate([
+            'phone' => 'required|string|min:10|max:10',
+        ]);
+        try {
+            /* Perform some operation */
+            $updated = User::updateInfo(
+                $this->user_id,
+                phone: $this->phone
+            );
+            /* Operation finished */
+            $this->resetModal();
+            sleep(1);
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {

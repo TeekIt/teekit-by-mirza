@@ -4,13 +4,13 @@
     @endphp
     <div class="content">
         <div class="container pt-4">
-            @if (session()->has('error'))
+            {{-- @if (session()->has('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <strong>Error!</strong>
                     {{ session()->get('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            @endif
+            @endif --}}
             @if (session()->has('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <strong>Success!</strong>
@@ -32,7 +32,7 @@
             @endif
         </div>
         <!-- Google Map Modal -->
-        <div wire:ignore.self class="modal hide" id="map_modal">
+        <div wire:ignore.self class="modal hide" id="mapModal">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <!-- Modal Header -->
@@ -48,8 +48,7 @@
                             <div class="p-3">
                                 <div class="col-md-12 my-2">
                                     <label for="full_address">Address 1</label>
-                                    <input type="text" class="form-control" name="full_address" id="modal_address"
-                                        value="{{ old('full_address') }}" />
+                                    <input type="text" class="form-control" name="full_address" id="modal_address" value="{{ Str::limit($user->full_address, 50) }}"/>
                                     <small class="text-danger">
                                         @error('full_address')
                                             {{ $message }}
@@ -60,12 +59,12 @@
                                     <label for="modal_unit_address">Address 2 (optional)</label>
                                     <input type="text" class="form-control"
                                         placeholder="Apartment, unit, suite, or floor#" name="unit_address"
-                                        id="modal_unit_address" value="{{ old('unit_address') }}">
+                                        id="modal_unit_address" value="{{ $user->unit_address }}">
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_postcode">Postcode</label>
                                     <input type="text" class="form-control" name="postcode" id="modal_postcode"
-                                        value="{{ old('postcode') }}" />
+                                        value="{{ $user->postcode }}" />
                                     <small class="text-danger">
                                         @error('postcode')
                                             {{ $message }}
@@ -75,7 +74,7 @@
                                 <div class="col-md-12 my-2">
                                     <label for="modal_country">Country</label>
                                     <input type="text" class="form-control" name="country" id="modal_country"
-                                        value="{{ old('country') }}" />
+                                        value="{{ $user->country }}" />
                                     <small class="text-danger">
                                         @error('country')
                                             {{ $message }}
@@ -85,7 +84,7 @@
                                 <div class="col-md-12 my-2">
                                     <label for="modal_state">State/Province</label>
                                     <input type="text" class="form-control" name="state" id="modal_state"
-                                        value="{{ old('state') }}" />
+                                        value="{{ $user->state }}" />
                                     <small class="text-danger">
                                         @error('state')
                                             {{ $message }}
@@ -95,7 +94,7 @@
                                 <div class="col-md-12 my-2">
                                     <label for="modal_city">City</label>
                                     <input type="text" class="form-control" name="city" id="modal_city"
-                                        value="{{ old('city') }}" />
+                                        value="{{ $user->city }}" />
                                     <small class="text-danger">
                                         @error('city')
                                             {{ $message }}
@@ -110,7 +109,7 @@
                                     <div class="col-md-6">
                                         <label for="modal_lat">Lat</label>
                                         <input type="text" class="form-control" name="lat" id="modal_lat"
-                                            value="{{ old('lat') }}" />
+                                            value="{{ $user->lat }}" />
                                         <small class="text-danger">
                                             @error('lat')
                                                 {{ $message }}
@@ -120,7 +119,7 @@
                                     <div class="col-md-6">
                                         <label for="modal_long">Long</label>
                                         <input type="text" class="form-control" name="lon" id="modal_long"
-                                            value="{{ old('lon') }}" />
+                                            value="{{ $user->lon }}" />
                                         <small class="text-danger">
                                             @error('lon')
                                                 {{ $message }}
@@ -128,7 +127,7 @@
                                         </small>
                                     </div>
                                 </div>
-                                <button type="submit" class="d-no mt-3 btn btn-submit btn-block btn-outline-primary">
+                                <button type="submit" class="btn btn-site-primary mt-3 w-100">
                                     Update
                                 </button>
                             </div>
@@ -142,94 +141,135 @@
             </div>
         </div>
         <!-- Edit Modal -->
-        <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog"
-            aria-labelledby="editUserModalLabel" style="display: none;" aria-hidden="true">
+        <div wire:ignore.self class="modal fade" id="editUserModal" tabindex="-1" role="dialog"
+            aria-labelledby="editUserModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
                             Update Your Info
                         </h5>
-                        <button type="button" class="close" aria-label="Close" data-bs-dismiss="modal">
+                        <button type="button" class="close" wire:click="resetModal" aria-label="Close"
+                            data-bs-dismiss="modal">
                             <span aria-hidden="true">×</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form wire:submit.prevent="update">
+                        <form>
                             <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>FIName</label>
-                                        <input type="text" wire:model.defer="name"
-                                            class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}"
-                                            value="{{ $user->name }}">
-                                        <small class="text-danger">
-                                            @error('name')
-                                                {{ $message }}
-                                            @enderror
-                                        </small>
+                                <div class="col-12 mb-3">
+                                    <label>Your Name</label>
+                                    <div class="input-group">
+                                        <input type="text" wire:model.defer="name" class="form-control"
+                                            placeholder="Enter your name">
+                                        <button type="button" class="btn btn-site-primary" wire:click="updateName"
+                                            wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
+                                            wire:loading.attr="disabled" wire:target="updateName">
+                                            <span wire:loading.remove wire:target="updateName">Update</span>
+                                            <span wire:loading wire:target="updateName">
+                                                <span class="spinner-border spinner-border-sm text-light"
+                                                    role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
                                     </div>
+                                    <small class="text-danger">
+                                        @error('name')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Business Name</label>
+                                <div class="col-12 mb-3">
+                                    <label>Business Name</label>
+                                    <div class="input-group">
                                         <input type="text" wire:model.defer="business_name" class="form-control"
-                                            value="{{ $user->business_name }}">
+                                            placeholder="Enter your business name">
+                                        <button type="button" class="btn btn-site-primary"
+                                            wire:click="updateBusinessName" wire:loading.class="btn-dark"
+                                            wire:loading.class.remove="btn-site-primary" wire:loading.attr="disabled"
+                                            wire:target="updateBusinessName">
+                                            <span wire:loading.remove wire:target="updateBusinessName">Update</span>
+                                            <span wire:loading wire:target="updateBusinessName">
+                                                <span class="spinner-border spinner-border-sm text-light"
+                                                    role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
                                     </div>
+                                    <small class="text-danger">
+                                        @error('business_name')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Email</label>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <input type="email" class="form-control" wire:model.defer="email"
-                                                    value="{{ $user->email }}">
-                                            </div>
-                                        </div>
+                                <div class="col-12 mb-3">
+                                    <label>Email</label>
+                                    <div class="input-group">
+                                        <input type="email" class="form-control" wire:model.defer="email"
+                                            placeholder="Enter your email address">
+                                        <button type="button" class="btn btn-site-primary" wire:click="updateEmail"
+                                            wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
+                                            wire:loading.attr="disabled" wire:target="updateEmail">
+                                            <span wire:loading.remove wire:target="updateEmail">Update</span>
+                                            <span wire:loading wire:target="updateEmail">
+                                                <span class="spinner-border spinner-border-sm text-light"
+                                                    role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
                                     </div>
+                                    <small class="text-danger">
+                                        @error('email')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Business Phone</label>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <input type="text" class="form-control"
-                                                    wire:model.defer="business_phone"
-                                                    value="{{ $user->business_phone }}">
-                                            </div>
-                                        </div>
+                                <div class="col-12 mb-3">
+                                    <label>Business Phone</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" wire:model.defer="business_phone"
+                                            placeholder="Enter your business number">
+                                        <button type="button" class="btn btn-site-primary"
+                                            wire:click="updateBusinessPhone" wire:loading.class="btn-dark"
+                                            wire:loading.class.remove="btn-site-primary" wire:loading.attr="disabled"
+                                            wire:target="updateBusinessPhone">
+                                            <span wire:loading.remove wire:target="updateBusinessPhone">Update</span>
+                                            <span wire:loading wire:target="updateBusinessPhone">
+                                                <span class="spinner-border spinner-border-sm text-light"
+                                                    role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
                                     </div>
+                                    <small class="text-danger">
+                                        @error('business_phone')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Phone</label>
-                                        <div class="row ">
-                                            <div class="col-md-12">
-                                                <input type="tel" class="form-control" wire:model.defer="phone"
-                                                    value="{{ $user->phone }}">
-                                            </div>
-                                        </div>
+                                <div class="col-12 mb-3">
+                                    <label>Personal Phone</label>
+                                    <div class="input-group">
+                                        <input type="tel" class="form-control" wire:model.defer="phone"
+                                            placeholder="Enter your phone number">
+                                        <button type="button" class="btn btn-site-primary" wire:click="updatePhone"
+                                            wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
+                                            wire:loading.attr="disabled" wire:target="updatePhone">
+                                            <span wire:loading.remove wire:target="updatePhone">Update</span>
+                                            <span wire:loading wire:target="updatePhone">
+                                                <span class="spinner-border spinner-border-sm text-light"
+                                                    role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
                                     </div>
+                                    <small class="text-danger">
+                                        @error('phone')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
-                            </div>
-                            <div class="modal-footer hidden">
-                                <button type="button" class="btn btn-secondary"
-                                    data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary" wire:loading.class="btn-dark"
-                                    wire:loading.class.remove="btn-primary" wire:loading.attr="disabled"
-                                    wire:target="update">
-                                    <span wire:loading.remove wire:target="update">Save</span>
-                                    <span wire:loading wire:target="update">
-                                        <span class="spinner-border spinner-border-sm" role="status"
-                                            aria-hidden="true"></span>
-                                    </span>
-                                </button>
                             </div>
                         </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" wire:click="resetModal"
+                            data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -261,7 +301,7 @@
                                                     <div class="col-12 col-lg-4">
                                                         <img class="img img-fluid img-thumbnail"
                                                             src="{{ config('constants.BUCKET') . $user->user_img }}"
-                                                            alt="No image uploaded :(">
+                                                            alt="Store image not uploaded :(">
                                                         <form wire:submit.prevent="updateImage">
                                                             <input type="file" class="my-3"
                                                                 wire:model.defer="image_to_upload" accept="image/*">
@@ -291,28 +331,35 @@
                                                             <table class="w-100">
                                                                 <tr>
                                                                     <td>
-                                                                        <input type="text" name="name"
+                                                                        <input type="text"
                                                                             value="{{ $user->name }} {{ $user->l_name }}"
                                                                             class="form-control w-100" disabled />
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td>
-                                                                        <input type="text" name="email"
-                                                                            value="{{ $user->email }}"
-                                                                            class="form-control w-100" disabled />
-                                                                    </td>
-                                                                </tr>
-                                                                <tr>
-                                                                    <td>
-                                                                        <input type="text" name="business_name"
+                                                                        <input type="text"
                                                                             value="{{ $user->business_name }}"
                                                                             class="form-control w-100" disabled />
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td>
-                                                                        <input type="text" name="phone"
+                                                                        <input type="text"
+                                                                            value="{{ $user->email }}"
+                                                                            class="form-control w-100" disabled />
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <input type="text"
+                                                                            value="{{ $user->business_phone }}"
+                                                                            class="form-control w-100" disabled />
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        <input type="text"
                                                                             value="{{ $user->phone }}"
                                                                             class="form-control w-100" disabled />
                                                                     </td>
@@ -324,12 +371,12 @@
                                                         <div class="col-lg-4"></div>
                                                         <div class="col-lg-8">
                                                             <div class="text-center">
-                                                                <a style="background: #ffcf42;color:black;font-weight: 600"
-                                                                    class="col-lg-12 w-100 pb-2 border-0 btn btn-secondary rounded-pill"
+                                                                <button type="button"
+                                                                    class="col-12 px-5 py-2 border-0 rounded-pill cstm-edit-btn"
                                                                     data-bs-toggle="modal"
-                                                                    data-bs-target="#editUserModal"
-                                                                    onclick="event.preventDefault();">Edit
-                                                                    Profile</a>
+                                                                    data-bs-target="#editUserModal">
+                                                                    Edit Profile
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -347,8 +394,7 @@
                                                                                     <input type="text"
                                                                                         value="{{ Str::limit($user->full_address, 50) }}"
                                                                                         class="form-control w-100"
-                                                                                        disabled
-                                                                                        title="{{ $user->full_address }}" />
+                                                                                        disabled />
                                                                                 </td>
                                                                             </tr>
                                                                             <tr>
@@ -399,12 +445,12 @@
                                                                 <div class="col-lg-4"></div>
                                                                 <div class="col-lg-8">
                                                                     <div class="text-center">
-                                                                        <a style="background: #ffcf42;color:black;font-weight: 600"
-                                                                            class="col-12 w-100 pb-2 border-0 btn btn-secondary rounded-pill"
+                                                                        <button type="button"
+                                                                            class="col-12 px-5 py-2 border-0 rounded-pill cstm-edit-btn"
                                                                             data-bs-toggle="modal"
-                                                                            data-bs-target="#map_modal">
+                                                                            data-bs-target="#mapModal">
                                                                             Edit Location
-                                                                        </a>
+                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -442,14 +488,14 @@
                                                         </div>
                                                         <div class="col-lg-8">
                                                             <div class="text-center">
-                                                                <button type="submit"
+                                                                <button type="button"
                                                                     class="col-12 px-5 py-2 border-0 rounded-pill cstm-edit-btn"
+                                                                    wire:click="passwordUpdate"
                                                                     wire:loading.class="btn-dark"
                                                                     wire:loading.class.remove="cstm-edit-btn"
-                                                                    wire:loading.attr="disabled"
-                                                                    wire:click="passwordUpdate">
+                                                                    wire:loading.attr="disabled">
                                                                     <span wire:loading.remove
-                                                                        wire:target="passwordUpdate">Update</span>
+                                                                        wire:target="passwordUpdate">Reset</span>
                                                                     <span wire:loading wire:target="passwordUpdate">
                                                                         <span
                                                                             class="spinner-border spinner-border-sm text-light"
@@ -460,19 +506,16 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    {{-- Export product --}}
-                                                    <div class="row my-2">
+                                                    {{--
+                                                        Please do not remove the following code
+                                                        As we may require this in the future
+                                                    --}}
+                                                    {{-- <div class="row my-2">
                                                         <label class="col-lg-4">
                                                             Export Products
                                                         </label>
                                                         <div class="col-lg-8">
                                                             <div class="text-center">
-                                                                {{-- <a wire:click="exportProducts"
-                                                                    class="col-12 px-5 py-2 border-0 rounded-pill cstm-edit-btn"
-                                                                    type="submit">
-                                                                    Export
-                                                                </a> --}}
-
                                                                 <button type="submit"
                                                                     class="col-12 px-5 py-2 border-0 rounded-pill cstm-edit-btn"
                                                                     wire:loading.class="btn-dark"
@@ -488,10 +531,9 @@
                                                                         </span>
                                                                     </span>
                                                                 </button>
-
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </div> --}}
                                                 </div>
                                             </div>
                                         </div>
