@@ -6,13 +6,10 @@ use App\Products;
 use App\Services\CsvFileServices;
 use App\Services\ImageServices;
 use App\User;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
 
 class UserGeneralSettings extends Component
 {
@@ -28,14 +25,6 @@ class UserGeneralSettings extends Component
         $phone,
         $old_password,
         $new_password,
-        // $full_address,
-        // $unit_address,
-        // $postcode,
-        // $country,
-        // $state,
-        // $city,
-        // $lat,
-        // $lon,
         $user_img,
         $image_to_upload;
 
@@ -55,14 +44,6 @@ class UserGeneralSettings extends Component
             'phone',
             'old_password',
             'new_password',
-            // 'full_address',
-            // 'unit_address',
-            // 'postcode',
-            // 'country',
-            // 'state',
-            // 'city',
-            // 'lat',
-            // 'lon',
             'user_img',
             'image_to_upload',
         ]);
