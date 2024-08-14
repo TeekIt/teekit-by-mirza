@@ -162,10 +162,29 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Helpers
      */
-    public static function updateInfo(int $id, array $hours = [], string $stripe_account_id = null): bool
-    {
+    public static function updateInfo(
+        int $id,
+        string $name = null,
+        string $l_name = null,
+        string $email = null,
+        string $phone = null,
+        string $business_name = null,
+        string $business_phone = null,
+        string $password = null,
+        array $hours = [],
+        string $user_img = null,
+        string $stripe_account_id = null
+    ): bool {
         $user = self::findOrFail($id);
+        if (!is_null($name)) $user->name = $name;
+        if (!is_null($l_name)) $user->l_name = $l_name;
+        if (!is_null($email)) $user->email = $email;
+        if (!is_null($phone)) $user->phone = '+44' . $phone;
+        if (!is_null($business_name)) $user->business_name = $business_name;
+        if (!is_null($business_phone)) $user->business_phone = '+44' . $business_phone;
+        if (!is_null($password)) $user->password = Hash::make($password);
         if (!empty($hours)) $user->business_hours = json_encode($hours);
+        if (!is_null($user_img)) $user->user_img = $user_img;
         if (!is_null($stripe_account_id)) $user->stripe_account_id = $stripe_account_id;
         return $user->save();
     }
