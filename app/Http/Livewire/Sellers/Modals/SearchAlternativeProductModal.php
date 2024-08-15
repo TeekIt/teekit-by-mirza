@@ -11,7 +11,6 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 /* Search Alternative Product shortly known as "SAP" */
-
 class SearchAlternativeProductModal extends Component
 {
     use WithPagination;

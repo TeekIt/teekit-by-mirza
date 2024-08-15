@@ -7,7 +7,7 @@
 
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
-        @include('layouts.admin.navbar')
+        @include('layouts.common.navbar')
         @include('layouts.admin.sidebar')
 
         <!-- Content Wrapper. Contains page content -->

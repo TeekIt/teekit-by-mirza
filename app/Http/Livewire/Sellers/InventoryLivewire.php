@@ -13,6 +13,7 @@ use Livewire\WithPagination;
 class InventoryLivewire extends Component
 {
     use WithPagination;
+    
     public
         $category_id,
         $category,
@@ -137,7 +138,7 @@ class InventoryLivewire extends Component
         } elseif (Gate::allows('child_seller')) {
             /*
             1st scenario when a child store will come he will have parent products with "0" Qty
-            2nd after entering the Qty for each product a child store can see his own entered Qty 
+            2nd after entering the Qty for each product a child store can see his own entered Qty
              */
             $data = Products::getChildSellerProductsForView(auth()->id(), $this->search, $this->category_id);
             $this->quantity = $this->populateQuantityArray($data);
