@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\DeviceToken;
+use App\Models\Notification;
 use App\notifications;
 use Illuminate\Http\Request;
-use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
@@ -20,7 +20,7 @@ class NotificationsController extends Controller
      */
     public function getNotifications()
     {
-        $notifications = notifications::query()->where('user_id', '=', Auth::id())->get();
+        $notifications = Notification::where('user_id', '=', Auth::id())->get();
         if ($notifications->count() <= 0) {
             return response()->json([
                 'data' => [],
@@ -43,7 +43,7 @@ class NotificationsController extends Controller
     public function deleteNotification($notification_id)
     {
         try {
-            $notification = notifications::find($notification_id);
+            $notification = Notification::find($notification_id);
             if (!empty($notification)) {
                 $notification->delete();
                 return response()->json([
@@ -89,7 +89,7 @@ class NotificationsController extends Controller
     {
         try {
             if (Gate::allows('superadmin')) {
-                $validatedData = notifications::validator($request);
+                $validatedData = Notification::validator($request);
                 if ($validatedData->fails()) {
                     flash('Error in sending notification because a required field is missing or invalid data.')->error();
                     return Redirect::back()->withInput($request->input());
@@ -134,7 +134,7 @@ class NotificationsController extends Controller
     public function notificationSendTest(Request $request)
     {
         try {
-            $validatedData = notifications::validator($request);
+            $validatedData = Notification::validator($request);
             if ($validatedData->fails()) {
                 return response()->json([
                     'data' => $validatedData->errors(),
