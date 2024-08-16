@@ -1,28 +1,16 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     @if (session()->has('error'))
-        <div class="bs-toast toast toast-placement-ex m-2 fade bg-danger top-0 end-0 show" role="alert"
-            aria-live="assertive" aria-atomic="true" data-delay="2000">
-            <div class="toast-header">
-                <i class="bx bx-bell me-2"></i>
-                <div class="me-auto fw-semibold">Error</div>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                {{ session()->get('error') }}
-            </div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong>
+            {{ session()->get('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
     @if (session()->has('success'))
-        <div class="bs-toast toast toast-placement-ex m-2 fade bg-success top-0 end-0 show" role="alert"
-            aria-live="assertive" aria-atomic="true" data-delay="2000">
-            <div class="toast-header">
-                <i class="bx bx-bell me-2"></i>
-                <div class="me-auto fw-semibold">Success</div>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                {{ session()->get('success') }}
-            </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Success!</strong>
+            {{ session()->get('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
     {{-- ************************************ Info Model ************************************ --}}
@@ -36,6 +24,22 @@
                         wire:click="resetModal"></button>
                 </div>
                 <div class="modal-body">
+                    {{-- @if ($modal_error)
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Error!</strong>
+                            {{ $modal_error_msg }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if ($modal_success)
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <strong>Success!</strong>
+                            {{ $modal_success_msg }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                        </div>
+                    @endif --}}
                     <div class="table-responsive text-nowrap">
                         <table class="table table-hover">
                             <tbody class="table-border-bottom-0">
@@ -106,70 +110,86 @@
                                     <th colspan="2" class="text-center">
                                         Apply Commissions
                                         <p class="text-muted text-sm fw-light">
-                                            You can either apply fixed or different commissions on all categories in
-                                            which the seller is selling the products
+                                            Apply the agreed commission for this seller on the following categories
                                         </p>
                                     </th>
                                 </tr>
-                                <tr>
-                                    <td colspan="2">
-                                        <div class="form-check">
-                                            <input type="radio" class="form-check-input" name="commissions"
-                                                id="fixedCommissionForAll">
-                                            <label class="form-check-label fw-bold" for="fixedCommissionForAll">
-                                                Fixed For All
-                                            </label>
-                                        </div>
-                                        <div>
-                                            <input type="number" class="form-control px-3"
-                                                placeholder="Enter fixed commission">
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2">
-                                        <div class="form-check">
-                                            <input type="radio" class="form-check-input" name="commissions"
-                                                id="differentCommissionForAll">
-                                            <label class="form-check-label fw-bold" for="differentCommissionForAll">
-                                                Different For All
-                                            </label>
-                                        </div>
-                                        <div class="d-flex">
-                                            <div class="p-2 w-50">Category Name</div>
-                                            <div class="p-2 w-50">
-                                                <input type="number" class="form-control px-3"
-                                                    placeholder="Enter commission for this category">
+                                @if ($categories)
+                                    <tr>
+                                        <td colspan="2">
+                                            <div class="form-check">
+                                                <input type="radio" class="form-check-input"
+                                                    wire:click="enableThis('enable_fixed_commission')"
+                                                    name="commissions" id="fixedCommissionForAll">
+                                                <label class="form-check-label fw-bold" for="fixedCommissionForAll">
+                                                    Fixed For All
+                                                </label>
                                             </div>
-                                        </div>
-                                        <div class="d-flex">
-                                            <div class="p-2 w-50">Category Name</div>
-                                            <div class="p-2 w-50">
+                                            <div>
                                                 <input type="number" class="form-control px-3"
-                                                    placeholder="Enter commission for this category">
+                                                    wire:model.defer="fixed_commission"
+                                                    placeholder="Enter fixed commission"
+                                                    @if (!$enable_fixed_commission) disabled @endif>
+                                                <small class="text-danger">
+                                                    @error('fixed_commission')
+                                                        {{ $message }}
+                                                    @enderror
+                                                </small>
                                             </div>
-                                        </div>
-                                        <div class="d-flex">
-                                            <div class="p-2 w-50">Category Name</div>
-                                            <div class="p-2 w-50">
-                                                <input type="number" class="form-control px-3"
-                                                    placeholder="Enter commission for this category">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <div class="form-check">
+                                                <input type="radio" class="form-check-input"
+                                                    wire:click="enableThis('enable_different_commissions')"
+                                                    name="commissions" id="differentCommissionForAll">
+                                                <label class="form-check-label fw-bold" for="differentCommissionForAll">
+                                                    Different For All
+                                                </label>
                                             </div>
-                                        </div>
-                                        <div>
-                                            <button type="button" class="btn btn-site-primary w-100 mt-4" wire:click="applyCommision"
-                                                wire:loading.class="btn-dark"
-                                                wire:loading.class.remove="btn-site-primary"
-                                                wire:loading.attr="disabled" wire:target="applyCommision">
-                                                <span wire:loading.remove wire:target="applyCommision">Apply</span>
-                                                <span wire:loading wire:target="applyCommision">
-                                                    <span class="spinner-border spinner-border-sm text-light"
-                                                        role="status" aria-hidden="true"></span>
-                                                </span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                            @foreach ($categories as $single_index => $value)
+                                                <div class="d-flex">
+                                                    <div class="p-2 w-50" wire:ignore>{{ $value->category_name }}</div>
+                                                    <div class="p-2 w-50">
+                                                        <input type="number" class="form-control px-3"
+                                                            wire:model.defer="different_commissions.{{ $single_index }}"
+                                                            placeholder="Enter commission for this category"
+                                                            @if (!$enable_different_commissions) disabled @endif>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                            <small class="text-danger">
+                                                @error('different_commissions')
+                                                    {{ $message }}
+                                                @enderror
+                                            </small>
+                                            <div>
+                                                <button type="button" class="btn btn-site-primary w-100 mt-4"
+                                                    wire:click="applyCommission" wire:loading.class="btn-dark"
+                                                    wire:loading.class.remove="btn-site-primary"
+                                                    wire:loading.attr="disabled" wire:target="applyCommission"
+                                                    @if (!$enable_apply_commission_btn) disabled @endif>
+                                                    <span wire:loading.remove wire:target="applyCommission">Apply</span>
+                                                    <span wire:loading wire:target="applyCommission">
+                                                        <span class="spinner-border spinner-border-sm text-light"
+                                                            role="status" aria-hidden="true"></span>
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @else
+                                    <tr>
+                                        <td colspan="2">
+                                            <div>
+                                                <p class="p-2 text-center">
+                                                    This seller has not uploaded products in any category yet
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endif
                                 {{-- Commision Sections - Ends --}}
 
                                 {{-- Service Fees Section - Begins --}}

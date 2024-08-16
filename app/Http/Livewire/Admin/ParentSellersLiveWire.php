@@ -2,6 +2,8 @@
 
 namespace App\Http\Livewire\Admin;
 
+use App\Categories;
+use App\Models\CommissionAndServiceFee;
 use App\User;
 use Exception;
 use Livewire\Component;
@@ -12,7 +14,7 @@ class ParentSellersLiveWire extends Component
     use WithPagination;
 
     public
-        $parent_seller_id,
+        $seller_id,
         $name,
         $email,
         $phone,
@@ -27,6 +29,17 @@ class ParentSellersLiveWire extends Component
         $total_withdraw,
         $is_online,
         $application_fee,
+        $enable_fixed_commission,
+        $enable_different_commissions,
+        $enable_apply_commission_btn,
+        $categories,
+        $fixed_commission,
+        $different_commissions = [],
+        $category_id_map,
+        $modal_success = false,
+        $modal_success_msg,
+        $modal_error = false,
+        $modal_error_msg,
         $search = '';
 
     private const
@@ -62,10 +75,30 @@ class ParentSellersLiveWire extends Component
         $this->resetValidation();
     }
 
+    public function enableThis($input_to_enable)
+    {
+        $this->resetAllErrors();
+
+        $this->{$input_to_enable} = true;
+
+        $commission_array = ['enable_fixed_commission', 'enable_different_commissions'];
+        if (in_array($input_to_enable, $commission_array)) {
+            $this->enable_apply_commission_btn = true;
+            if ($input_to_enable === $commission_array[0]) $this->enable_different_commissions = false;
+            if ($input_to_enable === $commission_array[1]) $this->enable_fixed_commission = false;
+        }
+    }
+
     public function renderInfoModal($id)
     {
         $data = User::find($id);
+
+        $this->categories = Categories::getAllCategoriesByStoreId($id);
+        $this->categories = ($this->categories->isEmpty()) ? [] : $this->categories;
+        $this->category_id_map = is_array($this->categories) ? [] : $this->categories->pluck('category_id')->toArray();
+
         if ($data) {
+            $this->seller_id = $data->id;
             $this->name = $data->name;
             $this->email = $data->email;
             $this->phone = $data->phone;
@@ -84,11 +117,6 @@ class ParentSellersLiveWire extends Component
             return redirect()->to(route('admin.sellers.parent'))->with('error', 'Record Not Found.');
         }
     }
-
-    // public function renderDeleteModal($id)
-    // {
-    //     $this->parent_seller_id = $id;
-    // }
 
     // public function destroy()
     // {
@@ -121,7 +149,52 @@ class ParentSellersLiveWire extends Component
     //     $this->$form_name();
     // }
 
-    public function applyCommision() {}
+    public function applyCommission()
+    {
+        if ($this->enable_fixed_commission) $this->validate([
+            'fixed_commission' => 'required|int',
+        ]);
+
+        if ($this->enable_different_commissions) $this->validate([
+            'different_commissions' => 'required|array',
+        ]);
+        try {
+            /* Perform some operation */
+            if ($this->enable_fixed_commission) {
+
+                // if ($is_fixed) {
+                //     $commissionData = ['fixed_commission' => $commission['fixed_commission']];
+                // } else {
+                //     $commissionData = ['different_commissions' => $commissionArray];
+                // }
+
+                $inserted = CommissionAndServiceFee::updateOrAdd($this->seller_id, ['fixed_commission' => (int)$this->fixed_commission]);
+            };
+
+            if ($this->enable_different_commissions) {
+                // dd($this->category_id_map);
+
+                // foreach ($this->different_commissions as $index => $commission) {
+                //     $categoryId = $this->categoryIdMap[$index] ?? null;
+                //     if ($categoryId) {
+                //         // Save commission for this category ID
+                //     }
+                // }
+
+            }
+            /* Operation finished */
+            if ($inserted) {
+                $this->modal_success = true;
+                $this->modal_success_msg = config('constants.DATA_UPDATED_SUCCESS');
+            } else {
+                $this->modal_error = true;
+                $this->modal_error_msg = config('constants.UPDATION_FAILED');
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', config('messages.INVALID_DATA'));
+        }
+    }
 
     public function changeStatus($id, $is_active)
     {

@@ -77,7 +77,7 @@ class Categories extends Model
 
     public static function getAllCategoriesByStoreId(int $store_id)
     {
-        return  Categories::select('id as category_id', 'category_name', 'category_image', 'created_at', 'updated_at')
+        return Categories::select('id as category_id', 'category_name', 'category_image', 'created_at', 'updated_at')
             ->whereHas('qty', function ($query) use ($store_id) {
                 $query->where('users_id', $store_id);
             })->get();
@@ -112,7 +112,7 @@ class Categories extends Model
 
     //     // // Get active parent and child stores that have products in the specified category
     //     // return User::whereIn('id', $store_ids)
-    //     // ->where('is_active', '=', 1) 
+    //     // ->where('is_active', '=', 1)
     //     // ->paginate(10);
 
     //     // $sellers = User::join('qty', 'qty.category_id', '=', 'products.category_id')
