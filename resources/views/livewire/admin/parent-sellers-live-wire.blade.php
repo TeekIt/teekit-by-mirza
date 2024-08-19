@@ -14,12 +14,12 @@
         </div>
     @endif
     {{-- ************************************ Info Model ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="infoModel" tabindex="-1" aria-labelledby="infoModelLabel"
+    <div wire:ignore.self class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg modal-fullscreen-lg-down" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="infoModelLabel">Seller Information</h5>
+                    <h5 class="modal-title" id="infoModalLabel">Seller Information</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         wire:click="resetModal"></button>
                 </div>
@@ -295,7 +295,7 @@
                                     <input type="checkbox" class="form-check-input select-checkbox" title="Select"
                                         id="{{ $single_index->id }}">
                                     <button type="button" class="btn btn-primary" title="Show detail information"
-                                        data-bs-toggle="modal" data-bs-target="#infoModel"
+                                        data-bs-toggle="modal" data-bs-target="#infoModal"
                                         wire:click="renderInfoModal({{ $single_index->id }})">
                                         <i class="fas fa-info-circle"></i>
                                     </button>

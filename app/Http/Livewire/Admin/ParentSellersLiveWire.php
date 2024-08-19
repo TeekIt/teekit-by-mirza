@@ -35,6 +35,7 @@ class ParentSellersLiveWire extends Component
         $categories,
         $fixed_commission,
         $different_commissions = [],
+        $seller_commission_and_service_fee,
         $category_id_map,
         $modal_success = false,
         $modal_success_msg,
@@ -113,6 +114,7 @@ class ParentSellersLiveWire extends Component
             $this->total_withdraw = $data->total_withdraw;
             $this->is_online = $data->is_online;
             $this->application_fee = $data->application_fee;
+            $this->seller_commission_and_service_fee = $data->commissionAndServiceFee;
         } else {
             return redirect()->to(route('admin.sellers.parent'))->with('error', 'Record Not Found.');
         }
@@ -160,27 +162,30 @@ class ParentSellersLiveWire extends Component
         ]);
         try {
             /* Perform some operation */
-            if ($this->enable_fixed_commission) {
-
-                // if ($is_fixed) {
-                //     $commissionData = ['fixed_commission' => $commission['fixed_commission']];
-                // } else {
-                //     $commissionData = ['different_commissions' => $commissionArray];
-                // }
-
-                $inserted = CommissionAndServiceFee::updateOrAdd($this->seller_id, ['fixed_commission' => (int)$this->fixed_commission]);
-            };
+            if ($this->enable_fixed_commission)
+                $inserted = CommissionAndServiceFee::updateOrAdd(
+                    $this->seller_id,
+                    ['fixed_commission' => (int)$this->fixed_commission]
+                );
 
             if ($this->enable_different_commissions) {
                 // dd($this->category_id_map);
+                foreach ($this->different_commissions as $index => $commission) {
+                    /*
+                    * Using $category_id_map to retreive the category ids
+                    * Which were saved during the initial rendering of the "infoModal"
+                    */
+                    $category_id = $this->category_id_map[$index] ?? null;
+                    if ($category_id) {
+                        $different_commissions_array[] = ['category_id' => $category_id, 'commission' => (int)$commission];
+                    }
+                }
 
-                // foreach ($this->different_commissions as $index => $commission) {
-                //     $categoryId = $this->categoryIdMap[$index] ?? null;
-                //     if ($categoryId) {
-                //         // Save commission for this category ID
-                //     }
-                // }
-
+                // dd($different_commissions_array);
+                $inserted = CommissionAndServiceFee::updateOrAdd(
+                    $this->seller_id,
+                    ['different_commissions' => $different_commissions_array]
+                );
             }
             /* Operation finished */
             if ($inserted) {

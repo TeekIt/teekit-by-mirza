@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\CommissionAndServiceFee;
 use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -101,6 +102,11 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Relations
      */
+    public function commissionAndServiceFee(): HasOne
+    {
+        return $this->hasOne(CommissionAndServiceFee::class, 'seller_id');
+    }
+
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany('App\Role', 'role_user');
