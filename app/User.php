@@ -4,6 +4,7 @@ namespace App;
 
 use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -289,7 +290,7 @@ class User extends Authenticatable implements JWTSubject
             ->paginate(10);
     }
 
-    public static function getParentAndChildSellersByState(string $state): object
+    public static function getParentAndChildSellersByState(string $state): Collection
     {
         return self::where('is_active', 1)
             ->whereNotNull('lat')
@@ -300,7 +301,7 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function getParentSellersSpecificColumns(array $columns): object
+    public static function getParentSellersSpecificColumns(array $columns): Collection
     {
         return self::select($columns)
             ->where('role_id', 2)
