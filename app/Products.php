@@ -3,11 +3,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -100,9 +102,9 @@ class Products extends Model
         ?float $max_price,
         ?float $min_weight,
         ?float $max_weight
-    ): object {
+    ): LengthAwarePaginator {
         return self::search($product_name)
-            ->query(fn ($query) => $query->with([
+            ->query(fn($query) => $query->with([
                 'store:id,business_name,business_hours,full_address,country,state,city,lat,lon',
                 'qty:id,products_id,qty',
                 'images:id,product_id,product_image',
@@ -136,7 +138,7 @@ class Products extends Model
             ->paginate(20);
     }
 
-    public static function getAllProducts(): object
+    public static function getAllProducts(): LengthAwarePaginator
     {
         return self::with([
             'qty:id,products_id,qty',
@@ -149,7 +151,22 @@ class Products extends Model
             ->paginate(20);
     }
 
-    public static function getProductsInfoBySellerId(int $seller_id): object
+    public static function getProductsByCategoryId(int $category_id, array $columns): LengthAwarePaginator
+    {
+        return self::select($columns)
+            ->with([
+                'store:id,business_name,business_hours,full_address,country,state,city,lat,lon,user_img',
+                'qty' => function ($query) use ($category_id) {
+                    $query->select('id', 'products_id', 'qty')->where('category_id', $category_id);
+                },
+                'images:id,product_id,product_image',
+                'category:id,category_name,category_image'
+            ])->where('category_id', $category_id)
+            ->where('status', 1)
+            ->paginate(10);
+    }
+
+    public static function getProductsInfoBySellerId(int $seller_id): LengthAwarePaginator
     {
         return self::with([
             'qty' => function ($query) use ($seller_id) {
@@ -161,10 +178,11 @@ class Products extends Model
             ->whereHas('qty', function ($query) use ($seller_id) {
                 $query->where('users_id', $seller_id);
             })
+            ->where('status', 1)
             ->paginate(20);
     }
 
-    public static function getProductInfo(int $seller_id, int $product_id, array $columns): object
+    public static function getProductInfo(int $seller_id, int $product_id, array $columns): Products
     {
         $product = self::select($columns)
             ->with([
@@ -178,6 +196,7 @@ class Products extends Model
                 $query->where('users_id', $seller_id);
             })
             ->where('id', $product_id)
+            ->where('status', 1)
             ->first();
 
         // $product->qty = $product->quantities[0]->qty;
@@ -187,24 +206,24 @@ class Products extends Model
         return $product;
     }
 
-    public static function getOnlyProductDetailsById(int $product_id): object
+    public static function getOnlyProductDetailsById(int $product_id): Products
     {
         return self::where('id', $product_id)
             ->where('status', '1')
             ->first();
     }
 
-    public static function getParentSellerProducts(int $seller_id): object
+    public static function getParentSellerProducts(int $seller_id): LengthAwarePaginator
     {
         return self::where('user_id', '=', $seller_id)->where('status', '=', 1)->paginate(20);
     }
 
-    public static function getParentSellerProductsAsc(int $seller_id): object
+    public static function getParentSellerProductsAsc(int $seller_id): Collection
     {
         return self::where('user_id', '=', $seller_id)->where('status', '=', 1)->orderBy('id', 'asc')->get();
     }
 
-    public static function getParentSellerProductsForView(int $seller_id, string $search = '', int $category_id = null, string $order_by): object
+    public static function getParentSellerProductsForView(int $seller_id, string $search = '', int $category_id = null, string $order_by): LengthAwarePaginator
     {
         return self::with('category')
             ->withAvg('rattings:ratting', 'average_ratting')
@@ -217,7 +236,7 @@ class Products extends Model
             ->paginate(12);
     }
 
-    public static function getChildSellerProductsForView(int $child_seller_id, string $search = '', int $category_id = null): object
+    public static function getChildSellerProductsForView(int $child_seller_id, string $search = '', int $category_id = null): LengthAwarePaginator
     {
         $parent_seller_id = User::find($child_seller_id)->parent_store_id;
         $qty = Qty::where('users_id', $child_seller_id)->first();
@@ -256,7 +275,7 @@ class Products extends Model
         }
     }
 
-    public function getProductsByParameters(int $store_id, string $sku, int $catgory_id): object
+    public function getProductsByParameters(int $store_id, string $sku, int $catgory_id): Products
     {
         return self::where('user_id', '=', $store_id)
             ->where('sku', '=', $sku)
@@ -285,7 +304,7 @@ class Products extends Model
         return $product->price * 1.2;
     }
 
-    public static function getFeaturedProducts(int $store_id): object
+    public static function getFeaturedProducts(int $store_id): LengthAwarePaginator
     {
         return self::whereHas('store', function ($query) {
             $query->where('is_active', 1);
@@ -296,7 +315,7 @@ class Products extends Model
             ->paginate(10);
     }
 
-    public static function getActiveProducts(): object
+    public static function getActiveProducts(): LengthAwarePaginator
     {
         return self::whereHas('store', function ($query) {
             $query->where('is_active', 1);
@@ -304,24 +323,24 @@ class Products extends Model
             ->paginate(10);
     }
 
-    public static function getProductsByLocation(object $request): object
+    public static function getProductsByLocation(object $request): LengthAwarePaginator
     {
         $latitude = $request->get('lat');
         $longitude = $request->get('lon');
         return self::selectRaw('*, ( 6367 * acos( cos( radians(?) ) * cos( radians( lat ) ) * cos( radians( lon ) - radians(?) ) + sin( radians(?) ) * sin( radians( lat ) ) ) ) AS distance', [$latitude, $longitude, $latitude])
             ->orderBy('distance')
-            ->paginate();
+            ->paginate(10);
     }
 
-    public static function getBulkProducts(object $request): object
+    public static function getBulkProducts(object $request): LengthAwarePaginator
     {
         $ids = explode(',', $request->ids);
-        return self::query()->whereIn('id', $ids)->paginate();
+        return self::whereIn('id', $ids)->paginate(10);
     }
     /**
      * SAP == Search Alternative Product
      */
-    public static function getProductsForSAPModal(int $seller_id, string $search = ''): object
+    public static function getProductsForSAPModal(int $seller_id, string $search = ''): LengthAwarePaginator
     {
         if (!empty($search)) $search = str_replace(' ', '%', $search);
         return self::join('qty', 'products.id', '=', 'qty.products_id')
@@ -337,7 +356,6 @@ class Products extends Model
     public static function markAsFeatured(int $id, int $status): int
     {
         return self::where('id', $id)
-            ->where('user_id', Auth::id())
             ->update([
                 'featured' => $status
             ]);
@@ -346,7 +364,6 @@ class Products extends Model
     public static function toggleProduct(int $id, int $status): int
     {
         return self::where('id', $id)
-            ->where('user_id', Auth::id())
             ->update([
                 'status' => $status
             ]);
