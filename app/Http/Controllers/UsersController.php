@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Services\JsonResponseServices;
 use App\Services\WebResponseServices;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class UsersController extends Controller
 {
@@ -146,16 +147,20 @@ class UsersController extends Controller
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
                 'state' => 'required|string',
-                'page' => 'required|numeric'
+                // 'page' => 'required|numeric',
             ]);
             if ($validated_data->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
-            $sellers = User::getParentAndChildSellersByState($request->state);
-            // $pagination = $sellers->toArray();
-            // unset($pagination['data']);
 
-            if (!$sellers->isEmpty()) $data = GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
+            $data = Cache::remember('sellers' . $request->state . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
+                $sellers = User::getParentAndChildSellersByState($request->state);
+                // $pagination = $sellers->toArray();
+                // unset($pagination['data']);
+                if (!$sellers->isEmpty()) {
+                    return GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
+                }
+            });
 
             if (empty($data)) {
                 return JsonResponseServices::getApiResponse(
@@ -166,6 +171,13 @@ class UsersController extends Controller
                 );
             }
 
+            return JsonResponseServices::getApiResponse(
+                $data,
+                config('constants.TRUE_STATUS'),
+                '',
+                config('constants.HTTP_OK'),
+            );
+
             // return JsonResponseServices::getApiResponseExtention(
             //     $data,
             //     config('constants.TRUE_STATUS'),
@@ -174,13 +186,6 @@ class UsersController extends Controller
             //     $pagination,
             //     config('constants.HTTP_OK')
             // );
-
-            return JsonResponseServices::getApiResponse(
-                $data,
-                config('constants.TRUE_STATUS'),
-                '',
-                config('constants.HTTP_OK'),
-            );
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(
