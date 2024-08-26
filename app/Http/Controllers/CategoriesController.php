@@ -21,14 +21,9 @@ class CategoriesController extends Controller
     public function add(Request $request)
     {
         try {
-            $validate = Categories::validator($request);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            $validated_data = Categories::validator($request);
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
             $category = Categories::add($request);
             return JsonResponseServices::getApiResponse(
@@ -54,14 +49,9 @@ class CategoriesController extends Controller
     public function update(Request $request, $category_id)
     {
         try {
-            $validate = Categories::validator($request);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->messages(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            $validated_data = Categories::validator($request);
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
             $category = Categories::updateCategory($request, $category_id);
             return JsonResponseServices::getApiResponse(
@@ -87,22 +77,17 @@ class CategoriesController extends Controller
     public function all(Request $request)
     {
         try {
-            $validate = Validator::make($request->all(), [
+            $validated_data = Validator::make($request->all(), [
                 'store_id' => 'integer',
             ]);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
 
             if ($request->store_id)
-                $data =  Categories::getAllCategoriesByStoreId($request->store_id);
+                $data =  Categories::getAllCategoriesByStoreId($request->store_id, ['id as category_id', 'category_name', 'category_image']);
             else
-                $data = Cache::rememberForever('allCategories', fn () => Categories::allCategories());
+                $data = Cache::rememberForever('allCategories', fn() => Categories::allCategories(['id as category_id', 'category_name', 'category_image']));
             /*
             * Just creating this variable so we don't have to call the "isEmpty()" function again & again
             * Which will obviouly reduce the API response speed
@@ -131,17 +116,13 @@ class CategoriesController extends Controller
     public function products(Request $request)
     {
         try {
-            $validate = Validator::make($request->route()->parameters(), [
+            $validated_data = Validator::make($request->route()->parameters(), [
                 'category_id' => 'required|integer',
             ]);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
+            
             if ($request->store_id)
                 $data = Qty::getProductsByGivenIds($request->category_id, $request->store_id);
             else
@@ -176,23 +157,18 @@ class CategoriesController extends Controller
     public function stores(Request $request)
     {
         try {
-            $validate = Validator::make($request->query(), [
+            $validated_data = Validator::make($request->query(), [
                 'category_id' => 'required|integer',
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
                 'state' => 'required|string'
                 // 'page' => 'required|numeric'
             ]);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            if ($validated_data->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
 
-            $stores = Cache::remember('get-stores-by-category'. $request->category_id . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
+            $stores = Cache::remember('get-stores-by-category' . $request->category_id . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
                 return Qty::getSellersByGivenParams($request->category_id, $request->state);
             });
 
