@@ -57,7 +57,7 @@
                                 </tr>
                                 <tr>
                                     <th>Address</th>
-                                    <td style="white-space: pre-line;"><?php echo wordwrap($address_1, $width = 50, $break = "\n", $cut = false); ?>
+                                    <td style="white-space: pre-line;"><?php echo wordwrap($full_address, $width = 50, $break = "\n", $cut = false); ?>
                                     </td>
                                 </tr>
                                 <tr>
@@ -120,7 +120,8 @@
                                             <div class="form-check">
                                                 <input type="radio" class="form-check-input"
                                                     wire:click="enableThis('enable_fixed_commission')"
-                                                    name="commissions" id="fixedCommissionForAll">
+                                                    name="commissions" id="fixedCommissionForAll"
+                                                    @if ($enable_fixed_commission) checked @endif>
                                                 <label class="form-check-label fw-bold" for="fixedCommissionForAll">
                                                     Fixed For All
                                                 </label>
@@ -143,7 +144,8 @@
                                             <div class="form-check">
                                                 <input type="radio" class="form-check-input"
                                                     wire:click="enableThis('enable_different_commissions')"
-                                                    name="commissions" id="differentCommissionForAll">
+                                                    name="commissions" id="differentCommissionForAll"
+                                                    @if ($enable_different_commissions) checked @endif>
                                                 <label class="form-check-label fw-bold" for="differentCommissionForAll">
                                                     Different For All
                                                 </label>
@@ -183,7 +185,7 @@
                                     <tr>
                                         <td colspan="2">
                                             <div>
-                                                <p class="p-2 text-center">
+                                                <p class="p-2 text-center text-danger">
                                                     This seller has not uploaded products in any category yet
                                                 </p>
                                             </div>

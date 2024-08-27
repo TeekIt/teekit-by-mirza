@@ -14,34 +14,33 @@ class ParentSellersLiveWire extends Component
     use WithPagination;
 
     public
-        $seller_id,
-        $name,
-        $email,
-        $phone,
-        $address_1,
-        $business_name,
-        $lat,
-        $lon,
-        $user_img,
-        $last_login,
-        $email_verified_at,
-        $pending_withdraw,
-        $total_withdraw,
-        $is_online,
-        $application_fee,
-        $enable_fixed_commission,
-        $enable_different_commissions,
-        $enable_apply_commission_btn,
-        $categories,
-        $fixed_commission,
-        $different_commissions = [],
-        $seller_commission_and_service_fee,
-        $category_id_map,
-        $modal_success = false,
-        $modal_success_msg,
-        $modal_error = false,
-        $modal_error_msg,
-        $search = '';
+    $seller_id,
+    $name,
+    $email,
+    $phone,
+    $address_1,
+    $business_name,
+    $lat,
+    $lon,
+    $user_img,
+    $last_login,
+    $email_verified_at,
+    $pending_withdraw,
+    $total_withdraw,
+    $is_online,
+    $application_fee,
+    $enable_fixed_commission,
+    $enable_different_commissions,
+    $enable_apply_commission_btn,
+    $categories,
+    $fixed_commission,
+    $different_commissions = [],
+    $category_id_map,
+    $modal_success = false,
+    $modal_success_msg,
+    $modal_error = false,
+    $modal_error_msg,
+    $search = '';
 
     private const
         ACTIVE = 1,
@@ -67,6 +66,18 @@ class ParentSellersLiveWire extends Component
             'total_withdraw',
             'is_online',
             'application_fee',
+            'enable_fixed_commission',
+            'enable_different_commissions',
+            'enable_apply_commission_btn',
+            'categories',
+            'fixed_commission',
+            'different_commissions',
+            'category_id_map',
+            'modal_success',
+            'modal_success_msg',
+            'modal_error',
+            'modal_error_msg',
+            'search',
         ]);
     }
 
@@ -85,8 +96,37 @@ class ParentSellersLiveWire extends Component
         $commission_array = ['enable_fixed_commission', 'enable_different_commissions'];
         if (in_array($input_to_enable, $commission_array)) {
             $this->enable_apply_commission_btn = true;
-            if ($input_to_enable === $commission_array[0]) $this->enable_different_commissions = false;
-            if ($input_to_enable === $commission_array[1]) $this->enable_fixed_commission = false;
+
+            if ($input_to_enable === $commission_array[0])
+                $this->enable_different_commissions = false;
+
+            if ($input_to_enable === $commission_array[1])
+                $this->enable_fixed_commission = false;
+        }
+    }
+
+    public function renderCommissions($commission)
+    {
+        $commission = json_decode($commission);
+
+        if (isset($commission->fixed_commission)) {
+
+            $this->enableThis('enable_fixed_commission');
+            $this->fixed_commission = $commission->fixed_commission;
+
+        } else if (isset($commission->different_commissions)) {
+
+            $this->enableThis('enable_different_commissions');
+            /* Convert different_commissions to an array of associative arrays */
+            $different_commissions = collect($commission->different_commissions)->map(fn($item) => (array) $item);
+
+            /* Align commissions according to categories */
+            $this->different_commissions = collect($this->categories)
+                ->mapWithKeys(function ($category, $index) use ($different_commissions) {
+                    $matching_commission = $different_commissions->firstWhere('category_id', $category->category_id);
+                    return [$index => $matching_commission['commission'] ?? 0];
+                })->toArray();
+
         }
     }
 
@@ -103,7 +143,7 @@ class ParentSellersLiveWire extends Component
             $this->name = $data->name;
             $this->email = $data->email;
             $this->phone = $data->phone;
-            $this->address_1 = $data->address_1;
+            $this->full_address = $data->full_address;
             $this->business_name = $data->business_name;
             $this->lat = $data->lat;
             $this->lon = $data->lon;
@@ -114,7 +154,11 @@ class ParentSellersLiveWire extends Component
             $this->total_withdraw = $data->total_withdraw;
             $this->is_online = $data->is_online;
             $this->application_fee = $data->application_fee;
-            $this->seller_commission_and_service_fee = $data->commissionAndServiceFee;
+            $seller_commission_and_service_fee = $data->commissionAndServiceFee;
+
+            if ($seller_commission_and_service_fee?->commission) {
+                $this->renderCommissions($seller_commission_and_service_fee->commission);
+            }
         } else {
             return redirect()->to(route('admin.sellers.parent'))->with('error', 'Record Not Found.');
         }
@@ -153,31 +197,33 @@ class ParentSellersLiveWire extends Component
 
     public function applyCommission()
     {
-        if ($this->enable_fixed_commission) $this->validate([
-            'fixed_commission' => 'required|int',
-        ]);
+        if ($this->enable_fixed_commission)
+            $this->validate([
+                'fixed_commission' => 'required|int',
+            ]);
 
-        if ($this->enable_different_commissions) $this->validate([
-            'different_commissions' => 'required|array',
-        ]);
+        if ($this->enable_different_commissions)
+            $this->validate([
+                'different_commissions' => 'required|array',
+            ]);
         try {
             /* Perform some operation */
             if ($this->enable_fixed_commission)
                 $inserted = CommissionAndServiceFee::updateOrAdd(
                     $this->seller_id,
-                    ['fixed_commission' => (int)$this->fixed_commission]
+                    ['fixed_commission' => (int) $this->fixed_commission]
                 );
 
             if ($this->enable_different_commissions) {
                 // dd($this->category_id_map);
                 foreach ($this->different_commissions as $index => $commission) {
                     /*
-                    * Using $category_id_map to retreive the category ids
-                    * Which were saved during the initial rendering of the "infoModal"
-                    */
+                     * Using $category_id_map to retreive the category ids
+                     * Which were saved during the initial rendering of the "infoModal"
+                     */
                     $category_id = $this->category_id_map[$index] ?? null;
                     if ($category_id) {
-                        $different_commissions_array[] = ['category_id' => $category_id, 'commission' => (int)$commission];
+                        $different_commissions_array[] = ['category_id' => $category_id, 'commission' => (int) $commission];
                     }
                 }
 
