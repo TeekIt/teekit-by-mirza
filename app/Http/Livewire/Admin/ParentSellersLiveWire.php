@@ -215,7 +215,6 @@ class ParentSellersLiveWire extends Component
                 );
 
             if ($this->enable_different_commissions) {
-                // dd($this->category_id_map);
                 foreach ($this->different_commissions as $index => $commission) {
                     /*
                      * Using $category_id_map to retreive the category ids
@@ -227,7 +226,6 @@ class ParentSellersLiveWire extends Component
                     }
                 }
 
-                // dd($different_commissions_array);
                 $inserted = CommissionAndServiceFee::updateOrAdd(
                     $this->seller_id,
                     ['different_commissions' => $different_commissions_array]
