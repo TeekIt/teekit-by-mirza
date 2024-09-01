@@ -32,13 +32,13 @@ class QtyController extends Controller
                     'message' => $validate->errors()
                 ], 422);
             }
-            $qty = Qty::where('users_id', $request->store_id)
-                ->where('products_id', $request->prod_id)
+            $qty = Qty::where('seller_id', $request->store_id)
+                ->where('product_id', $request->prod_id)
                 ->get();
             if (!is_null($qty)) {
                 return response()->json([
-                    'data' => Qty::where('users_id', $request->store_id)
-                        ->where('products_id', $request->prod_id)
+                    'data' => Qty::where('seller_id', $request->store_id)
+                        ->where('product_id', $request->prod_id)
                         ->get(),
                     'status' => true,
                     'message' => ''
@@ -78,8 +78,8 @@ class QtyController extends Controller
                     'message' =>  $validate->errors()
                 ], 422);
             }
-            DB::table('qty_tests')->where('users_id', $request->store_id)
-                ->where('products_id', $request->prod_id)
+            DB::table('qty_tests')->where('seller_id', $request->store_id)
+                ->where('product_id', $request->prod_id)
                 ->update(['qty' => $request->qty]);
             return response()->json([
                 'data' => [],
@@ -166,7 +166,7 @@ class QtyController extends Controller
             return Redirect::back()->withInput($request->input());
         }
         Qty::updateOrInsert(
-            ['users_id' => Auth::id(), 'products_id' => $request->input('product_id')],
+            ['seller_id' => Auth::id(), 'product_id' => $request->input('product_id')],
             ['qty' => $request->input('qty')]
         );
         return response()->json([
@@ -194,8 +194,8 @@ class QtyController extends Controller
                     'message' => $validate->errors()
                 ], 422);
             }
-            $parent_store_data = Qty::where('users_id', $request->parent_store)->get();
-            $child_store_data = Qty::where('users_id', $request->child_store)->first();
+            $parent_store_data = Qty::where('seller_id', $request->parent_store)->get();
+            $child_store_data = Qty::where('seller_id', $request->child_store)->first();
             if (!is_null($child_store_data)) {
                 return response()->json([
                     'data' => [],
@@ -217,8 +217,8 @@ class QtyController extends Controller
                 $data = [];
                 foreach ($chunk as $item) {
                     $data[] = [
-                        'users_id' => $request->child_store,
-                        'products_id' => $item['products_id'],
+                        'seller_id' => $request->child_store,
+                        'product_id' => $item['product_id'],
                         'category_id' => $item['category_id'],
                         'qty' => $item['qty'],
                         'created_at' => Carbon::now()

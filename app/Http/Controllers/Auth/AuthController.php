@@ -96,6 +96,7 @@ class AuthController extends Controller
     public function loginBuyer(Request $request)
     {
         try {
+            
             $credentials = $request->only('email', 'password');
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.INVALID_CREDENTIALS')], 401);

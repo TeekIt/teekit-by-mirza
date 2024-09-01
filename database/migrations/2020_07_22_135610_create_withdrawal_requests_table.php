@@ -15,9 +15,9 @@ class CreateWithdrawalRequestsTable extends Migration
     {
         Schema::create('withdrawal_requests', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('user_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained(table: 'users')->cascadeOnDelete();
             $table->float('amount');
-            $table->enum('status',['pending','completed'])->default('pending');
+            $table->enum('status', ['pending', 'completed'])->default('pending');
             $table->json('bank_detail')->nullable()->default(null);
             $table->string('transaction_id')->default(0);
             $table->timestamps();
@@ -26,7 +26,6 @@ class CreateWithdrawalRequestsTable extends Migration
              * Indexes
              */
             $table->index('user_id');
-            $table->index('amount');
         });
     }
 

@@ -154,7 +154,7 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('new', 'new');
         Route::get('/logged-in/buyer', 'showLoggedinBuyerOrders');
         Route::get('seller', 'sellerOrders');
-        Route::get('delivery_boy_orders/{delivery_boy_id}', 'deliveryBoyOrders');
+        Route::get('driver_orders/{driver_id}', 'driverOrders');
         Route::get('assign_order', 'assignOrder');
         Route::get('cancel_order', 'cancelOrder');
         Route::get('update_assign', 'updateAssign');

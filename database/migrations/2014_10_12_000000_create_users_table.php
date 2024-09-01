@@ -18,7 +18,7 @@ class CreateUsersTable extends Migration
             $table->string('name', 100); //modified
             $table->string('l_name', 30)->nullable(); //modified
             $table->string('email')->unique(); //modified
-            $table->longText('password');
+            $table->longText('password')->nullable(); //modified
             $table->string('phone', 13)->nullable();
             $table->string('business_name')->nullable(); //modified
             $table->string('business_phone', 13)->nullable();
@@ -54,15 +54,15 @@ class CreateUsersTable extends Migration
              * Indexes
              */
             $table->fullText('business_name');
-            $table->index('country');
-            $table->index('state');
-            $table->index('city');
-            $table->index('postcode');
-            $table->index('lat');
-            $table->index('lon');
-            $table->index('parent_store_id');
-            $table->index('referral_code');
-            $table->index('stripe_account_id');
+            // $table->index('country');
+            // $table->index('state');
+            // $table->index('city');
+            // $table->index('postcode');
+            // $table->index('lat');
+            // $table->index('lon');
+            // $table->index('parent_store_id');
+            // $table->index('referral_code');
+            // $table->index('stripe_account_id');
         });
     }
 

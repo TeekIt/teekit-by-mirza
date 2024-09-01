@@ -6,7 +6,7 @@ use App\Helpers\PromoCodeHelpers;
 use App\Models\PromoCodesUsageLimit;
 use App\Orders;
 use App\PromoCodes;
-use App\Role;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
@@ -22,8 +22,8 @@ class PromoCodesController extends Controller
     public function promocodesHome()
     {
         if (Gate::allows('superadmin')) {
-            //Get stores names for select dropdown
-            $stores = Role::find(2)->users;
+            /* Get stores names for select dropdown */
+            $stores = User::getParentAndChildSellersList(['id', 'business_name']);
             $promo_codes = PromoCodes::paginate(10);
             return view('admin.promo_codes', compact('promo_codes', 'stores'));
         } else {
@@ -165,7 +165,7 @@ class PromoCodesController extends Controller
     {
         try {
             $validatedData = Validator::make($request->all(), [
-                'user_id' => 'required|int',
+                'customer_id' => 'required|int',
                 'promo_code' => 'required|string|max:20'
             ]);
             if ($validatedData->fails()) {
@@ -195,7 +195,7 @@ class PromoCodesController extends Controller
                      * Promo code is only valid for a specific order#
                      */
                     if (!empty($promo_codes[0]->order_number)) {
-                        $user_orders_count = Orders::where('customer_id', '=', $request->user_id)->count();
+                        $user_orders_count = Orders::where('customer_id', '=', $request->customer_id)->count();
                         if ($promo_codes[0]->order_number == $user_orders_count + 1) {
                             if (!empty($promo_code_data->usage_limit)) return PromoCodeHelpers::checkUsageLimit($promo_codes, $promo_code_data, $request);
                         } else {
@@ -247,7 +247,7 @@ class PromoCodesController extends Controller
     {
         try {
             $validatedData = Validator::make($request->all(), [
-                'user_id' => 'required|int',
+                'customer_id' => 'required|int',
                 'promo_code' => 'required|string|max:20'
             ]);
             if ($validatedData->fails()) {
@@ -277,10 +277,10 @@ class PromoCodesController extends Controller
                      * Promo code is only valid for a specific order#
                      */
                     if (!empty($promo_codes[0]->order_number)) {
-                        $user_orders_count = Orders::where('customer_id', '=', $request->user_id)->count();
+                        $user_orders_count = Orders::where('customer_id', '=', $request->customer_id)->count();
                         if ($promo_codes[0]->order_number == $user_orders_count + 1) {
                             $data[0]['promo_code'] = $promo_codes[0];
-                            $data[1]['promo_codes_usage_limit'] = ($promo_codes[0]->usage_limit) ? PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->user_id, $promo_codes[0]->id) : null;
+                            $data[1]['promo_codes_usage_limit'] = ($promo_codes[0]->usage_limit) ? PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customer_id, $promo_codes[0]->id) : null;
                             $store_data = PromoCodeHelpers::ifPromoCodeBelongsToStore($promo_code_data);
                             $data[2]['store'] = ($store_data) ? ($store_data) : (NULL);
                             return response()->json([
@@ -297,7 +297,7 @@ class PromoCodesController extends Controller
                         }
                     }
                     $data[0]['promo_code'] = $promo_codes[0];
-                    $data[1]['promo_codes_usage_limit'] = ($promo_codes[0]->usage_limit) ? PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->user_id, $promo_codes[0]->id) : null;
+                    $data[1]['promo_codes_usage_limit'] = ($promo_codes[0]->usage_limit) ? PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customer_id, $promo_codes[0]->id) : null;
                     $store_data = PromoCodeHelpers::ifPromoCodeBelongsToStore($promo_code_data);
                     $data[2]['store'] = ($store_data) ? ($store_data) : (NULL);
                     return response()->json([

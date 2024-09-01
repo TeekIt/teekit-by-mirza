@@ -17,6 +17,7 @@ use App\User;
 use App\VerificationCodes;
 use App\WithdrawalRequests;
 use Exception;
+use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -62,17 +63,9 @@ class HomeController extends Controller
      */
     public function inventoryEdit($product_id)
     {
-        if (Gate::allows('seller')) {
-            $invent = Products::query()->where('user_id', '=', Auth::id())->where('id', '=', $product_id);
-            $store = Products::where('id', $product_id)->first();
-            $store_id = $store->user_id;
-            if (empty($invent)) {
-                abort(404);
-            }
-            $categories = Categories::all();
-            $inventory = Products::getProductInfo($store_id, $product_id, ['*']);
-            return view('shopkeeper.inventory.edit', compact('inventory', 'categories'));
-        }
+        $categories = Categories::all();
+        $inventory = Products::getProductInfo(Auth::id(), $product_id, ['*']);
+        return view('shopkeeper.inventory.edit', compact('inventory', 'categories'));
     }
     /**
      * It will redirect us to add
@@ -264,7 +257,8 @@ class HomeController extends Controller
                 }
                 $data['feature_img'] = $filename;
                 foreach ($data as $key => $value) {
-                    if ($key == 'vehicle') continue;
+                    if ($key == 'vehicle')
+                        continue;
                     $product->$key = ($key == 'contact') ? '+44' . $value : $value;
                 }
                 $product->save();
@@ -336,8 +330,8 @@ class HomeController extends Controller
             $data['van'] = ($data['vehicle'] == 'van') ? 1 : 0;
             $data['discount_percentage'] = (!isset($data['discount_percentage'])) ? 0.00 : $data['discount_percentage'];
             unset($data['gallery']);
-            Qty::where('products_id', $product_id)
-                ->where('users_id', Auth::id())
+            Qty::where('product_id', $product_id)
+                ->where('seller_id', Auth::id())
                 ->update([
                     'qty' => $data['qty'],
                 ]);
@@ -377,7 +371,8 @@ class HomeController extends Controller
                     }
                 }
                 foreach ($data as $key => $value) {
-                    if ($key == 'vehicle') continue;
+                    if ($key == 'vehicle')
+                        continue;
                     $product->$key = ($key == 'contact') ? '+44' . $value : $value;
                 }
                 $product->save();
@@ -522,30 +517,25 @@ class HomeController extends Controller
      * @author Mirza Abdullah Izhar
      * @version 1.0.0
      */
-    // public function passwordUpdate(Request $request)
-    // {
-    //     $validate = Validator::make($request->all(), [
-    //         'old_password' => 'required|string|min:8',
-    //         'new_password' => 'required|string|min:8'
-    //     ]);
-    //     if ($validate->fails()) {
-    //         flash('Password must be 8 characters long.')->error();
-    //         return Redirect::back();
-    //     }
+    public function passwordUpdate(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'old_password' => 'required|string|min:8',
+            'new_password' => 'required|string|min:8'
+        ]);
+        if ($validate->fails()) {
+            return redirect()->back()->with('flash', flash('Password must be 8 characters long.')->error());
+        }
 
-    //     $old_password = $request->old_password;
-    //     $new_password = $request->new_password;
-
-    //     $user = User::find(Auth::id());
-    //     if (Hash::check($old_password, $user->password)) {
-    //         $user->password = Hash::make($new_password);
-    //         $user->save();
-    //         flash('Your password has been updated successfully.')->success();
-    //     } else {
-    //         flash('Your old password is incorrect.')->error();
-    //     }
-    //     return redirect()->back();
-    // }
+        $user = User::find(Auth::id());
+        if (Hash::check($request->old_password, $user->password)) {
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+            return redirect()->back()->with('flash', flash('Your password has been updated successfully.')->success());
+        } else {
+            return redirect()->back()->with('flash', flash('Your old password is incorrect.')->error());
+        }
+    }
     /**
      * Update's payment settings
      * @author Huzaifa Haleem
@@ -691,10 +681,10 @@ class HomeController extends Controller
                 $product->save();
 
                 //this function will add qty to it's parti;cular table
-                $product_id = (int)$product->id;
+                $product_id = (int) $product->id;
                 $product_quantity = ($importData[3] == "") ? 0 : $importData[3];
                 Qty::add($user_id, $product_id, $product->category_id, $product_quantity);
-                productImages::add((int)$product->id, $importData[18]);
+                productImages::add((int) $product->id, $importData[18]);
                 $j++;
             }
         }
@@ -806,9 +796,11 @@ class HomeController extends Controller
         if (Gate::allows('superadmin')) {
             $user = User::find($user_id);
             // 2: Parent seller, 5: Child seller
-            if ($user->role_id == 2 || $user->role_id == 5) $orders = Orders::query()->where('seller_id', '=', $user_id);
+            if ($user->role_id == 2 || $user->role_id == 5)
+                $orders = Orders::query()->where('seller_id', '=', $user_id);
             // For buyer
-            if ($user->role_id == 3) $orders = Orders::query()->where('user_id', '=', $user_id);
+            if ($user->role_id == 3)
+                $orders = Orders::query()->where('user_id', '=', $user_id);
 
             $orders = $orders->where('payment_status', '!=', 'hidden')->orderByDesc('id');
             $orders = $orders->paginate(10);
@@ -847,7 +839,7 @@ class HomeController extends Controller
              */
             $driver = Drivers::find($driver_id);
             $orders = Orders::query()
-                ->where('delivery_boy_id', '=', $driver_id)
+                ->where('driver_id', '=', $driver_id)
                 ->where('payment_status', '!=', 'hidden')
                 ->orderByDesc('id');
             $role_id = 4;
@@ -1070,7 +1062,8 @@ class HomeController extends Controller
     {
         if (Gate::allows('superadmin')) {
             $drivers = Drivers::query();
-            if ($request->search) $drivers = $drivers->where('f_name', 'LIKE', $request->search);
+            if ($request->search)
+                $drivers = $drivers->where('f_name', 'LIKE', $request->search);
             $drivers = $drivers->paginate(9);
             return view('admin.drivers', compact('drivers'));
         } else {
@@ -1090,8 +1083,8 @@ class HomeController extends Controller
             if ($request->search) {
                 $orders = $orders->where('id', '=', $request->search);
             }
-            if ($request->user_id) {
-                $orders = $orders->where('user_id', '=', $request->user_id);
+            if ($request->customer_id) {
+                $orders = $orders->where('customer_id', '=', $request->customer_id);
             }
             if ($request->store_id) {
                 $orders = $orders->where('seller_id', '=', $request->store_id);
@@ -1220,16 +1213,12 @@ class HomeController extends Controller
      */
     public function withdrawals()
     {
-        // if (Gate::allows('seller') || Gate::allows('child_seller')) {
-        //     $user_id = Auth::id();
-        //     $return_data = WithdrawalRequests::query()->where('user_id', '=', $user_id)->get();
-        //     $transactions = $return_data;
-        //     return view('shopkeeper.withdrawal', compact('transactions'));
-        // }
         if (Gate::allows('superadmin')) {
-            $user_id = Auth::id();
-            $return_data = WithdrawalRequests::has('user.seller')->get();
-            $transactions = $return_data;
+            $transactions = WithdrawalRequests::whereHas('user', function ($query) {
+                $query->whereIn('role_id', [2,5]);
+            })
+            ->get();
+            
             return view('admin.withdrawal', compact('transactions'));
         }
     }
@@ -1245,6 +1234,7 @@ class HomeController extends Controller
             $transactions = $return_data;
             return view('shopkeeper.withdrawal', compact('transactions'));
         }
+
         if (Gate::allows('superadmin')) {
 
             // $transactions = WithdrawalRequests::has('user.driver')->get();
@@ -1346,11 +1336,11 @@ class HomeController extends Controller
     public function completeOrders()
     {
         $orders = DB::table('orders')
-            ->leftJoin('users', 'orders.user_id', '=', 'users.id')
-            ->LeftJoin('drivers', 'orders.delivery_boy_id', '=', 'drivers.id')
+            ->leftJoin('users', 'orders.customer_id', '=', 'users.id')
+            ->LeftJoin('drivers', 'orders.driver_id', '=', 'drivers.id')
             ->where('delivery_status', '=', 'complete')
             ->where('order_status', '=', 'complete')
-            ->select('drivers.f_name', 'drivers.l_name', 'orders.id', 'orders.total_items', 'orders.phone_number', 'orders.house_no', 'orders.address',  'orders.type', 'users.name')
+            ->select('drivers.f_name', 'drivers.l_name', 'orders.id', 'orders.total_items', 'orders.phone_number', 'orders.house_no', 'orders.address', 'orders.type', 'users.name')
             ->paginate(10);
         return view('admin.complete-orders', compact('orders'));
     }
@@ -1507,11 +1497,11 @@ class HomeController extends Controller
         }
         $html = '<html>
         Hi, Team Teek IT.<br><br>
-        '  .  $store_name->business_name   .  ' has demanded to update their business information as following:-<br><br>
-       <strong> Name:</strong> '  .  $request->name   .  '<br>
-       <strong>Business Name:</strong> '  .  $request->business_name   .  '<br>
-       <strong>Phone:</strong> '  .  $request->phone  .  '<br>
-       <strong>Business Phone:</strong> '  .  $request->business_phone  .  '<br>
+        ' . $store_name->business_name . ' has demanded to update their business information as following:-<br><br>
+       <strong> Name:</strong> ' . $request->name . '<br>
+       <strong>Business Name:</strong> ' . $request->business_name . '<br>
+       <strong>Phone:</strong> ' . $request->phone . '<br>
+       <strong>Business Phone:</strong> ' . $request->business_phone . '<br>
        <br><br>
        Please verify this information & take your desision about modifying their business information.
        <br><br>

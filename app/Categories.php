@@ -81,7 +81,7 @@ class Categories extends Model
     {
         return  self::select('id as category_id', 'category_name', 'category_image', 'created_at', 'updated_at')
             ->whereHas('qty', function ($query) use ($store_id) {
-                $query->where('users_id', $store_id);
+                $query->where('seller_id', $store_id);
             })->get();
     }
 
@@ -93,7 +93,7 @@ class Categories extends Model
         $pagination = $products->toArray();
         if (!$products->isEmpty()) {
             $products_data = [];
-            foreach ($products as $product) $products_data[] = Products::getProductInfo($product->users_id, $product->id, ['*']);
+            foreach ($products as $product) $products_data[] = Products::getProductInfo($product->seller_id, $product->id, ['*']);
             unset($pagination['data']);
             return ['data' => $products_data, 'pagination' => $pagination];
         } else {
@@ -104,13 +104,13 @@ class Categories extends Model
     // public static function stores(int $category_id, string $city)
     // {
     //     // Get IDs of both parent and child stores from the Qty table
-    //     // $store_ids = Qty::select('users_id')
+    //     // $store_ids = Qty::select('seller_id')
     //     //     ->distinct()
-    //     //     ->join('products', 'qty.products_id', '=', 'products.id')
+    //     //     ->join('products', 'qty.product_id', '=', 'products.id')
     //     //     ->where('qty', '>', 0) // Products Should Be In Stock
     //     //     ->where('products.status', '=', 1) // Products Should Be Live
     //     //     ->where('qty.category_id', '=', $category_id)
-    //     //     ->pluck('users_id');
+    //     //     ->pluck('seller_id');
 
     //     // // Get active parent and child stores that have products in the specified category
     //     // return User::whereIn('id', $store_ids)
@@ -118,14 +118,14 @@ class Categories extends Model
     //     // ->paginate(10);
 
     //     // $sellers = User::join('qty', 'qty.category_id', '=', 'products.category_id')
-    //     // ->join('products', 'products.id', '=', 'qty.products_id')
+    //     // ->join('products', 'products.id', '=', 'qty.product_id')
     //     // ->where('qty.qty', '>', 0) // Products Should Be In Stock
     //     // ->where('products.status', '=', 1) // Products Should Be Live
     //     // ->paginate(10);
 
     //    return  Qty::select('users.*')
-    //     ->join('users', 'users.id', '=', 'qty.users_id')
-    //     ->join('products', 'products.id', '=', 'qty.products_id')
+    //     ->join('users', 'users.id', '=', 'qty.seller_id')
+    //     ->join('products', 'products.id', '=', 'qty.product_id')
     //     ->where('qty.qty', '>', 0) // Products should be in stock
     //     ->where('qty.category_id', '=', $category_id)
     //     ->where('products.status', '=', 1) // Products should be live

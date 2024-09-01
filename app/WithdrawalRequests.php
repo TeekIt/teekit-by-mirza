@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Testing\Fluent\Concerns\Has;
 
 class WithdrawalRequests extends Model
 {
@@ -24,10 +23,10 @@ class WithdrawalRequests extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
     
-    public function role(): BelongsTo
-    {
-        return $this->belongsTo('App\Role');
-    }
+    // public function role(): BelongsTo
+    // {
+    //     return $this->belongsTo('App\Role');
+    // }
 
     public static function getWithdrawalResquests(int $user_id, string $search = null, int $amount = null, string $created_at = null)
     {

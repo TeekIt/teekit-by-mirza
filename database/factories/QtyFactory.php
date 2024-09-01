@@ -17,8 +17,8 @@ class QtyFactory extends Factory
     public function definition()
     {
         return [
-            'users_id' => $this->faker->numberBetween(1, 5000000),
-            'products_id' => $this->faker->numberBetween(1, 1000000),
+            'seller_id' => $this->faker->numberBetween(1, 5000000),
+            'product_id' => $this->faker->numberBetween(1, 1000000),
             'qty' => $this->faker->randomDigit()
         ];
     }

@@ -26,7 +26,7 @@ final class DriverFairServices
      */
     // public function calculateDriverFair($order, $store)
     // {
-    //     $childOrders = Orders::where('delivery_boy_id', $order->delivery_boy_id)
+    //     $childOrders = Orders::where('driver_id', $order->driver_id)
     //         ->where('id', '!=', $order->id)
     //         ->where('order_status', 'onTheWay')->get();
     //     if (count($childOrders) > 0) {
@@ -34,7 +34,7 @@ final class DriverFairServices
     //             $childOrder->update(['parent_id' => $order->id]);
     //         }
     //     }
-    //     $driver = User::find($order->delivery_boy_id);
+    //     $driver = User::find($order->driver_id);
     //     $driver_money = $driver->pending_withdraw;
     //     $fair_per_mile = 1.50;
     //     $pickup = 1.50;

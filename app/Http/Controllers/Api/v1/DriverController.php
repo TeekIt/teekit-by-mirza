@@ -174,7 +174,7 @@ class DriverController extends Controller
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|integer',
             'verification_code' => 'required|min:6|max:6',
-            'delivery_boy_id' => 'required|integer'
+            'driver_id' => 'required|integer'
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -201,8 +201,8 @@ class DriverController extends Controller
                 VerificationCodes::where('order_id', '=', $request->order_id)
                     ->update(['code->driver_failed_to_enter_code' => 'No']);
                 Orders::where('id', '=', $request->order_id)->update(['order_status' => 'complete', 'delivery_status' => 'complete']);
-                // $driver = User::find($request->delivery_boy_id);
-                $driver = Drivers::find($request->delivery_boy_id);
+                // $driver = User::find($request->driver_id);
+                $driver = Drivers::find($request->driver_id);
                 $order = Orders::find($request->order_id);
                 $driver->pending_withdraw = $order->driver_charges + $driver->pending_withdraw;
                 $driver->save();
