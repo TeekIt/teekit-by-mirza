@@ -41,10 +41,10 @@ class PromoCodesUsageLimit extends Model
         return $status;
     }
 
-    public static function promoCodeTotalUsedByUser(int $user_id, int $promo_code_id)
+    public static function promoCodeTotalUsedByUser(int $customer_id, int $promo_code_id)
     {
         return self::where('promo_code_id', $promo_code_id)
-            ->where('user_id', $user_id)
+            ->where('customer_id', $customer_id)
             ->first();
     }
 }

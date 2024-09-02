@@ -81,7 +81,7 @@ class WithdrawalLivewire extends Component
       
         $status = 'Pending';
         // Create withdrawal request
-        $withdrawalRequest = WithdrawalRequests::createwithdrawalRequest($user->id, $this->amount, $status, $user->bank_details);
+        $withdrawalRequest = WithdrawalRequests::add($user->id, $this->amount, $status, $user->bank_details);
         if ($withdrawalRequest) {
             session()->flash('success', 'Amount Withdrawal SuccessFull');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'requestWithdrawModal']);

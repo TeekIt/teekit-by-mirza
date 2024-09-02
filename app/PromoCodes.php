@@ -2,10 +2,14 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PromoCodes extends Model
 {
+    use HasFactory, SoftDeletes;
+    
     protected $fillable = [
         'promo_code',
         'discount_type',

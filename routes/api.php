@@ -19,12 +19,6 @@ use App\Http\Controllers\WithdrawalRequestsController;
 use App\Services\StripeServices;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
-
-/*
-Tasks:
-6) Add stipe payment_intent_id into the orders API
-*/
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -102,9 +96,7 @@ Route::prefix('sellers')->controller(UsersController::class)->group(function () 
 |--------------------------------------------------------------------------
 */
 Route::prefix('notifications')->controller(NotificationsController::class)->group(function () {
-    Route::get('/', 'getNotifications');
     Route::post('save_token', 'saveToken');
-    Route::get('delete/{notification_id}', 'deleteNotification');
     Route::post('send_test', 'notificationSendTest');
 });
 /*
@@ -151,7 +143,7 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('new', 'new');
         Route::get('/logged-in/buyer', 'showLoggedinBuyerOrders');
         Route::get('seller', 'sellerOrders');
-        Route::get('delivery_boy_orders/{delivery_boy_id}', 'deliveryBoyOrders');
+        Route::get('driver_orders/{driver_id}', 'driverOrders');
         Route::get('assign_order', 'assignOrder');
         Route::get('cancel_order', 'cancelOrder');
         Route::get('update_assign', 'updateAssign');

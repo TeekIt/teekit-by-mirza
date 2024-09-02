@@ -357,7 +357,7 @@
                                                     </div>
                                                 @endif
 
-                                                @if ($order->delivery_boy_id != '')
+                                                @if ($order->driver_id != '')
                                                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deliveryBoyDetailsModal" title="View delivery boy details">
                                                         Delivery Boy Details
                                                     </button>
@@ -532,10 +532,10 @@
                             <a href="{{route('accept_order',['order_id'=>1])}}" class=" d-block btn btn-warning float-right">Click when preparing order</a>
                             <a href="{{route('cancel_order',['order_id'=>1])}}" onclick="cancelOrder(event)" class=" d-block btn btn-danger float-right" style="margin-right: 20px">Cancel Order</a>
                             @else
-                            @if (!empty($order->delivery_boy_id))
+                            @if (!empty($order->driver_id))
                             <a href="" data-bs-toggle="modal" data-bs-target="#detailsModal{{1}}" class=" btn btn-primary d-block float-right">View Driver Details</a>
                             <?php
-                            $user = \App\User::find($order->delivery_boy_id);
+                            $user = \App\User::find($order->driver_id);
                             ?>
                             @if (!empty($user))
                             <div class="modal fade" id="detailsModal{{1}}" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
@@ -667,7 +667,7 @@
 
     {{-- Delivery Boy Details Modal --}}
     <?php
-    // $user = \App\User::find($order->delivery_boy_id);
+    // $user = \App\User::find($order->driver_id);
     $user = null;
     ?>
     @if (!empty($user))

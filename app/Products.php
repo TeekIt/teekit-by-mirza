@@ -2,13 +2,15 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +18,7 @@ use Illuminate\Support\Facades\Validator;
 
 class Products extends Model
 {
-    use Searchable;
+    use Searchable, HasFactory, SoftDeletes;
 
     protected $fillable = ['*'];
     /**
@@ -27,7 +29,7 @@ class Products extends Model
         return [
             'id' =>  $this->id,
             'product_name' => $this->product_name,
-            'user_id' => $this->user_id,
+            'seller_id' => $this->seller_id,
             'category_id' => $this->category_id,
             'price' => $this->price,
             'status' => $this->status,
@@ -38,14 +40,14 @@ class Products extends Model
     // Define filterable attributes for meilisearch
     public function scoutFilterable(): array
     {
-        return ['id', 'product_name', 'user_id', 'category_id', 'price', 'status', 'weight', 'brand'];
+        return ['id', 'product_name', 'seller_id', 'category_id', 'price', 'status', 'weight', 'brand'];
     }
     /**
      * Relations
      */
     public function store(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'seller_id');
     }
 
     public function category(): BelongsTo
@@ -65,7 +67,7 @@ class Products extends Model
 
     public function quantities(): HasMany
     {
-        return $this->hasMany(Qty::class);
+        return $this->hasMany(Qty::class, 'product_id');
     }
 
     public function qty(): HasMany
@@ -94,9 +96,9 @@ class Products extends Model
      */
     public static function searchProducts(
         string $product_name,
-        ?array $store_ids,
+        ?array $seller_ids,
         ?int $category_id,
-        ?int $store_id,
+        ?int $seller_id,
         ?string $brand,
         ?float $min_price,
         ?float $max_price,
@@ -106,19 +108,19 @@ class Products extends Model
         return self::search($product_name)
             ->query(fn($query) => $query->with([
                 'store:id,business_name,business_hours,full_address,country,state,city,lat,lon',
-                'qty:id,products_id,qty',
+                'qty:id,product_id,qty',
                 'images:id,product_id,product_image',
                 'category:id,category_name,category_image'
             ]))
             ->where('status', 1)
-            ->when($store_ids, function ($query) use ($store_ids) {
-                return $query->where_in('user_id', $store_ids['ids']);
+            ->when($seller_ids, function ($query) use ($seller_ids) {
+                return $query->where_in('seller_id', $seller_ids['ids']);
             })
             ->when($category_id, function ($query) use ($category_id) {
                 return $query->where('category_id', $category_id);
             })
-            ->when($store_id, function ($query) use ($store_id) {
-                return $query->where('user_id', $store_id);
+            ->when($seller_id, function ($query) use ($seller_id) {
+                return $query->where('seller_id', $seller_id);
             })
             ->when($brand, function ($query) use ($brand) {
                 return $query->where('brand', $brand);
@@ -141,7 +143,7 @@ class Products extends Model
     public static function getAllProducts(): LengthAwarePaginator
     {
         return self::with([
-            'qty:id,products_id,qty',
+            'qty:id,product_id,qty',
             'images:id,product_id,product_image',
             'category:id,category_name,category_image'
         ])
@@ -170,13 +172,13 @@ class Products extends Model
     {
         return self::with([
             'qty' => function ($query) use ($seller_id) {
-                $query->select('id', 'products_id', 'qty')->where('users_id', $seller_id);
+                $query->select('id', 'product_id', 'qty')->where('seller_id', $seller_id);
             },
             'images:id,product_id,product_image',
             'category:id,category_name,category_image'
         ])
             ->whereHas('qty', function ($query) use ($seller_id) {
-                $query->where('users_id', $seller_id);
+                $query->where('seller_id', $seller_id);
             })
             ->where('status', 1)
             ->paginate(20);
@@ -187,13 +189,13 @@ class Products extends Model
         $product = self::select($columns)
             ->with([
                 'qty' => function ($query) use ($seller_id) {
-                    $query->select('id', 'products_id', 'qty')->where('users_id', $seller_id);
+                    $query->select('id', 'product_id', 'qty')->where('seller_id', $seller_id);
                 },
                 'images:id,product_id,product_image',
                 'category:id,category_name,category_image'
             ])
             ->whereHas('qty', function ($query) use ($seller_id) {
-                $query->where('users_id', $seller_id);
+                $query->where('seller_id', $seller_id);
             })
             ->where('id', $product_id)
             ->where('status', 1)
@@ -215,12 +217,12 @@ class Products extends Model
 
     public static function getParentSellerProducts(int $seller_id): LengthAwarePaginator
     {
-        return self::where('user_id', '=', $seller_id)->where('status', '=', 1)->paginate(20);
+        return self::where('seller_id', '=', $seller_id)->where('status', '=', 1)->paginate(20);
     }
 
     public static function getParentSellerProductsAsc(int $seller_id): Collection
     {
-        return self::where('user_id', '=', $seller_id)->where('status', '=', 1)->orderBy('id', 'asc')->get();
+        return self::where('seller_id', '=', $seller_id)->where('status', '=', 1)->orderBy('id', 'asc')->get();
     }
 
     public static function getParentSellerProductsForView(int $seller_id, string $search = '', int $category_id = null, string $order_by): LengthAwarePaginator
@@ -228,7 +230,7 @@ class Products extends Model
         return self::with('category')
             ->withAvg('rattings:ratting', 'average_ratting')
             ->where('product_name', 'LIKE', "%{$search}%")
-            ->where('user_id', '=', $seller_id)
+            ->where('seller_id', '=', $seller_id)
             ->when($category_id, function ($query, $category_id) {
                 return $query->where('category_id', '=', $category_id);
             })
@@ -239,35 +241,35 @@ class Products extends Model
     public static function getChildSellerProductsForView(int $child_seller_id, string $search = '', int $category_id = null): LengthAwarePaginator
     {
         $parent_seller_id = User::find($child_seller_id)->parent_store_id;
-        $qty = Qty::where('users_id', $child_seller_id)->first();
+        $qty = Qty::where('seller_id', $child_seller_id)->first();
         if (!empty($qty)) {
-            return self::join('qty', 'products.id', '=', 'qty.products_id')
-                ->select('products.id as prod_id', 'products.user_id as parent_seller_id', 'products.category_id', 'products.product_name', 'products.price', 'products.feature_img', 'qty.id as qty_id', 'qty.users_id as child_seller_id', 'qty.qty')
+            return self::join('qty', 'products.id', '=', 'qty.product_id')
+                ->select('products.id as prod_id', 'products.seller_id as parent_seller_id', 'products.category_id', 'products.product_name', 'products.price', 'products.feature_img', 'qty.id as qty_id', 'qty.seller_id as child_seller_id', 'qty.qty')
                 ->where('products.product_name', 'LIKE', "%{$search}%")
-                ->where('products.user_id', $parent_seller_id)
-                ->where('qty.users_id', $child_seller_id)
+                ->where('products.seller_id', $parent_seller_id)
+                ->where('qty.seller_id', $child_seller_id)
                 ->when($category_id, function ($query, $category_id) {
                     return $query->where('category_id', '=', $category_id);
                 })
                 ->paginate(20);
         } else {
             // return [
-            //     'data' => self::join('qty', 'products.id', '=', 'qty.products_id')
-            //         ->select('products.id as prod_id', 'products.user_id as parent_seller_id', 'products.category_id', 'products.product_name', 'products.price', 'products.feature_img', 'qty.id as qty_id', 'qty.qty')
+            //     'data' => self::join('qty', 'products.id', '=', 'qty.product_id')
+            //         ->select('products.id as prod_id', 'products.seller_id as parent_seller_id', 'products.category_id', 'products.product_name', 'products.price', 'products.feature_img', 'qty.id as qty_id', 'qty.qty')
             //         ->where('products.product_name', 'LIKE', "%{$search}%")
-            //         ->where('products.user_id', $parent_seller_id)
-            //         ->where('qty.users_id', $parent_seller_id)
+            //         ->where('products.seller_id', $parent_seller_id)
+            //         ->where('qty.seller_id', $parent_seller_id)
             //         ->when($category_id, function ($query, $category_id) {
             //             return $query->where('category_id', '=', $category_id);
             //         })
             //         ->paginate(20),
             //     'owner' => 'parent'
             // ];
-            return self::join('qty', 'products.id', '=', 'qty.products_id')
-                ->select('products.id as prod_id', 'products.user_id as parent_seller_id', 'products.category_id', 'products.product_name', 'products.price', 'products.feature_img', 'qty.id as qty_id', 'qty.qty')
+            return self::join('qty', 'products.id', '=', 'qty.product_id')
+                ->select('products.id as prod_id', 'products.seller_id as parent_seller_id', 'products.category_id', 'products.product_name', 'products.price', 'products.feature_img', 'qty.id as qty_id', 'qty.qty')
                 ->where('products.product_name', 'LIKE', "%{$search}%")
-                ->where('products.user_id', $parent_seller_id)
-                ->where('qty.users_id', $parent_seller_id)
+                ->where('products.seller_id', $parent_seller_id)
+                ->where('qty.seller_id', $parent_seller_id)
                 ->when($category_id, function ($query, $category_id) {
                     return $query->where('category_id', '=', $category_id);
                 })
@@ -275,9 +277,9 @@ class Products extends Model
         }
     }
 
-    public function getProductsByParameters(int $store_id, string $sku, int $catgory_id): Products
+    public function getProductsByParameters(int $seller_id, string $sku, int $catgory_id): Products
     {
-        return self::where('user_id', '=', $store_id)
+        return self::where('seller_id', '=', $seller_id)
             ->where('sku', '=', $sku)
             ->where('category_id', '=', $catgory_id)
             ->first();
@@ -304,11 +306,11 @@ class Products extends Model
         return $product->price * 1.2;
     }
 
-    public static function getFeaturedProducts(int $store_id): LengthAwarePaginator
+    public static function getFeaturedProducts(int $seller_id): LengthAwarePaginator
     {
         return self::whereHas('store', function ($query) {
             $query->where('is_active', 1);
-        })->where('user_id', '=', $store_id)
+        })->where('seller_id', '=', $seller_id)
             ->where('featured', '=', 1)
             ->where('status', '=', 1)
             ->orderByDesc('id')
@@ -340,13 +342,13 @@ class Products extends Model
     /**
      * SAP == Search Alternative Product
      */
-    public static function getProductsForSAPModal(int $seller_id, string $search = ''): LengthAwarePaginator
+    public static function getProductsForSAPModal(int $seller_id, string $search = ''): Paginator
     {
         if (!empty($search)) $search = str_replace(' ', '%', $search);
-        return self::join('qty', 'products.id', '=', 'qty.products_id')
+        return self::join('qty', 'products.id', '=', 'qty.product_id')
             ->select('products.id as prod_id', 'products.product_name', 'qty.qty', 'products.price')
-            ->where('qty.users_id', $seller_id)
-            ->where('products.user_id', $seller_id)
+            ->where('qty.seller_id', $seller_id)
+            ->where('products.seller_id', $seller_id)
             ->when($search, function ($query, $search) {
                 return $query->where('products.product_name', 'LIKE', "%{$search}%");
             })
@@ -356,22 +358,24 @@ class Products extends Model
     public static function markAsFeatured(int $id, int $status): int
     {
         return self::where('id', $id)
+            ->where('seller_id', Auth::id())
             ->update([
                 'featured' => $status
             ]);
     }
 
-    public static function toggleProduct(int $id, int $status): int
+    public static function toggleProduct(int $id, string $status): int
     {
         return self::where('id', $id)
+            ->where('seller_id', Auth::id())
             ->update([
                 'status' => $status
             ]);
     }
 
-    public static function toggleAllProducts(int $status): int
+    public static function toggleAllProducts(string $status): int
     {
-        return self::where('user_id', Auth::id())
+        return self::where('seller_id', Auth::id())
             ->update([
                 'status' => $status
             ]);

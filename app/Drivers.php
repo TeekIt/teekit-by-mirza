@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Services\ImageServices;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Hash;
 
 class Drivers extends Authenticatable implements JWTSubject
 {
-    use Notifiable, SoftDeletes;
+    use Notifiable, HasFactory, SoftDeletes;
     /**
      * The attributes that are mass assignable.
      *

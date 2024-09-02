@@ -5,6 +5,7 @@ namespace App;
 use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -20,7 +21,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use Notifiable, SoftDeletes;
+    use Notifiable, HasFactory, SoftDeletes;
     /**
      * The attributes that are mass assignable.
      *
@@ -102,20 +103,20 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Relations
      */
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany('App\Role', 'role_user');
-    }
+    // public function roles(): BelongsToMany
+    // {
+    //     return $this->belongsToMany('App\Role', 'role_user');
+    // }
 
     public function role(): BelongsTo
     {
-        return $this->belongsTo('App\Role');
+        return $this->belongsTo(Role::class);
     }
 
-    public function seller(): BelongsToMany
-    {
-        return $this->belongsToMany('App\Role', 'role_user')->wherePivot('role_id', 2);
-    }
+    // public function seller(): BelongsToMany
+    // {
+    //     return $this->belongsToMany('App\Role', 'role_user')->wherePivot('role_id', 2);
+    // }
 
     // public function driver(): BelongsToMany
     // {
@@ -124,7 +125,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function orders(): HasMany
     {
-        return $this->hasMany('App\Orders');
+        return $this->hasMany(Orders::class);
     }
 
     public function referralRelations(): HasOne
@@ -203,7 +204,8 @@ class User extends Authenticatable implements JWTSubject
     ): bool {
         $user = self::findOrFail($user_id);
         $user->full_address = $full_address;
-        if (!is_null($unit_address)) $user->unit_address = $unit_address;
+        if (!is_null($unit_address))
+            $user->unit_address = $unit_address;
         $user->country = $country;
         $user->state = $state;
         $user->city = $city;
@@ -279,6 +281,17 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
 
+    public static function getParentAndChildSellersList(array $columns): Collection
+    {
+        return self::select($columns)
+            ->where('is_active', 1)
+            ->whereNotNull('lat')
+            ->whereNotNull('lon')
+            ->whereIn('role_id', [2, 5])
+            ->orderBy('business_name', 'asc')
+            ->get();
+    }
+
     public static function getParentAndChildSellersByCity(string $city): LengthAwarePaginator
     {
         return self::where('is_active', 1)
@@ -326,7 +339,7 @@ class User extends Authenticatable implements JWTSubject
 
     public static function getCustomers(string $search = ''): LengthAwarePaginator
     {
-        return self::where('name', 'like', '%' .  $search . '%')
+        return self::where('name', 'like', '%' . $search . '%')
             ->where('role_id', 3)
             ->orderByDesc('created_at')
             ->paginate(9);
@@ -377,7 +390,7 @@ class User extends Authenticatable implements JWTSubject
 
     public static function getUserRole(int $user_id): object
     {
-        return  self::where('id', $user_id)->pluck('role_id');
+        return self::where('id', $user_id)->pluck('role_id');
     }
 
     public static function getUserInfo(int $user_id): array|null
@@ -406,7 +419,7 @@ class User extends Authenticatable implements JWTSubject
     public static function verifyReferralCode(int $user_id, string $referral_code)
     {
         $data = User::where('id', '!=', $user_id)->where('referral_code', $referral_code)->first();
-        return (is_null($data)) ? false :  $data;
+        return (is_null($data)) ? false : $data;
     }
 
     public static function addIntoWallet(int $user_id, float $amount)

@@ -2,10 +2,12 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class VerificationCodes extends Model
 {
+    use HasFactory;
     /**
      * Relations
      */
@@ -14,7 +16,7 @@ class VerificationCodes extends Model
     /**
      * Helpers
      */
-    public static function insertVerificationCode(int $order_id, string $verification_code): bool
+    public static function add(int $order_id, string $verification_code): bool
     {
         $verification_codes = new VerificationCodes();
         $verification_codes->order_id = $order_id;

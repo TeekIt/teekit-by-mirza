@@ -1,0 +1,16 @@
+categories
+device_tokens
+keys
+orders
+order_items
+pages
+products
+product_images
+promo_codes
+promo_codes_usage_limit
+qty
+rattings
+referral_code_relations
+roles
+users
+

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateOrdersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('orders_from_other_sellers', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->foreignId('customer_id')->constrained(table:'users')->cascadeOnDelete();
             $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained(table:'products')->cascadeOnDelete();
-            $table->float('product_price');
-            $table->integer('product_qty');
             $table->float('order_total');
             $table->tinyInteger('total_items');
             $table->decimal('customer_lat', 11, 8)->nullable();
@@ -32,11 +29,11 @@ return new class extends Migration
             $table->string('house_no', 191)->nullable();
             $table->string('flat', 191)->nullable();
             $table->text('description')->nullable();
-            $table->string('payment_status', 191)->comment('paid, hidden');
+            $table->enum('payment_status', ['paid, hidden']);
             $table->enum('order_status', ['pending', 'accepted', 'ready', 'stuartDelivery', 'onTheWay', 'delivered', 'complete', 'cancelled'])->default('pending');
-            $table->enum('delivery_status', ['assigned', 'complete', 'pending_approval', 'cancelled'])->nullable();
+            $table->enum('delivery_status', ['assigned', 'pending_approval', 'complete', 'cancelled'])->nullable();
             $table->string('payment_intent_id')->nullable();
-            $table->foreignId('driver_id')->constrained(table:'drivers')->cascadeOnDelete();
+            $table->foreignId('driver_id')->nullable()->constrained(table: 'drivers')->cascadeOnDelete();
             $table->double('driver_traveled_km', 8, 2)->default(0.00);
             $table->double('driver_charges', 8, 2)->default(0.00);
             $table->tinyInteger('driver_charges_cleared')->default(0);
@@ -44,10 +41,7 @@ return new class extends Migration
             $table->double('service_charges')->nullable();
             $table->tinyInteger('offloading')->nullable()->comment('0: No, 1: Yes');
             $table->double('offloading_charges', 10, 2)->nullable();
-            $table->time('estimated_time')->nullable();
             $table->tinyInteger('is_viewed')->default(0)->comment('0: No, 1: Yes');
-            $table->tinyInteger('accepted')->default(0)->comment('0: No, 1: Yes');
-            $table->tinyInteger('times_rejected')->default(0);
             $table->timestamps();
             $table->softDeletes();
             /**
@@ -55,7 +49,8 @@ return new class extends Migration
              */
             $table->index('customer_id');
             $table->index('seller_id');
-            $table->index('product_id');
+            $table->index('order_status');
+            $table->index('delivery_status');
             $table->index('payment_intent_id');
             $table->index('driver_id');
         });
@@ -68,6 +63,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('orders_from_other_sellers');
+        Schema::dropIfExists('orders');
     }
-};
+}

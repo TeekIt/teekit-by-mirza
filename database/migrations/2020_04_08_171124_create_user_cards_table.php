@@ -15,7 +15,7 @@ class CreateUserCardsTable extends Migration
     {
         Schema::create('user_cards', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('user_id');
+            $table->foreignId('user_id')->constrained(table:'users')->cascadeOnDelete();
             $table->string('card_placeholder_name');
             $table->string('card_number');
             $table->string('cvv');
@@ -23,6 +23,10 @@ class CreateUserCardsTable extends Migration
             $table->timestamp('last_time_charge_date')->nullable();
             $table->string('last_time_charge_amount')->nullable();
             $table->timestamps();
+            /**
+             * Indexes
+             */
+            $table->index('user_id');
         });
     }
 

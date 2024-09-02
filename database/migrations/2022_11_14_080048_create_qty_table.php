@@ -15,15 +15,19 @@ class CreateQtyTable extends Migration
     {
         Schema::create('qty', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('users_id');            
-            // $table->foreign('users_id')->references('id')->on('users');
-            $table->unsignedBigInteger('products_id');
-            // $table->foreign('products_id')->references('id')->on('products');
-            $table->unsignedBigInteger('category_id');
-            // $table->foreign('category_id')->references('id')->on('categories');
+            $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained(table:'products')->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained(table:'categories')->cascadeOnDelete();
             $table->integer('qty');
-            $table->index(['users_id', 'products_id', 'category_id', 'qty']);
             $table->timestamps();
+            $table->softDeletes();
+            /**
+             * Indexes
+             */
+            $table->index('seller_id');
+            $table->index('product_id');
+            $table->index('category_id');
+            $table->index('qty');
         });
     }
 

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateNotificationsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,16 @@ class CreateNotificationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::create('device_tokens', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('user_id');
-            $table->integer('sender_id');
-            $table->string('title')->nullable();
-            $table->string('message')->nullable();
-            $table->text('other_data')->nullable();
+            $table->foreignId('user_id')->constrained(table:'users')->cascadeOnDelete()->nullable();
+            $table->text('device_id');
+            $table->text('device_token');
             $table->timestamps();
+            /**
+             * Indexes
+             */
+            $table->index('user_id');
         });
     }
 
@@ -31,6 +33,6 @@ class CreateNotificationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('device_tokens');
     }
-}
+};
