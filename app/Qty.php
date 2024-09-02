@@ -93,7 +93,27 @@ class Qty extends Model
         $pagination = $quantities->toArray();
         if (!$quantities->isEmpty()) {
             $products_data = [];
-            foreach ($quantities as $single_index) $products_data[] = Products::getProductInfo($single_index->seller_id, $single_index->product_id, ['*']);
+            foreach ($quantities as $single_index)
+                $products_data[] = Products::getProductInfo($single_index->users_id, $single_index->products_id, [
+                    'id',
+                    'user_id',
+                    'category_id',
+                    'product_name',
+                    'sku',
+                    'price',
+                    'featured',
+                    'discount_percentage',
+                    'weight',
+                    'brand',
+                    'size',
+                    'bike',
+                    'car',
+                    'van',
+                    'feature_img',
+                    'height',
+                    'width',
+                    'length',
+                ]);
             unset($pagination['data']);
             return ['data' => $products_data, 'pagination' => $pagination];
         } else {

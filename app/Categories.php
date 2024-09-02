@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Products;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Validator;
 
 class Categories extends Model
@@ -17,19 +19,19 @@ class Categories extends Model
     /**
      * Relations
      */
-    public function products()
+    public function products(): HasMany
     {
         return $this->hasMany(Products::class, 'category_id', 'id');
     }
 
-    public function qty()
+    public function qty(): HasMany
     {
         return $this->hasMany(Qty::class, 'category_id', 'id');
     }
     /**
      * Validators
      */
-    public static function validator(Request $request)
+    public static function validator(Request $request): object
     {
         return Validator::make($request->all(), [
             'category_name' => 'required|string|max:255',
@@ -39,7 +41,7 @@ class Categories extends Model
     /**
      * Helpers
      */
-    public static function uploadImg(object $request, string $category_name)
+    public static function uploadImg(object $request, string $category_name): string
     {
         $file = $request->file('category_image');
         $cat_name = str_replace(' ', '_', $category_name);
@@ -53,9 +55,9 @@ class Categories extends Model
         return $filename;
     }
 
-    public static function add(object $request)
+    public static function add(object $request): Categories
     {
-        $category = new Categories();
+        $category = new self();
         $category->category_name = $request->category_name;
         if ($request->hasFile('category_image'))
             $category->category_image = static::uploadImg($request, $category->category_name);
@@ -65,7 +67,7 @@ class Categories extends Model
         return $category;
     }
 
-    public static function updateCategory(object $request, $category_id)
+    public static function updateCategory(object $request, $category_id): Categories
     {
         $category = self::find($category_id);
         $category->category_name = $request->category_name;
@@ -77,25 +79,44 @@ class Categories extends Model
         return $category;
     }
 
-    public static function getAllCategoriesByStoreId(int $store_id)
+    public static function getAllCategoriesByStoreId(int $store_id, array $columns): Collection
     {
-        return  self::select('id as category_id', 'category_name', 'category_image', 'created_at', 'updated_at')
+        return self::select($columns)
             ->whereHas('qty', function ($query) use ($store_id) {
                 $query->where('seller_id', $store_id);
             })->get();
     }
 
-    public static function getProducts(int $category_id)
+    public static function getProducts(int $category_id): array
     {
-        $products = Products::where('category_id', $category_id)
-            ->where('status', 1)
-            ->paginate(10);
-        $pagination = $products->toArray();
-        if (!$products->isEmpty()) {
-            $products_data = [];
-            foreach ($products as $product) $products_data[] = Products::getProductInfo($product->seller_id, $product->id, ['*']);
-            unset($pagination['data']);
-            return ['data' => $products_data, 'pagination' => $pagination];
+        $products = Products::getProductsByCategoryId($category_id, [
+            'id',
+            'seller_id',
+            'category_id',
+            'product_name',
+            'sku',
+            'price',
+            'featured',
+            'discount_percentage',
+            'weight',
+            'brand',
+            'size',
+            'bike',
+            'car',
+            'van',
+            'feature_img',
+            'height',
+            'width',
+            'length',
+        ]);
+        $products = $products->toArray();
+        $data = $products['data'];
+
+        $pagination = $products;
+        unset($pagination['data']);
+
+        if (!empty($products)) {
+            return ['data' => $data, 'pagination' => $pagination];
         } else {
             return [];
         }
@@ -114,7 +135,7 @@ class Categories extends Model
 
     //     // // Get active parent and child stores that have products in the specified category
     //     // return User::whereIn('id', $store_ids)
-    //     // ->where('is_active', '=', 1) 
+    //     // ->where('is_active', '=', 1)
     //     // ->paginate(10);
 
     //     // $sellers = User::join('qty', 'qty.category_id', '=', 'products.category_id')
@@ -137,8 +158,8 @@ class Categories extends Model
     //     // return $sellers;
     // }
 
-    public static function allCategories()
+    public static function allCategories(array $columns): Collection
     {
-        return self::all();
+        return self::all($columns);
     }
 }

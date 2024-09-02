@@ -4,24 +4,41 @@ namespace App\Services;
 
 use App\Models\StuartDelivery;
 use App\Orders;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Redirect;
 use Throwable;
-use App\Services\JsonResponseServices;
 use Illuminate\Support\Carbon;
 
-final class StuartDeliveryServices {
+final class StuartDeliveryServices
+{
+    public static function getSandBoxJobsUrl()
+    {
+        return 'https://api.sandbox.stuart.com/v2/jobs';
+    }
+
+    public static function getSandBoxTokenUrl()
+    {
+        return 'https://api.sandbox.stuart.com/oauth/token';
+    }
+
+    public static function getProductionJobsUrl()
+    {
+        return 'https://api.stuart.com/v2/jobs';
+    }
+
+    public static function getProductionTokenUrl()
+    {
+        return 'https://api.stuart.com/oauth/token';
+    }
     /**
      * It will get a fresh token for hitting Stuart delivery API
-     * @author Mirza Abdullah Izhar
-     * @version 1.0.0
+     * @author Muhammad Abdullah Mirza
+     * @author Muhammad Abdullah Mirza
      */
     public static function stuartSandboxAccessToken()
     {
-        $stuart_auth = Http::asForm()->post('' . config("constants.STUART_SANDBOX_TOKEN_URL") . '', [
-            'client_id' => config('constants.STUART_SANDBOX_CLIENT_ID'),
-            'client_secret' => config('constants.STUART_SANDBOX_CLIENT_SECRET'),
+        $stuart_auth = Http::asForm()->post('' . self::getSandBoxTokenUrl() . '', [
+            'client_id' => env('STUART_SANDBOX_CLIENT_ID'),
+            'client_secret' => env('STUART_SANDBOX_CLIENT_SECRET'),
             'grant_type' => 'client_credentials',
             'scope' => 'api'
         ]);
@@ -29,13 +46,13 @@ final class StuartDeliveryServices {
         return $stuart_auth['access_token'];
     }
     /**
-     * @version 1.0.0
+     * @author Muhammad Abdullah Mirza
      */
     public static function stuartProductionAccessToken()
     {
-        $stuart_auth = Http::asForm()->post('' . config("constants.STUART_PRODUCTION_TOKEN_URL") . '', [
-            'client_id' => config('app.STUART_PRODUCTION_CLIENT_ID'),
-            'client_secret' => config('app.STUART_PRODUCTION_CLIENT_SECRET'),
+        $stuart_auth = Http::asForm()->post('' . self::getProductionTokenUrl() . '', [
+            'client_id' => env('STUART_PRODUCTION_CLIENT_ID'),
+            'client_secret' => env('STUART_PRODUCTION_CLIENT_SECRET'),
             'grant_type' => 'client_credentials',
             'scope' => 'api'
         ]);
@@ -43,40 +60,38 @@ final class StuartDeliveryServices {
         return $stuart_auth['access_token'];
     }
     /**
-     * @version 1.0.0
+     * @author Muhammad Abdullah Mirza
      */
     public static function stuartSandboxJobCreation(string $access_token, array $job)
     {
-        $response = Http::withToken($access_token)->post('' . config("constants.STUART_SANDBOX_JOBS_URL") . '', $job);
-        return $response->json();
+        return Http::withToken($access_token)->post('' . self::getSandBoxJobsUrl() . '', $job)->json();
     }
     /**
-     * @version 1.0.0
+     * @author Muhammad Abdullah Mirza
      */
     public static function stuartProductionJobCreation(string $access_token, array $job)
     {
-        $response = Http::withToken($access_token)->post('' . config("constants.STUART_PRODUCTION_JOBS_URL") . '', $job);
-        return $response->json();
+        return Http::withToken($access_token)->post('' . self::getProductionJobsUrl() . '', $job)->json();
     }
     /**
-     * @version 1.0.0
+     * @author Muhammad Abdullah Mirza
      */
     public static function stuartSandboxJobStatus(string $access_token, array $job_id)
     {
-        $response = Http::withToken($access_token)->patch('' . config("constants.STUART_SANDBOX_JOBS_URL") . '/' . $job_id);
+        $response = Http::withToken($access_token)->patch('' . self::getSandBoxJobsUrl() . '/' . $job_id);
         return $response->json();
     }
     /**
-     * @version 1.0.0
+     * @author Muhammad Abdullah Mirza
      */
     public static function stuartProductionJobStatus(string $access_token, array $job_id)
     {
-        $response = Http::withToken($access_token)->patch('' . config("constants.STUART_PRODUCTION_JOBS_URL") . '/' . $job_id);
+        $response = Http::withToken($access_token)->patch('' . self::getProductionJobsUrl() . '/' . $job_id);
         return $response->json();
     }
     /**
      * Creates a stuart delivery job for a livewire component
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public static function stuartJobCreationLivewire($order_id, $custom_order_id = null)
     {

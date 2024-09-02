@@ -128,7 +128,7 @@ class InventoryLivewire extends Component
 
     public function render()
     {
-        $categories = Categories::allCategories();
+        $categories = Categories::allCategories(['id', 'category_name']);
         $featured = [];
         $this->category_id = ($this->category_id == 0) ? null : $this->category_id;
         if (Gate::allows('seller')) {
@@ -137,7 +137,7 @@ class InventoryLivewire extends Component
         } elseif (Gate::allows('child_seller')) {
             /*
             1st scenario when a child store will come he will have parent products with "0" Qty
-            2nd after entering the Qty for each product a child store can see his own entered Qty 
+            2nd after entering the Qty for each product a child store can see his own entered Qty
              */
             $data = Products::getChildSellerProductsForView(auth()->id(), $this->search, $this->category_id);
             $this->quantity = $this->populateQuantityArray($data);

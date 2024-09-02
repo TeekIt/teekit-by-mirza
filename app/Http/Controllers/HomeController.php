@@ -133,7 +133,7 @@ class HomeController extends Controller
     // }
     // /**
     //  * Enable's all products of logged-in user
-    //  * @author Mirza Abdullah Izhar
+    //  * @author Muhammad Abdullah Mirza
     //  * @version 1.1.0
     //  */
     // public function inventoryEnableAll(Request $request)
@@ -146,7 +146,7 @@ class HomeController extends Controller
     // }
     // /**
     //  * Disable's all products of logged-in user
-    //  * @author Mirza Abdullah Izhar
+    //  * @author Muhammad Abdullah Mirza
     //  * @version 1.1.0
     //  */
     // public function inventoryDisableAll(Request $request)
@@ -159,7 +159,7 @@ class HomeController extends Controller
     // }
     // /**
     //  * Feature the given product
-    //  * @author Mirza Abdullah Izhar
+    //  * @author Muhammad Abdullah Mirza
     //  * @version 1.1.0
     //  */
     // public function markAsFeatured(Request $request)
@@ -185,7 +185,7 @@ class HomeController extends Controller
     // }
     // /**
     //  * Remove the given product from featured list
-    //  * @author Mirza Abdullah Izhar
+    //  * @author Muhammad Abdullah Mirza
     //  * @version 1.1.0
     //  */
     // public function removeFromFeatured(Request $request)
@@ -200,7 +200,7 @@ class HomeController extends Controller
     // }
     /**
      * Inserts a single store product
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.2.0
      */
     public function inventoryAddDB(Request $request)
@@ -385,7 +385,7 @@ class HomeController extends Controller
     }
     /**
      * It updates/uploads user image
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.1.0
      */
     public function userImgUpdate(Request $request)
@@ -410,7 +410,7 @@ class HomeController extends Controller
     }
     /**
      * Changes user setting provided in the parameter
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function changeSettings(Request $request)
@@ -514,7 +514,7 @@ class HomeController extends Controller
 
     /**
      * Update's user password
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function passwordUpdate(Request $request)
@@ -709,7 +709,7 @@ class HomeController extends Controller
     // }
     /**
      * Change's order status to "delivered"
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function markAsDelivered($order_id)
@@ -721,7 +721,7 @@ class HomeController extends Controller
     /**
      * It change's the order_status & delivery_status to "complete"
      * Only if the driver is failed to enter the correct verification code
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.1.0
      */
     public function markAsCompleted($order_id)
@@ -825,7 +825,7 @@ class HomeController extends Controller
     }
     /**
      * Return's driver details view
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function adminDriverDetails($driver_id)
@@ -984,7 +984,7 @@ class HomeController extends Controller
 
     /**
      * Render child sellers list view for admin
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     // public function adminChildSellers(Request $request)
@@ -1002,7 +1002,7 @@ class HomeController extends Controller
     // }
     /**
      * Delete selected users
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function adminUsersDel(Request $request)
@@ -1022,7 +1022,7 @@ class HomeController extends Controller
     }
     /**
      * Delete selected drivers
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function adminDriversDel(Request $request)
@@ -1110,7 +1110,7 @@ class HomeController extends Controller
     }
     /**
      * Render verified orders listing view for admin
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function adminOrdersVerified(Request $request)
@@ -1150,7 +1150,7 @@ class HomeController extends Controller
     }
     /**
      * Render unverified orders listing view for admin
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function adminOrdersUnverified(Request $request)
@@ -1192,7 +1192,7 @@ class HomeController extends Controller
     }
     /**
      * Delete selected orders
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function adminOrdersDel(Request $request)
@@ -1315,18 +1315,14 @@ class HomeController extends Controller
      * It will show the order count
      * @version 1.0.0
      */
-    public function myOrderCount()
+    public function countSellerOrders()
     {
-        if (Gate::allows('superadmin')) {
-            //$pending_orders = Orders::query()->where('order_status','=','ready')->where('seller_id','=',Auth::id())->count();
-            //$total_products = Orders::query()->where('payment_status','!=','hidden')->where('seller_id','=',Auth::id())->count();
-            $total_orders = Orders::query()->where('seller_id', '=', Auth::id())->count();
-            $user_settings = User::select('settings')->where('id', '=', Auth::id())->get();
-            //$total_sales = Orders::query()->where('payment_status','=','paid')->where('seller_id','=',Auth::id())->sum('order_total');
-            //return $this->inventory();
-            $response = array('total_orders' => $total_orders, 'user_settings' => $user_settings);
-            return response()->json($response);
-        }
+        $total_orders = Orders::where('seller_id', '=', Auth::id())->where('payment_status', '=', 'paid')->count();
+        $user_settings = User::select('settings')->where('id', '=', Auth::id())->get();
+        return response()->json([
+            'total_orders' => $total_orders,
+            'user_settings' => $user_settings
+        ]);
     }
     /**
      * It will show complete orders
@@ -1388,7 +1384,7 @@ class HomeController extends Controller
     //     $order->save();
     //     $message = "Hello " . $order->user->name . " .
     //         Your order from " . $order->store->name . " was unsuccessful.
-    //         Unfortunately " . $order->store->name . " is unable to complete your order. But don't worry 
+    //         Unfortunately " . $order->store->name . " is unable to complete your order. But don't worry
     //         you have not been charged.
     //         If you need any kinda of assistance, please contact us via email at:
     //         admin@teekit.co.uk";
@@ -1424,7 +1420,7 @@ class HomeController extends Controller
     }
     /**
      * it will update the store info via popup modal
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.3.0
      */
     public function updateStoreInfo(Request $request)
@@ -1474,7 +1470,7 @@ class HomeController extends Controller
     }
     /**
      * it will update the user info via popup modal
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function userInfoUpdate(Request $request)
@@ -1515,7 +1511,7 @@ class HomeController extends Controller
     }
     /**
      * it will update the unverified orders to verified
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function clickToVerify($order_id)

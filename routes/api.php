@@ -19,17 +19,6 @@ use App\Http\Controllers\WithdrawalRequestsController;
 use App\Services\StripeServices;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
-
-/* 
-Tasks:
-1) Make the product import perfect (Done)
-2) Add staurt delivery to sellers dashboard (Done)
-3) Export the app as an desktop application (Done)
-4) Resolve database relations problem (Done)
-5) Add new stripe params (Done)
-6) Add stipe payment_intent_id into the orders API (Done)
-*/
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -88,7 +77,7 @@ Route::prefix('qty')->controller(QtyController::class)->group(function () {
 Route::prefix('category')->controller(CategoriesController::class)->group(function () {
     Route::post('add', 'add');
     Route::post('update/{product_id}', 'update');
-    Route::get('view/{category_id}', 'products');
+    Route::get('{category_id}/products', 'products');
     Route::get('get-stores-by-category', 'stores');
     Route::get('all', 'all');
 });

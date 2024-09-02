@@ -48,10 +48,10 @@
                                         {{-- <td>
                                             <img src=@if ($profile_img) "{{ config('constants.BUCKET') . $profile_img }}"
                                                 @else
-                                            "{{ asset('/icons/driver.png') }}" @endif width="150px">
+                                            "{{ asset('images/icons/driver.png') }}" @endif width="150px">
                                         </td> --}}
                                         <td>
-                                            <img src="{{ asset('/icons/driver.png') }}" width="150px">
+                                            <img src="{{ asset('images/icons/driver.png') }}" width="150px">
                                         </td>
                                     </tr>
                                     <tr>

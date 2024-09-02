@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1" name="viewport">
 <meta content="ie=edge" http-equiv="x-ua-compatible">
-<link rel="icon" href="{{ asset('icons/logo.webp') }}" type="image/svg+xml" />
+<link rel="icon" href="{{ asset('images/icons/logo.webp') }}" type="image/svg+xml" />
 <!-- CSRF Token -->
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{{ config('app.name', 'Laravel App') }}</title>

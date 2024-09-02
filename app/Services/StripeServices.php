@@ -52,7 +52,7 @@ final class StripeServices
         $form_data = [
             'amount' => $_REQUEST['amount'],
             'currency' => $_REQUEST['currency'],
-            'payment_method_types[]' => 'card_present',
+            'payment_method_types[]' => 'card',
             'capture_method' => 'manual',
             'payment_method_options[card_present][request_incremental_authorization_support]' => 'true',
             'transfer_data' => ['destination' => $_REQUEST['stripe_account_id']],

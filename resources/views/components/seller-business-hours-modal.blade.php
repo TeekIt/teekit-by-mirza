@@ -10,10 +10,10 @@
                     <div class="col-md-12">
                         <form action="{{ route('seller.update.required.info') }}" method="POST" enctype="multipart/form-data">
                             {{ csrf_field() }}
-                            <div class="pb-5">
+                            {{-- <div class="pb-5">
                                 <label>Stripe Account Id</label>
                                 <input type="text" name="stripe_account_id" class="form-control" placeholder="Enter your stripe account id" required>
-                            </div>
+                            </div> --}}
                             <div class="row form-inline">
                                 <div class="col-md-2 col-2">
                                     <div class="form-group">

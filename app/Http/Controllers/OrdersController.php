@@ -23,7 +23,7 @@ class OrdersController extends Controller
 {
     /**
      * Inserts a newly arrived order
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public function new(Request $request)
     {
@@ -68,7 +68,6 @@ class OrdersController extends Controller
                 $temp['price'] = Products::getProductPrice($item['product_id']);
                 $product = Products::getOnlyProductDetailsById($item['product_id']);
                 $temp['seller_id'] = $product->seller_id;
-                // $temp['seller_id'] = $request->seller_id;
                 $temp['volumn'] = $product->height * $product->width * $product->length;
                 $temp['weight'] = $product->weight;
                 $grouped_seller[$temp['seller_id']][] = $temp;
@@ -89,8 +88,8 @@ class OrdersController extends Controller
                     $order_total = $order_total + ($order_item['price'] * $order_item['qty']);
                 }
                 $seller = User::getUserByID($seller_id, ['business_phone', 'lat', 'lon']);
-                /* 
-                * Adding amount into seller wallet 
+                /*
+                * Adding amount into seller wallet
                 */
                 User::addIntoWallet($seller_id, $order_total);
                 $new_order = new Orders();
@@ -210,7 +209,7 @@ class OrdersController extends Controller
         }
     }
     /**
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public function productsOfRecentOrder(Request $request)
     {
@@ -468,7 +467,7 @@ class OrdersController extends Controller
     }
     /**
      * A delivery boy can cancel a specific order through this function
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public function cancelOrder(Request $request)
     {
@@ -493,7 +492,7 @@ class OrdersController extends Controller
     }
     /**
      * Cancel's a customer order
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public function customerCancelOrder(Request $request)
     {
@@ -558,7 +557,7 @@ class OrdersController extends Controller
     }
     /**
      * Update's the order
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public function updateOrder(Request $request)
     {
@@ -675,7 +674,7 @@ class OrdersController extends Controller
     /**
      * It will calculate the total distance between client & store location & then
      * It will return the total distance in Miles
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     // public function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo)
     // {

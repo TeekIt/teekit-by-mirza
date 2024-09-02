@@ -11,16 +11,21 @@ use Illuminate\Http\Request;
 use App\Services\JsonResponseServices;
 use App\Services\WebResponseServices;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class UsersController extends Controller
 {
     /**
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public function updateSellerRequiredInfo(Request $request)
     {
+        // $request->validate([
+        //     'stripe_account_id' => 'required|string',
+        //     'time' => 'required|array',
+        // ]);
+
         $request->validate([
-            'stripe_account_id' => 'required|string',
             'time' => 'required|array',
         ]);
 
@@ -31,10 +36,14 @@ class UsersController extends Controller
         $business_hours['time'] = $time;
         $business_hours['submitted'] = "yes";
 
+        // $updated = User::updateInfo(
+        //     auth()->id(),
+        //     $business_hours,
+        //     $request->stripe_account_id
+        // );
         $updated = User::updateInfo(
             auth()->id(),
-            $business_hours,
-            $request->stripe_account_id
+            hours: $business_hours,
         );
         if ($updated) {
             return WebResponseServices::getResponseRedirectBack(
@@ -49,7 +58,7 @@ class UsersController extends Controller
     }
     /**
      * Fetch seller information w.r.t ID
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 2.1.0
      */
     public static function getSellerInfo(object $seller_info, array $map_api_result = null)
@@ -129,7 +138,7 @@ class UsersController extends Controller
     }
     /**
      * Listing of all Sellers/Stores within 5 miles
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      */
     public function sellers(Request $request)
     {
@@ -138,16 +147,20 @@ class UsersController extends Controller
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
                 'state' => 'required|string',
-                'page' => 'required|numeric'
+                // 'page' => 'required|numeric',
             ]);
             if ($validated_data->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
-            $sellers = User::getParentAndChildSellersByState($request->state);
-            $pagination = $sellers->toArray();
-            unset($pagination['data']);
 
-            if (!$sellers->isEmpty()) $data = GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
+            $data = Cache::remember('sellers' . $request->state . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
+                $sellers = User::getParentAndChildSellersByState($request->state);
+                // $pagination = $sellers->toArray();
+                // unset($pagination['data']);
+                if (!$sellers->isEmpty()) {
+                    return GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
+                }
+            });
 
             if (empty($data)) {
                 return JsonResponseServices::getApiResponse(
@@ -158,14 +171,21 @@ class UsersController extends Controller
                 );
             }
 
-            return JsonResponseServices::getApiResponseExtention(
+            return JsonResponseServices::getApiResponse(
                 $data,
                 config('constants.TRUE_STATUS'),
                 '',
-                'pagination',
-                $pagination,
-                config('constants.HTTP_OK')
+                config('constants.HTTP_OK'),
             );
+
+            // return JsonResponseServices::getApiResponseExtention(
+            //     $data,
+            //     config('constants.TRUE_STATUS'),
+            //     '',
+            //     'pagination',
+            //     $pagination,
+            //     config('constants.HTTP_OK')
+            // );
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(
@@ -178,7 +198,7 @@ class UsersController extends Controller
     }
     /**
      * Search products w.r.t Seller/Store 'id' & Product Name
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.4.0
      */
     public function searchSellerProducts($seller_id, $product_name)

@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\DeviceToken;
 use Illuminate\Http\Request;
+use App\Models\Notification;
+use App\notifications;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
@@ -12,8 +15,61 @@ use Throwable;
 class NotificationsController extends Controller
 {
     /**
+     * it will fetch all the notifications
+     * @version 1.0.0
+     */
+    public function getNotifications()
+    {
+        $notifications = Notification::where('user_id', '=', Auth::id())->get();
+        if ($notifications->count() <= 0) {
+            return response()->json([
+                'data' => [],
+                'status' => false,
+                'message' => 'No New Notifications'
+            ], 200);
+        } else {
+            return response()->json([
+                'data' => $notifications,
+                'status' => true,
+                'message' => 'User Notifications'
+            ], 200);
+        }
+    }
+    /**
+     * it will delete the notification via
+     * given id
+     * @version 1.0.0
+     */
+    public function deleteNotification($notification_id)
+    {
+        try {
+            $notification = Notification::find($notification_id);
+            if (!empty($notification)) {
+                $notification->delete();
+                return response()->json([
+                    'data' => [],
+                    'status' => true,
+                    'message' => config('constants.ITEM_DELETED'),
+                ], 200);
+            } else {
+                return response()->json([
+                    'data' => [],
+                    'status' => false,
+                    'message' => config('constants.NO_RECORD')
+                ], 200);
+            }
+        } catch (Throwable $error) {
+            report($error);
+            return response()->json([
+                'data' => [],
+                'status' => false,
+                'message' => $error
+            ], 500);
+        }
+    }
+    /**
      * Returns notification form view
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function notificationHome(Request $request)
@@ -26,7 +82,7 @@ class NotificationsController extends Controller
     }
     /**
      * It will send notifications
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.1.0
      */
     public function notificationSend(Request $request)
@@ -75,7 +131,7 @@ class NotificationsController extends Controller
     }
     /**
      * Test send notifications firebase API
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function notificationSendTest(Request $request)
@@ -138,7 +194,7 @@ class NotificationsController extends Controller
     }
     /**
      * It will save/update device token of every user
-     * @author Mirza Abdullah Izhar
+     * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
     public function saveToken(Request $request)
