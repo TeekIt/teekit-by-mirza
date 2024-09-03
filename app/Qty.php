@@ -78,7 +78,7 @@ class Qty extends Model
             ->join('products', 'products.id', '=', 'qty.product_id')
             ->where('qty.qty', '>', 0) // Products should be in stock
             ->where('qty.category_id', '=', $category_id)
-            ->where('products.status', '=', 1) // Products should be live
+            ->where('products.status', '=', '1') // Products should be live
             ->where('users.is_active', '=', 1) // Sellers should be active
             ->where('users.state', '=', $state)
             ->distinct() // Use distinct to select only unique stores
@@ -94,9 +94,9 @@ class Qty extends Model
         if (!$quantities->isEmpty()) {
             $products_data = [];
             foreach ($quantities as $single_index)
-                $products_data[] = Products::getProductInfo($single_index->users_id, $single_index->products_id, [
+                $products_data[] = Products::getProductInfo($single_index->seller_id, $single_index->product_id, [
                     'id',
-                    'user_id',
+                    'seller_id',
                     'category_id',
                     'product_name',
                     'sku',
