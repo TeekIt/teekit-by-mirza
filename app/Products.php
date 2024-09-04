@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -340,7 +341,7 @@ class Products extends Model
     /**
      * SAP == Search Alternative Product
      */
-    public static function getProductsForSAPModal(int $seller_id, string $search = ''): LengthAwarePaginator
+    public static function getProductsForSAPModal(int $seller_id, string $search = ''): Paginator
     {
         if (!empty($search)) $search = str_replace(' ', '%', $search);
         return self::join('qty', 'products.id', '=', 'qty.products_id')
