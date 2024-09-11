@@ -4,14 +4,15 @@ namespace App\Http\Controllers;
 
 use App\DeviceToken;
 use App\notifications;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
+use Google\Client;
 use Throwable;
-
 class NotificationsController extends Controller
 {
     /**
@@ -72,12 +73,71 @@ class NotificationsController extends Controller
      * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
-    public function notificationHome(Request $request)
+    public function notificationHome()
     {
-        if (Gate::allows('superadmin')) {
-            return view('admin.notification');
-        } else {
-            abort(404);
+        return view('admin.notification');
+    }
+
+    public function getAccessToken($serviceAccountPath)
+    {
+        $client = new Client();
+        $client->setAuthConfig($serviceAccountPath);
+        $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
+        $client->useApplicationDefaultCredentials();
+        $token = $client->fetchAccessTokenWithAssertion();
+        dd($token);
+        return $token['access_token'];
+    }
+
+    public function sendMessage($accessToken, $projectId, $message)
+    {
+        $url = 'https://fcm.googleapis.com/v1/projects/' . $projectId . '/messages:send';
+        $headers = [
+            'Authorization: Bearer ' . $accessToken,
+            'Content-Type: application/json',
+        ];
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['message' => $message]));
+        $response = curl_exec($ch);
+        if ($response === false) {
+            throw new Exception('Curl error: ' . curl_error($ch));
+        }
+        curl_close($ch);
+        return json_decode($response, true);
+    }
+
+    public function notificationSend(Request $request)
+    {
+        // Path to your service account JSON key file
+        $serviceAccountPath = storage_path('googleFcmServices/teek-it-965a8-1ec96a1aa676.json');
+        
+        // Your Firebase project ID
+        $projectId = 'teek-it-965a8';
+        
+        $firebaseTokens = DeviceToken::whereNotNull('device_token')->pluck('device_token')->all();
+        
+        // Example message payload
+        $message = [
+            // 'token' => 'device-token',
+            "registration_ids" => $firebaseTokens,
+            'notification' => [
+                'title' => 'Hello',
+                'body' => 'World',
+            ],
+            "priority" => "high",
+        ];
+        try {
+            $accessToken = $this->getAccessToken($serviceAccountPath);
+            dd('hello1');
+            $response = $this->sendMessage($accessToken, $projectId, $message);
+            dd($response);
+        } catch (Throwable $error) {
+            report($error);
+            return back()->with('error', 'Failed to send the notification due to some internal error.');
         }
     }
     /**
@@ -85,47 +145,43 @@ class NotificationsController extends Controller
      * @author Muhammad Abdullah Mirza
      * @version 1.1.0
      */
-    public function notificationSend(Request $request)
-    {
-        try {
-            if (Gate::allows('superadmin')) {
-                $validatedData = notifications::validator($request);
-                if ($validatedData->fails()) {
-                    flash('Error in sending notification because a required field is missing or invalid data.')->error();
-                    return Redirect::back()->withInput($request->input());
-                }
-                $firebaseToken = DeviceToken::whereNotNull('device_token')->pluck('device_token')->all();
-                $data = [
-                    "registration_ids" => $firebaseToken,
-                    "notification" => [
-                        "title" => $request->title,
-                        "body" => $request->body,
-                    ],
-                    "priority" => "high"
-                ];
-                $dataString = json_encode($data);
-                $headers = [
-                    'Authorization: key=AAAAQ4iVuPM:APA91bGUp791v4RmZlEm3Dge71Yoj_dKq-XIytfnHtvCnHdmiH-BTZGlaCHGydnWvd976Mm5bSU6OFUNZqSf9YdamZifR3HMUl4m57RE21vSzrgGpfHmvYS47RQxDHV4WIN4zPFfNO-A',
-                    'Content-Type: application/json',
-                ];
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
-                curl_exec($ch);
-                curl_close($ch);
-                return back()->with('success', 'Notification send successfully.');
-            } else {
-                abort(404);
-            }
-        } catch (Throwable $error) {
-            report($error);
-            return back()->with('error', 'Failed to send the notification due to some internal error.');
-        }
-    }
+    // public function notificationSend(Request $request)
+    // {
+    //     try {
+    //         $validatedData = notifications::validator($request);
+    //         if ($validatedData->fails()) {
+    //             flash('Error in sending notification because a required field is missing or invalid data.')->error();
+    //             return Redirect::back()->withInput($request->input());
+    //         }
+    //         $firebaseToken = DeviceToken::whereNotNull('device_token')->pluck('device_token')->all();
+    //         $data = [
+    //             "registration_ids" => $firebaseToken,
+    //             "notification" => [
+    //                 "title" => $request->title,
+    //                 "body" => $request->body,
+    //             ],
+    //             "priority" => "high"
+    //         ];
+    //         $dataString = json_encode($data);
+    //         $headers = [
+    //             'Authorization: key=AAAAQ4iVuPM:APA91bGUp791v4RmZlEm3Dge71Yoj_dKq-XIytfnHtvCnHdmiH-BTZGlaCHGydnWvd976Mm5bSU6OFUNZqSf9YdamZifR3HMUl4m57RE21vSzrgGpfHmvYS47RQxDHV4WIN4zPFfNO-A',
+    //             'Content-Type: application/json',
+    //         ];
+    //         $ch = curl_init();
+    //         curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+    //         curl_setopt($ch, CURLOPT_POST, true);
+    //         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    //         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    //         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //         curl_setopt($ch, CURLOPT_POSTFIELDS, $dataString);
+    //         curl_exec($ch);
+    //         curl_close($ch);
+    //         return back()->with('success', 'Notification send successfully.');
+    //     } catch (Throwable $error) {
+    //         report($error);
+    //         return back()->with('error', 'Failed to send the notification due to some internal error.');
+    //     }
+    // }
     /**
      * Test send notifications firebase API
      * @author Muhammad Abdullah Mirza
