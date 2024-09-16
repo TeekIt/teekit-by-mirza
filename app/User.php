@@ -345,6 +345,11 @@ class User extends Authenticatable implements JWTSubject
             ->paginate(9);
     }
 
+    public static function getAllCustomers(): Collection
+    {
+        return self::where('role_id', 3)->get();
+    }
+
     public static function getBuyersWithReferralCode(): LengthAwarePaginator
     {
         return self::whereNotNull('referral_code')->paginate(10);
