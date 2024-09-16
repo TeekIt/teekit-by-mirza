@@ -135,7 +135,7 @@ class ProductsController extends Controller
 
             foreach ($importData_arr as $importData) {
                 $product = new Products();
-                $product->user_id = $seller_id;
+                $product->seller_id = $seller_id;
                 $product->category_id = $importData[0];
                 $product->product_name = $importData[1];
                 $product->sku = $importData[2];
