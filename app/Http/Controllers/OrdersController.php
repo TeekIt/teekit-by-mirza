@@ -42,13 +42,13 @@ class OrdersController extends Controller
                         'delivery_charges' => 'required|numeric',
                         'service_charges' => 'required|numeric',
                         'device' => 'sometimes',
-                        // 'seller_id' => 'required|integer'
+                        'payment_intent_id' => 'required|string',
                     ];
                 } elseif ($request->type == 'self-pickup') {
                     $rules = [
                         'type' => 'required|string',
                         'phone_number' => 'string|min:13|max:13',
-                        // 'seller_id' => 'required|integer'
+                        'payment_intent_id' => 'required|string',
                     ];
                 }
             } else {
@@ -67,7 +67,7 @@ class OrdersController extends Controller
                 $temp['user_choice'] = $item['user_choice'];
                 $temp['price'] = Products::getProductPrice($item['product_id']);
                 $product = Products::getOnlyProductDetailsById($item['product_id']);
-                $temp['seller_id'] = $product->user_id;
+                $temp['seller_id'] = $product->seller_id;
                 $temp['volumn'] = $product->height * $product->width * $product->length;
                 $temp['weight'] = $product->weight;
                 $grouped_seller[$temp['seller_id']][] = $temp;
@@ -93,7 +93,7 @@ class OrdersController extends Controller
                 */
                 User::addIntoWallet($seller_id, $order_total);
                 $new_order = new Orders();
-                $new_order->user_id = $customer_id;
+                $new_order->customer_id = $customer_id;
                 $new_order->order_total = $order_total;
                 $new_order->total_items = $total_items;
                 if ($request->type == 'delivery') {
@@ -104,9 +104,9 @@ class OrdersController extends Controller
                     // $distance = $this->calculateDistance($customer_lat, $customer_lon, $store_lat, $store_lon);
                     $distance = GoogleMapServices::getDistanceInMiles($store_lat, $store_lon, $customer_lat, $customer_lon);
                     $driver_charges = DriverFairServices::calculateDriverFair2($total_weight, $total_volumn, $distance);
-                    $new_order->lat = $customer_lat;
-                    $new_order->lon = $customer_lon;
-                    $new_order->receiver_name = $request->receiver_name;
+                    $new_order->customer_lat = $customer_lat;
+                    $new_order->customer_lon = $customer_lon;
+                    $new_order->customer_name = $request->receiver_name;
                     $new_order->phone_number = $request->phone_number;
                     $new_order->address = $request->address;
                     $new_order->house_no = $request->house_no;
@@ -144,12 +144,11 @@ class OrdersController extends Controller
                         TwilioSmsService::sendSms('+447817332090', $message_for_admin); //Junaid Number
                         TwilioSmsService::sendSms('+923170155625', $message_for_admin); //Mirza Number
                     }
-                    
-                    VerificationCodes::insertVerificationCode($order_id, $verification_code);
+                    VerificationCodes::add($order_id, $verification_code);
                 }
                 $order_arr[] = $order_id;
                 foreach ($order as $order_item) {
-                    OrderItems::insertInfo($order_id, $order_item['product_id'], $order_item['price'], $order_item['qty'], $order_item['user_choice']);
+                    OrderItems::add($order_id, $order_item['product_id'], $order_item['price'], $order_item['qty'], $order_item['user_choice']);
                 }
                 $count++;
             }
@@ -171,13 +170,12 @@ class OrdersController extends Controller
         }
     }
     /**
-     * List orders w.r.t Seller ID
      * @author Huzaifa Haleem
      */
     public function showLoggedinBuyerOrders(Request $request)
     {
         try {
-            $orders = Orders::select('id')->where('user_id', '=', Auth::id())->orderByDesc('id');
+            $orders = Orders::select('id')->where('customer_id', '=', Auth::id())->orderByDesc('id');
             if (!empty($request->order_status)) $orders = $orders->where('order_status', '=', $request->order_status);
             $orders = $orders->paginate(20);
             $pagination = $orders->toArray();
@@ -266,7 +264,7 @@ class OrdersController extends Controller
             $orders = $orders->orderByDesc('created_at')->paginate();
             $pagination = $orders->toArray();
         } elseif ($request->has('order_status') && $request->order_status == 'ready') {
-            $assignedOrders = Orders::where('delivery_boy_id', \auth()->id())->where('delivery_status', 'assigned')->get();
+            $assignedOrders = Orders::where('driver_id', \auth()->id())->where('delivery_status', 'assigned')->get();
             if (count($assignedOrders) == 0) {
                 $users = DB::table("users")
                     ->select(
@@ -330,7 +328,7 @@ class OrdersController extends Controller
                     ->toArray();
                 $orders = Orders::query();
                 $orders = $orders->where('order_status', '=', $request->order_status)
-                    ->where('delivery_boy_id', \auth()->id());
+                    ->where('driver_id', \auth()->id());
                 $orders = $orders->orWhere(function ($q) use ($nearbyOrders) {
                     $q->whereIn('id', $nearbyOrders);
                     if (\auth()->user()->vehicle_type == 'bike') {
@@ -347,7 +345,7 @@ class OrdersController extends Controller
             $orders = Orders::query();
             $orders = $orders->where('type', '=', 'delivery')
                 ->where('order_status', 'complete')
-                ->whereNotNull('delivery_boy_id')
+                ->whereNotNull('driver_id')
                 ->orderByDesc('created_at')
                 ->paginate();
             $pagination = $orders->toArray();
@@ -355,7 +353,7 @@ class OrdersController extends Controller
             $orders = Orders::query();
             $orders = $orders->where('type', '=', 'delivery')
                 ->where('order_status', 'ready')
-                ->where('delivery_boy_id', NULL)
+                ->where('driver_id', NULL)
                 ->orderByDesc('created_at')
                 ->paginate();
             $pagination = $orders->toArray();
@@ -385,13 +383,13 @@ class OrdersController extends Controller
      * for a specific delivery boy
      * @author Huzaifa Haleem
      */
-    public function deliveryBoyOrders(Request $request, $delivery_boy_id)
+    public function driverOrders(Request $request, $driver_id)
     {
-        //delivery_status:assigned,complete,pending_approval,cancelled
-        $orders = Orders::select('id')->where('delivery_boy_id', '=', $delivery_boy_id)
+        /* delivery_status:assigned,complete,pending_approval,cancelled */
+        $orders = Orders::select('id')->where('driver_id', '=', $driver_id)
             ->where('delivery_status', '=', $request->delivery_status)
             ->where('type', '=', 'delivery')
-            ->paginate();
+            ->paginate(10);
         $pagination = $orders->toArray();
         if (!$orders->isEmpty()) {
             $order_data = [];
@@ -422,7 +420,7 @@ class OrdersController extends Controller
         $order = Orders::find($request->order_id);
         if ($order) {
             $order->delivery_status = $request->delivery_status;
-            $order->delivery_boy_id = $request->delivery_boy_id;
+            $order->driver_id = $request->driver_id;
             $order->order_status = $request->order_status;
             $order->save();
             return response()->json([
@@ -450,7 +448,7 @@ class OrdersController extends Controller
         $order = Orders::find($request->order_id);
         if ($order) {
             $order->delivery_status = $request->delivery_status;
-            $order->delivery_boy_id = $request->delivery_boy_id;
+            $order->driver_id = $request->driver_id;
             $order->order_status = $request->order_status;
             $order->driver_traveled_km = $request->driver_traveled_km;
             $order->save();
@@ -475,7 +473,7 @@ class OrdersController extends Controller
     {
         $order = Orders::find($request->order_id);
         if ($order) {
-            $order->delivery_boy_id = NULL;
+            $order->driver_id = NULL;
             $order->order_status = "ready";
             $order->delivery_status = "cancelled";
             $order->save();
@@ -644,7 +642,7 @@ class OrdersController extends Controller
                     config('constants.HTTP_OK')
                 );
             }
-            $order = Orders::with(['user', 'delivery_boy', 'store', 'order_items', 'order_items.products'])
+            $order = Orders::with(['customer', 'store', 'order_items', 'order_items.products'])
                 ->where('id', $request->id)->first();
             return JsonResponseServices::getApiResponse(
                 $order,

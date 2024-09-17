@@ -4,7 +4,7 @@ namespace App;
 
 
 use Illuminate\Database\Eloquent\Model;
-use Validator;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Role extends Model
 {
@@ -34,13 +34,13 @@ class Role extends Model
     // {
     //     return $this->belongsToMany('App\User', 'role_user');
     // }
-    public function permissions()
+    public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(Permission::class);
     }
     
-    public function users()
-    {
-        return $this->belongsToMany('App\User', 'role_user');
-    }
+    // public function users(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(User::class, 'role_user');
+    // }
 }

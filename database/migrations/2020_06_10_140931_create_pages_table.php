@@ -18,6 +18,7 @@ class CreatePagesTable extends Migration
             $table->string('page_type')->default(null)->nullable();
             $table->text('page_content')->default(null)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

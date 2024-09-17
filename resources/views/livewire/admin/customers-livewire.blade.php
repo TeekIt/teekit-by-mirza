@@ -136,7 +136,7 @@
                                     <button type="button" class="btn btn-primary" title="Show detail information" data-bs-toggle="modal" data-bs-target="#infoModel" wire:click="renderInfoModal({{ $single_index->id }})">
                                         <i class="fas fa-info-circle"></i>
                                     </button>
-                                    <a href="{{ route('admin.orders', ['user_id' => $single_index->id]) }}" class="btn btn-dark" title="Show orders">
+                                    <a href="{{ route('admin.orders', ['customer_id' => $single_index->id]) }}" class="btn btn-dark" title="Show orders">
                                         <i class="fas fa-luggage-cart"></i>
                                     </a>
                                 </div>

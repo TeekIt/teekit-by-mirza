@@ -2,12 +2,15 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class Qty extends Model
 {
+    use HasFactory, SoftDeletes;
     /**
      * The table associated with the model.
      *
@@ -21,24 +24,24 @@ class Qty extends Model
      */
     public function store(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'users_id');
+        return $this->belongsTo(User::class, 'seller_id');
     }
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Products::class, 'products_id');
+        return $this->belongsTo(Products::class, 'product_id');
     }
     /**
      * Helpers
      */
-    // public static function updateProductQty(int $product_id, int $user_id, int $product_quantity)
+    // public static function updateProductQty(int $product_id, int $seller_id, int $product_quantity)
     // {
-    //     if (!empty($user_id)) {
-    //         self::where('products_id', $product_id)
-    //             ->where('users_id', $user_id)
+    //     if (!empty($seller_id)) {
+    //         self::where('product_id', $product_id)
+    //             ->where('seller_id', $seller_id)
     //             ->update(['qty' => $product_quantity]);
-    //     } else if (empty($user_id)) {
-    //         self::where('products_id', $product_id)
+    //     } else if (empty($seller_id)) {
+    //         self::where('product_id', $product_id)
     //             ->decrement(['qty' => $product_quantity]);
     //     }
     //     return true;
@@ -46,7 +49,7 @@ class Qty extends Model
 
     public static function getTotalProductsCountBySellerId(int $seller_id): int
     {
-        return self::where('users_id', '=', $seller_id)->count();
+        return self::where('seller_id', '=', $seller_id)->count();
     }
 
     public static function getSellersByGivenParams(int $category_id, string $state): object
@@ -71,11 +74,11 @@ class Qty extends Model
             'users.is_online',
             'users.role_id'
         ])
-            ->join('users', 'users.id', '=', 'qty.users_id')
-            ->join('products', 'products.id', '=', 'qty.products_id')
+            ->join('users', 'users.id', '=', 'qty.seller_id')
+            ->join('products', 'products.id', '=', 'qty.product_id')
             ->where('qty.qty', '>', 0) // Products should be in stock
             ->where('qty.category_id', '=', $category_id)
-            ->where('products.status', '=', 1) // Products should be live
+            ->where('products.status', '=', '1') // Products should be live
             ->where('users.is_active', '=', 1) // Sellers should be active
             ->where('users.state', '=', $state)
             ->distinct() // Use distinct to select only unique stores
@@ -84,16 +87,16 @@ class Qty extends Model
 
     public static function getProductsByGivenIds(int $category_id, int $seller_id): array
     {
-        $quantities = self::where('users_id', $seller_id)
+        $quantities = self::where('seller_id', $seller_id)
             ->where('category_id', $category_id)
             ->paginate(10);
         $pagination = $quantities->toArray();
         if (!$quantities->isEmpty()) {
             $products_data = [];
             foreach ($quantities as $single_index)
-                $products_data[] = Products::getProductInfo($single_index->users_id, $single_index->products_id, [
+                $products_data[] = Products::getProductInfo($single_index->seller_id, $single_index->product_id, [
                     'id',
-                    'user_id',
+                    'seller_id',
                     'category_id',
                     'product_name',
                     'sku',
@@ -118,25 +121,25 @@ class Qty extends Model
         }
     }
 
-    public static function getChildSellerProducts(int $user_id): LengthAwarePaginator
+    public static function getChildSellerProducts(int $seller_id): LengthAwarePaginator
     {
-        return self::where('qty.users_id', $user_id)
-            ->join('products as prod', 'prod.id', 'qty.products_id')
+        return self::where('qty.seller_id', $seller_id)
+            ->join('products as prod', 'prod.id', 'qty.product_id')
             ->select('prod.*')
             ->paginate(20);
     }
 
-    public static function subtractProductQty(int $user_id, int $product_id, int $product_quantity): int
+    public static function subtractProductQty(int $seller_id, int $product_id, int $product_quantity): int
     {
-        return self::where('users_id', $user_id)
-            ->where('products_id', $product_id)
+        return self::where('seller_id', $seller_id)
+            ->where('product_id', $product_id)
             ->decrement('qty', $product_quantity);
     }
 
     public static function updateChildProductQty(array $quantity): Qty
     {
         return self::updateOrCreate(
-            ['users_id' => $quantity['child_seller_id'], 'products_id' => $quantity['prod_id']],
+            ['seller_id' => $quantity['child_seller_id'], 'product_id' => $quantity['prod_id']],
             ['qty' => $quantity['qty']]
         );
     }
@@ -145,11 +148,11 @@ class Qty extends Model
      * this will help us add qty with given details to qty table
      * @author Muhammad Abdullah Mirza
      */
-    public static function add(int $user_id, int $product_id, int $category_id, int $product_quantity): bool
+    public static function add(int $seller_id, int $product_id, int $category_id, int $product_quantity): bool
     {
         $quantity = new Qty();
-        $quantity->users_id = $user_id;
-        $quantity->products_id = $product_id;
+        $quantity->seller_id = $seller_id;
+        $quantity->product_id = $product_id;
         $quantity->category_id = $category_id;
         $quantity->qty = $product_quantity;
         return $quantity->save();

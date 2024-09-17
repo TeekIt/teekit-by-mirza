@@ -89,10 +89,10 @@ class ReferralCodeRelationController extends Controller
     public function insertReferrals()
     {
         try {
-            foreach (User::getBuyers() as $buyer) {
-                $buyer_obj = User::find($buyer->id);
-                $buyer_obj->referral_code = Str::uuid();
-                $buyer_obj->save();
+            foreach (User::getAllCustomers() as $customer) {
+                $customer_obj = User::find($customer->id);
+                $customer_obj->referral_code = Str::uuid();
+                $customer_obj->save();
             }
             return JsonResponseServices::getApiResponse(
                 [],

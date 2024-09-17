@@ -174,7 +174,7 @@ class DriverController extends Controller
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|integer',
             'verification_code' => 'required|min:6|max:6',
-            'delivery_boy_id' => 'required|integer'
+            'driver_id' => 'required|integer'
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -183,7 +183,7 @@ class DriverController extends Controller
                 'message' => config('constants.MISSING_OR_INVALID_DATA')
             ], 422);
         } else {
-            $verification_codes = VerificationCodes::query()->select('code->code as verification_code')
+            $verification_codes = VerificationCodes::select('code->code as verification_code')
                 ->where('order_id', '=', $request->order_id)
                 ->get();
             $saved_code = $verification_codes[0]->verification_code;
@@ -201,8 +201,8 @@ class DriverController extends Controller
                 VerificationCodes::where('order_id', '=', $request->order_id)
                     ->update(['code->driver_failed_to_enter_code' => 'No']);
                 Orders::where('id', '=', $request->order_id)->update(['order_status' => 'complete', 'delivery_status' => 'complete']);
-                // $driver = User::find($request->delivery_boy_id);
-                $driver = Drivers::find($request->delivery_boy_id);
+                // $driver = User::find($request->driver_id);
+                $driver = Drivers::find($request->driver_id);
                 $order = Orders::find($request->order_id);
                 $driver->pending_withdraw = $order->driver_charges + $driver->pending_withdraw;
                 $driver->save();
@@ -224,7 +224,7 @@ class DriverController extends Controller
      */
     public function driverFailedToEnterCode(Request $request)
     {
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'order_id' => 'required|int'
         ]);
         if ($validator->fails()) {
@@ -326,7 +326,7 @@ class DriverController extends Controller
      */
     protected function loginDriver(Request $request)
     {
-        $validatedData = \Validator::make($request->all(), [
+        $validatedData = Validator::make($request->all(), [
             'email' => 'required|string|email|max:80',
             'password' => 'required|string|min:8|max:50'
         ]);

@@ -7,12 +7,15 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use App\Products;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Validator;
 
 class Categories extends Model
 {
+    use HasFactory, SoftDeletes;
     /**
      * Relations
      */
@@ -80,7 +83,7 @@ class Categories extends Model
     {
         return self::select($columns)
             ->whereHas('qty', function ($query) use ($store_id) {
-                $query->where('users_id', $store_id);
+                $query->where('seller_id', $store_id);
             })->get();
     }
 
@@ -88,7 +91,7 @@ class Categories extends Model
     {
         $products = Products::getProductsByCategoryId($category_id, [
             'id',
-            'user_id',
+            'seller_id',
             'category_id',
             'product_name',
             'sku',
@@ -122,13 +125,13 @@ class Categories extends Model
     // public static function stores(int $category_id, string $city)
     // {
     //     // Get IDs of both parent and child stores from the Qty table
-    //     // $store_ids = Qty::select('users_id')
+    //     // $store_ids = Qty::select('seller_id')
     //     //     ->distinct()
-    //     //     ->join('products', 'qty.products_id', '=', 'products.id')
+    //     //     ->join('products', 'qty.product_id', '=', 'products.id')
     //     //     ->where('qty', '>', 0) // Products Should Be In Stock
     //     //     ->where('products.status', '=', 1) // Products Should Be Live
     //     //     ->where('qty.category_id', '=', $category_id)
-    //     //     ->pluck('users_id');
+    //     //     ->pluck('seller_id');
 
     //     // // Get active parent and child stores that have products in the specified category
     //     // return User::whereIn('id', $store_ids)
@@ -136,14 +139,14 @@ class Categories extends Model
     //     // ->paginate(10);
 
     //     // $sellers = User::join('qty', 'qty.category_id', '=', 'products.category_id')
-    //     // ->join('products', 'products.id', '=', 'qty.products_id')
+    //     // ->join('products', 'products.id', '=', 'qty.product_id')
     //     // ->where('qty.qty', '>', 0) // Products Should Be In Stock
     //     // ->where('products.status', '=', 1) // Products Should Be Live
     //     // ->paginate(10);
 
     //    return  Qty::select('users.*')
-    //     ->join('users', 'users.id', '=', 'qty.users_id')
-    //     ->join('products', 'products.id', '=', 'qty.products_id')
+    //     ->join('users', 'users.id', '=', 'qty.seller_id')
+    //     ->join('products', 'products.id', '=', 'qty.product_id')
     //     ->where('qty.qty', '>', 0) // Products should be in stock
     //     ->where('qty.category_id', '=', $category_id)
     //     ->where('products.status', '=', 1) // Products should be live

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
 
 class CreateJwtTokensTable extends Migration
 {
@@ -14,7 +15,7 @@ class CreateJwtTokensTable extends Migration
     {
         Schema::create('jwt_tokens', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
+            $table->foreignId('user_id')->constrained(table:'users')->cascadeOnDelete();
             $table->text('token');
             $table->string('browser');
             $table->string('platform');
@@ -22,7 +23,10 @@ class CreateJwtTokensTable extends Migration
             $table->boolean('desktop')->default('0');
             $table->boolean('phone')->default('0');
             $table->timestamps();
-
+            $table->softDeletes();
+            /**
+             * Indexes
+             */
             $table->index('user_id');
         });
     }

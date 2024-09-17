@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\DeviceToken;
+use Illuminate\Http\Request;
 use App\Models\Notification;
 use App\notifications;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
@@ -89,7 +89,10 @@ class NotificationsController extends Controller
     {
         try {
             if (Gate::allows('superadmin')) {
-                $validatedData = Notification::validator($request);
+                $validatedData = Validator::make($request->all(), [
+                    'title' => 'required|string',
+                    'body' => 'required|string'
+                ]);                
                 if ($validatedData->fails()) {
                     flash('Error in sending notification because a required field is missing or invalid data.')->error();
                     return Redirect::back()->withInput($request->input());
@@ -134,7 +137,10 @@ class NotificationsController extends Controller
     public function notificationSendTest(Request $request)
     {
         try {
-            $validatedData = Notification::validator($request);
+            $validatedData = Validator::make($request->all(), [
+                'title' => 'required|string',
+                'body' => 'required|string'
+            ]);
             if ($validatedData->fails()) {
                 return response()->json([
                     'data' => $validatedData->errors(),
