@@ -20,14 +20,34 @@ class Products extends Model
 {
     use Searchable, HasFactory, SoftDeletes;
 
-    protected $fillable = ['*'];
+    protected $fillable = [
+        'seller_id',
+        'category_id',
+        'product_name',
+        'sku',
+        'price',
+        'discount_percentage',
+        'weight',
+        'brand',
+        'size',
+        'status',
+        'contact',
+        'colors',
+        'bike',
+        'car',
+        'van',
+        'feature_img',
+        'height',
+        'width',
+        'length',
+    ];
     /**
      * Built-In Helpers
      */
     public function toSearchableArray(): array
     {
         return [
-            'id' =>  $this->id,
+            'id' => $this->id,
             'product_name' => $this->product_name,
             'seller_id' => $this->seller_id,
             'category_id' => $this->category_id,
@@ -94,6 +114,11 @@ class Products extends Model
     /**
      * Helpers
      */
+    public static function add(array $data): Products
+    {
+        return self::create($data);
+    }
+
     public static function searchProducts(
         string $product_name,
         ?array $seller_ids,
@@ -344,7 +369,8 @@ class Products extends Model
      */
     public static function getProductsForSAPModal(int $seller_id, string $search = ''): Paginator
     {
-        if (!empty($search)) $search = str_replace(' ', '%', $search);
+        if (!empty($search))
+            $search = str_replace(' ', '%', $search);
         return self::join('qty', 'products.id', '=', 'qty.product_id')
             ->select('products.id as prod_id', 'products.product_name', 'qty.qty', 'products.price')
             ->where('qty.seller_id', $seller_id)

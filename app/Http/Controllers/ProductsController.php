@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\ProductsImport;
 use App\productImages;
 use App\Products;
 use Illuminate\Http\Request;
@@ -13,9 +14,11 @@ use Illuminate\Support\Facades\Storage;
 use App\User;
 use App\Qty;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 use App\Services\JsonResponseServices;
 use Illuminate\Support\Facades\Cache;
+use Maatwebsite\Excel\Excel as ExcelConstants;
 
 class ProductsController extends Controller
 {
@@ -91,6 +94,93 @@ class ProductsController extends Controller
      * This is the replice of import products WEB URL
      * @version 1.0.0
      */
+    // public function importProductsAPI(Request $request)
+    // {
+    //     try {
+    //         $validatedData = Validator::make($request->all(), [
+    //             'file' => 'required|file',
+    //             'seller_id' => 'required|integer'
+    //         ]);
+    //         if ($validatedData->fails()) {
+    //             return JsonResponseServices::getApiResponse(
+    //                 [],
+    //                 config('constants.FALSE_STATUS'),
+    //                 $validatedData->errors(),
+    //                 config('constants.HTTP_UNPROCESSABLE_REQUEST')
+    //             );
+    //         }
+    //         $seller_id = $request->seller_id;
+    //         $file = $request->file('file');
+    //         $filename = $file->getClientOriginalName();
+    //         //Where uploaded file will be stored on the server
+    //         $location = public_path('upload/csv');
+    //         // Upload file
+    //         $file->move($location, $filename);
+    //         // Making filepath
+    //         $filepath = $location . "/" . $filename;
+    //         // Reading file
+    //         $file = fopen($filepath, "r");
+    //         // Read through the file and store the contents as an array
+    //         $importData_arr = array();
+    //         $i = 0;
+    //         //Read the contents of the uploaded file
+    //         while (($filedata = fgetcsv($file, 1000, ",")) !== FALSE) {
+    //             $num = count($filedata);
+    //             // Skip first row (Remove below comment if you want to skip the first row)
+    //             if ($i == 0) {
+    //                 $i++;
+    //                 continue;
+    //             }
+    //             for ($row = 0; $row < $num; $row++) $importData_arr[$i][] = $filedata[$row];
+    //             $i++;
+    //         }
+    //         fclose($file);
+
+    //         foreach ($importData_arr as $importData) {
+    //             $product = new Products();
+    //             $product->seller_id = $seller_id;
+    //             $product->category_id = $importData[0];
+    //             $product->product_name = $importData[1];
+    //             $product->sku = $importData[2];
+    //             $product->price = str_replace(',', '', $importData[4]);
+    //             $product->discount_percentage = ($importData[5] == "") ? 0 : $importData[5];
+    //             $product->weight = $importData[6];
+    //             $product->brand = $importData[7];
+    //             $product->size = ($importData[8] == "null") ? NULL : $importData[8];
+    //             $product->status = $importData[9];
+    //             $product->contact = $importData[10];
+    //             $product->colors = ($importData[11] == "null") ? NULL : $importData[11];
+    //             $product->bike = $importData[12];
+    //             $product->car = $importData[13];
+    //             $product->van = $importData[14];
+    //             $product->feature_img = $importData[18];
+    //             $product->height = $importData[15];
+    //             $product->width = $importData[16];
+    //             $product->length = $importData[17];
+    //             $product->save();
+    //             /* This snippet will add qty to it's particular table */
+    //             $product_quantity = ($importData[3] == "") ? 0 : $importData[3];
+    //             Qty::add($seller_id, (int)$product->id, $product->category_id, $product_quantity);
+    //             /* The following will add product image to it's particular table */
+    //             productImages::add((int)$product->id, $importData[18]);
+    //         }
+    //         return JsonResponseServices::getApiResponse(
+    //             [],
+    //             config('constants.FALSE_STATUS'),
+    //             config('constants.DATA_INSERTION_SUCCESS'),
+    //             config('constants.HTTP_OK')
+    //         );
+    //     } catch (Throwable $error) {
+    //         report($error);
+    //         return JsonResponseServices::getApiResponse(
+    //             [],
+    //             config('constants.FALSE_STATUS'),
+    //             $error,
+    //             config('constants.HTTP_SERVER_ERROR')
+    //         );
+    //     }
+    // }
+
     public function importProductsAPI(Request $request)
     {
         try {
@@ -99,68 +189,11 @@ class ProductsController extends Controller
                 'seller_id' => 'required|integer'
             ]);
             if ($validatedData->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validatedData->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
-            $seller_id = $request->seller_id;
-            $file = $request->file('file');
-            $filename = $file->getClientOriginalName();
-            //Where uploaded file will be stored on the server
-            $location = public_path('upload/csv');
-            // Upload file
-            $file->move($location, $filename);
-            // Making filepath
-            $filepath = $location . "/" . $filename;
-            // Reading file
-            $file = fopen($filepath, "r");
-            // Read through the file and store the contents as an array
-            $importData_arr = array();
-            $i = 0;
-            //Read the contents of the uploaded file
-            while (($filedata = fgetcsv($file, 1000, ",")) !== FALSE) {
-                $num = count($filedata);
-                // Skip first row (Remove below comment if you want to skip the first row)
-                if ($i == 0) {
-                    $i++;
-                    continue;
-                }
-                for ($row = 0; $row < $num; $row++) $importData_arr[$i][] = $filedata[$row];
-                $i++;
-            }
-            fclose($file);
+            
+            Excel::import(new ProductsImport($request->seller_id), $request->file('file'), readerType: ExcelConstants::CSV);
 
-            foreach ($importData_arr as $importData) {
-                $product = new Products();
-                $product->seller_id = $seller_id;
-                $product->category_id = $importData[0];
-                $product->product_name = $importData[1];
-                $product->sku = $importData[2];
-                $product->price = str_replace(',', '', $importData[4]);
-                $product->discount_percentage = ($importData[5] == "") ? 0 : $importData[5];
-                $product->weight = $importData[6];
-                $product->brand = $importData[7];
-                $product->size = ($importData[8] == "null") ? NULL : $importData[8];
-                $product->status = $importData[9];
-                $product->contact = $importData[10];
-                $product->colors = ($importData[11] == "null") ? NULL : $importData[11];
-                $product->bike = $importData[12];
-                $product->car = $importData[13];
-                $product->van = $importData[14];
-                $product->feature_img = $importData[18];
-                $product->height = $importData[15];
-                $product->width = $importData[16];
-                $product->length = $importData[17];
-                $product->save();
-                /* This snippet will add qty to it's particular table */
-                $product_quantity = ($importData[3] == "") ? 0 : $importData[3];
-                Qty::add($seller_id, (int)$product->id, $product->category_id, $product_quantity);
-                /* The following will add product image to it's particular table */
-                productImages::add((int)$product->id, $importData[18]);
-            }
             return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
@@ -589,7 +622,8 @@ class ProductsController extends Controller
             unset($pt->updated_at);
             $temp_img = [];
             if (isset($pt->images)) {
-                foreach ($pt->images as $img) $temp_img[] = $img->product_image;
+                foreach ($pt->images as $img)
+                    $temp_img[] = $img->product_image;
             }
             $pt->images = implode(',', $temp_img);
             $all_products[] = $pt;
@@ -599,7 +633,7 @@ class ProductsController extends Controller
             mkdir($destinationPath, 0777, true);
         }
         $file = time() . '_export.csv';
-        return  $this->jsonToCsv(json_encode($all_products), $destinationPath . $file, true);
+        return $this->jsonToCsv(json_encode($all_products), $destinationPath . $file, true);
     }
     /**
      *helper function for exporting products
@@ -656,7 +690,8 @@ class ProductsController extends Controller
             $user_lat = $request->lat;
             $user_lon = $request->lon;
             $miles = $request->miles;
-            if (isset($miles)) $store_ids =  $this->searchWrtNearByStores($user_lat, $user_lon,  $miles);
+            if (isset($miles))
+                $store_ids = $this->searchWrtNearByStores($user_lat, $user_lon, $miles);
 
             $products = Products::searchProducts(
                 $request->product_name,
@@ -705,7 +740,7 @@ class ProductsController extends Controller
      */
     public function searchWrtNearByStores($user_lat, $user_lon, $miles)
     {
-        $radius =  3958.8;
+        $radius = 3958.8;
         $store_data = (new User())->nearbyUsers($user_lat, $user_lon, $radius);
 
         foreach ($store_data as $data) {
@@ -738,13 +773,13 @@ class ProductsController extends Controller
             $results = json_decode($query, true);
             $distanceString[] = explode(' ', $results['routes'][0]['legs'][0]['distance']['text']);
             $durationString = explode(' ', $results['routes'][0]['legs'][0]['duration']['text']);
-            $miles[] = (int)$distanceString[0] * 0.621371;
+            $miles[] = (int) $distanceString[0] * 0.621371;
             $duration[] = implode(",", $durationString);
         }
         // Google Distance Matrix
         // $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$latitude1.",".$longitude1."&destinations=".$latitude2.",".$longitude2."&mode=driving&key=AIzaSyBFDmGYlVksc--o1jpEXf9jVQrhwmGPxkM";
         // return $miles > 1 ? $miles : 1;
-        return  $duration;
+        return $duration;
     }
     /**
      * Update product price from csv file w.r.t their SKU and store_id
