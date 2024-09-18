@@ -12,26 +12,27 @@ use Illuminate\Support\Facades\DB;
 class SellerDashboardLivewire extends Component
 {
     use WithPagination;
+    
     public
         $seller_id;
 
     protected $paginationTheme = 'bootstrap';
-    /* 
+    /*
     * Lifecycle Hooks
     */
     public function mount()
     {
         $this->seller_id = auth()->id();
     }
-    /* 
+    /*
     * Helpers
     */
-    // 
+    //
 
-    /* 
+    /*
     * CRUD Methods
     */
-    // 
+    //
 
     public function render()
     {

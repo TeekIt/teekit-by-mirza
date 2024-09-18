@@ -10,6 +10,7 @@ use Livewire\WithPagination;
 class DriversLivewire extends Component
 {
     use WithPagination;
+    
     public
         $name,
         $l_name,

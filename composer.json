@@ -11,6 +11,7 @@
         "php": "^8.0.2",
         "fakerphp/faker": "^1.23",
         "garygreen/pretty-routes": "^1.0",
+        "google/apiclient": "^2.17",
         "guzzlehttp/guzzle": "^7.0.1",
         "http-interop/http-factory-guzzle": "^1.2",
         "jenssegers/agent": "^2.6",

@@ -10,6 +10,7 @@ use Livewire\WithPagination;
 class ChildSellersLivewire extends Component
 {
     use WithPagination;
+    
     public
         $child_seller_id,
         $name,

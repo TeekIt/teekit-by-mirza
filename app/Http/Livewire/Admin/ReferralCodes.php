@@ -5,7 +5,6 @@ namespace App\Http\Livewire\Admin;
 use App\User;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Exception;
 
 class ReferralCodes extends Component
 {

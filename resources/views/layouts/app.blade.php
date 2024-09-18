@@ -8,19 +8,19 @@
 
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
+        @include('layouts.common.navbar')
+
         {{-- 1 == Super Admin --}}
         @if (Auth::user()->role_id === 1)
-            @include('layouts.admin.navbar')
             @include('layouts.admin.sidebar')
             {{-- 2 == Parent Seller, 5 == Child Seller --}}
         @elseif(Auth::user()->role_id == 2 || Auth::user()->role_id == 5)
-            @include('layouts.shopkeeper.navbar')
             @include('layouts.shopkeeper.sidebar')
             <x-seller-business-hours-modal/>
         @endif
 
         <div class="content-wrapper">
-            <!-- Livewire component will render here by default -->
+            <!-- Livewire components will render here by default -->
             {{ $slot }}
         </div>
     </div>
