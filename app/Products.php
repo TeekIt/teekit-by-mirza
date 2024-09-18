@@ -20,14 +20,34 @@ class Products extends Model
 {
     use Searchable, HasFactory, SoftDeletes;
 
-    protected $fillable = ['*'];
+    protected $fillable = [
+        'seller_id',
+        'category_id',
+        'product_name',
+        'sku',
+        'price',
+        'discount_percentage',
+        'weight',
+        'brand',
+        'size',
+        'status',
+        'contact',
+        'colors',
+        'bike',
+        'car',
+        'van',
+        'feature_img',
+        'height',
+        'width',
+        'length',
+    ];
     /**
      * Built-In Helpers
      */
     public function toSearchableArray(): array
     {
         return [
-            'id' =>  $this->id,
+            'id' => $this->id,
             'product_name' => $this->product_name,
             'seller_id' => $this->seller_id,
             'category_id' => $this->category_id,
@@ -94,6 +114,11 @@ class Products extends Model
     /**
      * Helpers
      */
+    public static function add(array $data): Products
+    {
+        return self::create($data);
+    }
+
     public static function searchProducts(
         string $product_name,
         ?array $seller_ids,
@@ -112,7 +137,7 @@ class Products extends Model
                 'images:id,product_id,product_image',
                 'category:id,category_name,category_image'
             ]))
-            ->where('status', 1)
+            ->where('status', '1')
             ->when($seller_ids, function ($query) use ($seller_ids) {
                 return $query->where_in('seller_id', $seller_ids['ids']);
             })
@@ -159,12 +184,12 @@ class Products extends Model
             ->with([
                 'store:id,business_name,business_hours,full_address,country,state,city,lat,lon,user_img',
                 'qty' => function ($query) use ($category_id) {
-                    $query->select('id', 'products_id', 'qty')->where('category_id', $category_id);
+                    $query->select('id', 'product_id', 'qty')->where('category_id', $category_id);
                 },
                 'images:id,product_id,product_image',
                 'category:id,category_name,category_image'
             ])->where('category_id', $category_id)
-            ->where('status', 1)
+            ->where('status', '1')
             ->paginate(10);
     }
 
@@ -180,7 +205,7 @@ class Products extends Model
             ->whereHas('qty', function ($query) use ($seller_id) {
                 $query->where('seller_id', $seller_id);
             })
-            ->where('status', 1)
+            ->where('status', '1')
             ->paginate(20);
     }
 
@@ -198,7 +223,7 @@ class Products extends Model
                 $query->where('seller_id', $seller_id);
             })
             ->where('id', $product_id)
-            ->where('status', 1)
+            ->where('status', '1')
             ->first();
 
         // $product->qty = $product->quantities[0]->qty;
@@ -217,12 +242,12 @@ class Products extends Model
 
     public static function getParentSellerProducts(int $seller_id): LengthAwarePaginator
     {
-        return self::where('seller_id', '=', $seller_id)->where('status', '=', 1)->paginate(20);
+        return self::where('seller_id', '=', $seller_id)->where('status', '=', '1')->paginate(20);
     }
 
     public static function getParentSellerProductsAsc(int $seller_id): Collection
     {
-        return self::where('seller_id', '=', $seller_id)->where('status', '=', 1)->orderBy('id', 'asc')->get();
+        return self::where('seller_id', '=', $seller_id)->where('status', '=', '1')->orderBy('id', 'asc')->get();
     }
 
     public static function getParentSellerProductsForView(int $seller_id, string $search = '', int $category_id = null, string $order_by): LengthAwarePaginator
@@ -312,7 +337,7 @@ class Products extends Model
             $query->where('is_active', 1);
         })->where('seller_id', '=', $seller_id)
             ->where('featured', '=', 1)
-            ->where('status', '=', 1)
+            ->where('status', '=', '1')
             ->orderByDesc('id')
             ->paginate(10);
     }
@@ -321,7 +346,7 @@ class Products extends Model
     {
         return self::whereHas('store', function ($query) {
             $query->where('is_active', 1);
-        })->where('status', 1)
+        })->where('status', '1')
             ->paginate(10);
     }
 
@@ -344,7 +369,8 @@ class Products extends Model
      */
     public static function getProductsForSAPModal(int $seller_id, string $search = ''): Paginator
     {
-        if (!empty($search)) $search = str_replace(' ', '%', $search);
+        if (!empty($search))
+            $search = str_replace(' ', '%', $search);
         return self::join('qty', 'products.id', '=', 'qty.product_id')
             ->select('products.id as prod_id', 'products.product_name', 'qty.qty', 'products.price')
             ->where('qty.seller_id', $seller_id)

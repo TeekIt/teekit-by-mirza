@@ -23,6 +23,7 @@
         "lcobucci/jwt": "4.1.0",
         "league/flysystem-aws-s3-v3": "^3.0",
         "livewire/livewire": "^2.12",
+        "maatwebsite/excel": "^3.1",
         "meilisearch/meilisearch-php": "^0.26.1",
         "stripe/stripe-php": "^13.11",
         "symfony/http-client": "^6.3",
