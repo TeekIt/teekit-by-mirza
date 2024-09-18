@@ -13,6 +13,7 @@ use Livewire\WithPagination;
 class InventoryLivewire extends Component
 {
     use WithPagination;
+    
     public
         $category_id,
         $category,

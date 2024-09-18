@@ -8,11 +8,9 @@
 
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
-        <!-- Navbar -->
-        @include('layouts.shopkeeper.navbar')
-        <!-- /.navbar -->
-        <!-- Main Sidebar Container -->
+        @include('layouts.common.navbar')
         @include('layouts.shopkeeper.sidebar')
+
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
             <div class="row">
@@ -29,21 +27,6 @@
         </div>
     </div>
     <!-- content-wrapper -->
-
-    <!-- jQuery -->
-    <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script>
-    <!-- Bootstrap 4 -->
-    <script src="{{ asset('res/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <!-- Bootstrap 5 -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
-        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
-        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
-    </script>
-
-    <!-- AdminLTE App -->
-    <script src="{{ asset('res/dist/js/adminlte.min.js') }}"></script>
 
     <style>
         table tr:first-of-type td {
@@ -236,6 +219,25 @@
         }
     </style>
 
+    <!-- jQuery -->
+    <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script>
+    <!-- Bootstrap 4 -->
+    <script src="{{ asset('res/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <!-- Bootstrap 5 -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
+    </script>
+
+    <!-- AdminLTE App -->
+    <script src="{{ asset('res/dist/js/adminlte.min.js') }}"></script>
+
+    <script src="{{ asset('res/plugins/select2/js/select2.min.js') }}"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
     <script>
         $(document).ready(function() {
             $(".updateQty").on('submit', (function(e) {
@@ -283,57 +285,8 @@
             setTimeout(changeHeight, 600);
         }
         changeHeight();
-
-        function userInfoUpdate() {
-            let name = $('#name').val();
-            let id = $('#id').val();
-            let business_name = $('#business_name').val();
-            let phone = $('#phone').val();
-            let business_phone = $('#business_phone').val();
-            $.ajax({
-                url: "{{ route('admin.userinfo.update') }}",
-                type: "post",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    name: name,
-                    id: id,
-                    business_name: business_name,
-                    phone: phone,
-                    phone: phone,
-                    business_phone: business_phone,
-                },
-                success: function(response) {
-                    if (response == "Data Sent") {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: 'We have received your modification request,our team will respond back soon after varifying',
-                            icon: 'success',
-                            confirmButtonText: 'Ok'
-                        }).then(function() {
-                            location.reload();
-                        });
-                    } else {
-                        $('.error').html('');
-                        if (response.errors.name) {
-                            $('.name').html(response.errors.name[0]);
-                        }
-                        if (response.errors.business_name) {
-                            $('.business_name').html(response.errors.business_name[0]);
-                        }
-                        if (response.errors.phone) {
-                            $('.phone').html(response.errors.phone[0]);
-                        }
-                        if (response.errors.business_phone) {
-                            $('.business_phone').html(response.errors.business_phone[0]);
-                        }
-                    }
-                }
-            });
-        }
     </script>
-    <script src="{{ asset('res/plugins/select2/js/select2.min.js') }}"></script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
     @yield('scripts')
 </body>
 

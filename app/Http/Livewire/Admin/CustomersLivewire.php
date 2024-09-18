@@ -10,6 +10,7 @@ use Livewire\WithPagination;
 class CustomersLivewire extends Component
 {
     use WithPagination;
+    
     public
         $name,
         $l_name,

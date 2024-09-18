@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\CommissionAndServiceFee;
 use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
 use Illuminate\Database\Eloquent\Collection;
@@ -103,10 +104,10 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Relations
      */
-    // public function roles(): BelongsToMany
-    // {
-    //     return $this->belongsToMany('App\Role', 'role_user');
-    // }
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany('App\Role', 'role_user');
+    }
 
     public function role(): BelongsTo
     {

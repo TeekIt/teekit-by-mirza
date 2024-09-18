@@ -19,6 +19,7 @@ use App\Http\Livewire\Sellers\OrdersLivewire;
 use App\Http\Livewire\Sellers\SellerDashboardLivewire;
 use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 /*
@@ -121,16 +122,19 @@ Route::controller(HomeController::class)->group(function () {
 | Admin Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->group(function () {
+Route::prefix('admin')->middleware(['auth', 'auth.admin'])->group(function () {
     Route::get('/referralcodes', ReferralCodes::class)->name('admin.referralcodes');
     Route::get('/sellers/parent', ParentSellersLiveWire::class)->name('admin.sellers.parent');
     Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
     Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
     Route::get('/drivers', DriversLivewire::class)->name('admin.test.drivers');
     Route::get('/drivers_del', [HomeController::class, 'adminDriversDel'])->name('admin.del.drivers');
+
+    Route::controller(NotificationsController::class)->group(function () {
+        Route::get('/notification/home', 'notificationHome')->name('admin.notification.home');
+        Route::post('/notification/send', 'notificationSend')->name('admin.notification.send');
+    });
 });
-Route::get('/notification/home', [NotificationsController::class, 'notificationHome'])->name('admin.notification.home');
-Route::post('/notification/send', [NotificationsController::class, 'notificationSend'])->name('admin.notification.send');
 
 // Route::get('/admin/sellers/parent', [HomeController::class, 'adminParentSellers'])->name('admin.sellers.parent');
 // Route::get('/customers', [HomeController::class, 'adminCustomers'])->name('admin.customers');

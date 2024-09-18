@@ -24,7 +24,7 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('notification/home') ? 'active' : '' }}" href="/notification/home">
+                      <a class="nav-link {{ request()->is('admin/notification/home') ? 'active' : '' }}" href="{{ route('admin.notification.home') }}">
                           <i class="nav-icon fas fa-bell"></i>
                           <p class="ml-2">
                               Notifications
@@ -32,7 +32,7 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('promocodes/home') ? 'active' : '' }}" href="/promocodes/home">
+                      <a class="nav-link {{ request()->is('promocodes/home') ? 'active' : '' }}" href="{{ route('admin.promocodes.home') }}">
                           <i class="nav-icon fas fa-qrcode"></i>
                           <p class="ml-2">
                               Promo Codes
