@@ -8,6 +8,7 @@ use App\Qty;
 use Exception;
 use Livewire\Component;
 use App\Categories;
+use Illuminate\Support\Facades\Cache;
 use Livewire\WithPagination;
 
 class InventoryLivewire extends Component
@@ -43,7 +44,7 @@ class InventoryLivewire extends Component
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
         } catch (Exception $error) {
-            session()->flash('error', $error);
+            session()->flash('error', $error->getMessage());
         }
     }
 
@@ -60,7 +61,7 @@ class InventoryLivewire extends Component
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
         } catch (Exception $error) {
-            session()->flash('error', $error);
+            session()->flash('error', $error->getMessage());
         }
     }
 
@@ -81,7 +82,7 @@ class InventoryLivewire extends Component
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
         } catch (Exception $error) {
-            session()->flash('error', $error);
+            session()->flash('error', $error->getMessage());
         }
     }
 
@@ -90,6 +91,7 @@ class InventoryLivewire extends Component
         try {
             /* Perform some operation */
             $updated = Qty::updateChildProductQty($this->quantity[$index]);
+            Cache::flush();
             /* Operation finished */
             sleep(1);
             if ($updated) {
@@ -98,7 +100,7 @@ class InventoryLivewire extends Component
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
         } catch (Exception $error) {
-            session()->flash('error', $error);
+            session()->flash('error', $error->getMessage());
         }
     }
 
@@ -107,6 +109,7 @@ class InventoryLivewire extends Component
         return $data->map(function ($product) {
             return [
                 'prod_id' => $product->prod_id,
+                'category_id' => $product->category_id,
                 'parent_seller_id' => $product->parent_seller_id,
                 'child_seller_id' => ($product->child_seller_id === null) ? auth()->id() : $product->child_seller_id,
                 'qty_id' => ($product->child_seller_id === null) ? 0 : $product->qty_id,
