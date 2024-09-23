@@ -243,13 +243,6 @@
                                     <p class="fw-normal mb-1">{{ $inventory->product_name }}</p>
                                 </td>
                                 <td class="align-middle fit-content">
-                                    {{-- {{ $inventory->qty }} --}}
-                                    {{-- {{ $this->owner }}
-                                    @if ($this->owner === 'parent')
-                                        <input type="number" class="form-control" style="width:80px;"
-                                            min="0" wire:model.defer="quantity.{{ $key }}.qty">
-                                    @else
-                                    @endif --}}
                                     <input type="number" class="form-control" style="width:80px;" min="0" wire:model.defer="quantity.{{ $key }}.qty">
                                 </td>
                                 <td class="align-middle fit-content">
