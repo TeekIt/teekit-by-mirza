@@ -139,7 +139,11 @@ class Qty extends Model
     public static function updateChildProductQty(array $quantity): Qty
     {
         return self::updateOrCreate(
-            ['seller_id' => $quantity['child_seller_id'], 'product_id' => $quantity['prod_id']],
+            [
+                'seller_id' => $quantity['child_seller_id'],
+                'product_id' => $quantity['prod_id'],
+                'category_id' => $quantity['category_id'],
+            ],
             ['qty' => $quantity['qty']]
         );
     }

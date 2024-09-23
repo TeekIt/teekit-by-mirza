@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -120,6 +121,37 @@ class Products extends Model
         ]);
     }
     /**
+     * Scopes
+     */
+    public function scopeParentSellerProducts(Builder $query): void
+    {
+        $query->select(
+                'products.id as prod_id',
+                'products.seller_id as parent_seller_id',
+                'products.category_id',
+                'products.product_name',
+                'products.price',
+                'products.feature_img',
+            );
+    }
+
+    public function scopeChildSellerQty(Builder $query, int $child_seller_id): void
+    {
+        $query->leftJoin('qty', function ($join) use ($child_seller_id) {
+            $join->on('qty.product_id', '=', 'products.id')->where('qty.seller_id', '=', $child_seller_id);
+        })->select(
+            'products.id as prod_id',
+            'products.seller_id as parent_seller_id',
+            'products.category_id',
+            'products.product_name',
+            'products.price',
+            'products.feature_img',
+            'qty.id as qty_id',
+            'qty.seller_id as child_seller_id',
+            'qty.qty'
+        );
+    }
+    /**
      * Helpers
      */
     public static function add(array $data): Products
@@ -234,9 +266,7 @@ class Products extends Model
             ->where('status', '1')
             ->first();
 
-        // $product->qty = $product->quantities[0]->qty;
         $product->store = User::getUserByID($seller_id, ['id', 'business_name', 'business_hours', 'full_address', 'country', 'state', 'city', 'lat', 'lon', 'user_img']);
-        // unset($product->quantities);
 
         return $product;
     }
@@ -275,39 +305,14 @@ class Products extends Model
     {
         $parent_seller_id = User::find($child_seller_id)->parent_store_id;
         $qty = Qty::where('seller_id', $child_seller_id)->first();
-        if (!empty($qty)) {
-            return self::join('qty', 'products.id', '=', 'qty.product_id')
-                ->select('products.id as prod_id', 'products.seller_id as parent_seller_id', 'products.category_id', 'products.product_name', 'products.price', 'products.feature_img', 'qty.id as qty_id', 'qty.seller_id as child_seller_id', 'qty.qty')
-                ->where('products.product_name', 'LIKE', "%{$search}%")
-                ->where('products.seller_id', $parent_seller_id)
-                ->where('qty.seller_id', $child_seller_id)
-                ->when($category_id, function ($query, $category_id) {
-                    return $query->where('category_id', '=', $category_id);
-                })
-                ->paginate(20);
-        } else {
-            // return [
-            //     'data' => self::join('qty', 'products.id', '=', 'qty.product_id')
-            //         ->select('products.id as prod_id', 'products.seller_id as parent_seller_id', 'products.category_id', 'products.product_name', 'products.price', 'products.feature_img', 'qty.id as qty_id', 'qty.qty')
-            //         ->where('products.product_name', 'LIKE', "%{$search}%")
-            //         ->where('products.seller_id', $parent_seller_id)
-            //         ->where('qty.seller_id', $parent_seller_id)
-            //         ->when($category_id, function ($query, $category_id) {
-            //             return $query->where('category_id', '=', $category_id);
-            //         })
-            //         ->paginate(20),
-            //     'owner' => 'parent'
-            // ];
-            return self::join('qty', 'products.id', '=', 'qty.product_id')
-                ->select('products.id as prod_id', 'products.seller_id as parent_seller_id', 'products.category_id', 'products.product_name', 'products.price', 'products.feature_img', 'qty.id as qty_id', 'qty.qty')
-                ->where('products.product_name', 'LIKE', "%{$search}%")
-                ->where('products.seller_id', $parent_seller_id)
-                ->where('qty.seller_id', $parent_seller_id)
-                ->when($category_id, function ($query, $category_id) {
-                    return $query->where('category_id', '=', $category_id);
-                })
-                ->paginate(20);
-        }
+        
+        $query = (empty($qty)) ? self::ParentSellerProducts() : self::ChildSellerQty(child_seller_id: $child_seller_id);
+        return $query->where('products.product_name', 'LIKE', "%{$search}%")
+            ->where('products.seller_id', $parent_seller_id)
+            ->when($category_id, function ($query, $category_id) {
+                return $query->where('category_id', '=', $category_id);
+            })
+            ->paginate(20);
     }
 
     public function getProductsByParameters(int $seller_id, string $sku, int $catgory_id): Products
