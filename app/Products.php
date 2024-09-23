@@ -2,11 +2,12 @@
 
 namespace App;
 
-use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -45,6 +46,13 @@ class Products extends Model
     /**
      * Built-In Helpers
      */
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => (string) $value
+        );
+    }
+
     public function toSearchableArray(): array
     {
         return [
