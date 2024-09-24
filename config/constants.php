@@ -21,8 +21,8 @@ return [
     'ARCHIVED_SUCCESS' => 'Data archived successfully.',
     'UN_ARCHIVED_SUCCESS' => 'Data unarchived successfully.',
     'DELETION_SUCCESS' => 'Data deleted successfully.',
-    'LOGIN_SUCCESS' => 'You have Logged in Successfully.',
-    'REGISTER_SUCCESS' => 'You have Registered Successfully.',
+    'LOGIN_SUCCESS' => 'You have logged in successfully.',
+    'REGISTER_SUCCESS' => 'You have registered successfully.',
     'DRIVER_REGISTERATION_MSG' => 'You have registered successfully. We have sent you a verification email please verify.',
     'DATA_INSERTION_SUCCESS' => 'Data Inserted Successfully.',
     'DATA_UPDATED_SUCCESS' => 'Data Updated Successfully.',
@@ -43,6 +43,7 @@ return [
     'PRODUCT_REMOVED_SUCCESSFULLY' => 'Product has been removed successfully.',
     'ORDER_PLACED_SUCCESSFULLY' => 'Your order has been placed successfully.',
     'SENT_TO_OTHER_STORE_SUCCESS' => 'Your order has been sent to other store.',
+    'PARENT_QTY_SYNCED_SUCCESS' => 'Quantities synced',
     /*
     |--------------------------------------------------------------------------
     | Failure Constants
@@ -82,6 +83,14 @@ return [
     'QTY_SHOULD_NOT_BE_GREATER' => 'You cannot enter quantity more then your stock.',
     'PRODUCT_REMOVED_FAILED' => 'There is an error while removing the product.',
     'SENT_TO_OTHER_STORE_FAILED' => 'Due to some error your order cannot be sent to other store.',
+    'PARENT_QTY_SYNCED_FAILED' => 'Failed to sync quantities',
+    'INTERNAL_SERVER_ERROR'=> 'Sorry! This operation has been failed due to some internal server error',
+    /*
+    |--------------------------------------------------------------------------
+    | General Messages Constants
+    |--------------------------------------------------------------------------
+    */
+    'PARENT_QTY_ALREADY_SYNCED' => 'Quantities of parent seller producs are already synced',
     /*
     |--------------------------------------------------------------------------
     | Digital Ocean Bucket

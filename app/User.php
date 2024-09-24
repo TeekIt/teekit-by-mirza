@@ -366,7 +366,7 @@ class User extends Authenticatable implements JWTSubject
         return self::where('business_name', $business_name)->first();
     }
 
-    public static function getUserByID(int $id, array $columns): object
+    public static function getUserByID(int $id, array $columns): self
     {
         return self::select($columns)->find($id);
     }
@@ -384,11 +384,11 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function activeOrBlockStore(int $user_id, int $status): bool
+    public static function activeOrBlockStore(int $id, int $status): bool
     {
-        self::where('id', '=', $user_id)->update(['is_active' => $status]);
+        self::where('id', '=', $id)->update(['is_active' => $status]);
         if ($status == 1) {
-            $user = self::findOrFail($user_id);
+            $user = self::findOrFail($id);
             EmailServices::sendStoreApprovedMail($user);
         }
         return true;

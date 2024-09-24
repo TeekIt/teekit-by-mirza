@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class Qty extends Model
 {
@@ -50,6 +51,16 @@ class Qty extends Model
     public static function getTotalProductsCountBySellerId(int $seller_id): int
     {
         return self::where('seller_id', '=', $seller_id)->count();
+    }
+
+    public static function syncParentSellerQuantities(int $parent_seller_id, int $child_seller_id): bool
+    {
+        return DB::statement("
+                INSERT INTO `qty` (`seller_id`, `product_id`, `category_id`, `qty`)
+                SELECT $child_seller_id, `product_id`, `category_id`, `qty`
+                FROM `qty`
+                WHERE `seller_id` = $parent_seller_id
+            ");
     }
 
     public static function getSellersByGivenParams(int $category_id, string $state): object
