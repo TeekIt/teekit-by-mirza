@@ -2,15 +2,18 @@
 
 namespace App\Http\Livewire\Admin;
 
+use App\Qty;
 use App\User;
 use Exception;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class ChildSellersLivewire extends Component
 {
     use WithPagination;
-    
+
     public
         $child_seller_id,
         $name,
@@ -75,6 +78,31 @@ class ChildSellersLivewire extends Component
         $this->total_withdraw = $data->total_withdraw;
         $this->is_online = $data->is_online;
         $this->application_fee = $data->application_fee;
+    }
+
+    public function syncParentQty($child_seller_id, $parent_seller_id)
+    {
+        try {
+            /* Perform some operation */
+            if (Qty::getTotalProductsCountBySellerId($child_seller_id) > 0) {
+                $synced = true;
+                $message = config('constants.PARENT_QTY_ALREADY_SYNCED');
+            } else {
+                $synced = Qty::syncParentSellerQuantities($parent_seller_id, $child_seller_id);
+                $message = ($synced) ? config('constants.PARENT_QTY_SYNCED_SUCCESS') : config('constants.PARENT_QTY_SYNCED_FAILED');
+            }
+            sleep(1);
+            /* Operation finished */
+            if ($synced) {
+                Cache::flush();
+                session()->flash('success', $message);
+            } else {
+                session()->flash('error', $message);
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', config('constants.INTERNAL_SERVER_ERROR'));
+        }
     }
 
     public function changeStatus($id, $is_active)
