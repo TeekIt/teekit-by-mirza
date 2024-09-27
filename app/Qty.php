@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +32,16 @@ class Qty extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Products::class, 'product_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Categories::class, 'category_id');
+    }
+
+    public function productImage(): HasMany
+    {
+        return $this->hasMany(productImages::class, 'product_id', 'product_id');
     }
     /**
      * Helpers
@@ -98,35 +109,73 @@ class Qty extends Model
 
     public static function getProductsByGivenIds(int $category_id, int $seller_id): array
     {
-        $quantities = self::where('seller_id', $seller_id)
+        $paginated_data = self::select('id', 'seller_id', 'product_id', 'category_id', 'qty')
+            ->with([
+                'product:id,product_name,sku,price,featured,discount_percentage,weight,brand,size,bike,car,van,feature_img,height,width,length',
+                'store:id,business_name,business_hours,full_address,country,state,city,lat,lon,user_img',
+                'category:id,category_name,category_image',
+                'productImage:id,product_id,product_image',
+            ])
             ->where('category_id', $category_id)
+            ->where('seller_id', $seller_id)
             ->paginate(10);
-        $pagination = $quantities->toArray();
-        if (!$quantities->isEmpty()) {
-            $products_data = [];
-            foreach ($quantities as $single_index)
-                $products_data[] = Products::getProductInfo($single_index->seller_id, $single_index->product_id, [
-                    'id',
-                    'seller_id',
-                    'category_id',
-                    'product_name',
-                    'sku',
-                    'price',
-                    'featured',
-                    'discount_percentage',
-                    'weight',
-                    'brand',
-                    'size',
-                    'bike',
-                    'car',
-                    'van',
-                    'feature_img',
-                    'height',
-                    'width',
-                    'length',
-                ]);
-            unset($pagination['data']);
-            return ['data' => $products_data, 'pagination' => $pagination];
+
+        if (!$paginated_data->isEmpty()) {
+            $products_data = $paginated_data->map(function ($singleIndex) {
+                return [
+                    'id' => $singleIndex->product_id,
+                    'seller_id' => $singleIndex->seller_id,
+                    'category_id' => $singleIndex->category_id,
+                    'product_name' => $singleIndex->product->product_name,
+                    'sku' => $singleIndex->product->sku,
+                    'price' => $singleIndex->product->price,
+                    'featured' => $singleIndex->product->featured,
+                    'discount_percentage' => $singleIndex->product->discount_percentage,
+                    'weight' => $singleIndex->product->weight,
+                    'brand' => $singleIndex->product->brand,
+                    'size' => $singleIndex->product->size,
+                    'bike' => $singleIndex->product->bike,
+                    'car' => $singleIndex->product->car,
+                    'van' => $singleIndex->product->van,
+                    'feature_img' => $singleIndex->product->feature_img,
+                    'height' => $singleIndex->product->height,
+                    'width' => $singleIndex->product->width,
+                    'length' => $singleIndex->product->length,
+                    'store' => [
+                        'id' => $singleIndex->store->id,
+                        'business_name' => $singleIndex->store->business_name,
+                        'business_hours' => $singleIndex->store->business_hours,
+                        'full_address' => $singleIndex->store->full_address,
+                        'country' => $singleIndex->store->country,
+                        'state' => $singleIndex->store->state,
+                        'city' => $singleIndex->store->city,
+                        'lat' => $singleIndex->store->lat,
+                        'lon' => $singleIndex->store->lon,
+                        'user_img' => $singleIndex->store->user_img,
+                    ],
+                    'qty' => [
+                        'id' => $singleIndex->id,
+                        'product_id' => $singleIndex->product_id,
+                        'qty' => $singleIndex->qty,
+                    ],
+                    'images' => $singleIndex->productImage->map(function ($singleImage) {
+                        return [
+                            'id' => $singleImage->id,
+                            'product_image' => $singleImage->product_image,
+                        ];
+                    })->toArray(),
+                    'category' => [
+                        'id' => $singleIndex->category->id,
+                        'category_name' => $singleIndex->category->category_name,
+                        'category_image' => $singleIndex->category->category_image,
+                    ]
+                ];
+            });
+
+            $paginated_data = $paginated_data->toArray();
+            unset($paginated_data['data']);
+
+            return ['data' => $products_data, 'pagination' => $paginated_data];
         } else {
             return [];
         }

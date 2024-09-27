@@ -118,13 +118,13 @@ class Products extends Model
     public function scopeParentSellerProducts(Builder $query): void
     {
         $query->select(
-                'products.id as prod_id',
-                'products.seller_id as parent_seller_id',
-                'products.category_id',
-                'products.product_name',
-                'products.price',
-                'products.feature_img',
-            );
+            'products.id as prod_id',
+            'products.seller_id as parent_seller_id',
+            'products.category_id',
+            'products.product_name',
+            'products.price',
+            'products.feature_img',
+        );
     }
 
     public function scopeChildSellerQty(Builder $query, int $child_seller_id): void
@@ -142,6 +142,11 @@ class Products extends Model
             'qty.seller_id as child_seller_id',
             'qty.qty'
         );
+    }
+
+    public function scopeWhereProductIsEnable(Builder $query): void
+    {
+        $query->where('status', '1');
     }
     /**
      * Helpers
@@ -163,13 +168,16 @@ class Products extends Model
         ?float $max_weight
     ): LengthAwarePaginator {
         return self::search($product_name)
-            ->query(fn($query) => $query->with([
-                'store:id,business_name,business_hours,full_address,country,state,city,lat,lon',
-                'qty:id,product_id,qty',
-                'images:id,product_id,product_image',
-                'category:id,category_name,category_image'
-            ]))
-            ->where('status', '1')
+            ->query(
+                fn($query) => $query->with([
+                    'store:id,business_name,business_hours,full_address,country,state,city,lat,lon',
+                    'qty:id,product_id,qty',
+                    'images:id,product_id,product_image',
+                    'category:id,category_name,category_image'
+                ])->whereHas('store', function ($query) {
+                    $query->WhereUserIsActive();
+                })->WhereProductIsEnable()
+            )
             ->when($seller_ids, function ($query) use ($seller_ids) {
                 return $query->where_in('seller_id', $seller_ids['ids']);
             })
@@ -221,7 +229,7 @@ class Products extends Model
                 'images:id,product_id,product_image',
                 'category:id,category_name,category_image'
             ])->where('category_id', $category_id)
-            ->where('status', '1')
+            ->WhereProductIsEnable()
             ->paginate(10);
     }
 
@@ -237,7 +245,7 @@ class Products extends Model
             ->whereHas('qty', function ($query) use ($seller_id) {
                 $query->where('seller_id', $seller_id);
             })
-            ->where('status', '1')
+            ->WhereProductIsEnable()
             ->paginate(20);
     }
 
@@ -255,7 +263,7 @@ class Products extends Model
                 $query->where('seller_id', $seller_id);
             })
             ->where('id', $product_id)
-            ->where('status', '1')
+            ->WhereProductIsEnable()
             ->first();
 
         $product->store = User::getUserByID($seller_id, ['id', 'business_name', 'business_hours', 'full_address', 'country', 'state', 'city', 'lat', 'lon', 'user_img']);
@@ -266,18 +274,18 @@ class Products extends Model
     public static function getOnlyProductDetailsById(int $product_id): Products
     {
         return self::where('id', $product_id)
-            ->where('status', '1')
+            ->WhereProductIsEnable()
             ->first();
     }
 
     public static function getParentSellerProducts(int $seller_id): LengthAwarePaginator
     {
-        return self::where('seller_id', '=', $seller_id)->where('status', '=', '1')->paginate(20);
+        return self::WhereProductIsEnable()->where('seller_id', '=', $seller_id)->paginate(20);
     }
 
     public static function getParentSellerProductsAsc(int $seller_id): Collection
     {
-        return self::where('seller_id', '=', $seller_id)->where('status', '=', '1')->orderBy('id', 'asc')->get();
+        return self::WhereProductIsEnable()->where('seller_id', '=', $seller_id)->orderBy('id', 'asc')->get();
     }
 
     public static function getParentSellerProductsForView(int $seller_id, string $search = '', int $category_id = null, string $order_by): LengthAwarePaginator
@@ -297,7 +305,7 @@ class Products extends Model
     {
         $parent_seller_id = User::find($child_seller_id)->parent_store_id;
         $qty = Qty::where('seller_id', $child_seller_id)->first();
-        
+
         $query = (empty($qty)) ? self::ParentSellerProducts() : self::ChildSellerQty(child_seller_id: $child_seller_id);
         return $query->where('products.product_name', 'LIKE', "%{$search}%")
             ->where('products.seller_id', $parent_seller_id)
@@ -342,7 +350,7 @@ class Products extends Model
             $query->where('is_active', 1);
         })->where('seller_id', '=', $seller_id)
             ->where('featured', '=', 1)
-            ->where('status', '=', '1')
+            ->WhereProductIsEnable()
             ->orderByDesc('id')
             ->paginate(10);
     }
@@ -350,8 +358,8 @@ class Products extends Model
     public static function getActiveProducts(): LengthAwarePaginator
     {
         return self::whereHas('store', function ($query) {
-            $query->where('is_active', 1);
-        })->where('status', '1')
+            $query->WhereUserIsActive();
+        })->WhereProductIsEnable()
             ->paginate(10);
     }
 
