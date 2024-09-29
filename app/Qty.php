@@ -142,7 +142,7 @@ class Qty extends Model
                     'width' => $singleIndex->product->width,
                     'length' => $singleIndex->product->length,
                     'store' => [
-                        'id' => $singleIndex->store->id,
+                        'id' => $singleIndex->seller_id,
                         'business_name' => $singleIndex->store->business_name,
                         'business_hours' => $singleIndex->store->business_hours,
                         'full_address' => $singleIndex->store->full_address,
@@ -165,7 +165,7 @@ class Qty extends Model
                         ];
                     })->toArray(),
                     'category' => [
-                        'id' => $singleIndex->category->id,
+                        'id' => $singleIndex->category_id,
                         'category_name' => $singleIndex->category->category_name,
                         'category_image' => $singleIndex->category->category_image,
                     ]
