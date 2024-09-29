@@ -5,6 +5,7 @@ namespace App;
 use App\Models\CommissionAndServiceFee;
 use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -167,6 +168,13 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
     /**
+     * Scopes
+     */
+    public function scopeWhereUserIsActive(Builder $query): void
+    {
+        $query->where('is_active', 1);
+    }
+    /**
      * Helpers
      */
     public static function updateInfo(
@@ -289,7 +297,7 @@ class User extends Authenticatable implements JWTSubject
     public static function getParentAndChildSellersList(array $columns): Collection
     {
         return self::select($columns)
-            ->where('is_active', 1)
+            ->WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
             ->whereIn('role_id', [2, 5])
@@ -299,7 +307,7 @@ class User extends Authenticatable implements JWTSubject
 
     public static function getParentAndChildSellersByCity(string $city): LengthAwarePaginator
     {
-        return self::where('is_active', 1)
+        return self::WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
             ->where('city', $city)
@@ -310,7 +318,7 @@ class User extends Authenticatable implements JWTSubject
 
     public static function getParentAndChildSellersByState(string $state): Collection
     {
-        return self::where('is_active', 1)
+        return self::WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
             ->where('state', $state)
