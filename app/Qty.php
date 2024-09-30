@@ -154,9 +154,11 @@ class Qty extends Model
                         'user_img' => $singleIndex->store->user_img,
                     ],
                     'qty' => [
-                        'id' => $singleIndex->id,
-                        'product_id' => $singleIndex->product_id,
-                        'qty' => $singleIndex->qty,
+                        [
+                            'id' => $singleIndex->id,
+                            'product_id' => $singleIndex->product_id,
+                            'qty' => $singleIndex->qty,
+                        ]
                     ],
                     'images' => $singleIndex->productImage->map(function ($singleImage) {
                         return [
