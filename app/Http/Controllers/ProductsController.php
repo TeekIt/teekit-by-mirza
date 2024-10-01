@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Imports\ProductsImport;
 use App\productImages;
 use App\Products;
@@ -17,7 +18,9 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 use App\Services\JsonResponseServices;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Excel as ExcelConstants;
 
 class ProductsController extends Controller
@@ -95,14 +98,24 @@ class ProductsController extends Controller
     public function importProductsAPI(Request $request)
     {
         try {
-            $validatedData = Validator::make($request->all(), [
-                'file' => 'required|file',
-                'seller_id' => 'required|integer'
-            ]);
+            $validatedData = Validator::make(
+                $request->all(),
+                rules: [
+                    'file' => 'required|file',
+                    'seller_id' => [
+                        'required',
+                        'integer',
+                        Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRole::SELLER)),
+                    ]
+                ],
+                messages: [
+                    'seller_id.exists' => 'The given :attribute either does not exist in our system or its a child seller',
+                ]
+            );
             if ($validatedData->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
-            
+
             Excel::import(new ProductsImport($request->seller_id), $request->file('file'), readerType: ExcelConstants::CSV);
 
             return JsonResponseServices::getApiResponse(
@@ -832,7 +845,7 @@ class ProductsController extends Controller
             if ($validatedData->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
-            
+
             $pagination = Cache::remember('sellerProducts' . $request->seller_id . $request->page, now()->addDay(), function () use ($request) {
                 return Products::getProductsInfoBySellerId($request->seller_id)->toArray();
             });

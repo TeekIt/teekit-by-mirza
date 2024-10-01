@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Enums\UserRole;
 use App\Models\CommissionAndServiceFee;
 use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
@@ -120,16 +121,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(Role::class);
     }
 
-    // public function seller(): BelongsToMany
-    // {
-    //     return $this->belongsToMany('App\Role', 'role_user')->wherePivot('role_id', 2);
-    // }
-
-    // public function driver(): BelongsToMany
-    // {
-    //     return $this->belongsToMany('App\Models\Role', 'role_user')->where('name', 'delivery_boy');
-    // }
-
     public function orders(): HasMany
     {
         return $this->hasMany(Orders::class);
@@ -237,7 +228,7 @@ class User extends Authenticatable implements JWTSubject
         string $phone,
         int $is_active,
         string $referral_code
-    ): object {
+    ): self {
         return self::create([
             'name' => $name,
             'l_name' => $l_name,
@@ -248,7 +239,7 @@ class User extends Authenticatable implements JWTSubject
             'state' => 'NA',
             'city' => 'NA',
             'is_active' => $is_active,
-            'role_id' => 3,
+            'role_id' => UserRole::BUYER,
             'referral_code' => $referral_code
         ]);
     }
@@ -271,7 +262,7 @@ class User extends Authenticatable implements JWTSubject
         string $business_hours,
         int $role_id,
         int|null $parent_store_id = null
-    ): User {
+    ): self {
         return self::create([
             'name' => $name,
             'email' => $email,
@@ -301,7 +292,7 @@ class User extends Authenticatable implements JWTSubject
             ->WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->whereIn('role_id', [2, 5])
+            ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
             ->get();
     }
@@ -312,7 +303,7 @@ class User extends Authenticatable implements JWTSubject
             ->whereNotNull('lat')
             ->whereNotNull('lon')
             ->where('city', $city)
-            ->whereIn('role_id', [2, 5])
+            ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
             ->paginate(10);
     }
@@ -323,7 +314,7 @@ class User extends Authenticatable implements JWTSubject
             ->whereNotNull('lat')
             ->whereNotNull('lon')
             ->where('state', $state)
-            ->whereIn('role_id', [2, 5])
+            ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
             ->get();
     }
@@ -331,14 +322,14 @@ class User extends Authenticatable implements JWTSubject
     public static function getParentSellersSpecificColumns(array $columns): Collection
     {
         return self::select($columns)
-            ->where('role_id', 2)
+            ->where('role_id', UserRole::SELLER)
             ->get();
     }
 
     public static function getParentSellers(string $search = ''): LengthAwarePaginator
     {
         return self::where('business_name', 'like', '%' . $search . '%')
-            ->where('role_id', 2)
+            ->where('role_id', UserRole::SELLER)
             ->orderBy('business_name', 'asc')
             ->paginate(9);
     }
@@ -346,7 +337,7 @@ class User extends Authenticatable implements JWTSubject
     public static function getChildSellers(string $search = ''): LengthAwarePaginator
     {
         return self::where('business_name', 'like', '%' . $search . '%')
-            ->where('role_id', 5)
+            ->where('role_id', UserRole::CHILD_SELLER)
             ->orderBy('business_name', 'asc')
             ->paginate(9);
     }
@@ -354,14 +345,14 @@ class User extends Authenticatable implements JWTSubject
     public static function getCustomers(string $search = ''): LengthAwarePaginator
     {
         return self::where('name', 'like', '%' . $search . '%')
-            ->where('role_id', 3)
+            ->where('role_id', UserRole::BUYER)
             ->orderByDesc('created_at')
             ->paginate(9);
     }
 
     public static function getAllCustomers(): Collection
     {
-        return self::where('role_id', 3)->get();
+        return self::where('role_id', UserRole::BUYER)->get();
     }
 
     public static function getBuyersWithReferralCode(): LengthAwarePaginator
