@@ -11,7 +11,7 @@ on:
 jobs:
   deploy:
     name: Deploy to Staging Droplet
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Git checkout@v3 For Code Checkout
@@ -22,22 +22,15 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.MIRZA_TEO_THINKPAD_SSH_KEY_FOR_DIGITALOCEAN }}
 
-      - name: Use Git Secrets
-        run: ssh -o StrictHostKeyChecking=no ${{ secrets.DIGITALOCEAN_STAGING_DROPLET_USER }}@${{ secrets.DIGITALOCEAN_STAGING_DROPLET_IP }} << 'EOF'
-
-      - name: Moving To The App Root Directory
-        run: cd /var/www/teekit-by-mirza/
-
-      - name: Performing Git Pull
-        run: git pull origin staging
+      - name: Use Git Secrets | Move To The App Root Directory | Git Pull | Composer Install | Artisan Commands
+        run: | 
+            ssh -o StrictHostKeyChecking=no ${{ secrets.DIGITALOCEAN_STAGING_DROPLET_USER }}@${{ secrets.DIGITALOCEAN_STAGING_DROPLET_IP }} << 'EOF'
+            cd /var/www/teekit-by-mirza/ 
+            git pull origin staging
+            composer install --optimize-autoloader --no-dev
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            EOF
           
-      - name: Running Composer Install
-        run: composer install --optimize-autoloader --no-dev
-          
-      - name: Running Artisan Commands
-        run: |
-          php artisan migrate --force
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
-          EOF

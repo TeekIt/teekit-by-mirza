@@ -100,7 +100,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return [
             'name' => $this->name,
-            'roles' => $this->roles
         ];
     }
     /**
@@ -111,10 +110,10 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(CommissionAndServiceFee::class, 'seller_id');
     }
 
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany('App\Role', 'role_user');
-    }
+    // public function roles(): BelongsToMany
+    // {
+    //     return $this->belongsToMany('App\Role', 'role_user');
+    // }
 
     public function role(): BelongsTo
     {
@@ -365,12 +364,12 @@ class User extends Authenticatable implements JWTSubject
         return self::whereNotNull('referral_code')->paginate(10);
     }
 
-    public static function getStoreByBusinessName(string $business_name): object
+    public static function getStoreByBusinessName(string $business_name): ?User
     {
         return self::where('business_name', $business_name)->first();
     }
 
-    public static function getUserByID(int $id, array $columns): self
+    public static function getUserByID(int $id, array $columns): ?User
     {
         return self::select($columns)->find($id);
     }
