@@ -148,6 +148,15 @@ Route::prefix('admin')->middleware(['auth', 'auth.admin'])->group(function () {
     });
 });
 
+Route::controller(StuartDeliveryController::class)->group(function () {
+    Route::prefix('stuart')->group(function () {
+        Route::prefix('job')->group(function () {
+            Route::post('/creation/', 'stuartJobCreation')->name('stuart.job.creation');
+            Route::post('/status', 'stuartJobStatus')->name('stuart.job.status');
+        });
+    });
+});
+
 Route::get('/drivers', [HomeController::class, 'adminDrivers'])->name('admin.drivers');
 Route::get('/promocodes/home', [PromoCodesController::class, 'promocodesHome'])->name('admin.promocodes.home');
 Route::post('/promocodes/add', [PromoCodesController::class, 'promocodesAdd'])->name('admin.promocodes.add');
@@ -170,5 +179,3 @@ Route::get('/driver/{driver_id}/details', [HomeController::class, 'adminDriverDe
 Route::get('/store/application-fee/{user_id}/{application_fee}', [UserAndRoleController::class, 'updateApplicationFee'])->name('application_fee');
 Route::get('/users/{user_id}/status/{status}', [HomeController::class, 'changeUserStatus'])->name('change_user_status');
 Route::post('/store_info/update', [HomeController::class, 'updateStoreInfo'])->name('admin.image.update');
-Route::post('/stuart/job/creation/', [StuartDeliveryController::class, 'stuartJobCreation'])->name('stuart.job.creation');
-Route::post('/stuart/job/status', [StuartDeliveryController::class, 'stuartJobStatus'])->name('stuart.job.status');
