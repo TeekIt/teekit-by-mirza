@@ -1,0 +1,37 @@
+name: Deploy to DigitalOcean Staging Droplet
+
+on:
+  push:
+    branches:
+      - staging
+  pull_request:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    name: Deploy to Staging Droplet
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git checkout@v3 For Code Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.MIRZA_TEO_THINKPAD_SSH_KEY_FOR_DIGITALOCEAN }}
+
+      - name: Use Git Secrets | Move To The App Root Directory | Git Pull | Composer Install | Artisan Commands
+        run: | 
+            ssh -o StrictHostKeyChecking=no ${{ secrets.DIGITALOCEAN_STAGING_DROPLET_USER }}@${{ secrets.DIGITALOCEAN_STAGING_DROPLET_IP }} << 'EOF'
+            cd /var/www/teekit-by-mirza/ 
+            git config --global credential.helper store
+            git pull https://${{ secrets.GH_USERNAME }}:${{ secrets.GH_TOKEN }}@github.com/mirza-organization/teekit-by-mirza staging
+            composer install --optimize-autoloader --no-dev
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            EOF
+          
