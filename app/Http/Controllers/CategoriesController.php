@@ -118,15 +118,17 @@ class CategoriesController extends Controller
         try {
             $validated_data = Validator::make($request->route()->parameters(), [
                 'category_id' => 'required|integer',
+                'store_id' => 'integer',
             ]);
             if ($validated_data->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
             }
-            
+
             if ($request->store_id)
                 $data = Qty::getProductsByGivenIds($request->category_id, $request->store_id);
             else
                 $data = Categories::getProducts($request->category_id);
+            
             /*
             * Just creating this variable so we don't have to call the "empty()" function again & again
             * Which will obviouly reduce the API response speed
