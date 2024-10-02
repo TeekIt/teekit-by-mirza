@@ -128,16 +128,25 @@ Route::prefix('admin')->middleware(['auth', 'auth.admin'])->group(function () {
     Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
     Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
     Route::get('/drivers', DriversLivewire::class)->name('admin.test.drivers');
-    Route::get('/drivers_del', [HomeController::class, 'adminDriversDel'])->name('admin.del.drivers');
 
     Route::controller(NotificationsController::class)->group(function () {
-        Route::get('/notification/home', 'notificationHome')->name('admin.notification.home');
-        Route::post('/notification/send', 'notificationSend')->name('admin.notification.send');
+        Route::prefix('notification')->group(function () {
+            Route::get('/home', 'notificationHome')->name('admin.notification.home');
+            Route::post('/send', 'notificationSend')->name('admin.notification.send');
+        });
+    });
+
+    Route::controller(UsersController::class)->group(function () {
+        Route::prefix('delete')->group(function () {
+            Route::get('/users', 'adminUsersDel')->name('admin.del.users');
+            Route::get('/drivers', 'adminDriversDel')->name('admin.del.drivers');
+        });
+    });
+
+    Route::controller(HomeController::class)->group(function () {
+        Route::post('/update/pages', 'updatePages')->name('admin.update.pages');
     });
 });
-
-// Route::get('/admin/sellers/parent', [HomeController::class, 'adminParentSellers'])->name('admin.sellers.parent');
-// Route::get('/customers', [HomeController::class, 'adminCustomers'])->name('admin.customers');
 
 Route::get('/drivers', [HomeController::class, 'adminDrivers'])->name('admin.drivers');
 Route::get('/promocodes/home', [PromoCodesController::class, 'promocodesHome'])->name('admin.promocodes.home');
@@ -159,10 +168,7 @@ Route::get('/queries', [HomeController::class, 'adminQueries'])->name('admin.que
 Route::get('/customer/{user_id}/details', [HomeController::class, 'adminCustomerDetails'])->name('customer_details');
 Route::get('/driver/{driver_id}/details', [HomeController::class, 'adminDriverDetails'])->name('driver_details');
 Route::get('/store/application-fee/{user_id}/{application_fee}', [UserAndRoleController::class, 'updateApplicationFee'])->name('application_fee');
-Route::post('/update_pages', [HomeController::class, 'updatePages'])->name('update_pages');
 Route::get('/users/{user_id}/status/{status}', [HomeController::class, 'changeUserStatus'])->name('change_user_status');
-Route::get('/users_del', [HomeController::class, 'adminUsersDel'])->name('admin.del.users');
-// Route::get('/drivers_del', [HomeController::class, 'adminDriversDel'])->name('admin.del.drivers');
 Route::post('/store_info/update', [HomeController::class, 'updateStoreInfo'])->name('admin.image.update');
 Route::post('/stuart/job/creation/', [StuartDeliveryController::class, 'stuartJobCreation'])->name('stuart.job.creation');
 Route::post('/stuart/job/status', [StuartDeliveryController::class, 'stuartJobStatus'])->name('stuart.job.status');

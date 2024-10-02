@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Drivers;
 use App\Products;
 use App\Services\GoogleMapServices;
 use App\User;
@@ -15,6 +16,26 @@ use Illuminate\Support\Facades\Cache;
 
 class UsersController extends Controller
 {
+    /**
+     * Delete selected users
+     * @author Muhammad Abdullah Mirza
+     */
+    public function adminUsersDel(Request $request)
+    {
+        User::adminUsersDel($request);
+
+        return response(config('constants.USERS_DELETION_SUCCESS'));
+    }
+    /**
+     * Delete selected drivers
+     * @author Muhammad Abdullah Mirza
+     */
+    public function adminDriversDel(Request $request)
+    {
+        Drivers::adminDriversDel($request);
+
+        return response(config('constants.DRIVERS_DELETION_SUCCESS'));
+    }
     /**
      * @author Muhammad Abdullah Mirza
      */
@@ -59,7 +80,6 @@ class UsersController extends Controller
     /**
      * Fetch seller information w.r.t ID
      * @author Muhammad Abdullah Mirza
-     * @version 2.1.0
      */
     public static function getSellerInfo(object $seller_info, array $map_api_result = null)
     {
