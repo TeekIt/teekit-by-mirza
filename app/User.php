@@ -169,6 +169,11 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Helpers
      */
+    public static function adminUsersDel(Request $request)
+    {
+        for ($i = 0; $i < count($request->users); $i++) self::findOrfail($request->users[$i])->delete();
+    }
+
     public static function updateInfo(
         int $id,
         string $name = null,

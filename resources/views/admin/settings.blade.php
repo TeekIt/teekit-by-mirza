@@ -64,7 +64,7 @@
     <!-- /.row -->
 </div><!-- /.container-fluid -->
 <!-- Main content -->
-<form method="post" action="{{route('update_pages')}}" enctype="multipart/form-data">
+<form method="post" action="{{route('admin.update.pages')}}" enctype="multipart/form-data">
     {{csrf_field()}}
     <div class="content">
         <div class="container-fluid">

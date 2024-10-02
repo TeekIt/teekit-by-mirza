@@ -16,7 +16,6 @@ use App\Services\TwilioSmsService;
 use App\User;
 use App\VerificationCodes;
 use App\WithdrawalRequests;
-use Exception;
 use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -902,8 +901,11 @@ class HomeController extends Controller
             $category->category_image = $filename;
         }
         $category->save();
+
         Cache::forget('allCategories');
+        
         flash('Added')->success();
+        
         return Redirect::back();
     }
     /**
@@ -935,7 +937,9 @@ class HomeController extends Controller
             $category->category_image = $filename;
         }
         $category->save();
+
         flash('Updated')->success();
+        
         return Redirect::back();
     }
     /**
@@ -943,97 +947,24 @@ class HomeController extends Controller
      * @author Huzaifa Haleem
      * @version 1.1.0
      */
-    public function deleteCat(Request $request)
-    {
-        if (Gate::allows('superadmin')) {
-            DB::table('categories')->where('id', '=', $request->id)->delete();
-            flash('Category Deleted Successfully')->success();
-        }
-        return Redirect::back();
-    }
+    // public function deleteCat(Request $request)
+    // {
+    //     if (Gate::allows('superadmin')) {
+    //         DB::table('categories')->where('id', '=', $request->id)->delete();
+    //         flash('Category Deleted Successfully')->success();
+    //     }
+    //     return Redirect::back();
+    // }
 
     public function updatePages(Request $request)
     {
-        if (Gate::allows('superadmin')) {
-            $terms_page = Pages::query()->where('page_type', '=', 'terms')->update(['page_content' => $request->tos]);
-            $help_page = Pages::query()->where('page_type', '=', 'help')->update(['page_content' => $request->help]);
-            $faq_page = Pages::query()->where('page_type', '=', 'faq')->update(['page_content' => $request->faq]);
-            return Redirect::back();
-        } else {
-            abort(404);
-        }
-    }
-    /**
-     * Render parent sellers list view for admin
-     * @author Huzaifa Haleem
-     * @version 1.1.0
-     */
-    // public function adminParentSellers(Request $request)
-    // {
-    //     if (Gate::allows('superadmin')) {
-    //         $users = User::query()->where('role_id', 2);
-    //         if ($request->search) {
-    //             $users = $users->where('business_name', 'LIKE', $request->search);
-    //         }
-    //         $users = $users->paginate(9);
-    //         return view('admin.parent_sellers', compact('users'));
-    //     } else {
-    //         abort(404);
-    //     }
-    // }
+        Pages::where('page_type', '=', 'terms')->update(['page_content' => $request->tos]);
+        Pages::where('page_type', '=', 'help')->update(['page_content' => $request->help]);
+        Pages::where('page_type', '=', 'faq')->update(['page_content' => $request->faq]);
 
-    /**
-     * Render child sellers list view for admin
-     * @author Muhammad Abdullah Mirza
-     * @version 1.0.0
-     */
-    // public function adminChildSellers(Request $request)
-    // {
-    //     if (Gate::allows('superadmin')) {
-    //         $users = User::query()->where('role_id', 5);
-    //         if ($request->search) {
-    //             $users = $users->where('business_name', 'LIKE', $request->search);
-    //         }
-    //         $users = $users->paginate(9);
-    //         return view('admin.child_sellers', compact('users'));
-    //     } else {
-    //         abort(404);
-    //     }
-    // }
-    /**
-     * Delete selected users
-     * @author Muhammad Abdullah Mirza
-     * @version 1.0.0
-     */
-    public function adminUsersDel(Request $request)
-    {
-        if (Gate::allows('superadmin')) {
-            // dd($request->users);
-            for ($i = 0; $i < count($request->users); $i++) {
-                User::findOrfail($request->users[$i])->delete();
-                // Del Products & Orders
-
-                // DB::table('users')->where('id', '=', $request->users[$i])->delete();
-                /* Obselete Code */
-                // DB::table('role_user')->where('user_id', '=', $request->users[$i])->delete();
-            }
-            return response("Users Deleted Successfully");
-        }
-    }
-    /**
-     * Delete selected drivers
-     * @author Muhammad Abdullah Mirza
-     * @version 1.0.0
-     */
-    public function adminDriversDel(Request $request)
-    {
-        if (Gate::allows('superadmin')) {
-            for ($i = 0; $i < count($request->drivers); $i++) {
-                DB::table('drivers')->where('id', '=', $request->drivers[$i])->delete();
-                DB::table('driver_documents')->where('driver_id', '=', $request->drivers[$i])->delete();
-            }
-            return response("Drivers Deleted Successfully");
-        }
+        flash('Updated')->success();
+        
+        return Redirect::back();
     }
     /**
      * Render customers listing view for admin
@@ -1215,10 +1146,10 @@ class HomeController extends Controller
     {
         if (Gate::allows('superadmin')) {
             $transactions = WithdrawalRequests::whereHas('user', function ($query) {
-                $query->whereIn('role_id', [2,5]);
+                $query->whereIn('role_id', [2, 5]);
             })
-            ->get();
-            
+                ->get();
+
             return view('admin.withdrawal', compact('transactions'));
         }
     }

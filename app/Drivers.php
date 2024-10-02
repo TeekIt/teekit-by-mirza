@@ -107,12 +107,8 @@ class Drivers extends Authenticatable implements JWTSubject
             ->paginate(9);
     }
 
-    public function adminDriversDel(Request $request)
+    public static function adminDriversDel(Request $request)
     {
-        for ($i = 0; $i < count($request->drivers); $i++) {
-            self::where('id', '=', $request->drivers[$i])->delete();
-            DriverDocuments::where('driver_id', '=', $request->drivers[$i])->delete();
-        }
-        return response("Drivers Deleted Successfully");
+        for ($i = 0; $i < count($request->drivers); $i++) self::findOrfail($request->drivers[$i])->delete();
     }
 }
