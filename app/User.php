@@ -2,9 +2,11 @@
 
 namespace App;
 
+use App\Enums\UserRole;
 use App\Models\CommissionAndServiceFee;
 use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -118,16 +120,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(Role::class);
     }
 
-    // public function seller(): BelongsToMany
-    // {
-    //     return $this->belongsToMany('App\Role', 'role_user')->wherePivot('role_id', 2);
-    // }
-
-    // public function driver(): BelongsToMany
-    // {
-    //     return $this->belongsToMany('App\Models\Role', 'role_user')->where('name', 'delivery_boy');
-    // }
-
     public function orders(): HasMany
     {
         return $this->hasMany(Orders::class);
@@ -167,8 +159,20 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
     /**
+     * Scopes
+     */
+    public function scopeWhereUserIsActive(Builder $query): void
+    {
+        $query->where('is_active', 1);
+    }
+    /**
      * Helpers
      */
+    public static function adminUsersDel(Request $request)
+    {
+        for ($i = 0; $i < count($request->users); $i++) self::findOrfail($request->users[$i])->delete();
+    }
+
     public static function updateInfo(
         int $id,
         string $name = null,
@@ -228,7 +232,7 @@ class User extends Authenticatable implements JWTSubject
         string $phone,
         int $is_active,
         string $referral_code
-    ): User {
+    ): self {
         return self::create([
             'name' => $name,
             'l_name' => $l_name,
@@ -239,7 +243,7 @@ class User extends Authenticatable implements JWTSubject
             'state' => 'NA',
             'city' => 'NA',
             'is_active' => $is_active,
-            'role_id' => 3,
+            'role_id' => UserRole::BUYER,
             'referral_code' => $referral_code
         ]);
     }
@@ -262,7 +266,7 @@ class User extends Authenticatable implements JWTSubject
         string $business_hours,
         int $role_id,
         int|null $parent_store_id = null
-    ): User {
+    ): self {
         return self::create([
             'name' => $name,
             'email' => $email,
@@ -289,32 +293,32 @@ class User extends Authenticatable implements JWTSubject
     public static function getParentAndChildSellersList(array $columns): Collection
     {
         return self::select($columns)
-            ->where('is_active', 1)
+            ->WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->whereIn('role_id', [2, 5])
+            ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
             ->get();
     }
 
     public static function getParentAndChildSellersByCity(string $city): LengthAwarePaginator
     {
-        return self::where('is_active', 1)
+        return self::WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
             ->where('city', $city)
-            ->whereIn('role_id', [2, 5])
+            ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
             ->paginate(10);
     }
 
     public static function getParentAndChildSellersByState(string $state): Collection
     {
-        return self::where('is_active', 1)
+        return self::WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
             ->where('state', $state)
-            ->whereIn('role_id', [2, 5])
+            ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
             ->get();
     }
@@ -322,14 +326,14 @@ class User extends Authenticatable implements JWTSubject
     public static function getParentSellersSpecificColumns(array $columns): Collection
     {
         return self::select($columns)
-            ->where('role_id', 2)
+            ->where('role_id', UserRole::SELLER)
             ->get();
     }
 
     public static function getParentSellers(string $search = ''): LengthAwarePaginator
     {
         return self::where('business_name', 'like', '%' . $search . '%')
-            ->where('role_id', 2)
+            ->where('role_id', UserRole::SELLER)
             ->orderBy('business_name', 'asc')
             ->paginate(9);
     }
@@ -337,7 +341,7 @@ class User extends Authenticatable implements JWTSubject
     public static function getChildSellers(string $search = ''): LengthAwarePaginator
     {
         return self::where('business_name', 'like', '%' . $search . '%')
-            ->where('role_id', 5)
+            ->where('role_id', UserRole::CHILD_SELLER)
             ->orderBy('business_name', 'asc')
             ->paginate(9);
     }
@@ -345,14 +349,14 @@ class User extends Authenticatable implements JWTSubject
     public static function getCustomers(string $search = ''): LengthAwarePaginator
     {
         return self::where('name', 'like', '%' . $search . '%')
-            ->where('role_id', 3)
+            ->where('role_id', UserRole::BUYER)
             ->orderByDesc('created_at')
             ->paginate(9);
     }
 
     public static function getAllCustomers(): Collection
     {
-        return self::where('role_id', 3)->get();
+        return self::where('role_id', UserRole::BUYER)->get();
     }
 
     public static function getBuyersWithReferralCode(): LengthAwarePaginator
@@ -383,11 +387,11 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function activeOrBlockStore(int $user_id, int $status): bool
+    public static function activeOrBlockStore(int $id, int $status): bool
     {
-        self::where('id', '=', $user_id)->update(['is_active' => $status]);
+        self::where('id', '=', $id)->update(['is_active' => $status]);
         if ($status == 1) {
-            $user = self::findOrFail($user_id);
+            $user = self::findOrFail($id);
             EmailServices::sendStoreApprovedMail($user);
         }
         return true;

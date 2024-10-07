@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Imports\ProductsImport;
 use App\productImages;
 use App\Products;
@@ -17,7 +18,9 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 use App\Services\JsonResponseServices;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Excel as ExcelConstants;
 
 class ProductsController extends Controller
@@ -90,108 +93,29 @@ class ProductsController extends Controller
     }
     /**
      * Upload's bulk products
-     * This function belongs to import products API
-     * This is the replice of import products WEB URL
-     * @version 1.0.0
+     * @author Muhammad Abdullah Mirza
      */
-    // public function importProductsAPI(Request $request)
-    // {
-    //     try {
-    //         $validatedData = Validator::make($request->all(), [
-    //             'file' => 'required|file',
-    //             'seller_id' => 'required|integer'
-    //         ]);
-    //         if ($validatedData->fails()) {
-    //             return JsonResponseServices::getApiResponse(
-    //                 [],
-    //                 config('constants.FALSE_STATUS'),
-    //                 $validatedData->errors(),
-    //                 config('constants.HTTP_UNPROCESSABLE_REQUEST')
-    //             );
-    //         }
-    //         $seller_id = $request->seller_id;
-    //         $file = $request->file('file');
-    //         $filename = $file->getClientOriginalName();
-    //         //Where uploaded file will be stored on the server
-    //         $location = public_path('upload/csv');
-    //         // Upload file
-    //         $file->move($location, $filename);
-    //         // Making filepath
-    //         $filepath = $location . "/" . $filename;
-    //         // Reading file
-    //         $file = fopen($filepath, "r");
-    //         // Read through the file and store the contents as an array
-    //         $importData_arr = array();
-    //         $i = 0;
-    //         //Read the contents of the uploaded file
-    //         while (($filedata = fgetcsv($file, 1000, ",")) !== FALSE) {
-    //             $num = count($filedata);
-    //             // Skip first row (Remove below comment if you want to skip the first row)
-    //             if ($i == 0) {
-    //                 $i++;
-    //                 continue;
-    //             }
-    //             for ($row = 0; $row < $num; $row++) $importData_arr[$i][] = $filedata[$row];
-    //             $i++;
-    //         }
-    //         fclose($file);
-
-    //         foreach ($importData_arr as $importData) {
-    //             $product = new Products();
-    //             $product->seller_id = $seller_id;
-    //             $product->category_id = $importData[0];
-    //             $product->product_name = $importData[1];
-    //             $product->sku = $importData[2];
-    //             $product->price = str_replace(',', '', $importData[4]);
-    //             $product->discount_percentage = ($importData[5] == "") ? 0 : $importData[5];
-    //             $product->weight = $importData[6];
-    //             $product->brand = $importData[7];
-    //             $product->size = ($importData[8] == "null") ? NULL : $importData[8];
-    //             $product->status = $importData[9];
-    //             $product->contact = $importData[10];
-    //             $product->colors = ($importData[11] == "null") ? NULL : $importData[11];
-    //             $product->bike = $importData[12];
-    //             $product->car = $importData[13];
-    //             $product->van = $importData[14];
-    //             $product->feature_img = $importData[18];
-    //             $product->height = $importData[15];
-    //             $product->width = $importData[16];
-    //             $product->length = $importData[17];
-    //             $product->save();
-    //             /* This snippet will add qty to it's particular table */
-    //             $product_quantity = ($importData[3] == "") ? 0 : $importData[3];
-    //             Qty::add($seller_id, (int)$product->id, $product->category_id, $product_quantity);
-    //             /* The following will add product image to it's particular table */
-    //             productImages::add((int)$product->id, $importData[18]);
-    //         }
-    //         return JsonResponseServices::getApiResponse(
-    //             [],
-    //             config('constants.FALSE_STATUS'),
-    //             config('constants.DATA_INSERTION_SUCCESS'),
-    //             config('constants.HTTP_OK')
-    //         );
-    //     } catch (Throwable $error) {
-    //         report($error);
-    //         return JsonResponseServices::getApiResponse(
-    //             [],
-    //             config('constants.FALSE_STATUS'),
-    //             $error,
-    //             config('constants.HTTP_SERVER_ERROR')
-    //         );
-    //     }
-    // }
-
     public function importProductsAPI(Request $request)
     {
         try {
-            $validatedData = Validator::make($request->all(), [
-                'file' => 'required|file',
-                'seller_id' => 'required|integer'
-            ]);
+            $validatedData = Validator::make(
+                $request->all(),
+                rules: [
+                    'file' => 'required|file',
+                    'seller_id' => [
+                        'required',
+                        'integer',
+                        Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRole::SELLER)),
+                    ]
+                ],
+                messages: [
+                    'seller_id.exists' => 'The given :attribute either does not exist in our system or its a child seller',
+                ]
+            );
             if ($validatedData->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
-            
+
             Excel::import(new ProductsImport($request->seller_id), $request->file('file'), readerType: ExcelConstants::CSV);
 
             return JsonResponseServices::getApiResponse(
@@ -914,18 +838,14 @@ class ProductsController extends Controller
     public function sellerProducts(Request $request)
     {
         try {
-            $validate = Validator::make($request->all(), [
+            $validatedData = Validator::make($request->all(), [
                 'seller_id' => 'required|integer',
                 'page' => 'required|integer'
             ]);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
+
             $pagination = Cache::remember('sellerProducts' . $request->seller_id . $request->page, now()->addDay(), function () use ($request) {
                 return Products::getProductsInfoBySellerId($request->seller_id)->toArray();
             });
