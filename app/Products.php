@@ -49,7 +49,7 @@ class Products extends Model
     protected function status(): Attribute
     {
         return Attribute::make(
-            set: fn ($value) => (string) $value
+            set: fn($value) => (string) $value
         );
     }
 
@@ -182,18 +182,29 @@ class Products extends Model
                     'qty:id,product_id,qty',
                     'images:id,product_id,product_image',
                     'category:id,category_name,category_image'
-                ])->whereHas('store', function ($query) {
-                    $query->WhereUserIsActive();
-                })->WhereProductIsEnable()
+                ])->when($seller_id, function ($productQuery) use ($seller_id) {
+
+                    return $productQuery->whereHas('qty', function ($qtyQuery) use ($seller_id) {
+
+                        $qtyQuery->where('seller_id', $seller_id)
+                            ->whereHas('store', function ($storeQuery) {
+                                $storeQuery->WhereUserIsActive();
+                            });
+                    });
+                })->when($seller_ids, function ($productQuery) use ($seller_ids) {
+
+                    return $productQuery->whereHas('qty', function ($qtyQuery) use ($seller_ids) {
+                        
+                        $qtyQuery->where_in('seller_id', $seller_ids['ids'])
+                            ->whereHas('store', function ($storeQuery) {
+                                $storeQuery->WhereUserIsActive();
+                            });
+                    });
+                })
+                    ->WhereProductIsEnable()
             )
-            ->when($seller_ids, function ($query) use ($seller_ids) {
-                return $query->where_in('seller_id', $seller_ids['ids']);
-            })
             ->when($category_id, function ($query) use ($category_id) {
                 return $query->where('category_id', $category_id);
-            })
-            ->when($seller_id, function ($query) use ($seller_id) {
-                return $query->where('seller_id', $seller_id);
             })
             ->when($brand, function ($query) use ($brand) {
                 return $query->where('brand', $brand);
