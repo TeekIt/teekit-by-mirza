@@ -19,7 +19,6 @@ use App\Http\Livewire\Sellers\OrdersLivewire;
 use App\Http\Livewire\Sellers\SellerDashboardLivewire;
 use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
-use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 /*
