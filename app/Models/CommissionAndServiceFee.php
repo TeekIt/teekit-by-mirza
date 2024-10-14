@@ -29,12 +29,19 @@ class CommissionAndServiceFee extends Model
      */
     public static function updateOrAdd(int $seller_id, array $commission = [], array $service_fee = []): CommissionAndServiceFee
     {
+        $data = [];
+
+        if (!empty($commission)) {
+            $data['commission'] = json_encode($commission);
+        }
+    
+        if (!empty($service_fee)) {
+            $data['service_fee'] = json_encode($service_fee);
+        }
+    
         return self::updateOrCreate(
             ['seller_id' => $seller_id],
-            [
-                'commission' => json_encode($commission),
-                'discounted' => json_encode($service_fee),
-            ]
+            $data
         );
     }
 }
