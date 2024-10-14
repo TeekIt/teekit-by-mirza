@@ -6,7 +6,7 @@ use App\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ReferralCodes extends Component
+class ReferralCodesLivewire extends Component
 {
     use WithPagination;
 
@@ -15,6 +15,6 @@ class ReferralCodes extends Component
     public function render()
     {
         $data = User::getBuyersWithReferralCode();
-        return view('livewire.admin.referral-codes', compact('data'));
+        return view('livewire.admin.referral-codes-livewire', compact('data'));
     }
 }

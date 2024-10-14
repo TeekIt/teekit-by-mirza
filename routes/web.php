@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\Admin\UserAndRoleController;
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Livewire\Admin\ParentSellersLiveWire;
-use App\Http\Livewire\Admin\ReferralCodes;
+use App\Http\Livewire\Admin\ParentSellersLivewire;
+use App\Http\Livewire\Admin\ReferralCodesLivewire;
 use App\Http\Livewire\Sellers\InventoryLivewire;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationsController;
@@ -122,8 +122,8 @@ Route::controller(HomeController::class)->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->middleware(['auth', 'auth.admin'])->group(function () {
-    Route::get('/referralcodes', ReferralCodes::class)->name('admin.referralcodes');
-    Route::get('/sellers/parent', ParentSellersLiveWire::class)->name('admin.sellers.parent');
+    Route::get('/referralcodes', ReferralCodesLivewire::class)->name('admin.referralcodes');
+    Route::get('/sellers/parent', ParentSellersLivewire::class)->name('admin.sellers.parent');
     Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
     Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
     Route::get('/drivers', DriversLivewire::class)->name('admin.test.drivers');
