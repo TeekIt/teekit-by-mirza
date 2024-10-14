@@ -1,18 +1,20 @@
 <div class="container-xxl flex-grow-1 container-p-y">
-    @if (session()->has('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>Error!</strong>
-            {{ session()->get('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-    @if (session()->has('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>Success!</strong>
-            {{ session()->get('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+    <div class="container pt-4">
+        @if (session()->has('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong>
+                {{ session()->get('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        @if (session()->has('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Success!</strong>
+                {{ session()->get('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+    </div>
     {{-- ************************************ Info Model ************************************ --}}
     <div wire:ignore.self class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel"
         aria-hidden="true">
@@ -181,6 +183,87 @@
                                             </div>
                                         </td>
                                     </tr>
+                                    {{-- Commissions Sections - Ends --}}
+
+                                    {{-- Service Fees Section - Begins --}}
+                                    <tr>
+                                        <th colspan="2" class="text-center">
+                                            Apply Service Fees
+                                            <p class="text-muted text-sm fw-light">
+                                                You can either apply fixed or different service fees on all categories
+                                                in
+                                                which the seller is selling his products
+                                            </p>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <div class="form-check">
+                                                <input type="radio" class="form-check-input"
+                                                    wire:click="enableThis('enable_fixed_service_fees')"
+                                                    name="service_fees" id="fixedServiceFeesForAll"
+                                                    @if ($enable_fixed_service_fees) checked @endif>
+                                                <label class="form-check-label fw-bold" for="fixedServiceFeesForAll">
+                                                    Fixed For All
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <input type="number" class="form-control px-3"
+                                                    wire:model.defer="fixed_service_fees"
+                                                    placeholder="Enter fixed service fees"
+                                                    @if (!$enable_fixed_service_fees) disabled @endif>
+                                                <small class="text-danger">
+                                                    @error('fixed_service_fees')
+                                                        {{ $message }}
+                                                    @enderror
+                                                </small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <div class="form-check">
+                                                <input type="radio" class="form-check-input"
+                                                    wire:click="enableThis('enable_different_service_fees')"
+                                                    name="service_fees" id="differentServiceFeesForAll"
+                                                    @if ($enable_different_service_fees) checked @endif>
+                                                <label class="form-check-label fw-bold"
+                                                    for="differentServiceFeesForAll">
+                                                    Different For All
+                                                </label>
+                                            </div>
+                                            @foreach ($categories as $single_index => $value)
+                                                <div class="d-flex">
+                                                    <div class="p-2 w-50" wire:ignore>{{ $value->category_name }}</div>
+                                                    <div class="p-2 w-50">
+                                                        <input type="number" class="form-control px-3"
+                                                            wire:model.defer="different_service_fees.{{ $single_index }}"
+                                                            placeholder="Enter service fees for this category"
+                                                            @if (!$enable_different_service_fees) disabled @endif>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                            <small class="text-danger">
+                                                @error('different_service_fees')
+                                                    {{ $message }}
+                                                @enderror
+                                            </small>
+                                            <div>
+                                                <button type="button" class="btn btn-site-primary w-100 mt-4"
+                                                    wire:click="applyServiceFees" wire:loading.class="btn-dark"
+                                                    wire:loading.class.remove="btn-site-primary"
+                                                    wire:loading.attr="disabled" wire:target="applyServiceFees"
+                                                    @if (!$enable_apply_service_fees_btn) disabled @endif>
+                                                    <span wire:loading.remove wire:target="applyServiceFees">Apply</span>
+                                                    <span wire:loading wire:target="applyServiceFees">
+                                                        <span class="spinner-border spinner-border-sm text-light"
+                                                            role="status" aria-hidden="true"></span>
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {{-- Service Fees Section - Ends --}}
                                 @else
                                     <tr>
                                         <td colspan="2">
@@ -192,66 +275,6 @@
                                         </td>
                                     </tr>
                                 @endif
-                                {{-- Commision Sections - Ends --}}
-
-                                {{-- Service Fees Section - Begins --}}
-                                <tr>
-                                    <th colspan="2" class="text-center">
-                                        Apply Service Fees
-                                        <p class="text-muted text-sm fw-light">
-                                            You can either apply fixed or different service fees on all categories in
-                                            which the seller is selling the products
-                                        </p>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <td colspan="2">
-                                        <div class="form-check">
-                                            <input type="radio" class="form-check-input" name="service_fees"
-                                                id="fixedServiceFeesForAll">
-                                            <label class="form-check-label fw-bold" for="fixedServiceFeesForAll">
-                                                Fixed For All
-                                            </label>
-                                        </div>
-                                        <div>
-                                            <input type="number" class="form-control px-3"
-                                                placeholder="Enter fixed commission">
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2">
-                                        <div class="form-check">
-                                            <input type="radio" class="form-check-input" name="service_fees"
-                                                id="differentServiceFeesForAll">
-                                            <label class="form-check-label fw-bold" for="differentServiceFeesForAll">
-                                                Different For All
-                                            </label>
-                                        </div>
-                                        <div class="d-flex">
-                                            <div class="p-2 w-50">Category Name</div>
-                                            <div class="p-2 w-50">
-                                                <input type="number" class="form-control px-3"
-                                                    placeholder="Enter commission for this category">
-                                            </div>
-                                        </div>
-                                        <div class="d-flex">
-                                            <div class="p-2 w-50">Category Name</div>
-                                            <div class="p-2 w-50">
-                                                <input type="number" class="form-control px-3"
-                                                    placeholder="Enter commission for this category">
-                                            </div>
-                                        </div>
-                                        <div class="d-flex">
-                                            <div class="p-2 w-50">Category Name</div>
-                                            <div class="p-2 w-50">
-                                                <input type="number" class="form-control px-3"
-                                                    placeholder="Enter commission for this category">
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {{-- Service Fees Section - Ends --}}
                             </tbody>
                         </table>
                     </div>
