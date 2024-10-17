@@ -45,7 +45,7 @@
                                     <tr>
                                         <th>Address</th>
                                         <td style="white-space: pre-line;">
-                                            <?php echo wordwrap($address_1, $width = 50, $break = "\n", $cut = false); ?>
+                                            <?php echo wordwrap($full_address, $width = 50, $break = "\n", $cut = false); ?>
                                         </td>
                                     </tr>
                                     <tr>

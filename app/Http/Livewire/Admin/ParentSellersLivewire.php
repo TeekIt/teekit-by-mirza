@@ -9,38 +9,43 @@ use Exception;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ParentSellersLiveWire extends Component
+class ParentSellersLivewire extends Component
 {
     use WithPagination;
 
     public
-    $seller_id,
-    $name,
-    $email,
-    $phone,
-    $full_address,
-    $business_name,
-    $lat,
-    $lon,
-    $user_img,
-    $last_login,
-    $email_verified_at,
-    $pending_withdraw,
-    $total_withdraw,
-    $is_online,
-    $application_fee,
-    $enable_fixed_commission,
-    $enable_different_commissions,
-    $enable_apply_commission_btn,
-    $categories,
-    $fixed_commission,
-    $different_commissions = [],
-    $category_id_map,
-    $modal_success = false,
-    $modal_success_msg,
-    $modal_error = false,
-    $modal_error_msg,
-    $search = '';
+        $seller_id,
+        $name,
+        $email,
+        $phone,
+        $full_address,
+        $business_name,
+        $lat,
+        $lon,
+        $user_img,
+        $last_login,
+        $email_verified_at,
+        $pending_withdraw,
+        $total_withdraw,
+        $is_online,
+        $application_fee,
+        $enable_fixed_commission,
+        $enable_different_commissions,
+        $fixed_commission,
+        $different_commissions = [],
+        $enable_apply_commission_btn,
+        $enable_fixed_service_fees,
+        $enable_different_service_fees,
+        $fixed_service_fees,
+        $different_service_fees = [],
+        $enable_apply_service_fees_btn,
+        $categories,
+        $category_id_map,
+        $modal_success = false,
+        $modal_success_msg,
+        $modal_error = false,
+        $modal_error_msg,
+        $search = '';
 
     private const
         ACTIVE = 1,
@@ -69,9 +74,14 @@ class ParentSellersLiveWire extends Component
             'enable_fixed_commission',
             'enable_different_commissions',
             'enable_apply_commission_btn',
+            'enable_fixed_service_fees',
+            'enable_different_service_fees',
+            'enable_apply_service_fees_btn',
             'categories',
             'fixed_commission',
             'different_commissions',
+            'fixed_service_fees',
+            'different_service_fees',
             'category_id_map',
             'modal_success',
             'modal_success_msg',
@@ -103,6 +113,17 @@ class ParentSellersLiveWire extends Component
             if ($input_to_enable === $commission_array[1])
                 $this->enable_fixed_commission = false;
         }
+
+        $service_fees_array = ['enable_fixed_service_fees', 'enable_different_service_fees'];
+        if (in_array($input_to_enable, $service_fees_array)) {
+            $this->enable_apply_service_fees_btn = true;
+
+            if ($input_to_enable === $service_fees_array[0])
+                $this->enable_different_service_fees = false;
+
+            if ($input_to_enable === $service_fees_array[1])
+                $this->enable_fixed_service_fees = false;
+        }
     }
 
     public function renderCommissions($commission)
@@ -113,7 +134,6 @@ class ParentSellersLiveWire extends Component
 
             $this->enableThis('enable_fixed_commission');
             $this->fixed_commission = $commission->fixed_commission;
-
         } else if (isset($commission->different_commissions)) {
 
             $this->enableThis('enable_different_commissions');
@@ -123,10 +143,36 @@ class ParentSellersLiveWire extends Component
             /* Align commissions according to categories */
             $this->different_commissions = collect($this->categories)
                 ->mapWithKeys(function ($category, $index) use ($different_commissions) {
-                    $matching_commission = $different_commissions->firstWhere('category_id', $category->category_id);
+
+                    $matching_commission = $different_commissions->firstWhere('category_id', $category->id);
+
                     return [$index => $matching_commission['commission'] ?? 0];
                 })->toArray();
+        }
+    }
 
+    public function renderServiceFees($service_fee)
+    {
+        $service_fee = json_decode($service_fee);
+
+        if (isset($service_fee->fixed_service_fees)) {
+
+            $this->enableThis('enable_fixed_service_fees');
+            $this->fixed_service_fees = $service_fee->fixed_service_fees;
+        } else if (isset($service_fee->different_service_fees)) {
+
+            $this->enableThis('enable_different_service_fees');
+            /* Convert different_service_fees to an array of associative arrays */
+            $different_service_fees = collect($service_fee->different_service_fees)->map(fn($item) => (array) $item);
+
+            /* Align service fees according to categories */
+            $this->different_service_fees = collect($this->categories)
+                ->mapWithKeys(function ($category, $index) use ($different_service_fees) {
+
+                    $matching_service_fees = $different_service_fees->firstWhere('category_id', $category->id);
+
+                    return [$index => $matching_service_fees['service_fees'] ?? 0];
+                })->toArray();
         }
     }
 
@@ -136,7 +182,7 @@ class ParentSellersLiveWire extends Component
 
         $this->categories = Categories::getAllCategoriesByStoreId($id, ['*']);
         $this->categories = ($this->categories->isEmpty()) ? [] : $this->categories;
-        $this->category_id_map = is_array($this->categories) ? [] : $this->categories->pluck('category_id')->toArray();
+        $this->category_id_map = is_array($this->categories) ? [] : $this->categories->pluck('id')->toArray();
 
         if ($data) {
             $this->seller_id = $data->id;
@@ -158,6 +204,10 @@ class ParentSellersLiveWire extends Component
 
             if ($seller_commission_and_service_fee?->commission) {
                 $this->renderCommissions($seller_commission_and_service_fee->commission);
+            }
+
+            if ($seller_commission_and_service_fee?->service_fee) {
+                $this->renderServiceFees($seller_commission_and_service_fee->service_fee);
             }
         } else {
             return redirect()->to(route('admin.sellers.parent'))->with('error', 'Record Not Found.');
@@ -211,13 +261,13 @@ class ParentSellersLiveWire extends Component
             if ($this->enable_fixed_commission)
                 $inserted = CommissionAndServiceFee::updateOrAdd(
                     $this->seller_id,
-                    ['fixed_commission' => (int) $this->fixed_commission]
+                    commission: ['fixed_commission' => (int) $this->fixed_commission]
                 );
 
             if ($this->enable_different_commissions) {
                 foreach ($this->different_commissions as $index => $commission) {
                     /*
-                     * Using $category_id_map to retreive the category ids
+                     * Using $category_id_map array to retreive the category ids
                      * Which were saved during the initial rendering of the "infoModal"
                      */
                     $category_id = $this->category_id_map[$index] ?? null;
@@ -225,20 +275,68 @@ class ParentSellersLiveWire extends Component
                         $different_commissions_array[] = ['category_id' => $category_id, 'commission' => (int) $commission];
                     }
                 }
-
                 $inserted = CommissionAndServiceFee::updateOrAdd(
                     $this->seller_id,
-                    ['different_commissions' => $different_commissions_array]
+                    commission: ['different_commissions' => $different_commissions_array]
                 );
             }
             /* Operation finished */
-            if ($inserted) {
-                $this->modal_success = true;
-                $this->modal_success_msg = config('constants.DATA_UPDATED_SUCCESS');
-            } else {
-                $this->modal_error = true;
-                $this->modal_error_msg = config('constants.UPDATION_FAILED');
+            // if ($inserted) {
+            //     $this->modal_success = true;
+            //     $this->modal_success_msg = config('constants.DATA_UPDATED_SUCCESS');
+            // } else {
+            //     $this->modal_error = true;
+            //     $this->modal_error_msg = config('constants.UPDATION_FAILED');
+            // }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', config('messages.INVALID_DATA'));
+        }
+    }
+
+    public function applyServiceFees()
+    {
+        if ($this->enable_fixed_service_fees)
+            $this->validate([
+                'fixed_service_fees' => 'required|int',
+            ]);
+
+        if ($this->enable_different_service_fees)
+            $this->validate([
+                'different_service_fees' => 'required|array',
+            ]);
+        try {
+            /* Perform some operation */
+            if ($this->enable_fixed_service_fees)
+                $inserted = CommissionAndServiceFee::updateOrAdd(
+                    $this->seller_id,
+                    service_fee: ['fixed_service_fees' => (int) $this->fixed_service_fees]
+                );
+
+            if ($this->enable_different_service_fees) {
+                foreach ($this->different_service_fees as $index => $service_fees) {
+                    /*
+                     * Using $category_id_map array to retreive the category ids
+                     * Which were saved during the initial rendering of the "infoModal"
+                     */
+                    $category_id = $this->category_id_map[$index] ?? null;
+                    if ($category_id) {
+                        $different_service_fees_array[] = ['category_id' => $category_id, 'service_fees' => (int) $service_fees];
+                    }
+                }
+                $inserted = CommissionAndServiceFee::updateOrAdd(
+                    $this->seller_id,
+                    service_fee: ['different_service_fees' => $different_service_fees_array]
+                );
             }
+            /* Operation finished */
+            // if ($inserted) {
+            //     $this->modal_success = true;
+            //     $this->modal_success_msg = config('constants.DATA_UPDATED_SUCCESS');
+            // } else {
+            //     $this->modal_error = true;
+            //     $this->modal_error_msg = config('constants.UPDATION_FAILED');
+            // }
         } catch (Exception $error) {
             report($error);
             session()->flash('error', config('messages.INVALID_DATA'));
@@ -271,6 +369,6 @@ class ParentSellersLiveWire extends Component
     public function render()
     {
         $data = User::getParentSellers($this->search);
-        return view('livewire.admin.parent-sellers-live-wire', compact('data'));
+        return view('livewire.admin.parent-sellers-livewire', compact('data'));
     }
 }

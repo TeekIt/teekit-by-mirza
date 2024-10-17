@@ -6,7 +6,6 @@ use App\Qty;
 use App\User;
 use Exception;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -19,7 +18,7 @@ class ChildSellersLivewire extends Component
         $name,
         $email,
         $phone,
-        $address_1,
+        $full_address,
         $business_name,
         $lat,
         $lon,
@@ -41,7 +40,7 @@ class ChildSellersLivewire extends Component
             'name',
             'email',
             'phone',
-            'address_1',
+            'full_address',
             'business_name',
             'lat',
             'lon',
@@ -67,7 +66,7 @@ class ChildSellersLivewire extends Component
         $this->name = $data->name;
         $this->email = $data->email;
         $this->phone = $data->phone;
-        $this->address_1 = $data->address_1;
+        $this->full_address = $data->full_address;
         $this->business_name = $data->business_name;
         $this->lat = $data->lat;
         $this->lon = $data->lon;
