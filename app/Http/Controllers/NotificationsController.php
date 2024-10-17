@@ -83,7 +83,7 @@ class NotificationsController extends Controller
         $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
         $client->useApplicationDefaultCredentials();
         $token = $client->fetchAccessTokenWithAssertion();
-        dd($token);
+        // dd($token);
         return $token['access_token'];
     }
 
@@ -110,34 +110,53 @@ class NotificationsController extends Controller
 
     public function notificationSend(Request $request)
     {
-        // Path to your service account JSON key file
-        $serviceAccountPath = storage_path('googleFcmServices/teek-it-965a8-1ec96a1aa676.json');
-        
-        // Your Firebase project ID
-        $projectId = 'teek-it-965a8';
-        
-        $firebaseTokens = DeviceToken::whereNotNull('device_token')->pluck('device_token')->all();
-        
-        // Example message payload
-        $message = [
-            // 'token' => 'device-token',
-            "registration_ids" => $firebaseTokens,
-            'notification' => [
-                'title' => 'Hello',
-                'body' => 'World',
-            ],
-            "priority" => "high",
-        ];
         try {
+            // Path to your service account JSON key file
+            $serviceAccountPath = storage_path('app/googleFcmServices/teek-it-965a8-1ec96a1aa676.json');
+            
+            // Your Firebase project ID
+            $projectId = 'teek-it-965a8';
+            
+            $firebaseTokens = DeviceToken::whereNotNull('device_token')->pluck('device_token')->all();
+        
+            if(empty($firebaseTokens)){
+                return response()->json(['error' => 'No valid device tokens available.'], 400);
+            }
+        
+        
+            $message = [
+                'token' => $firebaseTokens[0], // Sending to one token at a time            
+                    'notification' => [
+                        'title' => 'Hello',
+                        'body' => 'World',
+                    ],
+                    // 'priority' => 'high',
+            
+            ];
+        
             $accessToken = $this->getAccessToken($serviceAccountPath);
-            dd('hello1');
             $response = $this->sendMessage($accessToken, $projectId, $message);
-            dd($response);
-        } catch (Throwable $error) {
+
+            // Check if the response contains an error
+            if (isset($response['error'])) {
+                if ($response['error']['status'] === 'NOT_FOUND' && $response['error']['details'][0]['errorCode'] === 'UNREGISTERED') {
+                    return response()->json(['error' => 'The device token is unregistered or invalid.'], 404);
+                }
+                return response()->json(['error' => 'Failed to send notification: ' . $response['error']['message']], 400);
+            }
+    
+            // If successful, return the response
+            return response()->json(['success' => 'Notification sent successfully', 'response' => $response]);
+
+            dd($response); // Output the response for debugging purposes
+        }catch (Throwable $error) {
             report($error);
-            return back()->with('error', 'Failed to send the notification due to some internal error.');
+            return response()->json(['error' => 'Failed to send the notification due to an internal error.'], 500);
+
+            // return back()->with('error', 'Failed to send the notification due to some internal error.');
         }
-    }
+}
+
     /**
      * It will send notifications
      * @author Muhammad Abdullah Mirza
