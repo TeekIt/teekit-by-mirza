@@ -16,7 +16,7 @@
             {{-- 2 == Parent Seller, 5 == Child Seller --}}
         @elseif(Auth::user()->role_id == 2 || Auth::user()->role_id == 5)
             @include('layouts.shopkeeper.sidebar')
-            <x-seller-business-hours-modal/>
+            <x-seller-business-hours-modal />
         @endif
 
         <div class="content-wrapper">

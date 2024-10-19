@@ -97,7 +97,6 @@ Route::prefix('sellers')->controller(UsersController::class)->group(function () 
 */
 Route::prefix('notifications')->controller(NotificationsController::class)->group(function () {
     Route::post('save_token', 'saveToken');
-    Route::post('send_test', 'notificationSendTest');
 });
 /*
 |--------------------------------------------------------------------------
