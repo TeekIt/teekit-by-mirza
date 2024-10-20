@@ -22,6 +22,11 @@ class DeviceToken extends Model
     /**
      * Helpers
      */
+    public static function deleteByDeviceToken(string $deviceToken): int
+    {
+        return self::where('device_token', $deviceToken)->delete();
+    }
+
     public static function addOrUpdate(?int $userId, string $deviceId, string $deviceToken): self
     {
         return self::updateOrCreate(

@@ -29,7 +29,7 @@ class NotificationsController extends Controller
         $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
         $client->useApplicationDefaultCredentials();
         $token = $client->fetchAccessTokenWithAssertion();
-        
+
         return $token['access_token'];
     }
 
@@ -96,9 +96,7 @@ class NotificationsController extends Controller
                         $response['error']['status'] === 'NOT_FOUND' &&
                         $response['error']['details'][0]['errorCode'] === 'UNREGISTERED'
                     ) {
-                        /* Try to delete "UNREGISTERED" token from your system */
-                        return back()->with('error', 'The device token is unregistered or invalid');
-                        // return response()->json(['error' => 'The device token is unregistered or invalid.'], 404);
+                        DeviceToken::deleteByDeviceToken($singleFirebaseToken);
                     }
 
                     return back()->with('error', 'Failed to send notification: ' . $response['error']['message']);
