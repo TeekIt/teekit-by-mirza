@@ -1,5 +1,8 @@
 @extends('layouts.admin.app')
 @section('content')
+
+    <x-session-messages />
+
     <!-- Content Header (Page header) -->
     <div class="content-header">
         <div class="container-fluid">
@@ -29,7 +32,7 @@
                                                 <div class="col-md-12">
                                                     <div class="form-group">
                                                         <input type="text" class="form-control" name="title"
-                                                            placeholder="Title*" required>
+                                                            placeholder="Title*" >
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">

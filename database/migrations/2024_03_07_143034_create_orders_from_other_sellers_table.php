@@ -17,6 +17,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->foreignId('customer_id')->constrained(table:'users')->cascadeOnDelete();
             $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('parent_order_id')->constrained(table:'orders')->cascadeOnDelete();
             $table->foreignId('product_id')->constrained(table:'products')->cascadeOnDelete();
             $table->float('product_price');
             $table->integer('product_qty');
