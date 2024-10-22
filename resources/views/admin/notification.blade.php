@@ -32,7 +32,7 @@
                                                 <div class="col-md-12">
                                                     <div class="form-group">
                                                         <input type="text" class="form-control" name="title"
-                                                            placeholder="Title*" >
+                                                            placeholder="Title*">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">

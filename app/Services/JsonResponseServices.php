@@ -31,9 +31,4 @@ final class JsonResponseServices
             $extra_key => $extra_key_data
         ], $http_code);
     }
-
-    public static function getWebResponse($status, $message)
-    {
-        ($status) ? flash($message)->success() : flash($message)->error();
-    }
 }
