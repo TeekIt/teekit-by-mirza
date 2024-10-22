@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DeviceToken;
 use App\Services\JsonResponseServices;
+use App\Services\WebResponseServices;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Validator;
@@ -53,16 +54,19 @@ class NotificationsController extends Controller
         curl_close($ch);
         return json_decode($response, true);
     }
-
+    /**
+     * @author Muhammad Abdullah Mirza
+     */
     public function notificationSend(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'title' => 'required|string',
             'body' => 'required|string',
         ]);
-        if ($validatedData->fails()) {
-            return back()->with('error', $validatedData->errors()->first());
-        }
+        if ($validatedData->fails()) return WebResponseServices::getResponseRedirectBack(
+            'error',
+            $validatedData->errors()->first(),
+        );
 
         try {
             /* Path to your service account JSON key file */
