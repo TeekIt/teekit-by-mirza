@@ -110,11 +110,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(CommissionAndServiceFee::class, 'seller_id');
     }
 
-    // public function roles(): BelongsToMany
-    // {
-    //     return $this->belongsToMany('App\Role', 'role_user');
-    // }
-
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
@@ -361,7 +356,7 @@ class User extends Authenticatable implements JWTSubject
 
     public static function getBuyersWithReferralCode(): LengthAwarePaginator
     {
-        return self::whereNotNull('referral_code')->paginate(10);
+        return self::where('role_id', UserRole::BUYER)->whereNotNull('referral_code')->paginate(10);
     }
 
     public static function getStoreByBusinessName(string $business_name): ?User

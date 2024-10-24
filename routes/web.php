@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\Admin\UserAndRoleController;
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Livewire\Admin\ParentSellersLiveWire;
-use App\Http\Livewire\Admin\ReferralCodes;
+use App\Http\Livewire\Admin\ParentSellersLivewire;
+use App\Http\Livewire\Admin\ReferralCodesLivewire;
 use App\Http\Livewire\Sellers\InventoryLivewire;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationsController;
@@ -122,8 +122,8 @@ Route::controller(HomeController::class)->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->middleware(['auth', 'auth.admin'])->group(function () {
-    Route::get('/referralcodes', ReferralCodes::class)->name('admin.referralcodes');
-    Route::get('/sellers/parent', ParentSellersLiveWire::class)->name('admin.sellers.parent');
+    Route::get('/referralcodes', ReferralCodesLivewire::class)->name('admin.referralcodes');
+    Route::get('/sellers/parent', ParentSellersLivewire::class)->name('admin.sellers.parent');
     Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
     Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
     Route::get('/drivers', DriversLivewire::class)->name('admin.test.drivers');
@@ -144,6 +144,15 @@ Route::prefix('admin')->middleware(['auth', 'auth.admin'])->group(function () {
 
     Route::controller(HomeController::class)->group(function () {
         Route::post('/update/pages', 'updatePages')->name('admin.update.pages');
+    });
+});
+
+Route::controller(StuartDeliveryController::class)->group(function () {
+    Route::prefix('stuart')->group(function () {
+        Route::prefix('job')->group(function () {
+            Route::post('/creation/', 'stuartJobCreation')->name('stuart.job.creation');
+            Route::post('/status', 'stuartJobStatus')->name('stuart.job.status');
+        });
     });
 });
 
@@ -169,5 +178,3 @@ Route::get('/driver/{driver_id}/details', [HomeController::class, 'adminDriverDe
 Route::get('/store/application-fee/{user_id}/{application_fee}', [UserAndRoleController::class, 'updateApplicationFee'])->name('application_fee');
 Route::get('/users/{user_id}/status/{status}', [HomeController::class, 'changeUserStatus'])->name('change_user_status');
 Route::post('/store_info/update', [HomeController::class, 'updateStoreInfo'])->name('admin.image.update');
-Route::post('/stuart/job/creation/', [StuartDeliveryController::class, 'stuartJobCreation'])->name('stuart.job.creation');
-Route::post('/stuart/job/status', [StuartDeliveryController::class, 'stuartJobStatus'])->name('stuart.job.status');

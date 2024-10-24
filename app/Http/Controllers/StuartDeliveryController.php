@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redirect;
 use Throwable;
 use App\Services\JsonResponseServices;
+use App\Services\WebResponseServices;
 use Illuminate\Support\Carbon;
 
 class StuartDeliveryController extends Controller
@@ -135,17 +136,17 @@ class StuartDeliveryController extends Controller
                 Orders::where('id', $request->order_id)->update([
                     'order_status' => 'stuartDelivery'
                 ]);
-                JsonResponseServices::getWebResponse(config('constants.TRUE_STATUS'), config('constants.STUART_DELIVERY_SUCCESS'));
+                WebResponseServices::getWebResponse(config('constants.TRUE_STATUS'), config('constants.STUART_DELIVERY_SUCCESS'));
                 return Redirect::back();
             } else {
                 $message = $data['message'];
                 if ($data['error'] == 'JOB_DISTANCE_NOT_ALLOWED') $message = $message . " " . $transport_type;
-                JsonResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $message);
+                WebResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $message);
                 return Redirect::back();
             }
         } catch (Throwable $error) {
             report($error);
-            JsonResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $data['message']);
+            WebResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $data['message']);
             return Redirect::back();
         }
     }

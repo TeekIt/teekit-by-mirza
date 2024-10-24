@@ -1,20 +1,7 @@
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="container pt-4">
-        @if (session()->has('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>Error!</strong>
-                {{ session()->get('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-        @if (session()->has('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Success!</strong>
-                {{ session()->get('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-    </div>
+    
+    <x-session-messages />
+
     {{-- ************************************ Info Model ************************************ --}}
     <div wire:ignore.self class="modal fade" id="infoModel" tabindex="-1" aria-labelledby="infoModelLabel"
         aria-hidden="true">
@@ -45,7 +32,7 @@
                                     <tr>
                                         <th>Address</th>
                                         <td style="white-space: pre-line;">
-                                            <?php echo wordwrap($address_1, $width = 50, $break = "\n", $cut = false); ?>
+                                            <?php echo wordwrap($full_address, $width = 50, $break = "\n", $cut = false); ?>
                                         </td>
                                     </tr>
                                     <tr>
