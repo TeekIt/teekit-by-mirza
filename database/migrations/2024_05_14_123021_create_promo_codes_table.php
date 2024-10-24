@@ -22,8 +22,7 @@ return new class extends Migration
             $table->integer('usage_limit')->nullable()->comment('How many times this promo code can be used.');
             $table->float('min_amnt_for_discount', 10, 2);
             $table->float('max_amnt_for_discount', 10, 2);
-            $table->foreignId('store_id')->constrained(table:'users')->cascadeOnDelete()
-            ->nullable()->comment('If the promo code is for a specific store.');
+            $table->foreignId('store_id')->constrained(table:'users')->cascadeOnDelete()->nullable()->comment('If the promo code is for a specific store.');
             $table->date('expiry_dt');
             $table->timestamps();
             $table->softDeletes();

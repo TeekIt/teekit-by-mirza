@@ -1,3 +1,5 @@
 *
+!googleFcmServices/
+!googleFcmServices/**
 !public/
 !.gitignore

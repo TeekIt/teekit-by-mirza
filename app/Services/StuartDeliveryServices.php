@@ -147,12 +147,12 @@ final class StuartDeliveryServices
             } else {
                 $message = $data['error'] . ': ' . $data['message'];
                 if ($data['error'] == 'JOB_DISTANCE_NOT_ALLOWED') $message = $message . " " . $transport_type;
-                // JsonResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $message);
+                // WebResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $message);
                 return 'StuartErrorA: ' . $message;
             }
         } catch (Throwable $error) {
             report($error);
-            // JsonResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $data['message']);
+            // WebResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $data['message']);
             return 'StuartErrorB: ' . $data['error'] . ': ' . $data['message'];
         }
     }
