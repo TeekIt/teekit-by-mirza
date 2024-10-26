@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Enums\ProductStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,12 +12,14 @@ use Illuminate\Pagination\Paginator;
 use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Scout\Attributes\SearchUsingFullText;
 
 class Products extends Model
 {
@@ -44,15 +47,31 @@ class Products extends Model
         'length',
     ];
     /**
-     * Built-In Helpers
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'status' => ProductStatus::class
+    ];
+    /**
+     * Laravel Built-In Helpers
      */
     protected function status(): Attribute
     {
         return Attribute::make(
-            set: fn ($value) => (string) $value
+            set: fn($value) => (string) $value
         );
     }
-
+    /**
+     * Scout Built-In Helpers
+     */
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
+    #[SearchUsingFullText(['product_name'])]
     public function toSearchableArray(): array
     {
         return [
@@ -66,10 +85,40 @@ class Products extends Model
             'brand' => $this->brand
         ];
     }
-    // Define filterable attributes for meilisearch
+    /**
+     * Determine if the model should be searchable.
+     */
+    public function shouldBeSearchable(): bool
+    {
+        return $this->status === ProductStatus::ENABLE;
+    }
+    /**
+     * Modify the query used to retrieve models when making all of the models searchable.
+     */
+    protected function makeAllSearchableUsing(Builder $query): Builder
+    {
+        return $query->with([
+            'sellers:id,business_name,business_hours,full_address,country,state,city,lat,lon',
+            'qty:id,product_id,qty',
+            'images:id,product_id,product_image',
+            'category:id,category_name,category_image',
+        ]);
+    }
+    /**
+     *  Define filterable attributes for meilisearch 
+     */
     public function scoutFilterable(): array
     {
-        return ['id', 'product_name', 'seller_id', 'category_id', 'price', 'status', 'weight', 'brand'];
+        return [
+            'id',
+            'product_name',
+            'seller_id',
+            'category_id',
+            'price',
+            'status',
+            'weight',
+            'brand'
+        ];
     }
     /**
      * Relations
@@ -77,6 +126,19 @@ class Products extends Model
     public function store(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id');
+    }
+    /**
+     * Fetch all sellers related to a product.
+     * "Sellers" could be parent or child sellers.
+     */
+    public function sellers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'qty',
+            'product_id',
+            'seller_id',
+        );
     }
 
     public function category(): BelongsTo
@@ -154,7 +216,7 @@ class Products extends Model
 
     public function scopeWhereProductIsEnable(Builder $query): void
     {
-        $query->where('status', '1');
+        $query->where('status', ProductStatus::ENABLE);
     }
     /**
      * Helpers
@@ -165,52 +227,149 @@ class Products extends Model
     }
 
     public static function searchProducts(
-        string $product_name,
-        ?array $seller_ids,
-        ?int $category_id,
-        ?int $seller_id,
+        string $productName,
+        array $sellerIds,
+        ?int $categoryId,
+        // ?array $oldSellerIds,
         ?string $brand,
-        ?float $min_price,
-        ?float $max_price,
-        ?float $min_weight,
-        ?float $max_weight
-    ): LengthAwarePaginator {
-        return self::search($product_name)
-            ->query(
-                fn($query) => $query->with([
-                    'store:id,business_name,business_hours,full_address,country,state,city,lat,lon',
-                    'qty:id,product_id,qty',
-                    'images:id,product_id,product_image',
-                    'category:id,category_name,category_image'
-                ])->whereHas('store', function ($query) {
-                    $query->WhereUserIsActive();
-                })->WhereProductIsEnable()
-            )
-            ->when($seller_ids, function ($query) use ($seller_ids) {
-                return $query->where_in('seller_id', $seller_ids['ids']);
-            })
-            ->when($category_id, function ($query) use ($category_id) {
-                return $query->where('category_id', $category_id);
-            })
-            ->when($seller_id, function ($query) use ($seller_id) {
-                return $query->where('seller_id', $seller_id);
-            })
-            ->when($brand, function ($query) use ($brand) {
-                return $query->where('brand', $brand);
-            })
-            ->when($min_price, function ($query) use ($min_price) {
-                return $query->where('price', '>=', $min_price);
-            })
-            ->when($max_price, function ($query) use ($max_price) {
-                return $query->where('price', '<=', $max_price);
-            })
-            ->when($min_weight, function ($query) use ($min_weight) {
-                return $query->where('weight', '>=', $min_weight);
-            })
-            ->when($max_weight, function ($query) use ($max_weight) {
-                return $query->where('weight', '<=', $max_weight);
-            })
-            ->paginate(20);
+        ?float $minPrice,
+        ?float $maxPrice,
+        ?float $minWeight,
+        ?float $maxWeight,
+    ): array {
+        /* Old search query which is using only 1 query for all conditions */
+        // return self::search($productName)
+        //     ->query(
+        //         fn($query) => $query->select(
+        //             'products.id',
+        //             'products.seller_id as parent_seller_id',
+        //             'products.category_id',
+        //             'product_name',
+        //             'sku',
+        //             'price',
+        //             'featured',
+        //             'discount_percentage',
+        //             'weight',
+        //             'brand',
+        //             'size',
+        //             'status',
+        //             'contact',
+        //             'colors',
+        //             'bike',
+        //             'car',
+        //             'van',
+        //             'feature_img',
+        //             'height',
+        //             'width',
+        //             'length'
+        //         )->with([
+        //             'sellers' => function ($sellerRelation) use ($sellerIds) {
+        //                 $sellerRelation->select(
+        //                     'users.id',
+        //                     'business_name',
+        //                     'business_hours',
+        //                     'full_address',
+        //                     'country',
+        //                     'state',
+        //                     'city',
+        //                     'lat',
+        //                     'lon'
+        //                 )->whereIn('seller_id', $sellerIds);
+        //             },
+        //             'qty' => function ($qtyRelation) use ($sellerIds) {
+        //                 $qtyRelation->select('id', 'product_id', 'seller_id', 'qty')->whereIn('seller_id', $sellerIds);
+        //             },
+        //             'images:id,product_id,product_image',
+        //             'category:id,category_name,category_image'
+        //         ])->whereHas('qty', function ($qtyQuery) use ($sellerIds) {
+        //             $qtyQuery->whereIn('seller_id', $sellerIds)
+        //                 ->whereHas('store', function ($storeQuery) {
+        //                     $storeQuery->WhereUserIsActive();
+        //                 });
+        //         })->when($categoryId, function ($query) use ($categoryId) {
+        //             return $query->where('category_id', $categoryId);
+        //         })->when($brand, function ($query) use ($brand) {
+        //             return $query->where('brand', $brand);
+        //         })->when($minPrice, function ($query) use ($minPrice) {
+        //             return $query->where('price', '>=', $minPrice);
+        //         })->when($maxPrice, function ($query) use ($maxPrice) {
+        //             return $query->where('price', '<=', $maxPrice);
+        //         })->when($minWeight, function ($query) use ($minWeight) {
+        //             return $query->where('weight', '>=', $minWeight);
+        //         })->when($maxWeight, function ($query) use ($maxWeight) {
+        //             return $query->where('weight', '<=', $maxWeight);
+        //         })
+        //     )
+        //     ->paginate(20);
+
+        $scoutData = self::search($productName)->paginate(20, 'scoutPage')->toArray();
+        $productIds = array_column($scoutData['data'], 'id');
+        unset($scoutData['data']);
+        $pagination = $scoutData;
+        /* Use regular Laravel query builder */
+        $products = self::select(
+            'products.id',
+            'products.seller_id as parent_seller_id',
+            'products.category_id',
+            'product_name',
+            'sku',
+            'price',
+            'featured',
+            'discount_percentage',
+            'weight',
+            'brand',
+            'size',
+            'status',
+            'contact',
+            'colors',
+            'bike',
+            'car',
+            'van',
+            'feature_img',
+            'height',
+            'width',
+            'length'
+        )->with([
+            'sellers' => function ($sellerRelation) use ($sellerIds) {
+                $sellerRelation->select(
+                    'users.id',
+                    'business_name',
+                    'business_hours',
+                    'full_address',
+                    'country',
+                    'state',
+                    'city',
+                    'lat',
+                    'lon'
+                )->whereIn('seller_id', $sellerIds);
+            },
+            'qty' => function ($qtyRelation) use ($sellerIds) {
+                $qtyRelation->select('id', 'product_id', 'qty')->whereIn('seller_id', $sellerIds);
+            },
+            'images:id,product_id,product_image',
+            'category:id,category_name,category_image'
+        ])->whereHas('qty', function ($qtyQuery) use ($sellerIds) {
+            $qtyQuery->whereIn('seller_id', $sellerIds)
+                ->whereHas('store', function ($storeQuery) {
+                    $storeQuery->WhereUserIsActive();
+                });
+        })->when($categoryId, function ($query) use ($categoryId) {
+            return $query->where('category_id', $categoryId);
+        })->when($brand, function ($query) use ($brand) {
+            return $query->where('brand', $brand);
+        })->when($minPrice, function ($query) use ($minPrice) {
+            return $query->where('price', '>=', $minPrice);
+        })->when($maxPrice, function ($query) use ($maxPrice) {
+            return $query->where('price', '<=', $maxPrice);
+        })->when($minWeight, function ($query) use ($minWeight) {
+            return $query->where('weight', '>=', $minWeight);
+        })->when($maxWeight, function ($query) use ($maxWeight) {
+            return $query->where('weight', '<=', $maxWeight);
+        })
+            ->whereIn('products.id', $productIds)
+            ->get();
+
+        return ['data' => $products, 'pagination' => $pagination];
     }
 
     public static function getAllProducts(): LengthAwarePaginator

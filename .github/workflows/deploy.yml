@@ -26,9 +26,19 @@ jobs:
         run: | 
             ssh -o StrictHostKeyChecking=no ${{ secrets.DIGITALOCEAN_STAGING_DROPLET_USER }}@${{ secrets.DIGITALOCEAN_STAGING_DROPLET_IP }} << 'EOF'
             cd /var/www/teekit-by-mirza/ 
-            git pull origin staging
+            git config --global credential.helper store
+            git pull https://${{ secrets.GH_USERNAME }}:${{ secrets.GH_TOKEN }}@github.com/mirza-organization/teekit-by-mirza staging
             composer install --optimize-autoloader --no-dev
+
+            # 1st run migration then execute other commands
             php artisan migrate --force
+
+            # Other commands
+            php artisan scout:sync-index-settings
+            php artisan scout:flush "App\Products"
+            php artisan scout:import "App\Products"
+            
+            # Cache everything at the end
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache

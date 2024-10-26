@@ -611,54 +611,68 @@ class ProductsController extends Controller
     public function search(Request $request)
     {
         try {
-            $validate = Validator::make($request->all(), [
-                'product_name' => 'required|string',
+            $validatedData = Validator::make($request->all(), [
+                'productName' => 'required|string',
+                'sellerIds' => 'required|string',
+                'scoutPage' => 'required|integer',
             ]);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
-            $user_lat = $request->lat;
-            $user_lon = $request->lon;
+
+            $userLat = $request->lat;
+            $userLon = $request->lon;
             $miles = $request->miles;
             if (isset($miles))
-                $store_ids = $this->searchWrtNearByStores($user_lat, $user_lon, $miles);
+                $nearBySellerIds = $this->searchWrtNearByStores($userLat, $userLon, $miles);
 
             $products = Products::searchProducts(
-                $request->product_name,
-                (isset($store_ids['ids'])) ? $store_ids['ids'] : null,
-                $request->category_id,
-                $request->store_id,
+                $request->productName,
+                (isset($nearBySellerIds['ids'])) ? $nearBySellerIds['ids'] : json_decode($request->sellerIds),
+                $request->categoryId,
+                // json_decode($request->sellerIds),
                 $request->brand,
-                $request->min_price,
-                $request->max_price,
-                $request->min_weight,
-                $request->max_weight
+                $request->minPrice,
+                $request->maxPrice,
+                $request->minWeight,
+                $request->maxWeight
             );
 
-            $pagination = $products->toArray();
-            $data = $pagination['data'];
-            unset($pagination['data']);
-            if (!$products->isEmpty()) {
-                return JsonResponseServices::getApiResponseExtention(
-                    $data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
-            }
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
+            /*
+            * Just creating this variable so we don't have to call the "empty()" function again & again
+            * Which will obviouly reduce the API response speed
+            */
+            $dataIsEmpty = $products['data']->isEmpty();
+            return JsonResponseServices::getApiResponseExtention(
+                ($dataIsEmpty) ? [] : $products['data'],
+                ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+                'pagination',
+                ($dataIsEmpty) ? [] : $products['pagination'],
                 config('constants.HTTP_OK')
             );
+
+            // $pagination = $products->toArray();
+            // $data = $pagination['data'];
+            // unset($pagination['data']);
+
+            // if (!$products->isEmpty()) {
+            //     return JsonResponseServices::getApiResponseExtention(
+            //         $data,
+            //         config('constants.TRUE_STATUS'),
+            //         '',
+            //         'pagination',
+            //         $pagination,
+            //         config('constants.HTTP_OK')
+            //     );
+            // }
+
+            // return JsonResponseServices::getApiResponse(
+            //     [],
+            //     config('constants.FALSE_STATUS'),
+            //     config('constants.NO_RECORD'),
+            //     config('constants.HTTP_OK')
+            // );
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(

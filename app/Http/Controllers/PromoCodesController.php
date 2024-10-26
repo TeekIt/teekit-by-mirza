@@ -27,7 +27,7 @@ class PromoCodesController extends Controller
             $promo_codes = PromoCodes::paginate(10);
             return view('admin.promo_codes', compact('promo_codes', 'stores'));
         } else {
-            abort(404);
+            abort(403);
         }
     }
     /**
