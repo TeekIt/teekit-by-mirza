@@ -257,24 +257,27 @@ class Products extends Model
             ->paginate(20);
     }
 
-    public static function getProductInfo(int $seller_id, int $product_id, array $columns): Products
+    /* 
+    In this function we can work with 'sellers' relation which is introduced in the search API
+    */
+    public static function getProductInfo(int $sellerId, int $productId, array $columns): Products
     {
         $product = self::select($columns)
             ->with([
-                'qty' => function ($query) use ($seller_id) {
-                    $query->select('id', 'product_id', 'qty')->where('seller_id', $seller_id);
+                'qty' => function ($query) use ($sellerId) {
+                    $query->select('id', 'product_id', 'qty')->where('seller_id', $sellerId);
                 },
                 'images:id,product_id,product_image',
                 'category:id,category_name,category_image'
             ])
-            ->whereHas('qty', function ($query) use ($seller_id) {
-                $query->where('seller_id', $seller_id);
+            ->whereHas('qty', function ($query) use ($sellerId) {
+                $query->where('seller_id', $sellerId);
             })
-            ->where('id', $product_id)
+            ->where('id', $productId)
             ->WhereProductIsEnable()
             ->first();
-
-        $product->store = User::getUserByID($seller_id, ['id', 'business_name', 'business_hours', 'full_address', 'country', 'state', 'city', 'lat', 'lon', 'user_img']);
+        
+        $product->store = User::getUserByID($sellerId, ['id', 'business_name', 'business_hours', 'full_address', 'country', 'state', 'city', 'lat', 'lon', 'user_img']);
 
         return $product;
     }

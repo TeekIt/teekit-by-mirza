@@ -427,33 +427,44 @@ class ProductsController extends Controller
     public function view(Request $request)
     {
         try {
-            $validate = Validator::make($request->all(), [
-                'seller_id' => 'required|integer',
-                'product_id' => 'required|integer'
+            $validatedData = Validator::make($request->all(), [
+                'sellerId' => 'required|integer',
+                'productId' => 'required|integer'
             ]);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
-            $product = Products::getProductInfo($request->seller_id, $request->product_id, ['*']);
-            if (!empty($product)) {
-                return JsonResponseServices::getApiResponse(
-                    $product,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    config('constants.HTTP_OK')
-                );
-            }
+
+            // $product = Products::getProductInfo($request->sellerId, $request->productId, ['*']);
+            $data = Qty::getProductByGivenIds($request->productId, $request->sellerId);
+
+            /*
+            * Just creating this variable so we don't have to call the "empty()" function again & again
+            * Which will obviouly reduce the API response speed
+            */
+            $dataIsEmpty = empty($data);
             return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_OK')
+                ($dataIsEmpty) ? [] : $data['data'],
+                ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+                config('constants.HTTP_OK'),
             );
+
+            // if (!empty($product)) {
+            //     return JsonResponseServices::getApiResponse(
+            //         $product,
+            //         config('constants.TRUE_STATUS'),
+            //         '',
+            //         config('constants.HTTP_OK')
+            //     );
+            // }
+
+            // return JsonResponseServices::getApiResponse(
+            //     [],
+            //     config('constants.FALSE_STATUS'),
+            //     config('constants.NO_RECORD'),
+            //     config('constants.HTTP_OK')
+            // );
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(

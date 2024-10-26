@@ -116,12 +116,12 @@ class CategoriesController extends Controller
     public function products(Request $request)
     {
         try {
-            $validated_data = Validator::make($request->route()->parameters(), [
+            $validatedData = Validator::make($request->route()->parameters(), [
                 'category_id' => 'required|integer',
                 'store_id' => 'integer',
             ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
 
             if ($request->store_id)
