@@ -435,8 +435,11 @@ class ProductsController extends Controller
                 return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
 
-            // $product = Products::getProductInfo($request->sellerId, $request->productId, ['*']);
-            $data = Qty::getProductByGivenIds($request->productId, $request->sellerId);
+            $data = Products::getProductInfo(
+                $request->sellerId,
+                $request->productId,
+                Products::getCommonColumns(),
+            );
 
             /*
             * Just creating this variable so we don't have to call the "empty()" function again & again
@@ -444,27 +447,11 @@ class ProductsController extends Controller
             */
             $dataIsEmpty = empty($data);
             return JsonResponseServices::getApiResponse(
-                ($dataIsEmpty) ? [] : $data['data'],
+                ($dataIsEmpty) ? [] : $data,
                 ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
                 ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
                 config('constants.HTTP_OK'),
             );
-
-            // if (!empty($product)) {
-            //     return JsonResponseServices::getApiResponse(
-            //         $product,
-            //         config('constants.TRUE_STATUS'),
-            //         '',
-            //         config('constants.HTTP_OK')
-            //     );
-            // }
-
-            // return JsonResponseServices::getApiResponse(
-            //     [],
-            //     config('constants.FALSE_STATUS'),
-            //     config('constants.NO_RECORD'),
-            //     config('constants.HTTP_OK')
-            // );
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(
@@ -864,18 +851,23 @@ class ProductsController extends Controller
     {
         try {
             $validatedData = Validator::make($request->all(), [
-                'seller_id' => 'required|integer',
+                'sellerId' => 'required|integer',
                 'page' => 'required|integer'
             ]);
             if ($validatedData->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
 
-            $pagination = Cache::remember('sellerProducts' . $request->seller_id . $request->page, now()->addDay(), function () use ($request) {
-                return Products::getProductsInfoBySellerId($request->seller_id)->toArray();
+            $pagination = Cache::remember('sellerProducts' . $request->sellerId . $request->page, now()->addDay(), function () use ($request) {
+                return Products::getProductsInfoBySellerId(
+                    $request->sellerId,
+                    Products::getCommonColumns(),
+                )->toArray();
             });
+
             $data = $pagination['data'];
             unset($pagination['data']);
+
             if (!empty($data)) {
                 return JsonResponseServices::getApiResponseExtention(
                     $data,
