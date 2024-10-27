@@ -107,7 +107,80 @@ class Qty extends Model
             ->get();
     }
 
-    public static function getProductsByGivenIds(int $category_id, int $seller_id): array
+    // public static function getProductByGivenIds(int $productId, int $sellerId): array
+    // {
+    //     $productData = self::select('id', 'seller_id', 'product_id', 'category_id', 'qty')
+    //         ->with([
+    //             'product:id,product_name,sku,price,featured,discount_percentage,weight,brand,size,bike,car,van,feature_img,height,width,length',
+    //             'store:id,business_name,business_hours,full_address,country,state,city,lat,lon,user_img',
+    //             'category:id,category_name,category_image',
+    //             'productImage:id,product_id,product_image',
+    //         ])
+    //         ->where('product_id', $productId)
+    //         ->where('seller_id', $sellerId)
+    //         ->get();
+
+    //     if (!$productData->isEmpty()) {
+    //         $productData = $productData->map(function ($singleIndex) {
+    //             return [
+    //                 'id' => $singleIndex->product_id,
+    //                 'seller_id' => $singleIndex->seller_id,
+    //                 'category_id' => $singleIndex->category_id,
+    //                 'product_name' => $singleIndex->product->product_name,
+    //                 'sku' => $singleIndex->product->sku,
+    //                 'price' => $singleIndex->product->price,
+    //                 'featured' => $singleIndex->product->featured,
+    //                 'discount_percentage' => $singleIndex->product->discount_percentage,
+    //                 'weight' => $singleIndex->product->weight,
+    //                 'brand' => $singleIndex->product->brand,
+    //                 'size' => $singleIndex->product->size,
+    //                 'bike' => $singleIndex->product->bike,
+    //                 'car' => $singleIndex->product->car,
+    //                 'van' => $singleIndex->product->van,
+    //                 'feature_img' => $singleIndex->product->feature_img,
+    //                 'height' => $singleIndex->product->height,
+    //                 'width' => $singleIndex->product->width,
+    //                 'length' => $singleIndex->product->length,
+    //                 'store' => [
+    //                     'id' => $singleIndex->seller_id,
+    //                     'business_name' => $singleIndex->store->business_name,
+    //                     'business_hours' => $singleIndex->store->business_hours,
+    //                     'full_address' => $singleIndex->store->full_address,
+    //                     'country' => $singleIndex->store->country,
+    //                     'state' => $singleIndex->store->state,
+    //                     'city' => $singleIndex->store->city,
+    //                     'lat' => $singleIndex->store->lat,
+    //                     'lon' => $singleIndex->store->lon,
+    //                     'user_img' => $singleIndex->store->user_img,
+    //                 ],
+    //                 'qty' => [
+    //                     [
+    //                         'id' => $singleIndex->id,
+    //                         'product_id' => $singleIndex->product_id,
+    //                         'qty' => $singleIndex->qty,
+    //                     ]
+    //                 ],
+    //                 'images' => $singleIndex->productImage->map(function ($singleImage) {
+    //                     return [
+    //                         'id' => $singleImage->id,
+    //                         'product_image' => $singleImage->product_image,
+    //                     ];
+    //                 })->toArray(),
+    //                 'category' => [
+    //                     'id' => $singleIndex->category_id,
+    //                     'category_name' => $singleIndex->category->category_name,
+    //                     'category_image' => $singleIndex->category->category_image,
+    //                 ]
+    //             ];
+    //         });
+
+    //         return ['data' => $productData];
+    //     } else {
+    //         return [];
+    //     }
+    // }
+
+    public static function getProductsByGivenIds(int $categoryId, int $sellerId): array
     {
         $paginated_data = self::select('id', 'seller_id', 'product_id', 'category_id', 'qty')
             ->with([
@@ -116,8 +189,8 @@ class Qty extends Model
                 'category:id,category_name,category_image',
                 'productImage:id,product_id,product_image',
             ])
-            ->where('category_id', $category_id)
-            ->where('seller_id', $seller_id)
+            ->where('category_id', $categoryId)
+            ->where('seller_id', $sellerId)
             ->paginate(10);
 
         if (!$paginated_data->isEmpty()) {

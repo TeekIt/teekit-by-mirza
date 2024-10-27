@@ -46,6 +46,7 @@ class Products extends Model
         'width',
         'length',
     ];
+
     /**
      * The attributes that should be cast.
      *
@@ -221,6 +222,31 @@ class Products extends Model
     /**
      * Helpers
      */
+    public static function getCommonColumns(): array
+    {
+        return [
+            'id',
+            'seller_id as parent_seller_id',
+            'category_id',
+            'product_name',
+            'sku',
+            'price',
+            'featured',
+            'discount_percentage',
+            'weight',
+            'brand',
+            'size',
+            'status',
+            'bike',
+            'car',
+            'van',
+            'feature_img',
+            'height',
+            'width',
+            'length'
+        ];
+    }
+
     public static function add(array $data): Products
     {
         return self::create($data);
@@ -400,42 +426,65 @@ class Products extends Model
             ->paginate(10);
     }
 
-    public static function getProductsInfoBySellerId(int $seller_id): LengthAwarePaginator
+    public static function getProductsInfoBySellerId(int $sellerId, array $columns): LengthAwarePaginator
     {
-        return self::with([
-            'qty' => function ($query) use ($seller_id) {
-                $query->select('id', 'product_id', 'qty')->where('seller_id', $seller_id);
-            },
-            'images:id,product_id,product_image',
-            'category:id,category_name,category_image'
-        ])
-            ->whereHas('qty', function ($query) use ($seller_id) {
-                $query->where('seller_id', $seller_id);
+        return self::select($columns)
+            ->with([
+                'sellers' => function ($sellersRelation) use ($sellerId) {
+                    $sellersRelation->select(
+                        'users.id',
+                        'business_name',
+                        'business_hours',
+                        'full_address',
+                        'country',
+                        'state',
+                        'city',
+                        'lat',
+                        'lon'
+                    )->where('seller_id', $sellerId);
+                },
+                'qty' => function ($query) use ($sellerId) {
+                    $query->select('id', 'product_id', 'qty')->where('seller_id', $sellerId);
+                },
+                'images:id,product_id,product_image',
+                'category:id,category_name,category_image'
+            ])
+            ->whereHas('qty', function ($query) use ($sellerId) {
+                $query->where('seller_id', $sellerId);
             })
             ->WhereProductIsEnable()
             ->paginate(20);
     }
 
-    public static function getProductInfo(int $seller_id, int $product_id, array $columns): Products
+    public static function getProductInfo(int $sellerId, int $productId, array $columns): Products
     {
-        $product = self::select($columns)
+        return self::select($columns)
             ->with([
-                'qty' => function ($query) use ($seller_id) {
-                    $query->select('id', 'product_id', 'qty')->where('seller_id', $seller_id);
+                'sellers' => function ($sellersRelation) use ($sellerId) {
+                    $sellersRelation->select(
+                        'users.id',
+                        'business_name',
+                        'business_hours',
+                        'full_address',
+                        'country',
+                        'state',
+                        'city',
+                        'lat',
+                        'lon'
+                    )->where('seller_id', $sellerId);
+                },
+                'qty' => function ($qtyRelation) use ($sellerId) {
+                    $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', $sellerId);
                 },
                 'images:id,product_id,product_image',
                 'category:id,category_name,category_image'
             ])
-            ->whereHas('qty', function ($query) use ($seller_id) {
-                $query->where('seller_id', $seller_id);
+            ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
+                $qtyRelation->where('seller_id', $sellerId);
             })
-            ->where('id', $product_id)
+            ->where('id', $productId)
             ->WhereProductIsEnable()
-            ->first();
-
-        $product->store = User::getUserByID($seller_id, ['id', 'business_name', 'business_hours', 'full_address', 'country', 'state', 'city', 'lat', 'lon', 'user_img']);
-
-        return $product;
+            ->firstOrFail();
     }
 
     public static function getOnlyProductDetailsById(int $product_id): Products

@@ -427,32 +427,30 @@ class ProductsController extends Controller
     public function view(Request $request)
     {
         try {
-            $validate = Validator::make($request->all(), [
-                'seller_id' => 'required|integer',
-                'product_id' => 'required|integer'
+            $validatedData = Validator::make($request->all(), [
+                'sellerId' => 'required|integer',
+                'productId' => 'required|integer'
             ]);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
-            $product = Products::getProductInfo($request->seller_id, $request->product_id, ['*']);
-            if (!empty($product)) {
-                return JsonResponseServices::getApiResponse(
-                    $product,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    config('constants.HTTP_OK')
-                );
-            }
+
+            $data = Products::getProductInfo(
+                $request->sellerId,
+                $request->productId,
+                Products::getCommonColumns(),
+            );
+
+            /*
+            * Just creating this variable so we don't have to call the "empty()" function again & again
+            * Which will obviouly reduce the API response speed
+            */
+            $dataIsEmpty = empty($data);
             return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_OK')
+                ($dataIsEmpty) ? [] : $data,
+                ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+                config('constants.HTTP_OK'),
             );
         } catch (Throwable $error) {
             report($error);
@@ -853,18 +851,23 @@ class ProductsController extends Controller
     {
         try {
             $validatedData = Validator::make($request->all(), [
-                'seller_id' => 'required|integer',
+                'sellerId' => 'required|integer',
                 'page' => 'required|integer'
             ]);
             if ($validatedData->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
 
-            $pagination = Cache::remember('sellerProducts' . $request->seller_id . $request->page, now()->addDay(), function () use ($request) {
-                return Products::getProductsInfoBySellerId($request->seller_id)->toArray();
+            $pagination = Cache::remember('sellerProducts' . $request->sellerId . $request->page, now()->addDay(), function () use ($request) {
+                return Products::getProductsInfoBySellerId(
+                    $request->sellerId,
+                    Products::getCommonColumns(),
+                )->toArray();
             });
+
             $data = $pagination['data'];
             unset($pagination['data']);
+
             if (!empty($data)) {
                 return JsonResponseServices::getApiResponseExtention(
                     $data,
