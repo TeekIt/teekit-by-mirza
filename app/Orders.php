@@ -96,9 +96,9 @@ class Orders extends Model
         return self::where('id', $order_id)->exists();
     }
 
-    public static function checkTotalOrders(int $customer_id): int
+    public static function checkTotalOrders(int $customerId): int
     {
-        return self::where('customer_id', $customer_id)->count();
+        return self::where('customer_id', $customerId)->count();
     }
 
     public static function updateOrderStatus(int $order_id, string $status): int
@@ -145,15 +145,18 @@ class Orders extends Model
             ->paginate(10);
     }
 
-    public static function getRecentOrderByBuyerId(int $customer_id, int|null $prducts_limit = null, int|null $seller_id = null): ?Orders
-    {
+    public static function getRecentOrderByCustomerId(
+        int $customerId,
+        int|null $productsLimit = null,
+        int|null $sellerId = null
+    ): ?Orders {
         return self::with([
-            'products' => function ($query) use ($prducts_limit) {
-                if ($prducts_limit !== null) $query->take($prducts_limit);
+            'products' => function ($query) use ($productsLimit)  {
+                if ($productsLimit !== null) $query->take($productsLimit);
             }
         ])
-            ->when($seller_id, fn ($query) => $query->where('seller_id', $seller_id))
-            ->where('customer_id', $customer_id)
+            ->when($sellerId, fn($query) => $query->where('seller_id', $sellerId))
+            ->where('customer_id', $customerId)
             ->latest()
             ->first();
     }

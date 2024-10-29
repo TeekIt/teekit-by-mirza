@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Services\JsonResponseServices;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -43,8 +44,17 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        $this->reportable(function (Throwable $e) {
-            //
+        $this->reportable(function (Throwable $error) {});
+
+        $this->renderable(function (Throwable $error, $request) {
+            if ($request->is('api/*')) {
+                return JsonResponseServices::getApiResponse(
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    $error,
+                    config('constants.HTTP_SERVER_ERROR')
+                );
+            }
         });
     }
 }

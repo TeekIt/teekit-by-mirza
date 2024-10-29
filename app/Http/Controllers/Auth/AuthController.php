@@ -50,15 +50,15 @@ class AuthController extends Controller
     public function registerBuyer(Request $request)
     {
         try {
-            $validated_data = Validator::make($request->all(), [
+            $validatedData = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
                 'l_name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|max:50',
                 'phone' => 'required|string|max:13'
             ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
 
             $user = User::createBuyer(
@@ -511,15 +511,16 @@ class AuthController extends Controller
     public function registerBuyerFromGoogle(Request $request)
     {
         try {
-            $validated_data = Validator::make($request->all(), [
+            $validatedData = Validator::make($request->all(), [
                 'name' => 'required|string',
                 'l_name' => 'required|string',
                 'email' => 'required|string|email|max:255|unique:users',
                 'role' => 'required|string|max:5'
             ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
+            
             $user = User::create([
                 'name' => $request->name,
                 'l_name' => $request->l_name,

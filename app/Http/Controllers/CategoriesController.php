@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Categories;
+use App\Products;
 use App\Qty;
 use App\Services\GoogleMapServices;
 use Illuminate\Http\Request;
@@ -113,44 +114,65 @@ class CategoriesController extends Controller
      * It will get the products of a specific category
      * @version 1.9.0
      */
-    public function products(Request $request)
+    public function productsByCategory(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->route()->parameters(), [
-                'category_id' => 'required|integer',
-                'store_id' => 'integer',
-            ]);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-            }
-
-            if ($request->store_id)
-                $data = Qty::getProductsByGivenIds($request->category_id, $request->store_id);
-            else
-                $data = Categories::getProducts($request->category_id);
-            
-            /*
-            * Just creating this variable so we don't have to call the "empty()" function again & again
-            * Which will obviouly reduce the API response speed
-            */
-            $data_is_empty = empty($data);
-            return JsonResponseServices::getApiResponseExtention(
-                ($data_is_empty) ? [] : $data['data'],
-                ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-                ($data_is_empty) ? config('constants.NO_RECORD') : '',
-                'pagination',
-                ($data_is_empty) ? [] : $data['pagination'],
-                config('constants.HTTP_OK')
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
+        $validatedData = Validator::make(
+            array_merge($request->route()->parameters(), $request->query()),
+            [
+                'categoryId' => 'required|integer',
+                'sellerId' => 'required|integer',
+                'page' => 'required|integer',
+            ]
+        );
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+
+        // if ($request->sellerId)
+        //      $data = Qty::getProductsByGivenIds($request->categoryId, $request->sellerId);
+        // else
+        //     $data = Categories::getProducts($request->categoryId);
+
+        // dd(Products::getProductsInfoByCategoryId(
+        //     $request->categoryId,
+        //     $request->sellerId,
+        //     Products::getCommonColumns(),
+        // ));
+
+        $pagination = Cache::remember(
+            'productsByCategory' . $request->categoryId . $request->sellerId . $request->page,
+            now()->addDay(),
+            function () use ($request) {
+                return Products::getProductsInfoByCategoryId(
+                    $request->categoryId,
+                    $request->sellerId,
+                    Products::getCommonColumns(),
+                )->toArray();
+            }
+        );
+
+        // $pagination = Products::getProductsInfoByCategoryId(
+        //     $request->categoryId,
+        //     $request->sellerId,
+        //     Products::getCommonColumns(),
+        // )->toArray();
+
+        $data = $pagination['data'];
+        unset($pagination['data']);
+
+        /*
+        * Just creating this variable so we don't have to call the "empty()" function again & again
+        * Which will obviouly reduce the API response speed
+        */
+        $dataIsEmpty = empty($data);
+        return JsonResponseServices::getApiResponseExtention(
+            ($dataIsEmpty) ? [] : $data,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+            'pagination',
+            ($dataIsEmpty) ? [] : $pagination,
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * It will get the stores w.r.t category id
