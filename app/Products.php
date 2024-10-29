@@ -411,19 +411,49 @@ class Products extends Model
             ->paginate(20);
     }
 
-    public static function getProductsByCategoryId(int $category_id, array $columns): LengthAwarePaginator
+    // public static function getProductsByCategoryId(int $category_id, array $columns): LengthAwarePaginator
+    // {
+    //     return self::select($columns)
+    //         ->with([
+    //             'store:id,business_name,business_hours,full_address,country,state,city,lat,lon,user_img',
+    //             'qty' => function ($query) use ($category_id) {
+    //                 $query->select('id', 'product_id', 'qty')->where('category_id', $category_id);
+    //             },
+    //             'images:id,product_id,product_image',
+    //             'category:id,category_name,category_image'
+    //         ])->where('category_id', $category_id)
+    //         ->WhereProductIsEnable()
+    //         ->paginate(10);
+    // }
+
+    public static function getProductsInfoByCategoryId(int $categoryId, int $sellerId, array $columns): LengthAwarePaginator
     {
         return self::select($columns)
             ->with([
-                'store:id,business_name,business_hours,full_address,country,state,city,lat,lon,user_img',
-                'qty' => function ($query) use ($category_id) {
-                    $query->select('id', 'product_id', 'qty')->where('category_id', $category_id);
+                'sellers' => function ($sellersRelation) use ($sellerId) {
+                    $sellersRelation->select(
+                        'users.id',
+                        'business_name',
+                        'business_hours',
+                        'full_address',
+                        'country',
+                        'state',
+                        'city',
+                        'lat',
+                        'lon'
+                    )->where('seller_id', $sellerId);
+                },
+                'qty' => function ($qtyRelation) use ($sellerId) {
+                    $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', $sellerId);
                 },
                 'images:id,product_id,product_image',
                 'category:id,category_name,category_image'
-            ])->where('category_id', $category_id)
+            ])
+            ->whereHas('qty', function ($qtyRelation) use ($sellerId, $categoryId) {
+                $qtyRelation->where('seller_id', $sellerId)->where('category_id', $categoryId);
+            })
             ->WhereProductIsEnable()
-            ->paginate(10);
+            ->paginate(20);
     }
 
     public static function getProductsInfoBySellerId(int $sellerId, array $columns): LengthAwarePaginator
@@ -443,14 +473,14 @@ class Products extends Model
                         'lon'
                     )->where('seller_id', $sellerId);
                 },
-                'qty' => function ($query) use ($sellerId) {
-                    $query->select('id', 'product_id', 'qty')->where('seller_id', $sellerId);
+                'qty' => function ($qtyRelation) use ($sellerId) {
+                    $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', $sellerId);
                 },
                 'images:id,product_id,product_image',
                 'category:id,category_name,category_image'
             ])
-            ->whereHas('qty', function ($query) use ($sellerId) {
-                $query->where('seller_id', $sellerId);
+            ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
+                $qtyRelation->where('seller_id', $sellerId);
             })
             ->WhereProductIsEnable()
             ->paginate(20);
