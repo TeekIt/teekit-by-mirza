@@ -470,7 +470,8 @@ class Products extends Model
                         'state',
                         'city',
                         'lat',
-                        'lon'
+                        'lon',
+                        'user_img',
                     )->where('seller_id', $sellerId);
                 },
                 'qty' => function ($qtyRelation) use ($sellerId) {
