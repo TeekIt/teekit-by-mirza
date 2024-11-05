@@ -115,7 +115,7 @@ class UsersController extends Controller
     public function updateStoreLocation(Request $request)
     {
         try {
-            $validate = Validator::make($request->all(), [
+            $validatedData = Validator::make($request->all(), [
                 'full_address' => 'required|string',
                 'unit_address' => 'nullable|string',
                 'postcode' => 'required|string',
@@ -125,7 +125,9 @@ class UsersController extends Controller
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180'
             ]);
-            if ($validate->fails()) return WebResponseServices::getValidationResponseRedirectBack($validate);
+            if ($validatedData->fails()) return WebResponseServices::getValidationResponseRedirectBack(
+                $validatedData
+            );
 
             $updated = User::updateStoreLocation(
                 Auth::id(),

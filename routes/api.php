@@ -77,7 +77,7 @@ Route::prefix('qty')->controller(QtyController::class)->group(function () {
 Route::prefix('category')->controller(CategoriesController::class)->group(function () {
     Route::post('add', 'add');
     Route::post('update/{product_id}', 'update');
-    Route::get('{category_id}/products', 'products');
+    Route::get('{categoryId}/products', 'productsByCategory');
     Route::get('get-stores-by-category', 'stores');
     Route::get('all', 'all');
 });

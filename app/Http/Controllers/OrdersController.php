@@ -214,24 +214,35 @@ class OrdersController extends Controller
     public function productsOfRecentOrder(Request $request)
     {
         try {
-            $validated_data = Validator::make($request->all(), [
-                'prducts_limit' => 'required|integer',
-                'seller_id' => 'required|integer'
+            $validatedData = Validator::make($request->all(), [
+                'productsLimit' => 'required|integer',
+                'sellerId' => 'required|integer'
             ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->error());
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
             }
-            $order = Orders::getRecentOrderByBuyerId(Auth::id(), $request->prducts_limit, $request->seller_id);
+
+            $order = Orders::getRecentOrderByCustomerId(Auth::id(), $request->productsLimit, $request->sellerId);
             if (!empty($order)) {
-                $recent_order_prods_data = [];
-                foreach ($order->products as $product) $recent_order_prods_data[] = Products::getProductInfo($request->seller_id, $product->id, ['*']);
+                $recentOrderProdsData = [];
+                foreach ($order->products as $product) $recentOrderProdsData[] = Products::getProductInfo(
+                    $request->sellerId,
+                    $product->id,
+                    Products::getCommonColumns(),
+                );
+                /*
+                * Just creating this variable so we don't have to call the "empty()" function again & again
+                * Which will obviouly reduce the API response speed
+                */
+                $dataIsEmpty = empty($recentOrderProdsData);
                 return JsonResponseServices::getApiResponse(
-                    $recent_order_prods_data,
-                    true,
-                    '',
-                    config('constants.HTTP_OK')
+                    ($dataIsEmpty) ? [] : $recentOrderProdsData,
+                    ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                    ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+                    config('constants.HTTP_OK'),
                 );
             }
+
             return JsonResponseServices::getApiResponse(
                 [],
                 false,
