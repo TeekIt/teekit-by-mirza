@@ -39,7 +39,7 @@ jobs:
             php artisan scout:import "App\Products"
             
             # Cache everything at the end
-            php artisan config:cache
+            php artisan config:clear
             php artisan route:cache
             php artisan view:cache
             EOF
