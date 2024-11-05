@@ -163,6 +163,22 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Helpers
      */
+    public static function getSellerCommonColumns(): array
+    {
+        return [
+            'users.id',
+            'users.business_name',
+            'users.business_hours',
+            'users.full_address',
+            'users.country',
+            'users.state',
+            'users.city',
+            'users.lat',
+            'users.lon',
+            'users.user_img',
+        ];
+    }
+
     public static function adminUsersDel(Request $request)
     {
         for ($i = 0; $i < count($request->users); $i++) self::findOrfail($request->users[$i])->delete();

@@ -96,17 +96,30 @@ class AuthController extends Controller
     public function loginBuyer(Request $request)
     {
         try {
-            
             $credentials = $request->only('email', 'password');
             if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.INVALID_CREDENTIALS')], 401);
+                return response()->json([
+                    'data' => [],
+                    'status' => config('constants.FALSE_STATUS'),
+                    'message' => config('constants.INVALID_CREDENTIALS')
+                ], 401);
             }
+
             $user = JWTAuth::user();
             if ($user->email_verified_at == null) {
-                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.EMAIL_NOT_VERIFIED')], 401);
+                return response()->json([
+                    'data' => [],
+                    'status' => config('constants.FALSE_STATUS'),
+                    'message' => config('constants.EMAIL_NOT_VERIFIED')
+                ], 401);
             }
+
             if ($user->is_active == 0) {
-                return response()->json(['data' => [], 'status' => config('constants.FALSE_STATUS'), 'message' => config('constants.ACCOUNT_DEACTIVATED')], 401);
+                return response()->json([
+                    'data' => [],
+                    'status' => config('constants.FALSE_STATUS'),
+                    'message' => config('constants.ACCOUNT_DEACTIVATED')
+                ], 401);
             }
             $this->authenticated($request, $user, $token);
             return $this->respondWithToken($token);
@@ -520,7 +533,7 @@ class AuthController extends Controller
             if ($validatedData->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
-            
+
             $user = User::create([
                 'name' => $request->name,
                 'l_name' => $request->l_name,

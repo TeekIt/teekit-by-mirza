@@ -243,7 +243,7 @@ class Products extends Model
             'feature_img',
             'height',
             'width',
-            'length'
+            'length',
         ];
     }
 
@@ -356,17 +356,9 @@ class Products extends Model
             'width',
             'length'
         )->with([
-            'sellers' => function ($sellerRelation) use ($sellerIds) {
-                $sellerRelation->select(
-                    'users.id',
-                    'business_name',
-                    'business_hours',
-                    'full_address',
-                    'country',
-                    'state',
-                    'city',
-                    'lat',
-                    'lon'
+            'sellers' => function ($sellersRelation) use ($sellerIds) {
+                $sellersRelation->select(
+                    User::getSellerCommonColumns()
                 )->whereIn('seller_id', $sellerIds);
             },
             'qty' => function ($qtyRelation) use ($sellerIds) {
@@ -432,15 +424,7 @@ class Products extends Model
             ->with([
                 'sellers' => function ($sellersRelation) use ($sellerId) {
                     $sellersRelation->select(
-                        'users.id',
-                        'business_name',
-                        'business_hours',
-                        'full_address',
-                        'country',
-                        'state',
-                        'city',
-                        'lat',
-                        'lon'
+                        User::getSellerCommonColumns()
                     )->where('seller_id', $sellerId);
                 },
                 'qty' => function ($qtyRelation) use ($sellerId) {
@@ -462,16 +446,7 @@ class Products extends Model
             ->with([
                 'sellers' => function ($sellersRelation) use ($sellerId) {
                     $sellersRelation->select(
-                        'users.id',
-                        'business_name',
-                        'business_hours',
-                        'full_address',
-                        'country',
-                        'state',
-                        'city',
-                        'lat',
-                        'lon',
-                        'user_img',
+                        User::getSellerCommonColumns()
                     )->where('seller_id', $sellerId);
                 },
                 'qty' => function ($qtyRelation) use ($sellerId) {
@@ -493,15 +468,7 @@ class Products extends Model
             ->with([
                 'sellers' => function ($sellersRelation) use ($sellerId) {
                     $sellersRelation->select(
-                        'users.id',
-                        'business_name',
-                        'business_hours',
-                        'full_address',
-                        'country',
-                        'state',
-                        'city',
-                        'lat',
-                        'lon'
+                        User::getSellerCommonColumns()
                     )->where('seller_id', $sellerId);
                 },
                 'qty' => function ($qtyRelation) use ($sellerId) {
@@ -548,8 +515,11 @@ class Products extends Model
             ->paginate(12);
     }
 
-    public static function getChildSellerProductsForView(int $child_seller_id, string $search = '', int $category_id = null): LengthAwarePaginator
-    {
+    public static function getChildSellerProductsForView(
+        int $child_seller_id,
+        string $search = '',
+        int $category_id = null
+    ): LengthAwarePaginator {
         $parent_seller_id = User::find($child_seller_id)->parent_store_id;
         $qty = Qty::where('seller_id', $child_seller_id)->first();
 
