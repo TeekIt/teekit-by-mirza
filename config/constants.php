@@ -69,7 +69,7 @@ return [
     'VALIDATION_ERROR' => 'Validation Error',
     'INVALID_CREDENTIALS' => 'Invalid Credentials',
     'EMAIL_NOT_VERIFIED' => 'Email not verified, verify your email first',
-    'ACCOUNT_DEACTIVATED' => 'You are deactivated, kindly contact admin',
+    'ACCOUNT_DEACTIVATED' => 'Your account has been deactivated, Please contact the admin',
     'NO_RECORD' => 'No Record Found',
     'NO_SELLER' => 'No seller found against this id',
     'NO_STORES_FOUND' => 'No stores found in this area',

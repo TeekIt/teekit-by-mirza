@@ -858,12 +858,16 @@ class ProductsController extends Controller
                 return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
 
-            $pagination = Cache::remember('sellerProducts' . $request->sellerId . $request->page, now()->addDay(), function () use ($request) {
-                return Products::getProductsInfoBySellerId(
-                    $request->sellerId,
-                    Products::getCommonColumns(),
-                )->toArray();
-            });
+            $pagination = Cache::remember(
+                'sellerProducts' . $request->sellerId . $request->page,
+                now()->addDay(),
+                function () use ($request) {
+                    return Products::getProductsInfoBySellerId(
+                        $request->sellerId,
+                        Products::getCommonColumns(),
+                    )->toArray();
+                }
+            );
 
             $data = $pagination['data'];
             unset($pagination['data']);
