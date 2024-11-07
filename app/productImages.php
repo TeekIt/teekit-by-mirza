@@ -25,11 +25,11 @@ class productImages extends Model
     /**
      * Helpers
      */
-    public static function add(int $id, string $image_name): productImages
+    public static function add(int $id, string $imageName): productImages
     {
         return self::create([
             'product_id' => $id,
-            'product_image' => $image_name
+            'product_image' => $imageName
         ]);
     }
 }

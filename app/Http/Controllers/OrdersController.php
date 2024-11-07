@@ -2,21 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TransportVehicle;
+use App\Enums\UserRole;
+use App\Models\GuestBuyer;
+use App\Models\GuestCustomer;
+use App\Models\ProductsByBuyer;
 use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Qty;
 use App\Services\DriverFairServices;
 use App\Services\GoogleMapServices;
+use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
 use App\User;
 use App\Services\TwilioSmsService;
 use App\Services\VerificationCodeServices;
 use App\VerificationCodes;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Throwable;
 
 class OrdersController extends Controller
@@ -55,9 +63,9 @@ class OrdersController extends Controller
                 return JsonResponseServices::getApiValidationFailedResponse(json_decode('{"type": ["The type field is required."]}'));
             }
 
-            $validated_data = Validator::make($request->all(), $rules);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
+            $validatedData = Validator::make($request->all(), $rules);
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
             $grouped_seller = [];
             foreach ($request->items as $item) {
@@ -168,6 +176,116 @@ class OrdersController extends Controller
                 config('constants.HTTP_SERVER_ERROR')
             );
         }
+    }
+    /**
+     * @author Muhammad Abdullah Mirza
+     */
+    public function productByBuyer(Request $request)
+    {
+        // dd(array_column(TransportVehicle::cases(), 'value'));
+        $validatedData = Validator::make($request->all(), [
+            'sellerId' => [
+                'required',
+                'integer',
+                Rule::exists('users', 'id')
+                    ->where(fn(Builder $query) => $query
+                        ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])),
+            ],
+            'productName' => 'required|string|max:255',
+            'maxPrice' => 'required|numeric|min:0',
+            'weight' => 'nullable|numeric|min:0',
+            'brand' => 'nullable|string|max:255',
+            'partNumber' => 'nullable|string|max:255',
+            'colors' => 'nullable|json',
+            'transportVehicle' => [
+                'required',
+                Rule::in(array_column(TransportVehicle::cases(), 'value')),
+            ],
+            'featureImg' => 'nullable|image|max:2048',
+            'height' => 'nullable|numeric|min:0',
+            'width' => 'nullable|numeric|min:0',
+            'length' => 'nullable|numeric|min:0',
+            'fName' => 'required|string|max:100',
+            'lName' => 'required|string|max:100',
+            'email' => 'required|email|max:255',
+            'countryCode' => 'required|string|max:4',
+            'phone' => 'required|string|max:13',
+            'fullAddress' => 'nullable|string',
+            'unitAddress' => 'nullable|string',
+            'country' => 'nullable|string|max:70',
+            'state' => 'nullable|string|max:70',
+            'city' => 'nullable|string|max:70',
+            'postcode' => 'nullable|string|max:11',
+            'lat' => 'nullable|numeric|between:-90,90',
+            'lon' => 'nullable|numeric|between:-180,180',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        /* 
+        * Check that either the user with given email exists in the User model or not
+        * If not then its a guest user so createOrUpdate a guest user w.r.t given email
+        */
+        $buyer = User::getBuyerByEmail($request->email);
+        if (! $buyer) {
+            $guestBuyer = GuestBuyer::addOrUpdate(
+                $request->fName,
+                $request->lName,
+                $request->email,
+                $request->countryCode,
+                $request->phone,
+                $request->fullAddress,
+                $request->unitAddress,
+                $request->country,
+                $request->state,
+                $request->city,
+                $request->postcode,
+                $request->lat,
+                $request->lon
+            );
+        }
+
+        $createdById = isset($buyer) ? $buyer->id : $guestBuyer->id;
+        $createdByType = isset($buyer) ? $buyer->getMorphClass() : $guestBuyer->getMorphClass();
+        
+        if ($request->hasFile('featureImg')) {
+            $fileName = ImageServices::uploadImg($request, 'featureImg', $createdById);
+        }
+
+        $created = ProductsByBuyer::add(
+            $createdById,
+            $createdByType,
+            $request->sellerId,
+            $request->productName,
+            $request->maxPrice,
+            $request->weight,
+            $request->brand,
+            $request->partNumber,
+            $request->colors,
+            $request->transportVehicle,
+            $fileName ?? null,
+            $request->height,
+            $request->width,
+            $request->length
+        );
+
+        /* Last step: create order */
+
+        if ($created) {
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.TRUE_STATUS'),
+                config('constants.DATA_INSERTION_SUCCESS'),
+                config('constants.HTTP_OK')
+            );
+        }
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.INSERTION_FAILED'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * @author Huzaifa Haleem

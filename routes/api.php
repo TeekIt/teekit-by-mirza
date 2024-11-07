@@ -140,6 +140,7 @@ Route::middleware(['jwt.verify'])->group(function () {
 
     Route::prefix('orders')->controller(OrdersController::class)->group(function () {
         Route::post('new', 'new');
+        Route::post('product_by_buyer', 'productByBuyer');
         Route::get('/logged-in/buyer', 'showLoggedinBuyerOrders');
         Route::get('seller', 'sellerOrders');
         Route::get('driver_orders/{driver_id}', 'driverOrders');

@@ -222,6 +222,25 @@ class Products extends Model
     /**
      * Helpers
      */
+    public static function getCommonColors(): array
+    {
+        return [
+            'Blue',
+            'Green',
+            'Red',
+            'Yellow',
+            'White',
+            'Black',
+            'Orange',
+            'Pink',
+            'Brown',
+            'Indigo',
+            'Purple',
+            'Gray',
+            'Silver',
+        ];
+    }
+
     public static function getCommonColumns(): array
     {
         return [

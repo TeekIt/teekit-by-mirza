@@ -275,7 +275,7 @@ class User extends Authenticatable implements JWTSubject
         float $lat,
         float $lon,
         string $business_hours,
-        int $role_id,
+        UserRole $role_id,
         int|null $parent_store_id = null
     ): self {
         return self::create([
@@ -373,6 +373,11 @@ class User extends Authenticatable implements JWTSubject
     public static function getBuyersWithReferralCode(): LengthAwarePaginator
     {
         return self::where('role_id', UserRole::BUYER)->whereNotNull('referral_code')->paginate(10);
+    }
+
+    public static function getBuyerByEmail(string $email, array $columns = ['*']): ?User
+    {
+        return self::select($columns)->where('email', $email)->where('role_id', UserRole::BUYER)->first();
     }
 
     public static function getStoreByBusinessName(string $business_name): ?User

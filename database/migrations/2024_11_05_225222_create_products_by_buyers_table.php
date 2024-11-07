@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('products_by_customers', function (Blueprint $table) {
+        Schema::create('products_by_buyers', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('created_by')->constrained(table:'users')->cascadeOnDelete();
+            $table->morphs('created_by'); /* This column can either belong to "users" or "guest_buyers" */
             $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
             $table->string('product_name');
             $table->float('max_price');
@@ -23,9 +23,7 @@ return new class extends Migration
             $table->string('brand')->nullable();
             $table->string('part_number')->nullable();
             $table->json('colors')->nullable();
-            $table->tinyInteger('bike')->nullable();
-            $table->tinyInteger('car')->nullable();
-            $table->tinyInteger('van')->nullable();
+            $table->enum('transport_vehicle', ['bike', 'car', 'van']);
             $table->text('feature_img')->nullable();
             $table->float('height')->nullable();
             $table->float('width')->nullable();
@@ -42,6 +40,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('products_by_customers');
+        Schema::dropIfExists('products_by_buyers');
     }
 };

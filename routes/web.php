@@ -75,18 +75,22 @@ Route::prefix('orders')->group(function () {
     Route::get('/verify/{order_id}', [HomeController::class, 'clickToVerify'])->name('verify_order');
 });
 
-Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function () {
+Route::middleware(['auth', 'auth.sellers'])->prefix('seller')->group(function () {
 
     Route::get('/dashboard', SellerDashboardLivewire::class)->name('seller.dashboard');
 
     Route::prefix('inventory')->group(function () {
         Route::get('/', InventoryLivewire::class)->name('seller.inventory');
+
+        Route::controller(ProductsController::class)->group(function () {
+            Route::post('/add', 'addSingleInventory')->name('seller.add.single.inventory');
+            Route::get('/edit/{product_id}', 'editInventoryView')->name('seller.edit.inventory.form');
+            Route::post('/update/{product_id}', 'updateInventory')->name('seller.edit.inventory');
+        });
+
         Route::controller(HomeController::class)->group(function () {
             Route::get('/add', 'inventoryAdd')->name('seller.add.single.inventory.form');
-            Route::post('/add', 'inventoryAddDB')->name('seller.add.single.inventory');
             Route::get('/add_bulk', 'inventoryAddBulk')->name('seller.add.bulk.inventory');
-            Route::get('/edit/{product_id}', 'inventoryEdit')->name('seller.edit.inventory.form');
-            Route::post('/update/{product_id}', 'inventoryUpdate')->name('seller.edit.inventory');
             // Route::get('/image/delete/{image_id}', 'deleteImg')->name('seller.deleteImg');
         });
         // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');

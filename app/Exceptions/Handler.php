@@ -4,6 +4,8 @@ namespace App\Exceptions;
 
 use App\Services\JsonResponseServices;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -54,6 +56,16 @@ class Handler extends ExceptionHandler
                     $error,
                     config('constants.HTTP_SERVER_ERROR')
                 );
+            }
+        });
+
+        $this->renderable(function (HttpException $httpException) {
+            if ($httpException->getStatusCode() == config('constants.HTTP_PAGE_EXPIRED')) {
+                Auth::logout();
+
+                session()->invalidate();
+                
+                return redirect()->route('home');
             }
         });
     }
