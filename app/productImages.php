@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class productImages extends Model
 {
     use HasFactory, SoftDeletes;
-    
+
     protected $fillable = [
         'product_id',
         'product_image'
@@ -25,6 +25,11 @@ class productImages extends Model
     /**
      * Helpers
      */
+    public static function deleteById(int $id): int
+    {
+        return self::find($id)->delete();
+    }
+
     public static function add(int $id, string $imageName): productImages
     {
         return self::create([

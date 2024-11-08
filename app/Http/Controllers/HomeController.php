@@ -16,13 +16,13 @@ use App\Services\TwilioSmsService;
 use App\User;
 use App\VerificationCodes;
 use App\WithdrawalRequests;
-use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
@@ -79,19 +79,6 @@ class HomeController extends Controller
             abort(404);
         }
     }
-    /**
-     * It will delete the product image
-     * @version 1.0.0
-     */
-    // public function deleteImg($image_id)
-    // {
-    //     if (Gate::allows('seller')) {
-    //         productImages::find($image_id)->delete();
-    //         return redirect()->back();
-    //     } else {
-    //         abort(404);
-    //     }
-    // }
     /**
      * Disable's a single product
      * @author Huzaifa Haleem
@@ -320,7 +307,7 @@ class HomeController extends Controller
      * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
-    public function passwordUpdate(Request $request)
+    public function adminPasswordUpdate(Request $request)
     {
         $validate = Validator::make($request->all(), [
             'old_password' => 'required|string|min:8',

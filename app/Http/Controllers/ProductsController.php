@@ -234,6 +234,15 @@ class ProductsController extends Controller
         }
     }
     /**
+     * It will delete the product image
+     * @version 1.0.0
+     */
+    public function deleteImg($image_id)
+    {
+        productImages::deleteById($image_id);
+        return redirect()->back();
+    }
+    /**
      * Upload's bulk products
      * @author Muhammad Abdullah Mirza
      */
