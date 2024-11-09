@@ -15,6 +15,7 @@ use App\Services\DriverFairServices;
 use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
+use App\Services\OrderServices;
 use App\User;
 use App\Services\TwilioSmsService;
 use App\Services\VerificationCodeServices;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Stripe\Service\Climate\OrderService;
 use Throwable;
 
 class OrdersController extends Controller
@@ -44,6 +46,7 @@ class OrdersController extends Controller
                         'lat' => 'required|numeric|between:-90,90',
                         'lon' => 'required|numeric|between:-180,180',
                         'receiver_name' => 'required|regex:/^[A-Za-z\s]+$/',
+                        'email' => 'required|email',
                         'phone_number' => 'required|string|min:13|max:13',
                         'address' => 'required|string',
                         'house_no' => 'required|string',
@@ -67,20 +70,23 @@ class OrdersController extends Controller
             if ($validatedData->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
+
             $grouped_seller = [];
             foreach ($request->items as $item) {
-                $temp = [];
-                $temp['product_id'] = $item['product_id'];
-                $temp['qty'] = $item['qty'];
-                $temp['user_choice'] = $item['user_choice'];
-                $temp['price'] = Products::getProductPrice($item['product_id']);
+                Qty::subtractProductQty($item['seller_id'], $item['product_id'], $item['qty']);
+
                 $product = Products::getOnlyProductDetailsById($item['product_id']);
-                $temp['seller_id'] = $product->seller_id;
-                $temp['volumn'] = $product->height * $product->width * $product->length;
-                $temp['weight'] = $product->weight;
-                $grouped_seller[$temp['seller_id']][] = $temp;
-                Qty::subtractProductQty($temp['seller_id'], $item['product_id'], $item['qty']);
+                $grouped_seller[$item['seller_id']][] = [
+                    'product_id' => $item['product_id'],
+                    'qty' => $item['qty'],
+                    'user_choice' => $item['user_choice'],
+                    'seller_id' => $item['seller_id'],
+                    'price' => Products::getProductPrice($item['product_id']),
+                    'volumn' => $product->height * $product->width * $product->length,
+                    'weight' => $product->weight,
+                ];
             }
+
             $count = 0;
             $order_arr = [];
             $customer_id = auth()->id();
@@ -90,79 +96,98 @@ class OrdersController extends Controller
                 $order_total = 0;
                 $total_items = 0;
                 foreach ($order as $order_item) {
-                    $total_weight = $total_weight + $order_item['weight'];
-                    $total_volumn = $total_volumn + $order_item['volumn'];
-                    $total_items = $total_items + $order_item['qty'];
-                    $order_total = $order_total + ($order_item['price'] * $order_item['qty']);
+                    $total_weight += $order_item['weight'];
+                    $total_volumn += $order_item['volumn'];
+                    $total_items += $order_item['qty'];
+                    $order_total += $order_item['price'] * $order_item['qty'];
                 }
-                $seller = User::getUserByID($seller_id, ['business_phone', 'lat', 'lon']);
                 /*
                 * Adding amount into seller wallet
                 */
                 User::addIntoWallet($seller_id, $order_total);
-                $new_order = new Orders();
-                $new_order->customer_id = $customer_id;
-                $new_order->order_total = $order_total;
-                $new_order->total_items = $total_items;
+
+                $seller = User::getUserByID($seller_id, ['business_phone', 'lat', 'lon']);
                 if ($request->type == 'delivery') {
-                    $customer_lat = $request->lat;
-                    $customer_lon = $request->lon;
-                    $store_lat = $seller->lat;
-                    $store_lon = $seller->lon;
-                    // $distance = $this->calculateDistance($customer_lat, $customer_lon, $store_lat, $store_lon);
-                    $distance = GoogleMapServices::getDistanceInMiles($store_lat, $store_lon, $customer_lat, $customer_lon);
-                    $driver_charges = DriverFairServices::calculateDriverFair2($total_weight, $total_volumn, $distance);
-                    $new_order->customer_lat = $customer_lat;
-                    $new_order->customer_lon = $customer_lon;
-                    $new_order->customer_name = $request->receiver_name;
-                    $new_order->phone_number = $request->phone_number;
-                    $new_order->address = $request->address;
-                    $new_order->house_no = $request->house_no;
-                    $new_order->flat = $request->flat;
-                    $new_order->driver_charges = $driver_charges;
-                    $new_order->delivery_charges = $request->delivery_charges;
-                    $new_order->service_charges = $request->service_charges;
+                    $driverCharges = OrderServices::getDriverCharges(
+                        $seller->lat,
+                        $seller->lon,
+                        $request->lat,
+                        $request->lon,
+                        $total_weight,
+                        $total_volumn
+                    );
                 }
-                $new_order->type = $request->type;
-                $new_order->description = $request->description;
-                $new_order->payment_status = $request->payment_status ?? "hidden";
-                $new_order->seller_id = $seller_id;
-                $new_order->device = $request->device ?? NULL;
-                $new_order->offloading = $request->offloading ?? NULL;
-                $new_order->offloading_charges = $request->offloading_charges ?? NULL;
-                $new_order->save();
-                $order_id = $new_order->id;
+
+                $newOrder = Orders::add(
+                    $customer_id,
+                    $seller_id,
+                    $order_total,
+                    $total_items,
+                    $driverCharges ?? 0.00,
+                    $request
+                );
+                $orderId = $newOrder->id;
+
+                foreach ($order as $orderItem) {
+                    OrderItems::add(
+                        $orderId,
+                        $orderItem['product_id'],
+                        $orderItem['price'],
+                        $orderItem['qty'],
+                        $orderItem['user_choice']
+                    );
+                }
+
                 if ($request->type == 'delivery') {
                     $verification_code = VerificationCodeServices::generateCode();
-                    if (url()->current() == config('constants.LIVE_DASHBOARD_URL') . '/api/orders/new' || url()->current() == config('constants.APIS_DOMAIN_URL') . '/api/orders/new') {
-                        // Msg for sending SMS notification of this "New Order"
-                        $message_for_admin = "A new order #" . $order_id . " has been received. Please check TeekIt's platform, or SignIn here now:https://app.teekit.co.uk/login";
-                        $message_for_customer = "Thanks for your order. Your order has been accepted by the store. Please quote verification code: " . $verification_code . " on delivery. TeekIt";
+                    VerificationCodes::add($orderId, $verification_code);
 
-                        TwilioSmsService::sendSms($request->phone_number, $message_for_customer);
-                        // TwilioSmsService::sendSms('+923362451199', $message_for_customer); //Rameesha Number
-                        // TwilioSmsService::sendSms('+923002986281', $message_for_customer); //Fahad Number
+                    if (
+                        url()->current() == config('constants.LIVE_DASHBOARD_URL') . '/api/orders/new' ||
+                        url()->current() == config('constants.APIS_DOMAIN_URL') . '/api/orders/new'
+                    ) {
+                        /* Msg for sending SMS notification of this "New Order" */
+                        $message_for_admin = "A new order #" . $orderId . " has been received. 
+                        Please check Teek It's seller dashboard, or SignIn here now:https://app.teekit.co.uk/login";
 
-                        // To restrict "New Order" SMS notifications only for UK numbers
-                        if (strlen($seller->business_phone) == 13 && str_contains($seller->business_phone, '+44')) {
+                        $message_for_customer = "Thanks for your order! 
+                        Your order has been accepted by the store. 
+                        Please quote verification code: " . $verification_code . " on delivery. 
+                        TeekIt";
+
+                        /* To restrict "New Order" SMS notifications only for UK numbers */
+                        if (
+                            strlen($seller->business_phone) == 13 &&
+                            str_contains($seller->business_phone, '+44')
+                        ) {
+                            /* Seller Number */
                             TwilioSmsService::sendSms($seller->business_phone, $message_for_admin);
                         }
-                        TwilioSmsService::sendSms('+447976621849', $message_for_admin); //Azim Number
-                        TwilioSmsService::sendSms('+447490020063', $message_for_admin); //Eesa Number
-                        TwilioSmsService::sendSms('+447817332090', $message_for_admin); //Junaid Number
-                        TwilioSmsService::sendSms('+923170155625', $message_for_admin); //Mirza Number
+                        
+                        /* Customer Number */
+                        TwilioSmsService::sendSms($request->phone_number, $message_for_customer);
+                        /* Rameesha Number */
+                        TwilioSmsService::sendSms('+923362451199', $message_for_customer);
+                        /* Azim Number */
+                        TwilioSmsService::sendSms('+447976621849', $message_for_admin);
+                        /* Eesa Number */
+                        TwilioSmsService::sendSms('+447490020063', $message_for_admin);
+                        /* Junaid Number */
+                        TwilioSmsService::sendSms('+447817332090', $message_for_admin);
+                        /* Mirza Number */
+                        TwilioSmsService::sendSms('+923170155625', $message_for_admin);
                     }
-                    VerificationCodes::add($order_id, $verification_code);
                 }
-                $order_arr[] = $order_id;
-                foreach ($order as $order_item) {
-                    OrderItems::add($order_id, $order_item['product_id'], $order_item['price'], $order_item['qty'], $order_item['user_choice']);
-                }
+
+                $orderArr[] = $orderId;
+
                 $count++;
             }
+
             if ($request->wallet_flag == 1) User::deductFromWallet($customer_id, $request->wallet_deduction_amount);
+
             return JsonResponseServices::getApiResponse(
-                $this->getOrdersFromIds($order_arr),
+                $this->getOrdersFromIds($orderArr),
                 config('constants.TRUE_STATUS'),
                 config('constants.ORDER_PLACED_SUCCESSFULLY'),
                 config('constants.HTTP_OK')
@@ -182,7 +207,6 @@ class OrdersController extends Controller
      */
     public function productByBuyer(Request $request)
     {
-        // dd(array_column(TransportVehicle::cases(), 'value'));
         $validatedData = Validator::make($request->all(), [
             'sellerId' => [
                 'required',
@@ -223,10 +247,6 @@ class OrdersController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        /* 
-        * Check that either the user with given email exists in the User model or not
-        * If not then its a guest user so createOrUpdate a guest user w.r.t given email
-        */
         $buyer = User::getBuyerByEmail($request->email);
         if (! $buyer) {
             $guestBuyer = GuestBuyer::addOrUpdate(
@@ -248,12 +268,12 @@ class OrdersController extends Controller
 
         $createdById = isset($buyer) ? $buyer->id : $guestBuyer->id;
         $createdByType = isset($buyer) ? $buyer->getMorphClass() : $guestBuyer->getMorphClass();
-        
+
         if ($request->hasFile('featureImg')) {
             $fileName = ImageServices::uploadImg($request, 'featureImg', $createdById);
         }
 
-        $created = ProductsByBuyer::add(
+        $productByBuyer = ProductsByBuyer::add(
             $createdById,
             $createdByType,
             $request->sellerId,

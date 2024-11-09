@@ -385,7 +385,7 @@ class User extends Authenticatable implements JWTSubject
         return self::where('business_name', $business_name)->first();
     }
 
-    public static function getUserByID(int $id, array $columns): ?User
+    public static function getUserByID(int $id, array $columns = ['*']): ?User
     {
         return self::select($columns)->find($id);
     }
