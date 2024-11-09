@@ -504,11 +504,9 @@ class Products extends Model
             ->firstOrFail();
     }
 
-    public static function getOnlyProductDetailsById(int $product_id): Products
+    public static function getOnlyProductDetailsById(int $id, array $columns = ['*']): Products
     {
-        return self::where('id', $product_id)
-            ->WhereProductIsEnable()
-            ->first();
+        return self::select($columns)->where('id', $id)->WhereProductIsEnable()->first();
     }
 
     public static function getParentSellerProducts(int $seller_id): LengthAwarePaginator

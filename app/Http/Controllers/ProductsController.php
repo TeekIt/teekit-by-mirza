@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 use App\Services\JsonResponseServices;
+use App\Services\ProductServices;
 use App\Services\WebResponseServices;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Cache;
@@ -105,7 +106,7 @@ class ProductsController extends Controller
         $data = $request->validated();
 
         if ($request->has('colors')) {
-            $data['colors'] = json_encode(array_fill_keys($data['colors'], true));
+            $data['colors'] = ProductServices::jsonEncodeColors($data['colors']);
         }
 
         $data['bike'] = ($data['vehicle'] == TransportVehicle::BIKE->value) ? 1 : 0;

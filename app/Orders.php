@@ -52,7 +52,8 @@ class Orders extends Model
      * Helpers
      */
     public static function add(
-        int $customerId,
+        string $createdByType,
+        int $createdById,
         int $sellerId,
         float $orderTotal,
         int $totalItems,
@@ -60,28 +61,29 @@ class Orders extends Model
         Request $request
     ): Orders {
         $order = new self();
-        $order->customer_id = $customerId;
+        $order->created_by_type = $createdByType;
+        $order->created_by_id = $createdById;
         $order->seller_id = $sellerId;
         $order->order_total = $orderTotal;
         $order->total_items = $totalItems;
         if ($request->type == 'delivery') {
             $order->customer_lat = $request->lat;
             $order->customer_lon = $request->lon;
-            $order->customer_name = $request->receiver_name;
-            $order->phone_number = $request->phone_number;
-            $order->address = $request->address;
-            $order->house_no = $request->house_no;
+            $order->customer_name = $request->fName . $request->lName;
+            $order->phone_number = $request->phone;
+            $order->address = $request->fullAddress;
+            $order->house_no = $request->houseNo;
             $order->flat = $request->flat;
             $order->driver_charges = $driverCharges;
-            $order->delivery_charges = $request->delivery_charges;
-            $order->service_charges = $request->service_charges;
+            $order->delivery_charges = $request->deliveryCharges;
+            $order->service_charges = $request->serviceCharges;
         }
         $order->type = $request->type;
         $order->description = $request->description;
-        $order->payment_status = $request->payment_status ?? "hidden";
+        $order->payment_status = $request->paymentStatus ?? "hidden";
         $order->device = $request->device ?? NULL;
         $order->offloading = $request->offloading ?? NULL;
-        $order->offloading_charges = $request->offloading_charges ?? NULL;
+        $order->offloading_charges = $request->offloadingCharges ?? NULL;
         $order->save();
 
         return $order;

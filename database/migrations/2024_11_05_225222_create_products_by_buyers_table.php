@@ -18,6 +18,7 @@ return new class extends Migration
             $table->morphs('created_by'); /* This column can either belong to "users" or "guest_buyers" */
             $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
             $table->string('product_name');
+            $table->integer('qty');
             $table->float('max_price');
             $table->float('weight')->nullable();
             $table->string('brand')->nullable();

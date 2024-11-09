@@ -17,10 +17,11 @@ class ProductsByBuyer extends Model
      * @var array
      */
     protected $fillable = [
-        'created_by_id',
         'created_by_type',
+        'created_by_id',
         'seller_id',
         'product_name',
+        'qty',
         'max_price',
         'weight',
         'brand',
@@ -43,15 +44,16 @@ class ProductsByBuyer extends Model
      * Helpers
      */
     public static function add(
-        int $createdById,
         string $createdByType,
+        int $createdById,
         int $sellerId,
         string $productName,
+        int $qty,
         float $maxPrice,
         ?float $weight = null,
         ?string $brand = null,
         ?string $partNumber = null,
-        ?array $colors = null,
+        ?string $colors = null,
         string $transportVehicle,
         ?string $featureImg = null,
         ?float $height = null,
@@ -59,10 +61,11 @@ class ProductsByBuyer extends Model
         ?float $length = null
     ): self {
         return self::create([
-            'created_by_id' => $createdById,
             'created_by_type' => $createdByType,
+            'created_by_id' => $createdById,
             'seller_id' => $sellerId,
             'product_name' => $productName,
+            'qty' => $qty,
             'max_price' => $maxPrice,
             'weight' => $weight,
             'brand' => $brand,
