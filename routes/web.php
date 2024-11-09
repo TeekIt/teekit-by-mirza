@@ -51,7 +51,7 @@ Route::prefix('settings')->group(function () {
     Route::post('/payment/update', [HomeController::class, 'paymentSettingsUpdate'])->name('payment_settings_update');
     Route::post('/user_img/update', [HomeController::class, 'userImgUpdate'])->name('user_img_update');
     // Route::post('/location_update', [HomeController::class, 'locationUpdate'])->name('location_update');
-    Route::post('/password/update', [HomeController::class, 'passwordUpdate'])->name('password_update');
+    Route::post('/password/update', [HomeController::class, 'adminPasswordUpdate'])->name('password_update');
     Route::get('/change_settings/{setting_name}/{value}', [HomeController::class, 'changeSettings'])->name('change_settings')->where(['setting_name' => '^[a-z_]*$', 'value' => '[0-9]+']);
 });
 /*
@@ -75,19 +75,23 @@ Route::prefix('orders')->group(function () {
     Route::get('/verify/{order_id}', [HomeController::class, 'clickToVerify'])->name('verify_order');
 });
 
-Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function () {
+Route::middleware(['auth', 'auth.sellers'])->prefix('seller')->group(function () {
 
     Route::get('/dashboard', SellerDashboardLivewire::class)->name('seller.dashboard');
 
     Route::prefix('inventory')->group(function () {
         Route::get('/', InventoryLivewire::class)->name('seller.inventory');
+
+        Route::controller(ProductsController::class)->group(function () {
+            Route::post('/add', 'addSingleInventory')->name('seller.add.single.inventory');
+            Route::get('/edit/{product_id}', 'editInventoryView')->name('seller.edit.inventory.form');
+            Route::post('/update/{product_id}', 'updateInventory')->name('seller.edit.inventory');
+            Route::get('/image/delete/{image_id}', 'deleteImg')->name('seller.deleteImg');
+        });
+
         Route::controller(HomeController::class)->group(function () {
             Route::get('/add', 'inventoryAdd')->name('seller.add.single.inventory.form');
-            Route::post('/add', 'inventoryAddDB')->name('seller.add.single.inventory');
             Route::get('/add_bulk', 'inventoryAddBulk')->name('seller.add.bulk.inventory');
-            Route::get('/edit/{product_id}', 'inventoryEdit')->name('seller.edit.inventory.form');
-            Route::post('/update/{product_id}', 'inventoryUpdate')->name('seller.edit.inventory');
-            // Route::get('/image/delete/{image_id}', 'deleteImg')->name('seller.deleteImg');
         });
         // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
     });

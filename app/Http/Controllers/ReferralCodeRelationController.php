@@ -97,7 +97,7 @@ class ReferralCodeRelationController extends Controller
             return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.TRUE_STATUS'),
-                config('constants.INSERTION_SUCCESS'),
+                config('constants.DATA_INSERTION_SUCCESS'),
                 config('constants.HTTP_OK')
             );
         } catch (Throwable $error) {

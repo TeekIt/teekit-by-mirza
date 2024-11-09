@@ -16,7 +16,6 @@ return [
     | Success Constants
     |--------------------------------------------------------------------------
     */
-    'INSERTION_SUCCESS' => 'Data inserted successfully',
     'UPDATION_SUCCESS' => 'Data updated successfully',
     'ARCHIVED_SUCCESS' => 'Data archived successfully',
     'UN_ARCHIVED_SUCCESS' => 'Data unarchived successfull',
@@ -24,7 +23,7 @@ return [
     'USERS_DELETION_SUCCESS' => 'Users deleted successfully',
     'DRIVERS_DELETION_SUCCESS' => 'Drivers deleted successfully',
     'LOGIN_SUCCESS' => 'You have logged in successfully',
-    'REGISTER_SUCCESS' => 'You have registered successfully.',
+    'REGISTER_SUCCESS' => 'You have registered successfully',
     'DRIVER_REGISTERATION_MSG' => 'You have registered successfully. We have sent you a verification email please verify.',
     'DATA_INSERTION_SUCCESS' => 'Data inserted successfully',
     'DATA_UPDATED_SUCCESS' => 'Data updated successfully',
@@ -123,6 +122,7 @@ return [
     'HTTP_FORBIDDEN' => 403,
     'HTTP_UNPROCESSABLE_REQUEST' => 422,
     'HTTP_RESOURCE_EXHAUSTED' => 429,
+    'HTTP_PAGE_EXPIRED' => 419,
     'HTTP_SERVICE_UNAVAILABLE' => 503,
-    'HTTP_GATEWAY_TIMEOUT' => 504
+    'HTTP_GATEWAY_TIMEOUT' => 504,
 ];

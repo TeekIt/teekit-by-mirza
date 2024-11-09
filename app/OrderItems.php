@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Enums\UserChoicesEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,14 +34,19 @@ class OrderItems extends Model
     /**
      * Helpers
      */
-    public static function add(int $order_id, int $product_id, float $product_price, int $qty, int $user_choice): OrderItems
-    {
+    public static function add(
+        int $orderId,
+        int $productId,
+        float $productPrice,
+        int $qty,
+        UserChoicesEnum $userChoice
+    ): OrderItems {
         return self::create([
-            'order_id' => $order_id,
-            'product_id' => $product_id,
-            'product_price' => $product_price,
+            'order_id' => $orderId,
+            'product_id' => $productId,
+            'product_price' => $productPrice,
             'product_qty' => $qty,
-            'user_choice' => $user_choice
+            'user_choice' => $userChoice
         ]);
     }
 
@@ -49,13 +55,17 @@ class OrderItems extends Model
         return self::where('id', $id)->delete();
     }
 
-    public static function replaceWithAlternativeProduct(int $order_id, int $current_prod_id, int $alternative_prod_id, int $selected_qty): int
-    {
-        return self::where('order_id', $order_id)
-            ->where('product_id', $current_prod_id)
+    public static function replaceWithAlternativeProduct(
+        int $orderId,
+        int $currentProdId,
+        int $alternativeProdId,
+        int $selectedQty
+    ): int {
+        return self::where('order_id', $orderId)
+            ->where('product_id', $currentProdId)
             ->update([
-                'product_id' => $alternative_prod_id,
-                'product_qty' => $selected_qty
+                'product_id' => $alternativeProdId,
+                'product_qty' => $selectedQty
             ]);
     }
 }

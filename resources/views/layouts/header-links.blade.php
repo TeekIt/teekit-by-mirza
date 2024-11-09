@@ -19,3 +19,5 @@
 <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 <!-- JQuery Time Picker CSS -->
 <link rel="stylesheet" href="{{ asset('res/dist/css/jquery.timepicker.min.css') }}">
+<!-- JQuery Multi Selector -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />

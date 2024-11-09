@@ -258,10 +258,9 @@ class AuthController extends Controller
         );
     }
     /**
-     * It will Log the user out
+     * It will Logout the user
      * (Invalidate the token).
      * @version 1.0.0
-
      * @return \Illuminate\Http\JsonResponse
      */
     public function logout()

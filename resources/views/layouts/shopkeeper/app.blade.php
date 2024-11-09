@@ -219,74 +219,7 @@
         }
     </style>
 
-    <!-- jQuery -->
-    <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script>
-    <!-- Bootstrap 4 -->
-    <script src="{{ asset('res/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <!-- Bootstrap 5 -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
-        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
-        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
-    </script>
-
-    <!-- AdminLTE App -->
-    <script src="{{ asset('res/dist/js/adminlte.min.js') }}"></script>
-
-    <script src="{{ asset('res/plugins/select2/js/select2.min.js') }}"></script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-
-    <script>
-        $(document).ready(function() {
-            $(".updateQty").on('submit', (function(e) {
-                e.preventDefault();
-                $.ajax({
-                    url: $(this).attr('action'),
-                    type: "POST",
-                    data: new FormData(this),
-                    contentType: false,
-                    cache: false,
-                    processData: false,
-                    success: function(response) {}
-                });
-            }));
-        });
-
-        function updateBulk() {
-            $('#update_bulk').submit();
-            var checkboxes = document.querySelectorAll('.select-checkbox');
-            var products = [];
-            var x = 0;
-            for (var i = 0; i < checkboxes.length; i++) {
-                if (checkboxes[i].checked) {
-                    products[x] = checkboxes[i].id;
-                    x++;
-                }
-            }
-        }
-
-        function changeHeight() {
-            gpt_box = jQuery('.change-height');
-            jQuery('.change-height').height('auto');
-            // console.log(gpt_box);
-            max = jQuery(gpt_box[0]).height();
-            //console.log(max);
-            jQuery.each(gpt_box, function(index, value) {
-                if (jQuery(value).height() > max) {
-                    max = jQuery(value).height();
-                }
-
-            });
-            jQuery.each(gpt_box, function(index, value) {
-                jQuery(value).height(max);
-            });
-            setTimeout(changeHeight, 600);
-        }
-        changeHeight();
-    </script>
-
+    @include('layouts.scripts')
     @yield('scripts')
 </body>
 

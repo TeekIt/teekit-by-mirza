@@ -4,13 +4,15 @@ namespace App\Services;
 
 final class VerificationCodeServices
 {
-    public static function generateCode()
+    public static function generateCode(): string
     {
-        $verification_code = '';
-        while (strlen($verification_code) < 6) {
-            $rand_number = rand(0, time());
-            $verification_code = $verification_code . substr($rand_number, 0, 1);
+        $verificationCode = '';
+
+        while (strlen($verificationCode) < 6) {
+            $randNumber = rand(0, time());
+            $verificationCode .= substr($randNumber, 0, 1);
         }
-        return $verification_code;
+
+        return $verificationCode;
     }
 }

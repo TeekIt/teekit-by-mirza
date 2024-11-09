@@ -171,6 +171,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\EloquentRelationServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
         //  Zizaco\Entrust\EntrustServiceProvider::class,
         // Barryvdh\Cors\ServiceProvider::class,
