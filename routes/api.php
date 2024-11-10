@@ -29,7 +29,8 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::get('/', fn () =>  'Teek it API Routes Are Working Fine 😃');
+
+Route::get('/', fn() =>  'Teek it API Routes Are Working Fine 😃');
 /*
 |--------------------------------------------------------------------------
 | Authentication API Routes
@@ -77,7 +78,7 @@ Route::prefix('qty')->controller(QtyController::class)->group(function () {
 Route::prefix('category')->controller(CategoriesController::class)->group(function () {
     Route::post('add', 'add');
     Route::post('update/{product_id}', 'update');
-    Route::get('{category_id}/products', 'products');
+    Route::get('{categoryId}/products', 'productsByCategory');
     Route::get('get-stores-by-category', 'stores');
     Route::get('all', 'all');
 });
@@ -139,7 +140,11 @@ Route::middleware(['jwt.verify'])->group(function () {
     });
 
     Route::prefix('orders')->controller(OrdersController::class)->group(function () {
-        Route::post('new', 'new');
+        Route::withoutMiddleware(['jwt.verify'])->group(function () {
+            Route::post('new', 'new');
+            Route::post('product_by_buyer', 'orderProductByBuyer');
+        });
+        
         Route::get('/logged-in/buyer', 'showLoggedinBuyerOrders');
         Route::get('seller', 'sellerOrders');
         Route::get('driver_orders/{driver_id}', 'driverOrders');

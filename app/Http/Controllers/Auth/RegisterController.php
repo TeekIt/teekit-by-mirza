@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserRole;
 use App\User;
 use App\Http\Controllers\Controller;
 use App\Services\EmailServices;
@@ -140,7 +141,7 @@ class RegisterController extends Controller
             $data['lat'],
             $data['lon'],
             $business_hours,
-            $request->input('parent_store') ? 5 : 2,
+            $request->input('parent_store') ? UserRole::CHILD_SELLER : UserRole::SELLER,
             $parent_store_id
         );
 
@@ -149,7 +150,7 @@ class RegisterController extends Controller
         }
 
         /* 2: Parent store */
-        ($user->role_id === 2) ? EmailServices::sendNewParentStoreMail($user) : EmailServices::sendNewChildStoreMail($user, $request->input('parent_store'));
+        ($user->role_id === UserRole::SELLER) ? EmailServices::sendNewParentStoreMail($user) : EmailServices::sendNewChildStoreMail($user, $request->input('parent_store'));
 
         // $admin_users = Role::with('users')->where('name', 'superadmin')->first();
         // $store_link = $FRONTEND_URL . '/customer/' . $user->id . '/details';

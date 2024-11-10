@@ -13,22 +13,22 @@ final class JsonResponseServices
         ], config('constants.HTTP_UNPROCESSABLE_REQUEST'));
     }
 
-    public static function getApiResponse($data, $status, $message, $http_code)
+    public static function getApiResponse($data, $status, $message, $httpCode)
     {
         return response()->json([
             'data' => $data,
             'status' => $status,
-            'message' => ($http_code == 500) ? $message->getMessage() : $message
-        ], $http_code);
+            'message' => ($httpCode == 500) ? $message->getMessage() : $message
+        ], $httpCode);
     }
 
-    public static function getApiResponseExtention($data, $status, $message, $extra_key, $extra_key_data, $http_code)
+    public static function getApiResponseExtention($data, $status, $message, $extraKey, $extraKeyData, $httpCode)
     {
         return response()->json([
             'data' => $data,
             'status' => $status,
-            'message' => ($http_code == 500) ? $message->getMessage() : $message,
-            $extra_key => $extra_key_data
-        ], $http_code);
+            'message' => ($httpCode == 500) ? $message->getMessage() : $message,
+            $extraKey => $extraKeyData
+        ], $httpCode);
     }
 }

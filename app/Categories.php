@@ -87,40 +87,40 @@ class Categories extends Model
             })->get();
     }
 
-    public static function getProducts(int $category_id): array
-    {
-        $products = Products::getProductsByCategoryId($category_id, [
-            'id',
-            'seller_id',
-            'category_id',
-            'product_name',
-            'sku',
-            'price',
-            'featured',
-            'discount_percentage',
-            'weight',
-            'brand',
-            'size',
-            'bike',
-            'car',
-            'van',
-            'feature_img',
-            'height',
-            'width',
-            'length',
-        ]);
-        $products = $products->toArray();
-        $data = $products['data'];
+    // public static function getProducts(int $category_id): array
+    // {
+    //     $products = Products::getProductsByCategoryId($category_id, [
+    //         'id',
+    //         'seller_id',
+    //         'category_id',
+    //         'product_name',
+    //         'sku',
+    //         'price',
+    //         'featured',
+    //         'discount_percentage',
+    //         'weight',
+    //         'brand',
+    //         'size',
+    //         'bike',
+    //         'car',
+    //         'van',
+    //         'feature_img',
+    //         'height',
+    //         'width',
+    //         'length',
+    //     ]);
+    //     $products = $products->toArray();
+    //     $data = $products['data'];
 
-        $pagination = $products;
-        unset($pagination['data']);
+    //     $pagination = $products;
+    //     unset($pagination['data']);
 
-        if (!empty($products)) {
-            return ['data' => $data, 'pagination' => $pagination];
-        } else {
-            return [];
-        }
-    }
+    //     if (!empty($products)) {
+    //         return ['data' => $data, 'pagination' => $pagination];
+    //     } else {
+    //         return [];
+    //     }
+    // }
 
     // public static function stores(int $category_id, string $city)
     // {
