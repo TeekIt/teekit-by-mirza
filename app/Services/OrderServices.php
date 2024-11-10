@@ -67,7 +67,7 @@ final class OrderServices
             TwilioSmsService::sendSms($seller->business_phone, $messageForAdmin);
         }
         /* Customer Number */
-        TwilioSmsService::sendSms($customerNumber, $messageForCustomer);
+        TwilioSmsService::sendSms('+44'.$customerNumber, $messageForCustomer);
         /* Rameesha Number */
         TwilioSmsService::sendSms('+923362451199', $messageForCustomer);
         /* Azim Number */
