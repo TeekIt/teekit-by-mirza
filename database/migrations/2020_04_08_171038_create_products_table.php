@@ -31,7 +31,7 @@ class CreateProductsTable extends Migration
             $table->tinyInteger('bike')->nullable();
             $table->tinyInteger('car')->nullable();
             $table->tinyInteger('van')->nullable();
-            $table->text('feature_img')->nullable();
+            $table->text('feature_img');
             $table->float('height')->nullable();
             $table->float('width')->nullable();
             $table->float('length')->nullable();

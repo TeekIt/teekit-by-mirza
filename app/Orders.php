@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\Services\DriverFairServices;
+use App\Services\GoogleMapServices;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class Orders extends Model
@@ -48,6 +51,44 @@ class Orders extends Model
     /**
      * Helpers
      */
+    public static function add(
+        string $createdByType,
+        int $createdById,
+        int $sellerId,
+        float $orderTotal,
+        int $totalItems,
+        float $driverCharges,
+        Request $request
+    ): Orders {
+        $order = new self();
+        $order->created_by_type = $createdByType;
+        $order->created_by_id = $createdById;
+        $order->seller_id = $sellerId;
+        $order->order_total = $orderTotal;
+        $order->total_items = $totalItems;
+        if ($request->type == 'delivery') {
+            $order->customer_lat = $request->lat;
+            $order->customer_lon = $request->lon;
+            $order->customer_name = $request->fName . $request->lName;
+            $order->phone_number = $request->phone;
+            $order->address = $request->fullAddress;
+            $order->house_no = $request->houseNo;
+            $order->flat = $request->flat;
+            $order->driver_charges = $driverCharges;
+            $order->delivery_charges = $request->deliveryCharges;
+            $order->service_charges = $request->serviceCharges;
+        }
+        $order->type = $request->type;
+        $order->description = $request->description;
+        $order->payment_status = $request->paymentStatus ?? "hidden";
+        $order->device = $request->device ?? NULL;
+        $order->offloading = $request->offloading ?? NULL;
+        $order->offloading_charges = $request->offloadingCharges ?? NULL;
+        $order->save();
+
+        return $order;
+    }
+
     public static function subFromOrderTotal(int $order_id, float $prod_total_price): bool
     {
         $order = self::find($order_id);
@@ -96,9 +137,9 @@ class Orders extends Model
         return self::where('id', $order_id)->exists();
     }
 
-    public static function checkTotalOrders(int $customer_id): int
+    public static function checkTotalOrders(int $customerId): int
     {
-        return self::where('customer_id', $customer_id)->count();
+        return self::where('customer_id', $customerId)->count();
     }
 
     public static function updateOrderStatus(int $order_id, string $status): int
@@ -145,15 +186,18 @@ class Orders extends Model
             ->paginate(10);
     }
 
-    public static function getRecentOrderByBuyerId(int $customer_id, int|null $prducts_limit = null, int|null $seller_id = null): ?Orders
-    {
+    public static function getRecentOrderByCustomerId(
+        int $customerId,
+        int|null $productsLimit = null,
+        int|null $sellerId = null
+    ): ?Orders {
         return self::with([
-            'products' => function ($query) use ($prducts_limit) {
-                if ($prducts_limit !== null) $query->take($prducts_limit);
+            'products' => function ($query) use ($productsLimit) {
+                if ($productsLimit !== null) $query->take($productsLimit);
             }
         ])
-            ->when($seller_id, fn ($query) => $query->where('seller_id', $seller_id))
-            ->where('customer_id', $customer_id)
+            ->when($sellerId, fn($query) => $query->where('seller_id', $sellerId))
+            ->where('customer_id', $customerId)
             ->latest()
             ->first();
     }

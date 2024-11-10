@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Categories;
+use App\Enums\ProductStatus;
+use App\Enums\TransportVehicle;
 use App\Enums\UserRole;
 use App\Imports\ProductsImport;
 use App\productImages;
@@ -9,15 +12,19 @@ use App\Products;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AddOrUpdateProductRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\User;
 use App\Qty;
+use App\Services\ImageServices;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
 use App\Services\JsonResponseServices;
+use App\Services\ProductServices;
+use App\Services\WebResponseServices;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
@@ -92,6 +99,151 @@ class ProductsController extends Controller
         );
     }
     /**
+     * @author Muhammad Abdullah Mirza
+     */
+    public function addSingleInventory(AddOrUpdateProductRequest $request)
+    {
+        $data = $request->validated();
+
+        if ($request->has('colors')) {
+            $data['colors'] = ProductServices::jsonEncodeColors($data['colors']);
+        }
+
+        $data['bike'] = ($data['vehicle'] == TransportVehicle::BIKE->value) ? 1 : 0;
+        $data['car'] = ($data['vehicle'] == TransportVehicle::CAR->value) ? 1 : 0;
+        $data['van'] = ($data['vehicle'] == TransportVehicle::VAN->value) ? 1 : 0;
+        $data['discount_percentage'] = (!isset($data['discount_percentage'])) ? 0.00 : $data['discount_percentage'];
+        $data['contact'] = '+44' . $data['contact'];
+        $data['seller_id'] = Auth::id();
+        $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
+
+        unset($data['_token']);
+        unset($data['color']);
+        unset($data['gallery']);
+        unset($data['qty']);
+        unset($data['vehicle']);
+
+        $product = Products::add($data);
+
+        Qty::add($data['seller_id'], $product->id, $data['category_id'], $request->qty);
+
+        if ($request->hasFile('gallery')) {
+            foreach ($request->file('gallery') as $singleImage) {
+                $file = $singleImage;
+                /* Creating a unique file name */
+                $fileName = uniqid($data['seller_id'] . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension();
+
+                Storage::disk('spaces')->put($fileName, File::get($file));
+
+                ImageServices::createUploadLog('spaces', $fileName);
+
+                productImages::add($product->id, $fileName);
+            }
+        }
+
+        // WebResponseServices::getWebResponse(
+        //     config('constants.TRUE_STATUS'),
+        //     config('constants.DATA_INSERTION_SUCCESS')
+        // );
+
+        return redirect()->route('seller.inventory');
+    }
+    /**
+     * @author Muhammad Abdullah Mirza
+     */
+    public function editInventoryView($product_id)
+    {
+        $categories = Categories::all();
+
+        $inventory = Products::getProductInfo(Auth::id(), $product_id, ['*']);
+
+        return view('shopkeeper.inventory.edit', compact('inventory', 'categories'));
+    }
+    /**
+     * @author Muhammad Abdullah Mirza
+     */
+    public function updateInventory(AddOrUpdateProductRequest $request, $product_id)
+    {
+        $data = $request->validated();
+
+        if ($request->has('colors')) {
+            $data['colors'] = json_encode(array_fill_keys($data['colors'], true));
+        }
+
+        $data['bike'] = ($data['vehicle'] == TransportVehicle::BIKE->value) ? 1 : 0;
+        $data['car'] = ($data['vehicle'] == TransportVehicle::CAR->value) ? 1 : 0;
+        $data['van'] = ($data['vehicle'] == TransportVehicle::VAN->value) ? 1 : 0;
+        $data['discount_percentage'] = (!isset($data['discount_percentage'])) ? 0.00 : $data['discount_percentage'];
+        $data['contact'] = '+44' . $data['contact'];
+        $data['seller_id'] = Auth::id();
+        $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
+
+        unset($data['_token']);
+        unset($data['color']);
+        unset($data['gallery']);
+        unset($data['qty']);
+        unset($data['vehicle']);
+
+        Qty::where('product_id', $product_id)
+            ->where('seller_id', Auth::id())
+            ->update([
+                'qty' => $data['qty'],
+            ]);
+        unset($data['qty']);
+        $product = Products::find($product_id);
+        if (!empty($product)) {
+            $filename = $product->feature_img;
+            if ($request->hasFile('feature_img')) {
+                $file = $request->file('feature_img');
+                $filename = uniqid($product->id . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
+                Storage::disk('spaces')->put($filename, File::get($file));
+                if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
+                    info("file is stored successfully : " . $filename);
+                    // $filename = "/user_imgs/" . $filename;
+                } else {
+                    info("file is not found :- " . $filename);
+                }
+            }
+            $data['feature_img'] = $filename;
+            $user_id = Auth::id();
+            if ($request->hasFile('gallery')) {
+                $images = $request->file('gallery');
+                foreach ($images as $image) {
+                    $file = $image;
+                    $filename = uniqid($user_id . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension(); //create unique file name...
+                    Storage::disk('spaces')->put($filename, File::get($file));
+                    if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
+                        info("file is stored successfully : " . $filename);
+                        // $filename = "/user_imgs/" . $filename;
+                    } else {
+                        info("file is not found :- " . $filename);
+                    }
+                    $product_images = new productImages();
+                    $product_images->product_id = $product->id;
+                    $product_images->product_image = $filename;
+                    $product_images->save();
+                }
+            }
+            foreach ($data as $key => $value) {
+                if ($key == 'vehicle')
+                    continue;
+                $product->$key = ($key == 'contact') ? '+44' . $value : $value;
+            }
+            $product->save();
+            flash('Inventory updated successfully.')->success();
+            return \redirect()->route('inventory');
+        }
+    }
+    /**
+     * It will delete the product image
+     * @version 1.0.0
+     */
+    public function deleteImg($image_id)
+    {
+        productImages::deleteById($image_id);
+        return redirect()->back();
+    }
+    /**
      * Upload's bulk products
      * @author Muhammad Abdullah Mirza
      */
@@ -106,7 +258,7 @@ class ProductsController extends Controller
                         'required',
                         'integer',
                         Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRole::SELLER)),
-                    ]
+                    ],
                 ],
                 messages: [
                     'seller_id.exists' => 'The given :attribute either does not exist in our system or its a child seller',
@@ -427,32 +579,30 @@ class ProductsController extends Controller
     public function view(Request $request)
     {
         try {
-            $validate = Validator::make($request->all(), [
-                'seller_id' => 'required|integer',
-                'product_id' => 'required|integer'
+            $validatedData = Validator::make($request->all(), [
+                'sellerId' => 'required|integer',
+                'productId' => 'required|integer'
             ]);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
-            $product = Products::getProductInfo($request->seller_id, $request->product_id, ['*']);
-            if (!empty($product)) {
-                return JsonResponseServices::getApiResponse(
-                    $product,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    config('constants.HTTP_OK')
-                );
-            }
+
+            $data = Products::getProductInfo(
+                $request->sellerId,
+                $request->productId,
+                Products::getCommonColumns(),
+            );
+
+            /*
+            * Just creating this variable so we don't have to call the "empty()" function again & again
+            * Which will obviouly reduce the API response speed
+            */
+            $dataIsEmpty = empty($data);
             return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_OK')
+                ($dataIsEmpty) ? [] : $data,
+                ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+                config('constants.HTTP_OK'),
             );
         } catch (Throwable $error) {
             report($error);
@@ -600,54 +750,68 @@ class ProductsController extends Controller
     public function search(Request $request)
     {
         try {
-            $validate = Validator::make($request->all(), [
-                'product_name' => 'required|string',
+            $validatedData = Validator::make($request->all(), [
+                'productName' => 'required|string',
+                'sellerIds' => 'required|string',
+                'scoutPage' => 'required|integer',
             ]);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
-            $user_lat = $request->lat;
-            $user_lon = $request->lon;
+
+            $userLat = $request->lat;
+            $userLon = $request->lon;
             $miles = $request->miles;
             if (isset($miles))
-                $store_ids = $this->searchWrtNearByStores($user_lat, $user_lon, $miles);
+                $nearBySellerIds = $this->searchWrtNearByStores($userLat, $userLon, $miles);
 
             $products = Products::searchProducts(
-                $request->product_name,
-                (isset($store_ids['ids'])) ? $store_ids['ids'] : null,
-                $request->category_id,
-                $request->store_id,
+                $request->productName,
+                (isset($nearBySellerIds['ids'])) ? $nearBySellerIds['ids'] : json_decode($request->sellerIds),
+                $request->categoryId,
+                // json_decode($request->sellerIds),
                 $request->brand,
-                $request->min_price,
-                $request->max_price,
-                $request->min_weight,
-                $request->max_weight
+                $request->minPrice,
+                $request->maxPrice,
+                $request->minWeight,
+                $request->maxWeight
             );
 
-            $pagination = $products->toArray();
-            $data = $pagination['data'];
-            unset($pagination['data']);
-            if (!$products->isEmpty()) {
-                return JsonResponseServices::getApiResponseExtention(
-                    $data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
-            }
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
+            /*
+            * Just creating this variable so we don't have to call the "empty()" function again & again
+            * Which will obviouly reduce the API response speed
+            */
+            $dataIsEmpty = $products['data']->isEmpty();
+            return JsonResponseServices::getApiResponseExtention(
+                ($dataIsEmpty) ? [] : $products['data'],
+                ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+                'pagination',
+                ($dataIsEmpty) ? [] : $products['pagination'],
                 config('constants.HTTP_OK')
             );
+
+            // $pagination = $products->toArray();
+            // $data = $pagination['data'];
+            // unset($pagination['data']);
+
+            // if (!$products->isEmpty()) {
+            //     return JsonResponseServices::getApiResponseExtention(
+            //         $data,
+            //         config('constants.TRUE_STATUS'),
+            //         '',
+            //         'pagination',
+            //         $pagination,
+            //         config('constants.HTTP_OK')
+            //     );
+            // }
+
+            // return JsonResponseServices::getApiResponse(
+            //     [],
+            //     config('constants.FALSE_STATUS'),
+            //     config('constants.NO_RECORD'),
+            //     config('constants.HTTP_OK')
+            // );
         } catch (Throwable $error) {
             report($error);
             return JsonResponseServices::getApiResponse(
@@ -839,18 +1003,27 @@ class ProductsController extends Controller
     {
         try {
             $validatedData = Validator::make($request->all(), [
-                'seller_id' => 'required|integer',
+                'sellerId' => 'required|integer',
                 'page' => 'required|integer'
             ]);
             if ($validatedData->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
 
-            $pagination = Cache::remember('sellerProducts' . $request->seller_id . $request->page, now()->addDay(), function () use ($request) {
-                return Products::getProductsInfoBySellerId($request->seller_id)->toArray();
-            });
+            $pagination = Cache::remember(
+                'sellerProducts' . $request->sellerId . $request->page,
+                now()->addDay(),
+                function () use ($request) {
+                    return Products::getProductsInfoBySellerId(
+                        $request->sellerId,
+                        Products::getCommonColumns(),
+                    )->toArray();
+                }
+            );
+
             $data = $pagination['data'];
             unset($pagination['data']);
+
             if (!empty($data)) {
                 return JsonResponseServices::getApiResponseExtention(
                     $data,
