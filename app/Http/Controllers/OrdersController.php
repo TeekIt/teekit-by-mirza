@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicle;
 use App\Enums\UserChoicesEnum;
 use App\Enums\UserRole;
@@ -220,6 +221,10 @@ class OrdersController extends Controller
             'height' => 'nullable|numeric|min:0',
             'width' => 'nullable|numeric|min:0',
             'length' => 'nullable|numeric|min:0',
+            'type' => [
+                'required',
+                Rule::in(array_column(OrderTypeEnum::cases(), 'value')),
+            ],
             'fName' => 'required|string|max:100',
             'lName' => 'required|string|max:100',
             'email' => 'required|email|max:255',
@@ -292,7 +297,7 @@ class OrdersController extends Controller
         $totalWeight = $request->weight;
         $totalItems = $request->qty;
 
-        if ($request->type == 'delivery') {
+        if ($request->type == OrderTypeEnum::DELIVERY->value) {
             $seller = User::getUserByID($sellerId, [
                 'business_phone',
                 'lat',
@@ -321,7 +326,7 @@ class OrdersController extends Controller
         OrderItems::add(
             $orderId,
             $productByBuyer->id,
-            $productByBuyer->maxPrice,
+            $productByBuyer->max_price,
             $productByBuyer->qty,
             UserChoicesEnum::SEND_TO_OTHER_STORES
         );

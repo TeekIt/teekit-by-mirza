@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "teek-it-965a8",
+  "private_key_id": "1ec96a1aa676c2c6a93cf61034a93bce05881261",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC2TF0G9yAdfUEW\nR6D3ksByv0aX2oVeqbrI/3I5gk296Bi2u41agxmSYQKH54191DFP/EePQLZjhAT4\nGDBfDzrx/Nl+YQ7Y0dFvbVBDF4NHhS/4yiE+OfibTEwoNCas/aNG6aQBBKXep9ut\nCCXzIZGZY+pXOpPvpcy+iKgFhKEB3gnGQcCNAm4TgSbpQP6LVCt8rqIjq7Ppehzi\nNKmMJpeAXULiCz6L2f+Vhiazi9Bvq3XTL44zV0B7pyFjPmDZ9JaPAj3fi+2huK0J\nSH0bbShvgBm+RCUl4+f8VU7JOkyFFS1QB49wlSF4Nkm8NdLkBleD2djURcHE1PhW\nknbMkipHAgMBAAECggEAAm5MDHeg8Bog+Y6UwpuS2sgN+KCbbnk3hxs2gNADgF8T\n1HzCWqzsqBG7sM5xVqmzMW/AQ1R0eikJaSBNcmva3qoyYXSJRNiumo+r5jeHv4Oy\n1/YkcYngjkjH3stfO3RNLpKXMypGmfL43QeCr6MvDiTebzGJRatOarkz+fepFZDE\niajqODJpSqSUvtd8M9y3UygetGiQ4aSTGwNQAwTsxbnb8Kdt2UNYqVixKeP4QUUV\nH9qkE7015BKzkGKfd3m/pHUsrbK6T6se+SmREN4OF5j1Wb33Gi6bfrSG8pXUEBcr\nVk4lmOZsgnzgTJK5Vm4CWetLU+YBN7cWg20PtyB5IQKBgQDb8NudOkdBXsEbog+X\nYEW2rHq8tVze9F1pSzud+Flm9D4Dq/dHv7EkgXZT6/oZMP4mshEV1AMo4idaw5rN\n2mXZ6TMe2frZ6sao3z9Yd6GV0I1E3AwFSE58RTkA5qGlrLzUPz57byaMijSscp9j\nlgmvvwlX8axM7S5iuqVqSnxz5wKBgQDUL5vmAeZqeJ4gAvVWXm6/19XYNgN2IVvf\n20f0t/+E5imY/k+xlAEnvif86M7eSDdBjjhMYPF62jY1NlS6mqommiUlnvK2CJuH\nOvS3igKoQPVsttSKkdOeXGFzq7TZBSfMucH8/v6PCcf3u5fO9ofdqVLKEEncKAgf\n/V13jT/KoQKBgQDVrbg/lZoaqWslZJqPL+oq4oFQC0eSGIkUPhJKlDiPbKU/Pfg9\nTcBVPi3utKlDhjS09XTh5xu2wZkIdldUvWUMg6K1y4MJ6i1dbZ+GXJuxCG/nQX2w\nOCKAW2RZOrg7VIoUDumuVDt4eOFZ1PaDcwYwJ4J1XYdPKXNSWhFRJdKpawKBgQCM\nPftYhqD4dkhs+AeX0kp42fspMGoRRfMnfhONF5/3AvkzecLKp/wrfG+JpYY1PJ3o\n4ksrkFeKz3dMrGBMBbW4VeF/gBMDZaUGOF1OghVHh8eu1xibjc7EuGJgxXh+h/3K\nPmyM/yzY9aoJfx/TVvZt92AU1bc7n+ne2uNQBTfIgQKBgDllwAvzc+DcsGTkearF\njq8uPySdq7iWQHNkvvkmkrOfvC1rKOgkJPAD0Gwviyi1R63+J7mEvXXBO45JfZK1\nNKQ4z7POInDQ9pufXo2XUe/jpObK+FczkOig3YHHCsh0jhx8FTgd12sq8GOygs2Q\n7o+SmFkp3wpWJ7hR9jiP502I\n-----END PRIVATE KEY-----\n",
+  "client_email": "teek-it-965a8@appspot.gserviceaccount.com",
+  "client_id": "108192990834336468116",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/teek-it-965a8%40appspot.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
