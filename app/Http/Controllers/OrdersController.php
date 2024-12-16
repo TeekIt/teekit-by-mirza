@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicle;
 use App\Enums\UserChoicesEnum;
+use App\Enums\UserMorphTypeEnum;
 use App\Enums\UserRole;
 use App\Models\GuestBuyer;
 use App\Models\GuestCustomer;
@@ -73,7 +74,9 @@ class OrdersController extends Controller
                 ];
             }
         } else {
-            return JsonResponseServices::getApiValidationFailedResponse(json_decode('{"type": ["The type field is required."]}'));
+            return JsonResponseServices::getApiValidationFailedResponse(
+                json_decode('{"type": ["The type field is required."]}')
+            );
         }
 
         $validatedData = Validator::make($request->all(), $rules);
@@ -330,7 +333,7 @@ class OrdersController extends Controller
             $productByBuyer->qty,
             UserChoicesEnum::SEND_TO_OTHER_STORES
         );
-        
+
         if ($request->type == 'delivery') {
             $verificationCode = VerificationCodeServices::generateCode();
             VerificationCodes::add($orderId, $verificationCode);
@@ -365,39 +368,38 @@ class OrdersController extends Controller
      */
     public function showLoggedinBuyerOrders(Request $request)
     {
-        try {
-            $orders = Orders::select('id')->where('customer_id', '=', Auth::id())->orderByDesc('id');
-            if (!empty($request->order_status)) $orders = $orders->where('order_status', '=', $request->order_status);
-            $orders = $orders->paginate(20);
-            $pagination = $orders->toArray();
-            if (!$orders->isEmpty()) {
-                $order_data = [];
-                foreach ($orders as $order) $order_data[] = $this->getOrderDetails($order->id);
-                unset($pagination['data']);
-                return JsonResponseServices::getApiResponseExtention(
-                    $order_data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
-            }
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
+        $orders = Orders::select('id')
+            ->where('created_by_type', '=', UserMorphTypeEnum::USER)
+            ->where('created_by_id', '=', Auth::id())
+            ->when($request->orderStatus, function ($query) use ($request) {
+                return $query->where('order_status', '=', $request->orderStatus);
+            })
+            ->orderByDesc('id')
+            ->paginate(20);
+
+        $pagination = $orders->toArray();
+        unset($pagination['data']);
+
+        if (!$orders->isEmpty()) {
+            $orderData = [];
+            foreach ($orders as $order) $orderData[] = $this->getOrderDetails($order->id);
+
+            return JsonResponseServices::getApiResponseExtention(
+                $orderData,
+                config('constants.TRUE_STATUS'),
+                '',
+                'pagination',
+                $pagination,
                 config('constants.HTTP_OK')
             );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * @author Muhammad Abdullah Mirza

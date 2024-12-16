@@ -180,7 +180,7 @@ class ParentSellersLivewire extends Component
     {
         $data = User::find($id);
 
-        $this->categories = Categories::getAllCategoriesByStoreId($id, ['*']);
+        $this->categories = Categories::getAllCategoriesBySellerId($id, ['*']);
         $this->categories = ($this->categories->isEmpty()) ? [] : $this->categories;
         $this->category_id_map = is_array($this->categories) ? [] : $this->categories->pluck('id')->toArray();
 
