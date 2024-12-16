@@ -77,38 +77,38 @@ class CategoriesController extends Controller
      */
     public function all(Request $request)
     {
-        try {
-            $validated_data = Validator::make($request->all(), [
-                'store_id' => 'integer',
-            ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
-            }
-
-            if ($request->store_id)
-                $data =  Categories::getAllCategoriesByStoreId($request->store_id, ['id as category_id', 'category_name', 'category_image']);
-            else
-                $data = Cache::rememberForever('allCategories', fn() => Categories::allCategories(['id as category_id', 'category_name', 'category_image']));
-            /*
-            * Just creating this variable so we don't have to call the "isEmpty()" function again & again
-            * Which will obviouly reduce the API response speed
-            */
-            $data_is_empty = $data->isEmpty();
-            return JsonResponseServices::getApiResponse(
-                ($data_is_empty) ? [] : $data,
-                ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-                ($data_is_empty) ? config('constants.NO_RECORD') : '',
-                config('constants.HTTP_OK')
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
+        $validated_data = Validator::make($request->all(), [
+            'store_id' => 'integer',
+        ]);
+        if ($validated_data->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
         }
+
+        if ($request->store_id)
+            $data =  Categories::getAllCategoriesBySellerId(
+                $request->store_id,
+                ['id as category_id', 'category_name', 'category_image']
+            );
+        else
+            $data = Cache::rememberForever(
+                'allCategories',
+                fn() => Categories::allCategories([
+                    'id as category_id',
+                    'category_name',
+                    'category_image'
+                ])
+            );
+        /*
+        * Just creating this variable so we don't have to call the "isEmpty()" function again & again
+        * Which will obviouly reduce the API response speed
+        */
+        $data_is_empty = $data->isEmpty();
+        return JsonResponseServices::getApiResponse(
+            ($data_is_empty) ? [] : $data,
+            ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($data_is_empty) ? config('constants.NO_RECORD') : '',
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * It will get the products of a specific category

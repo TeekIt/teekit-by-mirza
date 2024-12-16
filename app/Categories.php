@@ -79,11 +79,11 @@ class Categories extends Model
         return $category;
     }
 
-    public static function getAllCategoriesByStoreId(int $store_id, array $columns): Collection
+    public static function getAllCategoriesBySellerId(int $sellerId, array $columns): Collection
     {
         return self::select($columns)
-            ->whereHas('qty', function ($query) use ($store_id) {
-                $query->where('seller_id', $store_id);
+            ->whereHas('qty', function ($qtyQuery) use ($sellerId) {
+                $qtyQuery->where('seller_id', $sellerId);
             })->get();
     }
 

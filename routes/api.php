@@ -145,7 +145,7 @@ Route::middleware(['jwt.verify'])->group(function () {
             Route::post('product_by_buyer', 'orderProductByBuyer');
         });
         
-        Route::get('/logged-in/buyer', 'showLoggedinBuyerOrders');
+        Route::get('/logged_in/buyer', 'showLoggedinBuyerOrders');
         Route::get('seller', 'sellerOrders');
         Route::get('driver_orders/{driver_id}', 'driverOrders');
         Route::get('assign_order', 'assignOrder');
