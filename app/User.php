@@ -144,15 +144,6 @@ class User extends Authenticatable implements JWTSubject
             'address_1' => 'required|string',
         ]);
     }
-
-    public static function updateValidator(Request $request): object
-    {
-        return Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'user_img' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'address_1' => 'required|string'
-        ]);
-    }
     /**
      * Scopes
      */
@@ -190,6 +181,14 @@ class User extends Authenticatable implements JWTSubject
         string $l_name = null,
         string $email = null,
         string $phone = null,
+        string $fullAddress = null,
+        string $unitAddress = null,
+        string $country = null,
+        string $state = null,
+        string $city = null,
+        string $postcode = null,
+        string $lat = null,
+        string $lon = null,
         string $business_name = null,
         string $business_phone = null,
         string $password = null,
@@ -202,6 +201,14 @@ class User extends Authenticatable implements JWTSubject
         if (!is_null($l_name)) $user->l_name = $l_name;
         if (!is_null($email)) $user->email = $email;
         if (!is_null($phone)) $user->phone = '+44' . $phone;
+        if (!is_null($fullAddress)) $user->full_address = $fullAddress;
+        if (!is_null($unitAddress)) $user->unit_address = $unitAddress;
+        if (!is_null($country)) $user->country = $country;
+        if (!is_null($state)) $user->state = $state;
+        if (!is_null($city)) $user->city = $city;
+        if (!is_null($postcode)) $user->postcode = $postcode;
+        if (!is_null($lat)) $user->lat = $lat;
+        if (!is_null($lon)) $user->lon = $lon;
         if (!is_null($business_name)) $user->business_name = $business_name;
         if (!is_null($business_phone)) $user->business_phone = '+44' . $business_phone;
         if (!is_null($password)) $user->password = Hash::make($password);
@@ -224,8 +231,7 @@ class User extends Authenticatable implements JWTSubject
     ): bool {
         $user = self::findOrFail($user_id);
         $user->full_address = $full_address;
-        if (!is_null($unit_address))
-            $user->unit_address = $unit_address;
+        if (!is_null($unit_address)) $user->unit_address = $unit_address;
         $user->country = $country;
         $user->state = $state;
         $user->city = $city;

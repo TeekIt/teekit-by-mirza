@@ -28,65 +28,39 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class AuthController extends Controller
 {
     /**
-     * Create a new AuthController instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('jwt.verify', ['except' => [
-            'loginBuyer',
-            'registerBuyer',
-            'verify',
-            'searchSellerProducts',
-            'loginBuyerFromGoogle',
-            'registerBuyerFromGoogle'
-        ]]);
-    }
-    /**
      * Register For Mobile App
      * @author Huzaifa Haleem
      */
     public function registerBuyer(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'l_name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8|max:50',
-                'phone' => 'required|string|max:13'
-            ]);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-            }
-
-            $user = User::createBuyer(
-                $request->name,
-                $request->l_name,
-                $request->email,
-                $request->password,
-                $request->phone,
-                1,
-                Str::uuid()
-            );
-
-            EmailServices::sendBuyerAccVerificationMail($user);
-
-            return response()->json([
-                'status' => config('constants.TRUE_STATUS'),
-                'role' => 'buyer',
-                'message' => 'You have registered succesfully! We have sent a verification link to your email address. Please click on the link to activate your account.'
-            ], config('constants.HTTP_OK'));
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
+        $validatedData = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'l_name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|max:50',
+            'phone' => 'required|string|max:13'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+
+        $user = User::createBuyer(
+            $request->name,
+            $request->l_name,
+            $request->email,
+            $request->password,
+            $request->phone,
+            1,
+            Str::uuid()
+        );
+
+        EmailServices::sendBuyerAccVerificationMail($user);
+
+        return response()->json([
+            'status' => config('constants.TRUE_STATUS'),
+            'role' => 'buyer',
+            'message' => 'You have registered succesfully! We have sent a verification link to your email address. Please click on the link to activate your account.'
+        ], config('constants.HTTP_OK'));
     }
     /**
      * Get a JWT via given credentials.
@@ -354,57 +328,6 @@ class AuthController extends Controller
         }
     }
     /**
-     * It will update user details
-     * via given id
-     * @author Muhammad Abdullah Mirza
-     * @version 1.1.0
-     */
-    public function updateUser(Request $request)
-    {
-        $validate = User::updateValidator($request);
-        if ($validate->fails()) {
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.FALSE_STATUS'),
-                'message' => $validate->messages()
-            ], 422);
-        }
-        $user = JWTAuth::user();
-        $User = User::find($user->id);
-        if ($User) {
-            $filename = $User->user_img;
-            if ($request->hasFile('user_img')) {
-                $file = $request->file('user_img');
-                $filename = $file->getClientOriginalName();
-                $filename = uniqid($User->id . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
-                Storage::disk('user_public')->put($filename, File::get($file));
-                if (Storage::disk('user_public')->exists($filename)) {  // check file exists in directory or not
-                    info("file is store successfully : " . $filename);
-                    $filename = "/user_imgs/" . $filename;
-                } else {
-                    info("file is not found :- " . $filename);
-                }
-            }
-            $User->name = $request->name;
-            $User->l_name = $request->l_name;
-            $User->postal_code = $request->postal_code;
-            $User->phone = $request->phone;
-            $User->address_1 = $request->address_1;
-            $User->address_2 = $request->address_2;
-            $User->user_img = $filename;
-            $User->save();
-            $response = $this->me();
-            return $response;
-            //return response()->json($response, config('constants.HTTP_OK'));
-        } else {
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.FALSE_STATUS'),
-                'message' => 'User not found.'
-            ], 404);
-        }
-    }
-    /**
      * It will update user status
      * @author Muhammad Abdullah Mirza
      * @version 1.1.0
@@ -414,8 +337,8 @@ class AuthController extends Controller
         $user = User::find(Auth::id());
         $user->is_online = $request->is_online;
         $user->save();
-        $response = $this->me();
-        return $response;
+        
+        return $this->me();
     }
 
     public function deliveryBoys()

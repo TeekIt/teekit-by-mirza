@@ -37,20 +37,22 @@ Route::get('/', fn() =>  'Teek it API Routes Are Working Fine 😃');
 |--------------------------------------------------------------------------
 */
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
-    Route::post('register', 'registerBuyer');
-    Route::post('register_google', 'registerBuyerFromGoogle');
     Route::post('login', 'loginBuyer');
-    Route::post('login_google', 'loginBuyerFromGoogle');
+    Route::post('register', 'registerBuyer');
     Route::get('verify', 'verify');
-    Route::post('change-password', 'changePassword');
-    Route::post('logout', 'logout');
-    Route::post('refresh', 'refresh');
-    Route::post('update', 'updateUser');
-    Route::post('updateStatus', 'updateStatus');
-    Route::get('delivery_boys', 'deliveryBoys');
-    Route::get('get_user/{user_id}', 'getUserDetails');
-    Route::post('user/delete', 'deleteUser');
-    Route::get('me', 'me');
+    Route::post('login_google', 'loginBuyerFromGoogle');
+    Route::post('register_google', 'registerBuyerFromGoogle');
+
+    Route::middleware(['jwt.verify'])->group(function () {
+        Route::post('change-password', 'changePassword');
+        Route::post('logout', 'logout');
+        Route::post('refresh', 'refresh');
+        Route::post('updateStatus', 'updateStatus');
+        Route::get('delivery_boys', 'deliveryBoys');
+        Route::get('get_user/{user_id}', 'getUserDetails');
+        Route::post('user/delete', 'deleteUser');
+        Route::get('me', 'me');
+    });
 });
 /*
 |--------------------------------------------------------------------------
@@ -144,7 +146,7 @@ Route::middleware(['jwt.verify'])->group(function () {
             Route::post('new', 'new');
             Route::post('product_by_buyer', 'orderProductByBuyer');
         });
-        
+
         Route::get('/logged-in/buyer', 'showLoggedinBuyerOrders');
         Route::get('seller', 'sellerOrders');
         Route::get('driver_orders/{driver_id}', 'driverOrders');
@@ -190,6 +192,10 @@ Route::middleware(['jwt.verify'])->group(function () {
         // Route::post('/update', [WalletController::class, 'update']);
     });
 
+    Route::prefix('buyer')->controller(UsersController::class)->group(function () {
+        Route::patch('update', 'updateBuyer');
+    });
+    
     // Route::get('keys', [AuthController::class, 'keys']);
 });
 /*
