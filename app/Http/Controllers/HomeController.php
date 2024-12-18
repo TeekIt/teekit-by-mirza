@@ -706,11 +706,6 @@ class HomeController extends Controller
      */
     public function updateCat(Request $request, $id)
     {
-        //$validate = Categories::updateValidator($request);
-        // if ($validate->fails()) {
-        //     $response = array('status' => false, 'message' => 'Validation error', 'data' => $validate->messages());
-        //     return response()->json($response, 400);
-        // }
         $category = Categories::find($id);
         $category->category_name = $request->category_name;
         if ($request->hasFile('category_image')) {
