@@ -137,7 +137,7 @@ final class EmailServices
 
     public static function sendPickupYourOrderFromOtherSellerMail(OrdersFromOtherSeller $order)
     {
-        Mail::to($order->seller->email)->send(new OrderIsReadyMail($order));
+        Mail::to($order->customer->email)->send(new OrderIsReadyMail($order));
     }
 
     public static function sendOrderHasBeenCancelledMail(Orders $order)

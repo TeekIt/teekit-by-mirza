@@ -18,15 +18,15 @@ final class OrderServices
 
     public static function getTotalItems(array $order): float
     {
-        return array_sum(array_column($order, 'qty'));
+        return array_sum(array_column($order, 'product_qty'));
     }
 
-    public static function getOrderTotal(array $order): float
+    public static function getOrderTotal(array $orderItems): float
     {
         $orderTotal = 0.00;
 
-        foreach ($order as $orderItem) {
-            $orderTotal += $orderItem['price'] * $orderItem['qty'];
+        foreach ($orderItems as $singleIndex) {
+            $orderTotal += $singleIndex['product_price'] * $singleIndex['product_qty'];
         }
 
         return $orderTotal;

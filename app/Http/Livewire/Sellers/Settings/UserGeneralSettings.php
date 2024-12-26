@@ -63,7 +63,7 @@ class UserGeneralSettings extends Component
         try {
             /* Perform some operation */
             $filename = ImageServices::uploadLivewireImg($this->image_to_upload, $this->user_id);
-            if ($filename) User::updateInfo($this->user_id, user_img: $filename);
+            if ($filename) User::updateInfo($this->user_id, userImg: $filename);
             /* Operation finished */
             $this->resetModal();
             sleep(1);
@@ -147,7 +147,7 @@ class UserGeneralSettings extends Component
             /* Perform some operation */
             $updated = User::updateInfo(
                 $this->user_id,
-                business_name: $this->business_name
+                businessName: $this->business_name
             );
             /* Operation finished */
             $this->resetModal();
@@ -195,7 +195,7 @@ class UserGeneralSettings extends Component
             /* Perform some operation */
             $updated = User::updateInfo(
                 $this->user_id,
-                business_phone: $this->business_phone
+                businessPhone: $this->business_phone
             );
             /* Operation finished */
             $this->resetModal();

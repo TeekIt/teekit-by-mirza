@@ -130,16 +130,16 @@
                 </div>
                 <div class="modal-body">
                     <div class="text-center">
-                        <h2>PLEASE SELECT A STORE</h2>
+                        <h2>Please select a store</h2>
                         <div class="d-flex justify-content-center">
                             @if (empty($nearby_sellers))
                                 <div class="col-6">
                                     <div class="spinner-border" role="status"></div>
                                 </div>
                             @else
-                                <div class="col-6 border border-danger">
+                                <div class="col-6">
                                     <select class="form-select form-select-lg" wire:model="selected_nearby_seller">
-                                        <option value="" selected>Stores list</option>
+                                        <option value="" selected>Nearby stores</option>
                                         @foreach ($nearby_sellers as $single_index)
                                             <option value="{{ $single_index['business_name'] }}">{{ $single_index['business_name'] }}</option>
                                         @endforeach
@@ -307,7 +307,7 @@
                                             @if ($order->order_status === 'pending')
                                                 <button class="btn btn-warning" wire:click="orderIsAccepted({{ $order->id }})" wire:target="orderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Click here when preparing order">
                                                     <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading.remove>
-                                                        Accept Order
+                                                        Accept
                                                     </span>
                                                     <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading>
                                                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
@@ -316,7 +316,7 @@
 
                                                 <button class="btn btn-danger" wire:click="cancelOrder({{ $order }})" wire:target="cancelOrder({{ $order }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Cancel the whole order">
                                                     <span wire:target="cancelOrder({{ $order }})" wire:loading.remove>
-                                                        Cancel Order
+                                                        Cancel
                                                     </span>
                                                     <span wire:target="cancelOrder({{ $order }})" wire:loading>
                                                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
@@ -405,7 +405,7 @@
 
                                     <tr>
                                         <td><b>Order Total</b></td>
-                                        <td>£{{ $order->order_total }}</td>
+                                        <td>£{{ $order->initial_total }}</td>
                                         <td><b>Payment Status</b></td>
                                         <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
                                     </tr>
@@ -456,7 +456,7 @@
                                                 <tr>
                                                     <td class="col-4 text-site-primary">
                                                         <b>I don't have this product!</b>
-                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="If you don't have this product then go for the option selected by the user by clicking the front button.">
+                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="If you don't have this product then go for the option selected by the buyer by clicking the front button">
                                                             <i class="fas fa-exclamation-circle"></i>
                                                         </button>
                                                     </td>
@@ -472,14 +472,14 @@
                                                                 Remove Product
                                                             </button>
                                                         @elseif ($order->order_items[$index]->user_choice === 3)
-                                                            {{-- <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#sendToOtherStoresModal" wire:click="renderSTOSModal({{ $order }}, {{ $order->order_items[$index] }})">
+                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#sendToOtherStoresModal" wire:click="renderSTOSModal({{ $order }}, {{ $order->order_items[$index] }})">
                                                                 <i class="fas fa-paper-plane"></i>
                                                                 Send To Other Stores
-                                                            </button> --}}
-                                                            <button type="button" class="btn btn-site-primary" disabled>
+                                                            </button>
+                                                            {{-- <button type="button" class="btn btn-site-primary" disabled>
                                                                 <i class="fas fa-paper-plane"></i>
                                                                 Send To Other Stores (Feature Underdevelopment)
-                                                            </button>
+                                                            </button> --}}
                                                         @elseif ($order->order_items[$index]->user_choice === 4)
                                                             <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#showCustomerContactModel" wire:click="renderCustomerContactModal('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
                                                                 <i class="fas fa-phone-alt"></i>
@@ -581,7 +581,7 @@
 
                                 <div class="col-md-6 text-lg">
                                     <p>
-                                        <b>Placed on:</b> {{$order->created_at}} <b> Order Total: </b> £{{$order->order_total}}
+                                        <b>Placed on:</b> {{$order->created_at}} <b> Order Total: </b> £{{$order->initial_total}}
                                     </p>
                                 </div>
                                 <div class="col-md-6">

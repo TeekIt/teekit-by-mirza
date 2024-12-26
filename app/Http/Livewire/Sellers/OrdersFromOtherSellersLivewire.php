@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Sellers;
 
+use App\Enums\OrderStatusEnum;
 use App\Models\OrdersFromOtherSeller;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
@@ -120,7 +121,10 @@ class OrdersFromOtherSellersLivewire extends Component
         try {
             /* Perform some operation */
             OrdersFromOtherSeller::isViewed($order_from_other_seller['id']);
-            $updated = OrdersFromOtherSeller::updateOrderStatus($order_from_other_seller['id'], 'accepted');
+            $updated = OrdersFromOtherSeller::updateOrderStatus(
+                $order_from_other_seller['id'],
+                OrderStatusEnum::ACCEPTED,
+            );
             /* Operation finished */
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -137,10 +141,17 @@ class OrdersFromOtherSellersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $updated = OrdersFromOtherSeller::updateOrderStatus($order_from_other_seller['id'], 'ready');
+            $updated = OrdersFromOtherSeller::updateOrderStatus(
+                $order_from_other_seller['id'],
+                OrderStatusEnum::READY,
+            );
             if ($order_from_other_seller['type'] == 'self-pickup') {
-                $order_details = OrdersFromOtherSeller::getById(['id', 'customer_id', 'seller_id', 'product_id'], $order_from_other_seller['id']);
-                // dd($order_details);
+                $order_details = OrdersFromOtherSeller::getById([
+                    'id',
+                    'customer_id',
+                    'seller_id',
+                    'product_id'
+                ], $order_from_other_seller['id']);
                 EmailServices::sendPickupYourOrderFromOtherSellerMail($order_details);
             }
             /* Operation finished */
@@ -159,7 +170,10 @@ class OrdersFromOtherSellersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $updated = OrdersFromOtherSeller::updateOrderStatus($order_from_other_seller['id'], 'delivered');
+            $updated = OrdersFromOtherSeller::updateOrderStatus(
+                $order_from_other_seller['id'],
+                OrderStatusEnum::DELIVERED
+            );
             /* Operation finished */
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -190,7 +204,7 @@ class OrdersFromOtherSellersLivewire extends Component
                 'product_id',
                 'product_price',
                 'product_qty',
-                'order_total',
+                'initial_total',
                 'customer_lat',
                 'customer_lon',
                 'type',
@@ -201,6 +215,7 @@ class OrdersFromOtherSellersLivewire extends Component
             $this->seller_id,
             'desc'
         );
+
         return view('livewire.sellers.orders-from-other-sellers-livewire', ['data' => $data]);
     }
 }

@@ -3,8 +3,11 @@
 namespace App\Models;
 
 use App\Enums\TransportVehicle;
+use App\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -36,6 +39,11 @@ class ProductsByBuyer extends Model
     /**
      * Relations
      */
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'seller_id');
+    }
+
     public function createdBy(): MorphTo
     {
         return $this->morphTo();
@@ -78,4 +86,12 @@ class ProductsByBuyer extends Model
             'length' => $length,
         ]);
     }
+
+    // public static function getForView(array $columns, int $sellerId, string $orderBy): Collection
+    // {
+    //     return self::select($columns)
+    //         ->where('seller_id', '=', $sellerId)
+    //         ->orderBy('created_at', $orderBy)
+    //         ->get();
+    // }
 }

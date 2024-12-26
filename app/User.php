@@ -178,7 +178,7 @@ class User extends Authenticatable implements JWTSubject
     public static function updateInfo(
         int $id,
         string $name = null,
-        string $l_name = null,
+        string $lName = null,
         string $email = null,
         string $phone = null,
         string $fullAddress = null,
@@ -189,16 +189,16 @@ class User extends Authenticatable implements JWTSubject
         string $postcode = null,
         string $lat = null,
         string $lon = null,
-        string $business_name = null,
-        string $business_phone = null,
+        string $businessName = null,
+        string $businessPhone = null,
         string $password = null,
         array $hours = [],
-        string $user_img = null,
-        string $stripe_account_id = null
+        string $userImg = null,
+        string $stripeAccountId = null
     ): bool {
         $user = self::findOrFail($id);
         if (!is_null($name)) $user->name = $name;
-        if (!is_null($l_name)) $user->l_name = $l_name;
+        if (!is_null($lName)) $user->l_name = $lName;
         if (!is_null($email)) $user->email = $email;
         if (!is_null($phone)) $user->phone = '+44' . $phone;
         if (!is_null($fullAddress)) $user->full_address = $fullAddress;
@@ -209,12 +209,13 @@ class User extends Authenticatable implements JWTSubject
         if (!is_null($postcode)) $user->postcode = $postcode;
         if (!is_null($lat)) $user->lat = $lat;
         if (!is_null($lon)) $user->lon = $lon;
-        if (!is_null($business_name)) $user->business_name = $business_name;
-        if (!is_null($business_phone)) $user->business_phone = '+44' . $business_phone;
+        if (!is_null($businessName)) $user->business_name = $businessName;
+        if (!is_null($businessPhone)) $user->business_phone = '+44' . $businessPhone;
         if (!is_null($password)) $user->password = Hash::make($password);
         if (!empty($hours)) $user->business_hours = json_encode($hours);
-        if (!is_null($user_img)) $user->user_img = $user_img;
-        if (!is_null($stripe_account_id)) $user->stripe_account_id = $stripe_account_id;
+        if (!is_null($userImg)) $user->user_img = $userImg;
+        if (!is_null($stripeAccountId)) $user->stripe_account_id = $stripeAccountId;
+        
         return $user->save();
     }
 

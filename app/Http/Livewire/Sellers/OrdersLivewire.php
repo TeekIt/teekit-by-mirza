@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Sellers;
 
+use App\Enums\OrderStatusEnum;
 use App\Models\OrdersFromOtherSeller;
 use App\OrderItems;
 use App\Orders;
@@ -134,25 +135,22 @@ class OrdersLivewire extends Component
         $this->validate([
             'selected_nearby_seller' => 'required|string'
         ]);
-        // dd($this->selected_nearby_seller);
         try {
             /* Perform some operation */
-            $order_total_price = $this->order_item['product_price'] * $this->order_item['product_qty'];
-            $selected_seller = User::getStoreByBusinessName($this->selected_nearby_seller);
-            // dd($this->order);
-            // dd($this->order_item);
+            $orderTotalPrice = $this->order_item['product_price'] * $this->order_item['product_qty'];
+            $selectedSeller = User::getStoreByBusinessName($this->selected_nearby_seller);
 
-            /* Send this product to another store */
-            $order_from_other_seller = OrdersFromOtherSeller::insertInfo(
-                $this->order['user_id'],
-                $selected_seller->id,
+            /* Send this product to another seller */
+            OrdersFromOtherSeller::insertInfo(
+                $this->order['created_by_id'],
+                $selectedSeller->id,
                 $this->order_item['product_id'],
                 $this->order_item['product_price'],
                 $this->order_item['product_qty'],
-                $order_total_price,
+                $orderTotalPrice,
                 isset($this->order['lat']) ? (float) $this->order['lat'] : null,
                 isset($this->order['lon']) ? (float) $this->order['lon'] : null,
-                $this->order['receiver_name'],
+                $this->order['customer_name'],
                 $this->order['phone_number'],
                 $this->order['address'],
                 $this->order['house_no'],
@@ -168,15 +166,15 @@ class OrdersLivewire extends Component
                 $this->order['offloading_charges']
             );
 
-            // // /* Remove the item from current order items */
-            // $removed = OrderItems::removeItem($this->order_item['id']);
-            // // /* Subtract the total price of this product/order_item from the current order's total */
-            // $subtracted = Orders::subFromOrderTotal($this->order_item['order_id'], $prod_total_price);
-            // // dd($order_from_other_seller);
-
+            /* Remove the item from current order items */
+            $removed = OrderItems::removeItem($this->order_item['id']);
+            /* Subtract the total price of this product/order_item from the current order's total */
+            $subtracted = Orders::subFromOrderTotal($this->order_item['order_id'], $orderTotalPrice);
             /* Operation finished */
             sleep(1);
-            if (true) {
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'sendToOtherStoresModal']);
+
+            if ($removed && $subtracted) {
                 session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.SENT_TO_OTHER_STORE_FAILED'));
@@ -192,7 +190,7 @@ class OrdersLivewire extends Component
         try {
             /* Perform some operation */
             $order_details = Orders::isViewed($id);
-            $updated = Orders::updateOrderStatus($id, 'accepted');
+            $updated = Orders::updateOrderStatus($id, OrderStatusEnum::ACCEPTED);
             if ($order_details->type == 'self-pickup') {
                 EmailServices::sendPickupYourOrderMail($order_details);
             }
@@ -215,7 +213,7 @@ class OrdersLivewire extends Component
     //         /* Perform some operation */
     //         $updated = Orders::updateOrderStatus($order['id'], 'ready');
     //         if ($order['type'] == 'self-pickup') {
-    //             $order_details = Orders::getOrderById($order['id']);
+    //             $order_details = Orders::getById($order['id']);
     //             EmailServices::sendPickupYourOrderMail($order_details);
     //         }
     //         /* Operation finished */
@@ -235,7 +233,7 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $updated = Orders::updateOrderStatus($id, 'complete');
+            $updated = Orders::updateOrderStatus($id, OrderStatusEnum::COMPLETE);
             /* Operation finished */
             sleep(1);
             if ($updated) {
@@ -253,7 +251,7 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $order_details = Orders::getOrderById($order['id']);
+            $order_details = Orders::getById($order['id']);
             // dd($order_details);
             // Orders::updateOrderStatus($order['id'], 'cancelled');
             StripeServices::refundCustomer($order_details);
@@ -330,14 +328,15 @@ class OrdersLivewire extends Component
     {
         try {
             $data = Orders::getOrdersForView(
-                order_by: 'desc',
-                seller_id: $this->seller_id,
-                order_id: $this->isSearchByIdSet(),
+                orderBy: 'desc',
+                sellerId: $this->seller_id,
+                orderId: $this->isSearchByIdSet(),
             );
             return view('livewire.sellers.orders-livewire', compact('data'));
         } catch (Exception $error) {
             report($error);
             session()->flash('error', $error->getMessage());
+
             $data = [];
             return view('livewire.sellers.orders-livewire', compact('data'));
         }

@@ -25,7 +25,7 @@ class OrdersFromOtherSellerFactory extends Factory
             'product_id' => Products::inRandomOrder()->first()->id,
             'product_price' => Products::inRandomOrder()->first()->price,
             'product_qty' => fake()->numberBetween(1, 10),
-            'order_total' => fake()->randomFloat(2, 10, 200), // Generate random order total between 10 and 200 with 2 decimal places
+            'initial_total' => fake()->randomFloat(2, 10, 200), // Generate random order total between 10 and 200 with 2 decimal places
             'total_items' => fake()->numberBetween(1, 10), // Generate random number of items between 1 and 10
             'customer_lat' => fake()->latitude, // Generate random latitude
             'customer_lon' => fake()->longitude, // Generate random longitude

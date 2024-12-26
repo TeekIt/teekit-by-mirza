@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\OrderStatusEnum;
 use App\Models\StuartDelivery;
 use App\Orders;
 use Illuminate\Support\Facades\Http;
@@ -96,7 +97,7 @@ final class StuartDeliveryServices
     public static function stuartJobCreationLivewire($order_id, $custom_order_id = null)
     {
         try {
-            $order_details = Orders::getOrderById($order_id);
+            $order_details = Orders::getById($order_id);
             $transport_type = Orders::fetchTransportType($order_id);
             $access_token = (url('/') == 'https://app.teekit.co.uk') ? static::stuartProductionAccessToken() : static::stuartSandboxAccessToken();
             // dd(Carbon::now()->addMinutes(10));
@@ -142,7 +143,9 @@ final class StuartDeliveryServices
             $data = (url('/') == 'https://app.teekit.co.uk') ? static::stuartProductionJobCreation($access_token, $job) : static::stuartSandboxJobCreation($access_token, $job);
             if ($data && !isset($data['error'])) {
                 StuartDelivery::insertInfo($order_id, $data['id']);
-                Orders::updateOrderStatus($order_id, 'stuartDelivery');
+
+                Orders::updateOrderStatus($order_id, OrderStatusEnum::STUART_DELIVERY);
+
                 return 'JobCreated';
             } else {
                 $message = $data['error'] . ': ' . $data['message'];

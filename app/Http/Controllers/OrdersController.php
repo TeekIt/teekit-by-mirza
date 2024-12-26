@@ -109,11 +109,11 @@ class OrdersController extends Controller
 
             $product = Products::getOnlyProductDetailsById($item['productId']);
             $groupedSellers[$item['sellerId']][] = [
-                'productId' => $item['productId'],
-                'qty' => $item['qty'],
-                'userChoice' => $item['userChoice'],
-                'sellerId' => $item['sellerId'],
-                'price' => Products::getProductPrice($item['productId']),
+                'product_id' => $item['productId'],
+                'product_qty' => $item['qty'],
+                'user_choice' => $item['userChoice'],
+                'seller_id' => $item['sellerId'],
+                'product_price' => Products::getProductPrice($item['productId']),
                 'volume' => $product->height * $product->width * $product->length,
                 'weight' => $product->weight,
             ];
@@ -123,9 +123,9 @@ class OrdersController extends Controller
             $totalWeight = OrderServices::getTotalWeight($order);
             $totalVolumn = OrderServices::getTotalVolumn($order);
             $totalItems = OrderServices::getTotalItems($order);
-            $orderTotal = OrderServices::getOrderTotal($order);
+            $initialTotal = OrderServices::getOrderTotal($order);
             /* Adding amount into seller's wallet */
-            User::addIntoWallet($sellerId, $orderTotal);
+            User::addIntoWallet($sellerId, $initialTotal);
 
             if ($request->type == 'delivery') {
                 $seller = User::getUserByID($sellerId, [
@@ -147,7 +147,7 @@ class OrdersController extends Controller
                 $createdByType,
                 $createdById,
                 $sellerId,
-                $orderTotal,
+                $initialTotal,
                 $totalItems,
                 $driverCharges ?? 0.00,
                 $request
@@ -156,10 +156,11 @@ class OrdersController extends Controller
             foreach ($order as $orderItem) {
                 OrderItems::add(
                     $orderId,
-                    $orderItem['productId'],
-                    $orderItem['price'],
-                    $orderItem['qty'],
-                    UserChoicesEnum::from($orderItem['userChoice'])
+                    (new Products())->getMorphClass(),
+                    $orderItem['product_id'],
+                    $orderItem['product_price'],
+                    $orderItem['product_qty'],
+                    UserChoicesEnum::from($orderItem['user_choice'])
                 );
             }
 
@@ -167,10 +168,10 @@ class OrdersController extends Controller
                 $verificationCode = VerificationCodeServices::generateCode();
                 VerificationCodes::add($orderId, $verificationCode);
 
-                $newOrderApiEndPoint = '/api/orders/new';
+                $apiEndPoint = '/api/orders/new';
                 if (
-                    url()->current() == config('constants.LIVE_DASHBOARD_URL') . $newOrderApiEndPoint ||
-                    url()->current() == config('constants.APIS_DOMAIN_URL') . $newOrderApiEndPoint
+                    url()->current() == config('constants.LIVE_DASHBOARD_URL') . $apiEndPoint ||
+                    url()->current() == config('constants.APIS_DOMAIN_URL') . $apiEndPoint
                 ) {
                     OrderServices::sendBulkSms(
                         $seller,
@@ -293,7 +294,7 @@ class OrdersController extends Controller
         /* Place order against the above product */
         $totalVolumn = $productByBuyer->height * $productByBuyer->width * $productByBuyer->length;
         $sellerId = $request->sellerId;
-        $orderTotal = $request->maxPrice;
+        $initialTotal = $request->maxPrice * $request->qty;
         $totalWeight = $request->weight;
         $totalItems = $request->qty;
 
@@ -317,7 +318,7 @@ class OrdersController extends Controller
             $createdByType,
             $createdById,
             $sellerId,
-            $orderTotal,
+            $initialTotal,
             $totalItems,
             $driverCharges ?? 0.00,
             $request
@@ -325,6 +326,7 @@ class OrdersController extends Controller
         /* Insert order items */
         OrderItems::add(
             $orderId,
+            $productByBuyer->getMorphClass(),
             $productByBuyer->id,
             $productByBuyer->max_price,
             $productByBuyer->qty,
@@ -335,10 +337,10 @@ class OrdersController extends Controller
             $verificationCode = VerificationCodeServices::generateCode();
             VerificationCodes::add($orderId, $verificationCode);
 
-            $newOrderApiEndPoint = '/api/orders/new';
+            $apiEndPoint = '/api/orders/product_by_buyer';
             if (
-                url()->current() == config('constants.LIVE_DASHBOARD_URL') . $newOrderApiEndPoint ||
-                url()->current() == config('constants.APIS_DOMAIN_URL') . $newOrderApiEndPoint
+                url()->current() == config('constants.LIVE_DASHBOARD_URL') . $apiEndPoint ||
+                url()->current() == config('constants.APIS_DOMAIN_URL') . $apiEndPoint
             ) {
                 OrderServices::sendBulkSms(
                     $seller,
@@ -492,13 +494,13 @@ class OrdersController extends Controller
                 if (!empty($request->order_status)) {
                     $orders = $orders->where('order_status', '=', $request->order_status);
                     $orders = $orders
-                        ->whereHas('order_items.products', function ($q) use ($users) {
+                        ->whereHas('order_items.product', function ($q) use ($users) {
                             $q->whereHas('user', function ($w) use ($users) {
                                 $w->whereIn('id', $users);
                             });
                         });
                     if (\auth()->user()->vehicle_type == 'bike') {
-                        $orders = $orders->whereHas('order_items.products', function ($q) {
+                        $orders = $orders->whereHas('order_items.product', function ($q) {
                             return $q->where('bike', 1);
                         });
                     }
@@ -534,7 +536,7 @@ class OrdersController extends Controller
                 $orders = $orders->orWhere(function ($q) use ($nearbyOrders) {
                     $q->whereIn('id', $nearbyOrders);
                     if (\auth()->user()->vehicle_type == 'bike') {
-                        $q->whereHas('order_items.products', function ($query) {
+                        $q->whereHas('order_items.product', function ($query) {
                             return $query->where('bike', 1);
                         });
                     }
@@ -771,7 +773,7 @@ class OrdersController extends Controller
             if ($request->payment_status == "paid" && $order->payment_status != "paid" && $request->order_status == 'complete' && $order->order_status != 'complete' && $request->delivery_status == 'delivered' && $order->delivery_status != 'delivered') {
                 $user = User::find($order->seller_id);
                 $user_money = $user->pending_withdraw;
-                $user->pending_withdraw = $order->order_total + $user_money;
+                $user->pending_withdraw = $order->initial_total + $user_money;
                 $user->save();
                 //$this->calculateDriverFair($order, $user);
             }
@@ -822,7 +824,7 @@ class OrdersController extends Controller
         $temp = [];
         $order = Orders::find($orderId);
         $temp['order'] = $order;
-        $temp['order_items'] = OrderItems::with('products.store')->where('order_id', '=', $orderId)->get();
+        $temp['order_items'] = OrderItems::with('product.store')->where('order_id', '=', $orderId)->get();
 
         return $temp;
     }
@@ -846,7 +848,7 @@ class OrdersController extends Controller
                     config('constants.HTTP_OK')
                 );
             }
-            $order = Orders::with(['customer', 'store', 'order_items', 'order_items.products'])
+            $order = Orders::with(['customer', 'store', 'order_items', 'order_items.product'])
                 ->where('id', $request->id)->first();
             return JsonResponseServices::getApiResponse(
                 $order,
