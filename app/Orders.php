@@ -27,12 +27,12 @@ class Orders extends Model
         return $this->hasMany(OrderItems::class, 'order_id');
     }
 
-    public function customer(): BelongsTo
+    public function buyer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->morphTo(__FUNCTION__, 'created_by_type', 'created_by_id');
     }
 
-    public function store(): BelongsTo
+    public function seller(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id');
     }
@@ -69,7 +69,7 @@ class Orders extends Model
     {
         return self::where('id', '=', $id)->update([
             'seller_id' => $sellerId,
-            'created_at' => now(),
+            'moved_at' => now(),
             'updated_at' => now()
         ]);
     }
@@ -258,7 +258,7 @@ class Orders extends Model
     public static function getById(int $id, array $columns = ['*']): ?Orders
     {
         return self::select($columns)
-            ->with(['order_items', 'customer', 'store'])
+            ->with(['order_items.product', 'buyer', 'seller'])
             ->where('id', $id)
             ->first();
     }

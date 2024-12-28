@@ -100,7 +100,7 @@ final class StuartDeliveryServices
             $order_details = Orders::getById($order_id);
             $transport_type = Orders::fetchTransportType($order_id);
             $access_token = (url('/') == 'https://app.teekit.co.uk') ? static::stuartProductionAccessToken() : static::stuartSandboxAccessToken();
-            // dd(Carbon::now()->addMinutes(10));
+
             $job = [
                 'job' => [
                     'pickup_at' => Carbon::now()->addMinutes(10),

@@ -48,6 +48,7 @@ return new class extends Migration
             $table->tinyInteger('is_viewed')->default(0)->comment('0: No, 1: Yes');
             $table->tinyInteger('accepted')->default(0)->comment('0: No, 1: Yes');
             $table->tinyInteger('times_rejected')->default(0);
+            $table->timestamp('moved_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
             /**

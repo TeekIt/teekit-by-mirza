@@ -44,6 +44,7 @@ class CreateOrdersTable extends Migration
             $table->tinyInteger('offloading')->nullable()->comment('0: No, 1: Yes');
             $table->double('offloading_charges', 10, 2)->nullable();
             $table->tinyInteger('is_viewed')->default(0)->comment('0: No, 1: Yes');
+            $table->timestamp('moved_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
             /**

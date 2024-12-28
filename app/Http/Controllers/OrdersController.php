@@ -295,7 +295,6 @@ class OrdersController extends Controller
         $totalVolumn = $productByBuyer->height * $productByBuyer->width * $productByBuyer->length;
         $sellerId = $request->sellerId;
         $initialTotal = $request->maxPrice * $request->qty;
-        $totalWeight = $request->weight;
         $totalItems = $request->qty;
 
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
@@ -309,7 +308,7 @@ class OrdersController extends Controller
                 $seller->lon,
                 $request->lat,
                 $request->lon,
-                $totalWeight,
+                $request->weight,
                 $totalVolumn
             );
         }

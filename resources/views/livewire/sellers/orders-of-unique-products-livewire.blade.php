@@ -139,9 +139,9 @@
                                                                 Time Over...
                                                             </p>
                                                         @else
-                                                            {{-- <p class="fs-3 fw-bold timer" id={{ $singleIndex->id }}> --}}
+                                                            <p class="fs-3 fw-bold timer" id={{ $singleIndex->id }}>
                                                             {{-- Timer will render here --}}
-                                                            {{-- </p> --}}
+                                                            </p>
                                                         @endif
                                                     @endif
                                                 </div>
@@ -179,7 +179,6 @@
                             <div class="row mb-2">
                                 <div class="col-md-2">
                                     <span class="img-container">
-                                        {{-- @dd($singleIndex->order_items[0]) --}}
                                         @if (str_contains($singleIndex->order_items[0]->product->feature_img, 'https://'))
                                             <img class="d-block m-auto" src="{{ $singleIndex->order_items[0]->product->feature_img }}">
                                         @else
@@ -220,13 +219,13 @@
             <h2>No orders of any unique products yet... :(</h2>
         @endforelse
 
-        {{-- @if (!empty($data))
+        @if (!empty($data))
             <div class="row">
                 <div class="col-md-12">
                     {{ $data->links() }}
                 </div>
             </div>
-        @endif --}}
+        @endif
 
     </div>
     <script>

@@ -79,41 +79,62 @@ final class StripeServices
         );
     }
 
-    public static function performIncrementalAuthorization()
-    {
-        $curl = curl_init();
-        $payment_intent_id = $_REQUEST['payment_intent_id'];
-        $form_data = [
-            'amount' => $_REQUEST['amount']
+    public static function performIncrementalAuthorization(
+        string $paymentIntentId = null,
+        int $amount = null,
+        bool $callingFromApi = true
+    ) {
+        $paymentIntentId = $_REQUEST['payment_intent_id'] ?? $paymentIntentId;
+        $formData = [
+            'amount' => $_REQUEST['amount'] ?? $amount,
         ];
-        $api_key = (request()->getPathInfo() === '/api/payment_intent/test/perform_incremental_authorization') ? static::getTestApiKey() : static::getLiveApiKey();
 
-        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $payment_intent_id . '/increment_authorization');
+        if ($callingFromApi) {
+            $apiKey = (request()->getPathInfo() === '/api/payment_intent/test/perform_incremental_authorization') ? static::getTestApiKey() : static::getLiveApiKey();
+        } else {
+            $apiKey = (request()->getSchemeAndHttpHost() != config('constants.LIVE_DASHBOARD_URL')) ? static::getTestApiKey() : static::getLiveApiKey();
+        }
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $paymentIntentId . '/increment_authorization');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($form_data));
-        curl_setopt($curl, CURLOPT_USERPWD, $api_key);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
+        curl_setopt($curl, CURLOPT_USERPWD, $apiKey);
 
         $data = curl_exec($curl);
         if (curl_errno($curl)) echo 'Error:' . curl_error($curl);
 
         curl_close($curl);
+
+        if (!isset(json_decode($data)->error)) {
+            return JsonResponseServices::getApiResponse(
+                json_decode($data),
+                config('constants.TRUE_STATUS'),
+                '',
+                config('constants.HTTP_OK')
+            );
+        }
+
         return JsonResponseServices::getApiResponse(
             json_decode($data),
-            config('constants.TRUE_STATUS'),
+            config('constants.FALSE_STATUS'),
             '',
-            config('constants.HTTP_OK')
+            config('constants.HTTP_UNPROCESSABLE_REQUEST')
         );
     }
 
-    public static function capturePaymentIntent(string $paymentIntentId = null, float $amount = null, bool $apiCall = true)
-    {
+    public static function capturePaymentIntent(
+        string $paymentIntentId = null,
+        int $amount = null,
+        bool $callingFromApi = true
+    ) {
         $paymentIntentId = $_REQUEST['payment_intent_id'] ?? $paymentIntentId;
         $formData = [
             'amount_to_capture' => $_REQUEST['amount'] ?? $amount,
         ];
 
-        if ($apiCall) {
+        if ($callingFromApi) {
             $apiKey = (request()->getPathInfo() === '/api/payment_intent/test/capture') ? static::getTestApiKey() : static::getLiveApiKey();
         } else {
             $apiKey = (request()->getSchemeAndHttpHost() != config('constants.LIVE_DASHBOARD_URL')) ? static::getTestApiKey() : static::getLiveApiKey();
