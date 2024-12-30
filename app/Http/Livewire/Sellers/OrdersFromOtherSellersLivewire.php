@@ -35,9 +35,11 @@ class OrdersFromOtherSellersLivewire extends Component
 
     public function getSellersOfSameCity()
     {
-        return Cache::remember('getSellersOfSameCity' . $this->seller_id, Carbon::now()->addDay(), function () {
-            return User::getParentAndChildSellersByCity(auth()->user()->city);
-        });
+        return Cache::remember(
+            'getSellersOfSameCity' . $this->sellerId,
+            Carbon::now()->addDay(),
+            fn () => User::getParentAndChildSellersByCity(auth()->user()->city)
+        );
     }
 
     public function getNearBySellers($customer_lat, $customer_lon, $sellers_of_same_city)
@@ -59,29 +61,29 @@ class OrdersFromOtherSellersLivewire extends Component
     /* 
     * CRUD Methods
     */
-    public function moveToAnotherSeller($order_id, $order_status, $customer_lat, $customer_lon, $created_at)
+    public function moveToAnotherSeller($orderId, $orderStatus, $customerLat, $customerLon, $createdAt)
     {
         try {
             /* Perform some operation */
 
             /* Get sellers who belongs to the city of this store owner */
-            $sellers_of_same_city = $this->getSellersOfSameCity();
-            /* Get sellers who are nearby to the order placing buyer */
-            $nearby_sellers = $this->getNearBySellers($customer_lat, $customer_lon, $sellers_of_same_city);
-            $random_index = array_rand($nearby_sellers, 1);
-            /* Update seller_id if the current order is older then 2 minutes */
+            $sellersOfSameCity = $this->getSellersOfSameCity();
+            /* Get sellers who are nearby to the order-placing buyer */
+            $nearbySellers = $this->getNearBySellers($customerLat, $customerLon, $sellersOfSameCity);
+            $randomIndex = array_rand($nearbySellers, 1);
+            /* Update sellerId if the current order is older than 2 minutes */
             $moved = false;
-            if ($this->isTheOrderOlderThen($this->order_holding_minutes, $created_at) && $order_status === 'pending') {
-                OrdersFromOtherSeller::incrementTimesRejected($order_id);
-                $moved = OrdersFromOtherSeller::moveToAnotherSeller($order_id, $nearby_sellers[$random_index]['id']);
+            if ($this->isTheOrderOlderThen($this->orderHoldingMinutes, $createdAt) && $orderStatus === 'pending') {
+                OrdersFromOtherSeller::incrementTimesRejected($orderId);
+                $moved = OrdersFromOtherSeller::moveToAnotherSeller($orderId, $nearbySellers[$randomIndex]['id']);
             }
 
             /* Operation finished */
-            if ($order_status === 'pending') {
+            if ($orderStatus === 'pending') {
                 if ($moved) {
-                    session()->flash('success', 'Order#' . $order_id . ' has been moved to another seller.');
+                    session()->flash('success', 'Order#' . $orderId . ' has been moved to another seller.');
                 } else {
-                    session()->flash('warning', 'Soon Order#' . $order_id . ' will be moved to another seller.');
+                    session()->flash('warning', 'Soon Order#' . $orderId . ' will be moved to another seller.');
                 }
             }
         } catch (Exception $error) {

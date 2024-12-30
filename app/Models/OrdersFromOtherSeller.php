@@ -64,7 +64,7 @@ class OrdersFromOtherSeller extends Model
     {
         return self::where('id', '=', $id)->update([
             'seller_id' => $sellerId,
-            'created_at' => now(),
+            'moved_at' => now(),
             'updated_at' => now()
         ]);
     }
