@@ -53,7 +53,7 @@ final class StripeServices
             'amount' => $_REQUEST['amount'],
             'currency' => $_REQUEST['currency'],
             // 'payment_method' => 'pm_card_amex',
-            'payment_method_types[]' => 'card',
+            'payment_method_types[]' => 'card_present',
             'capture_method' => 'manual',
             // 'payment_method_options[card][request_three_d_secure]' => 'any',
             'payment_method_options[card_present][request_incremental_authorization_support]' => 'true',
