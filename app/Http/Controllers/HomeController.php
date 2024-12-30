@@ -545,7 +545,7 @@ class HomeController extends Controller
             $pending_orders = Orders::query()->where('order_status', '=', 'ready')->count();
             $total_products = Products::query()->count();
             $total_orders = Orders::query()->where('payment_status', '!=', 'hidden')->count();
-            $total_sales = Orders::query()->where('payment_status', '=', 'paid')->sum('order_total');
+            $total_sales = Orders::query()->where('payment_status', '=', 'paid')->sum('initial_total');
             return view('admin.home', compact('terms_page', 'help_page', 'faq_page', 'slogan', 'favicon', 'logo', 'pending_orders', 'total_products', 'total_orders', 'total_sales'));
         } else {
             abort(404);
@@ -569,7 +569,7 @@ class HomeController extends Controller
             $pending_orders = Orders::query()->where('order_status', '=', 'ready')->count();
             $total_products = Orders::query()->where('payment_status', '!=', 'hidden')->count();
             $total_orders = Products::query()->count();
-            $total_sales = Orders::query()->where('payment_status', '=', 'paid')->sum('order_total');
+            $total_sales = Orders::query()->where('payment_status', '=', 'paid')->sum('initial_total');
             return view('admin.settings', compact('terms_page', 'help_page', 'faq_page', 'slogan', 'favicon', 'logo', 'pending_orders', 'total_products', 'total_orders', 'total_sales'));
         } else {
             abort(404);
@@ -1120,7 +1120,7 @@ class HomeController extends Controller
     {
         try {
             $order = Orders::find($order_id);
-            $order->order_total -= $product_price;
+            $order->initial_total -= $product_price;
             $order->total_items -= $product_qty;
             $order->save();
             // Now remove the product from order items table

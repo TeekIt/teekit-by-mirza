@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatusEnum;
 use App\OrderItems;
 use App\Orders;
 use App\Products;
@@ -36,7 +37,7 @@ class OrdersFromOtherSeller extends Model
     /**
      * Helpers
      */
-    public static function updateOrderStatus(int $id, string $status): int
+    public static function updateOrderStatus(int $id, OrderStatusEnum $status): int
     {
         return self::where('id', '=', $id)->update(['order_status' => $status]);
     }
@@ -59,10 +60,10 @@ class OrdersFromOtherSeller extends Model
         return self::where('id', '=', $id)->increment('times_rejected');
     }
 
-    public static function moveToAnotherSeller(int $id, int $seller_id): int
+    public static function moveToAnotherSeller(int $id, int $sellerId): int
     {
         return self::where('id', '=', $id)->update([
-            'seller_id' => $seller_id,
+            'seller_id' => $sellerId,
             'created_at' => now(),
             'updated_at' => now()
         ]);
@@ -74,24 +75,23 @@ class OrdersFromOtherSeller extends Model
         int $product_id,
         float $product_price,
         int $product_qty,
-        float $order_total,
-        int $total_items,
-        ?float $customer_lat = null, // Optional parameter with default null
-        ?float $customer_lon = null, // Optional parameter with default null
+        float $initial_total,
+        ?float $customer_lat = null,
+        ?float $customer_lon = null,
         string $receiver_name,
         string $phone_number,
         string $address,
-        string $house_no = null,      // Optional parameter with default null
-        string $flat = null,          // Optional parameter with default null
-        float $driver_charges = 0.0, // Optional parameter with default value
-        ?float $delivery_charges = null, // Optional parameter with default null
-        ?float $service_charges = null, // Optional parameter with default null
-        string $device = null,       // Optional parameter with default null
+        string $house_no = null,
+        string $flat = null,
+        float $driver_charges = 0.0,
+        ?float $delivery_charges = null,
+        ?float $service_charges = null,
+        string $device = null,
         string $type,
         ?string $description = null,
-        string $payment_status = "hidden", // Optional parameter with default value
-        ?int $offloading = null,      // Optional parameter with default null
-        ?float $offloading_charges = null // Optional parameter with default null
+        string $payment_status = "hidden",
+        ?int $offloading = null,
+        ?float $offloading_charges = null
     ): OrdersFromOtherSeller {
         $model = new OrdersFromOtherSeller();
         $model->customer_id = $customer_id;
@@ -99,8 +99,7 @@ class OrdersFromOtherSeller extends Model
         $model->product_id = $product_id;
         $model->product_price = $product_price;
         $model->product_qty = $product_qty;
-        $model->order_total = $order_total;
-        $model->total_items = $total_items;
+        $model->initial_total = $initial_total;
         if ($type == 'delivery') {
             $model->customer_lat = $customer_lat;
             $model->customer_lon = $customer_lon;
@@ -120,12 +119,16 @@ class OrdersFromOtherSeller extends Model
         $model->offloading = $offloading;
         $model->offloading_charges = $offloading_charges;
         $model->save();
+
         return $model;
     }
 
     public static function getById(array $columns, int $id): object
     {
-        return self::select($columns)->with(['product.category', 'seller', 'customer'])->where('id', '=', $id)->first();
+        return self::select($columns)
+            ->with(['product.category', 'seller', 'customer'])
+            ->where('id', '=', $id)
+            ->first();
     }
 
     public static function getForView(array $columns, int $seller_id, string $order_by): object

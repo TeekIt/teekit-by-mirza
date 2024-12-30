@@ -2,8 +2,8 @@
 
 namespace App;
 
-use App\Services\DriverFairServices;
-use App\Services\GoogleMapServices;
+use App\Enums\OrderStatusEnum;
+use App\Models\ProductsByBuyer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,12 +27,12 @@ class Orders extends Model
         return $this->hasMany(OrderItems::class, 'order_id');
     }
 
-    public function customer(): BelongsTo
+    public function buyer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->morphTo(__FUNCTION__, 'created_by_type', 'created_by_id');
     }
 
-    public function store(): BelongsTo
+    public function seller(): BelongsTo
     {
         return $this->belongsTo(User::class, 'seller_id');
     }
@@ -45,17 +45,40 @@ class Orders extends Model
             'order_id',
             'id',
             'id',
-            'product_id'
+            'product_belongs_to_id'
         );
     }
     /**
      * Helpers
      */
+    public static function updateInfo(
+        int $id,
+        ?float $initialTotal = null,
+        ?float $currentTotal = null,
+        ?OrderStatusEnum $orderStatus = null
+    ): bool {
+        $order = self::findOrFail($id);
+        if (!is_null($initialTotal)) $order->initial_total = $initialTotal;
+        if (!is_null($currentTotal)) $order->current_total = $currentTotal;
+        if (!is_null($orderStatus)) $order->order_status = $orderStatus;
+
+        return $order->save();
+    }
+
+    public static function moveToAnotherSeller(int $id, int $sellerId): int
+    {
+        return self::where('id', '=', $id)->update([
+            'seller_id' => $sellerId,
+            'moved_at' => now(),
+            'updated_at' => now()
+        ]);
+    }
+
     public static function add(
         string $createdByType,
         int $createdById,
         int $sellerId,
-        float $orderTotal,
+        float $initialTotal,
         int $totalItems,
         float $driverCharges,
         Request $request
@@ -64,12 +87,14 @@ class Orders extends Model
         $order->created_by_type = $createdByType;
         $order->created_by_id = $createdById;
         $order->seller_id = $sellerId;
-        $order->order_total = $orderTotal;
+        $order->initial_total = $initialTotal;
+        /* When we create a new order current_total == initial_total */
+        $order->current_total = $initialTotal;
         $order->total_items = $totalItems;
         if ($request->type == 'delivery') {
             $order->customer_lat = $request->lat;
             $order->customer_lon = $request->lon;
-            $order->customer_name = $request->fName . $request->lName;
+            $order->customer_name = $request->fName . " " .  $request->lName;
             $order->phone_number = $request->phone;
             $order->address = $request->fullAddress;
             $order->house_no = $request->houseNo;
@@ -81,6 +106,7 @@ class Orders extends Model
         $order->type = $request->type;
         $order->description = $request->description;
         $order->payment_status = $request->paymentStatus ?? "hidden";
+        $order->payment_intent_id = $request->paymentIntentId;
         $order->device = $request->device ?? NULL;
         $order->offloading = $request->offloading ?? NULL;
         $order->offloading_charges = $request->offloadingCharges ?? NULL;
@@ -89,17 +115,18 @@ class Orders extends Model
         return $order;
     }
 
-    public static function subFromOrderTotal(int $order_id, float $prod_total_price): bool
+    public static function subFromOrderTotal(int $orderId, float $prodTotalPrice): bool
     {
-        $order = self::find($order_id);
-        $order->order_total = $order->order_total - $prod_total_price;
+        $order = self::find($orderId);
+        $order->initial_total -= $prodTotalPrice;
+
         return $order->save();
     }
 
     public static function replaceWithAlternativePrice(int $order_id, float $current_prod_price, float $alternative_prod_price): bool
     {
         $order = self::find($order_id);
-        $order->order_total = ($order->order_total - $current_prod_price) + $alternative_prod_price;
+        $order->initial_total = ($order->initial_total - $current_prod_price) + $alternative_prod_price;
         return $order->save();
     }
 
@@ -142,24 +169,25 @@ class Orders extends Model
         return self::where('customer_id', $customerId)->count();
     }
 
-    public static function updateOrderStatus(int $order_id, string $status): int
+    public static function updateOrderStatus(int $orderId, OrderStatusEnum $status): int
     {
-        return self::where('id', $order_id)->update([
+        return self::where('id', $orderId)->update([
             'order_status' => $status
         ]);
     }
 
-    public static function isViewed(int $order_id): object
+    public static function isViewed(int $orderId): ?Orders
     {
-        $order = self::findOrFail($order_id);
+        $order = self::findOrFail($orderId);
         $order->is_viewed = 1;
         $order->save();
+
         return $order;
     }
 
     public static function getTotalSalesBySellerId(int $seller_id): float
     {
-        return self::where('payment_status', '=', 'paid')->where('seller_id', '=', $seller_id)->sum('order_total');
+        return self::where('payment_status', '=', 'paid')->where('seller_id', '=', $seller_id)->sum('initial_total');
     }
 
     public static function getTotalOrdersBySellerId(int $seller_id): Collection
@@ -172,17 +200,42 @@ class Orders extends Model
         return self::where('order_status', '=', $status)->where('seller_id', '=', $seller_id)->get();
     }
 
-    public static function getOrdersForView(int|null $order_id = null, int $seller_id, string $order_by): LengthAwarePaginator
+    public static function getOrdersOfUniqueProductsForView(
+        int $sellerId,
+        string $orderBy,
+        int|null $orderId = null,
+        array $columns = ['*'],
+    ): LengthAwarePaginator {
+        /* First we will update the "is_viewed" column if the order is searched by ID */
+        if ($orderId) static::isViewed($orderId);
+        /* Now we will fetch the required data */
+        return self::select($columns)
+            ->with(['order_items.product'])
+            ->when($orderId, function ($query) use ($orderId) {
+                return $query->where('id', '=', $orderId);
+            })
+            ->whereHas('order_items', function ($orderItemsQuery) {
+                $orderItemsQuery->where('product_belongs_to_type', (new ProductsByBuyer())->getMorphClass());
+            })
+            ->where('seller_id', '=', $sellerId)
+            ->orderBy('created_at', $orderBy)
+            ->paginate(10);
+    }
+
+    public static function getOrdersForView(int|null $orderId = null, int $sellerId, string $orderBy): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
-        if ($order_id) static::isViewed($order_id);
+        if ($orderId) static::isViewed($orderId);
         /* Now we will fetch the required data */
         return self::with(['order_items', 'products.category'])
-            ->when($order_id, function ($query) use ($order_id) {
-                return $query->where('id', '=', $order_id);
+            ->when($orderId, function ($query) use ($orderId) {
+                return $query->where('id', '=', $orderId);
             })
-            ->where('seller_id', '=', $seller_id)
-            ->orderBy('created_at', $order_by)
+            ->whereHas('order_items', function ($orderItemsQuery) {
+                $orderItemsQuery->where('product_belongs_to_type', (new Products())->getMorphClass());
+            })
+            ->where('seller_id', '=', $sellerId)
+            ->orderBy('created_at', $orderBy)
             ->paginate(10);
     }
 
@@ -202,8 +255,11 @@ class Orders extends Model
             ->first();
     }
 
-    public static function getOrderById(int $order_id): ?Orders
+    public static function getById(int $id, array $columns = ['*']): ?Orders
     {
-        return self::with(['order_items', 'customer', 'store'])->where('id', $order_id)->first();
+        return self::select($columns)
+            ->with(['order_items.product', 'buyer', 'seller'])
+            ->where('id', $id)
+            ->first();
     }
 }

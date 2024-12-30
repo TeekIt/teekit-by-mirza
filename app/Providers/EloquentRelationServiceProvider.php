@@ -24,6 +24,8 @@ class EloquentRelationServiceProvider extends ServiceProvider
         Relation::enforceMorphMap([
             'User' => 'App\User',
             'GuestBuyer' => 'App\Models\GuestBuyer',
+            'Product' => 'App\Products',
+            'ProductsByBuyer' => 'App\Models\ProductsByBuyer',
         ]);
     }
 }

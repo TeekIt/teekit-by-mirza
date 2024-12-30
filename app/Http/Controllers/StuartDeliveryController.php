@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatusEnum;
 use App\Models\StuartDelivery;
 use App\Orders;
 use Illuminate\Http\Request;
@@ -163,7 +164,8 @@ class StuartDeliveryController extends Controller
             $data = (url('/') == 'https://app.teekit.co.uk') ? $this->stuartProductionJobStatus($access_token, $stuart_delivery->job_id) : $this->stuartSandboxJobStatus($access_token, $stuart_delivery->job_id);
 
             if ($data['status'] == 'finished') {
-                Orders::updateOrderStatus($request->order_id, 'complete');
+                Orders::updateOrderStatus($request->order_id, OrderStatusEnum::COMPLETE);
+                
                 return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.TRUE_STATUS'),

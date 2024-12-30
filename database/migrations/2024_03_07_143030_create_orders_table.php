@@ -18,7 +18,8 @@ class CreateOrdersTable extends Migration
             // $table->foreignId('customer_id')->constrained(table:'users')->cascadeOnDelete();
             $table->morphs('created_by'); /* This column can either belong to "users" or "guest_buyers" */
             $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
-            $table->float('order_total');
+            $table->float('initial_total');
+            $table->float('current_total');
             $table->tinyInteger('total_items');
             $table->decimal('customer_lat', 11, 8)->nullable();
             $table->decimal('customer_lon', 11, 8)->nullable();
@@ -43,6 +44,7 @@ class CreateOrdersTable extends Migration
             $table->tinyInteger('offloading')->nullable()->comment('0: No, 1: Yes');
             $table->double('offloading_charges', 10, 2)->nullable();
             $table->tinyInteger('is_viewed')->default(0)->comment('0: No, 1: Yes');
+            $table->timestamp('moved_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
             /**

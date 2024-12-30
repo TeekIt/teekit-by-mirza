@@ -16,6 +16,7 @@ use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
 use App\Http\Livewire\Sellers\OrdersFromOtherSellersLivewire;
 use App\Http\Livewire\Sellers\OrdersLivewire;
+use App\Http\Livewire\Sellers\OrdersOfUniqueProductsLivewire;
 use App\Http\Livewire\Sellers\SellerDashboardLivewire;
 use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
@@ -98,6 +99,7 @@ Route::middleware(['auth', 'auth.sellers'])->prefix('seller')->group(function ()
 
     Route::prefix('orders')->group(function () {
         Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
+        Route::get('/of-unique-products', OrdersOfUniqueProductsLivewire::class)->name('seller.orders.of.unique.products');
         Route::get('/count', [HomeController::class, 'countSellerOrders'])->name('seller.orders.count');
         Route::get('/{request_order_id?}', OrdersLivewire::class)->name('seller.orders');
     });

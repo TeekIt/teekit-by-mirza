@@ -28,7 +28,6 @@ class UsersController extends Controller
         $validatedData = Validator::make($request->all(), [
             'fName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
             'lName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
-            'email' => 'required|email|max:255',
             'password' => 'required|string|min:8|max:50',
             'countryCode' => 'required|string|max:4',
             'phone' => 'required|string|max:13',
@@ -48,8 +47,7 @@ class UsersController extends Controller
         $updated = User::updateInfo(
             id: JWTAuth::user()->id,
             name: $request->fName,
-            l_name: $request->lName,
-            email: $request->email,
+            lName: $request->lName,
             // phone: $request->countryCode . $request->phone,
             phone: $request->phone,
             fullAddress: $request->fullAddress,
@@ -104,11 +102,6 @@ class UsersController extends Controller
      */
     public function updateSellerRequiredInfo(Request $request)
     {
-        // $request->validate([
-        //     'stripe_account_id' => 'required|string',
-        //     'time' => 'required|array',
-        // ]);
-
         $request->validate([
             'time' => 'required|array',
         ]);
@@ -117,17 +110,13 @@ class UsersController extends Controller
         foreach ($time as $key => $value) {
             if (!in_array("on", $time[$key])) $time[$key] += ["closed" => null];
         }
-        $business_hours['time'] = $time;
-        $business_hours['submitted'] = "yes";
 
-        // $updated = User::updateInfo(
-        //     auth()->id(),
-        //     $business_hours,
-        //     $request->stripe_account_id
-        // );
+        $businessHours['time'] = $time;
+        $businessHours['submitted'] = "yes";
+
         $updated = User::updateInfo(
             auth()->id(),
-            hours: $business_hours,
+            hours: $businessHours,
         );
         if ($updated) {
             return WebResponseServices::getResponseRedirectBack(
@@ -135,6 +124,7 @@ class UsersController extends Controller
                 config('constants.UPDATION_SUCCESS')
             );
         }
+
         return WebResponseServices::getResponseRedirectBack(
             config('constants.ERROR_STATUS'),
             config('constants.UPDATION_FAILED')
