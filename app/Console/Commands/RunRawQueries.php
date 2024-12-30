@@ -29,7 +29,7 @@ class RunRawQueries extends Command
      */
     public function handle()
     {
-        $executeQueries = false;
+        $executeQueries = true;
 
         try {
             if ($executeQueries) {
@@ -50,7 +50,7 @@ class RunRawQueries extends Command
                     // /* * Update "created_by_type" column to "User": */
                     // DB::statement('UPDATE orders SET created_by_type = \'User\'');
                     
-                    /* Above queries are already executed on Staging env */
+                    /* Above queries are already executed on Staging ENV */
 
                     DB::statement('ALTER TABLE `orders` CHANGE `order_total` `initial_total` DOUBLE(8,2) NOT NULL');
                     DB::statement('ALTER TABLE `orders` ADD `current_total` DOUBLE(8,2) NOT NULL AFTER `initial_total`');

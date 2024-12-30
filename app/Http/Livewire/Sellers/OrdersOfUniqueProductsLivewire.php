@@ -62,16 +62,18 @@ class OrdersOfUniqueProductsLivewire extends Component
         $this->dispatchBrowserEvent('show-modal', ['id' => 'acceptOrderModal']);
     }
 
-    public function isTheOrderOlderThen(int $theseMinutes, string $orderCreatedAt)
+    public function isTheOrderOlderThen(int $theseMinutes, string $orderMovedAt)
     {
-        return (Carbon::parse($orderCreatedAt)->diffInMinutes(Carbon::now()) > $theseMinutes) ? true : false;
+        return (Carbon::parse($orderMovedAt)->diffInMinutes(Carbon::now()) > $theseMinutes) ? true : false;
     }
 
     public function getSellersOfSameCity()
     {
-        return Cache::remember('getSellersOfSameCity' . $this->sellerId, Carbon::now()->addDay(), function () {
-            return User::getParentAndChildSellersByCity(auth()->user()->city);
-        });
+        return Cache::remember(
+            'getSellersOfSameCity' . $this->sellerId,
+            Carbon::now()->addDay(),
+            fn() => User::getParentAndChildSellersByCity(auth()->user()->city)
+        );
     }
 
     public function getNearBySellers($customerLat, $customerLon, $sellersOfSameCity)
@@ -100,8 +102,14 @@ class OrdersOfUniqueProductsLivewire extends Component
     /* 
     * CRUD Methods
     */
-    public function moveToAnotherSeller($orderId, $orderStatus, $customerLat, $customerLon, $createdAt)
-    {
+    public function moveToAnotherSeller(
+        $orderId,
+        $orderStatus,
+        $customerLat,
+        $customerLon,
+        $movedAt,
+        $createdAt
+    ) {
         try {
             /* Perform some operation */
 
@@ -112,7 +120,8 @@ class OrdersOfUniqueProductsLivewire extends Component
             $randomIndex = array_rand($nearbySellers, 1);
             /* Update sellerId if the current order is older than 2 minutes */
             $moved = false;
-            if ($this->isTheOrderOlderThen($this->orderHoldingMinutes, $createdAt) && $orderStatus === 'pending') {
+            $movedAt = ($movedAt) ? $movedAt : $createdAt;
+            if ($this->isTheOrderOlderThen($this->orderHoldingMinutes, $movedAt) && $orderStatus === 'pending') {
                 // Orders::incrementTimesRejected($orderId);
                 $moved = Orders::moveToAnotherSeller($orderId, $nearbySellers[$randomIndex]['id']);
 

@@ -57,7 +57,13 @@
         </div>
         @forelse ($data as $singleIndex)
             <!-- Single Order Content -->
-            <div class="col-12 p-2" wire:poll.60000ms="moveToAnotherSeller({{ $singleIndex->id }}, '{{ $singleIndex->order_status }}', {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }}, '{{ $singleIndex->created_at }}')">
+            <div class="col-12 p-2" wire:poll.60000ms="moveToAnotherSeller(
+            {{ $singleIndex->id }}, 
+            '{{ $singleIndex->order_status }}', 
+            {{ $singleIndex->customer_lat }}, 
+            {{ $singleIndex->customer_lon }}, 
+            '{{ $singleIndex->moved_at }}', 
+            '{{ $singleIndex->created_at }}')">
                 <div class="card">
                     <div class="card-body py-1 px-2">
                         <!-- Order Header -->
@@ -77,6 +83,22 @@
                                                             role="status" aria-hidden="true"></span>
                                                     </span>
                                                     </button> --}}
+
+                                                    <button class="btn btn-warning col-3 col-md-2" wire:click="moveToAnotherSeller(
+                                                                {{ $singleIndex->id }}, 
+                                                                '{{ $singleIndex->order_status }}', 
+                                                                {{ $singleIndex->customer_lat }}, 
+                                                                {{ $singleIndex->customer_lon }}, 
+                                                                '{{ $singleIndex->moved_at }}', 
+                                                                '{{ $singleIndex->created_at }}'
+                                                                )">
+                                                        <span>
+                                                            Move To Another Seller
+                                                        </span>
+                                                        <span>
+                                                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                                        </span>
+                                                    </button>
 
                                                     @if ($singleIndex->order_status === 'pending')
                                                         <button class="btn btn-success col-4 col-md-2" wire:click="renderAcceptOrderModal({{ $singleIndex->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" wire:target="renderAcceptOrderModal({{ $singleIndex->id }})" title="Accept the order">
@@ -140,7 +162,7 @@
                                                             </p>
                                                         @else
                                                             <p class="fs-3 fw-bold timer" id={{ $singleIndex->id }}>
-                                                            {{-- Timer will render here --}}
+                                                                {{-- Timer will render here --}}
                                                             </p>
                                                         @endif
                                                     @endif
