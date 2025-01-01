@@ -48,7 +48,8 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('seller.orders.of.unique.products') ? 'active' : '' }}" href="{{ route('seller.orders.of.unique.products') }}">
-                        <i class="nav-icon fas fa-luggage-cart"></i>
+                        {{-- <i class="nav-icon fas fa-luggage-cart"></i> --}}
+                        <i class="nav-icon fas fa-fingerprint"></i>
                         <p class="ml-2">
                             Unique Product Orders
                         </p>

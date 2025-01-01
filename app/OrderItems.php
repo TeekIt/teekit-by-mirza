@@ -29,11 +29,6 @@ class OrderItems extends Model
         return $this->belongsTo(Orders::class, 'order_id');
     }
 
-    // public function products(): BelongsTo
-    // {
-    //     return $this->belongsTo(Products::class, 'product_id');
-    // }
-
     public function product(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'product_belongs_to_type', 'product_belongs_to_id');
