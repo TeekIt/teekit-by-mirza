@@ -43,7 +43,7 @@ return [
     'WITHDRAWAL_REQUEST_SUBMITTED' => 'Withdrawal request is successfully submitted',
     'PRODUCT_REMOVED_SUCCESSFULLY' => 'Product has been removed successfully',
     'ORDER_PLACED_SUCCESSFULLY' => 'Your order has been placed successfully',
-    'SENT_TO_OTHER_STORE_SUCCESS' => 'Your order has been sent to other store',
+    'SENT_TO_OTHER_STORE_SUCCESS' => 'Your order has been sent to another store',
     'PARENT_QTY_SYNCED_SUCCESS' => 'Quantities synced',
     /*
     |--------------------------------------------------------------------------
@@ -57,7 +57,7 @@ return [
     'UN_ARCHIVED_FAILED' => 'Failed to unarchive data',
     'DELETION_FAILED' => 'Failed to delete data',
     'INVALID_DATA' => 'You have entered invalid or too long data',
-    'ORDER_CANCELLATION_FAILED' => 'Sorry! We are facing an error in cancelling your order',
+    'ORDER_CANCELLATION_FAILED' => 'Sorry! We regret that we are facing an error in cancelling your order',
     'FAILED_CODE' => 0,
     'FALSE_STATUS' => false,
     'ERROR_STATUS' => 'error',

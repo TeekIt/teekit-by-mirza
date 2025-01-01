@@ -3,9 +3,12 @@
 namespace App\Http\Livewire\Sellers;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\OrderTypeEnum;
 use App\Models\OrdersFromOtherSeller;
+use App\Orders;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
+use App\Services\StripeServices;
 use App\User;
 use Carbon\Carbon;
 use Exception;
@@ -15,22 +18,24 @@ use Livewire\Component;
 class OrdersFromOtherSellersLivewire extends Component
 {
     public
-        $seller_id,
-        $order_holding_minutes = 2;
+        $sellerId,
+        $orderId;
+
+    public $orderHoldingMinutes = 2;
 
     /* 
     * Lifecycle Hooks
     */
     public function mount()
     {
-        $this->seller_id = auth()->id();
+        $this->sellerId = auth()->id();
     }
     /* 
     * Helpers
     */
-    public function isTheOrderOlderThen(int $these_minutes, string $order_created_at)
+    public function isTheOrderOlderThen(int $theseMinutes, string $orderMovedAt)
     {
-        return (Carbon::parse($order_created_at)->diffInMinutes(Carbon::now()) > $these_minutes) ? true : false;
+        return (Carbon::parse($orderMovedAt)->diffInMinutes(Carbon::now()) > $theseMinutes) ? true : false;
     }
 
     public function getSellersOfSameCity()
@@ -38,14 +43,14 @@ class OrdersFromOtherSellersLivewire extends Component
         return Cache::remember(
             'getSellersOfSameCity' . $this->sellerId,
             Carbon::now()->addDay(),
-            fn () => User::getParentAndChildSellersByCity(auth()->user()->city)
+            fn() => User::getParentAndChildSellersByCity(auth()->user()->city)
         );
     }
 
     public function getNearBySellers($customer_lat, $customer_lon, $sellers_of_same_city)
     {
         return Cache::remember(
-            'getNearBySellers' . $this->seller_id . $customer_lat . $customer_lon,
+            'getNearBySellers' . $this->sellerId . $customer_lat . $customer_lon,
             Carbon::now()->addDay(),
             function () use ($customer_lat, $customer_lon, $sellers_of_same_city) {
                 /* 
@@ -58,10 +63,16 @@ class OrdersFromOtherSellersLivewire extends Component
             }
         );
     }
+
+    public function noNearBySellers($orderId)
+    {
+        $this->orderId = $orderId;
+        $this->dispatchBrowserEvent('show-modal', ['id' => 'noOtherSellersModal']);
+    }
     /* 
     * CRUD Methods
     */
-    public function moveToAnotherSeller($orderId, $orderStatus, $customerLat, $customerLon, $createdAt)
+    public function moveToAnotherSeller($orderId, $orderStatus, $customerLat, $customerLon, $movedAt)
     {
         try {
             /* Perform some operation */
@@ -70,20 +81,23 @@ class OrdersFromOtherSellersLivewire extends Component
             $sellersOfSameCity = $this->getSellersOfSameCity();
             /* Get sellers who are nearby to the order-placing buyer */
             $nearbySellers = $this->getNearBySellers($customerLat, $customerLon, $sellersOfSameCity);
+
+            if (empty($nearbySellers)) return $this->noNearBySellers($orderId);
+
             $randomIndex = array_rand($nearbySellers, 1);
             /* Update sellerId if the current order is older than 2 minutes */
             $moved = false;
-            if ($this->isTheOrderOlderThen($this->orderHoldingMinutes, $createdAt) && $orderStatus === 'pending') {
-                OrdersFromOtherSeller::incrementTimesRejected($orderId);
+            if ($this->isTheOrderOlderThen($this->orderHoldingMinutes, $movedAt) && $orderStatus === 'pending') {
                 $moved = OrdersFromOtherSeller::moveToAnotherSeller($orderId, $nearbySellers[$randomIndex]['id']);
+                OrdersFromOtherSeller::incrementTimesRejected($orderId);
             }
 
             /* Operation finished */
             if ($orderStatus === 'pending') {
                 if ($moved) {
-                    session()->flash('success', 'Order#' . $orderId . ' has been moved to another seller.');
+                    session()->flash('success', 'Order#' . $orderId . ' has been moved to another seller');
                 } else {
-                    session()->flash('warning', 'Soon Order#' . $orderId . ' will be moved to another seller.');
+                    session()->flash('warning', 'Soon Order#' . $orderId . ' will be moved to another seller');
                 }
             }
         } catch (Exception $error) {
@@ -92,31 +106,38 @@ class OrdersFromOtherSellersLivewire extends Component
         }
     }
 
-    public function rejectedBySeller($order_id, $customer_lat, $customer_lon)
+    public function rejectedBySeller($orderId, $customerLat, $customerLon)
     {
         try {
             /* Perform some operation */
 
-            /* Get sellers who belongs to the city of this store owner */
-            $sellers_of_same_city = $this->getSellersOfSameCity();
+            /* Get sellers who belong to the city of this store owner */
+            $sellersOfSameCity = $this->getSellersOfSameCity();
             /* Get sellers who are nearby to the order placing buyer */
-            $nearby_sellers = $this->getNearBySellers($customer_lat, $customer_lon, $sellers_of_same_city);
-            $random_index = array_rand($nearby_sellers, 1);
+            $nearbySellers = $this->getNearBySellers($customerLat, $customerLon, $sellersOfSameCity);
 
-            OrdersFromOtherSeller::incrementTimesRejected($order_id);
-            $moved = OrdersFromOtherSeller::moveToAnotherSeller($order_id, $nearby_sellers[$random_index]['id']);
+            if (empty($nearbySellers)) return $this->noNearBySellers($orderId);
 
+            $randomIndex = array_rand($nearbySellers, 1);
+
+            OrdersFromOtherSeller::incrementTimesRejected($orderId);
+            $moved = OrdersFromOtherSeller::moveToAnotherSeller($orderId, $nearbySellers[$randomIndex]['id']);
+
+            info('The current order has been sent to seller: ' . $nearbySellers[$randomIndex]['id']);
             /* Operation finished */
+            sleep(1);
+
             if ($moved) {
-                session()->flash('success', 'Order#' . $order_id . ' has been moved to another seller.');
+                session()->flash('success', 'Order#' . $orderId . ' has been moved to another seller.');
             } else {
-                session()->flash('warning', 'Sorry! Order#' . $order_id . ' has not been moved to another seller due to some technical error.');
+                session()->flash('warning', 'Sorry! Order#' . $orderId . ' has not been moved to another seller due to some technical error.');
             }
         } catch (Exception $error) {
             report($error);
             session()->flash('error', $error->getMessage());
         }
     }
+
 
     public function acceptedBySeller($order_from_other_seller)
     {
@@ -147,7 +168,7 @@ class OrdersFromOtherSellersLivewire extends Component
                 $order_from_other_seller['id'],
                 OrderStatusEnum::READY,
             );
-            if ($order_from_other_seller['type'] == 'self-pickup') {
+            if ($order_from_other_seller['type'] == OrderTypeEnum::SELF_PICKUP->value) {
                 $order_details = OrdersFromOtherSeller::getById([
                     'id',
                     'customer_id',
@@ -188,6 +209,42 @@ class OrdersFromOtherSellersLivewire extends Component
         }
     }
 
+    public function cancelOrder($orderId)
+    {
+        try {
+            /* Perform some operation */
+            $orderDetails = Orders::getById($orderId);
+            dd('Order cancelled');
+            // dd($orderDetails);
+            // Orders::updateOrderStatus($order['id'], 'cancelled');
+            StripeServices::refundCustomer($orderDetails);
+
+
+            $message = "Hello " . $orderDetails->user->name . " .
+            Your order from " . $orderDetails->store->name . " was unsuccessful.
+            Unfortunately " . $orderDetails->store->name . " is unable to complete your order. But don't worry 
+            you have not been charged.
+            If you need any kinda of assistance, please contact us via email at:
+            admin@teekit.co.uk";
+
+            // TwilioSmsService::sendSms($orderDetails->user->phone, $message);
+            // EmailServices::sendOrderHasBeenCancelledMail($orderDetails);
+
+            /* Operation finished */
+            sleep(1);
+            session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
+
+            // if ($cancelled) {
+            //     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            // } else {
+            //     session()->flash('error', config('constants.UPDATION_FAILED'));
+            // }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
+    }
+
     /* 
     * IMPORTANT NOTE!!!
     * completeBySeller function is not created yet bcz the order will
@@ -201,9 +258,11 @@ class OrdersFromOtherSellersLivewire extends Component
         $data = OrdersFromOtherSeller::getForView(
             [
                 'id',
-                'customer_id',
+                'created_by_type',
+                'created_by_id',
                 'seller_id',
-                'product_id',
+                'product_belongs_to_type',
+                'product_belongs_to_id',
                 'product_price',
                 'product_qty',
                 'initial_total',
@@ -212,9 +271,10 @@ class OrdersFromOtherSellersLivewire extends Component
                 'type',
                 'payment_status',
                 'order_status',
-                'created_at'
+                'moved_at',
+                'created_at',
             ],
-            $this->seller_id,
+            $this->sellerId,
             'desc'
         );
 

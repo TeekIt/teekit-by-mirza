@@ -49,7 +49,43 @@
             </div>
         </div>
     </div>
-
+    {{-- ************************************ No Other Sellers Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="noOtherSellersModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancel Order</h5>
+                    <button type="button" class="close" wire:click="resetModal" aria-label="Close" data-bs-dismiss="modal">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form wire:submit.prevent="cancelOrder({{ $orderId }})" method="post">
+                    <div class="modal-body">
+                        <div class="text-center">
+                            <h2>Attention!!</h2>
+                            <div class="text-center">
+                                <p>Sorry! There are no other sellers in this area except you</p>
+                                <p>Do you want to cancel order #{{ $orderId }}?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" wire:click="resetModal" data-bs-dismiss="modal">
+                            No
+                        </button>
+                        <button type="submit" class="btn btn-danger" wire:target="cancelOrder" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled">
+                            <span wire:target="cancelOrder" wire:loading.remove>
+                                Yes
+                            </span>
+                            <span wire:target="cancelOrder" wire:loading>
+                                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <!-- Main Content -->
     <div class="container">
         <div class="col-12">
@@ -57,13 +93,7 @@
         </div>
         @forelse ($data as $singleIndex)
             <!-- Single Order Content -->
-            <div class="col-12 p-2" wire:poll.60000ms="moveToAnotherSeller(
-            {{ $singleIndex->id }}, 
-            '{{ $singleIndex->order_status }}', 
-            {{ $singleIndex->customer_lat }}, 
-            {{ $singleIndex->customer_lon }}, 
-            '{{ $singleIndex->moved_at }}', 
-            '{{ $singleIndex->created_at }}')">
+            <div class="col-12 p-2">
                 <div class="card">
                     <div class="card-body py-1 px-2">
                         <!-- Order Header -->
@@ -84,7 +114,7 @@
                                                     </span>
                                                     </button> --}}
 
-                                                    <button class="btn btn-warning col-3 col-md-2" wire:click="moveToAnotherSeller(
+                                                    {{-- <button class="btn btn-warning col-3 col-md-2" wire:click="moveToAnotherSeller(
                                                                 {{ $singleIndex->id }}, 
                                                                 '{{ $singleIndex->order_status }}', 
                                                                 {{ $singleIndex->customer_lat }}, 
@@ -98,10 +128,10 @@
                                                         <span>
                                                             <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                                                         </span>
-                                                    </button>
+                                                    </button> --}}
 
                                                     @if ($singleIndex->order_status === 'pending')
-                                                        <button class="btn btn-success col-4 col-md-2" wire:click="renderAcceptOrderModal({{ $singleIndex->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" wire:target="renderAcceptOrderModal({{ $singleIndex->id }})" title="Accept the order">
+                                                        <button class="btn btn-success col-12 col-md-2 m-1 m-md-0"  wire:click="renderAcceptOrderModal({{ $singleIndex->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" wire:target="renderAcceptOrderModal({{ $singleIndex->id }})" title="Accept the order">
                                                             <span wire:target="renderAcceptOrderModal({{ $singleIndex->id }})" wire:loading.remove>
                                                                 Accept
                                                             </span>
@@ -110,11 +140,11 @@
                                                             </span>
                                                         </button>
 
-                                                        <button class="btn btn-danger col-3 col-md-2" wire:click="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:target="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Reject the order">
-                                                            <span wire:target="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:loading.remove>
-                                                                Reject
+                                                        <button class="btn btn-danger col-12 col-md-5 m-1 m-md-0"  wire:click="sendItemToAnOtherSeller({{ $singleIndex->id }})" wire:target="sendItemToAnOtherSeller({{ $singleIndex->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Send this order to another nearby seller">
+                                                            <span wire:target="sendItemToAnOtherSeller({{ $singleIndex->id }})" wire:loading.remove>
+                                                                Send To Other Sellers
                                                             </span>
-                                                            <span wire:target="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:loading>
+                                                            <span wire:target="sendItemToAnOtherSeller({{ $singleIndex->id }})" wire:loading>
                                                                 <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                                                             </span>
                                                         </button>
@@ -154,19 +184,6 @@
                                                         </button>
                                                     @endif
                                                 </div>
-                                                <div class="col-12 col-md-2 mt-md-1 mt-4">
-                                                    @if ($singleIndex->order_status === 'pending')
-                                                        @if ($this->isTheOrderOlderThen($orderHoldingMinutes, $singleIndex->created_at))
-                                                            <p class="fs-3 fw-bold text-danger">
-                                                                Time Over...
-                                                            </p>
-                                                        @else
-                                                            <p class="fs-3 fw-bold timer" id={{ $singleIndex->id }}>
-                                                                {{-- Timer will render here --}}
-                                                            </p>
-                                                        @endif
-                                                    @endif
-                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -188,7 +205,7 @@
 
                                     <tr>
                                         <td><b>Order Total</b></td>
-                                        <td>£{{ $singleIndex->initial_total }}</td>
+                                        <td>£{{ $singleIndex->current_total }}</td>
                                         <td><b>Payment Status</b></td>
                                         <td><span class="badge badge-primary">{{ $singleIndex->payment_status }}</span></td>
                                     </tr>

@@ -96,8 +96,14 @@ class OrdersLivewire extends Component
     {
         $this->order = $order;
         $this->order_item = $order_item;
+
         $sellers = User::getParentAndChildSellersByCity(auth()->user()->city);
-        $this->nearby_sellers = GoogleMapServices::findDistanceByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellers, 25);
+        $this->nearby_sellers = GoogleMapServices::findDistanceByMakingChunks(
+            auth()->user()->lat,
+            auth()->user()->lon,
+            $sellers,
+            25
+        );
     }
 
     public function renderRemoveItemModal($order_item)
@@ -141,7 +147,7 @@ class OrdersLivewire extends Component
             $selectedSeller = User::getStoreByBusinessName($this->selected_nearby_seller);
 
             /* Send this product to another seller */
-            OrdersFromOtherSeller::insertInfo(
+            OrdersFromOtherSeller::add(
                 $this->order['created_by_id'],
                 $selectedSeller->id,
                 $this->order_item['product_id'],
@@ -247,35 +253,34 @@ class OrdersLivewire extends Component
         }
     }
 
-    public function cancelOrder($order)
+    public function cancelOrder($orderId)
     {
         try {
             /* Perform some operation */
-            $order_details = Orders::getById($order['id']);
-            // dd($order_details);
-            // Orders::updateOrderStatus($order['id'], 'cancelled');
-            StripeServices::refundCustomer($order_details);
+            $orderDetails = Orders::getById($orderId);
+            // dd($orderDetails);
+            StripeServices::refundCustomer($orderDetails);
 
+            $cancelled = Orders::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
 
-            $message = "Hello " . $order_details->user->name . " .
-            Your order from " . $order_details->store->name . " was unsuccessful.
-            Unfortunately " . $order_details->store->name . " is unable to complete your order. But don't worry 
+            $message = "Hello " . $orderDetails->user->name . " .
+            Your order from " . $orderDetails->store->name . " was unsuccessful.
+            Unfortunately " . $orderDetails->store->name . " is unable to complete your order. But don't worry 
             you have not been charged.
-            If you need any kinda of assistance, please contact us via email at:
+            If you need any kind of assistance, please contact us via email at:
             admin@teekit.co.uk";
 
-            // TwilioSmsService::sendSms($order_details->user->phone, $message);
-            // EmailServices::sendOrderHasBeenCancelledMail($order_details);
+            // TwilioSmsService::sendSms($orderDetails->user->phone, $message);
+            // EmailServices::sendOrderHasBeenCancelledMail($orderDetails);
 
             /* Operation finished */
             sleep(1);
-            session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
 
-            // if ($cancelled) {
-            //     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-            // } else {
-            //     session()->flash('error', config('constants.UPDATION_FAILED'));
-            // }
+            if ($cancelled) {
+                session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
+            }
         } catch (Exception $error) {
             report($error);
             session()->flash('error', $error->getMessage());

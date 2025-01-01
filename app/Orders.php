@@ -65,14 +65,13 @@ class Orders extends Model
         return $order->save();
     }
 
-    public static function moveToAnotherSeller(int $id, int $sellerId): int
-    {
-        return self::where('id', '=', $id)->update([
-            'seller_id' => $sellerId,
-            'moved_at' => now(),
-            'updated_at' => now()
-        ]);
-    }
+    // public static function moveToAnotherSeller(int $id, int $sellerId): int
+    // {
+    //     return self::where('id', '=', $id)->update([
+    //         'seller_id' => $sellerId,
+    //         'moved_at' => now(),
+    //     ]);
+    // }
 
     public static function add(
         string $createdByType,
