@@ -8,8 +8,6 @@
             <h1 class="text-white text-center">{{ __('Reset Password') }}</h1>
             <form method="POST" action="{{ route('password.update') }}">
                 @csrf
-                <input type="hidden" name="token" value="{{ $token }}">
-
                 <div class="form-group row">
                     <div class="col-md-12">
                         <input id="email" placeholder="Email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ $email ?? old('email') }}" required autofocus>

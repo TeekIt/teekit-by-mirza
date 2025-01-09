@@ -387,7 +387,7 @@ class User extends Authenticatable implements JWTSubject
         return self::select($columns)->where('email', $email)->where('role_id', UserRole::BUYER)->first();
     }
 
-    public static function getStoreByBusinessName(string $business_name): ?User
+    public static function getSellerByBusinessName(string $business_name): ?User
     {
         return self::where('business_name', $business_name)->first();
     }

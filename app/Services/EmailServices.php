@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Drivers;
 use App\Mail\OrderIsCanceledMail;
+use App\Mail\OrderIsCanceledMailTwo;
 use App\Mail\OrderIsReadyMail;
 use App\Mail\StoreRegisterMail;
 use App\Models\OrdersFromOtherSeller;
@@ -142,6 +143,6 @@ final class EmailServices
 
     public static function sendOrderHasBeenCancelledMail(Orders $order)
     {
-        Mail::to([$order->user->email])->send(new OrderIsCanceledMail($order));
+        Mail::to([$order->buyer->email])->send(new OrderIsCanceledMail($order));
     }
 }

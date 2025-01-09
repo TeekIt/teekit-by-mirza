@@ -1,5 +1,9 @@
 <div class="container-xxl flex-grow-1 container-p-y">
-     
+
+    @php
+        use App\Enums\UserChoicesEnum;
+    @endphp
+
     <x-session-messages />
 
     {{-- ************************************ Delivery Boy Details Modal ************************************ --}}
@@ -73,12 +77,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal"></button>
                 </div>
                 <div class="modal-body">
-                    @if (empty($order_id) || empty($current_prod_id) || empty($current_prod_qty) || empty($receiver_name) || empty($phone_number))
+                    @if (empty($orderId) || empty($currentProdId) || empty($currentProdQty) || empty($customerName) || empty($phoneNumber))
                         <div class="col-12 text-center">
                             <div class="spinner-border" role="status"></div>
                         </div>
                     @else
-                        <livewire:sellers.modals.search-alternative-product-modal :order_id="$order_id" :current_prod_id="$current_prod_id" :current_prod_qty="$current_prod_qty" :receiver_name="$receiver_name" :phone_number="$phone_number">
+                        <livewire:sellers.modals.search-alternative-product-modal 
+                        :order_id="$orderId" 
+                        :current_prod_id="$currentProdId" 
+                        :current_prod_qty="$currentProdQty" 
+                        :receiver_name="$customerName" 
+                        :phone_number="$phoneNumber">
                     @endif
                 </div>
                 <div class="modal-footer">
@@ -155,14 +164,6 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    {{-- <button type="button" class="btn btn-site-primary" wire:click="removeItemFromOrder" wire:target="removeItemFromOrder" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled">
-                        <span wire:target="removeItemFromOrder" wire:loading.remove>
-                            Send
-                        </span>
-                        <span wire:target="removeItemFromOrder" wire:loading>
-                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
-                        </span>
-                    </button> --}}
                     <button type="button" class="btn btn-site-primary" wire:click="sendItemToAnOtherStore" wire:target="sendItemToAnOtherStore" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled">
                         <span wire:target="sendItemToAnOtherStore" wire:loading.remove>
                             Send
@@ -314,11 +315,11 @@
                                                     </span>
                                                 </button>
 
-                                                <button class="btn btn-danger" wire:click="cancelOrder({{ $order }})" wire:target="cancelOrder({{ $order }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Cancel the whole order">
-                                                    <span wire:target="cancelOrder({{ $order }})" wire:loading.remove>
+                                                <button class="btn btn-danger" wire:click="cancelOrder({{ $order->id }})" wire:target="cancelOrder({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Cancel the whole order">
+                                                    <span wire:target="cancelOrder({{ $order->id }})" wire:loading.remove>
                                                         Cancel
                                                     </span>
-                                                    <span wire:target="cancelOrder({{ $order }})" wire:loading>
+                                                    <span wire:target="cancelOrder({{ $order->id }})" wire:loading>
                                                         <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                                                     </span>
                                                 </button>
@@ -429,10 +430,6 @@
                                     <div class="col-12 col-sm-10">
                                         <table class="table">
                                             <tr>
-                                                <td class="col-4 text-site-primary"><b>Product Id: (Remove in production)</b></td>
-                                                <td class="col-8">{{ $item->id }}</td>
-                                            </tr>
-                                            <tr>
                                                 <td class="col-4 text-site-primary"><b>Product Name:</b></td>
                                                 <td class="col-8">{{ $item->product_name }}</td>
                                             </tr>
@@ -461,31 +458,27 @@
                                                         </button>
                                                     </td>
                                                     <td class="col-8">
-                                                        @if ($order->order_items[$index]->user_choice === 1)
-                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal({{ $order->id }}, {{ $item->id }}, {{ $order->order_items[$index]->product_qty }}, '{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
+                                                        @if ($order->order_items[$index]->user_choice === UserChoicesEnum::ALTERNATIVE_PRODUCT->value)
+                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal({{ $order->id }}, {{ $item->id }}, {{ $order->order_items[$index]->product_qty }}, '{{ $order->customer_name }}', '{{ $order->phone_number }}')">
                                                                 <i class="fas fa-search"></i>
                                                                 Search Alternative
                                                             </button>
-                                                        @elseif ($order->order_items[$index]->user_choice === 2)
+                                                        @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::REMOVE_PRODUCT->value)
                                                             <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#removeItemFromOrderModel" wire:click="renderRemoveItemModal({{ $order->order_items[$index] }})">
                                                                 <i class="fas fa-minus-circle"></i>
                                                                 Remove Product
                                                             </button>
-                                                        @elseif ($order->order_items[$index]->user_choice === 3)
-                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#sendToOtherStoresModal" wire:click="renderSTOSModal({{ $order }}, {{ $order->order_items[$index] }})">
+                                                        @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::SEND_TO_OTHER_STORES->value)
+                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#sendToOtherStoresModal" wire:click="renderSTOSModal({{ $order->id }})">
                                                                 <i class="fas fa-paper-plane"></i>
                                                                 Send To Other Stores
                                                             </button>
-                                                            {{-- <button type="button" class="btn btn-site-primary" disabled>
-                                                                <i class="fas fa-paper-plane"></i>
-                                                                Send To Other Stores (Feature Underdevelopment)
-                                                            </button> --}}
-                                                        @elseif ($order->order_items[$index]->user_choice === 4)
+                                                        @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::CALL_ME->value)
                                                             <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#showCustomerContactModel" wire:click="renderCustomerContactModal('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
                                                                 <i class="fas fa-phone-alt"></i>
                                                                 Call The Customer
                                                             </button>
-                                                        @elseif ($order->order_items[$index]->user_choice === 5)
+                                                        @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::CANCEL_ORDER->value)
                                                             <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal({{ $order->id }}, {{ $item->id }}, {{ $order->order_items[$index]->product_qty }}, '{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
                                                                 <i class="fas fa-times"></i>
                                                                 Cancel Order

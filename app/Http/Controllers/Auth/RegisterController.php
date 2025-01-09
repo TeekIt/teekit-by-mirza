@@ -124,7 +124,7 @@ class RegisterController extends Controller
             },
             "submitted" : null
         }';
-        $parent_store_id = ($request->input('parent_store')) ? User::getStoreByBusinessName($request->input('parent_store'))->id : null;
+        $parent_store_id = ($request->input('parent_store')) ? User::getSellerByBusinessName($request->input('parent_store'))->id : null;
         $user = User::createStore(
             $data['name'],
             strtolower($data['email']),
