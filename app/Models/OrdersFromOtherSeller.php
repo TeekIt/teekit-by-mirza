@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\OrderTypeEnum;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,7 +25,7 @@ class OrdersFromOtherSeller extends Model
         return $this->belongsTo(User::class, 'seller_id');
     }
 
-    public function customer(): MorphTo
+    public function buyer(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'created_by_type', 'created_by_id');
     }
@@ -104,18 +105,29 @@ class OrdersFromOtherSeller extends Model
         $model->product_price = $productPrice;
         $model->product_qty = $productQty;
         $model->initial_total = $initialTotal;
-        if ($type == 'delivery') {
-            $model->customer_lat = $customerLat;
-            $model->customer_lon = $customerLon;
-            $model->customer_name = $receiverName;
-            $model->phone_number = $phoneNumber;
-            $model->address = $address;
-            $model->house_no = $houseNo;
-            $model->flat = $flat;
-            $model->driver_charges = $driverCharges;
-            $model->delivery_charges = $deliveryCharges;
-            $model->service_charges = $serviceCharges;
-        }
+        // if ($type == OrderTypeEnum::DELIVERY->value) {
+        //     $model->customer_lat = $customerLat;
+        //     $model->customer_lon = $customerLon;
+        //     $model->customer_name = $receiverName;
+        //     $model->phone_number = $phoneNumber;
+        //     $model->address = $address;
+        //     $model->house_no = $houseNo;
+        //     $model->flat = $flat;
+        //     $model->driver_charges = $driverCharges;
+        //     $model->delivery_charges = $deliveryCharges;
+        //     $model->service_charges = $serviceCharges;
+        // }
+        $model->customer_lat = $customerLat;
+        $model->customer_lon = $customerLon;
+        $model->customer_name = $receiverName;
+        $model->phone_number = $phoneNumber;
+        $model->address = $address;
+        $model->house_no = $houseNo;
+        $model->flat = $flat;
+        $model->driver_charges = $driverCharges;
+        $model->delivery_charges = $deliveryCharges;
+        $model->service_charges = $serviceCharges;
+
         $model->device = $device;
         $model->type = $type;
         $model->description = $description;
@@ -133,7 +145,7 @@ class OrdersFromOtherSeller extends Model
     public static function getById(array $columns = ['*'], int $id): object
     {
         return self::select($columns)
-            ->with(['product', 'seller', 'customer'])
+            ->with(['product', 'buyer', 'seller'])
             ->where('id', '=', $id)
             ->first();
     }

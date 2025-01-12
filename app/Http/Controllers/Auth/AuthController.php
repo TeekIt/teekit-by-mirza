@@ -50,7 +50,7 @@ class AuthController extends Controller
             $request->email,
             $request->password,
             $request->phone,
-            1,
+            User::ACTIVE,
             Str::uuid()
         );
 

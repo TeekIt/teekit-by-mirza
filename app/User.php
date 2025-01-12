@@ -103,6 +103,11 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
     /**
+     * Custom Properties
+     */
+    public const ACTIVE = 1,
+        BLOCK = 0;
+    /**
      * Relations
      */
     public function commissionAndServiceFee(): HasOne
@@ -215,7 +220,7 @@ class User extends Authenticatable implements JWTSubject
         if (!empty($hours)) $user->business_hours = json_encode($hours);
         if (!is_null($userImg)) $user->user_img = $userImg;
         if (!is_null($stripeAccountId)) $user->stripe_account_id = $stripeAccountId;
-        
+
         return $user->save();
     }
 
@@ -244,27 +249,27 @@ class User extends Authenticatable implements JWTSubject
 
     public static function createBuyer(
         string $name,
-        string $l_name,
+        string $lastName,
         string $email,
         string $password,
-        string $phone,
-        int $is_active,
-        string $referral_code
+        string $phoneNumber,
+        int $isActive,
+        string $referralCode
     ): self {
         return self::create([
             'name' => $name,
-            'l_name' => $l_name,
+            'l_name' => $lastName,
             'email' => $email,
             'password' => Hash::make($password),
-            'phone' => $phone,
+            'phone' => $phoneNumber,
             'country' => 'NA',
             'state' => 'NA',
             'city' => 'NA',
-            'is_active' => $is_active,
+            'is_active' => $isActive,
             'role_id' => UserRole::BUYER,
-            'referral_code' => $referral_code
+            'referral_code' => $referralCode,
         ]);
-    }
+    }    
 
     public static function createStore(
         string $name,
@@ -302,7 +307,7 @@ class User extends Authenticatable implements JWTSubject
             'lat' => $lat,
             'lon' => $lon,
             'settings' => '{"notification_music": 1}',
-            'is_active' => 0,
+            'is_active' => User::BLOCK,
             'role_id' => $role_id,
             'parent_store_id' => $parent_store_id
         ]);
@@ -410,14 +415,16 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function activeOrBlockStore(int $id, int $status): bool
+    public static function activeOrBlockSeller(int $id, int $status): bool
     {
-        self::where('id', '=', $id)->update(['is_active' => $status]);
+        $updated = self::where('id', '=', $id)->update(['is_active' => $status]);
+
         if ($status == 1) {
             $user = self::findOrFail($id);
-            EmailServices::sendStoreApprovedMail($user);
+            EmailServices::sendSellerApprovedMail($user);
         }
-        return true;
+
+        return $updated;
     }
 
     public static function activeOrBlockCustomer(int $user_id, int $status): int

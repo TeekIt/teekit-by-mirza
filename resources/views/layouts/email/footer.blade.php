@@ -7,7 +7,6 @@
         line-height: 21px !important;
         text-align: center !important;
     }
-    {{--  --}}
 </style>
 {{-- 
     Note:

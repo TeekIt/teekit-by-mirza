@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\OrderTypeEnum;
 use App\Models\ProductsByBuyer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -90,18 +91,30 @@ class Orders extends Model
         /* When we create a new order current_total == initial_total */
         $order->current_total = $initialTotal;
         $order->total_items = $totalItems;
-        if ($request->type == 'delivery') {
-            $order->customer_lat = $request->lat;
-            $order->customer_lon = $request->lon;
-            $order->customer_name = $request->fName . " " .  $request->lName;
-            $order->phone_number = $request->phone;
-            $order->address = $request->fullAddress;
-            $order->house_no = $request->houseNo;
-            $order->flat = $request->flat;
-            $order->driver_charges = $driverCharges;
-            $order->delivery_charges = $request->deliveryCharges;
-            $order->service_charges = $request->serviceCharges;
-        }
+        // if ($request->type == OrderTypeEnum::DELIVERY->value) {
+        //     $order->customer_lat = $request->lat;
+        //     $order->customer_lon = $request->lon;
+        //     $order->customer_name = $request->fName . " " .  $request->lName;
+        //     $order->phone_number = $request->phone;
+        //     $order->address = $request->fullAddress;
+        //     $order->house_no = $request->houseNo;
+        //     $order->flat = $request->flat;
+        //     $order->driver_charges = $driverCharges;
+        //     $order->delivery_charges = $request->deliveryCharges;
+        //     $order->service_charges = $request->serviceCharges;
+        // }
+        /* If order type == self-pickup even then you have to solve this */
+        $order->customer_lat = $request->lat;
+        $order->customer_lon = $request->lon;
+        $order->customer_name = $request->fName . " " .  $request->lName;
+        $order->phone_number = $request->phone;
+        $order->address = $request->fullAddress;
+        $order->house_no = $request->houseNo;
+        $order->flat = $request->flat;
+        $order->driver_charges = $driverCharges;
+        $order->delivery_charges = $request->deliveryCharges;
+        $order->service_charges = $request->serviceCharges;
+
         $order->type = $request->type;
         $order->description = $request->description;
         $order->payment_status = $request->paymentStatus ?? "hidden";

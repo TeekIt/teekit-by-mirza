@@ -361,7 +361,7 @@
                                                         <hr>
                                                         <h4 class="alert-heading">IMPORTANT NOTE!</h4>
                                                         <p class="mb-0">
-                                                            This is a <b>{{ $order->type }}</b> order therefore only press the <b>complete button</b> when the customer has collected the order
+                                                            This is a <b>{{ $order->type }}</b> order therefore only press the <b>Complete Order</b> button when the customer has collected the order physically
                                                         </p>
                                                     </div>
                                                     <button class="btn btn-success" wire:click="orderIsCompleted({{ $order->id }})" wire:target="orderIsCompleted({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Mark as completed">

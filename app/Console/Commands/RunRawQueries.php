@@ -65,7 +65,9 @@ class RunRawQueries extends Command
                     // DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `moved_at` TIMESTAMP NOT NULL AFTER times_rejected');
 
                     /* Above queries are already executed on Staging ENV */
-                    
+                    DB::statement('DELETE FROM `orders` WHERE payment_intent_id IS NULL');
+                    DB::statement('ALTER TABLE `orders` CHANGE `payment_intent_id` `payment_intent_id` VARCHAR(191) NOT NULL');
+
                     DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `product_belongs_to_type` VARCHAR(191) NOT NULL AFTER `parent_order_id`');
                     DB::statement('UPDATE `orders_from_other_sellers` SET `product_belongs_to_type` = \'Product\'');
                     DB::statement('ALTER TABLE `orders_from_other_sellers` DROP FOREIGN KEY orders_from_other_sellers_product_id_foreign');

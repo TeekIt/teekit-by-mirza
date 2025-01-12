@@ -73,23 +73,31 @@
                                                     </button> --}}
 
                                                     @if ($singleIndex->order_status === 'pending')
-                                                        <button class="btn btn-success col-4 col-md-2" wire:click="acceptedBySeller({{ $singleIndex }})" wire:target="acceptedBySeller({{ $singleIndex }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Accept the order">
-                                                            <span wire:target="acceptedBySeller({{ $singleIndex }})" wire:loading.remove>
+                                                        @if ($this->isTheOrderOlderThen($orderHoldingMinutes, $singleIndex->moved_at))
+                                                            <button class="btn btn-success col-4 col-md-2" disabled title="Accept the order">
                                                                 Accept
-                                                            </span>
-                                                            <span wire:target="acceptedBySeller({{ $singleIndex }})" wire:loading>
-                                                                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
-                                                            </span>
-                                                        </button>
-
-                                                        <button class="btn btn-danger col-3 col-md-2" wire:click="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:target="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Reject the order">
-                                                            <span wire:target="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:loading.remove>
+                                                            </button>
+                                                            <button class="btn btn-danger col-3 col-md-2" disabled title="Reject the order">
                                                                 Reject
-                                                            </span>
-                                                            <span wire:target="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:loading>
-                                                                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
-                                                            </span>
-                                                        </button>
+                                                            </button>
+                                                        @else
+                                                            <button class="btn btn-success col-4 col-md-2" wire:click="acceptedBySeller({{ $singleIndex }})" wire:target="acceptedBySeller({{ $singleIndex }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Accept the order">
+                                                                <span wire:target="acceptedBySeller({{ $singleIndex }})" wire:loading.remove>
+                                                                    Accept
+                                                                </span>
+                                                                <span wire:target="acceptedBySeller({{ $singleIndex }})" wire:loading>
+                                                                    <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                                                </span>
+                                                            </button>
+                                                            <button class="btn btn-danger col-3 col-md-2" wire:click="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:target="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Reject the order">
+                                                                <span wire:target="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:loading.remove>
+                                                                    Reject
+                                                                </span>
+                                                                <span wire:target="rejectedBySeller({{ $singleIndex->id }}, {{ $singleIndex->customer_lat }}, {{ $singleIndex->customer_lon }})" wire:loading>
+                                                                    <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                                                </span>
+                                                            </button>
+                                                        @endif
                                                     @endif
 
                                                     @if ($singleIndex->order_status === 'accepted')

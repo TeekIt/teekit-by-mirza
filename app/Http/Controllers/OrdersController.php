@@ -40,40 +40,46 @@ class OrdersController extends Controller
      */
     public function new(Request $request)
     {
-        if ($request->has('type')) {
-            if ($request->type == 'delivery') {
-                $rules = [
-                    /* Order details */
-                    'type' => 'required|string',
-                    'items' => 'required|array',
-                    'houseNo' => 'required|string',
-                    'deliveryCharges' => 'required|numeric',
-                    'serviceCharges' => 'required|numeric',
-                    'device' => 'sometimes',
-                    'paymentIntentId' => 'required|string',
-                    /* Customer details */
-                    'fName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
-                    'lName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
-                    'email' => 'required|email|max:255',
-                    'countryCode' => 'required|string|max:4',
-                    'phone' => 'required|string|max:13',
-                    'fullAddress' => 'required|string',
-                    'unitAddress' => 'nullable|string',
-                    'country' => 'required|string|max:70',
-                    'state' => 'required|string|max:70',
-                    'city' => 'required|string|max:70',
-                    'postcode' => 'nullable|string|max:11',
-                    'lat' => 'required|numeric|between:-90,90',
-                    'lon' => 'required|numeric|between:-180,180',
-                ];
-            } elseif ($request->type == 'self-pickup') {
-                $rules = [
-                    'type' => 'required|string',
-                    'paymentIntentId' => 'required|string',
-                ];
-            }
-        } else {
-            return JsonResponseServices::getApiValidationFailedResponse(json_decode('{"type": ["The type field is required."]}'));
+        $validatedData = Validator::make($request->all(), [
+            'type' => [
+                'required',
+                Rule::in(array_column(OrderTypeEnum::cases(), 'value')),
+            ],
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        if ($request->type == OrderTypeEnum::DELIVERY->value) {
+            $rules = [
+                /* Order details */
+                'type' => 'required|string',
+                'items' => 'required|array',
+                'houseNo' => 'required|string',
+                'deliveryCharges' => 'required|numeric',
+                'serviceCharges' => 'required|numeric',
+                'device' => 'sometimes',
+                'paymentIntentId' => 'required|string',
+                /* Customer details */
+                'fName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
+                'lName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
+                'email' => 'required|email|max:255',
+                'countryCode' => 'required|string|max:4',
+                'phone' => 'required|string|max:13',
+                'fullAddress' => 'required|string',
+                'unitAddress' => 'nullable|string',
+                'country' => 'required|string|max:70',
+                'state' => 'required|string|max:70',
+                'city' => 'required|string|max:70',
+                'postcode' => 'nullable|string|max:11',
+                'lat' => 'required|numeric|between:-90,90',
+                'lon' => 'required|numeric|between:-180,180',
+            ];
+        } elseif ($request->type == OrderTypeEnum::SELF_PICKUP->value) {
+            $rules = [
+                'type' => 'required|string',
+                'paymentIntentId' => 'required|string',
+            ];
         }
 
         $validatedData = Validator::make($request->all(), $rules);
@@ -218,7 +224,7 @@ class OrdersController extends Controller
                 'required',
                 Rule::in(array_column(TransportVehicle::cases(), 'value')),
             ],
-            'featureImg' => 'nullable|image|max:2048',
+            'featureImg' => 'image|max:2048',
             'height' => 'nullable|numeric|min:0',
             'width' => 'nullable|numeric|min:0',
             'length' => 'nullable|numeric|min:0',

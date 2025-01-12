@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Models\OrdersFromOtherSeller;
 use App\Orders;
+use App\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -11,7 +12,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderIsCanceledMail extends Mailable
+class OrderIsReadyForPickupMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -20,7 +21,7 @@ class OrderIsCanceledMail extends Mailable
      *
      * @return void
      */
-    public function __construct(public Orders|OrdersFromOtherSeller $order) {}
+    public function __construct(public Orders|OrdersFromOtherSeller $order, public User $user) {}
 
     /**
      * Get the message envelope.
@@ -30,7 +31,7 @@ class OrderIsCanceledMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Your Order #' . $this->order->id . ' Has Been Cancelled - ' . env('APP_NAME'),
+            subject: 'Your Order #' . $this->order->id . ' Is Ready To Be Picked Up - ' . env('APP_NAME'),
         );
     }
 
@@ -42,9 +43,11 @@ class OrderIsCanceledMail extends Mailable
     public function content()
     {
         return new Content(
-            markdown: 'emails.order_is_canceled',
+            markdown: 'emails.order_is_ready_for_pickup',
             with: [
                 'order' => $this->order,
+                'seller' => $this->user,
+                'pinLocation' => 'https://www.google.com/maps?q=' . $this->user->lat . "," . $this->user->lon,
             ]
         );
     }

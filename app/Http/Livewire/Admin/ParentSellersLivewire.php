@@ -348,7 +348,7 @@ class ParentSellersLivewire extends Component
         try {
             /* Perform some operation */
             $status = ($is_active) ? self::BLOCK : self::ACTIVE;
-            $status_cahnged = User::activeOrBlockStore($id, $status);
+            $status_cahnged = User::activeOrBlockSeller($id, $status);
             /* Operation finished */
             if ($status_cahnged) {
                 $this->resetPage();

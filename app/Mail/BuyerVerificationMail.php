@@ -2,8 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\OrdersFromOtherSeller;
-use App\Orders;
+use App\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -11,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class OrderIsCanceledMail extends Mailable
+class BuyerVerificationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -20,7 +19,7 @@ class OrderIsCanceledMail extends Mailable
      *
      * @return void
      */
-    public function __construct(public Orders|OrdersFromOtherSeller $order) {}
+    public function __construct(public User $user, public string $accountVerificationLink) {}
 
     /**
      * Get the message envelope.
@@ -30,7 +29,7 @@ class OrderIsCanceledMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Your Order #' . $this->order->id . ' Has Been Cancelled - ' . env('APP_NAME'),
+            subject: 'Welcome To ' . env('APP_NAME') . '🥳 Please Verify Your Buyer Account',
         );
     }
 
@@ -42,10 +41,11 @@ class OrderIsCanceledMail extends Mailable
     public function content()
     {
         return new Content(
-            markdown: 'emails.order_is_canceled',
+            markdown: 'emails.buyer_verification_mail',
             with: [
-                'order' => $this->order,
-            ]
+                'buyer' => $this->user,
+                'accountVerificationLink' => $this->accountVerificationLink,
+            ],
         );
     }
 

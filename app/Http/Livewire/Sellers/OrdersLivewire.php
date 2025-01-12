@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Sellers;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\OrderTypeEnum;
 use App\Models\OrdersFromOtherSeller;
 use App\OrderItems;
 use App\Orders;
@@ -195,10 +196,12 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $order_details = Orders::isViewed($id);
-            $updated = Orders::updateOrderStatus($id, OrderStatusEnum::ACCEPTED);
-            if ($order_details->type == 'self-pickup') {
-                EmailServices::sendPickupYourOrderMail($order_details);
+            $order = Orders::isViewed($id);
+
+            // $updated = Orders::updateOrderStatus($id, OrderStatusEnum::ACCEPTED);
+            $updated = true;
+            if ($order->type == OrderTypeEnum::SELF_PICKUP->value) {
+                EmailServices::sendPickupYourOrderMail($order);
             }
             /* Operation finished */
             sleep(1);
@@ -256,30 +259,13 @@ class OrdersLivewire extends Component
     public function cancelOrder($orderId)
     {
         try {
-
-            /* 
-                Note:
-                Remove all orders where payment_intent_id == null
-            */
-
             /* Perform some operation */
             $order = Orders::getById($orderId);
-            // dd($order);
-            // StripeServices::refundCustomer($order);
 
-            // $cancelled = Orders::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
+            StripeServices::refundCustomer($order);
 
-            $cancelled = true;
-            // dd($order);
+            $cancelled = Orders::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
 
-            $message = "Hello " . $order->buyer->name . " .
-            Your order from " . $order->seller->business_name . " was unsuccessful.
-            Unfortunately " . $order->seller->business_name . " is unable to complete your order. But don't worry 
-            you have not been charged.
-            If you need any kind of assistance, please contact us via email at:
-            admin@teekit.co.uk";
-            // dd($message);
-            // TwilioSmsService::sendSms($order->user->phone, $message);
             EmailServices::sendOrderHasBeenCancelledMail($order);
             /* Operation finished */
             sleep(1);
