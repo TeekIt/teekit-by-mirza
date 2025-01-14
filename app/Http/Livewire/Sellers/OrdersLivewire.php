@@ -198,8 +198,8 @@ class OrdersLivewire extends Component
             /* Perform some operation */
             $order = Orders::isViewed($id);
 
-            // $updated = Orders::updateOrderStatus($id, OrderStatusEnum::ACCEPTED);
-            $updated = true;
+            $updated = Orders::updateOrderStatus($id, OrderStatusEnum::ACCEPTED);
+            
             if ($order->type == OrderTypeEnum::SELF_PICKUP->value) {
                 EmailServices::sendPickupYourOrderMail($order);
             }

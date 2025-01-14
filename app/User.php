@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\CommissionAndServiceFee;
 use App\Services\EmailServices;
 use App\Models\ReferralCodeRelation;
+use App\Notifications\CustomResetPasswordNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -101,6 +102,11 @@ class User extends Authenticatable implements JWTSubject
         return [
             'name' => $this->name,
         ];
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new CustomResetPasswordNotification($token));
     }
     /**
      * Custom Properties
@@ -269,7 +275,7 @@ class User extends Authenticatable implements JWTSubject
             'role_id' => UserRole::BUYER,
             'referral_code' => $referralCode,
         ]);
-    }    
+    }
 
     public static function createStore(
         string $name,

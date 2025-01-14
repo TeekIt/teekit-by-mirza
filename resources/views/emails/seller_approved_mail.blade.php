@@ -4,7 +4,7 @@
 <b>Welcome to {{ env('APP_NAME') }}!</b><br>
 We are pleased to inform you that your store has been approved. You can now login to your dashboard & start selling.
 
-<x-mail::button :url="config('constants.LIVE_DASHBOARD_URL')" class="">
+<x-mail::button :url="config('constants.LIVE_DASHBOARD_URL')">
 Login To Your Dashboard
 </x-mail::button>
 

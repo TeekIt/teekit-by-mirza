@@ -22,7 +22,7 @@
                         <!-- small box -->
                         <div class="small-box p-5 bg-info">
                             <div class="inner">
-                                <h3>{{ $pending_orders }}</h3>
+                                <h3>{{ $pendingOrders }}</h3>
                                 <p>Pending Orders</p>
                             </div>
                             <div class="icon">
@@ -36,7 +36,7 @@
                         <!-- small box -->
                         <div class="small-box p-5 bg-success">
                             <div class="inner">
-                                <h3>{{ $total_orders }}</h3>
+                                <h3>{{ $totalOrders }}</h3>
                                 <p>Total Orders</p>
                             </div>
                             <div class="icon">
@@ -52,7 +52,7 @@
                         <!-- small box -->
                         <div class="small-box p-5 bg-warning">
                             <div class="inner">
-                                <h3>{{ $total_products }}</h3>
+                                <h3>{{ $totalProducts }}</h3>
                                 <p>Total Products</p>
                             </div>
                             <div class="icon">
@@ -66,7 +66,7 @@
                         <!-- small box -->
                         <div class="small-box p-5 bg-danger">
                             <div class="inner">
-                                <h3>£{{ $total_sales }}</h3>
+                                <h3>£{{ $totalSales }}</h3>
                                 <p>Total Sales</p>
                             </div>
                             {{-- <a href="{{ route('orders') }}" class="small-box-footer d-none">More info <i

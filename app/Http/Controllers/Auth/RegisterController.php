@@ -83,8 +83,9 @@ class RegisterController extends Controller
                 'errors' => $validator->errors(),
             ], config('constants.HTTP_OK'));
         }
+
         $data = $request->toArray();
-        $business_hours = '{
+        $businessHours = '{
             "time": {
                 "Monday": {
                     "open": null,
@@ -124,7 +125,8 @@ class RegisterController extends Controller
             },
             "submitted" : null
         }';
-        $parent_store_id = ($request->input('parent_store')) ? User::getSellerByBusinessName($request->input('parent_store'))->id : null;
+        $parentStoreId = ($request->input('parent_store')) ? User::getSellerByBusinessName($request->input('parent_store'))->id : null;
+        
         $user = User::createStore(
             $data['name'],
             strtolower($data['email']),
@@ -140,19 +142,19 @@ class RegisterController extends Controller
             $data['business_phone'],
             $data['lat'],
             $data['lon'],
-            $business_hours,
+            $businessHours,
             $request->input('parent_store') ? UserRole::CHILD_SELLER : UserRole::SELLER,
-            $parent_store_id
+            $parentStoreId
         );
 
         if ($user) {
             echo "User Created";
         }
 
-        /* 2: Parent store */
         EmailServices::sendNewSellerMail(
             $user,
             ($user->role_id === UserRole::SELLER) ? 'Parent' : 'Child',
+            ($user->role_id === UserRole::CHILD_SELLER) ? $request->input('parent_store') : null,
         );
     }
 }

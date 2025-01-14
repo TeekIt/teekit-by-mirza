@@ -11,7 +11,7 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-white">
             <div class="container">
                 <div class="cstm-container-sm">
-                    <a class="navbar-brand" target="_blank" href="https://teekit.co.uk/">
+                    <a class="navbar-brand" target="_blank" href="{{ config('constants.LIVE_WEBSITE_URL') }}">
                         <img style="max-height: 50px;" src="{{ asset('images/icons/logo.webp') }}" alt="TeekIt Logo">
                     </a>
                     <!-- Toggle Button For Mobiles - Begins -->
@@ -63,15 +63,18 @@
         </nav>
         <!-- /Navbar -->
         <div class="container">
+
             @include('flash::message')
+
             @if (session('status'))
                 <div class="alert alert-success" role="alert">
                     {{ session('status') }}
                 </div>
             @endif
-            <div class="row mtd" style="margin-top: 20vh">
+
+            <div class="row" style="margin-top: 20vh">
                 <div class="col-md-6 col-lg-8">
-                    <img src="{{ asset('images/backgrounds/bike.webp') }}" class="bg-img">
+                    <img src="{{ asset('images/backgrounds/bike.webp') }}" class="bg-img" alt="{{ asset('images/backgrounds/bike.webp') }}">
                 </div>
                 <div class="col-md-6 col-lg-4">
                     @yield('content')

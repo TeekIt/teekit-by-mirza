@@ -125,12 +125,13 @@ return [
     |--------------------------------------------------------------------------
     */
     'HTTP_OK' => 200,
-    'HTTP_SERVER_ERROR' => 500,
     'HTTP_INVALID_ARGUMETS' => 400,
+    'HTTP_UNAUTHORIZED' => 401,
     'HTTP_FORBIDDEN' => 403,
+    'HTTP_PAGE_EXPIRED' => 419,
     'HTTP_UNPROCESSABLE_REQUEST' => 422,
     'HTTP_RESOURCE_EXHAUSTED' => 429,
-    'HTTP_PAGE_EXPIRED' => 419,
+    'HTTP_SERVER_ERROR' => 500,
     'HTTP_SERVICE_UNAVAILABLE' => 503,
     'HTTP_GATEWAY_TIMEOUT' => 504,
 ];

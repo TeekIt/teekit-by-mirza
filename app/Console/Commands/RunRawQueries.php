@@ -79,6 +79,8 @@ class RunRawQueries extends Command
                     DB::statement('UPDATE `orders_from_other_sellers` SET created_by_type = \'User\'');
 
                     DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `order_total` `initial_total` DOUBLE(8,2) NOT NULL');
+
+                    DB::statement('ALTER TABLE `users` CHANGE `temp_code` `temp_code` VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL');
                 });
 
                 $this->info('All raw queries are executed successfully');

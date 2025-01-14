@@ -6,6 +6,9 @@ Please review their details provided below & proceed with the verification proce
 <x-mail::table>
 |               |               |          |
 | ------------- |:-------------:| --------:|
+@if ($parentSeller)
+| <b>Parent</b>      | {{ $parentSeller }}|
+@endif
 | <b>Store</b>      | {{ $seller->business_name }}|
 | <b>Owner</b>      | {{ $seller->name }} |
 | <b>Email</b>      | {{ $seller->email }} |

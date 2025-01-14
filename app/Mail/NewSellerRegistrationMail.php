@@ -22,7 +22,8 @@ class NewSellerRegistrationMail extends Mailable
     public function __construct(
         public User $user,
         public string $sellerType,
-        public string $accountVerificationLink
+        public string $accountVerificationLink,
+        public ?string $parentSeller = null,
     ) {}
 
     /**
@@ -49,6 +50,8 @@ class NewSellerRegistrationMail extends Mailable
             with: [
                 'seller' => $this->user,
                 'sellerType' => $this->sellerType,
+                'accountVerificationLink' => $this->accountVerificationLink,
+                'parentSeller' => $this->parentSeller,
             ]
         );
     }

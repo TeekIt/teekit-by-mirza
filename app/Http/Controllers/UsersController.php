@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Drivers;
+use App\Pages;
 use App\Products;
 use App\Services\GoogleMapServices;
 use App\User;
@@ -17,6 +18,31 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UsersController extends Controller
 {
+    /**
+     * Return's admin settings view
+     * @author Muhammad Abdullah Mirza
+     */
+    public function adminSettings()
+    {
+        $pageTypes = ['terms', 'help', 'faq', 'slogan', 'favicon', 'logo'];
+        $pages = Pages::whereIn('page_type', $pageTypes)->get()->keyBy('page_type');
+
+        $terms_page = $pages->get('terms');
+        $help_page = $pages->get('help');
+        $faq_page = $pages->get('faq');
+        $slogan = $pages->get('slogan');
+        $favicon = $pages->get('favicon');
+        $logo = $pages->get('logo');
+
+        return view('admin.settings', compact(
+            'terms_page',
+            'help_page',
+            'faq_page',
+            'slogan',
+            'favicon',
+            'logo'
+        ));
+    }
     /**
      * It will update user details
      * via given id
