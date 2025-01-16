@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Auth\AuthController;
 use App\Rattings;
+use App\Services\JsonResponseServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Throwable;
 
 class RattingsController extends Controller
 {
@@ -16,18 +15,17 @@ class RattingsController extends Controller
      */
     public function add(Request $request)
     {
-        $validate = Rattings::validator($request);
-        if ($validate->fails()) {
-            $response = array('status' => false, 'message' => 'Validation error', 'data' => $validate->messages());
-            return response()->json($response, 400);
+        $validatedData = Rattings::validator($request);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
-        $user_id = Auth::id();
-        $response = [];
+
         $ratting = new Rattings();
-        $ratting->user_id = $user_id;
+        $ratting->user_id = Auth::id();
         $ratting->product_id = $request->get('product_id');
         $ratting->ratting = $request->get('ratting');
         $ratting->save();
+
         return (new ProductsController)->view($request->get('product_id'));
     }
     /**
@@ -54,31 +52,23 @@ class RattingsController extends Controller
      *It will delete rating of a specific product    
      * @version 1.0.0
      */
-    public function delete($ratting_id)
+    public function delete($rattingId)
     {
-        try {
-            $delete_rating =  Rattings::find($ratting_id);
-            if ($delete_rating) {
-                $delete_rating->delete();
-                return response()->json([
-                    'data' => [],
-                    'status' => true,
-                    'message' => config('constants.ITEM_DELETED'),
-                ], 200);
-            } else {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => config('constants.NO_RECORD')
-                ], 200);
-            }
-        } catch (Throwable $error) {
-            report($error);
+        $deleteRating = Rattings::find($rattingId);
+
+        if ($deleteRating) {
+            $deleteRating->delete();
+            return response()->json([
+                'data' => [],
+                'status' => true,
+                'message' => config('constants.ITEM_DELETED'),
+            ], 200);
+        } else {
             return response()->json([
                 'data' => [],
                 'status' => false,
-                'message' => $error
-            ], 500);
+                'message' => config('constants.NO_RECORD')
+            ], 200);
         }
     }
 }

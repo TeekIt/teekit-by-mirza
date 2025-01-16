@@ -7,20 +7,16 @@ use App\Enums\TransportVehicle;
 use App\Enums\UserChoicesEnum;
 use App\Enums\UserRole;
 use App\Models\GuestBuyer;
-use App\Models\GuestCustomer;
 use App\Models\ProductsByBuyer;
 use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Qty;
-use App\Services\DriverFairServices;
-use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
 use App\Services\OrderServices;
 use App\Services\ProductServices;
 use App\User;
-use App\Services\TwilioSmsService;
 use App\Services\VerificationCodeServices;
 use App\VerificationCodes;
 use Illuminate\Database\Query\Builder;
@@ -29,7 +25,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Stripe\Service\Climate\OrderService;
 use Throwable;
 
 class OrdersController extends Controller
@@ -337,7 +332,7 @@ class OrdersController extends Controller
             $productByBuyer->qty,
             UserChoicesEnum::SEND_TO_OTHER_STORES
         );
-        
+
         if ($request->type == 'delivery') {
             $verificationCode = VerificationCodeServices::generateCode();
             VerificationCodes::add($orderId, $verificationCode);
@@ -372,90 +367,70 @@ class OrdersController extends Controller
      */
     public function showLoggedinBuyerOrders(Request $request)
     {
-        try {
-            $orders = Orders::select('id')->where('customer_id', '=', Auth::id())->orderByDesc('id');
-            if (!empty($request->order_status)) $orders = $orders->where('order_status', '=', $request->order_status);
-            $orders = $orders->paginate(20);
-            $pagination = $orders->toArray();
-            if (!$orders->isEmpty()) {
-                $order_data = [];
-                foreach ($orders as $order) $order_data[] = $this->getOrderDetails($order->id);
-                unset($pagination['data']);
-                return JsonResponseServices::getApiResponseExtention(
-                    $order_data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
-            }
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
+        $orders = Orders::select('id')->where('customer_id', '=', Auth::id())->orderByDesc('id');
+        if (!empty($request->order_status)) $orders = $orders->where('order_status', '=', $request->order_status);
+        $orders = $orders->paginate(20);
+        $pagination = $orders->toArray();
+        if (!$orders->isEmpty()) {
+            $order_data = [];
+            foreach ($orders as $order) $order_data[] = $this->getOrderDetails($order->id);
+            unset($pagination['data']);
+            return JsonResponseServices::getApiResponseExtention(
+                $order_data,
+                config('constants.TRUE_STATUS'),
+                '',
+                'pagination',
+                $pagination,
                 config('constants.HTTP_OK')
             );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
         }
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * @author Muhammad Abdullah Mirza
      */
     public function productsOfRecentOrder(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'productsLimit' => 'required|integer',
-                'sellerId' => 'required|integer'
-            ]);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
-            }
+        $validatedData = Validator::make($request->all(), [
+            'productsLimit' => 'required|integer',
+            'sellerId' => 'required|integer'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
+        }
 
-            $order = Orders::getRecentOrderByCustomerId(Auth::id(), $request->productsLimit, $request->sellerId);
-            if (!empty($order)) {
-                $recentOrderProdsData = [];
-                foreach ($order->products as $product) $recentOrderProdsData[] = Products::getProductInfo(
-                    $request->sellerId,
-                    $product->id,
-                    Products::getCommonColumns(),
-                );
-                /*
-                * Just creating this variable so we don't have to call the "empty()" function again & again
-                * Which will obviouly reduce the API response speed
-                */
-                $dataIsEmpty = empty($recentOrderProdsData);
-                return JsonResponseServices::getApiResponse(
-                    ($dataIsEmpty) ? [] : $recentOrderProdsData,
-                    ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-                    ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
-                    config('constants.HTTP_OK'),
-                );
-            }
-
-            return JsonResponseServices::getApiResponse(
-                [],
-                false,
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_OK')
+        $order = Orders::getRecentOrderByCustomerId(Auth::id(), $request->productsLimit, $request->sellerId);
+        if (!empty($order)) {
+            $recentOrderProdsData = [];
+            foreach ($order->products as $product) $recentOrderProdsData[] = Products::getProductInfo(
+                $request->sellerId,
+                $product->id,
+                Products::getCommonColumns(),
             );
-        } catch (Throwable $error) {
-            report($error);
+            /*
+            * Just creating this variable so we don't have to call the "empty()" function again & again
+            * Which will obviouly reduce the API response speed
+            */
+            $dataIsEmpty = empty($recentOrderProdsData);
             return JsonResponseServices::getApiResponse(
-                [],
-                false,
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
+                ($dataIsEmpty) ? [] : $recentOrderProdsData,
+                ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+                config('constants.HTTP_OK'),
             );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            false,
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * List all ready or delivered orders
@@ -839,11 +814,11 @@ class OrdersController extends Controller
     public function getOrderDetailsTwo(Request $request)
     {
         try {
-            $validated_data = Validator::make($request->route()->parameters(), [
+            $validatedData = Validator::make($request->route()->parameters(), [
                 'id' => 'required|integer'
             ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->error());
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
             }
             if (!Orders::checkIfOrderExists($request->id)) {
                 return JsonResponseServices::getApiResponse(

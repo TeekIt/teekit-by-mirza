@@ -243,59 +243,49 @@ class UsersController extends Controller
      */
     public function sellers(Request $request)
     {
-        try {
-            $validated_data = Validator::make($request->query(), [
-                'lat' => 'required|numeric|between:-90,90',
-                'lon' => 'required|numeric|between:-180,180',
-                'state' => 'required|string',
-                // 'page' => 'required|numeric',
-            ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
+        $validatedData = Validator::make($request->query(), [
+            'lat' => 'required|numeric|between:-90,90',
+            'lon' => 'required|numeric|between:-180,180',
+            'state' => 'required|string',
+            // 'page' => 'required|numeric',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        $data = Cache::remember('sellers' . $request->state . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
+            $sellers = User::getParentAndChildSellersByState($request->state);
+            // $pagination = $sellers->toArray();
+            // unset($pagination['data']);
+            if (!$sellers->isEmpty()) {
+                return GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
             }
+        });
 
-            $data = Cache::remember('sellers' . $request->state . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
-                $sellers = User::getParentAndChildSellersByState($request->state);
-                // $pagination = $sellers->toArray();
-                // unset($pagination['data']);
-                if (!$sellers->isEmpty()) {
-                    return GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
-                }
-            });
-
-            if (empty($data)) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    config('constants.NO_STORES_FOUND'),
-                    config('constants.HTTP_OK')
-                );
-            }
-
-            return JsonResponseServices::getApiResponse(
-                $data,
-                config('constants.TRUE_STATUS'),
-                '',
-                config('constants.HTTP_OK'),
-            );
-
-            // return JsonResponseServices::getApiResponseExtention(
-            //     $data,
-            //     config('constants.TRUE_STATUS'),
-            //     '',
-            //     'pagination',
-            //     $pagination,
-            //     config('constants.HTTP_OK')
-            // );
-        } catch (Throwable $error) {
-            report($error);
+        if (empty($data)) {
             return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
+                config('constants.NO_STORES_FOUND'),
+                config('constants.HTTP_OK')
             );
         }
+
+        return JsonResponseServices::getApiResponse(
+            $data,
+            config('constants.TRUE_STATUS'),
+            '',
+            config('constants.HTTP_OK'),
+        );
+
+        // return JsonResponseServices::getApiResponseExtention(
+        //     $data,
+        //     config('constants.TRUE_STATUS'),
+        //     '',
+        //     'pagination',
+        //     $pagination,
+        //     config('constants.HTTP_OK')
+        // );
     }
     /**
      * Search products w.r.t Seller/Store 'id' & Product Name
@@ -304,42 +294,32 @@ class UsersController extends Controller
      */
     public function searchSellerProducts($seller_id, $product_name)
     {
-        try {
-            $data = [];
-            $article = Products::search($product_name)
-                ->where('user_id', $seller_id)
-                ->where('status', 1);
-            $products = $article->paginate(20);
-            $pagination = $products->toArray();
-            if (!$products->isEmpty()) {
-                foreach ($products as $product) {
-                    $data[] = Products::getProductInfo($seller_id, $product->id, ['*']);
-                }
-                unset($pagination['data']);
-                return JsonResponseServices::getApiResponseExtention(
-                    $data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
+        $data = [];
+        $article = Products::search($product_name)
+            ->where('user_id', $seller_id)
+            ->where('status', 1);
+        $products = $article->paginate(20);
+        $pagination = $products->toArray();
+        if (!$products->isEmpty()) {
+            foreach ($products as $product) {
+                $data[] = Products::getProductInfo($seller_id, $product->id, ['*']);
             }
-
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
+            unset($pagination['data']);
+            return JsonResponseServices::getApiResponseExtention(
+                $data,
+                config('constants.TRUE_STATUS'),
+                '',
+                'pagination',
+                $pagination,
                 config('constants.HTTP_OK')
             );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
 }

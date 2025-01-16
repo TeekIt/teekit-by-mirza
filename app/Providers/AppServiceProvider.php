@@ -14,10 +14,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
-    {
-        //
-    }
+    public function register() {}
 
     /**
      * Bootstrap any application services.
@@ -28,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrap();
 
+        Schema::defaultStringLength(191);
+
         Gate::before(function ($user, $ability) {
             Gate::define($ability, function ($user) use ($ability) {
                 if ($user->role->name == $ability) {
@@ -36,7 +35,5 @@ class AppServiceProvider extends ServiceProvider
                 return false;
             });
         });
-
-        Schema::defaultStringLength(191);
     }
 }

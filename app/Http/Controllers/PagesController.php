@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Pages;
+use App\Services\JsonResponseServices;
 use Illuminate\Http\Request;
 
 class PagesController extends Controller
@@ -13,11 +14,13 @@ class PagesController extends Controller
      */
     public function getPage(Request $request)
     {
-        $page = Pages::query()->where('page_type', '=', $request->page_type)->get();
-        return response()->json([
-            'data' => $page,
-            'status' => true,
-            'message' => ''
-        ], 200);
+        $page = Pages::where('page_type', '=', $request->page_type)->get();
+
+        return JsonResponseServices::getApiResponse(
+            $page,
+            config('constants.TRUE_STATUS'),
+            '',
+            config('constants.HTTP_OK')
+        );
     }
 }
