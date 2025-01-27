@@ -227,6 +227,8 @@ class OrdersController extends Controller
                 'required',
                 Rule::in(array_column(OrderTypeEnum::cases(), 'value')),
             ],
+            'deliveryCharges' => 'required|numeric|min:0',
+            'serviceCharges' => 'required|numeric|min:0',
             'fName' => 'required|string|max:100',
             'lName' => 'required|string|max:100',
             'email' => 'required|email|max:255',

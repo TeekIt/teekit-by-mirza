@@ -22,19 +22,19 @@ class OrdersLivewire extends Component
     use WithPagination;
 
     public
-        $seller_id,
-        $orderId,
-        $currentProdId,
-        $currentProdQty,
-        $customerName,
-        $phoneNumber,
-        $order,
-        $order_item,
-        $nearby_sellers,
-        $selected_nearby_seller,
-        $search,
-        $custom_order_id,
-        $request_order_id;
+    $seller_id,
+    $orderId,
+    $currentProdId,
+    $currentProdQty,
+    $customerName,
+    $phoneNumber,
+    $order,
+    $order_item,
+    $nearby_sellers,
+    $selected_nearby_seller,
+    $search,
+    $custom_order_id,
+    $request_order_id;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -119,7 +119,10 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $stuart_message = StuartDeliveryServices::stuartJobCreationLivewire($this->orderId, $this->custom_order_id);
+            $stuart_message = StuartDeliveryServices::stuartJobCreationLivewire(
+                $this->orderId,
+                $this->custom_order_id
+            );
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'stuartModal']);
@@ -199,7 +202,7 @@ class OrdersLivewire extends Component
             $order = Orders::isViewed($id);
 
             $updated = Orders::updateOrderStatus($id, OrderStatusEnum::ACCEPTED);
-            
+
             if ($order->type == OrderTypeEnum::SELF_PICKUP->value) {
                 EmailServices::sendPickupYourOrderMail($order);
             }
@@ -215,28 +218,6 @@ class OrdersLivewire extends Component
             session()->flash('error', $error->getMessage());
         }
     }
-
-    // public function orderIsReady($order)
-    // {
-    //     try {
-    //         /* Perform some operation */
-    //         $updated = Orders::updateOrderStatus($order['id'], 'ready');
-    //         if ($order['type'] == 'self-pickup') {
-    //             $order_details = Orders::getById($order['id']);
-    //             EmailServices::sendPickupYourOrderMail($order_details);
-    //         }
-    //         /* Operation finished */
-    //         sleep(1);
-    //         if ($updated) {
-    //             session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-    //         } else {
-    //             session()->flash('error', config('constants.UPDATION_FAILED'));
-    //         }
-    //     } catch (Exception $error) {
-    //         report($error);
-    //         session()->flash('error', $error->getMessage());
-    //     }
-    // }
 
     public function orderIsCompleted($id)
     {
@@ -305,7 +286,9 @@ class OrdersLivewire extends Component
     public function resetThisPage()
     {
         $this->resetModal();
+
         $this->resetPage();
+        
         $this->reset([
             'request_order_id'
         ]);
@@ -314,12 +297,14 @@ class OrdersLivewire extends Component
     public function isSearchByIdSet()
     {
         if ($this->search) {
-            $searched_order_id = (int)$this->search;
-            $this->request_order_id = (int)$this->search;
+            $searched_order_id = (int) $this->search;
+            $this->request_order_id = (int) $this->search;
         } else {
             $searched_order_id = $this->request_order_id;
         }
+
         if ($searched_order_id != 0) $this->resetPage();
+
         return $searched_order_id;
     }
 

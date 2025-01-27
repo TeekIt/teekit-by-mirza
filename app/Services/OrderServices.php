@@ -54,7 +54,7 @@ final class OrderServices
         }
 
         $distanceInMiles = GoogleMapServices::getDistanceInMiles($sellerLat, $sellerLon, $buyerLat, $buyerLon);
-
+        
         return (2.5 + 1.25) * ($distanceInMiles + static::$deliveryFee);
     }
 

@@ -104,32 +104,6 @@
                                         <td colspan="6">
                                             <div class="row">
                                                 <div class="col-12 col-md-10">
-                                                    {{-- <button class="btn btn-warning col-3 col-md-2" title="Hold the order">
-                                                        <span onclick="timerManager.holdThisTimer({{ $singleIndex->id }})">
-                                                            Hold
-                                                        </span>
-                                                        <span>
-                                                        <span class="spinner-border spinner-border-sm text-light"
-                                                            role="status" aria-hidden="true"></span>
-                                                    </span>
-                                                    </button> --}}
-
-                                                    {{-- <button class="btn btn-warning col-3 col-md-2" wire:click="moveToAnotherSeller(
-                                                                {{ $singleIndex->id }}, 
-                                                                '{{ $singleIndex->order_status }}', 
-                                                                {{ $singleIndex->customer_lat }}, 
-                                                                {{ $singleIndex->customer_lon }}, 
-                                                                '{{ $singleIndex->moved_at }}', 
-                                                                '{{ $singleIndex->created_at }}'
-                                                                )">
-                                                        <span>
-                                                            Move To Another Seller
-                                                        </span>
-                                                        <span>
-                                                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
-                                                        </span>
-                                                    </button> --}}
-
                                                     @if ($singleIndex->order_status === 'pending')
                                                         <button class="btn btn-success col-12 col-md-2 m-1 m-md-0"  wire:click="renderAcceptOrderModal({{ $singleIndex->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" wire:target="renderAcceptOrderModal({{ $singleIndex->id }})" title="Accept the order">
                                                             <span wire:target="renderAcceptOrderModal({{ $singleIndex->id }})" wire:loading.remove>
@@ -151,7 +125,7 @@
                                                     @endif
 
                                                     @if ($singleIndex->order_status === 'accepted')
-                                                        <button class="btn btn-warning col-4 col-md-2" wire:click="readyBySeller({{ $singleIndex->id }}, '{{ $singleIndex->type }}')" wire:target="readyBySeller({{ $singleIndex->id }}, '{{ $singleIndex->type }}')" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Mark the order as ready">
+                                                        <button class="btn btn-warning col-12 col-md-2 m-1 m-md-0" wire:click="readyBySeller({{ $singleIndex->id }}, '{{ $singleIndex->type }}')" wire:target="readyBySeller({{ $singleIndex->id }}, '{{ $singleIndex->type }}')" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Mark the order as ready">
                                                             <span wire:target="readyBySeller({{ $singleIndex->id }}, '{{ $singleIndex->type }}')" wire:loading.remove>
                                                                 Ready
                                                             </span>
@@ -162,7 +136,7 @@
                                                     @endif
 
                                                     @if ($singleIndex->order_status === 'ready')
-                                                        <button class="btn btn-warning col-4 col-md-2" wire:click="deliveredBySeller({{ $singleIndex->id }})" wire:target="deliveredBySeller({{ $singleIndex->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Mark the order as delivered">
+                                                        <button class="btn btn-warning col-12 col-md-2 m-1 m-md-0" wire:click="deliveredBySeller({{ $singleIndex->id }})" wire:target="deliveredBySeller({{ $singleIndex->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Mark the order as delivered">
                                                             <span wire:target="deliveredBySeller({{ $singleIndex->id }})" wire:loading.remove>
                                                                 Deliver
                                                             </span>
@@ -173,13 +147,13 @@
                                                     @endif
 
                                                     @if ($singleIndex->order_status === 'onTheWay')
-                                                        <button class="btn btn-dark col-4 col-md-2" title="Our delivery boy is delivering your order">
+                                                        <button class="btn btn-dark col-12 col-md-2 m-1 m-md-0" title="Our delivery boy is delivering your order">
                                                             On The Way 😊
                                                         </button>
                                                     @endif
 
                                                     @if ($singleIndex->order_status === 'delivered')
-                                                        <button class="btn btn-dark col-4 col-md-2" title="You have delivered the order successfully">
+                                                        <button class="btn btn-dark col-12 col-md-2 m-1 m-md-0" title="You have delivered the order successfully">
                                                             Delivered 🥳
                                                         </button>
                                                     @endif

@@ -36,6 +36,8 @@ return [
     'VALID_REFERRAL' => 'Valid referral code',
     'ORDER_ASSIGNED' => 'Assigned',
     'ORDER_UPDATED' => 'Updated',
+    'ORDER_DELIVERED_SUCCESSFULLY' => 'You have delivered your order successfully 🎉',
+    'ORDER_COMPLETED_SUCCESSFULLY' => 'Your order has been completed successfully',
     'VALID_PROMOCODE' => 'You have entered a valid promo code',
     'BANK_DETAILS_UPDATED' => 'Bank Account details are successfully updated',
     'VERIFICATION_SUCCESS' => 'Verification Successful',

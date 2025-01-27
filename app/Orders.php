@@ -103,7 +103,7 @@ class Orders extends Model
         //     $order->delivery_charges = $request->deliveryCharges;
         //     $order->service_charges = $request->serviceCharges;
         // }
-        /* If order type == self-pickup even then you have to solve this */
+        /* If order type == self-pickup even then we need this information */
         $order->customer_lat = $request->lat;
         $order->customer_lon = $request->lon;
         $order->customer_name = $request->fName . " " .  $request->lName;
