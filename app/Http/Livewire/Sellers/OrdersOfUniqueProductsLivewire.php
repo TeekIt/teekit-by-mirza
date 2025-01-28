@@ -268,7 +268,7 @@ class OrdersOfUniqueProductsLivewire extends Component
             $currentTotalAmount = round($this->selectedOrder->current_total + $this->selectedOrder->service_charges + $currentDeliveryCharges);
             $initialTotalAmount = round($this->selectedOrder->initial_total + $this->selectedOrder->service_charges + $this->selectedOrder->delivery_charges);
 
-            if ($currentTotalAmount <= $initialTotalAmount) {
+            if ($currentTotalAmount <= OrderServices::getTotalWithExtraCharge($initialTotalAmount)) {
                 $response = StripeServices::capturePaymentIntent(
                     $this->selectedOrder->payment_intent_id,
                     bcmul($currentTotalAmount, 100),

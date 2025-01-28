@@ -11,6 +11,13 @@ return [
     |
     */
 
+     /*
+    |--------------------------------------------------------------------------
+    | Globally Required 
+    |--------------------------------------------------------------------------
+    */
+    'EXTRA_CHARGE_AMOUNT' => 5.00,
+
     /*
     |--------------------------------------------------------------------------
     | Success Constants
@@ -36,7 +43,7 @@ return [
     'VALID_REFERRAL' => 'Valid referral code',
     'ORDER_ASSIGNED' => 'Assigned',
     'ORDER_UPDATED' => 'Updated',
-    'ORDER_DELIVERED_SUCCESSFULLY' => 'You have delivered your order successfully 🎉',
+    'ORDER_DELIVERED_SUCCESSFULLY' => 'You have successfully delivered your order 🎉',
     'ORDER_COMPLETED_SUCCESSFULLY' => 'Your order has been completed successfully',
     'VALID_PROMOCODE' => 'You have entered a valid promo code',
     'BANK_DETAILS_UPDATED' => 'Bank Account details are successfully updated',
