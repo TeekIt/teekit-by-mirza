@@ -29,7 +29,7 @@ class RunRawQueries extends Command
      */
     public function handle()
     {
-        $executeQueries = false;
+        $executeQueries = true;
 
         try {
             if ($executeQueries) {
