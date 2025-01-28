@@ -6,7 +6,6 @@ final class ProductServices
 {
     /**
      * @author Muhammad Abdullah Mirza
-     * @return Json string 
      */
     public static function jsonEncodeColors(array $colors): string
     {

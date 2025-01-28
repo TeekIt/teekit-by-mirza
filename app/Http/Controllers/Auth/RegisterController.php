@@ -41,7 +41,7 @@ class RegisterController extends Controller
     {
         $this->middleware('guest');
     }
-    
+
     /**
      * Get a validator for an incoming registration request.
      *
@@ -81,10 +81,11 @@ class RegisterController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'errors' => $validator->errors(),
-            ], 200);
+            ], config('constants.HTTP_OK'));
         }
+
         $data = $request->toArray();
-        $business_hours = '{
+        $businessHours = '{
             "time": {
                 "Monday": {
                     "open": null,
@@ -124,7 +125,8 @@ class RegisterController extends Controller
             },
             "submitted" : null
         }';
-        $parent_store_id = ($request->input('parent_store')) ? User::getStoreByBusinessName($request->input('parent_store'))->id : null;
+        $parentStoreId = ($request->input('parent_store')) ? User::getSellerByBusinessName($request->input('parent_store'))->id : null;
+        
         $user = User::createStore(
             $data['name'],
             strtolower($data['email']),
@@ -140,33 +142,19 @@ class RegisterController extends Controller
             $data['business_phone'],
             $data['lat'],
             $data['lon'],
-            $business_hours,
+            $businessHours,
             $request->input('parent_store') ? UserRole::CHILD_SELLER : UserRole::SELLER,
-            $parent_store_id
+            $parentStoreId
         );
 
         if ($user) {
             echo "User Created";
         }
 
-        /* 2: Parent store */
-        ($user->role_id === UserRole::SELLER) ? EmailServices::sendNewParentStoreMail($user) : EmailServices::sendNewChildStoreMail($user, $request->input('parent_store'));
-
-        // $admin_users = Role::with('users')->where('name', 'superadmin')->first();
-        // $store_link = $FRONTEND_URL . '/customer/' . $user->id . '/details';
-        // $admin_subject = env('APP_NAME') . ': New Store Registered';
-        // foreach ($admin_users->users as $user) {
-        //     $adminHtml = '<html>
-        //     Hi, ' . $user->name . '<br><br>
-        //     A new store has been register to your site  ' . env('APP_NAME') . '.
-        //     <br>
-        //     Please click on below link to activate store. <br><br>
-        //     <a href="' . $store_link . '">Verify</a> OR Copy This in your Browser
-        //     ' . $store_link . '
-        //     <br><br><br>
-        // </html>';
-        //     if (!empty($adminHtml)) Mail::to($user->email)
-        //         ->send(new StoreRegisterMail($adminHtml, $admin_subject));
-        // }
+        EmailServices::sendNewSellerMail(
+            $user,
+            ($user->role_id === UserRole::SELLER) ? 'Parent' : 'Child',
+            ($user->role_id === UserRole::CHILD_SELLER) ? $request->input('parent_store') : null,
+        );
     }
 }

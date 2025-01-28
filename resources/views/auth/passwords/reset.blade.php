@@ -1,46 +1,72 @@
 @extends('layouts.auth.app')
 
 @section('content')
+<style>
+    .password-reset-btn {
+        display: block;
+        width: 100%;
+        margin-top: 15px !important;
+        background: #ffec00;
+        border: 0;
+        border-radius: 0;
+        color: #000100;
+        font-weight: 600;
+        border: 0;
+    }
 
+    .white-placeholder::placeholder {
+        color: white;
+    }
+</style>
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            <h1 class="text-white text-center">{{ __('Reset Password') }}</h1>
-            <form method="POST" action="{{ route('password.update') }}">
+            <h1 class="text-white fs-3">Reset Password</h1>
+            <form method="POST" action="{{ route('password.update') }}" class="mt-3">
                 @csrf
-                <input type="hidden" name="token" value="{{ $token }}">
-
+                <input type="hidden" name="token" value="{{ $token }}"
+                    class="form-control white-placeholder {{ $errors->has('token') ? 'is-invalid' : '' }}">
+                @error('token')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
                 <div class="form-group row">
                     <div class="col-md-12">
-                        <input id="email" placeholder="Email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ $email ?? old('email') }}" required autofocus>
-                        @if ($errors->has('email'))
+                        <input id="email" placeholder="Email" type="email"
+                            class="form-control white-placeholder {{ $errors->has('email') ? 'is-invalid' : '' }}"
+                            name="email" value="{{ $email ?? old('email') }}" autofocus>
+                        @error('email')
                         <span class="invalid-feedback" role="alert">
-                            <strong>{{ $errors->first('email') }}</strong>
+                            <strong>{{ $message }}</strong>
                         </span>
-                        @endif
+                        @enderror
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <div class="col-md-12">
-                        <input id="password" type="password" class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" placeholder="Password" name="password" required>
-                        @if ($errors->has('password'))
+                        <input id="password" type="password"
+                            class="form-control white-placeholder {{ $errors->has('password') ? 'is-invalid' : '' }}"
+                            placeholder="Password" name="password">
+                        @error('password')
                         <span class="invalid-feedback" role="alert">
-                            <strong>{{ $errors->first('password') }}</strong>
+                            <strong>{{ $message }}</strong>
                         </span>
-                        @endif
+                        @enderror
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <div class="col-md-12">
-                        <input id="password-confirm" type="password" class="form-control" placeholder="Confirm Password" name="password_confirmation" required>
+                        <input id="password-confirm" type="password" class="form-control white-placeholder"
+                            placeholder="Confirm Password" name="password_confirmation">
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <div class="col-md-12">
-                        <button type="submit" class="btn btn-primary" style="/* padding: 5px 25px; */display: block;width: 100%;margin-top: 15px!important;background: #ffec00;border: 0;border-radius: 0;color: #000100;font-weight: 600;border: 0; ">
+                        <button type="submit" class="btn btn-primary password-reset-btn">
                             {{ __('Reset Password') }}
                         </button>
                     </div>

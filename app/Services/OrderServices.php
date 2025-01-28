@@ -6,7 +6,10 @@ use App\User;
 
 final class OrderServices
 {
-    public static float $deliveryFee = 0.00;
+    public static function getTotalWithExtraCharge(float $totalAmout): float
+    {
+        return $totalAmout + config('constants.EXTRA_CHARGE_AMOUNT');
+    }
 
     public static function getTotalWeight(array $order): float
     {
@@ -42,20 +45,20 @@ final class OrderServices
         float $totalWeight,
     ): float {
         if ($totalWeight < 5) {
-            static::$deliveryFee = 0.15;
+            $deliveryFee = 0.15;
         } else if ($totalWeight >= 5 && $totalWeight < 10) {
-            static::$deliveryFee = 0.50;
+            $deliveryFee = 0.50;
         } else if ($totalWeight >= 10 && $totalWeight < 15) {
-            static::$deliveryFee = 0.75;
+            $deliveryFee = 0.75;
         } else if ($totalWeight >= 15 && $totalWeight < 20) {
-            static::$deliveryFee = 1.50;
+            $deliveryFee = 1.50;
         } else if ($totalWeight >= 20) {
-            static::$deliveryFee = 2.0;
+            $deliveryFee = 2.0;
         }
 
         $distanceInMiles = GoogleMapServices::getDistanceInMiles($sellerLat, $sellerLon, $buyerLat, $buyerLon);
 
-        return (2.5 + 1.25) * ($distanceInMiles + static::$deliveryFee);
+        return (2.5 + 1.25) * ($distanceInMiles + $deliveryFee);
     }
 
     public static function getDriverCharges(
@@ -66,7 +69,6 @@ final class OrderServices
         float $totalWeight,
         float $totalVolumn,
     ): float {
-        // $distance = $this->calculateDistance($buyer_lat, $buyer_lon, $store_lat, $store_lon);
         $distance = GoogleMapServices::getDistanceInMiles($sellerLat, $sellerLon, $buyerLat, $buyerLon);
 
         return DriverFairServices::calculateDriverFair2($totalWeight, $totalVolumn, $distance);

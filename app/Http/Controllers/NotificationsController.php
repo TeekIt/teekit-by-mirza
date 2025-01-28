@@ -169,36 +169,26 @@ class NotificationsController extends Controller
      */
     public function saveToken(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'user_id' => 'integer',
-                'device_id' => 'required|string',
-                'device_token' => 'required|string'
-            ]);
-            if ($validatedData->fails()) {
-                JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-            }
-
-            DeviceToken::addOrUpdate(
-                $request->user_id,
-                $request->device_id,
-                $request->device_token,
-            );
-
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.TRUE_STATUS'),
-                config('constants.DATA_UPDATED_SUCCESS'),
-                config('constants.HTTP_OK'),
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR'),
-            );
+        $validatedData = Validator::make($request->all(), [
+            'user_id' => 'integer',
+            'device_id' => 'required|string',
+            'device_token' => 'required|string'
+        ]);
+        if ($validatedData->fails()) {
+            JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+
+        DeviceToken::addOrUpdate(
+            $request->user_id,
+            $request->device_id,
+            $request->device_token,
+        );
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.TRUE_STATUS'),
+            config('constants.DATA_UPDATED_SUCCESS'),
+            config('constants.HTTP_OK'),
+        );
     }
 }

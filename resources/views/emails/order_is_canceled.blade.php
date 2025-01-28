@@ -1,21 +1,13 @@
-<!doctype html>
-<html lang="en">
+<x-mail::message>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Teek-it</title>
-</head>
+<b>Dear {{ $order->buyer->name }},</b>
 
-<body>
-    <b>Hello {{ $order->user->name }}</b><br><br>
-    <b>Your order from {{ $order->store->name }} was unsuccessful.</b><br><br>
-    <p>Unfortunately {{ $order->store->name }} were unable to complete your order. You have not been
-        charged.</p><br>
-    <b>If you need any assistance, please contact us via email at:</b><br>
-    <b>{{ config('constants.ADMIN_EMAIL') }}</b><br><br>
-    <img src="{{ asset('teekit.png') }}" alt="">
-</body>
+We regret to inform you that your recent <b>order #{{ $order->id }}</b> from <b>{{ $order->seller->name }}</b> has been canceled by the seller.
+Unfortunately, the seller is unable to complete your order at this time. But don't worry <b>as you have been refunded</b> for this transaction.
 
-</html>
+We apologize for any inconvenience this may have caused and appreciate your understanding.
+
+If you require any assistance or have any questions, please do not hesitate to contact us at: <b>{{ config('constants.ADMIN_EMAIL') }}</b>
+
+@include('layouts.email.footer')
+</x-mail::message>

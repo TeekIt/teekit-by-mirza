@@ -22,9 +22,9 @@ class CategoriesController extends Controller
     public function add(Request $request)
     {
         try {
-            $validated_data = Categories::validator($request);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
+            $validatedData = Categories::validator($request);
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
             $category = Categories::add($request);
             return JsonResponseServices::getApiResponse(
@@ -50,9 +50,9 @@ class CategoriesController extends Controller
     public function update(Request $request, $category_id)
     {
         try {
-            $validated_data = Categories::validator($request);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
+            $validatedData = Categories::validator($request);
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
             $category = Categories::updateCategory($request, $category_id);
             return JsonResponseServices::getApiResponse(
@@ -77,11 +77,11 @@ class CategoriesController extends Controller
      */
     public function all(Request $request)
     {
-        $validated_data = Validator::make($request->all(), [
+        $validatedData = Validator::make($request->all(), [
             'store_id' => 'integer',
         ]);
-        if ($validated_data->fails()) {
-            return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
         if ($request->store_id)
@@ -181,15 +181,15 @@ class CategoriesController extends Controller
     public function stores(Request $request)
     {
         try {
-            $validated_data = Validator::make($request->query(), [
+            $validatedData = Validator::make($request->query(), [
                 'category_id' => 'required|integer',
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
                 'state' => 'required|string'
                 // 'page' => 'required|numeric'
             ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
 
             $stores = Cache::remember('get-stores-by-category' . $request->category_id . $request->lat . $request->lon, now()->addDay(), function () use ($request) {

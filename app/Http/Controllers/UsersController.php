@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Drivers;
+use App\Pages;
 use App\Products;
 use App\Services\GoogleMapServices;
 use App\User;
@@ -17,6 +18,31 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UsersController extends Controller
 {
+    /**
+     * Return's admin settings view
+     * @author Muhammad Abdullah Mirza
+     */
+    public function adminSettings()
+    {
+        $pageTypes = ['terms', 'help', 'faq', 'slogan', 'favicon', 'logo'];
+        $pages = Pages::whereIn('page_type', $pageTypes)->get()->keyBy('page_type');
+
+        $terms_page = $pages->get('terms');
+        $help_page = $pages->get('help');
+        $faq_page = $pages->get('faq');
+        $slogan = $pages->get('slogan');
+        $favicon = $pages->get('favicon');
+        $logo = $pages->get('logo');
+
+        return view('admin.settings', compact(
+            'terms_page',
+            'help_page',
+            'faq_page',
+            'slogan',
+            'favicon',
+            'logo'
+        ));
+    }
     /**
      * It will update user details
      * via given id
@@ -217,59 +243,49 @@ class UsersController extends Controller
      */
     public function sellers(Request $request)
     {
-        try {
-            $validated_data = Validator::make($request->query(), [
-                'lat' => 'required|numeric|between:-90,90',
-                'lon' => 'required|numeric|between:-180,180',
-                'state' => 'required|string',
-                // 'page' => 'required|numeric',
-            ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
+        $validatedData = Validator::make($request->query(), [
+            'lat' => 'required|numeric|between:-90,90',
+            'lon' => 'required|numeric|between:-180,180',
+            'state' => 'required|string',
+            // 'page' => 'required|numeric',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        $data = Cache::remember('sellers' . $request->state . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
+            $sellers = User::getParentAndChildSellersByState($request->state);
+            // $pagination = $sellers->toArray();
+            // unset($pagination['data']);
+            if (!$sellers->isEmpty()) {
+                return GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
             }
+        });
 
-            $data = Cache::remember('sellers' . $request->state . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
-                $sellers = User::getParentAndChildSellersByState($request->state);
-                // $pagination = $sellers->toArray();
-                // unset($pagination['data']);
-                if (!$sellers->isEmpty()) {
-                    return GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
-                }
-            });
-
-            if (empty($data)) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    config('constants.NO_STORES_FOUND'),
-                    config('constants.HTTP_OK')
-                );
-            }
-
-            return JsonResponseServices::getApiResponse(
-                $data,
-                config('constants.TRUE_STATUS'),
-                '',
-                config('constants.HTTP_OK'),
-            );
-
-            // return JsonResponseServices::getApiResponseExtention(
-            //     $data,
-            //     config('constants.TRUE_STATUS'),
-            //     '',
-            //     'pagination',
-            //     $pagination,
-            //     config('constants.HTTP_OK')
-            // );
-        } catch (Throwable $error) {
-            report($error);
+        if (empty($data)) {
             return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
+                config('constants.NO_STORES_FOUND'),
+                config('constants.HTTP_OK')
             );
         }
+
+        return JsonResponseServices::getApiResponse(
+            $data,
+            config('constants.TRUE_STATUS'),
+            '',
+            config('constants.HTTP_OK'),
+        );
+
+        // return JsonResponseServices::getApiResponseExtention(
+        //     $data,
+        //     config('constants.TRUE_STATUS'),
+        //     '',
+        //     'pagination',
+        //     $pagination,
+        //     config('constants.HTTP_OK')
+        // );
     }
     /**
      * Search products w.r.t Seller/Store 'id' & Product Name
@@ -278,42 +294,32 @@ class UsersController extends Controller
      */
     public function searchSellerProducts($seller_id, $product_name)
     {
-        try {
-            $data = [];
-            $article = Products::search($product_name)
-                ->where('user_id', $seller_id)
-                ->where('status', 1);
-            $products = $article->paginate(20);
-            $pagination = $products->toArray();
-            if (!$products->isEmpty()) {
-                foreach ($products as $product) {
-                    $data[] = Products::getProductInfo($seller_id, $product->id, ['*']);
-                }
-                unset($pagination['data']);
-                return JsonResponseServices::getApiResponseExtention(
-                    $data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
+        $data = [];
+        $article = Products::search($product_name)
+            ->where('user_id', $seller_id)
+            ->where('status', 1);
+        $products = $article->paginate(20);
+        $pagination = $products->toArray();
+        if (!$products->isEmpty()) {
+            foreach ($products as $product) {
+                $data[] = Products::getProductInfo($seller_id, $product->id, ['*']);
             }
-
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
+            unset($pagination['data']);
+            return JsonResponseServices::getApiResponseExtention(
+                $data,
+                config('constants.TRUE_STATUS'),
+                '',
+                'pagination',
+                $pagination,
                 config('constants.HTTP_OK')
             );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
 }

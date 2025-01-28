@@ -11,6 +11,13 @@ return [
     |
     */
 
+     /*
+    |--------------------------------------------------------------------------
+    | Globally Required 
+    |--------------------------------------------------------------------------
+    */
+    'EXTRA_CHARGE_AMOUNT' => 5.00,
+
     /*
     |--------------------------------------------------------------------------
     | Success Constants
@@ -36,6 +43,8 @@ return [
     'VALID_REFERRAL' => 'Valid referral code',
     'ORDER_ASSIGNED' => 'Assigned',
     'ORDER_UPDATED' => 'Updated',
+    'ORDER_DELIVERED_SUCCESSFULLY' => 'You have successfully delivered your order 🎉',
+    'ORDER_COMPLETED_SUCCESSFULLY' => 'Your order has been completed successfully',
     'VALID_PROMOCODE' => 'You have entered a valid promo code',
     'BANK_DETAILS_UPDATED' => 'Bank Account details are successfully updated',
     'VERIFICATION_SUCCESS' => 'Verification Successful',
@@ -106,9 +115,17 @@ return [
     'ADMIN_EMAIL' => 'admin@teekit.co.uk',
     /*
     |--------------------------------------------------------------------------
+    | Head Office Details
+    |--------------------------------------------------------------------------
+    */
+    'HEAD_OFFICE_ADDRESS' => '1 Waldegrave Road, Ealing, W5 3HT',
+    'HEAD_OFFICE_CONTACT' => '+44 0208 998 0315',
+    /*
+    |--------------------------------------------------------------------------
     | Teek it URL's
     |--------------------------------------------------------------------------
     */
+    'LIVE_WEBSITE_URL' => 'https://teekit.co.uk',
     'LIVE_DASHBOARD_URL' => 'https://app.teekit.co.uk',
     // 'APIS_DOMAIN_URL' => 'https://teekitstaging.online',
     /*
@@ -117,12 +134,14 @@ return [
     |--------------------------------------------------------------------------
     */
     'HTTP_OK' => 200,
-    'HTTP_SERVER_ERROR' => 500,
     'HTTP_INVALID_ARGUMETS' => 400,
+    'HTTP_UNAUTHORIZED' => 401,
     'HTTP_FORBIDDEN' => 403,
+    'HTTP_NOT_FOUND' => 404,
+    'HTTP_PAGE_EXPIRED' => 419,
     'HTTP_UNPROCESSABLE_REQUEST' => 422,
     'HTTP_RESOURCE_EXHAUSTED' => 429,
-    'HTTP_PAGE_EXPIRED' => 419,
+    'HTTP_SERVER_ERROR' => 500,
     'HTTP_SERVICE_UNAVAILABLE' => 503,
     'HTTP_GATEWAY_TIMEOUT' => 504,
 ];

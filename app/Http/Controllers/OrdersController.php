@@ -8,20 +8,16 @@ use App\Enums\UserChoicesEnum;
 use App\Enums\UserMorphTypeEnum;
 use App\Enums\UserRole;
 use App\Models\GuestBuyer;
-use App\Models\GuestCustomer;
 use App\Models\ProductsByBuyer;
 use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Qty;
-use App\Services\DriverFairServices;
-use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
 use App\Services\OrderServices;
 use App\Services\ProductServices;
 use App\User;
-use App\Services\TwilioSmsService;
 use App\Services\VerificationCodeServices;
 use App\VerificationCodes;
 use Illuminate\Database\Query\Builder;
@@ -30,7 +26,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Stripe\Service\Climate\OrderService;
 use Throwable;
 
 class OrdersController extends Controller
@@ -41,42 +36,46 @@ class OrdersController extends Controller
      */
     public function new(Request $request)
     {
-        if ($request->has('type')) {
-            if ($request->type == 'delivery') {
-                $rules = [
-                    /* Order details */
-                    'type' => 'required|string',
-                    'items' => 'required|array',
-                    'houseNo' => 'required|string',
-                    'deliveryCharges' => 'required|numeric',
-                    'serviceCharges' => 'required|numeric',
-                    'device' => 'sometimes',
-                    'paymentIntentId' => 'required|string',
-                    /* Customer details */
-                    'fName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
-                    'lName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
-                    'email' => 'required|email|max:255',
-                    'countryCode' => 'required|string|max:4',
-                    'phone' => 'required|string|max:13',
-                    'fullAddress' => 'required|string',
-                    'unitAddress' => 'nullable|string',
-                    'country' => 'required|string|max:70',
-                    'state' => 'required|string|max:70',
-                    'city' => 'required|string|max:70',
-                    'postcode' => 'nullable|string|max:11',
-                    'lat' => 'required|numeric|between:-90,90',
-                    'lon' => 'required|numeric|between:-180,180',
-                ];
-            } elseif ($request->type == 'self-pickup') {
-                $rules = [
-                    'type' => 'required|string',
-                    'paymentIntentId' => 'required|string',
-                ];
-            }
-        } else {
-            return JsonResponseServices::getApiValidationFailedResponse(
-                json_decode('{"type": ["The type field is required."]}')
-            );
+        $validatedData = Validator::make($request->all(), [
+            'type' => [
+                'required',
+                Rule::in(array_column(OrderTypeEnum::cases(), 'value')),
+            ],
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        if ($request->type == OrderTypeEnum::DELIVERY->value) {
+            $rules = [
+                /* Order details */
+                'type' => 'required|string',
+                'items' => 'required|array',
+                'houseNo' => 'required|string',
+                'deliveryCharges' => 'required|numeric',
+                'serviceCharges' => 'required|numeric',
+                'device' => 'sometimes',
+                'paymentIntentId' => 'required|string',
+                /* Customer details */
+                'fName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
+                'lName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
+                'email' => 'required|email|max:255',
+                'countryCode' => 'required|string|max:4',
+                'phone' => 'required|string|max:13',
+                'fullAddress' => 'required|string',
+                'unitAddress' => 'nullable|string',
+                'country' => 'required|string|max:70',
+                'state' => 'required|string|max:70',
+                'city' => 'required|string|max:70',
+                'postcode' => 'nullable|string|max:11',
+                'lat' => 'required|numeric|between:-90,90',
+                'lon' => 'required|numeric|between:-180,180',
+            ];
+        } elseif ($request->type == OrderTypeEnum::SELF_PICKUP->value) {
+            $rules = [
+                'type' => 'required|string',
+                'paymentIntentId' => 'required|string',
+            ];
         }
 
         $validatedData = Validator::make($request->all(), $rules);
@@ -221,7 +220,7 @@ class OrdersController extends Controller
                 'required',
                 Rule::in(array_column(TransportVehicle::cases(), 'value')),
             ],
-            'featureImg' => 'nullable|image|max:2048',
+            'featureImg' => 'required|image|max:2048',
             'height' => 'nullable|numeric|min:0',
             'width' => 'nullable|numeric|min:0',
             'length' => 'nullable|numeric|min:0',
@@ -229,6 +228,8 @@ class OrdersController extends Controller
                 'required',
                 Rule::in(array_column(OrderTypeEnum::cases(), 'value')),
             ],
+            'deliveryCharges' => 'required|numeric|min:0',
+            'serviceCharges' => 'required|numeric|min:0',
             'fName' => 'required|string|max:100',
             'lName' => 'required|string|max:100',
             'email' => 'required|email|max:255',
@@ -394,7 +395,7 @@ class OrdersController extends Controller
                 config('constants.HTTP_OK')
             );
         }
-
+        
         return JsonResponseServices::getApiResponse(
             [],
             config('constants.FALSE_STATUS'),
@@ -407,51 +408,41 @@ class OrdersController extends Controller
      */
     public function productsOfRecentOrder(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'productsLimit' => 'required|integer',
-                'sellerId' => 'required|integer'
-            ]);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
-            }
+        $validatedData = Validator::make($request->all(), [
+            'productsLimit' => 'required|integer',
+            'sellerId' => 'required|integer'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
+        }
 
-            $order = Orders::getRecentOrderByCustomerId(Auth::id(), $request->productsLimit, $request->sellerId);
-            if (!empty($order)) {
-                $recentOrderProdsData = [];
-                foreach ($order->products as $product) $recentOrderProdsData[] = Products::getProductInfo(
-                    $request->sellerId,
-                    $product->id,
-                    Products::getCommonColumns(),
-                );
-                /*
-                * Just creating this variable so we don't have to call the "empty()" function again & again
-                * Which will obviouly reduce the API response speed
-                */
-                $dataIsEmpty = empty($recentOrderProdsData);
-                return JsonResponseServices::getApiResponse(
-                    ($dataIsEmpty) ? [] : $recentOrderProdsData,
-                    ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-                    ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
-                    config('constants.HTTP_OK'),
-                );
-            }
-
-            return JsonResponseServices::getApiResponse(
-                [],
-                false,
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_OK')
+        $order = Orders::getRecentOrderByCustomerId(Auth::id(), $request->productsLimit, $request->sellerId);
+        if (!empty($order)) {
+            $recentOrderProdsData = [];
+            foreach ($order->products as $product) $recentOrderProdsData[] = Products::getProductInfo(
+                $request->sellerId,
+                $product->id,
+                Products::getCommonColumns(),
             );
-        } catch (Throwable $error) {
-            report($error);
+            /*
+            * Just creating this variable so we don't have to call the "empty()" function again & again
+            * Which will obviouly reduce the API response speed
+            */
+            $dataIsEmpty = empty($recentOrderProdsData);
             return JsonResponseServices::getApiResponse(
-                [],
-                false,
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
+                ($dataIsEmpty) ? [] : $recentOrderProdsData,
+                ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+                config('constants.HTTP_OK'),
             );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            false,
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * List all ready or delivered orders
@@ -835,11 +826,11 @@ class OrdersController extends Controller
     public function getOrderDetailsTwo(Request $request)
     {
         try {
-            $validated_data = Validator::make($request->route()->parameters(), [
+            $validatedData = Validator::make($request->route()->parameters(), [
                 'id' => 'required|integer'
             ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->error());
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
             }
             if (!Orders::checkIfOrderExists($request->id)) {
                 return JsonResponseServices::getApiResponse(

@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Sellers;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\OrderTypeEnum;
 use App\Models\OrdersFromOtherSeller;
 use App\OrderItems;
 use App\Orders;
@@ -21,19 +22,19 @@ class OrdersLivewire extends Component
     use WithPagination;
 
     public
-        $seller_id,
-        $order_id,
-        $current_prod_id,
-        $current_prod_qty,
-        $receiver_name,
-        $phone_number,
-        $order,
-        $order_item,
-        $nearby_sellers,
-        $selected_nearby_seller,
-        $search,
-        $custom_order_id,
-        $request_order_id;
+    $seller_id,
+    $orderId,
+    $currentProdId,
+    $currentProdQty,
+    $customerName,
+    $phoneNumber,
+    $order,
+    $order_item,
+    $nearby_sellers,
+    $selected_nearby_seller,
+    $search,
+    $custom_order_id,
+    $request_order_id;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -51,13 +52,14 @@ class OrdersLivewire extends Component
 
     public function resetModal()
     {
-        $this->resetAllErrors();
+        $this->resetValidation();
+
         $this->reset([
-            'order_id',
-            'current_prod_id',
-            'current_prod_qty',
-            'receiver_name',
-            'phone_number',
+            'orderId',
+            'currentProdId',
+            'currentProdQty',
+            'customerName',
+            'phoneNumber',
             'order_item',
             'nearby_sellers',
             'selected_nearby_seller',
@@ -66,36 +68,32 @@ class OrdersLivewire extends Component
         ]);
     }
 
-    public function resetAllErrors()
-    {
-        $this->resetErrorBag();
-        $this->resetValidation();
-    }
-
     public function resetAllPaginators()
     {
         $this->resetPage('sap_products_page');
     }
 
-    public function renderStuartModal($order_id)
+    public function renderStuartModal($orderId)
     {
-        $this->order_id = $order_id;
+        $this->orderId = $orderId;
     }
 
-    public function renderSAPModal($order_id, $current_prod_id, $current_prod_qty, $receiver_name, $phone_number)
+    public function renderSAPModal($orderId, $currentProdId, $currentProdQty, $customerName, $phoneNumber)
     {
         /* Details of the current product & cutomer who has placed the order */
-        $this->order_id = $order_id;
-        $this->current_prod_id = $current_prod_id;
-        $this->current_prod_qty = $current_prod_qty;
-        $this->receiver_name = $receiver_name;
-        $this->phone_number = $phone_number;
+        $this->orderId = $orderId;
+        $this->currentProdId = $currentProdId;
+        $this->currentProdQty = $currentProdQty;
+        $this->customerName = $customerName;
+        $this->phoneNumber = $phoneNumber;
     }
 
-    public function renderSTOSModal($order, $order_item)
+    public function renderSTOSModal($orderId)
     {
-        $this->order = $order;
-        $this->order_item = $order_item;
+        $this->resetModal();
+
+        $this->order = Orders::getById($orderId);
+        $this->order_item = $this->order->order_items[0];
 
         $sellers = User::getParentAndChildSellersByCity(auth()->user()->city);
         $this->nearby_sellers = GoogleMapServices::findDistanceByMakingChunks(
@@ -111,17 +109,20 @@ class OrdersLivewire extends Component
         $this->order_item = $order_item;
     }
 
-    public function renderCustomerContactModal($receiver_name, $phone_number)
+    public function renderCustomerContactModal($customerName, $phoneNumber)
     {
-        $this->receiver_name = $receiver_name;
-        $this->phone_number = $phone_number;
+        $this->customerName = $customerName;
+        $this->phoneNumber = $phoneNumber;
     }
 
     public function assignToStuartDriver()
     {
         try {
             /* Perform some operation */
-            $stuart_message = StuartDeliveryServices::stuartJobCreationLivewire($this->order_id, $this->custom_order_id);
+            $stuart_message = StuartDeliveryServices::stuartJobCreationLivewire(
+                $this->orderId,
+                $this->custom_order_id
+            );
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'stuartModal']);
@@ -143,39 +144,42 @@ class OrdersLivewire extends Component
         ]);
         try {
             /* Perform some operation */
-            $orderTotalPrice = $this->order_item['product_price'] * $this->order_item['product_qty'];
-            $selectedSeller = User::getStoreByBusinessName($this->selected_nearby_seller);
+            $selectedSeller = User::getSellerByBusinessName($this->selected_nearby_seller);
 
+            $orderTotalPrice = $this->order_item->product_price * $this->order_item->product_qty;
             /* Send this product to another seller */
             OrdersFromOtherSeller::add(
-                $this->order['created_by_id'],
+                $this->order->created_by_type,
+                $this->order->created_by_id,
                 $selectedSeller->id,
-                $this->order_item['product_id'],
-                $this->order_item['product_price'],
-                $this->order_item['product_qty'],
+                $this->order_item->product_belongs_to_type,
+                $this->order_item->product_belongs_to_id,
+                $this->order_item->product_price,
+                $this->order_item->product_qty,
                 $orderTotalPrice,
-                isset($this->order['lat']) ? (float) $this->order['lat'] : null,
-                isset($this->order['lon']) ? (float) $this->order['lon'] : null,
-                $this->order['customer_name'],
-                $this->order['phone_number'],
-                $this->order['address'],
-                $this->order['house_no'],
-                $this->order['flat'],
-                $this->order['driver_charges'],
-                $this->order['delivery_charges'],
-                $this->order['service_charges'],
-                $this->order['device'],
-                $this->order['type'],
-                $this->order['description'],
-                $this->order['payment_status'],
-                $this->order['offloading'],
-                $this->order['offloading_charges']
+                isset($this->order->customer_lat) ? (float) $this->order->customer_lat : null,
+                isset($this->order->customer_lon) ? (float) $this->order->customer_lon : null,
+                $this->order->customer_name,
+                $this->order->phone_number,
+                $this->order->address,
+                $this->order->house_no,
+                $this->order->flat,
+                $this->order->driver_charges,
+                $this->order->delivery_charges,
+                $this->order->service_charges,
+                $this->order->device,
+                $this->order->type,
+                $this->order->description,
+                $this->order->payment_status,
+                $this->order->offloading,
+                $this->order->offloading_charges,
+                now(),
+                $this->order->created_at,
             );
-
             /* Remove the item from current order items */
-            $removed = OrderItems::removeItem($this->order_item['id']);
+            $removed = OrderItems::removeItem($this->order_item->id);
             /* Subtract the total price of this product/order_item from the current order's total */
-            $subtracted = Orders::subFromOrderTotal($this->order_item['order_id'], $orderTotalPrice);
+            $subtracted = Orders::subFromOrderTotal($this->order_item->order_id, $orderTotalPrice);
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'sendToOtherStoresModal']);
@@ -195,10 +199,12 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $order_details = Orders::isViewed($id);
+            $order = Orders::isViewed($id);
+
             $updated = Orders::updateOrderStatus($id, OrderStatusEnum::ACCEPTED);
-            if ($order_details->type == 'self-pickup') {
-                EmailServices::sendPickupYourOrderMail($order_details);
+
+            if ($order->type == OrderTypeEnum::SELF_PICKUP->value) {
+                EmailServices::sendPickupYourOrderMail($order);
             }
             /* Operation finished */
             sleep(1);
@@ -212,28 +218,6 @@ class OrdersLivewire extends Component
             session()->flash('error', $error->getMessage());
         }
     }
-
-    // public function orderIsReady($order)
-    // {
-    //     try {
-    //         /* Perform some operation */
-    //         $updated = Orders::updateOrderStatus($order['id'], 'ready');
-    //         if ($order['type'] == 'self-pickup') {
-    //             $order_details = Orders::getById($order['id']);
-    //             EmailServices::sendPickupYourOrderMail($order_details);
-    //         }
-    //         /* Operation finished */
-    //         sleep(1);
-    //         if ($updated) {
-    //             session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-    //         } else {
-    //             session()->flash('error', config('constants.UPDATION_FAILED'));
-    //         }
-    //     } catch (Exception $error) {
-    //         report($error);
-    //         session()->flash('error', $error->getMessage());
-    //     }
-    // }
 
     public function orderIsCompleted($id)
     {
@@ -257,22 +241,13 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $orderDetails = Orders::getById($orderId);
-            // dd($orderDetails);
-            StripeServices::refundCustomer($orderDetails);
+            $order = Orders::getById($orderId);
+
+            StripeServices::refundCustomer($order);
 
             $cancelled = Orders::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
 
-            $message = "Hello " . $orderDetails->user->name . " .
-            Your order from " . $orderDetails->store->name . " was unsuccessful.
-            Unfortunately " . $orderDetails->store->name . " is unable to complete your order. But don't worry 
-            you have not been charged.
-            If you need any kind of assistance, please contact us via email at:
-            admin@teekit.co.uk";
-
-            // TwilioSmsService::sendSms($orderDetails->user->phone, $message);
-            // EmailServices::sendOrderHasBeenCancelledMail($orderDetails);
-
+            EmailServices::sendOrderHasBeenCancelledMail($order);
             /* Operation finished */
             sleep(1);
 
@@ -311,7 +286,9 @@ class OrdersLivewire extends Component
     public function resetThisPage()
     {
         $this->resetModal();
+
         $this->resetPage();
+        
         $this->reset([
             'request_order_id'
         ]);
@@ -320,12 +297,14 @@ class OrdersLivewire extends Component
     public function isSearchByIdSet()
     {
         if ($this->search) {
-            $searched_order_id = (int)$this->search;
-            $this->request_order_id = (int)$this->search;
+            $searched_order_id = (int) $this->search;
+            $this->request_order_id = (int) $this->search;
         } else {
             $searched_order_id = $this->request_order_id;
         }
+
         if ($searched_order_id != 0) $this->resetPage();
+
         return $searched_order_id;
     }
 

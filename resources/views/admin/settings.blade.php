@@ -75,8 +75,8 @@
                             <div class="row">
                                 <div class="d-none col-md-3 pl- pr- pb-">
                                     <div>
-                                        <h5 class="d-block text-center p-3 pb-0 m-0 text-site-primary"><a
-                                                class="font-weight-bold  text-site-primary" href="#">Company Logo</a>
+                                        <h5 class="d-block text-center p-3 pb-0 m-0 text-site-primary">
+                                        <a class="font-weight-bold text-site-primary" href="#">Company Logo</a>
                                         </h5>
                                     </div>
                                     <div class="card-text">

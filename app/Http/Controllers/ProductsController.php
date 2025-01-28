@@ -524,13 +524,13 @@ class ProductsController extends Controller
     public function recheckProducts(Request $request)
     {
         try {
-            $validated_data = Validator::make($request->all(), [
+            $validatedData = Validator::make($request->all(), [
                 'items' => 'required|array',
                 'day' => 'required|string',
                 'time' => 'required|string'
             ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->error());
+            if ($validatedData->fails()) {
+                return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
             }
             $i = 0;
             foreach ($request->items as $item) {
