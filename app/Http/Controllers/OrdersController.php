@@ -166,15 +166,11 @@ class OrdersController extends Controller
                 );
             }
 
-            if ($request->type == 'delivery') {
+            if ($request->type == OrderTypeEnum::DELIVERY->value) {
                 $verificationCode = VerificationCodeServices::generateCode();
                 VerificationCodes::add($orderId, $verificationCode);
 
-                $apiEndPoint = '/api/orders/new';
-                if (
-                    url()->current() == config('constants.LIVE_DASHBOARD_URL') . $apiEndPoint ||
-                    url()->current() == config('constants.APIS_DOMAIN_URL') . $apiEndPoint
-                ) {
+                if (app()->environment('production')) {
                     OrderServices::sendBulkSms(
                         $seller,
                         $request->phone,
@@ -336,15 +332,11 @@ class OrdersController extends Controller
             UserChoicesEnum::SEND_TO_OTHER_STORES
         );
 
-        if ($request->type == 'delivery') {
+        if ($request->type == OrderTypeEnum::DELIVERY->value) {
             $verificationCode = VerificationCodeServices::generateCode();
             VerificationCodes::add($orderId, $verificationCode);
 
-            $apiEndPoint = '/api/orders/product_by_buyer';
-            if (
-                url()->current() == config('constants.LIVE_DASHBOARD_URL') . $apiEndPoint ||
-                url()->current() == config('constants.APIS_DOMAIN_URL') . $apiEndPoint
-            ) {
+            if (app()->environment('production')) {
                 OrderServices::sendBulkSms(
                     $seller,
                     $request->phone,
