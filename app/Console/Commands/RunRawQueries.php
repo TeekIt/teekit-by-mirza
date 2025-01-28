@@ -64,22 +64,20 @@ class RunRawQueries extends Command
                     // DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `driver_id` `driver_id` BIGINT UNSIGNED NULL DEFAULT NULL');
                     // DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `moved_at` TIMESTAMP NOT NULL AFTER times_rejected');
 
+                    // DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `product_belongs_to_type` VARCHAR(191) NOT NULL AFTER `parent_order_id`');
+                    // DB::statement('UPDATE `orders_from_other_sellers` SET `product_belongs_to_type` = \'Product\'');
+                    // DB::statement('ALTER TABLE `orders_from_other_sellers` DROP FOREIGN KEY orders_from_other_sellers_product_id_foreign');
+                    // DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `product_id` `product_belongs_to_id` BIGINT UNSIGNED NOT NULL');
+                    // DB::statement('ALTER TABLE `orders_from_other_sellers` DROP FOREIGN KEY orders_from_other_sellers_customer_id_foreign'); 
+                    // DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `customer_id` `created_by_id` BIGINT UNSIGNED NOT NULL'); 
+                    // DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `created_by_type` VARCHAR(191) NOT NULL AFTER `id`'); 
+                    // DB::statement('UPDATE `orders_from_other_sellers` SET created_by_type = \'User\'');
+                    // DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `order_total` `initial_total` DOUBLE(8,2) NOT NULL');
+
+                    // DB::statement('DELETE FROM `orders` WHERE payment_intent_id IS NULL');
+                    // DB::statement('ALTER TABLE `orders` CHANGE `payment_intent_id` `payment_intent_id` VARCHAR(191) NOT NULL');
+                    
                     /* Above queries are already executed on Staging ENV */
-                    DB::statement('DELETE FROM `orders` WHERE payment_intent_id IS NULL');
-                    DB::statement('ALTER TABLE `orders` CHANGE `payment_intent_id` `payment_intent_id` VARCHAR(191) NOT NULL');
-
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `product_belongs_to_type` VARCHAR(191) NOT NULL AFTER `parent_order_id`');
-                    DB::statement('UPDATE `orders_from_other_sellers` SET `product_belongs_to_type` = \'Product\'');
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` DROP FOREIGN KEY orders_from_other_sellers_product_id_foreign');
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `product_id` `product_belongs_to_id` BIGINT UNSIGNED NOT NULL');
-
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` DROP FOREIGN KEY orders_from_other_sellers_customer_id_foreign'); 
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `customer_id` `created_by_id` BIGINT UNSIGNED NOT NULL'); 
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `created_by_type` VARCHAR(191) NOT NULL AFTER `id`'); 
-                    DB::statement('UPDATE `orders_from_other_sellers` SET created_by_type = \'User\'');
-
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `order_total` `initial_total` DOUBLE(8,2) NOT NULL');
-
                     DB::statement('ALTER TABLE `users` CHANGE `temp_code` `temp_code` VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL');
                 });
 
