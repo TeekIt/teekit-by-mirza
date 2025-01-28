@@ -219,7 +219,7 @@ class OrdersController extends Controller
                 'required',
                 Rule::in(array_column(TransportVehicle::cases(), 'value')),
             ],
-            'featureImg' => 'image|max:2048',
+            'featureImg' => 'required|image|max:2048',
             'height' => 'nullable|numeric|min:0',
             'width' => 'nullable|numeric|min:0',
             'length' => 'nullable|numeric|min:0',
