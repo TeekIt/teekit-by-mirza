@@ -18,7 +18,7 @@ final class JsonResponseServices
         return response()->json([
             'data' => $data,
             'status' => $status,
-            'message' => ($httpCode == 500) ? $message->getMessage() : $message
+            'message' => ($httpCode == config('constants.HTTP_SERVER_ERROR')) ? $message->getMessage() : $message
         ], $httpCode);
     }
 
@@ -27,7 +27,7 @@ final class JsonResponseServices
         return response()->json([
             'data' => $data,
             'status' => $status,
-            'message' => ($httpCode == 500) ? $message->getMessage() : $message,
+            'message' => ($httpCode == config('constants.HTTP_SERVER_ERROR')) ? $message->getMessage() : $message,
             $extraKey => $extraKeyData
         ], $httpCode);
     }

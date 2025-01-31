@@ -79,10 +79,11 @@ class RunRawQueries extends Command
                     
                     // DB::statement('ALTER TABLE `users` CHANGE `temp_code` `temp_code` VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL');
                     /* Above queries are already executed on Staging ENV */
+
+                    DB::statement('DELETE FROM `orders_from_other_sellers` WHERE payment_intent_id IS NULL');
+                    DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `payment_intent_id` `payment_intent_id` VARCHAR(191) NOT NULL');
                     
                 });
-
-                $this->info('All raw queries are executed successfully');
             }
         } catch (Exception $error) {
             report($error);

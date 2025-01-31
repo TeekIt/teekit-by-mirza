@@ -170,6 +170,7 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::get('all-withdrawals', 'driverAllWithdrawalRequests');
         Route::post('check_verification_code/{order_id}', 'checkVerificationCode');
         Route::post('driver_failed_to_enter_code/{order_id}', 'driverFailedToEnterCode');
+
         Route::withoutMiddleware('jwt.verify')->group(function () {
             Route::post('register', 'registerDriver');
             Route::post('login', 'loginDriver');
@@ -211,8 +212,12 @@ Route::get('page', [PagesController::class, 'getPage']);
 |--------------------------------------------------------------------------
 */
 Route::prefix('stripe')->controller(StripeContorller::class)->group(function () {
-    Route::get('/payment_intent/create', 'createPaymentIntent');
-    Route::get('/payment_intent/capture', 'capturePaymentIntent');
+    Route::prefix('payment_intent')->group(function () {
+        Route::get('/create', 'createPaymentIntent');
+        Route::get('/capture', 'capturePaymentIntent');
+        Route::get('/refund', 'refundPaymentIntent');
+    });
+
     Route::get('/request_payment_authorization', 'requestPaymentAuthorization');
     Route::get('/request_incremental_authorization_support', 'requestIncrementalAuthorizationSupport');
     Route::get('/perform_incremental_authorization', 'performIncrementalAuthorization');

@@ -172,26 +172,26 @@ final class StripeServices
         return json_decode($data);
     }
 
-    public static function refundCustomer(Orders $order)
+    public static function refundPaymentIntent(string $paymentIntentId = null): string|stdClass
     {
-        $apiKey = (url('/') === config('constants.LIVE_DASHBOARD_URL')) ? static::getLivePublishKey() : static::getTestPublishKey();
-        // Stripe::setApiKey($apiKey);
-        // Refund::create([
-        //     // 'charge' => $order->transaction_id,
-        //     'payment_intent' => $order->payment_intent,
-        //     'reason' => 'requested_by_customer'
-        // ]);
+        $paymentIntentId = $_REQUEST['paymentIntentId'] ?? $paymentIntentId;
 
-        $stripe = new StripeClient($apiKey); //new \Stripe\StripeClient($apiKey);
-        // $stripe->refunds->create([
-        //     'payment_intent' => $order->payment_intent,
-        //     'reason' => 'requested_by_customer'
-        // ]);
+        $apiKey = (app()->environment('production')) ? static::getLiveSecretKey() : static::getTestSecretKey();
 
-        return $stripe->refunds->create([
-            'payment_intent' => 'pi_3OmYstIiDDGv1gaV2F5Xeu5t',
-            'reason' => 'requested_by_customer'
-        ]);
-        // $stripe->refunds->create(['charge' => 'ch_1NirD82eZvKYlo2CIvbtLWuY']);
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/'. $paymentIntentId .'/cancel');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        // curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
+        curl_setopt($curl, CURLOPT_USERPWD, $apiKey);
+
+        $data = curl_exec($curl);
+
+        if (curl_errno($curl))
+            echo 'Error:' . curl_error($curl);
+
+        curl_close($curl);
+
+        return json_decode($data);
     }
 }

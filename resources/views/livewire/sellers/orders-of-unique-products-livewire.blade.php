@@ -321,7 +321,7 @@
         }
 
         /* Params: minutes, seconds, holdingMinutes, holdingSeconds */
-        const timerManager = new TimerManager({{ $orderHoldingMinutes }}, 00, 5, 59);
+        const timerManager = new TimerManager({{ $orderHoldingMinutes }}, '00', '5', '59');
         timerManager.start();
     </script>
 
