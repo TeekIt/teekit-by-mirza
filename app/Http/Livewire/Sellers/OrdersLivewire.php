@@ -9,6 +9,7 @@ use App\OrderItems;
 use App\Orders;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
+use App\Services\GophrServices;
 use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
 use App\User;
@@ -22,19 +23,20 @@ class OrdersLivewire extends Component
     use WithPagination;
 
     public
-    $seller_id,
-    $orderId,
-    $currentProdId,
-    $currentProdQty,
-    $customerName,
-    $phoneNumber,
-    $order,
-    $order_item,
-    $nearby_sellers,
-    $selected_nearby_seller,
-    $search,
-    $custom_order_id,
-    $request_order_id;
+        $seller_id,
+        $orderId,
+        $currentProdId,
+        $currentProdQty,
+        $customerName,
+        $phoneNumber,
+        $order,
+        $order_item,
+        $nearby_sellers,
+        $selected_nearby_seller,
+        $search,
+        $custom_order_id,
+        $request_order_id,
+        $additionalParcelDescription;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -73,7 +75,12 @@ class OrdersLivewire extends Component
         $this->resetPage('sap_products_page');
     }
 
-    public function renderStuartModal($orderId)
+    // public function renderStuartModal($orderId)
+    // {
+    //     $this->orderId = $orderId;
+    // }
+
+    public function renderOrderId($orderId)
     {
         $this->orderId = $orderId;
     }
@@ -113,6 +120,37 @@ class OrdersLivewire extends Component
     {
         $this->customerName = $customerName;
         $this->phoneNumber = $phoneNumber;
+    }
+
+    public function assignToGophrDriver()
+    {
+        try {
+            /* Perform some operation */
+            $order = Orders::getById($this->orderId);
+
+            $parcelDescription = $this->additionalParcelDescription ?? "Please pickup your order ASAP";
+
+            $response = GophrServices::createJob($order, $parcelDescription);
+
+            if (isset($response->errors)) {
+                $this->dispatchBrowserEvent('close-modal', ['id' => 'gophrModal']);
+                throw new Exception(json_encode($response->errors));
+            }
+
+            $updated = Orders::updateOrderStatus($this->orderId, OrderStatusEnum::ON_THE_WAY);
+            /* Operation finished */
+            sleep(1);
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'gophrModal']);
+
+            if ($updated && isset($response->data)) {
+                session()->flash('success', config('constants.DELIVERY_SUCCESS'));
+            } else {
+                session()->flash('error', json_encode($response->errors));
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
     }
 
     public function assignToStuartDriver()
@@ -164,6 +202,11 @@ class OrdersLivewire extends Component
                 $this->order->address,
                 $this->order->house_no,
                 $this->order->flat,
+                $this->order->country,
+                $this->order->state,
+                $this->order->city,
+                $this->order->postcode,
+                $this->order->payment_intent_id,
                 $this->order->driver_charges,
                 $this->order->delivery_charges,
                 $this->order->service_charges,
@@ -288,7 +331,7 @@ class OrdersLivewire extends Component
         $this->resetModal();
 
         $this->resetPage();
-        
+
         $this->reset([
             'request_order_id'
         ]);

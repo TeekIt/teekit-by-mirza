@@ -30,6 +30,10 @@ class CreateOrdersTable extends Migration
             $table->string('address', 191)->nullable();
             $table->string('house_no', 191)->nullable();
             $table->string('flat', 191)->nullable();
+            $table->string('country', 70)->nullable();
+            $table->string('state', 70)->nullable();
+            $table->string('city', 70)->nullable();
+            $table->string('postcode', 11)->nullable();
             $table->text('description')->nullable();
             $table->enum('payment_status', ['paid, hidden']);
             $table->enum('order_status', ['pending', 'accepted', 'ready', 'stuartDelivery', 'onTheWay', 'delivered', 'complete', 'cancelled'])->default('pending');

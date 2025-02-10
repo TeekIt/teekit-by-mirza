@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\OrdersFromOtherSeller;
+use App\Orders;
 use App\User;
 
 final class OrderServices
@@ -11,12 +13,31 @@ final class OrderServices
         return $totalAmout + config('constants.EXTRA_CHARGE_AMOUNT');
     }
 
-    public static function getTotalWeight(array $order): float
+    public static function getTotalWeight(array|Orders|OrdersFromOtherSeller $order): float
     {
-        return array_sum(array_column($order, 'weight'));
+        if (is_array($order)) {
+            return array_sum(array_column($order, 'weight'));
+        }
+        
+        return $order->order_items->pluck('product')->sum('weight');
     }
 
-    public static function getTotalVolumn(array $order): float
+    public static function getTotalHeight(Orders|OrdersFromOtherSeller $order): float
+    {
+        return $order->order_items->pluck('product')->sum('height');
+    }
+
+    public static function getTotalWidth(Orders|OrdersFromOtherSeller $order): float
+    {
+        return $order->order_items->pluck('product')->sum('width');
+    }
+
+    public static function getTotalLength(Orders|OrdersFromOtherSeller $order): float
+    {
+        return $order->order_items->pluck('product')->sum('length');
+    }
+
+    public static function getTotalOfGivenVolumn(array $order): float
     {
         return array_sum(array_column($order, 'volumn'));
     }

@@ -103,6 +103,7 @@ class Orders extends Model
         //     $order->delivery_charges = $request->deliveryCharges;
         //     $order->service_charges = $request->serviceCharges;
         // }
+        
         /* If order type == self-pickup even then we need this information */
         $order->customer_lat = $request->lat;
         $order->customer_lon = $request->lon;
@@ -110,7 +111,10 @@ class Orders extends Model
         $order->phone_number = $request->phone;
         $order->address = $request->fullAddress;
         $order->house_no = $request->houseNo;
-        $order->flat = $request->flat;
+        $order->country = $request->country;
+        $order->state = $request->state;
+        $order->city = $request->city;
+        $order->postcode = $request->postcode;
         $order->driver_charges = $driverCharges;
         $order->delivery_charges = $request->deliveryCharges;
         $order->service_charges = $request->serviceCharges;

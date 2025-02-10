@@ -37,16 +37,16 @@ class RunRawQueries extends Command
 
                 DB::transaction(function () {
                     /* Modification in "orders" table: */
-                    
+
                     /* * Drop customer_id relation from "orders" table: */
                     // DB::statement('ALTER TABLE orders DROP FOREIGN KEY orders_customer_id_foreign'); 
-                    
+
                     /* * Change "customer_id" to "created_by_id" and modify its data type: */
                     // DB::statement('ALTER TABLE `orders` CHANGE `customer_id` `created_by_id` BIGINT UNSIGNED NOT NULL'); 
-                    
+
                     // /* * Add "created_by_type" column: */
                     // DB::statement('ALTER TABLE `orders` ADD `created_by_type` VARCHAR(191) NOT NULL AFTER `id`'); 
-                    
+
                     // /* * Update "created_by_type" column to "User": */
                     // DB::statement('UPDATE orders SET created_by_type = \'User\'');
 
@@ -76,10 +76,23 @@ class RunRawQueries extends Command
 
                     // DB::statement('DELETE FROM `orders` WHERE payment_intent_id IS NULL');
                     // DB::statement('ALTER TABLE `orders` CHANGE `payment_intent_id` `payment_intent_id` VARCHAR(191) NOT NULL');
-                    
+
                     // DB::statement('ALTER TABLE `users` CHANGE `temp_code` `temp_code` VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL');
                     /* Above queries are already executed on Staging ENV */
-                    
+
+                    DB::statement("ALTER TABLE orders
+                        ADD COLUMN country VARCHAR(70) NULL AFTER flat,
+                        ADD COLUMN state VARCHAR(70) NULL AFTER country,
+                        ADD COLUMN city VARCHAR(70) NULL AFTER state,
+                        ADD COLUMN postcode VARCHAR(11) NULL AFTER city;
+                    ");
+
+                    DB::statement("ALTER TABLE orders_from_other_sellers
+                        ADD COLUMN country VARCHAR(70) NULL AFTER flat,
+                        ADD COLUMN state VARCHAR(70) NULL AFTER country,
+                        ADD COLUMN city VARCHAR(70) NULL AFTER state,
+                        ADD COLUMN postcode VARCHAR(11) NULL AFTER city;
+                    ");
                 });
 
                 $this->info('All raw queries are executed successfully');

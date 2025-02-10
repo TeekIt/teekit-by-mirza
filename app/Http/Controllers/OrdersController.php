@@ -67,7 +67,7 @@ class OrdersController extends Controller
                 'country' => 'required|string|max:70',
                 'state' => 'required|string|max:70',
                 'city' => 'required|string|max:70',
-                'postcode' => 'nullable|string|max:11',
+                'postcode' => 'required|string|max:11',
                 'lat' => 'required|numeric|between:-90,90',
                 'lon' => 'required|numeric|between:-180,180',
             ];
@@ -123,7 +123,7 @@ class OrdersController extends Controller
         $orderArr = [];
         foreach ($groupedSellers as $sellerId => $order) {
             $totalWeight = OrderServices::getTotalWeight($order);
-            $totalVolumn = OrderServices::getTotalVolumn($order);
+            $totalVolumn = OrderServices::getTotalOfGivenVolumn($order);
             $totalItems = OrderServices::getTotalItems($order);
             $initialTotal = OrderServices::getOrderTotal($order);
             /* Adding amount into seller's wallet */
@@ -231,14 +231,14 @@ class OrdersController extends Controller
             'email' => 'required|email|max:255',
             'countryCode' => 'required|string|max:4',
             'phone' => 'required|string|max:13',
-            'fullAddress' => 'nullable|string',
+            'fullAddress' => 'required|string',
             'unitAddress' => 'nullable|string',
-            'country' => 'nullable|string|max:70',
-            'state' => 'nullable|string|max:70',
-            'city' => 'nullable|string|max:70',
-            'postcode' => 'nullable|string|max:11',
-            'lat' => 'nullable|numeric|between:-90,90',
-            'lon' => 'nullable|numeric|between:-180,180',
+            'country' => 'required|string|max:70',
+            'state' => 'required|string|max:70',
+            'city' => 'required|string|max:70',
+            'postcode' => 'required|string|max:11',
+            'lat' => 'required|numeric|between:-90,90',
+            'lon' => 'required|numeric|between:-180,180',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());

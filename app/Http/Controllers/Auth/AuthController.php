@@ -93,7 +93,9 @@ class AuthController extends Controller
                     'message' => config('constants.ACCOUNT_DEACTIVATED')
                 ], 401);
             }
+
             $this->authenticated($request, $user, $token);
+
             return $this->respondWithToken($token);
         } catch (Throwable $error) {
             report($error);
@@ -265,35 +267,27 @@ class AuthController extends Controller
     {
         $user = JWTAuth::user();
 
-        $url = URL::to('/');
-        $imagePath = $user['user_img'];
-        $data_info = array(
+        $data = [
             'id' => $user->id,
             'name' => $user->name,
             'l_name' => $user->l_name,
             'email' => $user->email,
             'phone' => $user->phone,
             'postal_code' => $user->postal_code,
-            'address_1' => $user->address_1,
-            'address_2' => $user->address_2,
+            'address_1' => $user->full_address,
+            'address_2' => $user->unit_address,
             'is_online' => $user->is_online,
-            'business_name' => $user->business_name,
-            'business_phone' => $user->business_phone,
-            'business_location' => $user->business_location,
-            'business_hours' => $user->business_hours,
-            'bank_details' => $user->bank_details,
             'last_login' => $user->last_login,
             'roles' => $user->role()->pluck('name'),
-            'user_img' => $imagePath,
             'pending_withdraw' => $user->pending_withdraw,
             'total_withdraw' => $user->total_withdraw,
-            'vehicle_type' => $user->vehicle_type,
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
-        );
+        ];
+
         return response()->json([
-            'data' => $data_info,
+            'data' => $data,
             'status' => config('constants.TRUE_STATUS'),
             'message' =>  config('constants.LOGIN_SUCCESS')
         ], config('constants.HTTP_OK'));
@@ -301,13 +295,13 @@ class AuthController extends Controller
 
     protected function authenticated($request, $user, $token)
     {
-        $olduser = $user;
         $user->last_login = date("Y-m-d H:i:s");
         $user->save();
 
         $agent = new Agent();
         $isDesktop = $agent->isDesktop();
         $isPhone = $agent->isPhone();
+
         $jwtToken = new JwtToken();
         $jwtToken->user_id = $user->id;
         $jwtToken->token = $token;
@@ -315,6 +309,7 @@ class AuthController extends Controller
         $jwtToken->platform = $agent->platform();
         $jwtToken->device = $agent->device();
         $mobileHeader = $request->header('x_platform');
+
         if (isset($mobileHeader) && $mobileHeader == 'mobile') {
             JwtToken::where('user_id', $user->id)->where('phone', 1)->delete();
             $jwtToken->phone = 1;
@@ -335,7 +330,7 @@ class AuthController extends Controller
         $user = User::find(Auth::id());
         $user->is_online = $request->is_online;
         $user->save();
-        
+
         return $this->me();
     }
 

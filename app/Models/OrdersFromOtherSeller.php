@@ -84,6 +84,11 @@ class OrdersFromOtherSeller extends Model
         string $address,
         string $houseNo = null,
         string $flat = null,
+        string $country,
+        string $state,
+        string $city,
+        string $postcode,
+        string $paymentIntentId,
         float $driverCharges = 0.0,
         ?float $deliveryCharges = null,
         ?float $serviceCharges = null,
@@ -124,6 +129,12 @@ class OrdersFromOtherSeller extends Model
         $model->address = $address;
         $model->house_no = $houseNo;
         $model->flat = $flat;
+        $model->country = $country;
+        $model->state = $state;
+        $model->city = $city;
+        $model->postcode = $postcode;
+        $model->payment_intent_id = $paymentIntentId;
+
         $model->driver_charges = $driverCharges;
         $model->delivery_charges = $deliveryCharges;
         $model->service_charges = $serviceCharges;

@@ -264,6 +264,45 @@
             </div>
         </div>
     </div>
+    {{-- ************************************ Gophr Delivery Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="gophrModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form wire:submit.prevent="assignToGophrDriver">
+                    {{ csrf_field() }}
+                    <div class="modal-header">
+                        <h5 class="modal-title display-center">Gophr Delivery</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Add Aditional Notes (Optional)</label>
+                                    <input type="text" wire:model.defer="additionalParcelDescription" placeholder="Enter additional notes here if any..." class="form-control" autofocus>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer hidden">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" wire:click="resetModal">
+                            Close
+                        </button>
+                        <button type="submit" class="btn btn-warning" wire:target="assignToGophrDriver" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled">
+                            <span wire:target="assignToGophrDriver" wire:loading.remove>
+                                Assign
+                            </span>
+                            <span wire:target="assignToGophrDriver" wire:loading>
+                                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Content Header -->
     <form wire:submit.prevent="render">
@@ -327,11 +366,19 @@
 
                                             @if ($order->type === 'delivery')
                                                 @if ($order->order_status === 'accepted')
-                                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#stuartModal" wire:click="renderStuartModal({{ $order->id }})" wire:target="renderStuartModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to Stuart delivery boy">
+                                                    <!-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#stuartModal" wire:click="renderStuartModal({{ $order->id }})" wire:target="renderStuartModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to Stuart delivery boy">
                                                         <span wire:target="renderStuartModal({{ $order->id }})" wire:loading.remove>
                                                             Assign To Stuart Delivery
                                                         </span>
                                                         <span wire:target="renderStuartModal({{ $order->id }})" wire:loading>
+                                                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                                        </span>
+                                                    </button> -->
+                                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#gophrModal" wire:click="renderOrderId({{ $order->id }})" wire:target="renderOrderId({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to delivery boy">
+                                                        <span wire:target="renderOrderId({{ $order->id }})" wire:loading.remove>
+                                                            Assign To Delivery Boy
+                                                        </span>
+                                                        <span wire:target="renderOrderId({{ $order->id }})" wire:loading>
                                                             <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                                                         </span>
                                                     </button>

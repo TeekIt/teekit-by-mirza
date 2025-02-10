@@ -39,6 +39,7 @@ return [
     'SUCCESS_STATUS' => 'success',
     'TRUE_STATUS' => true,
     'STUART_DELIVERY_SUCCESS' => 'Stuart delivery has been initiated successfully, You can please check the status by clicking the "Check Status" button',
+    'DELIVERY_SUCCESS' => 'Your order delivery has been initiated successfully, You can please check the status by clicking the "Delivery Status" button',
     'COMPLETED' => 'Completed',
     'VALID_REFERRAL' => 'Valid referral code',
     'ORDER_ASSIGNED' => 'Assigned',
@@ -95,6 +96,7 @@ return [
     'SENT_TO_OTHER_STORE_FAILED' => 'Due to some error your order cannot be sent to other store',
     'PARENT_QTY_SYNCED_FAILED' => 'Failed to sync quantities',
     'INTERNAL_SERVER_ERROR'=> 'Sorry! This operation has been failed due to some internal server error',
+    'DELIVERY_FAILED' => 'Sorry! Due to some internal error we are failed to initiate your delivery',
     /*
     |--------------------------------------------------------------------------
     | General Messages Constants
