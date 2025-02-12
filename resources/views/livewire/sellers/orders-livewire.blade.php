@@ -2,72 +2,11 @@
 
     @php
         use App\Enums\UserChoicesEnum;
+        use App\Enums\OrderStatusEnum;
     @endphp
 
     <x-session-messages />
 
-    {{-- ************************************ Delivery Boy Details Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="deliveryBoyDetailsModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Delivery Boy Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal"></button>
-                </div>
-                <form>
-                    <div class="modal-body">
-                        <div class="table-responsive text-nowrap">
-                            <table class="table table-hover">
-                                <tbody class="table-border-bottom-0">
-                                    <tr>
-                                        <td><b>Name</b></td>
-                                        {{-- <td>{{ $f_name }} {{ $l_name }}</td> --}}
-                                        <td>James Cameron</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Email</th>
-                                        {{-- <td>{{ $email }}</td> --}}
-                                        <td>james@gmail.com</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Phone</th>
-                                        {{-- <td>{{ $phone }}</td> --}}
-                                        <td>03170155652</td>
-                                    </tr>
-                                    <tr>
-                                        <th>DP</th>
-                                        {{-- <td>
-                                            <img src=@if ($profile_img) "{{ config('constants.BUCKET') . $profile_img }}"
-                                                @else
-                                            "{{ asset('images/icons/driver.png') }}" @endif width="150px">
-                                        </td> --}}
-                                        <td>
-                                            <img src="{{ asset('images/icons/driver.png') }}" width="150px">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Vehicle Type</th>
-                                        {{-- <td>{{ $vehicle_type }}</td> --}}
-                                        <td>Bike</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Vehicle Number</th>
-                                        {{-- <td>{{ $vehicle_number }}</td> --}}
-                                        <td>99829846</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetModal">
-                            Close
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
     {{-- ************************************ Search Alternative Product Modal ************************************ --}}
     <div wire:ignore.self class="modal fade" id="searchAlternativeProductModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -344,7 +283,7 @@
                                 <thead>
                                     <tr>
                                         <td colspan="4">
-                                            @if ($order->order_status === 'pending')
+                                            @if ($order->order_status === OrderStatusEnum::PENDING->value)
                                                 <button class="btn btn-warning" wire:click="orderIsAccepted({{ $order->id }})" wire:target="orderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Click here when preparing order">
                                                     <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading.remove>
                                                         Accept
@@ -365,7 +304,8 @@
                                             @endif
 
                                             @if ($order->type === 'delivery')
-                                                @if ($order->order_status === 'accepted')
+                                                <p>Delivery order</p>
+                                                @if ($order->order_status === OrderStatusEnum::ACCEPTED->value)
                                                     <!-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#stuartModal" wire:click="renderStuartModal({{ $order->id }})" wire:target="renderStuartModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to Stuart delivery boy">
                                                         <span wire:target="renderStuartModal({{ $order->id }})" wire:loading.remove>
                                                             Assign To Stuart Delivery
@@ -384,23 +324,17 @@
                                                     </button>
                                                 @endif
 
-                                                @if ($order->order_status === 'stuartDelivery')
+                                                @if ($order->order_status === OrderStatusEnum::STUART_DELIVERY->value)
                                                     <div class="alert alert-primary" role="alert">
                                                         <p>
                                                             Stuart delivery is on the way..!!
                                                         </p>
                                                     </div>
                                                 @endif
-
-                                                @if ($order->driver_id != '')
-                                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deliveryBoyDetailsModal" title="View delivery boy details">
-                                                        Delivery Boy Details
-                                                    </button>
-                                                @endif
                                             @endif
 
                                             @if ($order->type === 'self-pickup')
-                                                @if ($order->order_status === 'accepted')
+                                                @if ($order->order_status === OrderStatusEnum::ACCEPTED->value)
                                                     <div class="alert alert-primary" role="alert">
                                                         <p>
                                                             A {{ $order->type }} email has been sent to the customer
@@ -422,13 +356,13 @@
                                                 @endif
                                             @endif
 
-                                            @if ($order->order_status == 'complete')
+                                            @if ($order->order_status == OrderStatusEnum::COMPLETE->value)
                                                 <button class="btn btn-success" disabled title="This order has been completed">
                                                     Order Completed
                                                 </button>
                                             @endif
 
-                                            @if ($order->order_status == 'cancelled')
+                                            @if ($order->order_status == OrderStatusEnum::CANCELLED->value)
                                                 <button class="btn btn-dark" disabled title="This order has been cencelled">
                                                     Order Cancelled
                                                 </button>

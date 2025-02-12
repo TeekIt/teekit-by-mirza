@@ -37,7 +37,7 @@ final class OrderServices
         return $order->order_items->pluck('product')->sum('length');
     }
 
-    public static function getTotalOfGivenVolumn(array $order): float
+    public static function getTotalOfGivenVolume(array $order): float
     {
         return array_sum(array_column($order, 'volumn'));
     }

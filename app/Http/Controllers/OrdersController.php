@@ -123,7 +123,7 @@ class OrdersController extends Controller
         $orderArr = [];
         foreach ($groupedSellers as $sellerId => $order) {
             $totalWeight = OrderServices::getTotalWeight($order);
-            $totalVolumn = OrderServices::getTotalOfGivenVolumn($order);
+            $totalVolume = OrderServices::getTotalOfGivenVolume($order);
             $totalItems = OrderServices::getTotalItems($order);
             $initialTotal = OrderServices::getOrderTotal($order);
             /* Adding amount into seller's wallet */
@@ -141,7 +141,7 @@ class OrdersController extends Controller
                     $request->lat,
                     $request->lon,
                     $totalWeight,
-                    $totalVolumn
+                    $totalVolume
                 );
             }
             /* Create order */
@@ -292,7 +292,7 @@ class OrdersController extends Controller
             $request->length
         );
         /* Place order against the above product */
-        $totalVolumn = $productByBuyer->height * $productByBuyer->width * $productByBuyer->length;
+        $totalVolume = $productByBuyer->height * $productByBuyer->width * $productByBuyer->length;
         $sellerId = $request->sellerId;
         $initialTotal = $request->maxPrice * $request->qty;
         $totalItems = $request->qty;
@@ -309,7 +309,7 @@ class OrdersController extends Controller
                 $request->lat,
                 $request->lon,
                 $request->weight,
-                $totalVolumn
+                $totalVolume
             );
         }
         /* Create order */
