@@ -227,12 +227,9 @@ class OrdersOfUniqueProductsLivewire extends Component
             /* Perform some operation */
             $updated = Orders::updateOrderStatus($orderId, OrderStatusEnum::READY);
 
-            /*
-                Note:
-                Please remove the bugs related to the sendPickupYourOrderMail() email method
-             */
-            // dd(Orders::getById($orderId, ['id', 'created_by_id', 'seller_id']));
-
+            Note:
+            Please remove the bugs related to the sendPickupYourOrderMail() email method
+           
             if ($type == OrderTypeEnum::SELF_PICKUP->value) {
                 $orderDetails = Orders::getById($orderId, ['id', 'created_by_id', 'seller_id']);
                 EmailServices::sendPickupYourOrderMail($orderDetails);
@@ -256,24 +253,25 @@ class OrdersOfUniqueProductsLivewire extends Component
         try {
             /* Perform some operation */
             $this->selectedOrder = Orders::getById($orderId);
+            $totalWeight = $this->selectedOrder->order_items[0]->product->weight;
 
-            $currentDeliveryCharges = OrderServices::getDeliveryCharges(
+            $currentDeliveryCharges = OrderServices::getTotalDeliveryCharges(
                 $this->selectedOrder->seller->lat,
                 $this->selectedOrder->seller->lon,
                 $this->selectedOrder->buyer->lat,
                 $this->selectedOrder->buyer->lon,
-                $this->selectedOrder->order_items[0]->product->weight,
+                $totalWeight,
             );
 
             $currentTotalAmount = round($this->selectedOrder->current_total + $this->selectedOrder->service_charges + $currentDeliveryCharges);
+          
             $initialTotalAmount = round($this->selectedOrder->initial_total + $this->selectedOrder->service_charges + $this->selectedOrder->delivery_charges);
 
-            if ($currentTotalAmount <= OrderServices::getTotalWithExtraCharge($initialTotalAmount)) {
+            if ($currentTotalAmount <= $initialTotalAmount) {
                 $response = StripeServices::capturePaymentIntent(
                     $this->selectedOrder->payment_intent_id,
                     bcmul($currentTotalAmount, 100),
                 );
-
                 if (isset($response->error)) {
                     throw new Exception($response->error->message);
                 }
@@ -290,42 +288,6 @@ class OrdersOfUniqueProductsLivewire extends Component
             } else {
                 session()->flash('error', config('constants.INTERNAL_SERVER_ERROR'));
             }
-        } catch (Exception $error) {
-            report($error);
-            session()->flash('error', $error->getMessage());
-        }
-    }
-
-    public function cancelOrder($orderId)
-    {
-        try {
-            /* Perform some operation */
-            $orderDetails = Orders::getById($orderId);
-            dd('Order cancelled');
-            // dd($orderDetails);
-            // Orders::updateOrderStatus($order['id'], 'cancelled');
-            StripeServices::refundCustomer($orderDetails);
-
-
-            $message = "Hello " . $orderDetails->user->name . " .
-            Your order from " . $orderDetails->store->name . " was unsuccessful.
-            Unfortunately " . $orderDetails->store->name . " is unable to complete your order. But don't worry 
-            you have not been charged.
-            If you need any kinda of assistance, please contact us via email at:
-            admin@teekit.co.uk";
-
-            // TwilioSmsService::sendSms($orderDetails->user->phone, $message);
-            // EmailServices::sendOrderHasBeenCancelledMail($orderDetails);
-
-            /* Operation finished */
-            sleep(1);
-            session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
-
-            // if ($cancelled) {
-            //     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-            // } else {
-            //     session()->flash('error', config('constants.UPDATION_FAILED'));
-            // }
         } catch (Exception $error) {
             report($error);
             session()->flash('error', $error->getMessage());

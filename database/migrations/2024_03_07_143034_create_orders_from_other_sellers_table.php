@@ -36,7 +36,7 @@ return new class extends Migration
             $table->string('payment_status', 191)->comment('paid, hidden');
             $table->enum('order_status', ['pending', 'accepted', 'ready', 'stuartDelivery', 'onTheWay', 'delivered', 'complete', 'cancelled'])->default('pending');
             $table->enum('delivery_status', ['assigned', 'complete', 'pending_approval', 'cancelled'])->nullable();
-            $table->string('payment_intent_id')->nullable();
+            $table->string('payment_intent_id');
             $table->foreignId('driver_id')->nullable()->constrained(table:'drivers')->cascadeOnDelete();
             $table->double('driver_traveled_km', 8, 2)->default(0.00);
             $table->double('driver_charges', 8, 2)->default(0.00);

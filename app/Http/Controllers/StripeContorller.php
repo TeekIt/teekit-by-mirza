@@ -66,6 +66,26 @@ class StripeContorller extends Controller
         );
     }
 
+    public function refundPaymentIntent(Request $request)
+    {
+        $validatedData = Validator::make($request->all(), [
+            'paymentIntentId' => 'required|string',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        $response = StripeServices::refundPaymentIntent();
+        $error = isset($response->error);
+        
+        return JsonResponseServices::getApiResponse(
+            $response,
+            ($error) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            '',
+            ($error) ? config('constants.HTTP_UNPROCESSABLE_REQUEST') : config('constants.HTTP_OK')
+        );
+    }
+
     public function requestIncrementalAuthorizationSupport(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
