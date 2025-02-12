@@ -73,7 +73,9 @@ class RunRawQueries extends Command
                     // DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `created_by_type` VARCHAR(191) NOT NULL AFTER `id`'); 
                     // DB::statement('UPDATE `orders_from_other_sellers` SET created_by_type = \'User\'');
                     // DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `order_total` `initial_total` DOUBLE(8,2) NOT NULL');
-
+                    // DB::statement('DELETE FROM `orders_from_other_sellers` WHERE payment_intent_id IS NULL');
+                    // DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `payment_intent_id` `payment_intent_id` VARCHAR(191) NOT NULL');
+                    
                     // DB::statement('DELETE FROM `orders` WHERE payment_intent_id IS NULL');
                     // DB::statement('ALTER TABLE `orders` CHANGE `payment_intent_id` `payment_intent_id` VARCHAR(191) NOT NULL');
 
@@ -94,8 +96,6 @@ class RunRawQueries extends Command
                         ADD COLUMN postcode VARCHAR(11) NULL AFTER city;
                     ");
                 });
-
-                $this->info('All raw queries are executed successfully');
             }
         } catch (Exception $error) {
             report($error);

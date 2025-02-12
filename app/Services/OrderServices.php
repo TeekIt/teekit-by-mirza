@@ -8,9 +8,11 @@ use App\User;
 
 final class OrderServices
 {
-    public static function getTotalWithExtraCharge(float $totalAmout): float
+    public static int $maxDistanceInMiles = 5;
+
+    public static function getTotalWithExtraCharge(float $orderTotalAmount, float $totalWeight): float
     {
-        return $totalAmout + config('constants.EXTRA_CHARGE_AMOUNT');
+        return $orderTotalAmount + ((2.5 + 1.25) * (static::$maxDistanceInMiles + static::getDeliveryFee($totalWeight)));
     }
 
     public static function getTotalWeight(array|Orders|OrdersFromOtherSeller $order): float
@@ -58,28 +60,27 @@ final class OrderServices
         return $orderTotal;
     }
 
-    public static function getDeliveryCharges(
+    public static function getDeliveryFee(float $totalWeight): float
+    {
+        return match (true) {
+            $totalWeight < 5 => 0.15,
+            $totalWeight < 10 => 0.50,
+            $totalWeight < 15 => 0.75,
+            $totalWeight < 20 => 1.50,
+            default => 2.0,
+        };
+    }
+
+    public static function getTotalDeliveryCharges(
         float $sellerLat,
         float $sellerLon,
         float $buyerLat,
         float $buyerLon,
         float $totalWeight,
     ): float {
-        if ($totalWeight < 5) {
-            $deliveryFee = 0.15;
-        } else if ($totalWeight >= 5 && $totalWeight < 10) {
-            $deliveryFee = 0.50;
-        } else if ($totalWeight >= 10 && $totalWeight < 15) {
-            $deliveryFee = 0.75;
-        } else if ($totalWeight >= 15 && $totalWeight < 20) {
-            $deliveryFee = 1.50;
-        } else if ($totalWeight >= 20) {
-            $deliveryFee = 2.0;
-        }
-
         $distanceInMiles = GoogleMapServices::getDistanceInMiles($sellerLat, $sellerLon, $buyerLat, $buyerLon);
 
-        return (2.5 + 1.25) * ($distanceInMiles + $deliveryFee);
+        return (2.5 + 1.25) * ($distanceInMiles + static::getDeliveryFee($totalWeight));
     }
 
     public static function getDriverCharges(

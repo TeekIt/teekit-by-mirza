@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\CommissionAndServiceFee;
+use App\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
@@ -23,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Date::use(CarbonImmutable::class);
+
         Paginator::useBootstrap();
 
         Schema::defaultStringLength(191);

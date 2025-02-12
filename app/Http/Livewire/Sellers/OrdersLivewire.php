@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Sellers;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Models\GophrDelivery;
+use App\Enums\PaymentIntentStatusEnum;
 use App\Models\OrdersFromOtherSeller;
 use App\OrderItems;
 use App\Orders;
@@ -34,6 +35,7 @@ class OrdersLivewire extends Component
         $orderItem,
         $nearbySellers,
         $selectedNearbySeller,
+        $selectedOrder,
         $search,
         $customOrderId,
         $requestOrderId,
@@ -68,6 +70,7 @@ class OrdersLivewire extends Component
             'orderItem',
             'nearbySellers',
             'selectedNearbySeller',
+            'selectedOrder',
             'search',
             'customOrderId',
             'additionalParcelDescription',
@@ -307,17 +310,20 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $order = Orders::getById($orderId);
+            $this->selectedOrder = Orders::getById($orderId);
 
-            StripeServices::refundCustomer($order);
+            $refunded = StripeServices::refundPaymentIntent($this->selectedOrder->payment_intent_id);
+            if (isset($refunded->error)) {
+                throw new Exception($refunded->error->message);
+            }
 
             $cancelled = Orders::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
 
-            EmailServices::sendOrderHasBeenCancelledMail($order);
+            EmailServices::sendOrderHasBeenCancelledMail($this->selectedOrder);
             /* Operation finished */
             sleep(1);
 
-            if ($cancelled) {
+            if ($cancelled && $refunded->status === PaymentIntentStatusEnum::CANCELED->value) {
                 session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
