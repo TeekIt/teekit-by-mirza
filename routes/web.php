@@ -97,7 +97,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
         Route::get('/of-unique-products', OrdersOfUniqueProductsLivewire::class)->name('seller.orders.of.unique.products');
         Route::get('/count', [HomeController::class, 'countSellerOrders'])->name('seller.orders.count');
-        Route::get('/{request_order_id?}', OrdersLivewire::class)->name('seller.orders');
+        Route::get('/{requestOrderId?}', OrdersLivewire::class)->name('seller.orders');
     });
 
     Route::get('/withdrawal', WithdrawalLivewire::class)->name('seller.withdrawal');

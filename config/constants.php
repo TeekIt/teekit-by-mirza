@@ -97,6 +97,7 @@ return [
     'PARENT_QTY_SYNCED_FAILED' => 'Failed to sync quantities',
     'INTERNAL_SERVER_ERROR'=> 'Sorry! This operation has been failed due to some internal server error',
     'DELIVERY_FAILED' => 'Sorry! Due to some internal error we are failed to initiate your delivery',
+    'SEARCH_FAILED' => 'Sorry! We could not find any results against your search',
     /*
     |--------------------------------------------------------------------------
     | General Messages Constants

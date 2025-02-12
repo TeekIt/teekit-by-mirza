@@ -24,19 +24,19 @@ class OrdersLivewire extends Component
     use WithPagination;
 
     public
-        $seller_id,
+        $sellerId,
         $orderId,
         $currentProdId,
         $currentProdQty,
         $customerName,
         $phoneNumber,
         $order,
-        $order_item,
-        $nearby_sellers,
-        $selected_nearby_seller,
+        $orderItem,
+        $nearbySellers,
+        $selectedNearbySeller,
         $search,
-        $custom_order_id,
-        $request_order_id,
+        $customOrderId,
+        $requestOrderId,
         $additionalParcelDescription,
         $selectedDeliveryDetails;
 
@@ -49,8 +49,9 @@ class OrdersLivewire extends Component
 
     public function mount(Request $request)
     {
-        $this->seller_id = auth()->id();
-        $this->request_order_id = $request->request_order_id;
+        $this->sellerId = auth()->id();
+        $this->requestOrderId = $request->requestOrderId;
+
         $this->resetAllPaginators();
     }
 
@@ -64,11 +65,11 @@ class OrdersLivewire extends Component
             'currentProdQty',
             'customerName',
             'phoneNumber',
-            'order_item',
-            'nearby_sellers',
-            'selected_nearby_seller',
+            'orderItem',
+            'nearbySellers',
+            'selectedNearbySeller',
             'search',
-            'custom_order_id',
+            'customOrderId',
             'additionalParcelDescription',
             'selectedDeliveryDetails',
         ]);
@@ -104,10 +105,10 @@ class OrdersLivewire extends Component
         $this->resetModal();
 
         $this->order = Orders::getById($orderId);
-        $this->order_item = $this->order->order_items[0];
+        $this->orderItem = $this->order->order_items[0];
 
         $sellers = User::getParentAndChildSellersByCity(auth()->user()->city);
-        $this->nearby_sellers = GoogleMapServices::findDistanceByMakingChunks(
+        $this->nearbySellers = GoogleMapServices::findDistanceByMakingChunks(
             auth()->user()->lat,
             auth()->user()->lon,
             $sellers,
@@ -115,9 +116,9 @@ class OrdersLivewire extends Component
         );
     }
 
-    public function renderRemoveItemModal($order_item)
+    public function renderRemoveItemModal($orderItem)
     {
-        $this->order_item = $order_item;
+        $this->orderItem = $orderItem;
     }
 
     public function renderCustomerContactModal($customerName, $phoneNumber)
@@ -142,12 +143,12 @@ class OrdersLivewire extends Component
             $order = Orders::getById($this->orderId);
 
             $parcelDescription = $this->additionalParcelDescription ?? "Please pickup your order ASAP";
-
+            
             $response = GophrServices::createJob($order, $parcelDescription);
 
             if (isset($response->errors)) {
                 $this->dispatchBrowserEvent('close-modal', ['id' => 'gophrModal']);
-                throw new Exception(json_encode($response->errors));
+                throw new Exception(json_encode($response->errors[0]->message));
             }
 
             GophrDelivery::add(
@@ -176,17 +177,18 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $stuart_message = StuartDeliveryServices::stuartJobCreationLivewire(
+            $stuartMessage = StuartDeliveryServices::stuartJobCreationLivewire(
                 $this->orderId,
-                $this->custom_order_id
+                $this->customOrderId
             );
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'stuartModal']);
-            if ($stuart_message === 'JobCreated') {
+
+            if ($stuartMessage === 'JobCreated') {
                 session()->flash('success', config('constants.STUART_DELIVERY_SUCCESS'));
             } else {
-                session()->flash('error', $stuart_message);
+                session()->flash('error', $stuartMessage);
             }
         } catch (Exception $error) {
             report($error);
@@ -197,22 +199,22 @@ class OrdersLivewire extends Component
     public function sendItemToAnOtherStore()
     {
         $this->validate([
-            'selected_nearby_seller' => 'required|string'
+            'selectedNearbySeller' => 'required|string'
         ]);
         try {
             /* Perform some operation */
-            $selectedSeller = User::getSellerByBusinessName($this->selected_nearby_seller);
+            $selectedSeller = User::getSellerByBusinessName($this->selectedNearbySeller);
 
-            $orderTotalPrice = $this->order_item->product_price * $this->order_item->product_qty;
+            $orderTotalPrice = $this->orderItem->product_price * $this->orderItem->product_qty;
             /* Send this product to another seller */
             OrdersFromOtherSeller::add(
                 $this->order->created_by_type,
                 $this->order->created_by_id,
                 $selectedSeller->id,
-                $this->order_item->product_belongs_to_type,
-                $this->order_item->product_belongs_to_id,
-                $this->order_item->product_price,
-                $this->order_item->product_qty,
+                $this->orderItem->product_belongs_to_type,
+                $this->orderItem->product_belongs_to_id,
+                $this->orderItem->product_price,
+                $this->orderItem->product_qty,
                 $orderTotalPrice,
                 isset($this->order->customer_lat) ? (float) $this->order->customer_lat : null,
                 isset($this->order->customer_lon) ? (float) $this->order->customer_lon : null,
@@ -239,9 +241,9 @@ class OrdersLivewire extends Component
                 $this->order->created_at,
             );
             /* Remove the item from current order items */
-            $removed = OrderItems::removeItem($this->order_item->id);
+            $removed = OrderItems::removeItem($this->orderItem->id);
             /* Subtract the total price of this product/order_item from the current order's total */
-            $subtracted = Orders::subFromOrderTotal($this->order_item->order_id, $orderTotalPrice);
+            $subtracted = Orders::subFromOrderTotal($this->orderItem->order_id, $orderTotalPrice);
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'sendToOtherStoresModal']);
@@ -270,6 +272,7 @@ class OrdersLivewire extends Component
             }
             /* Operation finished */
             sleep(1);
+
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {
@@ -288,6 +291,7 @@ class OrdersLivewire extends Component
             $updated = Orders::updateOrderStatus($id, OrderStatusEnum::COMPLETE);
             /* Operation finished */
             sleep(1);
+            
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {
@@ -328,12 +332,14 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $prod_total_price = $this->order_item['product_price'] * $this->order_item['product_qty'];
-            $removed = OrderItems::removeItem($this->order_item['id']);
-            $updated = Orders::subFromOrderTotal($this->order_item['order_id'], $prod_total_price);
+            $removed = OrderItems::removeItem($this->orderItem['id']);
+
+            $prodTotalPrice = $this->orderItem['product_price'] * $this->orderItem['product_qty'];
+            $updated = Orders::subFromOrderTotal($this->orderItem['order_id'], $prodTotalPrice);
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'removeItemFromOrderModel']);
+
             if ($removed && $updated) {
                 session()->flash('success', config('constants.PRODUCT_REMOVED_SUCCESSFULLY'));
             } else {
@@ -352,22 +358,22 @@ class OrdersLivewire extends Component
         $this->resetPage();
 
         $this->reset([
-            'request_order_id'
+            'requestOrderId'
         ]);
     }
 
     public function isSearchByIdSet()
     {
         if ($this->search) {
-            $searched_order_id = (int) $this->search;
-            $this->request_order_id = (int) $this->search;
+            $searchedOrderId = (int) $this->search;
+            $this->requestOrderId = (int) $this->search;
         } else {
-            $searched_order_id = $this->request_order_id;
+            $searchedOrderId = $this->requestOrderId;
         }
 
-        if ($searched_order_id != 0) $this->resetPage();
+        if ($searchedOrderId != 0) $this->resetPage();
 
-        return $searched_order_id;
+        return $searchedOrderId;
     }
 
     public function render()
@@ -375,15 +381,17 @@ class OrdersLivewire extends Component
         try {
             $data = Orders::getOrdersForView(
                 orderBy: 'desc',
-                sellerId: $this->seller_id,
+                sellerId: $this->sellerId,
                 orderId: $this->isSearchByIdSet(),
             );
+
             return view('livewire.sellers.orders-livewire', compact('data'));
         } catch (Exception $error) {
             report($error);
-            session()->flash('error', $error->getMessage());
+            session()->flash('error', config('constants.SEARCH_FAILED'));
 
             $data = [];
+            
             return view('livewire.sellers.orders-livewire', compact('data'));
         }
     }
