@@ -1,8 +1,9 @@
 <div class="container-xxl flex-grow-1 container-p-y">
 
     @php
-        use App\Enums\UserChoicesEnum;
-        use App\Enums\OrderStatusEnum;
+    use App\Enums\UserChoicesEnum;
+    use App\Enums\OrderStatusEnum;
+    use App\Enums\OrderTypeEnum;
     @endphp
 
     <x-session-messages />
@@ -17,17 +18,17 @@
                 </div>
                 <div class="modal-body">
                     @if (empty($orderId) || empty($currentProdId) || empty($currentProdQty) || empty($customerName) || empty($phoneNumber))
-                        <div class="col-12 text-center">
-                            <div class="spinner-border" role="status"></div>
-                        </div>
+                    <div class="col-12 text-center">
+                        <div class="spinner-border" role="status"></div>
+                    </div>
                     @else
-                        <livewire:sellers.modals.search-alternative-product-modal 
-                        :order_id="$orderId" 
-                        :current_prod_id="$currentProdId" 
-                        :current_prod_qty="$currentProdQty" 
-                        :receiver_name="$customerName" 
+                    <livewire:sellers.modals.search-alternative-product-modal
+                        :order_id="$orderId"
+                        :current_prod_id="$currentProdId"
+                        :current_prod_qty="$currentProdQty"
+                        :receiver_name="$customerName"
                         :phone_number="$phoneNumber">
-                    @endif
+                        @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetModal">
@@ -81,23 +82,23 @@
                         <h2>Please select a store</h2>
                         <div class="d-flex justify-content-center">
                             @if (empty($nearby_sellers))
-                                <div class="col-6">
-                                    <div class="spinner-border" role="status"></div>
-                                </div>
+                            <div class="col-6">
+                                <div class="spinner-border" role="status"></div>
+                            </div>
                             @else
-                                <div class="col-6">
-                                    <select class="form-select form-select-lg" wire:model="selected_nearby_seller">
-                                        <option value="" selected>Nearby stores</option>
-                                        @foreach ($nearby_sellers as $single_index)
-                                            <option value="{{ $single_index['business_name'] }}">{{ $single_index['business_name'] }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                            <div class="col-6">
+                                <select class="form-select form-select-lg" wire:model="selected_nearby_seller">
+                                    <option value="" selected>Nearby stores</option>
+                                    @foreach ($nearby_sellers as $single_index)
+                                    <option value="{{ $single_index['business_name'] }}">{{ $single_index['business_name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             @endif
                         </div>
                         <small class="text-danger">
                             @error('selected_nearby_seller')
-                                {{ $message }}
+                            {{ $message }}
                             @enderror
                         </small>
                     </div>
@@ -128,24 +129,24 @@
                 </div>
                 <div class="modal-body">
                     @if (empty($receiver_name) || empty($phone_number))
-                        <div class="col-12 text-center">
-                            <div class="spinner-border" role="status"></div>
-                        </div>
+                    <div class="col-12 text-center">
+                        <div class="spinner-border" role="status"></div>
+                    </div>
                     @else
-                        <div class="text-center">
-                            <h2 class="text-danger"><i class="fas fa-phone-alt"></i> CALL THE CUSTOMER</h2>
-                            <p class="fw-bold">Customer Name: {{ $receiver_name }}</p>
-                            <p class="fw-bold">Customer Contact: {{ $phone_number }}</p>
+                    <div class="text-center">
+                        <h2 class="text-danger"><i class="fas fa-phone-alt"></i> CALL THE CUSTOMER</h2>
+                        <p class="fw-bold">Customer Name: {{ $receiver_name }}</p>
+                        <p class="fw-bold">Customer Contact: {{ $phone_number }}</p>
+                    </div>
+                    <div class=" d-flex justify-content-center">
+                        <div class="d-flex justify-content-center col-8 col-sm-6">
+                            <select class="form-select" aria-label="Default select example">
+                                <option value="1">Search Alternative</option>
+                                <option value="2">Remove Product</option>
+                                <option value="3">Cancel</option>
+                            </select>
                         </div>
-                        <div class=" d-flex justify-content-center">
-                            <div class="d-flex justify-content-center col-8 col-sm-6">
-                                <select class="form-select" aria-label="Default select example">
-                                    <option value="1">Search Alternative</option>
-                                    <option value="2">Remove Product</option>
-                                    <option value="3">Cancel</option>
-                                </select>
-                            </div>
-                        </div>
+                    </div>
                     @endif
                 </div>
                 <div class="modal-footer">
@@ -242,6 +243,37 @@
             </div>
         </div>
     </div>
+    {{-- ************************************ Track Gophr Delivery Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="trackGophrDeliveryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <form wire:submit.prevent="assignToGophrDriver">
+                    {{ csrf_field() }}
+                    <div class="modal-header">
+                        <h5 class="modal-title display-center">Live Delivery Tracking</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        @if (isset($selectedDeliveryDetails))
+                        <div class="row" style="height: 100vh;">
+                            <iframe
+                                src="{{ $selectedDeliveryDetails['data']['deliveries'][0]['public_tracker_url'] }}"
+                                class="col-12">
+                            </iframe>
+                        </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer hidden">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" wire:click="resetModal">
+                            Close
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Content Header -->
     <form wire:submit.prevent="render">
@@ -273,40 +305,39 @@
             <h4 class="py-4 my-1">Orders</h4>
         </div>
         @forelse ($data as $order)
-            <!-- Single Order Content -->
-            <div class="col-12 p-2">
-                <div class="card">
-                    <div class="card-body py-1 px-2">
-                        <!-- Order Header -->
-                        <div class="p-2 mb-2">
-                            <table class="table table-striped table-responsive-sm">
-                                <thead>
-                                    <tr>
-                                        <td colspan="4">
-                                            @if ($order->order_status === OrderStatusEnum::PENDING->value)
-                                                <button class="btn btn-warning" wire:click="orderIsAccepted({{ $order->id }})" wire:target="orderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Click here when preparing order">
-                                                    <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading.remove>
-                                                        Accept
-                                                    </span>
-                                                    <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading>
-                                                        <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
-                                                    </span>
-                                                </button>
+        <!-- Single Order Content -->
+        <div class="col-12 p-2">
+            <div class="card">
+                <div class="card-body py-1 px-2">
+                    <!-- Order Header -->
+                    <div class="p-2 mb-2">
+                        <table class="table table-striped table-responsive-sm">
+                            <thead>
+                                <tr>
+                                    <td colspan="4">
+                                        @if ($order->order_status === OrderStatusEnum::PENDING->value)
+                                        <button class="btn btn-warning" wire:click="orderIsAccepted({{ $order->id }})" wire:target="orderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Click here when preparing order">
+                                            <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading.remove>
+                                                Accept
+                                            </span>
+                                            <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading>
+                                                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
 
-                                                <button class="btn btn-danger" wire:click="cancelOrder({{ $order->id }})" wire:target="cancelOrder({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Cancel the whole order">
-                                                    <span wire:target="cancelOrder({{ $order->id }})" wire:loading.remove>
-                                                        Cancel
-                                                    </span>
-                                                    <span wire:target="cancelOrder({{ $order->id }})" wire:loading>
-                                                        <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
-                                                    </span>
-                                                </button>
-                                            @endif
+                                        <button class="btn btn-danger" wire:click="cancelOrder({{ $order->id }})" wire:target="cancelOrder({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Cancel the whole order">
+                                            <span wire:target="cancelOrder({{ $order->id }})" wire:loading.remove>
+                                                Cancel
+                                            </span>
+                                            <span wire:target="cancelOrder({{ $order->id }})" wire:loading>
+                                                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
+                                        @endif
 
-                                            @if ($order->type === 'delivery')
-                                                <p>Delivery order</p>
-                                                @if ($order->order_status === OrderStatusEnum::ACCEPTED->value)
-                                                    <!-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#stuartModal" wire:click="renderStuartModal({{ $order->id }})" wire:target="renderStuartModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to Stuart delivery boy">
+                                        @if ($order->type === OrderTypeEnum::DELIVERY->value)
+                                        @if ($order->order_status === OrderStatusEnum::ACCEPTED->value)
+                                        <!-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#stuartModal" wire:click="renderStuartModal({{ $order->id }})" wire:target="renderStuartModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to Stuart delivery boy">
                                                         <span wire:target="renderStuartModal({{ $order->id }})" wire:loading.remove>
                                                             Assign To Stuart Delivery
                                                         </span>
@@ -314,173 +345,184 @@
                                                             <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
                                                         </span>
                                                     </button> -->
-                                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#gophrModal" wire:click="renderOrderId({{ $order->id }})" wire:target="renderOrderId({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to delivery boy">
-                                                        <span wire:target="renderOrderId({{ $order->id }})" wire:loading.remove>
-                                                            Assign To Delivery Boy
-                                                        </span>
-                                                        <span wire:target="renderOrderId({{ $order->id }})" wire:loading>
-                                                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
-                                                        </span>
-                                                    </button>
-                                                @endif
+                                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#gophrModal" wire:click="renderOrderId({{ $order->id }})" wire:target="renderOrderId({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to delivery boy">
+                                            <span wire:target="renderOrderId({{ $order->id }})" wire:loading.remove>
+                                                Assign To Delivery Boy
+                                            </span>
+                                            <span wire:target="renderOrderId({{ $order->id }})" wire:loading>
+                                                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
+                                        @endif
 
-                                                @if ($order->order_status === OrderStatusEnum::STUART_DELIVERY->value)
-                                                    <div class="alert alert-primary" role="alert">
-                                                        <p>
-                                                            Stuart delivery is on the way..!!
-                                                        </p>
-                                                    </div>
-                                                @endif
-                                            @endif
+                                        @if ($order->order_status === OrderStatusEnum::STUART_DELIVERY->value)
+                                        <div class="alert alert-primary" role="alert">
+                                            <p>
+                                                Stuart delivery is on the way..!!
+                                            </p>
+                                        </div>
+                                        @endif
 
-                                            @if ($order->type === 'self-pickup')
-                                                @if ($order->order_status === OrderStatusEnum::ACCEPTED->value)
-                                                    <div class="alert alert-primary" role="alert">
-                                                        <p>
-                                                            A {{ $order->type }} email has been sent to the customer
-                                                        </p>
-                                                        <hr>
-                                                        <h4 class="alert-heading">IMPORTANT NOTE!</h4>
-                                                        <p class="mb-0">
-                                                            This is a <b>{{ $order->type }}</b> order therefore only press the <b>Complete Order</b> button when the customer has collected the order physically
-                                                        </p>
-                                                    </div>
-                                                    <button class="btn btn-success" wire:click="orderIsCompleted({{ $order->id }})" wire:target="orderIsCompleted({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Mark as completed">
-                                                        <span wire:target="orderIsCompleted({{ $order->id }})" wire:loading.remove>
-                                                            Complete Order
-                                                        </span>
-                                                        <span wire:target="orderIsCompleted({{ $order->id }})" wire:loading>
-                                                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
-                                                        </span>
-                                                    </button>
-                                                @endif
-                                            @endif
+                                        @if ($order->order_status === OrderStatusEnum::ON_THE_WAY->value)
+                                        <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#trackGophrDeliveryModal" wire:click="renderTrackGophrDeliveryModal({{ $order->id }})" wire:target="renderTrackGophrDeliveryModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-dark" wire:loading.attr="disabled" title="Track the live status of your delivery">
+                                            <span wire:target="renderTrackGophrDeliveryModal({{ $order->id }})" wire:loading.remove>
+                                                Track Delivery
+                                            </span>
+                                            <span wire:target="renderTrackGophrDeliveryModal({{ $order->id }})" wire:loading>
+                                                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
+                                        @endif
+                                        @endif
 
-                                            @if ($order->order_status == OrderStatusEnum::COMPLETE->value)
-                                                <button class="btn btn-success" disabled title="This order has been completed">
-                                                    Order Completed
-                                                </button>
-                                            @endif
+                                        @if ($order->type === OrderTypeEnum::SELF_PICKUP->value)
+                                        @if ($order->order_status === OrderStatusEnum::ACCEPTED->value)
+                                        <div class="alert alert-primary" role="alert">
+                                            <p>
+                                                A {{ $order->type }} email has been sent to the customer
+                                            </p>
+                                            <hr>
+                                            <h4 class="alert-heading">IMPORTANT NOTE!</h4>
+                                            <p class="mb-0">
+                                                This is a <b>{{ $order->type }}</b> order therefore only press the <b>Complete Order</b> button when the customer has collected the order physically
+                                            </p>
+                                        </div>
+                                        <button class="btn btn-success" wire:click="orderIsCompleted({{ $order->id }})" wire:target="orderIsCompleted({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Mark as completed">
+                                            <span wire:target="orderIsCompleted({{ $order->id }})" wire:loading.remove>
+                                                Complete Order
+                                            </span>
+                                            <span wire:target="orderIsCompleted({{ $order->id }})" wire:loading>
+                                                <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
+                                        @endif
+                                        @endif
 
-                                            @if ($order->order_status == OrderStatusEnum::CANCELLED->value)
-                                                <button class="btn btn-dark" disabled title="This order has been cencelled">
-                                                    Order Cancelled
-                                                </button>
+                                        @if ($order->order_status == OrderStatusEnum::COMPLETE->value)
+                                        <button class="btn btn-success" disabled title="This order has been completed">
+                                            Order Completed
+                                        </button>
+                                        @endif
+
+                                        @if ($order->order_status == OrderStatusEnum::CANCELLED->value)
+                                        <button class="btn btn-dark" disabled title="This order has been cencelled">
+                                            Order Cancelled
+                                        </button>
+                                        @endif
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>Order#</b></td>
+                                    <td>{{ $order->id }}</td>
+                                    <td><b>Order Status</b></td>
+                                    <td><span class="badge badge-warning">{{ $order->order_status }}</span></td>
+                                </tr>
+
+                                <tr>
+                                    <td><b>Placed At</b></td>
+                                    <td>{{ $order->created_at }}</td>
+                                    <td><b>Order Type</b></td>
+                                    <td><span class="badge badge-info">{{ $order->type }}</span></td>
+                                </tr>
+
+                                <tr>
+                                    <td><b>Order Total</b></td>
+                                    <td>£{{ $order->initial_total }}</td>
+                                    <td><b>Payment Status</b></td>
+                                    <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /Order Header -->
+                    <div class="card-text">
+                        @foreach ($order->products as $index => $item)
+                        <!-- Order Items -->
+                        <div class="row mb-2">
+                            <div class="col-md-2">
+                                <span class="img-container">
+                                    @if (str_contains($item->feature_img, 'https://'))
+                                    <img class="d-block m-auto" src="{{ asset($item->feature_img) }}">
+                                    @else
+                                    <img class="d-block m-auto" src="{{ config('constants.BUCKET') . $item->feature_img }}">
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="col-12 col-sm-10">
+                                <table class="table">
+                                    <tr>
+                                        <td class="col-4 text-site-primary"><b>Product Name:</b></td>
+                                        <td class="col-8">{{ $item->product_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-4 text-site-primary"><b>Category:</b></td>
+                                        <td class="col-8">{{ $item->category->category_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-4 text-site-primary"><b>SKU:</b></td>
+                                        <td class="col-8">{{ $item->sku }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-4 text-site-primary"><b>QTY:</b></td>
+                                        <td class="col-8"> {{ $order->order_items[$index]->product_qty }} </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-4 text-site-primary"><b>Price:</b></td>
+                                        <td class="col-8"> £{{ $item->price }} </td>
+                                    </tr>
+                                    @if ($order->order_status == 'pending')
+                                    <tr>
+                                        <td class="col-4 text-site-primary">
+                                            <b>I don't have this product!</b>
+                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="If you don't have this product then go for the option selected by the buyer by clicking the front button">
+                                                <i class="fas fa-exclamation-circle"></i>
+                                            </button>
+                                        </td>
+                                        <td class="col-8">
+                                            @if ($order->order_items[$index]->user_choice === UserChoicesEnum::ALTERNATIVE_PRODUCT->value)
+                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal({{ $order->id }}, {{ $item->id }}, {{ $order->order_items[$index]->product_qty }}, '{{ $order->customer_name }}', '{{ $order->phone_number }}')">
+                                                <i class="fas fa-search"></i>
+                                                Search Alternative
+                                            </button>
+                                            @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::REMOVE_PRODUCT->value)
+                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#removeItemFromOrderModel" wire:click="renderRemoveItemModal({{ $order->order_items[$index] }})">
+                                                <i class="fas fa-minus-circle"></i>
+                                                Remove Product
+                                            </button>
+                                            @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::SEND_TO_OTHER_STORES->value)
+                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#sendToOtherStoresModal" wire:click="renderSTOSModal({{ $order->id }})">
+                                                <i class="fas fa-paper-plane"></i>
+                                                Send To Other Stores
+                                            </button>
+                                            @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::CALL_ME->value)
+                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#showCustomerContactModel" wire:click="renderCustomerContactModal('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
+                                                <i class="fas fa-phone-alt"></i>
+                                                Call The Customer
+                                            </button>
+                                            @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::CANCEL_ORDER->value)
+                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal({{ $order->id }}, {{ $item->id }}, {{ $order->order_items[$index]->product_qty }}, '{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
+                                                <i class="fas fa-times"></i>
+                                                Cancel Order
+                                            </button>
                                             @endif
                                         </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><b>Order#</b></td>
-                                        <td>{{ $order->id }}</td>
-                                        <td><b>Order Status</b></td>
-                                        <td><span class="badge badge-warning">{{ $order->order_status }}</span></td>
-                                    </tr>
-
-                                    <tr>
-                                        <td><b>Placed At</b></td>
-                                        <td>{{ $order->created_at }}</td>
-                                        <td><b>Order Type</b></td>
-                                        <td><span class="badge badge-info">{{ $order->type }}</span></td>
-                                    </tr>
-
-                                    <tr>
-                                        <td><b>Order Total</b></td>
-                                        <td>£{{ $order->initial_total }}</td>
-                                        <td><b>Payment Status</b></td>
-                                        <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                    @endif
+                                </table>
+                            </div>
                         </div>
-                        <!-- /Order Header -->
-                        <div class="card-text">
-                            @foreach ($order->products as $index => $item)
-                                <!-- Order Items -->
-                                <div class="row mb-2">
-                                    <div class="col-md-2">
-                                        <span class="img-container">
-                                            @if (str_contains($item->feature_img, 'https://'))
-                                                <img class="d-block m-auto" src="{{ asset($item->feature_img) }}">
-                                            @else
-                                                <img class="d-block m-auto" src="{{ config('constants.BUCKET') . $item->feature_img }}">
-                                            @endif
-                                        </span>
-                                    </div>
-                                    <div class="col-12 col-sm-10">
-                                        <table class="table">
-                                            <tr>
-                                                <td class="col-4 text-site-primary"><b>Product Name:</b></td>
-                                                <td class="col-8">{{ $item->product_name }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="col-4 text-site-primary"><b>Category:</b></td>
-                                                <td class="col-8">{{ $item->category->category_name }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="col-4 text-site-primary"><b>SKU:</b></td>
-                                                <td class="col-8">{{ $item->sku }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="col-4 text-site-primary"><b>QTY:</b></td>
-                                                <td class="col-8"> {{ $order->order_items[$index]->product_qty }} </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="col-4 text-site-primary"><b>Price:</b></td>
-                                                <td class="col-8"> £{{ $item->price }} </td>
-                                            </tr>
-                                            @if ($order->order_status == 'pending')
-                                                <tr>
-                                                    <td class="col-4 text-site-primary">
-                                                        <b>I don't have this product!</b>
-                                                        <button type="button" class="btn btn-site-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="If you don't have this product then go for the option selected by the buyer by clicking the front button">
-                                                            <i class="fas fa-exclamation-circle"></i>
-                                                        </button>
-                                                    </td>
-                                                    <td class="col-8">
-                                                        @if ($order->order_items[$index]->user_choice === UserChoicesEnum::ALTERNATIVE_PRODUCT->value)
-                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal({{ $order->id }}, {{ $item->id }}, {{ $order->order_items[$index]->product_qty }}, '{{ $order->customer_name }}', '{{ $order->phone_number }}')">
-                                                                <i class="fas fa-search"></i>
-                                                                Search Alternative
-                                                            </button>
-                                                        @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::REMOVE_PRODUCT->value)
-                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#removeItemFromOrderModel" wire:click="renderRemoveItemModal({{ $order->order_items[$index] }})">
-                                                                <i class="fas fa-minus-circle"></i>
-                                                                Remove Product
-                                                            </button>
-                                                        @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::SEND_TO_OTHER_STORES->value)
-                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#sendToOtherStoresModal" wire:click="renderSTOSModal({{ $order->id }})">
-                                                                <i class="fas fa-paper-plane"></i>
-                                                                Send To Other Stores
-                                                            </button>
-                                                        @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::CALL_ME->value)
-                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#showCustomerContactModel" wire:click="renderCustomerContactModal('{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
-                                                                <i class="fas fa-phone-alt"></i>
-                                                                Call The Customer
-                                                            </button>
-                                                        @elseif ($order->order_items[$index]->user_choice === UserChoicesEnum::CANCEL_ORDER->value)
-                                                            <button type="button" class="btn btn-site-primary" data-bs-toggle="modal" data-bs-target="#searchAlternativeProductModal" wire:click="renderSAPModal({{ $order->id }}, {{ $item->id }}, {{ $order->order_items[$index]->product_qty }}, '{{ $order->receiver_name }}', '{{ $order->phone_number }}')">
-                                                                <i class="fas fa-times"></i>
-                                                                Cancel Order
-                                                            </button>
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                            @endif
-                                        </table>
-                                    </div>
-                                </div>
-                                <!-- /Order Items -->
-                            @endforeach
-                        </div>
-
+                        <!-- /Order Items -->
+                        @endforeach
                     </div>
+
                 </div>
             </div>
-            <!-- /Single Order Content -->
+        </div>
+        <!-- /Single Order Content -->
         @empty
-            <h1>No orders yet... :(</h1>
+        <h1>No orders yet... :(</h1>
         @endforelse
 
 
@@ -490,193 +532,193 @@
                 <div class="card">
                     <div class="card-body p-2 pl-5 pr-5 pb-5">
                         <div class="p-2 mb-2">Order #{{1}} @if ($order->order_status == 'pending')
-                            <a href="{{route('accept_order',['order_id'=>1])}}" class=" d-block btn btn-warning float-right">Click when preparing order</a>
-                            <a href="{{route('cancel_order',['order_id'=>1])}}" onclick="cancelOrder(event)" class=" d-block btn btn-danger float-right" style="margin-right: 20px">Cancel Order</a>
-                            @else
-                            @if (!empty($order->driver_id))
-                            <a href="" data-bs-toggle="modal" data-bs-target="#detailsModal{{1}}" class=" btn btn-primary d-block float-right">View Driver Details</a>
-                            <?php
-                            $user = \App\User::find($order->driver_id);
-                            ?>
-                            @if (!empty($user))
-                            <div class="modal fade" id="detailsModal{{1}}" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="detailsModalLabel">{{$user->name}} {{$user->l_name}}</h5>
-                                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <?php
-                                            $fields = ['is_online', 'is_active', 'business_name', 'business_location', 'business_hours', 'bank_details', 'settings', 'user_img', 'remember_token', 'created_at', 'updated_at', 'pending_withdraw', 'total_withdraw', 'application_fee', 'temp_code'];
-                                            ?>
-                                            <div class="row">
-
-                                                @foreach (json_decode($user) as $key => $u)
-                                                @if (!empty($u) && !in_array($key, $fields))
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label  class="text-capitalize">{{str_replace('_',' ',$key)}}</label>
-                                                        <input type="text" disabled class="form-control" value="{{$u}}">
-                                                    </div>
-                                                </div>
-                                                @endif
-                                                @endforeach
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <label  class="mt-5">
-                                                            @if ($user->is_active == 0)
-                                                            <a href="{{route('change_user_status',['user_id'=>$user->id,'status'=>1])}}"> <span class="text-success">Click here to Enable Account</span></a>
-                                                            @else
-                                                            <a href="{{route('change_user_status',['user_id'=>$user->id,'status'=>0])}}"> <span class="text-danger">Click here to Disable Account </span></a>
-                                                            @endif
-                                                        </label>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer hidden d-none">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary">Save changes</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @endif
-                            @endif
-                            @endif
+            <a href="{{route('accept_order',['order_id'=>1])}}" class=" d-block btn btn-warning float-right">Click when preparing order</a>
+            <a href="{{route('cancel_order',['order_id'=>1])}}" onclick="cancelOrder(event)" class=" d-block btn btn-danger float-right" style="margin-right: 20px">Cancel Order</a>
+            @else
+            @if (!empty($order->driver_id))
+            <a href="" data-bs-toggle="modal" data-bs-target="#detailsModal{{1}}" class=" btn btn-primary d-block float-right">View Driver Details</a>
+            <?php
+            $user = \App\User::find($order->driver_id);
+            ?>
+            @if (!empty($user))
+            <div class="modal fade" id="detailsModal{{1}}" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="detailsModalLabel">{{$user->name}} {{$user->l_name}}</h5>
+                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
-
-                        <div class="card-text">
+                        <div class="modal-body">
+                            <?php
+                            $fields = ['is_online', 'is_active', 'business_name', 'business_location', 'business_hours', 'bank_details', 'settings', 'user_img', 'remember_token', 'created_at', 'updated_at', 'pending_withdraw', 'total_withdraw', 'application_fee', 'temp_code'];
+                            ?>
                             <div class="row">
 
-                                <div class="col-md-6 text-lg">
-                                    <p>
-                                        <b>Placed on:</b> {{$order->created_at}} <b> Order Total: </b> £{{$order->initial_total}}
-                                    </p>
-                                </div>
+                                @foreach (json_decode($user) as $key => $u)
+                                @if (!empty($u) && !in_array($key, $fields))
                                 <div class="col-md-6">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <b>Order Status:</b> <span class=" badge badge-warning">{{$order->order_status}}</span>
-                                            <b>Order Type:</b> <span class=" badge badge-info">{{$order->type}}</span>
-                                            <b>Payment Status:</b> <span class=" badge badge-primary">{{$order->payment_status}}</span>
-                                        </div>
+                                    <div class="form-group">
+                                        <label class="text-capitalize">{{str_replace('_',' ',$key)}}</label>
+                                        <input type="text" disabled class="form-control" value="{{$u}}">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-12">
-
-                                <hr>
-                            </div>
-                            <div class="col-md-12">
-
-                                @foreach ($order->items as $item)
-                                <div class="row mb-2">
-                                    <div class="col-md-2">
-                                        <span class="img-container">
-                                            <img class="d-block m-auto" src="{{asset($item->product->feature_img)}}" alt="">
-                                        </span>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <h3 class="d-block text-left p-3 pb-0 m-0 text-site-primary text-lg">
-                                            <table class="table table-borderless">
-                                                <tr>
-                                                    <th>Product Name: </th>
-                                                    <td>{{$item->product->product_name}}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Category: </th>
-                                                    <td>{{$item->product->category->category_name}}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>SKU: </th>
-                                                    <td>{{$item->product->sku}}</td>
-                                                </tr>
-                                            </table>
-                                        </h3>
-                                    </div>
-                                    <div class="col-md-2 mt-5 text-lg">
-                                        <b class="text-site-primary text-lg">QTY:</b> {{$item->product_qty}}
-                                    </div>
-                                    <div class="col-md-12"><br></div>
-                                </div>
+                                @endif
                                 @endforeach
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="mt-5">
+                                            @if ($user->is_active == 0)
+                                            <a href="{{route('change_user_status',['user_id'=>$user->id,'status'=>1])}}"> <span class="text-success">Click here to Enable Account</span></a>
+                                            @else
+                                            <a href="{{route('change_user_status',['user_id'=>$user->id,'status'=>0])}}"> <span class="text-danger">Click here to Disable Account </span></a>
+                                            @endif
+                                        </label>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
-
-
+                        <div class="modal-footer hidden d-none">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Save changes</button>
+                        </div>
                     </div>
                 </div>
             </div>
-            @endforeach --}}
+            @endif
+            @endif
+            @endif
         </div>
 
-        @if (!empty($data))
+        <div class="card-text">
             <div class="row">
-                <div class="col-md-12">
-                    {{ $data->links() }}
+
+                <div class="col-md-6 text-lg">
+                    <p>
+                        <b>Placed on:</b> {{$order->created_at}} <b> Order Total: </b> £{{$order->initial_total}}
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <b>Order Status:</b> <span class=" badge badge-warning">{{$order->order_status}}</span>
+                            <b>Order Type:</b> <span class=" badge badge-info">{{$order->type}}</span>
+                            <b>Payment Status:</b> <span class=" badge badge-primary">{{$order->payment_status}}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        @endif
+            <div class="col-md-12">
+
+                <hr>
+            </div>
+            <div class="col-md-12">
+
+                @foreach ($order->items as $item)
+                <div class="row mb-2">
+                    <div class="col-md-2">
+                        <span class="img-container">
+                            <img class="d-block m-auto" src="{{asset($item->product->feature_img)}}" alt="">
+                        </span>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="d-block text-left p-3 pb-0 m-0 text-site-primary text-lg">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th>Product Name: </th>
+                                    <td>{{$item->product->product_name}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Category: </th>
+                                    <td>{{$item->product->category->category_name}}</td>
+                                </tr>
+                                <tr>
+                                    <th>SKU: </th>
+                                    <td>{{$item->product->sku}}</td>
+                                </tr>
+                            </table>
+                        </h3>
+                    </div>
+                    <div class="col-md-2 mt-5 text-lg">
+                        <b class="text-site-primary text-lg">QTY:</b> {{$item->product_qty}}
+                    </div>
+                    <div class="col-md-12"><br></div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+
 
     </div>
-    <!-- /Main Content -->
+</div>
+</div>
+@endforeach --}}
+</div>
 
-    {{-- Delivery Boy Details Modal --}}
-    <?php
-    // $user = \App\User::find($order->driver_id);
-    $user = null;
-    ?>
-    @if (!empty($user))
-        <div class="modal fade" id="detailsModal{{ 1 }}" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="detailsModalLabel">{{ $user->name }} {{ $user->l_name }}</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <?php
-                        $fields = ['is_online', 'is_active', 'business_name', 'business_location', 'business_hours', 'bank_details', 'settings', 'user_img', 'remember_token', 'created_at', 'updated_at', 'pending_withdraw', 'total_withdraw', 'application_fee', 'temp_code'];
-                        ?>
-                        <div class="row">
-                            @foreach (json_decode($user) as $key => $u)
-                                @if (!empty($u) && !in_array($key, $fields))
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="text-capitalize">{{ str_replace('_', ' ', $key) }}</label>
-                                            <input type="text" disabled class="form-control" value="{{ $u }}">
-                                        </div>
-                                    </div>
-                                @endif
-                            @endforeach
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label class="mt-5">
-                                        @if ($user->is_active == 0)
-                                            <a href="{{ route('change_user_status', ['user_id' => $user->id, 'status' => 1]) }}"> <span class="text-success">Click here to Enable Account</span></a>
-                                        @else
-                                            <a href="{{ route('change_user_status', ['user_id' => $user->id, 'status' => 0]) }}"> <span class="text-danger">Click here to Disable Account </span></a>
-                                        @endif
-                                    </label>
-                                </div>
-                            </div>
+@if (!empty($data))
+<div class="row">
+    <div class="col-md-12">
+        {{ $data->links() }}
+    </div>
+</div>
+@endif
 
+</div>
+<!-- /Main Content -->
+
+{{-- Delivery Boy Details Modal --}}
+<?php
+// $user = \App\User::find($order->driver_id);
+$user = null;
+?>
+@if (!empty($user))
+<div class="modal fade" id="detailsModal{{ 1 }}" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailsModalLabel">{{ $user->name }} {{ $user->l_name }}</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <?php
+                $fields = ['is_online', 'is_active', 'business_name', 'business_location', 'business_hours', 'bank_details', 'settings', 'user_img', 'remember_token', 'created_at', 'updated_at', 'pending_withdraw', 'total_withdraw', 'application_fee', 'temp_code'];
+                ?>
+                <div class="row">
+                    @foreach (json_decode($user) as $key => $u)
+                    @if (!empty($u) && !in_array($key, $fields))
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="text-capitalize">{{ str_replace('_', ' ', $key) }}</label>
+                            <input type="text" disabled class="form-control" value="{{ $u }}">
                         </div>
                     </div>
-                    <div class="modal-footer hidden d-none">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
+                    @endif
+                    @endforeach
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="mt-5">
+                                @if ($user->is_active == 0)
+                                <a href="{{ route('change_user_status', ['user_id' => $user->id, 'status' => 1]) }}"> <span class="text-success">Click here to Enable Account</span></a>
+                                @else
+                                <a href="{{ route('change_user_status', ['user_id' => $user->id, 'status' => 0]) }}"> <span class="text-danger">Click here to Disable Account </span></a>
+                                @endif
+                            </label>
+                        </div>
                     </div>
+
                 </div>
             </div>
+            <div class="modal-footer hidden d-none">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
         </div>
-    @endif
-    {{-- @endif --}}
+    </div>
+</div>
+@endif
+{{-- @endif --}}
 </div>

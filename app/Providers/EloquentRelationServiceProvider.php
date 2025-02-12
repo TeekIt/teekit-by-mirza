@@ -26,6 +26,8 @@ class EloquentRelationServiceProvider extends ServiceProvider
             'GuestBuyer' => 'App\Models\GuestBuyer',
             'Product' => 'App\Products',
             'ProductsByBuyer' => 'App\Models\ProductsByBuyer',
+            'Order' => 'App\Orders',
+            'OrdersFromOtherSeller' => 'App\Models\OrdersFromOtherSeller',
         ]);
     }
 }

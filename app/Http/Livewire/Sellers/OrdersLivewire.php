@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Sellers;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
+use App\Models\GophrDelivery;
 use App\Models\OrdersFromOtherSeller;
 use App\OrderItems;
 use App\Orders;
@@ -36,7 +37,8 @@ class OrdersLivewire extends Component
         $search,
         $custom_order_id,
         $request_order_id,
-        $additionalParcelDescription;
+        $additionalParcelDescription,
+        $selectedDeliveryDetails;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -67,6 +69,8 @@ class OrdersLivewire extends Component
             'selected_nearby_seller',
             'search',
             'custom_order_id',
+            'additionalParcelDescription',
+            'selectedDeliveryDetails',
         ]);
     }
 
@@ -122,6 +126,15 @@ class OrdersLivewire extends Component
         $this->phoneNumber = $phoneNumber;
     }
 
+    public function renderTrackGophrDeliveryModal($orderId)
+    {
+        $gophrDelivery = GophrDelivery::getByOrderId((new Orders)->getMorphClass(), $orderId, ['job_id']);
+        $this->selectedDeliveryDetails = json_decode(
+            json_encode(GophrServices::getJob($gophrDelivery->job_id)),
+            true
+        );
+    }
+
     public function assignToGophrDriver()
     {
         try {
@@ -137,6 +150,12 @@ class OrdersLivewire extends Component
                 throw new Exception(json_encode($response->errors));
             }
 
+            GophrDelivery::add(
+                (new Orders)->getMorphClass(),
+                $this->orderId,
+                $response->data->job_id
+            );
+
             $updated = Orders::updateOrderStatus($this->orderId, OrderStatusEnum::ON_THE_WAY);
             /* Operation finished */
             sleep(1);
@@ -145,7 +164,7 @@ class OrdersLivewire extends Component
             if ($updated && isset($response->data)) {
                 session()->flash('success', config('constants.DELIVERY_SUCCESS'));
             } else {
-                session()->flash('error', json_encode($response->errors));
+                session()->flash('error', config('constants.DELIVERY_FAILED'));
             }
         } catch (Exception $error) {
             report($error);

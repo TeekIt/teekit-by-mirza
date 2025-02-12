@@ -27,7 +27,7 @@ class CommissionAndServiceFee extends Model
     /**
      * Helpers
      */
-    public static function updateOrAdd(int $seller_id, array $commission = [], array $service_fee = []): CommissionAndServiceFee
+    public static function addOrUpdate(int $seller_id, array $commission = [], array $service_fee = []): CommissionAndServiceFee
     {
         $data = [];
 

@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
             DriverSeeder::class,
             DriverDocumentsSeeder::class,
             OrdersFromOtherSellerSeeder::class,
-            OrderItemsSeeder::class
+            OrderItemsSeeder::class,
+            GophrDeliverySeeder::class,
         ]);
     }
 }
