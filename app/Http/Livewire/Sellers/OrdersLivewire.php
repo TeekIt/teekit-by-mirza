@@ -270,6 +270,9 @@ class OrdersLivewire extends Component
 
             $updated = Orders::updateOrderStatus($id, OrderStatusEnum::ACCEPTED);
 
+            /**
+             * Remove bugs related to "sendPickupYourOrderMail()"
+             */
             if ($order->type == OrderTypeEnum::SELF_PICKUP->value) {
                 EmailServices::sendPickupYourOrderMail($order);
             }

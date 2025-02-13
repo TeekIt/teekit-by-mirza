@@ -6,7 +6,6 @@ use App\Models\OrdersFromOtherSeller;
 use App\Orders;
 use stdClass;
 use Illuminate\Support\Str;
-use Stripe\Service\Climate\OrderService;
 
 final class GophrServices
 {
@@ -28,10 +27,8 @@ final class GophrServices
     }
 
 
-    public static function createJob(
-        Orders|OrdersFromOtherSeller $order,
-        string $parcelDescription
-    ): stdClass {
+    public static function createJob(Orders|OrdersFromOtherSeller $order, string $parcelDescription): stdClass
+    {
         $parcelData = [
             "parcel_external_id" => static::generateUuid(),
             "parcel_reference_number" => static::generateUuid(),
@@ -136,7 +133,7 @@ final class GophrServices
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => static::getApiUrl() . '/jobs/$jobId/cancel',
+            CURLOPT_URL => static::getApiUrl() . '/jobs/'. $jobId .'/cancel',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,

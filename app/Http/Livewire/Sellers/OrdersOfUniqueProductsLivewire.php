@@ -232,8 +232,8 @@ class OrdersOfUniqueProductsLivewire extends Component
             /* Perform some operation */
             $updated = Orders::updateOrderStatus($orderId, OrderStatusEnum::READY);
 
-            Note:
-            Please remove the bugs related to the sendPickupYourOrderMail() email method
+            // Note:
+            // Please remove the bugs related to the sendPickupYourOrderMail() email method
            
             if ($type == OrderTypeEnum::SELF_PICKUP->value) {
                 $orderDetails = Orders::getById($orderId, ['id', 'created_by_id', 'seller_id']);
