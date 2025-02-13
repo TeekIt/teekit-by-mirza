@@ -17,6 +17,7 @@ use App\Services\StuartDeliveryServices;
 use App\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -150,7 +151,10 @@ class OrdersLivewire extends Component
             $response = GophrServices::createJob($order, $parcelDescription);
 
             if (isset($response->errors)) {
+                Log::error($response->errors);
+
                 $this->dispatchBrowserEvent('close-modal', ['id' => 'gophrModal']);
+                
                 throw new Exception(json_encode($response->errors[0]->message));
             }
 
