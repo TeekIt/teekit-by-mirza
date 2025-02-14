@@ -175,9 +175,9 @@ class Orders extends Model
             return "bike";
     }
 
-    public static function checkIfOrderExists(int $order_id): bool
+    public static function checkIfOrderExists(int $id): bool
     {
-        return self::where('id', $order_id)->exists();
+        return self::where('id', $id)->exists();
     }
 
     public static function checkTotalOrders(int $customerId): int
@@ -185,9 +185,9 @@ class Orders extends Model
         return self::where('customer_id', $customerId)->count();
     }
 
-    public static function updateOrderStatus(int $orderId, OrderStatusEnum $status): int
+    public static function updateOrderStatus(int $id, OrderStatusEnum $status): int
     {
-        return self::where('id', $orderId)->update([
+        return self::where('id', $id)->update([
             'order_status' => $status
         ]);
     }
@@ -247,9 +247,9 @@ class Orders extends Model
             ->when($orderId, function ($query) use ($orderId) {
                 return $query->where('id', '=', $orderId);
             })
-            ->whereHas('order_items', function ($orderItemsQuery) {
-                $orderItemsQuery->where('product_belongs_to_type', (new Products())->getMorphClass());
-            })
+            // ->whereHas('order_items', function ($orderItemsQuery) {
+            //     $orderItemsQuery->where('product_belongs_to_type', '=', 'Product');
+            // })
             ->where('seller_id', '=', $sellerId)
             ->orderBy('created_at', $orderBy)
             ->paginate(10);

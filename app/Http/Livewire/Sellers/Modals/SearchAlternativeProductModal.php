@@ -37,14 +37,10 @@ class SearchAlternativeProductModal extends Component
         'selected_qty.integer' => 'The qty must be a integer value'
     ];
 
-    // public function mount(string | bool $receiver_name, string $phone_number)
-    // {
-    //     $this->resetAllPaginators();
-    //     dd($receiver_name);
-    // }
     public function mount($order_id, $current_prod_id, $current_prod_qty, $receiver_name, $phone_number)
     {
         $this->resetAllPaginators();
+
         $this->order_id = $order_id;
         $this->current_prod_id = $current_prod_id;
         $this->current_prod_qty = $current_prod_qty;
@@ -136,6 +132,7 @@ class SearchAlternativeProductModal extends Component
     public function render()
     {
         $products = Products::getProductsForSAPModal($this->seller_id, $this->search);
+        
         return view('livewire.sellers.modals.search-alternative-product-modal', compact('products'));
     }
 }
