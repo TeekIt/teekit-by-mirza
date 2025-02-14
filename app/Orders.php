@@ -103,7 +103,7 @@ class Orders extends Model
         //     $order->delivery_charges = $request->deliveryCharges;
         //     $order->service_charges = $request->serviceCharges;
         // }
-        
+
         /* If order type == self-pickup even then we need this information */
         $order->customer_lat = $request->lat;
         $order->customer_lon = $request->lon;
@@ -243,7 +243,7 @@ class Orders extends Model
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) static::isViewed($orderId);
         /* Now we will fetch the required data */
-        return self::with(['order_items', 'products.category'])
+        return self::with(['order_items.product', 'products.category'])
             ->when($orderId, function ($query) use ($orderId) {
                 return $query->where('id', '=', $orderId);
             })
@@ -269,6 +269,14 @@ class Orders extends Model
             ->where('customer_id', $customerId)
             ->latest()
             ->first();
+    }
+
+    public static function getByIds(array $ids, array $columns = ['*']): Collection
+    {
+        return self::select($columns)
+            ->with(['order_items.product', 'buyer', 'seller'])
+            ->whereIn('id', $ids)
+            ->get();
     }
 
     public static function getById(int $id, array $columns = ['*']): ?Orders

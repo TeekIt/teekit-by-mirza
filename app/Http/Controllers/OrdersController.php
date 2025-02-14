@@ -346,12 +346,10 @@ class OrdersController extends Controller
             }
         }
 
-        $orderArr[] = $orderId;
-
-        if ($request->walletFlag == 1) User::deductFromWallet($createdById, $request->walletDeductionAmount);
+        $idsArray[] = $orderId;
 
         return JsonResponseServices::getApiResponse(
-            $this->getOrdersFromIds($orderArr),
+            Orders::getByIds($idsArray),
             config('constants.TRUE_STATUS'),
             config('constants.ORDER_PLACED_SUCCESSFULLY'),
             config('constants.HTTP_OK')

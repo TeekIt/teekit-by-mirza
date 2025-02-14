@@ -38,7 +38,8 @@ class OrdersHeader extends Component
         $customOrderId,
         $requestOrderId,
         $additionalParcelDescription,
-        $selectedDeliveryDetails;
+        $selectedDeliveryDetails,
+        $priceBySeller;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -60,6 +61,7 @@ class OrdersHeader extends Component
             'customOrderId',
             'additionalParcelDescription',
             'selectedDeliveryDetails',
+            'priceBySeller',
         ]);
     }
 
@@ -88,6 +90,15 @@ class OrdersHeader extends Component
     //         25
     //     );
     // }
+
+    public function renderCustomProductOrderModal($orderId)
+    {
+        $this->resetModal();
+
+        $this->selectedOrder = Orders::getById($orderId);
+
+        $this->dispatchBrowserEvent('show-modal', ['id' => 'acceptCustomProductOrderModal']);
+    }
 
     public function renderTrackGophrDeliveryModal($orderId)
     {
@@ -232,6 +243,42 @@ class OrdersHeader extends Component
                 session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.SENT_TO_OTHER_STORE_FAILED'));
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
+    }
+
+    public function customProductOrderIsAccepted()
+    {
+        $this->validate([
+            'priceBySeller' => [
+                'required',
+                'numeric',
+                'max:' . $this->selectedOrder->order_items[0]->product_price,
+                'min:1',
+            ],
+        ]);
+
+        try {
+            /* Perform some operation */
+            Orders::isViewed($this->selectedOrder->id);
+
+            $newOrderTotal = $this->priceBySeller * $this->selectedOrder->order_items[0]->product_qty;
+            $updated = Orders::updateInfo(
+                id: $this->selectedOrder->id,
+                currentTotal: $newOrderTotal,
+                orderStatus: OrderStatusEnum::ACCEPTED
+            );
+            /* Operation finished */
+            sleep(1);
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'acceptOrderModal']);
+
+            if ($updated) {
+                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.UPDATION_FAILED'));
             }
         } catch (Exception $error) {
             report($error);
