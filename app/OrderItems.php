@@ -54,7 +54,7 @@ class OrderItems extends Model
         ]);
     }
 
-    public static function removeItem(int $id): int
+    public static function remove(int $id): int
     {
         return self::where('id', $id)->delete();
     }

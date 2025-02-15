@@ -48,7 +48,7 @@ class OrdersLivewire extends Component
     protected $listeners = [
         'alternativeProductIncluded' => 'render',
         'callParentResetModal' => 'resetModal',
-        'refreshChildComponent' => '$refresh',
+        'askParentToRefreshChildComponent' => '$refresh',
     ];
 
     public function mount(Request $request)
@@ -249,12 +249,13 @@ class OrdersLivewire extends Component
                 $this->order->created_at,
             );
             /* Remove the item from current order items */
-            $removed = OrderItems::removeItem($this->orderItem->id);
+            $removed = OrderItems::remove($this->orderItem->id);
             /* Subtract the total price of this product/order_item from the current order's total */
             $subtracted = Orders::subFromOrderTotal($this->orderItem->order_id, $orderTotalPrice);
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'sendToOtherStoresModal']);
+            
 
             if ($removed && $subtracted) {
                 session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
@@ -346,7 +347,7 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $removed = OrderItems::removeItem($this->orderItem['id']);
+            $removed = OrderItems::remove($this->orderItem['id']);
 
             $prodTotalPrice = $this->orderItem['product_price'] * $this->orderItem['product_qty'];
             $updated = Orders::subFromOrderTotal($this->orderItem['order_id'], $prodTotalPrice);

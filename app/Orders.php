@@ -52,6 +52,11 @@ class Orders extends Model
     /**
      * Helpers
      */
+    public static function remove(int $id): int
+    {
+        return self::where('id', '=', $id)->delete();
+    }
+
     public static function updateInfo(
         int $id,
         ?float $initialTotal = null,
@@ -243,16 +248,23 @@ class Orders extends Model
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) static::isViewed($orderId);
         /* Now we will fetch the required data */
-        return self::with(['order_items.product', 'products.category'])
+        $orders = self::with(['order_items.product'])
             ->when($orderId, function ($query) use ($orderId) {
                 return $query->where('id', '=', $orderId);
             })
-            // ->whereHas('order_items', function ($orderItemsQuery) {
-            //     $orderItemsQuery->where('product_belongs_to_type', '=', 'Product');
-            // })
             ->where('seller_id', '=', $sellerId)
             ->orderBy('created_at', $orderBy)
             ->paginate(10);
+        /* Load 'category' for products where 'product_belongs_to_type' is 'Product' */
+        $orders->each(function ($order) {
+            $order->order_items->each(function ($orderItem) {
+                if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
+                    $orderItem->product->load('category');
+                }
+            });
+        });
+
+        return $orders;
     }
 
     public static function getRecentOrderByCustomerId(

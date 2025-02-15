@@ -7,15 +7,17 @@ use App\Enums\OrderTypeEnum;
 use App\Models\GophrDelivery;
 use App\Enums\PaymentIntentStatusEnum;
 use App\Models\OrdersFromOtherSeller;
-use App\OrderItems;
 use App\Orders;
 use App\Services\EmailServices;
+use App\Services\GoogleMapServices;
 use App\Services\GophrServices;
 use App\Services\OrderServices;
 use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
 use App\User;
+use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -29,31 +31,38 @@ class OrdersHeader extends Component
         $currentProdQty,
         $customerName,
         $phoneNumber,
-        $order,
         $orderItem,
         $nearbySellers,
         $selectedNearbySeller,
         $selectedOrder,
-        $search,
         $customOrderId,
-        $requestOrderId,
         $additionalParcelDescription,
         $selectedDeliveryDetails,
         $priceBySeller;
+
+    public $order;
+
+    protected $sellerId;
 
     protected $paginationTheme = 'bootstrap';
 
     public function mount(Orders $order)
     {
+        $this->sellerId = auth()->user()->id;
         $this->order = $order;
     }
-
+    /* 
+     * Helpers
+     */
     public function resetModal()
     {
         $this->resetValidation();
 
         $this->reset([
             'orderId',
+            'currentProdQty',
+            'customerName',
+            'phoneNumber',
             'orderItem',
             'nearbySellers',
             'selectedNearbySeller',
@@ -75,28 +84,13 @@ class OrdersHeader extends Component
         $this->orderId = $orderId;
     }
 
-    // public function renderSTOSModal($orderId)
-    // {
-    //     $this->resetModal();
-
-    //     $this->order = Orders::getById($orderId);
-    //     $this->orderItem = $this->order->order_items[0];
-
-    //     $sellers = User::getParentAndChildSellersByCity(auth()->user()->city);
-    //     $this->nearbySellers = GoogleMapServices::findDistanceByMakingChunks(
-    //         auth()->user()->lat,
-    //         auth()->user()->lon,
-    //         $sellers,
-    //         25
-    //     );
-    // }
-
     public function renderCustomProductOrderModal($orderId)
     {
         $this->resetModal();
 
         $this->selectedOrder = Orders::getById($orderId);
 
+        $this->emit('askParentToRefreshChildComponent');
         $this->dispatchBrowserEvent('show-modal', ['id' => 'acceptCustomProductOrderModal']);
     }
 
@@ -124,6 +118,76 @@ class OrdersHeader extends Component
         }
     }
 
+    public function getSellersOfSameCity()
+    {
+        return Cache::remember(
+            'getSellersOfSameCity' . $this->sellerId,
+            Carbon::now()->addDay(),
+            fn() => User::getParentAndChildSellersByCity(auth()->user()->city)
+        );
+    }
+
+    public function getNearBySellers($customerLat, $customerLon, $sellersOfSameCity)
+    {
+        return Cache::remember(
+            'getNearBySellers' . $this->sellerId . $customerLat . $customerLon,
+            Carbon::now()->addDay(),
+            function () use ($customerLat, $customerLon, $sellersOfSameCity) {
+                /* 
+                 * Add this function when moving to production/staging
+                 * Bcz this function will not work with "faker" generated 
+                 * customer lat, lon
+                 */
+                return GoogleMapServices::findDistanceByMakingChunks(
+                    $customerLat,
+                    $customerLon,
+                    $sellersOfSameCity,
+                    10
+                );
+            }
+        );
+    }
+
+    public function noNearBySellers($orderId)
+    {
+        $this->orderId = $orderId;
+        $this->dispatchBrowserEvent('show-modal', ['id' => 'noOtherSellersModal']);
+    }
+
+    public function capturePayment($currentTotal = null)
+    {
+        $totalWeight = $this->selectedOrder->order_items[0]->product->weight;
+
+        $currentDeliveryCharges = OrderServices::getTotalDeliveryCharges(
+            $this->selectedOrder->seller->lat,
+            $this->selectedOrder->seller->lon,
+            $this->selectedOrder->buyer->lat,
+            $this->selectedOrder->buyer->lon,
+            $totalWeight,
+        );
+
+        $currentTotal ??= $this->selectedOrder->current_total;
+
+        $currentTotalAmount = round($currentTotal + $this->selectedOrder->service_charges + $currentDeliveryCharges);
+        $initialTotalAmount = round($this->selectedOrder->initial_total + $this->selectedOrder->service_charges + $this->selectedOrder->delivery_charges);
+
+        if ($currentTotalAmount <= $initialTotalAmount) {
+            $response = StripeServices::capturePaymentIntent(
+                $this->selectedOrder->payment_intent_id,
+                bcmul($currentTotalAmount, 100),
+            );
+            if (isset($response->error)) {
+                throw new Exception($response->error->message);
+            }
+        } else {
+            throw new Exception('Your current order total should be equal to or less than the initial order total amount');
+        }
+
+        return $response;
+    }
+    /* 
+     * CRUD Methods
+     */
     public function assignToGophrDriver()
     {
         try {
@@ -150,7 +214,8 @@ class OrdersHeader extends Component
             $updated = Orders::updateOrderStatus($this->orderId, OrderStatusEnum::ON_THE_WAY);
             /* Operation finished */
             sleep(1);
-            $this->emit('refreshChildComponent');
+            $this->emit('askParentToRefreshChildComponent');
+            $this->render();
             $this->dispatchBrowserEvent('close-modal', ['id' => 'gophrModal']);
 
             if ($updated && isset($response->data)) {
@@ -187,59 +252,70 @@ class OrdersHeader extends Component
         }
     }
 
-    public function sendItemToAnOtherStore()
+    public function sendCustomProductOrderToAnOtherSeller($orderId)
     {
-        $this->validate([
-            'selectedNearbySeller' => 'required|string'
-        ]);
         try {
             /* Perform some operation */
-            $selectedSeller = User::getSellerByBusinessName($this->selectedNearbySeller);
+            $this->selectedOrder = Orders::getById($orderId);
+           
+            $orderTotalPrice = $this->selectedOrder->order_items[0]->product_price * $this->selectedOrder->order_items[0]->product_qty;
+            /* Get sellers who belongs to the city of this store owner */
+            $sellersOfTheSameCity = $this->getSellersOfSameCity();
+            /* Get sellers who are nearby to the order placing buyer */
+            $nearbySellers = $this->getNearBySellers(
+                $this->selectedOrder->customer_lat,
+                $this->selectedOrder->customer_lon,
+                $sellersOfTheSameCity
+            );
 
-            $orderTotalPrice = $this->orderItem->product_price * $this->orderItem->product_qty;
+            if (empty($nearbySellers))
+                return $this->noNearBySellers($orderId);
+
+            $randomIndex = array_rand($nearbySellers, 1);
+
             /* Send this product to another seller */
             OrdersFromOtherSeller::add(
-                $this->order->created_by_type,
-                $this->order->created_by_id,
-                $selectedSeller->id,
-                $this->orderItem->product_belongs_to_type,
-                $this->orderItem->product_belongs_to_id,
-                $this->orderItem->product_price,
-                $this->orderItem->product_qty,
+                $this->selectedOrder->created_by_type,
+                $this->selectedOrder->created_by_id,
+                $nearbySellers[$randomIndex]['id'],
+                $this->selectedOrder->order_items[0]->product_belongs_to_type,
+                $this->selectedOrder->order_items[0]->product_belongs_to_id,
+                $this->selectedOrder->order_items[0]->product_price,
+                $this->selectedOrder->order_items[0]->product_qty,
                 $orderTotalPrice,
-                isset($this->order->customer_lat) ? (float) $this->order->customer_lat : null,
-                isset($this->order->customer_lon) ? (float) $this->order->customer_lon : null,
-                $this->order->customer_name,
-                $this->order->phone_number,
-                $this->order->address,
-                $this->order->house_no,
-                $this->order->flat,
-                $this->order->country,
-                $this->order->state,
-                $this->order->city,
-                $this->order->postcode,
-                $this->order->payment_intent_id,
-                $this->order->driver_charges,
-                $this->order->delivery_charges,
-                $this->order->service_charges,
-                $this->order->device,
-                $this->order->type,
-                $this->order->description,
-                $this->order->payment_status,
-                $this->order->offloading,
-                $this->order->offloading_charges,
+                (float) $this->selectedOrder->customer_lat ?? null,
+                (float) $this->selectedOrder->customer_lon ?? null,
+                $this->selectedOrder->customer_name,
+                $this->selectedOrder->phone_number,
+                $this->selectedOrder->address,
+                $this->selectedOrder->house_no,
+                $this->selectedOrder->flat,
+                $this->selectedOrder->country,
+                $this->selectedOrder->state,
+                $this->selectedOrder->city,
+                $this->selectedOrder->postcode,
+                $this->selectedOrder->payment_intent_id,
+                $this->selectedOrder->driver_charges,
+                $this->selectedOrder->delivery_charges,
+                $this->selectedOrder->service_charges,
+                $this->selectedOrder->device,
+                $this->selectedOrder->type,
+                $this->selectedOrder->description,
+                $this->selectedOrder->payment_status,
+                $this->selectedOrder->offloading,
+                $this->selectedOrder->offloading_charges,
                 now(),
-                $this->order->created_at,
+                $this->selectedOrder->created_at,
             );
-            /* Remove the item from current order items */
-            $removed = OrderItems::removeItem($this->orderItem->id);
-            /* Subtract the total price of this product/order_item from the current order's total */
-            $subtracted = Orders::subFromOrderTotal($this->orderItem->order_id, $orderTotalPrice);
+            /* Remove the whole order in case of custom product order's */
+            $removed = Orders::remove($this->selectedOrder->id);
+           
+            info('The current order has been sent to seller: ' . $nearbySellers[$randomIndex]['id']);
             /* Operation finished */
             sleep(1);
-            $this->dispatchBrowserEvent('close-modal', ['id' => 'sendToOtherStoresModal']);
+            $this->emit('askParentToRefreshChildComponent');
 
-            if ($removed && $subtracted) {
+            if ($removed) {
                 session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.SENT_TO_OTHER_STORE_FAILED'));
@@ -266,6 +342,9 @@ class OrdersHeader extends Component
             Orders::isViewed($this->selectedOrder->id);
 
             $newOrderTotal = $this->priceBySeller * $this->selectedOrder->order_items[0]->product_qty;
+
+            $response = $this->capturePayment($newOrderTotal);
+
             $updated = Orders::updateInfo(
                 id: $this->selectedOrder->id,
                 currentTotal: $newOrderTotal,
@@ -273,9 +352,11 @@ class OrdersHeader extends Component
             );
             /* Operation finished */
             sleep(1);
-            $this->dispatchBrowserEvent('close-modal', ['id' => 'acceptOrderModal']);
+            $this->emit('askParentToRefreshChildComponent');
+            $this->render();
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'acceptCustomProductOrderModal']);
 
-            if ($updated) {
+            if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.UPDATION_FAILED'));
@@ -292,33 +373,7 @@ class OrdersHeader extends Component
             /* Perform some operation */
             $this->selectedOrder = Orders::isViewed($orderId);
 
-            if ($this->selectedOrder->type === OrderTypeEnum::DELIVERY->value) {
-
-                $totalWeight = $this->selectedOrder->order_items[0]->product->weight;
-
-                $currentDeliveryCharges = OrderServices::getTotalDeliveryCharges(
-                    $this->selectedOrder->seller->lat,
-                    $this->selectedOrder->seller->lon,
-                    $this->selectedOrder->buyer->lat,
-                    $this->selectedOrder->buyer->lon,
-                    $totalWeight,
-                );
-
-                $currentTotalAmount = round($this->selectedOrder->current_total + $this->selectedOrder->service_charges + $currentDeliveryCharges);
-                $initialTotalAmount = round($this->selectedOrder->initial_total + $this->selectedOrder->service_charges + $this->selectedOrder->delivery_charges);
-
-                if ($currentTotalAmount <= $initialTotalAmount) {
-                    $response = StripeServices::capturePaymentIntent(
-                        $this->selectedOrder->payment_intent_id,
-                        bcmul($currentTotalAmount, 100),
-                    );
-                    if (isset($response->error)) {
-                        throw new Exception($response->error->message);
-                    }
-                } else {
-                    throw new Exception('Your current order total should be equal to or less than the initial order total amount');
-                }
-            }
+            $response = $this->capturePayment();
 
             if ($this->selectedOrder->type == OrderTypeEnum::SELF_PICKUP->value) {
                 /**
@@ -330,7 +385,7 @@ class OrdersHeader extends Component
             $updated = Orders::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
             /* Operation finished */
             sleep(1);
-            $this->emit('refreshChildComponent');
+            $this->emit('askParentToRefreshChildComponent');
 
             if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -343,24 +398,24 @@ class OrdersHeader extends Component
         }
     }
 
-    public function orderIsCompleted($id)
-    {
-        try {
-            /* Perform some operation */
-            $updated = Orders::updateOrderStatus($id, OrderStatusEnum::COMPLETE);
-            /* Operation finished */
-            sleep(1);
+    // public function orderIsCompleted($id)
+    // {
+    //     try {
+    //         /* Perform some operation */
+    //         $updated = Orders::updateOrderStatus($id, OrderStatusEnum::COMPLETE);
+    //         /* Operation finished */
+    //         sleep(1);
 
-            if ($updated) {
-                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-            } else {
-                session()->flash('error', config('constants.UPDATION_FAILED'));
-            }
-        } catch (Exception $error) {
-            report($error);
-            session()->flash('error', $error->getMessage());
-        }
-    }
+    //         if ($updated) {
+    //             session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+    //         } else {
+    //             session()->flash('error', config('constants.UPDATION_FAILED'));
+    //         }
+    //     } catch (Exception $error) {
+    //         report($error);
+    //         session()->flash('error', $error->getMessage());
+    //     }
+    // }
 
     public function cancelOrder($orderId)
     {
@@ -378,7 +433,7 @@ class OrdersHeader extends Component
             EmailServices::sendOrderHasBeenCancelledMail($this->selectedOrder);
             /* Operation finished */
             sleep(1);
-            $this->emit('refreshChildComponent');
+            $this->emit('askParentToRefreshChildComponent');
 
             if ($cancelled && $refunded->status === PaymentIntentStatusEnum::CANCELED->value) {
                 session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
