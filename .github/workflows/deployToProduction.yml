@@ -20,7 +20,7 @@ jobs:
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.MIRZA_TEO_THINKPAD_SSH_KEY_FOR_DIGITALOCEAN }}
+          ssh-private-key: ${{ secrets.MIRZA_HP_ELITEBOOK_PRIVATE_SSH_KEY_FOR_DO }}
 
       - name: Use Git Secrets | Move To The App Root Directory | Git Pull | Composer Install | Artisan Commands
         run: | 
