@@ -192,10 +192,10 @@
                             <div class="row mb-2">
                                 <div class="col-md-2">
                                     <span class="img-container">
-                                        @if (str_contains($singleIndex->order_items[0]->product->feature_img, 'https://'))
-                                            <img class="d-block m-auto" src="{{ $singleIndex->order_items[0]->product->feature_img }}">
+                                        @if (str_contains($singleIndex->order_items[0]->product?->feature_img, 'https://'))
+                                            <img class="d-block m-auto" src="{{ $singleIndex->order_items[0]->product?->feature_img }}">
                                         @else
-                                            <img class="d-block m-auto" src="{{ config('constants.BUCKET') . $singleIndex->order_items[0]->product->feature_img }}">
+                                            <img class="d-block m-auto" src="{{ config('constants.BUCKET') . $singleIndex->order_items[0]->product?->feature_img }}">
                                         @endif
                                     </span>
                                 </div>
@@ -203,11 +203,11 @@
                                     <table class="table">
                                         <tr>
                                             <td class="col-4 text-site-primary"><b>Product Name:</b></td>
-                                            <td class="col-8">{{ $singleIndex->order_items[0]->product->product_name }}</td>
+                                            <td class="col-8">{{ $singleIndex->order_items[0]->product?->product_name }}</td>
                                         </tr>
                                         {{-- <tr>
                                             <td class="col-4 text-site-primary"><b>Category:</b></td>
-                                            <td class="col-8">{{ $singleIndex->order_items[0]->product->category->category_name }}</td>
+                                            <td class="col-8">{{ $singleIndex->order_items[0]->product?->category->category_name }}</td>
                                         </tr> --}}
                                         <tr>
                                             <td class="col-4 text-site-primary"><b>QTY:</b></td>

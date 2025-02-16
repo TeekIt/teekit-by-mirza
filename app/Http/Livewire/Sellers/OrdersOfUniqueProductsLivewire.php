@@ -171,7 +171,7 @@ class OrdersOfUniqueProductsLivewire extends Component
             );
 
             /* Remove the item from current order items */
-            $removed = OrderItems::removeItem($this->selectedOrder->order_items[0]->id);
+            $removed = OrderItems::remove($this->selectedOrder->order_items[0]->id);
             /* Subtract the total price of this product/order_item from the current order's total */
             $subtracted = Orders::subFromOrderTotal($this->selectedOrder->id, $orderTotalPrice);
 

@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Http\Controllers\UsersController;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 final class GoogleMapServices
 {
@@ -14,6 +16,27 @@ final class GoogleMapServices
     public static function generateUrl($origing_address, $destination_address)
     {
         return self::GOOGLE_DISTANCEMATRIX_API_URL . '?units=imperial&origins=' . urlencode($origing_address) . '&destinations=' . urlencode($destination_address) . '&mode=driving&key=' . self::GOOGLE_DISTANCEMATRIX_API_KEY;
+    }
+
+    public static function getNearBySellers(float $customerLat, float $customerLon, $sellersOfSameCity, int $currentSellerId): array
+    {
+        return Cache::remember(
+            'getNearBySellers' . $currentSellerId . $customerLat . $customerLon,
+            Carbon::now()->addDay(),
+            function () use ($customerLat, $customerLon, $sellersOfSameCity) {
+                /* 
+                 * Add this function when moving to production/staging
+                 * Bcz this function will not work with "faker" generated 
+                 * customer lat, lon
+                 */
+                return static::findDistanceByMakingChunks(
+                    $customerLat,
+                    $customerLon,
+                    $sellersOfSameCity,
+                    25
+                );
+            }
+        );
     }
     /**
      * It will fetch the curved distance between 2 points
@@ -84,23 +107,23 @@ final class GoogleMapServices
      * $chunk_size > 25 is not allowed
      * Because Google distance matrix API does not support destinations more then 25
      */
-    public static function findDistanceByMakingChunks(float $lat, float $lon, object $users, int $chunk_size = 25)
+    public static function findDistanceByMakingChunks(float $lat, float $lon, object $users, int $chunkSize = 25): array
     {
-        if ($chunk_size > 25) return [];
+        if ($chunkSize > 25) return [];
 
-        $all_user_data = [];
+        $allUserData = [];
 
-        $chunks = $users->chunk($chunk_size);
+        $chunks = $users->chunk($chunkSize);
         foreach ($chunks as $chunk) {
-            $destination_data = [
+            $destinationData = [
                 'users' => $chunk->values(),
                 'users_coordinates' => $chunk->map(fn($user) => "{$user->lat},{$user->lon}")->values()->toArray(),
             ];
 
-            $temp = self::getDistanceForMultipleDestinations($lat, $lon, $destination_data, 5);
-            $all_user_data = array_merge($all_user_data, $temp);
+            $temp = self::getDistanceForMultipleDestinations($lat, $lon, $destinationData, 5);
+            $allUserData = array_merge($allUserData, $temp);
         }
 
-        return $all_user_data;
+        return $allUserData;
     }
 }

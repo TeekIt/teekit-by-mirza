@@ -47,7 +47,8 @@ class OrdersLivewire extends Component
 
     protected $listeners = [
         'alternativeProductIncluded' => 'render',
-        'callParentResetModal' => 'resetModal'
+        'callParentResetModal' => 'resetModal',
+        'askParentToRefreshChildComponent' => '$refresh',
     ];
 
     public function mount(Request $request)
@@ -111,12 +112,12 @@ class OrdersLivewire extends Component
         $this->order = Orders::getById($orderId);
         $this->orderItem = $this->order->order_items[0];
 
-        $sellers = User::getParentAndChildSellersByCity(auth()->user()->city);
-        $this->nearbySellers = GoogleMapServices::findDistanceByMakingChunks(
-            auth()->user()->lat,
-            auth()->user()->lon,
-            $sellers,
-            25
+        $sellersOfTheSameCity = User::getParentAndChildSellersByCity(auth()->user()->city);
+        $this->nearbySellers = GoogleMapServices::getNearBySellers(
+            $this->order->customer_lat,
+            $this->order->customer_lon,
+            $sellersOfTheSameCity,
+            $this->sellerId,
         );
     }
 
@@ -140,6 +141,7 @@ class OrdersLivewire extends Component
         );
     }
 
+
     public function assignToGophrDriver()
     {
         try {
@@ -147,14 +149,14 @@ class OrdersLivewire extends Component
             $order = Orders::getById($this->orderId);
 
             $parcelDescription = $this->additionalParcelDescription ?? "Please pickup your order ASAP";
-            
+
             $response = GophrServices::createJob($order, $parcelDescription);
 
             if (isset($response->errors)) {
                 Log::error($response->errors);
 
                 $this->dispatchBrowserEvent('close-modal', ['id' => 'gophrModal']);
-                
+
                 throw new Exception(json_encode($response->errors[0]->message));
             }
 
@@ -212,7 +214,7 @@ class OrdersLivewire extends Component
             /* Perform some operation */
             $selectedSeller = User::getSellerByBusinessName($this->selectedNearbySeller);
 
-            $orderTotalPrice = $this->orderItem->product_price * $this->orderItem->product_qty;
+            $productTotalPrice = $this->orderItem->product_price * $this->orderItem->product_qty;
             /* Send this product to another seller */
             OrdersFromOtherSeller::add(
                 $this->order->created_by_type,
@@ -222,7 +224,7 @@ class OrdersLivewire extends Component
                 $this->orderItem->product_belongs_to_id,
                 $this->orderItem->product_price,
                 $this->orderItem->product_qty,
-                $orderTotalPrice,
+                $productTotalPrice,
                 isset($this->order->customer_lat) ? (float) $this->order->customer_lat : null,
                 isset($this->order->customer_lon) ? (float) $this->order->customer_lon : null,
                 $this->order->customer_name,
@@ -247,13 +249,17 @@ class OrdersLivewire extends Component
                 now(),
                 $this->order->created_at,
             );
-            /* Remove the item from current order items */
-            $removed = OrderItems::removeItem($this->orderItem->id);
             /* Subtract the total price of this product/order_item from the current order's total */
-            $subtracted = Orders::subFromOrderTotal($this->orderItem->order_id, $orderTotalPrice);
+            $subtracted = Orders::subFromOrderTotal($this->orderItem->order_id, $productTotalPrice);
+            /**
+             * If there's only 1 item in the order, remove the whole order, 
+             * else only remove the selected item from current order items 
+             */
+            $removed = ($this->order->order_items->count() == 1) ? Orders::remove($this->order->id) : OrderItems::remove($this->orderItem->id);
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'sendToOtherStoresModal']);
+
 
             if ($removed && $subtracted) {
                 session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
@@ -301,7 +307,7 @@ class OrdersLivewire extends Component
             $updated = Orders::updateOrderStatus($id, OrderStatusEnum::COMPLETE);
             /* Operation finished */
             sleep(1);
-            
+
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {
@@ -345,7 +351,7 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $removed = OrderItems::removeItem($this->orderItem['id']);
+            $removed = OrderItems::remove($this->orderItem['id']);
 
             $prodTotalPrice = $this->orderItem['product_price'] * $this->orderItem['product_qty'];
             $updated = Orders::subFromOrderTotal($this->orderItem['order_id'], $prodTotalPrice);
@@ -404,7 +410,7 @@ class OrdersLivewire extends Component
             session()->flash('error', config('constants.SEARCH_FAILED'));
 
             $data = [];
-            
+
             return view('livewire.sellers.orders-livewire', compact('data'));
         }
     }
