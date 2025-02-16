@@ -127,27 +127,6 @@ class OrdersHeader extends Component
         );
     }
 
-    public function getNearBySellers($customerLat, $customerLon, $sellersOfSameCity)
-    {
-        return Cache::remember(
-            'getNearBySellers' . $this->sellerId . $customerLat . $customerLon,
-            Carbon::now()->addDay(),
-            function () use ($customerLat, $customerLon, $sellersOfSameCity) {
-                /* 
-                 * Add this function when moving to production/staging
-                 * Bcz this function will not work with "faker" generated 
-                 * customer lat, lon
-                 */
-                return GoogleMapServices::findDistanceByMakingChunks(
-                    $customerLat,
-                    $customerLon,
-                    $sellersOfSameCity,
-                    10
-                );
-            }
-        );
-    }
-
     public function noNearBySellers($orderId)
     {
         $this->orderId = $orderId;
@@ -262,10 +241,11 @@ class OrdersHeader extends Component
             /* Get sellers who belongs to the city of this store owner */
             $sellersOfTheSameCity = $this->getSellersOfSameCity();
             /* Get sellers who are nearby to the order placing buyer */
-            $nearbySellers = $this->getNearBySellers(
+            $nearbySellers = GoogleMapServices::getNearBySellers(
                 $this->selectedOrder->customer_lat,
                 $this->selectedOrder->customer_lon,
-                $sellersOfTheSameCity
+                $sellersOfTheSameCity,
+                $this->sellerId,
             );
 
             if (empty($nearbySellers))

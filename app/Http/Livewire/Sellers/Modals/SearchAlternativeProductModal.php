@@ -106,22 +106,24 @@ class SearchAlternativeProductModal extends Component
     public function addProductIntoOrder($alternativeProduct)
     {
         $this->validate();
+
         try {
             /* Perform some operation */
             if ($alternativeProduct['qty'][0]['qty'] < $this->selectedQty) {
                 return session()->flash('qty_should_not_be_greater', config('constants.QTY_SHOULD_NOT_BE_GREATER'));
             } else {
                 $currentProduct = Products::getOnlyProductDetailsById($this->currentProdId);
-                $currentProdPrice = $currentProduct->price * $this->currentProdQty;
-                $alternativeProdPrice = $alternativeProduct['price'] * $this->selectedQty;
 
-                $replaced = Orders::replaceWithAlternativePrice(
+                $currentProdTotalPrice = $currentProduct->price * $this->currentProdQty;
+                $alternativeProdTotalPrice = $alternativeProduct['price'] * $this->selectedQty;
+
+                $replacedPrice = Orders::replaceWithAlternativePrice(
                     $this->orderId,
-                    $currentProdPrice,
-                    $alternativeProdPrice
+                    $currentProdTotalPrice,
+                    $alternativeProdTotalPrice
                 );
                 
-                $updated = OrderItems::replaceWithAlternativeProduct(
+                $replacedProduct = OrderItems::replaceWithAlternativeProduct(
                     $this->orderId,
                     $this->currentProdId,
                     $alternativeProduct['id'],
@@ -133,7 +135,8 @@ class SearchAlternativeProductModal extends Component
             $this->emit('alternativeProductIncluded');
             $this->emit('callParentResetModal');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'searchAlternativeProductModal']);
-            if ($replaced && $updated) {
+            
+            if ($replacedPrice && $replacedProduct) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.UPDATION_FAILED'));

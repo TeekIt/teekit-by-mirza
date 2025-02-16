@@ -239,7 +239,7 @@
                 <div class="d-flex flex-column-reverse flex-md-row justify-content-between pb-4 gap-1">
                     <div>
                         @if ($order->order_status === OrderStatusEnum::PENDING->value)
-                            @if ($order->order_items[0]->product_belongs_to_type == (new Products())->getMorphClass())
+                            @if ($order->order_items[0]->product_belongs_to_type === (new Products())->getMorphClass())
                                 <button class="btn btn-success" wire:click="orderIsAccepted({{ $order->id }})"
                                     wire:target="orderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark"
                                     wire:loading.class.remove="btn-success" wire:loading.attr="disabled"
@@ -265,8 +265,8 @@
                                     </span>
                                 </button>
                             @endif
-
-                            @if ($order->order_items[0]->product_belongs_to_type == (new ProductsByBuyer())->getMorphClass())
+                            
+                            @if ($order->order_items[0]->product_belongs_to_type === (new ProductsByBuyer())->getMorphClass())
                                 <button class="btn btn-success"
                                     wire:click="renderCustomProductOrderModal({{ $order->id }})"
                                     wire:loading.class="btn-dark" wire:loading.class.remove="btn-success"

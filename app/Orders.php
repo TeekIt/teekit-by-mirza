@@ -54,7 +54,7 @@ class Orders extends Model
      */
     public static function remove(int $id): int
     {
-        return self::where('id', '=', $id)->delete();
+        return self::where('id', '=', $id)->forceDelete();
     }
 
     public static function updateInfo(
@@ -144,12 +144,14 @@ class Orders extends Model
         return $order->save();
     }
 
-    public static function replaceWithAlternativePrice(int $order_id, float $current_prod_price, float $alternative_prod_price): bool
+    public static function replaceWithAlternativePrice(int $orderId, float $currentProdPrice, float $alternativeProdPrice): bool
     {
-        $order = self::find($order_id);
-        $order->initial_total = ($order->initial_total - $current_prod_price) + $alternative_prod_price;
+        $order = self::find($orderId);
+        $order->current_total = ($order->current_total - $currentProdPrice) + $alternativeProdPrice;
+
         return $order->save();
     }
+
 
     public static function fetchTransportType(int $order_id = null): string
     {
