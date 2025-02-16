@@ -29,7 +29,7 @@ class RunRawQueries extends Command
      */
     public function handle()
     {
-        $executeQueries = true;
+        $executeQueries = false;
 
         try {
             if ($executeQueries) {
@@ -80,21 +80,22 @@ class RunRawQueries extends Command
                     // DB::statement('ALTER TABLE `orders` CHANGE `payment_intent_id` `payment_intent_id` VARCHAR(191) NOT NULL');
 
                     // DB::statement('ALTER TABLE `users` CHANGE `temp_code` `temp_code` VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL');
+                    
+                    // DB::statement("ALTER TABLE orders
+                    //     ADD COLUMN country VARCHAR(70) NULL AFTER flat,
+                    //     ADD COLUMN state VARCHAR(70) NULL AFTER country,
+                    //     ADD COLUMN city VARCHAR(70) NULL AFTER state,
+                    //     ADD COLUMN postcode VARCHAR(11) NULL AFTER city;
+                    // ");
+
+                    // DB::statement("ALTER TABLE orders_from_other_sellers
+                    //     ADD COLUMN country VARCHAR(70) NULL AFTER flat,
+                    //     ADD COLUMN state VARCHAR(70) NULL AFTER country,
+                    //     ADD COLUMN city VARCHAR(70) NULL AFTER state,
+                    //     ADD COLUMN postcode VARCHAR(11) NULL AFTER city;
+                    // ");
                     /* Above queries are already executed on Staging ENV */
 
-                    DB::statement("ALTER TABLE orders
-                        ADD COLUMN country VARCHAR(70) NULL AFTER flat,
-                        ADD COLUMN state VARCHAR(70) NULL AFTER country,
-                        ADD COLUMN city VARCHAR(70) NULL AFTER state,
-                        ADD COLUMN postcode VARCHAR(11) NULL AFTER city;
-                    ");
-
-                    DB::statement("ALTER TABLE orders_from_other_sellers
-                        ADD COLUMN country VARCHAR(70) NULL AFTER flat,
-                        ADD COLUMN state VARCHAR(70) NULL AFTER country,
-                        ADD COLUMN city VARCHAR(70) NULL AFTER state,
-                        ADD COLUMN postcode VARCHAR(11) NULL AFTER city;
-                    ");
                 });
             }
         } catch (Exception $error) {

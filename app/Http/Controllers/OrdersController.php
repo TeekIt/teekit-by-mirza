@@ -346,12 +346,10 @@ class OrdersController extends Controller
             }
         }
 
-        $orderArr[] = $orderId;
-
-        if ($request->walletFlag == 1) User::deductFromWallet($createdById, $request->walletDeductionAmount);
+        $idsArray[] = $orderId;
 
         return JsonResponseServices::getApiResponse(
-            $this->getOrdersFromIds($orderArr),
+            Orders::getByIds($idsArray),
             config('constants.TRUE_STATUS'),
             config('constants.ORDER_PLACED_SUCCESSFULLY'),
             config('constants.HTTP_OK')
@@ -387,7 +385,7 @@ class OrdersController extends Controller
                 config('constants.HTTP_OK')
             );
         }
-        
+
         return JsonResponseServices::getApiResponse(
             [],
             config('constants.FALSE_STATUS'),
@@ -817,38 +815,32 @@ class OrdersController extends Controller
      */
     public function getOrderDetailsTwo(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->route()->parameters(), [
-                'id' => 'required|integer'
-            ]);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
-            }
-            if (!Orders::checkIfOrderExists($request->id)) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    config('constants.NO_RECORD'),
-                    config('constants.HTTP_OK')
-                );
-            }
-            $order = Orders::with(['customer', 'store', 'order_items', 'order_items.product'])
-                ->where('id', $request->id)->first();
-            return JsonResponseServices::getApiResponse(
-                $order,
-                config('constants.TRUE_STATUS'),
-                "",
-                config('constants.HTTP_OK')
-            );
-        } catch (Throwable $error) {
-            report($error);
+        $validatedData = Validator::make($request->route()->parameters(), [
+            'id' => 'required|integer'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
+        }
+
+        $validatedData = (object) $validatedData->safe()->all();
+
+        if (!Orders::checkIfOrderExists($validatedData->id)) {
             return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
+                config('constants.NO_RECORD'),
+                config('constants.HTTP_OK')
             );
         }
+
+        $order = Orders::getById($validatedData->id);
+
+        return JsonResponseServices::getApiResponse(
+            $order,
+            config('constants.TRUE_STATUS'),
+            "",
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * It will store the estimated time

@@ -273,7 +273,7 @@ class AuthController extends Controller
             'l_name' => $user->l_name,
             'email' => $user->email,
             'phone' => $user->phone,
-            'postal_code' => $user->postal_code,
+            'postal_code' => $user->postcode,
             'address_1' => $user->full_address,
             'address_2' => $user->unit_address,
             'is_online' => $user->is_online,

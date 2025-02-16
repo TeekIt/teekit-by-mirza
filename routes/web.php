@@ -126,7 +126,7 @@ Route::controller(HomeController::class)->group(function () {
 | Admin Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->middleware(['auth', 'auth.admin'])->group(function () {
+Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function () {
     Route::get('/referralcodes', ReferralCodesLivewire::class)->name('admin.referralcodes');
     Route::get('/sellers/parent', ParentSellersLivewire::class)->name('admin.sellers.parent');
     Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');

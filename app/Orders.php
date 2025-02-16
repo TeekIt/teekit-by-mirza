@@ -52,6 +52,11 @@ class Orders extends Model
     /**
      * Helpers
      */
+    public static function remove(int $id): int
+    {
+        return self::where('id', '=', $id)->forceDelete();
+    }
+
     public static function updateInfo(
         int $id,
         ?float $initialTotal = null,
@@ -103,7 +108,7 @@ class Orders extends Model
         //     $order->delivery_charges = $request->deliveryCharges;
         //     $order->service_charges = $request->serviceCharges;
         // }
-        
+
         /* If order type == self-pickup even then we need this information */
         $order->customer_lat = $request->lat;
         $order->customer_lon = $request->lon;
@@ -139,12 +144,14 @@ class Orders extends Model
         return $order->save();
     }
 
-    public static function replaceWithAlternativePrice(int $order_id, float $current_prod_price, float $alternative_prod_price): bool
+    public static function replaceWithAlternativePrice(int $orderId, float $currentProdPrice, float $alternativeProdPrice): bool
     {
-        $order = self::find($order_id);
-        $order->initial_total = ($order->initial_total - $current_prod_price) + $alternative_prod_price;
+        $order = self::find($orderId);
+        $order->current_total = ($order->current_total - $currentProdPrice) + $alternativeProdPrice;
+
         return $order->save();
     }
+
 
     public static function fetchTransportType(int $order_id = null): string
     {
@@ -175,9 +182,9 @@ class Orders extends Model
             return "bike";
     }
 
-    public static function checkIfOrderExists(int $order_id): bool
+    public static function checkIfOrderExists(int $id): bool
     {
-        return self::where('id', $order_id)->exists();
+        return self::where('id', $id)->exists();
     }
 
     public static function checkTotalOrders(int $customerId): int
@@ -185,9 +192,9 @@ class Orders extends Model
         return self::where('customer_id', $customerId)->count();
     }
 
-    public static function updateOrderStatus(int $orderId, OrderStatusEnum $status): int
+    public static function updateOrderStatus(int $id, OrderStatusEnum $status): int
     {
-        return self::where('id', $orderId)->update([
+        return self::where('id', $id)->update([
             'order_status' => $status
         ]);
     }
@@ -243,16 +250,23 @@ class Orders extends Model
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) static::isViewed($orderId);
         /* Now we will fetch the required data */
-        return self::with(['order_items', 'products.category'])
+        $orders = self::with(['order_items.product'])
             ->when($orderId, function ($query) use ($orderId) {
                 return $query->where('id', '=', $orderId);
-            })
-            ->whereHas('order_items', function ($orderItemsQuery) {
-                $orderItemsQuery->where('product_belongs_to_type', (new Products())->getMorphClass());
             })
             ->where('seller_id', '=', $sellerId)
             ->orderBy('created_at', $orderBy)
             ->paginate(10);
+        /* Load 'category' for products where 'product_belongs_to_type' is 'Product' */
+        $orders->each(function ($order) {
+            $order->order_items->each(function ($orderItem) {
+                if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
+                    $orderItem->product->load('category');
+                }
+            });
+        });
+
+        return $orders;
     }
 
     public static function getRecentOrderByCustomerId(
@@ -269,6 +283,14 @@ class Orders extends Model
             ->where('customer_id', $customerId)
             ->latest()
             ->first();
+    }
+
+    public static function getByIds(array $ids, array $columns = ['*']): Collection
+    {
+        return self::select($columns)
+            ->with(['order_items.product', 'buyer', 'seller'])
+            ->whereIn('id', $ids)
+            ->get();
     }
 
     public static function getById(int $id, array $columns = ['*']): ?Orders
