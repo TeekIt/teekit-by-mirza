@@ -180,7 +180,7 @@ class ParentSellersLivewire extends Component
     {
         $data = User::find($id);
 
-        $this->categories = Categories::getAllCategoriesByStoreId($id, ['*']);
+        $this->categories = Categories::getAllCategoriesBySellerId($id, ['*']);
         $this->categories = ($this->categories->isEmpty()) ? [] : $this->categories;
         $this->category_id_map = is_array($this->categories) ? [] : $this->categories->pluck('id')->toArray();
 
@@ -259,7 +259,7 @@ class ParentSellersLivewire extends Component
         try {
             /* Perform some operation */
             if ($this->enable_fixed_commission)
-                $inserted = CommissionAndServiceFee::updateOrAdd(
+                $inserted = CommissionAndServiceFee::addOrUpdate(
                     $this->seller_id,
                     commission: ['fixed_commission' => (int) $this->fixed_commission]
                 );
@@ -275,7 +275,7 @@ class ParentSellersLivewire extends Component
                         $different_commissions_array[] = ['category_id' => $category_id, 'commission' => (int) $commission];
                     }
                 }
-                $inserted = CommissionAndServiceFee::updateOrAdd(
+                $inserted = CommissionAndServiceFee::addOrUpdate(
                     $this->seller_id,
                     commission: ['different_commissions' => $different_commissions_array]
                 );
@@ -308,7 +308,7 @@ class ParentSellersLivewire extends Component
         try {
             /* Perform some operation */
             if ($this->enable_fixed_service_fees)
-                $inserted = CommissionAndServiceFee::updateOrAdd(
+                $inserted = CommissionAndServiceFee::addOrUpdate(
                     $this->seller_id,
                     service_fee: ['fixed_service_fees' => (int) $this->fixed_service_fees]
                 );
@@ -324,7 +324,7 @@ class ParentSellersLivewire extends Component
                         $different_service_fees_array[] = ['category_id' => $category_id, 'service_fees' => (int) $service_fees];
                     }
                 }
-                $inserted = CommissionAndServiceFee::updateOrAdd(
+                $inserted = CommissionAndServiceFee::addOrUpdate(
                     $this->seller_id,
                     service_fee: ['different_service_fees' => $different_service_fees_array]
                 );
@@ -348,7 +348,7 @@ class ParentSellersLivewire extends Component
         try {
             /* Perform some operation */
             $status = ($is_active) ? self::BLOCK : self::ACTIVE;
-            $status_cahnged = User::activeOrBlockStore($id, $status);
+            $status_cahnged = User::activeOrBlockSeller($id, $status);
             /* Operation finished */
             if ($status_cahnged) {
                 $this->resetPage();

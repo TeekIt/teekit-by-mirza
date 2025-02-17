@@ -5,22 +5,19 @@ namespace App\Http\Controllers;
 use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicle;
 use App\Enums\UserChoicesEnum;
+use App\Enums\UserMorphTypeEnum;
 use App\Enums\UserRole;
 use App\Models\GuestBuyer;
-use App\Models\GuestCustomer;
 use App\Models\ProductsByBuyer;
 use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Qty;
-use App\Services\DriverFairServices;
-use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
 use App\Services\OrderServices;
 use App\Services\ProductServices;
 use App\User;
-use App\Services\TwilioSmsService;
 use App\Services\VerificationCodeServices;
 use App\VerificationCodes;
 use Illuminate\Database\Query\Builder;
@@ -29,7 +26,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Stripe\Service\Climate\OrderService;
 use Throwable;
 
 class OrdersController extends Controller
@@ -40,40 +36,46 @@ class OrdersController extends Controller
      */
     public function new(Request $request)
     {
-        if ($request->has('type')) {
-            if ($request->type == 'delivery') {
-                $rules = [
-                    /* Order details */
-                    'type' => 'required|string',
-                    'items' => 'required|array',
-                    'houseNo' => 'required|string',
-                    'deliveryCharges' => 'required|numeric',
-                    'serviceCharges' => 'required|numeric',
-                    'device' => 'sometimes',
-                    'paymentIntentId' => 'required|string',
-                    /* Customer details */
-                    'fName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
-                    'lName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
-                    'email' => 'required|email|max:255',
-                    'countryCode' => 'required|string|max:4',
-                    'phone' => 'required|string|max:13',
-                    'fullAddress' => 'required|string',
-                    'unitAddress' => 'nullable|string',
-                    'country' => 'required|string|max:70',
-                    'state' => 'required|string|max:70',
-                    'city' => 'required|string|max:70',
-                    'postcode' => 'nullable|string|max:11',
-                    'lat' => 'required|numeric|between:-90,90',
-                    'lon' => 'required|numeric|between:-180,180',
-                ];
-            } elseif ($request->type == 'self-pickup') {
-                $rules = [
-                    'type' => 'required|string',
-                    'paymentIntentId' => 'required|string',
-                ];
-            }
-        } else {
-            return JsonResponseServices::getApiValidationFailedResponse(json_decode('{"type": ["The type field is required."]}'));
+        $validatedData = Validator::make($request->all(), [
+            'type' => [
+                'required',
+                Rule::in(array_column(OrderTypeEnum::cases(), 'value')),
+            ],
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        if ($request->type == OrderTypeEnum::DELIVERY->value) {
+            $rules = [
+                /* Order details */
+                'type' => 'required|string',
+                'items' => 'required|array',
+                'houseNo' => 'required|string',
+                'deliveryCharges' => 'required|numeric',
+                'serviceCharges' => 'required|numeric',
+                'device' => 'sometimes',
+                'paymentIntentId' => 'required|string',
+                /* Customer details */
+                'fName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
+                'lName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
+                'email' => 'required|email|max:255',
+                'countryCode' => 'required|string|max:4',
+                'phone' => 'required|string|max:13',
+                'fullAddress' => 'required|string',
+                'unitAddress' => 'nullable|string',
+                'country' => 'required|string|max:70',
+                'state' => 'required|string|max:70',
+                'city' => 'required|string|max:70',
+                'postcode' => 'required|string|max:11',
+                'lat' => 'required|numeric|between:-90,90',
+                'lon' => 'required|numeric|between:-180,180',
+            ];
+        } elseif ($request->type == OrderTypeEnum::SELF_PICKUP->value) {
+            $rules = [
+                'type' => 'required|string',
+                'paymentIntentId' => 'required|string',
+            ];
         }
 
         $validatedData = Validator::make($request->all(), $rules);
@@ -109,11 +111,11 @@ class OrdersController extends Controller
 
             $product = Products::getOnlyProductDetailsById($item['productId']);
             $groupedSellers[$item['sellerId']][] = [
-                'productId' => $item['productId'],
-                'qty' => $item['qty'],
-                'userChoice' => $item['userChoice'],
-                'sellerId' => $item['sellerId'],
-                'price' => Products::getProductPrice($item['productId']),
+                'product_id' => $item['productId'],
+                'product_qty' => $item['qty'],
+                'user_choice' => $item['userChoice'],
+                'seller_id' => $item['sellerId'],
+                'product_price' => Products::getProductPrice($item['productId']),
                 'volume' => $product->height * $product->width * $product->length,
                 'weight' => $product->weight,
             ];
@@ -121,11 +123,11 @@ class OrdersController extends Controller
         $orderArr = [];
         foreach ($groupedSellers as $sellerId => $order) {
             $totalWeight = OrderServices::getTotalWeight($order);
-            $totalVolumn = OrderServices::getTotalVolumn($order);
+            $totalVolume = OrderServices::getTotalOfGivenVolume($order);
             $totalItems = OrderServices::getTotalItems($order);
-            $orderTotal = OrderServices::getOrderTotal($order);
+            $initialTotal = OrderServices::getOrderTotal($order);
             /* Adding amount into seller's wallet */
-            User::addIntoWallet($sellerId, $orderTotal);
+            User::addIntoWallet($sellerId, $initialTotal);
 
             if ($request->type == 'delivery') {
                 $seller = User::getUserByID($sellerId, [
@@ -139,7 +141,7 @@ class OrdersController extends Controller
                     $request->lat,
                     $request->lon,
                     $totalWeight,
-                    $totalVolumn
+                    $totalVolume
                 );
             }
             /* Create order */
@@ -147,7 +149,7 @@ class OrdersController extends Controller
                 $createdByType,
                 $createdById,
                 $sellerId,
-                $orderTotal,
+                $initialTotal,
                 $totalItems,
                 $driverCharges ?? 0.00,
                 $request
@@ -156,22 +158,19 @@ class OrdersController extends Controller
             foreach ($order as $orderItem) {
                 OrderItems::add(
                     $orderId,
-                    $orderItem['productId'],
-                    $orderItem['price'],
-                    $orderItem['qty'],
-                    UserChoicesEnum::from($orderItem['userChoice'])
+                    (new Products())->getMorphClass(),
+                    $orderItem['product_id'],
+                    $orderItem['product_price'],
+                    $orderItem['product_qty'],
+                    UserChoicesEnum::from($orderItem['user_choice'])
                 );
             }
 
-            if ($request->type == 'delivery') {
+            if ($request->type == OrderTypeEnum::DELIVERY->value) {
                 $verificationCode = VerificationCodeServices::generateCode();
                 VerificationCodes::add($orderId, $verificationCode);
 
-                $newOrderApiEndPoint = '/api/orders/new';
-                if (
-                    url()->current() == config('constants.LIVE_DASHBOARD_URL') . $newOrderApiEndPoint ||
-                    url()->current() == config('constants.APIS_DOMAIN_URL') . $newOrderApiEndPoint
-                ) {
+                if (app()->environment('production')) {
                     OrderServices::sendBulkSms(
                         $seller,
                         $request->phone,
@@ -217,7 +216,7 @@ class OrdersController extends Controller
                 'required',
                 Rule::in(array_column(TransportVehicle::cases(), 'value')),
             ],
-            'featureImg' => 'nullable|image|max:2048',
+            'featureImg' => 'required|image|max:2048',
             'height' => 'nullable|numeric|min:0',
             'width' => 'nullable|numeric|min:0',
             'length' => 'nullable|numeric|min:0',
@@ -225,19 +224,21 @@ class OrdersController extends Controller
                 'required',
                 Rule::in(array_column(OrderTypeEnum::cases(), 'value')),
             ],
+            'deliveryCharges' => 'required|numeric|min:0',
+            'serviceCharges' => 'required|numeric|min:0',
             'fName' => 'required|string|max:100',
             'lName' => 'required|string|max:100',
             'email' => 'required|email|max:255',
             'countryCode' => 'required|string|max:4',
             'phone' => 'required|string|max:13',
-            'fullAddress' => 'nullable|string',
+            'fullAddress' => 'required|string',
             'unitAddress' => 'nullable|string',
-            'country' => 'nullable|string|max:70',
-            'state' => 'nullable|string|max:70',
-            'city' => 'nullable|string|max:70',
-            'postcode' => 'nullable|string|max:11',
-            'lat' => 'nullable|numeric|between:-90,90',
-            'lon' => 'nullable|numeric|between:-180,180',
+            'country' => 'required|string|max:70',
+            'state' => 'required|string|max:70',
+            'city' => 'required|string|max:70',
+            'postcode' => 'required|string|max:11',
+            'lat' => 'required|numeric|between:-90,90',
+            'lon' => 'required|numeric|between:-180,180',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -291,10 +292,9 @@ class OrdersController extends Controller
             $request->length
         );
         /* Place order against the above product */
-        $totalVolumn = $productByBuyer->height * $productByBuyer->width * $productByBuyer->length;
+        $totalVolume = $productByBuyer->height * $productByBuyer->width * $productByBuyer->length;
         $sellerId = $request->sellerId;
-        $orderTotal = $request->maxPrice;
-        $totalWeight = $request->weight;
+        $initialTotal = $request->maxPrice * $request->qty;
         $totalItems = $request->qty;
 
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
@@ -308,8 +308,8 @@ class OrdersController extends Controller
                 $seller->lon,
                 $request->lat,
                 $request->lon,
-                $totalWeight,
-                $totalVolumn
+                $request->weight,
+                $totalVolume
             );
         }
         /* Create order */
@@ -317,7 +317,7 @@ class OrdersController extends Controller
             $createdByType,
             $createdById,
             $sellerId,
-            $orderTotal,
+            $initialTotal,
             $totalItems,
             $driverCharges ?? 0.00,
             $request
@@ -325,21 +325,18 @@ class OrdersController extends Controller
         /* Insert order items */
         OrderItems::add(
             $orderId,
+            $productByBuyer->getMorphClass(),
             $productByBuyer->id,
             $productByBuyer->max_price,
             $productByBuyer->qty,
             UserChoicesEnum::SEND_TO_OTHER_STORES
         );
-        
-        if ($request->type == 'delivery') {
+
+        if ($request->type == OrderTypeEnum::DELIVERY->value) {
             $verificationCode = VerificationCodeServices::generateCode();
             VerificationCodes::add($orderId, $verificationCode);
 
-            $newOrderApiEndPoint = '/api/orders/new';
-            if (
-                url()->current() == config('constants.LIVE_DASHBOARD_URL') . $newOrderApiEndPoint ||
-                url()->current() == config('constants.APIS_DOMAIN_URL') . $newOrderApiEndPoint
-            ) {
+            if (app()->environment('production')) {
                 OrderServices::sendBulkSms(
                     $seller,
                     $request->phone,
@@ -349,12 +346,10 @@ class OrdersController extends Controller
             }
         }
 
-        $orderArr[] = $orderId;
-
-        if ($request->walletFlag == 1) User::deductFromWallet($createdById, $request->walletDeductionAmount);
+        $idsArray[] = $orderId;
 
         return JsonResponseServices::getApiResponse(
-            $this->getOrdersFromIds($orderArr),
+            Orders::getByIds($idsArray),
             config('constants.TRUE_STATUS'),
             config('constants.ORDER_PLACED_SUCCESSFULLY'),
             config('constants.HTTP_OK')
@@ -365,90 +360,79 @@ class OrdersController extends Controller
      */
     public function showLoggedinBuyerOrders(Request $request)
     {
-        try {
-            $orders = Orders::select('id')->where('customer_id', '=', Auth::id())->orderByDesc('id');
-            if (!empty($request->order_status)) $orders = $orders->where('order_status', '=', $request->order_status);
-            $orders = $orders->paginate(20);
-            $pagination = $orders->toArray();
-            if (!$orders->isEmpty()) {
-                $order_data = [];
-                foreach ($orders as $order) $order_data[] = $this->getOrderDetails($order->id);
-                unset($pagination['data']);
-                return JsonResponseServices::getApiResponseExtention(
-                    $order_data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
-            }
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
+        $orders = Orders::select('id')
+            ->where('created_by_type', '=', UserMorphTypeEnum::USER)
+            ->where('created_by_id', '=', Auth::id())
+            ->when($request->orderStatus, function ($query) use ($request) {
+                return $query->where('order_status', '=', $request->orderStatus);
+            })
+            ->orderByDesc('id')
+            ->paginate(20);
+
+        $pagination = $orders->toArray();
+        unset($pagination['data']);
+
+        if (!$orders->isEmpty()) {
+            $orderData = [];
+            foreach ($orders as $order) $orderData[] = $this->getOrderDetails($order->id);
+
+            return JsonResponseServices::getApiResponseExtention(
+                $orderData,
+                config('constants.TRUE_STATUS'),
+                '',
+                'pagination',
+                $pagination,
                 config('constants.HTTP_OK')
             );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * @author Muhammad Abdullah Mirza
      */
     public function productsOfRecentOrder(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'productsLimit' => 'required|integer',
-                'sellerId' => 'required|integer'
-            ]);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
-            }
+        $validatedData = Validator::make($request->all(), [
+            'productsLimit' => 'required|integer',
+            'sellerId' => 'required|integer'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
+        }
 
-            $order = Orders::getRecentOrderByCustomerId(Auth::id(), $request->productsLimit, $request->sellerId);
-            if (!empty($order)) {
-                $recentOrderProdsData = [];
-                foreach ($order->products as $product) $recentOrderProdsData[] = Products::getProductInfo(
-                    $request->sellerId,
-                    $product->id,
-                    Products::getCommonColumns(),
-                );
-                /*
-                * Just creating this variable so we don't have to call the "empty()" function again & again
-                * Which will obviouly reduce the API response speed
-                */
-                $dataIsEmpty = empty($recentOrderProdsData);
-                return JsonResponseServices::getApiResponse(
-                    ($dataIsEmpty) ? [] : $recentOrderProdsData,
-                    ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-                    ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
-                    config('constants.HTTP_OK'),
-                );
-            }
-
-            return JsonResponseServices::getApiResponse(
-                [],
-                false,
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_OK')
+        $order = Orders::getRecentOrderByCustomerId(Auth::id(), $request->productsLimit, $request->sellerId);
+        if (!empty($order)) {
+            $recentOrderProdsData = [];
+            foreach ($order->products as $product) $recentOrderProdsData[] = Products::getProductInfo(
+                $request->sellerId,
+                $product->id,
+                Products::getCommonColumns(),
             );
-        } catch (Throwable $error) {
-            report($error);
+            /*
+            * Just creating this variable so we don't have to call the "empty()" function again & again
+            * Which will obviouly reduce the API response speed
+            */
+            $dataIsEmpty = empty($recentOrderProdsData);
             return JsonResponseServices::getApiResponse(
-                [],
-                false,
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
+                ($dataIsEmpty) ? [] : $recentOrderProdsData,
+                ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+                ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+                config('constants.HTTP_OK'),
             );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            false,
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * List all ready or delivered orders
@@ -492,13 +476,13 @@ class OrdersController extends Controller
                 if (!empty($request->order_status)) {
                     $orders = $orders->where('order_status', '=', $request->order_status);
                     $orders = $orders
-                        ->whereHas('order_items.products', function ($q) use ($users) {
+                        ->whereHas('order_items.product', function ($q) use ($users) {
                             $q->whereHas('user', function ($w) use ($users) {
                                 $w->whereIn('id', $users);
                             });
                         });
                     if (\auth()->user()->vehicle_type == 'bike') {
-                        $orders = $orders->whereHas('order_items.products', function ($q) {
+                        $orders = $orders->whereHas('order_items.product', function ($q) {
                             return $q->where('bike', 1);
                         });
                     }
@@ -534,7 +518,7 @@ class OrdersController extends Controller
                 $orders = $orders->orWhere(function ($q) use ($nearbyOrders) {
                     $q->whereIn('id', $nearbyOrders);
                     if (\auth()->user()->vehicle_type == 'bike') {
-                        $q->whereHas('order_items.products', function ($query) {
+                        $q->whereHas('order_items.product', function ($query) {
                             return $query->where('bike', 1);
                         });
                     }
@@ -771,7 +755,7 @@ class OrdersController extends Controller
             if ($request->payment_status == "paid" && $order->payment_status != "paid" && $request->order_status == 'complete' && $order->order_status != 'complete' && $request->delivery_status == 'delivered' && $order->delivery_status != 'delivered') {
                 $user = User::find($order->seller_id);
                 $user_money = $user->pending_withdraw;
-                $user->pending_withdraw = $order->order_total + $user_money;
+                $user->pending_withdraw = $order->initial_total + $user_money;
                 $user->save();
                 //$this->calculateDriverFair($order, $user);
             }
@@ -822,7 +806,7 @@ class OrdersController extends Controller
         $temp = [];
         $order = Orders::find($orderId);
         $temp['order'] = $order;
-        $temp['order_items'] = OrderItems::with('products.store')->where('order_id', '=', $orderId)->get();
+        $temp['order_items'] = OrderItems::with('product.store')->where('order_id', '=', $orderId)->get();
 
         return $temp;
     }
@@ -831,38 +815,32 @@ class OrdersController extends Controller
      */
     public function getOrderDetailsTwo(Request $request)
     {
-        try {
-            $validated_data = Validator::make($request->route()->parameters(), [
-                'id' => 'required|integer'
-            ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->error());
-            }
-            if (!Orders::checkIfOrderExists($request->id)) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    config('constants.NO_RECORD'),
-                    config('constants.HTTP_OK')
-                );
-            }
-            $order = Orders::with(['customer', 'store', 'order_items', 'order_items.products'])
-                ->where('id', $request->id)->first();
-            return JsonResponseServices::getApiResponse(
-                $order,
-                config('constants.TRUE_STATUS'),
-                "",
-                config('constants.HTTP_OK')
-            );
-        } catch (Throwable $error) {
-            report($error);
+        $validatedData = Validator::make($request->route()->parameters(), [
+            'id' => 'required|integer'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
+        }
+
+        $validatedData = (object) $validatedData->safe()->all();
+
+        if (!Orders::checkIfOrderExists($validatedData->id)) {
             return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
+                config('constants.NO_RECORD'),
+                config('constants.HTTP_OK')
             );
         }
+
+        $order = Orders::getById($validatedData->id);
+
+        return JsonResponseServices::getApiResponse(
+            $order,
+            config('constants.TRUE_STATUS'),
+            "",
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * It will store the estimated time

@@ -34,9 +34,10 @@ jobs:
             php artisan migrate --force
 
             # Other commands
+            php artisan run:raw-queries 
             php artisan scout:sync-index-settings
-            php artisan scout:flush "App\Products"
-            php artisan scout:import "App\Products"
+            # php artisan scout:flush "App\Products"
+            # php artisan scout:import "App\Products"
             
             # Cache everything at the end
             php artisan config:clear

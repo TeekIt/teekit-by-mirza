@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\CommissionAndServiceFee;
+use App\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
@@ -14,10 +17,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
-    {
-        //
-    }
+    public function register() {}
 
     /**
      * Bootstrap any application services.
@@ -26,7 +26,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Date::use(CarbonImmutable::class);
+
         Paginator::useBootstrap();
+
+        Schema::defaultStringLength(191);
 
         Gate::before(function ($user, $ability) {
             Gate::define($ability, function ($user) use ($ability) {
@@ -36,7 +40,5 @@ class AppServiceProvider extends ServiceProvider
                 return false;
             });
         });
-
-        Schema::defaultStringLength(191);
     }
 }

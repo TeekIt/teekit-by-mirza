@@ -11,6 +11,13 @@ return [
     |
     */
 
+     /*
+    |--------------------------------------------------------------------------
+    | Globally Required 
+    |--------------------------------------------------------------------------
+    */
+    'EXTRA_CHARGE_AMOUNT' => 5.00,
+
     /*
     |--------------------------------------------------------------------------
     | Success Constants
@@ -32,10 +39,13 @@ return [
     'SUCCESS_STATUS' => 'success',
     'TRUE_STATUS' => true,
     'STUART_DELIVERY_SUCCESS' => 'Stuart delivery has been initiated successfully, You can please check the status by clicking the "Check Status" button',
+    'DELIVERY_SUCCESS' => 'Your order delivery has been initiated successfully, You can please check the status by clicking the "Track Delivery" button',
     'COMPLETED' => 'Completed',
     'VALID_REFERRAL' => 'Valid referral code',
     'ORDER_ASSIGNED' => 'Assigned',
     'ORDER_UPDATED' => 'Updated',
+    'ORDER_DELIVERED_SUCCESSFULLY' => 'You have successfully delivered your order 🎉',
+    'ORDER_COMPLETED_SUCCESSFULLY' => 'Your order has been completed successfully',
     'VALID_PROMOCODE' => 'You have entered a valid promo code',
     'BANK_DETAILS_UPDATED' => 'Bank Account details are successfully updated',
     'VERIFICATION_SUCCESS' => 'Verification Successful',
@@ -43,7 +53,7 @@ return [
     'WITHDRAWAL_REQUEST_SUBMITTED' => 'Withdrawal request is successfully submitted',
     'PRODUCT_REMOVED_SUCCESSFULLY' => 'Product has been removed successfully',
     'ORDER_PLACED_SUCCESSFULLY' => 'Your order has been placed successfully',
-    'SENT_TO_OTHER_STORE_SUCCESS' => 'Your order has been sent to other store',
+    'SENT_TO_OTHER_STORE_SUCCESS' => 'Your order has been sent to another store',
     'PARENT_QTY_SYNCED_SUCCESS' => 'Quantities synced',
     /*
     |--------------------------------------------------------------------------
@@ -57,7 +67,7 @@ return [
     'UN_ARCHIVED_FAILED' => 'Failed to unarchive data',
     'DELETION_FAILED' => 'Failed to delete data',
     'INVALID_DATA' => 'You have entered invalid or too long data',
-    'ORDER_CANCELLATION_FAILED' => 'Sorry! We are facing an error in cancelling your order',
+    'ORDER_CANCELLATION_FAILED' => 'Sorry! We regret that we are facing an error in cancelling your order',
     'FAILED_CODE' => 0,
     'FALSE_STATUS' => false,
     'ERROR_STATUS' => 'error',
@@ -86,6 +96,8 @@ return [
     'SENT_TO_OTHER_STORE_FAILED' => 'Due to some error your order cannot be sent to other store',
     'PARENT_QTY_SYNCED_FAILED' => 'Failed to sync quantities',
     'INTERNAL_SERVER_ERROR'=> 'Sorry! This operation has been failed due to some internal server error',
+    'DELIVERY_FAILED' => 'Sorry! Due to some internal error we are failed to initiate your delivery',
+    'SEARCH_FAILED' => 'Sorry! We could not find any results against your search',
     /*
     |--------------------------------------------------------------------------
     | General Messages Constants
@@ -106,23 +118,33 @@ return [
     'ADMIN_EMAIL' => 'admin@teekit.co.uk',
     /*
     |--------------------------------------------------------------------------
+    | Head Office Details
+    |--------------------------------------------------------------------------
+    */
+    'HEAD_OFFICE_ADDRESS' => '1 Waldegrave Road, Ealing, W5 3HT',
+    'HEAD_OFFICE_CONTACT' => '+44 0208 998 0315',
+    /*
+    |--------------------------------------------------------------------------
     | Teek it URL's
     |--------------------------------------------------------------------------
     */
+    'LIVE_WEBSITE_URL' => 'https://teekit.co.uk',
     'LIVE_DASHBOARD_URL' => 'https://app.teekit.co.uk',
-    'APIS_DOMAIN_URL' => 'https://teekitapi.com',
+    // 'APIS_DOMAIN_URL' => 'https://teekitstaging.online',
     /*
     |--------------------------------------------------------------------------
     | HTTP Status Codes
     |--------------------------------------------------------------------------
     */
     'HTTP_OK' => 200,
-    'HTTP_SERVER_ERROR' => 500,
     'HTTP_INVALID_ARGUMETS' => 400,
+    'HTTP_UNAUTHORIZED' => 401,
     'HTTP_FORBIDDEN' => 403,
+    'HTTP_NOT_FOUND' => 404,
+    'HTTP_PAGE_EXPIRED' => 419,
     'HTTP_UNPROCESSABLE_REQUEST' => 422,
     'HTTP_RESOURCE_EXHAUSTED' => 429,
-    'HTTP_PAGE_EXPIRED' => 419,
+    'HTTP_SERVER_ERROR' => 500,
     'HTTP_SERVICE_UNAVAILABLE' => 503,
     'HTTP_GATEWAY_TIMEOUT' => 504,
 ];

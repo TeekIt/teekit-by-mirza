@@ -135,7 +135,7 @@
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        <a href="{{ route('seller.orders', ['request_order_id' => $order->id]) }}" class="btn btn-primary">
+                                                        <a href="{{ route('seller.orders', ['requestOrderId' => $order->id]) }}" class="btn btn-primary">
                                                             View
                                                         </a>
                                                     </td>

@@ -166,7 +166,7 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('asetting') ? 'active' : '' }}" href="/asetting">
+                      <a href="{{ route('admin.settings') }}" class="nav-link {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                           <i class="nav-icon fa fa-cog"></i>
                           <p class="ml-2">
                               Settings

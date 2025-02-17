@@ -2,36 +2,60 @@
 
 namespace App\Mail;
 
+use App\Models\OrdersFromOtherSeller;
+use App\Orders;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class OrderIsCanceledMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $order;
-
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($order)
+    public function __construct(public Orders|OrdersFromOtherSeller $order) {}
+
+    /**
+     * Get the message envelope.
+     *
+     * @return \Illuminate\Mail\Mailables\Envelope
+     */
+    public function envelope()
     {
-        $this->order = $order;
+        return new Envelope(
+            subject: 'Your Order #' . $this->order->id . ' Has Been Cancelled - ' . env('APP_NAME'),
+        );
     }
 
     /**
-     * Build the message.
+     * Get the message content definition.
      *
-     * @return $this
+     * @return \Illuminate\Mail\Mailables\Content
      */
-    public function build()
+    public function content()
     {
-        $order = $this->order;
-        return $this->view('emails.order_is_canceled', compact('order'))
-            ->subject("Your Order Has Been Cancelled");
+        return new Content(
+            markdown: 'emails.order_is_canceled',
+            with: [
+                'order' => $this->order,
+            ]
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array
+     */
+    public function attachments()
+    {
+        return [];
     }
 }

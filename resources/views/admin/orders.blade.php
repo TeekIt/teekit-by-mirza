@@ -51,9 +51,9 @@
                                     </div>
                                     @if ($order->order_status == 'pending')
                                         <div>
-                                            <a href="{{ route('accept_order', ['order_id' => $order->id]) }}"
+                                            <a href="#"
                                                 class="d-block btn btn-success float-right">Click Here If Order Is Ready</a>
-                                            <a href="{{ route('cancel_order', ['order_id' => $order->id]) }}"
+                                            <a href="#"
                                                 class="d-block btn btn-danger float-right" onclick="cancelOrder(event)"
                                                 style="margin-right: 20px">Cancel Order</a>
                                         </div>

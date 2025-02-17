@@ -61,16 +61,16 @@ class WithdrawalLivewire extends Component
 
     public function withdrawRequest()
     {
-        $user = auth()->user();
+        $user = User::find(auth()->user()->id);
         // Check if withdrawal amount is valid
         if ($this->amount <= 0) {
-            session()->flash('error', 'withdrawal amount is not valid');
+            session()->flash('error', 'Withdrawal amount is not valid');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'requestWithdrawModal']);
             return;
         }
 
         if ($this->amount > $user->pending_withdraw) {
-            $this->addError('amount', 'Withdrawal amount exceeds pending balance.');
+            $this->addError('amount', 'Withdrawal amount exceeds pending balance');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'requestWithdrawModal']);
             return;
         }

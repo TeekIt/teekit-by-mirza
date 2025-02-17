@@ -17,12 +17,12 @@ class WithdrawalRequests extends Model
         'status',
         'bank_detail',
     ];
-    
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-    
+
     // public function role(): BelongsTo
     // {
     //     return $this->belongsTo('App\Role');
@@ -30,7 +30,8 @@ class WithdrawalRequests extends Model
 
     public static function getWithdrawalResquests(int $user_id, string $search = null, int $amount = null, string $created_at = null)
     {
-        return self::select('id', 'amount', 'status', 'transaction_id', 'created_at')->where('user_id', $user_id)
+        return self::select('id', 'amount', 'status', 'transaction_id', 'created_at')
+            ->where('user_id', $user_id)
             ->when($search, function ($query, $search) {
                 return $query->where('status', $search);
             })
@@ -42,7 +43,7 @@ class WithdrawalRequests extends Model
             });
     }
 
-    public static function add(int $user_id, int $amount, string $status , string $bank_details): WithdrawalRequests
+    public static function add(int $user_id, int $amount, string $status, string $bank_details): WithdrawalRequests
     {
         return self::create([
             'user_id' => $user_id,

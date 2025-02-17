@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
-use App\OrderItems;
-use App\Orders;
-use App\Products;
+use App\Enums\OrderStatusEnum;
+use App\Enums\OrderTypeEnum;
 use App\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrdersFromOtherSeller extends Model
@@ -24,19 +25,19 @@ class OrdersFromOtherSeller extends Model
         return $this->belongsTo(User::class, 'seller_id');
     }
 
-    public function customer(): BelongsTo
+    public function buyer(): MorphTo
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->morphTo(__FUNCTION__, 'created_by_type', 'created_by_id');
     }
 
-    public function product(): BelongsTo
+    public function product(): MorphTo
     {
-        return $this->belongsTo(Products::class);
+        return $this->morphTo(__FUNCTION__, 'product_belongs_to_type', 'product_belongs_to_id');
     }
     /**
      * Helpers
      */
-    public static function updateOrderStatus(int $id, string $status): int
+    public static function updateOrderStatus(int $id, OrderStatusEnum $status): int
     {
         return self::where('id', '=', $id)->update(['order_status' => $status]);
     }
@@ -59,80 +60,112 @@ class OrdersFromOtherSeller extends Model
         return self::where('id', '=', $id)->increment('times_rejected');
     }
 
-    public static function moveToAnotherSeller(int $id, int $seller_id): int
+    public static function moveToAnotherSeller(int $id, int $sellerId): int
     {
         return self::where('id', '=', $id)->update([
-            'seller_id' => $seller_id,
-            'created_at' => now(),
-            'updated_at' => now()
+            'seller_id' => $sellerId,
+            'moved_at' => now(),
         ]);
     }
 
-    public static function insertInfo(
-        int $customer_id,
-        int $seller_id,
-        int $product_id,
-        float $product_price,
-        int $product_qty,
-        float $order_total,
-        int $total_items,
-        ?float $customer_lat = null, // Optional parameter with default null
-        ?float $customer_lon = null, // Optional parameter with default null
-        string $receiver_name,
-        string $phone_number,
+    public static function add(
+        string $createdByType,
+        int $createdById,
+        int $sellerId,
+        string $productBelongsToType,
+        int $productBelongsToId,
+        float $productPrice,
+        int $productQty,
+        float $initialTotal,
+        ?float $customerLat = null,
+        ?float $customerLon = null,
+        string $receiverName,
+        string $phoneNumber,
         string $address,
-        string $house_no = null,      // Optional parameter with default null
-        string $flat = null,          // Optional parameter with default null
-        float $driver_charges = 0.0, // Optional parameter with default value
-        ?float $delivery_charges = null, // Optional parameter with default null
-        ?float $service_charges = null, // Optional parameter with default null
-        string $device = null,       // Optional parameter with default null
+        string $houseNo = null,
+        string $flat = null,
+        string $country,
+        string $state,
+        string $city,
+        string $postcode,
+        string $paymentIntentId,
+        float $driverCharges = 0.0,
+        ?float $deliveryCharges = null,
+        ?float $serviceCharges = null,
+        string $device = null,
         string $type,
         ?string $description = null,
-        string $payment_status = "hidden", // Optional parameter with default value
-        ?int $offloading = null,      // Optional parameter with default null
-        ?float $offloading_charges = null // Optional parameter with default null
+        string $paymentStatus = "hidden",
+        ?int $offloading = null,
+        ?float $offloadingCharges = null,
+        string $movedAt,
+        string $createdAt,
     ): OrdersFromOtherSeller {
-        $model = new OrdersFromOtherSeller();
-        $model->customer_id = $customer_id;
-        $model->seller_id = $seller_id;
-        $model->product_id = $product_id;
-        $model->product_price = $product_price;
-        $model->product_qty = $product_qty;
-        $model->order_total = $order_total;
-        $model->total_items = $total_items;
-        if ($type == 'delivery') {
-            $model->customer_lat = $customer_lat;
-            $model->customer_lon = $customer_lon;
-            $model->customer_name = $receiver_name;
-            $model->phone_number = $phone_number;
-            $model->address = $address;
-            $model->house_no = $house_no;
-            $model->flat = $flat;
-            $model->driver_charges = $driver_charges;
-            $model->delivery_charges = $delivery_charges;
-            $model->service_charges = $service_charges;
-        }
+        $model = new self();
+        $model->created_by_type = $createdByType;
+        $model->created_by_id = $createdById;
+        $model->seller_id = $sellerId;
+        $model->product_belongs_to_type = $productBelongsToType;
+        $model->product_belongs_to_id = $productBelongsToId;
+        $model->product_price = $productPrice;
+        $model->product_qty = $productQty;
+        $model->initial_total = $initialTotal;
+        // if ($type == OrderTypeEnum::DELIVERY->value) {
+        //     $model->customer_lat = $customerLat;
+        //     $model->customer_lon = $customerLon;
+        //     $model->customer_name = $receiverName;
+        //     $model->phone_number = $phoneNumber;
+        //     $model->address = $address;
+        //     $model->house_no = $houseNo;
+        //     $model->flat = $flat;
+        //     $model->driver_charges = $driverCharges;
+        //     $model->delivery_charges = $deliveryCharges;
+        //     $model->service_charges = $serviceCharges;
+        // }
+        $model->customer_lat = $customerLat;
+        $model->customer_lon = $customerLon;
+        $model->customer_name = $receiverName;
+        $model->phone_number = $phoneNumber;
+        $model->address = $address;
+        $model->house_no = $houseNo;
+        $model->flat = $flat;
+        $model->country = $country;
+        $model->state = $state;
+        $model->city = $city;
+        $model->postcode = $postcode;
+        $model->payment_intent_id = $paymentIntentId;
+
+        $model->driver_charges = $driverCharges;
+        $model->delivery_charges = $deliveryCharges;
+        $model->service_charges = $serviceCharges;
+
         $model->device = $device;
         $model->type = $type;
         $model->description = $description;
-        $model->payment_status = $payment_status;
+        $model->payment_status = $paymentStatus;
         $model->offloading = $offloading;
-        $model->offloading_charges = $offloading_charges;
+        $model->offloading_charges = $offloadingCharges;
+        $model->moved_at = $movedAt;
+        $model->created_at = $createdAt;
+
         $model->save();
+
         return $model;
     }
 
-    public static function getById(array $columns, int $id): object
+    public static function getById(array $columns = ['*'], int $id): object
     {
-        return self::select($columns)->with(['product.category', 'seller', 'customer'])->where('id', '=', $id)->first();
+        return self::select($columns)
+            ->with(['product', 'buyer', 'seller'])
+            ->where('id', '=', $id)
+            ->first();
     }
 
-    public static function getForView(array $columns, int $seller_id, string $order_by): object
+    public static function getForView(array $columns = ['*'], int $sellerId, string $orderBy): Collection
     {
-        return self::select($columns)->with(['product.category'])
-            ->where('seller_id', '=', $seller_id)
-            ->orderBy('created_at', $order_by)
+        return self::select($columns)->with('product')
+            ->where('seller_id', '=', $sellerId)
+            ->orderBy('created_at', $orderBy)
             ->get();
     }
 }

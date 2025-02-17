@@ -11,7 +11,7 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-white">
             <div class="container">
                 <div class="cstm-container-sm">
-                    <a class="navbar-brand" target="_blank" href="https://teekit.co.uk/">
+                    <a class="navbar-brand" target="_blank" href="{{ config('constants.LIVE_WEBSITE_URL') }}">
                         <img style="max-height: 50px;" src="{{ asset('images/icons/logo.webp') }}" alt="TeekIt Logo">
                     </a>
                     <!-- Toggle Button For Mobiles - Begins -->
@@ -28,13 +28,13 @@
                         action="{{ route('login') }}">
                         <div class="row">
                             <div class="col-md-5 mt-3">
-                                {{ csrf_field() }}
+                                @csrf
                                 <div class="form-group">
                                     <input class="form-control mr-sm-2" type="email" required autocomplete="off"
                                         name="email" placeholder="Email" aria-label="email"
                                         value="{{ old('email') }}">
-                                    <label for="checkauto">
-                                        <input name="remember" id="checkauto" type="checkbox"> Keep me logged in
+                                    <label for="remember">
+                                        <input name="remember" id="remember" type="checkbox"> keep me logged in
                                     </label>
                                 </div>
                             </div>
@@ -44,7 +44,7 @@
                                         placeholder="Password" name="password" required>
                                     <p>
                                         <a class="text-dark" href="{{ route('password.request') }}">
-                                            Forgot Password?
+                                            forgot password?
                                         </a>
                                     </p>
                                 </div>
@@ -63,15 +63,18 @@
         </nav>
         <!-- /Navbar -->
         <div class="container">
+
             @include('flash::message')
+
             @if (session('status'))
                 <div class="alert alert-success" role="alert">
                     {{ session('status') }}
                 </div>
             @endif
-            <div class="row mtd" style="margin-top: 20vh">
+
+            <div class="row" style="margin-top: 20vh">
                 <div class="col-md-6 col-lg-8">
-                    <img src="{{ asset('images/backgrounds/bike.webp') }}" class="bg-img">
+                    <img src="{{ asset('images/backgrounds/bike.webp') }}" class="bg-img" alt="{{ asset('images/backgrounds/bike.webp') }}">
                 </div>
                 <div class="col-md-6 col-lg-4">
                     @yield('content')

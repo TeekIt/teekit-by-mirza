@@ -12,23 +12,6 @@
     <script src="{{ asset('res/dist/js/adminlte.min.js') }}"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-
-    {{-- If the following commented code does not impact in a negative way then remove it --}}
-    <!-- jQuery -->
-    {{-- <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script> --}}
-    <!-- Bootstrap 4 -->
-    {{-- <script src="{{ asset('res/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script> --}}
-    <!-- Bootstrap 5 -->
-    {{-- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
-         integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
-     </script>
-     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
-         integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
-     </script> --}}
-
-    <!-- AdminLTE App -->
-    {{-- <script src="{{ asset('res/dist/js/adminlte.min.js') }}"></script> --}}
-
     <!-- JQuery Multi Selector -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <!-- Sweet Alerts -->
