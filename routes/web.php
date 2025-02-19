@@ -17,6 +17,7 @@ use App\Http\Livewire\Admin\DriversLivewire;
 use App\Http\Livewire\Sellers\OrdersFromOtherSellersLivewire;
 use App\Http\Livewire\Sellers\OrdersLivewire;
 use App\Http\Livewire\Sellers\OrdersOfUniqueProductsLivewire;
+use App\Http\Livewire\Sellers\RequestDeliveryLivewire;
 use App\Http\Livewire\Sellers\SellerDashboardLivewire;
 use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
@@ -101,6 +102,8 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
     });
 
     Route::get('/withdrawal', WithdrawalLivewire::class)->name('seller.withdrawal');
+
+    Route::get('/request-delivery', RequestDeliveryLivewire::class)->name('seller.request.delivery');
 
     Route::prefix('settings')->group(function () {
         Route::get('/general', UserGeneralSettings::class)->name('seller.settings.general');

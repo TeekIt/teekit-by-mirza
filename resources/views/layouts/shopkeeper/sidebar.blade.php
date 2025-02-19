@@ -56,9 +56,17 @@
                 </li> --}}
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('seller.withdrawal') ? 'active' : '' }}" href="{{ route('seller.withdrawal') }}">
-                        <i class="nav-icon fas fa-dollar-sign"></i>
+                        <i class="nav-icon fas fa-money-bill-wave"></i>
                         <p class="ml-2">
                             Withdrawals
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('seller.request.delivery') ? 'active' : '' }}" href="{{ route('seller.request.delivery') }}">
+                        <i class="nav-icon fas fa-truck-loading"></i>
+                        <p class="ml-2">
+                            Requst Delivery
                         </p>
                     </a>
                 </li>
