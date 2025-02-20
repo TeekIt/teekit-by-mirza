@@ -17,7 +17,7 @@ class AuthenticateSuperAdmin
      */
     public function handle(Request $request, Closure $next)
     {
-        if(auth()->user()->role_id === UserRole::SUPERADMIN) return $next($request);
+        if(auth()->user()->role_id === UserRole::SUPERADMIN->value) return $next($request);
 
         abort(403, 'Access Denied');
     }
