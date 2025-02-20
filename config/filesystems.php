@@ -57,7 +57,7 @@ return [
 
         'user_public' => [
             'driver' => 'local',
-            'root'   => public_path() . '/user_imgs',
+            'root'   => public_path() . '/images',
             'visibility' => 'public',
         ],
 

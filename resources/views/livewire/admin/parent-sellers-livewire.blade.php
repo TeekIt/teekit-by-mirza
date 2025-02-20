@@ -277,9 +277,10 @@
             </div>
         </div>
     </div>
+
     <div class="row">
         <div class="col-12 col-sm-6 col-md-5 col-xl-6">
-            <h4 class="py-4 my-1">Parent Sellers</h4>
+            <h4 class="py-4 my-1 text-site-primary">Parent Sellers</h4>
         </div>
         <div class="col-12 col-sm-6 col-md-5 col-xl-5">
             <div class="input-group py-4 my-2">
@@ -295,6 +296,7 @@
             </button>
         </div>
     </div>
+
     <div class="container">
         <div class="row">
             @forelse ($data as $single_index)

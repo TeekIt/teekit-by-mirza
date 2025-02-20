@@ -14,12 +14,14 @@
         <div class="content-wrapper">
             <div class="row">
                 <div class="col-md-12">
-                    @include('flash::message')
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+                    <div class="container pt-4">
+                        @include('flash::message')
+                        @if (session('status'))
+                            <div class="alert alert-success" role="alert">
+                                {{ session('status') }}
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
             @yield('content')

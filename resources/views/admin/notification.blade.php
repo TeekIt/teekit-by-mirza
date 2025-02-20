@@ -8,10 +8,10 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-12">
-                    <h4 class="py-4 my-1">Send Notifications</h4>
+                    <h4 class="py-4 my-1 text-site-primary">Send Notifications</h4>
                 </div>
-            </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
+            </div>
+        </div>
     </div>
     <!-- /.content-header -->
 

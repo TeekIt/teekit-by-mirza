@@ -6,11 +6,11 @@
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
-                    <div class="col-sm-12">
-                        <h1 class="text-dark text-center fs-1">Dashboard</h1>
-                    </div><!-- /.col -->
-                </div><!-- /.row -->
-            </div><!-- /.container-fluid -->
+                    <div class="col-12">
+                        <h4 class="py-4 my-1 text-site-primary">Dashboard</h4>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- /.content-header -->
 

@@ -12,7 +12,7 @@
                             <div class="card-text">
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <h4 class="text-center text-primary">Request Delivery For Buyer</h4>
+                                        <h4 class="text-center text-site-primary">Request Delivery For Buyer</h4>
                                     </div>
                                     <div class="col-md-12">
                                         <form action="#" method="POST"
@@ -59,14 +59,11 @@
                                                         <p>Total Cost: £30</p>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6 offset-md-3 text-center">
-                                                    <button
-                                                        style="background: #ffcf42;color:black;font-weight: 600"
-                                                        class="pl-5 pr-5 pt-2 pb-2 border-0 btn btn-secondary rounded-pill"
-                                                        type="submit">
-                                                        Request
-                                                    </button>
-                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <button type="submit" class="btn site-primary-yellow-bg rounded-pill col-12">
+                                                    Request
+                                                </button>
                                             </div>
                                         </form>
                                     </div>

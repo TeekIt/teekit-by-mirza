@@ -12,7 +12,7 @@
             <div class="container">
                 <div class="cstm-container-sm">
                     <a class="navbar-brand" target="_blank" href="{{ config('constants.LIVE_WEBSITE_URL') }}">
-                        <img style="max-height: 50px;" src="{{ asset('images/icons/logo.webp') }}" alt="TeekIt Logo">
+                        <img style="max-height: 50px;" src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }} - Logo">
                     </a>
                     <!-- Toggle Button For Mobiles - Begins -->
                     <button class="navbar-toggler mobile-login-btn" type="button" data-bs-toggle="collapse"
@@ -21,8 +21,9 @@
                         <i class="fas fa-sign-in-alt me-2"></i>
                         Login
                     </button>
+                    <!-- Toggle Button For Mobiles - Ends -->
                 </div>
-                <!-- Toggle Button For Mobiles - Ends -->
+
                 <div class="collapse navbar-collapse" id="navbarSupportedContent" aria-current="true" role="navigation">
                     <form class="my-2 my-lg-0 ml-auto w-lg-50" style="min-width: 45vw;" method="POST"
                         action="{{ route('login') }}">
@@ -34,7 +35,8 @@
                                         name="email" placeholder="Email" aria-label="email"
                                         value="{{ old('email') }}">
                                     <label for="remember">
-                                        <input name="remember" id="remember" type="checkbox"> keep me logged in
+                                        <input name="remember" id="remember" type="checkbox">
+                                        <span class="fw-light">keep me logged in</span>
                                     </label>
                                 </div>
                             </div>
