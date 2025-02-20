@@ -157,7 +157,7 @@
                     </div>
                 </div>
             @empty
-                <h1 class="text-dark">No Drivers Found :(</h1>
+                <h1 class="text-dark">No Drivers Found 🥺</h1>
             @endforelse
         </div>
         <div class="row">

@@ -2,33 +2,18 @@
 
 namespace App\Services;
 
-use App\Orders;
-use Illuminate\Http\JsonResponse;
 use stdClass;
-use Stripe\Refund;
-use Stripe\Stripe;
-use Stripe\StripeClient;
 
 final class StripeServices
 {
-    public static function getLiveSecretKey(): string
+    public static function getSecretKey(): string
     {
-        return env('STRIPE_LIVE_SECRET_KEY');
+        return config('stripe.STRIPE_SECRET_KEY');
     }
 
-    public static function getLivePublishKey(): string
+    public static function getPublishKey(): string
     {
-        return env('STRIPE_LIVE_PUBLISH_KEY');
-    }
-
-    public static function getTestSecretKey(): string
-    {
-        return env('STRIPE_TEST_SECRET_KEY');
-    }
-
-    public static function getTestPublishKey(): string
-    {
-        return env('STRIPE_TEST_PUBLISH_KEY');
+        return config('stripe.STRIPE_PUBLISH_KEY');
     }
 
     public static function createPaymentIntent()
@@ -40,13 +25,11 @@ final class StripeServices
             'currency' => $_REQUEST['currency'],
         ];
 
-        $apiKey = (app()->environment('production')) ? static::getLivePublishKey() : static::getTestPublishKey();
-
         curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, $apiKey);
+        curl_setopt($curl, CURLOPT_USERPWD, static::getPublishKey());
 
         $data = curl_exec($curl);
 
@@ -68,14 +51,12 @@ final class StripeServices
             'payment_method_types' => ['card'],
             'capture_method' => 'manual',
         ];
-
-        $apiKey = (app()->environment('production')) ? static::getLiveSecretKey() : static::getTestSecretKey();
-
+        
         curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, $apiKey);
+        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
 
         $data = curl_exec($curl);
 
@@ -101,13 +82,11 @@ final class StripeServices
             'transfer_data' => ['destination' => $_REQUEST['stripeAccountId']],
         ];
 
-        $apiKey = (app()->environment('production')) ? static::getLivePublishKey() : static::getTestPublishKey();
-
         curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, $apiKey);
+        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
 
         $data = curl_exec($curl);
 
@@ -126,14 +105,12 @@ final class StripeServices
             'amount' => $_REQUEST['amount'] ?? $amount,
         ];
 
-        $apiKey = (app()->environment('production')) ? static::getLivePublishKey() : static::getTestPublishKey();
-
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $paymentIntentId . '/increment_authorization');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, $apiKey);
+        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
 
         $data = curl_exec($curl);
 
@@ -153,14 +130,12 @@ final class StripeServices
             'amount_to_capture' => $_REQUEST['amount'] ?? $amount,
         ];
 
-        $apiKey = (app()->environment('production')) ? static::getLiveSecretKey() : static::getTestSecretKey();
-
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $paymentIntentId . '/capture');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, $apiKey);
+        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
 
         $data = curl_exec($curl);
 
@@ -176,13 +151,11 @@ final class StripeServices
     {
         $paymentIntentId = $_REQUEST['paymentIntentId'] ?? $paymentIntentId;
 
-        $apiKey = (app()->environment('production')) ? static::getLiveSecretKey() : static::getTestSecretKey();
-
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/'. $paymentIntentId .'/cancel');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_USERPWD, $apiKey);
+        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
 
         $data = curl_exec($curl);
 

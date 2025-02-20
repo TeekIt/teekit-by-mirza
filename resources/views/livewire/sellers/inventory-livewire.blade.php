@@ -255,13 +255,13 @@
                                                     @endif
                                                 </div> --}}
                                             </div>
-                                            <h5>${{ $inventory->price }}</h5>
+                                            <h5>£{{ $inventory->price }}</h5>
                                         </div>
                                     </div>
                                 </div>
                             @endif
                         @empty
-                            <h4 class="text-dark text-center p-2">No Products Found :(</h4>
+                            <h4 class="text-dark text-center p-2">No Products Found 🥺</h4>
                         @endforelse
                     </div>
                     <div class="row">
@@ -322,7 +322,7 @@
                         @empty
                             <tr>
                                 <td colspan="4">
-                                    <h4 class="text-dark text-center p-2">No Products Found :(</h4>
+                                    <h4 class="text-dark text-center p-2">No Products Found 🥺</h4>
                                 </td>
                             </tr>
                         @endforelse

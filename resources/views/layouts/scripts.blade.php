@@ -66,7 +66,7 @@
                     return permission === "granted";
                 }
 
-                console.log("Please allow notifications for TeeIt :(");
+                console.log("Please allow notifications for TeeIt 🥺");
                 return false;
             }
 

@@ -11,7 +11,7 @@ final class GophrServices
 {
     public static function getApiKey(): string
     {
-        return env('GOPHR_API_KEY');
+        return config('gophr.GOPHR_API_KEY');
     }
 
     public static function getApiUrl(): string

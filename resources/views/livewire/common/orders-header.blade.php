@@ -428,6 +428,26 @@
                 <td><b>Payment Status</b></td>
                 <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
             </tr>
+
+            <tr>
+                <th class="text-center site-primary-bg text-light" colspan="4">Customer Details</th>
+            </tr>
+
+            <tr>
+                <td><b>Name</b></td>
+                <td>{{ $order->customer_name }}</td>
+                <td><b>Contact</b></td>
+                <td>{{ $order->phone_number }}</td>
+            </tr>
+
+            <tr>
+                <td><b>Address</b></td>
+                <td colspan="3">{{ $order->address }}</td>
+            </tr>
+
+            <tr>
+                <th class="text-center site-primary-bg text-light" colspan="4">Order Items</th>
+            </tr>
         </tbody>
     </table>
 </div>

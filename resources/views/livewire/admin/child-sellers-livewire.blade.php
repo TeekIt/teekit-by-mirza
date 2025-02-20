@@ -179,7 +179,7 @@
                     </div>
                 </div>
             @empty
-                <h1 class="text-dark">No Sellers Found :(</h1>
+                <h1 class="text-dark">No Sellers Found 🥺</h1>
             @endforelse
         </div>
         <div class="row">

@@ -276,7 +276,7 @@
                                                     <div class="col-12 col-lg-4">
                                                         <img class="img img-fluid img-thumbnail"
                                                             src="{{ config('constants.BUCKET') . $user->user_img }}"
-                                                            alt="Store image not uploaded :(">
+                                                            alt="Store image not uploaded 🥺">
                                                         <form wire:submit.prevent="updateImage">
                                                             <input type="file" class="my-3"
                                                                 wire:model.defer="image_to_upload" accept="image/*">

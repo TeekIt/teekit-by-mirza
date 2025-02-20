@@ -229,7 +229,7 @@
             </div>
             <!-- /Single Order Content -->
         @empty
-            <h2>No orders of any unique products yet... :(</h2>
+            <h2>No orders of any unique products yet... 🥺</h2>
         @endforelse
 
         @if (!empty($data))
