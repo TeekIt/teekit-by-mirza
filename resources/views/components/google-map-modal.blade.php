@@ -48,14 +48,14 @@
                             <input type="text" name="modal_long" id="modal_long" class="form-control" />
                         </div>
                     </div>
-                    <button type="submit" onclick="submitLocation()" class="d-no mt-3 btn btn-submit btn-block btn-outline-primary">
+                    <button type="submit" onclick="submitLocation()" class="btn btn-site-primary btn-submit mt-3 col-12">
                         Submit
                     </button>
                 </div>
             </div>
             <!-- Modal footer -->
             <div class="modal-footer">
-                <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary rounded-pill px-5 py-2" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

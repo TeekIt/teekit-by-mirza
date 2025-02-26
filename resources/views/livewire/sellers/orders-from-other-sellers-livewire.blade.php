@@ -47,7 +47,7 @@
     <!-- Main Content -->
     <div class="container">
         <div class="col-12">
-            <h4 class="py-4 my-1">Orders From Other Sellers</h4>
+            <h4 class="py-4 my-1 text-site-primary">Orders From Other Sellers</h4>
         </div>
         @forelse ($data as $singleIndex)
             <!-- Single Order Content -->

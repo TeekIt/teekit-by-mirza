@@ -91,7 +91,7 @@
     </div>
     <div class="row">
         <div class="col-12 col-sm-6 col-md-5 col-xl-6">
-            <h4 class="py-4 my-1">Drivers</h4>
+            <h4 class="py-4 my-1 text-site-primary">Drivers</h4>
         </div>
         <div class="col-12 col-sm-6 col-md-5 col-xl-5">
             <div class="input-group py-4 my-2">

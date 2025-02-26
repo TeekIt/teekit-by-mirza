@@ -2,15 +2,17 @@
 @section('content')
 <div class="content">
 
+    <x-session-messages />
+
     <!-- Content Header (Page header) -->
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-sm-12">
-                    <h1 class="m-0 text-dark text-center">Payment Settings</h1>
-                </div><!-- /.col -->
-            </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <h4 class="py-2 my-1 text-site-primary">Payment Settings</h4>
+                </div>
+            </div>
+        </div>
     </div>
     <!-- /.content-header -->
 
@@ -26,7 +28,7 @@
                                 <div class="card-text">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <h4 class="text-center text-primary">Bank Details</h4>
+                                            <h4 class="text-center text-site-primary">Bank Details</h4>
                                         </div>
                                         <div class="col-md-12">
                                             <form action="{{route('payment_settings_update')}}" method="POST" enctype="multipart/form-data">

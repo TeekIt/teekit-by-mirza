@@ -1,6 +1,6 @@
     <!-- jQuery -->
-    <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script>
+    <script src="{{ asset('js/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('js/jquery.timepicker.min.js') }}"></script>
     <!-- Bootstrap 5 -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
         integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
@@ -9,7 +9,7 @@
         integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
     </script>
     <!-- AdminLTE App -->
-    <script src="{{ asset('res/dist/js/adminlte.min.js') }}"></script>
+    <script src="{{ asset('js/adminlte.min.js') }}"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <!-- JQuery Multi Selector -->

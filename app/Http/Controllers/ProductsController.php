@@ -199,7 +199,6 @@ class ProductsController extends Controller
                 Storage::disk('spaces')->put($filename, File::get($file));
                 if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
                     info("file is stored successfully : " . $filename);
-                    // $filename = "/user_imgs/" . $filename;
                 } else {
                     info("file is not found :- " . $filename);
                 }
@@ -214,7 +213,6 @@ class ProductsController extends Controller
                     Storage::disk('spaces')->put($filename, File::get($file));
                     if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
                         info("file is stored successfully : " . $filename);
-                        // $filename = "/user_imgs/" . $filename;
                     } else {
                         info("file is not found :- " . $filename);
                     }
@@ -330,7 +328,6 @@ class ProductsController extends Controller
                 Storage::disk('user_public')->put($filename, File::get($file));
                 if (Storage::disk('user_public')->exists($filename)) {  // check file exists in directory or not
                     info("file is store successfully : " . $filename);
-                    $filename = "/user_imgs/" . $filename;
                 } else {
                     info("file is not found :- " . $filename);
                 }

@@ -77,7 +77,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-lg-12 col-sm-12 col-md-12">
-                        <h4 class="py-4 my-1">Withdrawal Requests</h4>
+                        <h4 class="py-4 my-1 text-site-primary">Withdrawal Requests</h4>
                     </div>
                 </div><!-- /.row -->
             </div><!-- /.container-fluid -->

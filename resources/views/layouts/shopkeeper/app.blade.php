@@ -45,7 +45,7 @@
             color: #fff;
         }
 
-        .text-primary {
+        .text-site-primary {
             color: #3a4b83 !important;
         }
 

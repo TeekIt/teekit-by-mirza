@@ -18,7 +18,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="offset-md-2 col-md-8 pl-4 pr-4 pb-4">
-                    <h4 class="text-left text-primary">Import Products</h4>
+                    <h4 class="text-left text-site-primary">Import Products</h4>
                     <div class="card">
                         <div class="card-body">
                             <div class=" d-block text-right">

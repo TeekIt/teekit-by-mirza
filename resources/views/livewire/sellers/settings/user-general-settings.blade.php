@@ -6,7 +6,7 @@
         
         <x-session-messages />
 
-        <!-- Google Map Modal -->
+        {{-- ************************************ Google Map Modal ************************************ --}}
         <div wire:ignore.self class="modal hide" id="mapModal">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
@@ -110,12 +110,13 @@
                     </div>
                     <!-- Modal footer -->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary rounded-pill px-5 py-2" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Edit Modal -->
+
+        {{-- ************************************ Edit Modal ************************************ --}}
         <div wire:ignore.self class="modal fade" id="editUserModal" tabindex="-1" role="dialog"
             aria-labelledby="editUserModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -249,15 +250,16 @@
                 </div>
             </div>
         </div>
+
         <!-- Content Header (Page header) -->
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-12 col-sm-6 col-md-4">
-                        <h4 class="py-2 my-1">General Settings</h4>
+                        <h4 class="py-2 my-1 text-site-primary">General Settings</h4>
                     </div>
-                </div><!-- /.row -->
-            </div><!-- /.container-fluid -->
+                </div>
+            </div>
         </div>
         <!-- /.content-header -->
 
@@ -521,10 +523,11 @@
                 <!-- /.row -->
             </div>
             <!-- /.container-fluid -->
+
             <div class="container-fluid">
                 <div class="row">
                     <div class="offset-md-2 col-md-8 pl-4 pr-4 pb-4">
-                        <h4 class="text-left text-primary">Update Store Hours</h4>
+                        <h4 class="text-center text-site-primary">Update Business Hours</h4>
                         <div class="card">
                             <div class="card-body-custom">
                                 <div class=" d-block text-right">
