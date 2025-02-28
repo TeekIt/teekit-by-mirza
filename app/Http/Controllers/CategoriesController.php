@@ -6,6 +6,7 @@ use App\Categories;
 use App\Products;
 use App\Qty;
 use App\Services\GoogleMapServices;
+use App\Services\ImageServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
@@ -21,27 +22,27 @@ class CategoriesController extends Controller
      */
     public function add(Request $request)
     {
-        try {
-            $validatedData = Categories::validator($request);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-            }
-            $category = Categories::add($request);
-            return JsonResponseServices::getApiResponse(
-                $category,
-                config('constants.TRUE_STATUS'),
-                config('constants.DATA_INSERTION_SUCCESS'),
-                config('constants.HTTP_OK')
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
+        $validatedData = Validator::make($request->all(), [
+            'categoryName' => 'required|string|max:255',
+            'categoryImage' => 'required|image|mimes:jpeg,png,jpg|max:100',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+
+        $validatedData = (object) $validatedData->validated();
+
+        $category = Categories::add(
+            $validatedData->categoryName,
+            ImageServices::uploadImg($request, "categoryImage")
+        );
+
+        return JsonResponseServices::getApiResponse(
+            $category,
+            config('constants.TRUE_STATUS'),
+            config('constants.DATA_INSERTION_SUCCESS'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * Update category
@@ -50,10 +51,10 @@ class CategoriesController extends Controller
     public function update(Request $request, $category_id)
     {
         try {
-            $validatedData = Categories::validator($request);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-            }
+            // $validatedData = Categories::validator($request);
+            // if ($validatedData->fails()) {
+            //     return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+            // }
             $category = Categories::updateCategory($request, $category_id);
             return JsonResponseServices::getApiResponse(
                 $category,

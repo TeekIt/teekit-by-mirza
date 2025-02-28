@@ -58,7 +58,9 @@ class OrdersLivewire extends Component
 
         $this->resetAllPaginators();
     }
-
+    /* 
+     * Custom Helpers
+     */
     public function resetModal()
     {
         $this->resetValidation();
@@ -140,8 +142,9 @@ class OrdersLivewire extends Component
             true
         );
     }
-
-
+    /* 
+     * CRUD Methods
+     */
     public function assignToGophrDriver()
     {
         try {

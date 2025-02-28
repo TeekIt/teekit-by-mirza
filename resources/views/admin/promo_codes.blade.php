@@ -15,7 +15,7 @@
                             <span class="text-white">All</span>
                         </button>
                         <button type="button" class="btn btn-danger my-3 py-3 w-100" onclick="delPromoCodes()"
-                            title="Delete Selcted">
+                            title="Delete Selected">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                         <button data-bs-toggle="modal" data-bs-target="#add_promocodeModal"

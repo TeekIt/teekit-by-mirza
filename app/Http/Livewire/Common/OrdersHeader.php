@@ -52,7 +52,7 @@ class OrdersHeader extends Component
         $this->order = $order;
     }
     /* 
-     * Helpers
+     * Custom Helpers
      */
     public function resetModal()
     {

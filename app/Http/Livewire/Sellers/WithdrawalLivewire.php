@@ -20,7 +20,7 @@ class WithdrawalLivewire extends Component
         $page = 1;
 
     protected $paginationTheme = 'bootstrap';
-    
+
     protected $rules = [
         'amount' => 'numeric|between:0,999999.99'
     ];
@@ -45,7 +45,7 @@ class WithdrawalLivewire extends Component
     public function resetAllPaginators()
     {
         $this->resetPage('sap_products_page');
-    }   
+    }
 
     public function resetThisPage()
     {
@@ -78,7 +78,7 @@ class WithdrawalLivewire extends Component
         $user->pending_withdraw -= $this->amount;
         $user->total_withdraw += $this->amount;
         $user->save();
-      
+
         $status = 'Pending';
         // Create withdrawal request
         $withdrawalRequest = WithdrawalRequests::add($user->id, $this->amount, $status, $user->bank_details);
@@ -93,7 +93,13 @@ class WithdrawalLivewire extends Component
 
     public function render()
     {
-        $data = WithdrawalRequests::getWithdrawalResquests(User::getSellerID(), $this->search, $this->isAmountByIdSet(), $this->created_at)->paginate(9);
+        $data = WithdrawalRequests::getWithdrawalResquests(
+            User::getSellerID(),
+            $this->search,
+            $this->isAmountByIdSet(),
+            $this->created_at
+        )->paginate(9);
+
         return view('livewire.sellers.withdrawal-livewire', compact('data'));
     }
 }

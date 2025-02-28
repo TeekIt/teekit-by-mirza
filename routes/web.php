@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PromoCodesController;
 use App\Http\Controllers\StuartDeliveryController;
 use App\Http\Controllers\UsersController;
+use App\Http\Livewire\Admin\CategoriesLivewire;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
@@ -135,6 +136,7 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
     Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
     Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
     Route::get('/drivers', DriversLivewire::class)->name('admin.test.drivers');
+    Route::get('/categories', CategoriesLivewire::class)->name('admin.categories.new');
 
     Route::prefix('notification')->controller(NotificationsController::class)->group(function () {
         Route::get('/home', 'notificationHome')->name('admin.notification.home');
@@ -175,10 +177,14 @@ Route::get('/aorders/unverified', [HomeController::class, 'adminOrdersUnverified
 Route::get('/aorders/delete', [HomeController::class, 'adminOrdersDel'])->name('admin.del.orders');
 Route::get('/complete-orders', [HomeController::class, 'completeOrders'])->name('complete.order');
 Route::get('/mark-complete-order/{id}', [HomeController::class, 'markCompleteOrder'])->name('mark.complete.order');
+
+/* Old categories routes - begins */
 Route::get('/acategories', [HomeController::class, 'allCat'])->name('admin.categories');
 Route::post('/acategories/{id}/update', [HomeController::class, 'updateCat'])->name('update_cat');
 Route::post('/acategories/add_cat', [HomeController::class, 'addCat'])->name('add_cat');
 Route::get('/acategories/delete_cat/{id}', [HomeController::class, 'deleteCat'])->name('delete_cat');
+/* Old categories routes - ends */
+
 Route::get('/queries', [HomeController::class, 'adminQueries'])->name('admin.queries');
 Route::get('/store/application-fee/{user_id}/{application_fee}', [UserAndRoleController::class, 'updateApplicationFee'])->name('application_fee');
 Route::get('/users/{user_id}/status/{status}', [HomeController::class, 'changeUserStatus'])->name('change_user_status');

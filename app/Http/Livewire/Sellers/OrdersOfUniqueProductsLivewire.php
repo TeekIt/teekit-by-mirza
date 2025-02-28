@@ -44,19 +44,13 @@ class OrdersOfUniqueProductsLivewire extends Component
      */
     public function resetModal()
     {
-        $this->resetAllErrors();
+        $this->resetValidation();
 
         $this->reset([
             'priceBySeller',
             'selectedOrder',
             'orderId',
         ]);
-    }
-
-    public function resetAllErrors()
-    {
-        $this->resetErrorBag();
-        // $this->resetValidation();
     }
 
     public function renderAcceptOrderModal($orderId)
@@ -305,6 +299,7 @@ class OrdersOfUniqueProductsLivewire extends Component
             sellerId: $this->sellerId,
             orderBy: 'desc',
         );
-        return view('livewire.sellers.orders-of-unique-products-livewire', ['data' => $data]);
+
+        return view('livewire.sellers.orders-of-unique-products-livewire', compact('data'));
     }
 }

@@ -14,7 +14,7 @@ use Livewire\WithPagination;
 class InventoryLivewire extends Component
 {
     use WithPagination;
-    
+
     public
         $category_id,
         $category,
@@ -135,6 +135,7 @@ class InventoryLivewire extends Component
         $categories = Categories::allCategories(['id', 'category_name']);
         $featured = [];
         $this->category_id = ($this->category_id == 0) ? null : $this->category_id;
+
         if (Gate::allows('seller')) {
             $data = Products::getParentSellerProductsForView(auth()->id(), $this->search, $this->category_id, order_by: 'desc');
             $featured = $this->getFeaturedProducts($data);
@@ -146,6 +147,11 @@ class InventoryLivewire extends Component
             $data = Products::getChildSellerProductsForView(auth()->id(), $this->search, $this->category_id);
             $this->quantity = $this->populateQuantityArray($data);
         }
-        return view('livewire.sellers.inventory-livewire', ['data' => $data, 'categories' => $categories, 'featured_products' => $featured]);
+
+        return view('livewire.sellers.inventory-livewire', [
+            'data' => $data,
+            'categories' => $categories,
+            'featured_products' => $featured
+        ]);
     }
 }
