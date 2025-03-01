@@ -35,19 +35,19 @@ class Categories extends Model
     /**
      * Helpers
      */
-    public static function uploadImg(object $request, string $category_name): string
-    {
-        $file = $request->file('category_image');
-        $cat_name = str_replace(' ', '_', $category_name);
-        $filename = uniqid("Category_" . $cat_name . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
-        Storage::disk('spaces')->put($filename, File::get($file));
-        if (Storage::disk('spaces')->exists($filename)) { // check file exists in directory or not
-            info("file is stored successfully : " . $filename);
-        } else {
-            info("file is not found :- " . $filename);
-        }
-        return $filename;
-    }
+    // public static function uploadImg(object $request, string $category_name): string
+    // {
+    //     $file = $request->file('category_image');
+    //     $cat_name = str_replace(' ', '_', $category_name);
+    //     $filename = uniqid("Category_" . $cat_name . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
+    //     Storage::disk('spaces')->put($filename, File::get($file));
+    //     if (Storage::disk('spaces')->exists($filename)) { // check file exists in directory or not
+    //         info("file is stored successfully : " . $filename);
+    //     } else {
+    //         info("file is not found :- " . $filename);
+    //     }
+    //     return $filename;
+    // }
 
     public static function add(string $categoryName, string $categoryImage): Categories
     {
