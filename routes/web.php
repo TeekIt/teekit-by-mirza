@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\UserAndRoleController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CategoriesController;
 use App\Http\Livewire\Admin\ParentSellersLivewire;
 use App\Http\Livewire\Admin\ReferralCodesLivewire;
 use App\Http\Livewire\Sellers\InventoryLivewire;
@@ -136,7 +137,11 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
     Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
     Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
     Route::get('/drivers', DriversLivewire::class)->name('admin.test.drivers');
-    Route::get('/categories', CategoriesLivewire::class)->name('admin.categories.new');
+
+    Route::prefix('categories')->group(function () {
+        Route::get('/', CategoriesLivewire::class)->name('admin.categories.new');
+        Route::get('/delete', [CategoriesController::class, 'destroy'])->name('admin.categories.del');
+    });
 
     Route::prefix('notification')->controller(NotificationsController::class)->group(function () {
         Route::get('/home', 'notificationHome')->name('admin.notification.home');

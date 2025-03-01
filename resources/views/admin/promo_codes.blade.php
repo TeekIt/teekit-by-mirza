@@ -140,7 +140,8 @@
                                                 data-bs-dismiss="modal">
                                                 Close
                                             </button>
-                                            <button type="submit" class="btn site-primary-yellow-bg rounded-pill px-5 py-2">
+                                            <button type="submit"
+                                                class="btn site-primary-yellow-bg rounded-pill px-5 py-2">
                                                 Update
                                             </button>
                                         </div>
@@ -274,7 +275,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($promo_codes as $promo_code)
+                                        @forelse ($promo_codes as $promo_code)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>
@@ -297,7 +298,13 @@
                                                     </button>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="text-center">
+                                                    {{ config('constants.NO_RECORD') }}
+                                                </td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                                 <div class="d-flex justify-content-center" style="padding-top: 10px;">

@@ -239,12 +239,14 @@ class UserGeneralSettings extends Component
         $this->business_phone = $user->business_phone;
         $this->phone = $user->phone;
         $this->user_img = $user->user_img;
+        
         return $user;
     }
 
     public function render()
     {
         $user = $this->setUserInfo($this->user_id);
+
         return view('livewire.sellers.settings.user-general-settings', compact('user'));
     }
 }

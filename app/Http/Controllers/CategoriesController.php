@@ -72,6 +72,15 @@ class CategoriesController extends Controller
             );
         }
     }
+
+    public function destroy(Request $request)
+    {
+        for ($i = 0; $i < count($request->categories); $i++) {
+            Categories::where('id', '=', $request->categories[$i])->delete();
+        }
+
+        return response("Categories Deleted Successfully");
+    }
     /**
      * List all categories w.r.t store ID or without store ID
      * @version 1.2.0

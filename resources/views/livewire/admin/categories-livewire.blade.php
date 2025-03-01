@@ -18,8 +18,8 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <input type="file" class="form-control" accept="image/jpeg,jpg,png"
-                                            wire:model="image">
+                                        <input type="file" class="form-control" accept="image/*"
+                                            wire:model.defer="image">
                                     </div>
                                     <small class="text-danger">
                                         @error('image')
@@ -31,8 +31,8 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="form-group">
-                                        <input type="text" class="form-control" wire:model="name"
-                                            placeholder="Name*">
+                                        <input type="text" class="form-control" placeholder="Enter category name..."
+                                            wire:model.defer="name">
                                     </div>
                                     <small class="text-danger">
                                         @error('name')
@@ -46,19 +46,89 @@
                                     data-bs-dismiss="modal" wire:click="resetModal">
                                     Close
                                 </button>
-                                <button class="btn site-primary-yellow-bg rounded-pill px-5 py-2" type="submit">
-                                    Add
-                                </button>
-
-                                <button type="button" class="btn btn-primary my-4 p-1 w-100 mx-1"
-                                    wire:click="resetThisPage" wire:target="resetThisPage" wire:loading.class="btn-dark"
-                                    wire:loading.class.remove="btn-primary" wire:loading.attr="disabled"
-                                    title="Reset orders page">
-                                    <span class="fas fa-sync" wire:target="resetThisPage" wire:loading.remove></span>
-                                    <span wire:target="resetThisPage" wire:loading>
+                                <button type="submit" class="btn site-primary-yellow-bg rounded-pill px-5 py-2"
+                                    wire:target="addCategory" wire:loading.class="btn-dark"
+                                    wire:loading.class.remove="site-primary-yellow-bg" wire:loading.attr="disabled">
+                                    <span wire:target="addCategory" wire:loading.remove>
+                                        Add
+                                    </span>
+                                    <span wire:target="addCategory" wire:loading>
                                         <span class="spinner-border spinner-border-sm text-light" role="status"
                                             aria-hidden="true"></span>
                                     </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ************************************ Edit Categories Model ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="editCategoryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="row">
+                        <form>
+                            <div class="modal-header">
+                                <h5 class="modal-title">Edit Category</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                                    wire:click="resetModal"></button>
+                            </div>
+                            <div class="col-12 my-3">
+                                <div class="d-flex justify-content-center">
+                                    <img class="w-25" src="{{ config('constants.BUCKET') . $image }}">
+                                </div>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label>Image</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" accept="image/*"
+                                        wire:model.defer="image">
+                                    <button type="button" class="btn btn-site-primary" wire:click="updateCategoryImage"
+                                        wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
+                                        wire:loading.attr="disabled" wire:target="updateCategoryImage">
+                                        <span wire:loading.remove wire:target="updateCategoryImage">Update</span>
+                                        <span wire:loading wire:target="updateCategoryImage">
+                                            <span class="spinner-border spinner-border-sm text-light" role="status"
+                                                aria-hidden="true"></span>
+                                        </span>
+                                    </button>
+                                </div>
+                                <small class="text-danger">
+                                    @error('image')
+                                        {{ $message }}
+                                    @enderror
+                                </small>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label>Name</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" wire:model.defer="name"
+                                        placeholder="Enter category name...">
+                                    <button type="button" class="btn btn-site-primary"
+                                        placeholder="Enter category name..." wire:click="updateCategoryName"
+                                        wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
+                                        wire:loading.attr="disabled" wire:target="updateCategoryName">
+                                        <span wire:loading.remove wire:target="updateCategoryName">Update</span>
+                                        <span wire:loading wire:target="updateCategoryName">
+                                            <span class="spinner-border spinner-border-sm text-light" role="status"
+                                                aria-hidden="true"></span>
+                                        </span>
+                                    </button>
+                                </div>
+                                <small class="text-danger">
+                                    @error('name')
+                                        {{ $message }}
+                                    @enderror
+                                </small>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary rounded-pill px-5 py-2"
+                                    data-bs-dismiss="modal" wire:click="resetModal">
+                                    Close
                                 </button>
                             </div>
                         </form>
@@ -80,7 +150,7 @@
                         title="Select All">
                         <span class="text-white">All</span>
                     </button>
-                    <button type="button" class="btn btn-danger my-3 py-3 w-100" onclick="delPromoCodes()"
+                    <button type="button" class="btn btn-danger my-3 py-3 w-100" onclick="delCategories()"
                         title="Delete Selected">
                         <i class="fas fa-trash-alt"></i>
                     </button>
@@ -128,6 +198,7 @@
                                     <td>{{ $category->created_at }}</td>
                                     <td>
                                         <button data-bs-toggle="modal" data-bs-target="#editCategoryModal"
+                                            wire:click="renderEditCategoryModal({{ $category->id }})"
                                             class="btn text-site-primary">
                                             <i class="far fa-edit"></i>
                                         </button>

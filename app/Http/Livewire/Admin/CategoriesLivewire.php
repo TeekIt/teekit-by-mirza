@@ -14,6 +14,7 @@ class CategoriesLivewire extends Component
     use WithPagination, WithFileUploads;
 
     public
+        $categoryId,
         $image,
         $name;
 
@@ -26,9 +27,18 @@ class CategoriesLivewire extends Component
         $this->resetValidation();
 
         $this->reset([
+            'categoryId',
             'image',
             'name',
         ]);
+    }
+
+    public function renderEditCategoryModal($id)
+    {
+        $category = Categories::find($id);
+        $this->categoryId = $category->id;
+        $this->name = $category->category_name;
+        $this->image = $category->category_image;
     }
     /* 
      * CRUD Methods
@@ -36,15 +46,16 @@ class CategoriesLivewire extends Component
     public function addCategory()
     {
         $validatedData = $this->validate([
-            'image' => 'required|image|mimes:jpeg,jpg,png|max:1024',
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
+            'image' => 'required|image|mimes:jpeg,jpg,png|max:100',
         ]);
+        $validatedData = (object) $validatedData;
 
         try {
             /* Perform some operation */
             $inserted = Categories::add(
-                $validatedData['name'],
-                ImageServices::uploadLivewireImg($this->image)
+                $validatedData->name,
+                ImageServices::uploadLivewireImg($validatedData->image)
             );
             /* Operation finished */
             sleep(1);
@@ -61,23 +72,44 @@ class CategoriesLivewire extends Component
         }
     }
 
-    public function updateCategory()
+    public function updateCategoryImage()
     {
         $this->validate([
-            'image' => 'required|image|mimes:jpeg,jpg,png|max:1024',
+            'image' => 'required|image|mimes:jpeg,jpg,png|max:100',
+        ]);
+
+        try {
+            /* Perform some operation */
+            $updated = Categories::updateInfo(
+                $this->categoryId,
+                categoryImage: ImageServices::uploadLivewireImg($this->image)
+            );
+            /* Operation finished */
+            sleep(1);
+
+            if ($updated) {
+                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.UPDATION_FAILED'));
+            }
+        } catch (Exception $error) {
+            session()->flash('error', $error);
+        }
+    }
+
+    public function updateCategoryName()
+    {
+        $this->validate([
             'name' => 'required|string',
         ]);
 
         try {
             /* Perform some operation */
-            // $updated = User::updateInfo(
-            //     $this->user_id,
-            //     name: $this->name
-            // );
-
-            $updated = true;
+            $updated = Categories::updateInfo(
+                $this->categoryId,
+                categoryName: $this->name
+            );
             /* Operation finished */
-            $this->resetModal();
             sleep(1);
 
             if ($updated) {
@@ -92,7 +124,7 @@ class CategoriesLivewire extends Component
 
     public function render()
     {
-        $data = Categories::getCategoriesForView(columns: ['*'], orderBy: 'desc');
+        $data = Categories::getCategoriesForView();
 
         return view('livewire.admin.categories-livewire', compact('data'));
     }

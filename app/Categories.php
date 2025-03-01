@@ -52,9 +52,22 @@ class Categories extends Model
     public static function add(string $categoryName, string $categoryImage): Categories
     {
         return self::create([
-           'category_name' => $categoryName,
-           'category_image' => $categoryImage,
+            'category_name' => $categoryName,
+            'category_image' => $categoryImage,
         ]);
+    }
+
+    public static function updateInfo(
+        int $id,
+        ?string $categoryName = null,
+        ?string $categoryImage = null
+    ): bool {
+        $category = self::findOrFail($id);
+
+        if (!is_null($categoryName)) $category->category_name = $categoryName;
+        if (!is_null($categoryImage)) $category->category_image = $categoryImage;
+
+        return $category->save();
     }
 
     public static function updateCategory(object $request, $category_id): Categories
@@ -77,7 +90,7 @@ class Categories extends Model
             })->get();
     }
 
-    public static function getCategoriesForView(array $columns = ['*'], string $orderBy, int $perPage = 10): LengthAwarePaginator
+    public static function getCategoriesForView(array $columns = ['*'], string $orderBy = 'desc', int $perPage = 10): LengthAwarePaginator
     {
         return self::select($columns)
             ->orderBy('created_at', $orderBy)

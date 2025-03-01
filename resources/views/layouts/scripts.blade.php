@@ -229,17 +229,17 @@
         }
 
         const selectAll = () => {
-            var checkboxes = document.querySelectorAll('.select-checkbox');
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = true;
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            for (let i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = !checkboxes[i].checked;
             }
         }
 
         const delUsers = () => {
-            var checkboxes = document.querySelectorAll('.select-checkbox');
-            var users = [];
-            var x = 0;
-            for (var i = 0; i < checkboxes.length; i++) {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const users = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].checked) {
                     users[x] = checkboxes[i].id;
                     x++;
@@ -272,10 +272,10 @@
         }
 
         const delDrivers = () => {
-            var checkboxes = document.querySelectorAll('.select-checkbox');
-            var drivers = [];
-            var x = 0;
-            for (var i = 0; i < checkboxes.length; i++) {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const drivers = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].checked) {
                     drivers[x] = checkboxes[i].id;
                     x++;
@@ -308,10 +308,10 @@
         }
 
         const delOrders = () => {
-            var checkboxes = document.querySelectorAll('.select-checkbox');
-            var orders = [];
-            var x = 0;
-            for (var i = 0; i < checkboxes.length; i++) {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const orders = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].checked) {
                     orders[x] = checkboxes[i].id;
                     x++;
@@ -344,10 +344,10 @@
         }
 
         const delPromoCodes = () => {
-            var checkboxes = document.querySelectorAll('.select-checkbox');
-            var promocodes = [];
-            var x = 0;
-            for (var i = 0; i < checkboxes.length; i++) {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const promocodes = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].checked) {
                     promocodes[x] = checkboxes[i].id;
                     x++;
@@ -379,9 +379,45 @@
             }
         }
 
+        const delCategories = () => {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const categories = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    categories[x] = checkboxes[i].id;
+                    x++;
+                }
+            }
+            if (categories.length != 0) {
+                Swal.fire({
+                    title: 'Warning!',
+                    text: 'Are you sure you want to delete the selected categories?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('admin.categories.del') }}",
+                            type: "get",
+                            data: {
+                                "categories": categories
+                            },
+                            success: function(response) {
+                                if (response == "Categories Deleted Successfully") {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
         const updateStoreInfo = () => {
-            var form = document.forms.namedItem("user_form");
-            var formdata = new FormData(form);
+            const form = document.forms.namedItem("user_form");
+            const formdata = new FormData(form);
             $.ajax({
                 url: "{{ route('admin.image.update') }}",
                 type: "post",
