@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\SubCategory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
@@ -23,6 +24,11 @@ class Categories extends Model
     /**
      * Relations
      */
+    public function subCategories(): HasMany
+    {
+        return $this->hasMany(SubCategory::class, 'parent_category_id');
+    }
+
     public function products(): HasMany
     {
         return $this->hasMany(Products::class, 'category_id', 'id');
@@ -70,17 +76,17 @@ class Categories extends Model
         return $category->save();
     }
 
-    public static function updateCategory(object $request, $category_id): Categories
-    {
-        $category = self::find($category_id);
-        $category->category_name = $request->category_name;
-        if ($request->hasFile('category_image'))
-            $category->category_image = static::uploadImg($request, $category->category_name);
-        else
-            info("Category image is missing");
-        $category->save();
-        return $category;
-    }
+    // public static function updateCategory(object $request, $category_id): Categories
+    // {
+    //     $category = self::find($category_id);
+    //     $category->category_name = $request->category_name;
+    //     if ($request->hasFile('category_image'))
+    //         $category->category_image = static::uploadImg($request, $category->category_name);
+    //     else
+    //         info("Category image is missing");
+    //     $category->save();
+    //     return $category;
+    // }
 
     public static function getAllCategoriesBySellerId(int $sellerId, array $columns): Collection
     {
@@ -93,6 +99,7 @@ class Categories extends Model
     public static function getCategoriesForView(array $columns = ['*'], string $orderBy = 'desc', int $perPage = 10): LengthAwarePaginator
     {
         return self::select($columns)
+            ->with('subCategories')
             ->orderBy('created_at', $orderBy)
             ->paginate($perPage);
     }

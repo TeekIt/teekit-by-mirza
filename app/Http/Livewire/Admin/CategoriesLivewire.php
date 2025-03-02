@@ -125,7 +125,7 @@ class CategoriesLivewire extends Component
     public function render()
     {
         $data = Categories::getCategoriesForView();
-
+        
         return view('livewire.admin.categories-livewire', compact('data'));
     }
 }
