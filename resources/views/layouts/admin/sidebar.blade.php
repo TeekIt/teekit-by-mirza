@@ -176,7 +176,7 @@
                           <i class="nav-icon fas fa-clipboard-list"></i>
                           <p class="ml-2">
                               Categories
-                              <span class="badge badge-primary">new</span>
+                              <span class="badge badge-warning text-light">new</span>
                           </p>
                       </a>
                   </li>

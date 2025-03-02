@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Admin;
 
+use App\Categories;
 use App\Models\SubCategory;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,11 +14,15 @@ class SubCategoriesLivewire extends Component
         $subCategoryId,
         $name;
 
-    public $subCategories;
+    public $category;
 
-    public function mount(Collection $subCategories)
+    protected $listeners = [
+        'refreshThisComponent' => '$refresh',
+    ];
+
+    public function mount(Categories $category)
     {
-        $this->subCategories = $subCategories;
+        $this->category = $category;
     }
     /* 
      * Custom Helpers
@@ -38,7 +43,7 @@ class SubCategoriesLivewire extends Component
         $this->subCategoryId = $subCategory->id;
         $this->name = $subCategory->name;
     }
-     /* 
+    /* 
      * CRUD Methods
      */
     public function addSubCategory()
@@ -52,12 +57,13 @@ class SubCategoriesLivewire extends Component
             /* Perform some operation */
             $inserted = SubCategory::add(
                 $validatedData->name,
-                1
+                $this->category->id
             );
             /* Operation finished */
             sleep(1);
+            $this->emitSelf('refreshThisComponent');
             $this->resetModal();
-            $this->dispatchBrowserEvent('close-modal', ['id' => 'addSubCategoryModal']);
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'addSubCategoryModal' . $this->category->id]);
 
             if ($inserted) {
                 session()->flash('success', config('constants.DATA_INSERTION_SUCCESS'));
@@ -83,7 +89,8 @@ class SubCategoriesLivewire extends Component
             );
             /* Operation finished */
             sleep(1);
-            $this->dispatchBrowserEvent('close-modal', ['id' => 'editSubCategoryModal']);
+            $this->emitSelf('refreshThisComponent');
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'editSubCategoryModal' . $this->category->id]);
 
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));

@@ -1,7 +1,7 @@
 <div class="col-11">
 
     {{-- ************************************ Add Categories Model ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="addSubCategoryModal" tabindex="-1">
+    <div wire:ignore.self class="modal fade" id="addSubCategoryModal{{ $category->id }}" tabindex="-1">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-body">
@@ -50,12 +50,12 @@
     </div>
 
     {{-- ************************************ Edit Categories Model ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="editSubCategoryModal" tabindex="-1">
+    <div wire:ignore.self class="modal fade" id="editSubCategoryModal{{ $category->id }}" tabindex="-1">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="row">
-                        <form>
+                        <form wire:submit.prevent>
                             <div class="modal-header">
                                 <h5 class="modal-title">Edit Category</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
@@ -66,11 +66,12 @@
                                 <div class="input-group">
                                     <input type="text" class="form-control" wire:model.defer="name"
                                         placeholder="Enter sub category name...">
-                                    <button type="button" class="btn btn-site-primary" wire:click="updateCategoryName"
-                                        wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
-                                        wire:loading.attr="disabled" wire:target="updateCategoryName">
-                                        <span wire:loading.remove wire:target="updateCategoryName">Update</span>
-                                        <span wire:loading wire:target="updateCategoryName">
+                                    <button type="button" class="btn btn-site-primary"
+                                        wire:click="updateSubCategoryName" wire:loading.class="btn-dark"
+                                        wire:loading.class.remove="btn-site-primary" wire:loading.attr="disabled"
+                                        wire:target="updateSubCategoryName">
+                                        <span wire:loading.remove wire:target="updateSubCategoryName">Update</span>
+                                        <span wire:loading wire:target="updateSubCategoryName">
                                             <span class="spinner-border spinner-border-sm text-light"
                                                 role="status"></span>
                                         </span>
@@ -102,15 +103,11 @@
                     <!-- For maintaining left space -->
                 </div>
                 <div class="col-12 col-md-5 col-xl-3 d-flex gap-2">
-                    <button type="button" class="btn btn-success my-3 py-3 w-100" onclick="selectAll()"
-                        title="Select All">
-                        <span class="text-white">All</span>
-                    </button>
                     <button type="button" class="btn btn-danger my-3 py-3 w-100" onclick="delSubCategories()"
                         title="Delete Selected">
                         <i class="fas fa-trash-alt"></i>
                     </button>
-                    <button data-bs-toggle="modal" data-bs-target="#addSubCategoryModal"
+                    <button data-bs-toggle="modal" data-bs-target="#addSubCategoryModal{{ $category->id }}"
                         class="btn btn-site-primary my-3 py-3 w-100" title="Add New">
                         <span class="fas fa-plus"></span>
                     </button>
@@ -131,7 +128,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($subCategories as $subCategory)
+                @forelse ($category->subCategories as $subCategory)
                     <tr>
                         <td>{{ $subCategory->id }}</td>
                         <td>
@@ -141,7 +138,8 @@
                         <td>{{ $subCategory->name }}</td>
                         <td>{{ $subCategory->created_at }}</td>
                         <td>
-                            <button data-bs-toggle="modal" data-bs-target="#editSubCategoryModal"
+                            <button data-bs-toggle="modal" data-bs-target="#editSubCategoryModal{{ $category->id }}"
+                                wire:click="renderEditSubCategoryModal({{ $subCategory->id }})"
                                 class="btn text-site-primary">
                                 <i class="far fa-edit"></i>
                             </button>

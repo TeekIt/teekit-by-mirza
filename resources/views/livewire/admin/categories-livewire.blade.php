@@ -219,10 +219,9 @@
                                                     class="accordion-collapse collapse" aria-labelledby="headingTwo"
                                                     data-bs-parent="#accordionExample">
                                                     <div class="accordion-body">
-                                                        <div
-                                                            class="d-flex align-items-center flex-column border border-danger">
+                                                        <div class="d-flex align-items-center flex-column">
 
-                                                            <livewire:admin.sub-categories-livewire :subCategories="$category->subCategories"
+                                                            <livewire:admin.sub-categories-livewire :category="$category"
                                                                 wire:key="sub-categories-{{ $category->id }}" />
 
                                                         </div>

@@ -48,7 +48,6 @@ class OrdersLivewire extends Component
     protected $listeners = [
         'alternativeProductIncluded' => 'render',
         'callParentResetModal' => 'resetModal',
-        'askParentToRefreshChildComponent' => '$refresh',
     ];
 
     public function mount(Request $request)
