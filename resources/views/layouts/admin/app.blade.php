@@ -24,7 +24,9 @@
                     </div>
                 </div>
             </div>
+
             @yield('content')
+
         </div>
         <!-- /.content -->
     </div>
