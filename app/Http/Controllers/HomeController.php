@@ -200,7 +200,7 @@ class HomeController extends Controller
         $key = fgetcsv($fp, "1024", ",");
 
         // parse csv rows into array
-        $json = array();
+        $json = [];
         while ($row = fgetcsv($fp, "1024", ",")) {
             $json[] = array_combine($key, $row);
         }
@@ -238,7 +238,7 @@ class HomeController extends Controller
             // Reading file
             $file = fopen($filepath, "r");
             // Read through the file and store the contents as an array
-            $importData_arr = array();
+            $importData_arr = [];
             $i = 0;
             //Read the contents of the uploaded file
             while (($filedata = fgetcsv($file, 1000, ",")) !== FALSE) {

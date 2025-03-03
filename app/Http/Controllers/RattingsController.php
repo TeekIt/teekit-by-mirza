@@ -36,7 +36,7 @@ class RattingsController extends Controller
     {
         $validate = Rattings::updateValidator($request);
         if ($validate->fails()) {
-            $response = array('status' => false, 'message' => 'Validation error', 'data' => $validate->messages());
+            $response = ['status' => false, 'message' => 'Validation error', 'data' => $validate->messages()];
             return response()->json($response, 400);
         }
         $user_id = Auth::id();
