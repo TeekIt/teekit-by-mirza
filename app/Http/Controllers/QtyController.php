@@ -62,7 +62,7 @@ class QtyController extends Controller
         for ($times = 0; $times < 100; $times++) {
             // create both cURL resources
             $ch[$times] = curl_init();
-            curl_setopt_array($ch[$times], array(
+            curl_setopt_array($ch[$times], [
                 CURLOPT_URL => 'https://teekitstaging.shop/api/qty/all',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
@@ -71,7 +71,7 @@ class QtyController extends Controller
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => 'GET',
-            ));
+            ]);
         }
 
         //create the multiple cURL handle

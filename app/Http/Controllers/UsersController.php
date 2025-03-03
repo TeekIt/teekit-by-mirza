@@ -162,7 +162,7 @@ class UsersController extends Controller
      */
     public static function getSellerInfo(object $seller_info, array $map_api_result = null)
     {
-        $data = array(
+        $data = [
             'id' => $seller_info->id,
             'name' => $seller_info->name,
             'email' => $seller_info->email,
@@ -183,7 +183,7 @@ class UsersController extends Controller
             'is_online' => $seller_info->is_online,
             'roles' => ($seller_info->role_id == 2) ? ['sellers'] : ['child_sellers'],
             'stripe_account_id' => $seller_info->stripe_account_id,
-        );
+        ];
         if (!empty($map_api_result)) {
             $data['distance'] = $map_api_result['distance'];
             $data['duration'] = $map_api_result['duration'];
