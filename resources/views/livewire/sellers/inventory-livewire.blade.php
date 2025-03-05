@@ -62,7 +62,7 @@
                     @if (count($featured_products) > 0)
                         <div class="row">
                             <div class="col-lg-12 col-sm-12 col-md-12">
-                                <h4 class="py-4 my-1">Featured</h4>
+                                <h4 class="py-4 my-1 text-site-primary">Featured</h4>
                             </div>
                             @foreach ($featured_products as $inventory)
                                 <!-- Single Product -->
@@ -163,7 +163,7 @@
 
                     <div class="row">
                         <div class="col-12">
-                            <h4 class="py-4 my-1">Inventory</h4>
+                            <h4 class="py-4 my-1 text-site-primary">Inventory</h4>
                         </div>
                         @forelse ($data as $key => $inventory)
                             <!-- Single Product -->

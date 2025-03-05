@@ -1,10 +1,10 @@
 <aside class="main-sidebar sidebar-dark-primary" style="overflow: initial;">
     <!-- Brand Logo -->
     <a class="nav-link nav-sidebar-arrow" onclick="jQuery('.navbar-nav>.nav-item>.nav-link').click();"> 
-        <img src="{{ asset('res/res/img/arrow.png') }}">
+        <img src="{{ asset('images/icons/arrow.png') }}">
     </a>
     <a class="brand-link" href="/" style="display:block;opacity: 1">
-        <img alt="AdminLTE Logo" class="brand-image" src="{{ asset('res/res/img/logo.png') }}" style="display: block; opacity: 1">
+        <img alt="{{ config('app.name') }} - Logo" class="brand-image" src="{{ asset('images/logo.png') }}" style="display: block; opacity: 1">
     </a>
 
     <!-- Sidebar -->
@@ -66,7 +66,7 @@
                     <a class="nav-link {{ request()->routeIs('seller.request.delivery') ? 'active' : '' }}" href="{{ route('seller.request.delivery') }}">
                         <i class="nav-icon fas fa-truck-loading"></i>
                         <p class="ml-2">
-                            Requst Delivery
+                            Request Delivery
                         </p>
                     </a>
                 </li>

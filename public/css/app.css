@@ -2,6 +2,7 @@
 
 :root {
     --primary-bg: #3a4b83;
+    --primary-yellow:#ffcf42;
 }
 
 body {
@@ -10,8 +11,22 @@ body {
     font-weight: 300;
 }
 
+.text-site-primary {
+    color: var(--primary-bg) !important;
+}
+
+.btn-site-primary {
+    background-color: var(--primary-bg) !important;
+    border: none !important;
+    color: white !important;
+}
+
 .site-primary-bg {
     background-color: var(--primary-bg) !important;
+}
+
+.site-primary-yellow-bg {
+    background-color: var(--primary-yellow) !important;
 }
 
 .main-pages-bg-img {
@@ -32,10 +47,6 @@ table tr:first-of-type td {
 
 [class*=sidebar-dark-] * {
     color: #fff;
-}
-
-.text-primary {
-    color: var(--primary-bg) !important;
 }
 
 nav.main-header {
@@ -106,16 +117,6 @@ nav.main-header a {
 
 .content-header h1 {
     font-size: 3.5rem;
-}
-
-.text-site-primary {
-    color: var(--primary-bg) !important;
-}
-
-.btn-site-primary {
-    background-color: var(--primary-bg) !important;
-    border: none !important;
-    color: white !important;
 }
 
 .card-body {

@@ -21,7 +21,7 @@
                                 <div class="card-text">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <h4 class="text-center text-primary">Edit Product</h4>
+                                            <h4 class="text-center text-site-primary">Edit Product</h4>
                                         </div>
                                         <div class="col-md-12">
                                             <form action="{{ route('seller.edit.inventory', $inventory->id) }}"

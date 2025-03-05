@@ -89,7 +89,7 @@
     <!-- Main Content -->
     <div class="container">
         <div class="col-12">
-            <h4 class="py-4 my-1">Orders Of Unique Products</h4>
+            <h4 class="py-4 my-1 text-site-primary">Orders Of Unique Products</h4>
         </div>
         @forelse ($data as $singleIndex)
             <!-- Single Order Content -->
