@@ -154,7 +154,7 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
         Route::post('/update/pages', 'updatePages')->name('admin.update.pages');
 
         Route::prefix('orders')->group(function () {
-            Route::get('/', 'adminOrders')->name('admin.orders');
+            Route::get('/all', 'adminOrders')->name('admin.orders');
             Route::get('/verified', 'adminOrdersVerified')->name('admin.orders.verified');
             Route::get('/unverified', 'adminOrdersUnverified')->name('admin.orders.unverified');
             Route::get('/complete', 'completeOrders')->name('admin.orders.complete');
