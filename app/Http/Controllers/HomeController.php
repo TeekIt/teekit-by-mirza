@@ -463,8 +463,8 @@ class HomeController extends Controller
             $items = OrderItems::where('order_id', '=', $order->id)->get();
             $item_arr = [];
             foreach ($items as $item) {
+                dd('Product info will be gathered');
                 $product = Products::getProductInfo($order->seller_id, $item->product_belongs_to_id, ['*']);
-                dd('Product info gathered');
                 $item['product'] = $product;
                 $item_arr[] = $item;
             }
