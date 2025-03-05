@@ -446,55 +446,9 @@ class HomeController extends Controller
      */
     public function adminOrders(Request $request)
     {
-        $return_arr = [];
-        $orders = Orders::where('payment_status', '!=', 'hidden')->orderByDesc('id');
-        if ($request->search) {
-            $orders = $orders->where('id', '=', $request->search);
-        }
-        if ($request->customer_id) {
-            $orders = $orders->where('customer_id', '=', $request->customer_id);
-        }
-        if ($request->store_id) {
-            $orders = $orders->where('seller_id', '=', $request->store_id);
-        }
-        $orders = $orders->paginate(10);
-        $orders_p = $orders;
-        foreach ($orders as $order) {
-            $items = OrderItems::where('order_id', '=', $order->id)->get();
-            $item_arr = [];
-            foreach ($items as $item) {
-                // dd('Product info will be gathered');
-                // $product = Products::getProductInfo($order->seller_id, $item->product_belongs_to_id, ['*']);
+        $orders = Orders::getOrdersForSuperAdminView(orderBy: 'desc');
 
-                $product = Products::select(['*'])
-                ->with([
-                    'sellers' => function ($sellersRelation) use ($order) {
-                        $sellersRelation->select(
-                            User::getSellerCommonColumns()
-                        )->where('seller_id', $order->seller_id);
-                    },
-                    'qty' => function ($qtyRelation) use ($order) {
-                        $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', $order->seller_id);
-                    },
-                    'images:id,product_id,product_image',
-                    'category:id,category_name,category_image'
-                ])
-                ->whereHas('qty', function ($qtyRelation) use ($order) {
-                    $qtyRelation->where('seller_id', $order->seller_id);
-                })
-                ->where('id', $item->product_belongs_to_id)
-                ->WhereProductIsEnable()
-                ->firstOrFail();
-
-                $item['product'] = $product;
-                $item_arr[] = $item;
-            }
-            $order['items'] = $item_arr;
-            $return_arr[] = $order;
-        }
-        $orders = $return_arr;
-
-        return view('admin.orders', compact('orders', 'orders_p'));
+        return view('admin.orders', compact('orders'));
     }
     /**
      * Render verified orders listing view for admin

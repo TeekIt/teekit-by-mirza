@@ -245,6 +245,29 @@ class Orders extends Model
             ->paginate(10);
     }
 
+    public static function getOrdersForSuperAdminView(string $orderBy, int|null $orderId = null): LengthAwarePaginator
+    {
+        /* First we will update the "is_viewed" column if the order is searched by ID */
+        if ($orderId) static::isViewed($orderId);
+        /* Now we will fetch the required data */
+        $orders = self::with(['order_items.product'])
+            ->when($orderId, function ($query) use ($orderId) {
+                return $query->where('id', '=', $orderId);
+            })
+            ->orderBy('created_at', $orderBy)
+            ->paginate(10);
+        /* Load 'category' for products where 'product_belongs_to_type' is 'Product' */
+        $orders->each(function ($order) {
+            $order->order_items->each(function ($orderItem) {
+                if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
+                    $orderItem->product->load('category');
+                }
+            });
+        });
+
+        return $orders;
+    }
+
     public static function getOrdersForView(int|null $orderId = null, int $sellerId, string $orderBy): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */

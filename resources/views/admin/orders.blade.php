@@ -102,7 +102,7 @@
                                         <hr>
                                     </div>
                                     <div class="col-md-12">
-                                        @foreach ($order->items as $item)
+                                        @foreach ($order->order_items as $item)
                                             <div class="row mb-2">
                                                 <div class="col-md-2">
                                                     <span class="img-container">
@@ -222,7 +222,7 @@
             <!-- /.row -->
             <div class="row">
                 <div class="col-md-12">
-                    {{ $orders_p->links() }}
+                    {{ $orders->links() }}
                 </div>
             </div>
         </div><!-- /.container-fluid -->
