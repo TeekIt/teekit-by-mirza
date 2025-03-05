@@ -463,8 +463,29 @@ class HomeController extends Controller
             $items = OrderItems::where('order_id', '=', $order->id)->get();
             $item_arr = [];
             foreach ($items as $item) {
-                dd('Product info will be gathered');
-                $product = Products::getProductInfo($order->seller_id, $item->product_belongs_to_id, ['*']);
+                // dd('Product info will be gathered');
+                // $product = Products::getProductInfo($order->seller_id, $item->product_belongs_to_id, ['*']);
+
+                $product = Products::select(['*'])
+                ->with([
+                    'sellers' => function ($sellersRelation) use ($order) {
+                        $sellersRelation->select(
+                            User::getSellerCommonColumns()
+                        )->where('seller_id', $order->seller_id);
+                    },
+                    'qty' => function ($qtyRelation) use ($order) {
+                        $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', $order->seller_id);
+                    },
+                    'images:id,product_id,product_image',
+                    'category:id,category_name,category_image'
+                ])
+                ->whereHas('qty', function ($qtyRelation) use ($order) {
+                    $qtyRelation->where('seller_id', $order->seller_id);
+                })
+                ->where('id', $item->product_belongs_to_id)
+                ->WhereProductIsEnable()
+                ->firstOrFail();
+
                 $item['product'] = $product;
                 $item_arr[] = $item;
             }
