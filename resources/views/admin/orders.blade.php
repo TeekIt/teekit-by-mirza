@@ -127,7 +127,7 @@
                                                 </div>
                                                 <div class="col-md-6 mt-5">
                                                     <strong class="text-site-primary"> Receiver Name: </strong>
-                                                    {{ $order->receiver_name }} <br>
+                                                    {{ $order->customer_name }} <br>
                                                     <strong class="text-site-primary"> Contact: </strong>
                                                     {{ $order->phone_number }}
                                                     <br>
