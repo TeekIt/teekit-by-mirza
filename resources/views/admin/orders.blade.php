@@ -161,12 +161,6 @@
                                                     @elseif ($item->user_choice == 4)
                                                         {{-- 4 == Request a call from the store --}}
                                                         <b>Call the user if this product is out of stock</b>
-                                                    @elseif ($item->user_choice == 5)
-                                                        <b>Cancel the order if this product is out of stock</b>
-                                                        <a href="{{ route('cancel_order', ['order_id' => $order->id]) }}"
-                                                            class="d-block btn btn-danger" onclick="cancelOrder(event)">
-                                                            Cancel Order
-                                                        </a>
                                                     @endif
                                                 </div>
                                                 <div class="col-md-12"><br></div>
