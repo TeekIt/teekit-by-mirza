@@ -446,36 +446,33 @@ class HomeController extends Controller
      */
     public function adminOrders(Request $request)
     {
-        if (Gate::allows('superadmin')) {
-            $return_arr = [];
-            $orders = Orders::where('payment_status', '!=', 'hidden')->orderByDesc('id');
-            if ($request->search) {
-                $orders = $orders->where('id', '=', $request->search);
-            }
-            if ($request->customer_id) {
-                $orders = $orders->where('customer_id', '=', $request->customer_id);
-            }
-            if ($request->store_id) {
-                $orders = $orders->where('seller_id', '=', $request->store_id);
-            }
-            $orders = $orders->paginate(10);
-            $orders_p = $orders;
-            foreach ($orders as $order) {
-                $items = OrderItems::where('order_id', '=', $order->id)->get();
-                $item_arr = [];
-                foreach ($items as $item) {
-                    $product = Products::getProductInfo($order->seller_id, $item->product_belongs_to_id, ['*']);
-                    $item['product'] = $product;
-                    $item_arr[] = $item;
-                }
-                $order['items'] = $item_arr;
-                $return_arr[] = $order;
-            }
-            $orders = $return_arr;
-            return view('admin.orders', compact('orders', 'orders_p'));
-        } else {
-            abort(404);
+        $return_arr = [];
+        $orders = Orders::where('payment_status', '!=', 'hidden')->orderByDesc('id');
+        if ($request->search) {
+            $orders = $orders->where('id', '=', $request->search);
         }
+        if ($request->customer_id) {
+            $orders = $orders->where('customer_id', '=', $request->customer_id);
+        }
+        if ($request->store_id) {
+            $orders = $orders->where('seller_id', '=', $request->store_id);
+        }
+        $orders = $orders->paginate(10);
+        $orders_p = $orders;
+        foreach ($orders as $order) {
+            $items = OrderItems::where('order_id', '=', $order->id)->get();
+            $item_arr = [];
+            foreach ($items as $item) {
+                $product = Products::getProductInfo($order->seller_id, $item->product_belongs_to_id, ['*']);
+                $item['product'] = $product;
+                $item_arr[] = $item;
+            }
+            $order['items'] = $item_arr;
+            $return_arr[] = $order;
+        }
+        $orders = $return_arr;
+
+        return view('admin.orders', compact('orders', 'orders_p'));
     }
     /**
      * Render verified orders listing view for admin
@@ -484,38 +481,26 @@ class HomeController extends Controller
      */
     public function adminOrdersVerified(Request $request)
     {
-        if (Gate::allows('superadmin')) {
-            $return_arr = [];
-            $verified_orders = VerificationCodes::where('code->driver_failed_to_enter_code', '=', 'No')->orderByDesc('id');
-            // if ($request->search) {
-            //     $orders = $orders->where('id', '=', $request->search);
-            // }
-            // if ($request->user_id) {
-            //     $orders = $orders->where('user_id', '=', $request->user_id);
-            // }
-            // if ($request->store_id) {
-            //     $orders = $orders->where('seller_id', '=', $request->store_id);
-            // }
-            $verified_orders = $verified_orders->paginate(10);
-            $orders_p = $verified_orders;
-            foreach ($verified_orders as $order) {
-                $order_details = Orders::where('id', '=', $order->order_id)->first();
-                $items = OrderItems::where('order_id', '=', $order->order_id)->get();
-                $item_arr = [];
-                foreach ($items as $item) {
-                    $product = Products::getProductInfo($order_details->seller_id, $item->product_id, ['*']);
-                    $item['product'] = $product;
-                    $item_arr[] = $item;
-                }
-                $order['order_details'] = $order_details;
-                $order['items'] = $item_arr;
-                $return_arr[] = $order;
+        $return_arr = [];
+        $verified_orders = VerificationCodes::where('code->driver_failed_to_enter_code', '=', 'No')->orderByDesc('id');
+        $verified_orders = $verified_orders->paginate(10);
+        $orders_p = $verified_orders;
+        foreach ($verified_orders as $order) {
+            $order_details = Orders::where('id', '=', $order->order_id)->first();
+            $items = OrderItems::where('order_id', '=', $order->order_id)->get();
+            $item_arr = [];
+            foreach ($items as $item) {
+                $product = Products::getProductInfo($order_details->seller_id, $item->product_id, ['*']);
+                $item['product'] = $product;
+                $item_arr[] = $item;
             }
-            $orders = $return_arr;
-            return view('admin.verified_orders', compact('orders', 'orders_p'));
-        } else {
-            abort(404);
+            $order['order_details'] = $order_details;
+            $order['items'] = $item_arr;
+            $return_arr[] = $order;
         }
+        $orders = $return_arr;
+
+        return view('admin.verified_orders', compact('orders', 'orders_p'));
     }
     /**
      * Render unverified orders listing view for admin
@@ -524,40 +509,28 @@ class HomeController extends Controller
      */
     public function adminOrdersUnverified(Request $request)
     {
-        if (Gate::allows('superadmin')) {
-            $return_arr = [];
-            $verified_orders = VerificationCodes::query()
-                ->where('code->driver_failed_to_enter_code', '=', 'Yes')
-                ->orderByDesc('id');
-            // if ($request->search) {
-            //     $orders = $orders->where('id', '=', $request->search);
-            // }
-            // if ($request->user_id) {
-            //     $orders = $orders->where('user_id', '=', $request->user_id);
-            // }
-            // if ($request->store_id) {
-            //     $orders = $orders->where('seller_id', '=', $request->store_id);
-            // }
-            $verified_orders = $verified_orders->paginate(10);
-            $orders_p = $verified_orders;
-            foreach ($verified_orders as $order) {
-                $order_details = Orders::query()->where('id', '=', $order->order_id)->first();
-                $items = OrderItems::query()->where('order_id', '=', $order->order_id)->get();
-                $item_arr = [];
-                foreach ($items as $item) {
-                    $product = Products::getProductInfo($order_details->seller_id, $item->product_id, ['*']);
-                    $item['product'] = $product;
-                    $item_arr[] = $item;
-                }
-                $order['order_details'] = $order_details;
-                $order['items'] = $item_arr;
-                $return_arr[] = $order;
+        $return_arr = [];
+        $verified_orders = VerificationCodes::query()
+            ->where('code->driver_failed_to_enter_code', '=', 'Yes')
+            ->orderByDesc('id');
+        $verified_orders = $verified_orders->paginate(10);
+        $orders_p = $verified_orders;
+        foreach ($verified_orders as $order) {
+            $order_details = Orders::query()->where('id', '=', $order->order_id)->first();
+            $items = OrderItems::query()->where('order_id', '=', $order->order_id)->get();
+            $item_arr = [];
+            foreach ($items as $item) {
+                $product = Products::getProductInfo($order_details->seller_id, $item->product_id, ['*']);
+                $item['product'] = $product;
+                $item_arr[] = $item;
             }
-            $orders = $return_arr;
-            return view('admin.unverified_orders', compact('orders', 'orders_p'));
-        } else {
-            abort(404);
+            $order['order_details'] = $order_details;
+            $order['items'] = $item_arr;
+            $return_arr[] = $order;
         }
+        $orders = $return_arr;
+
+        return view('admin.unverified_orders', compact('orders', 'orders_p'));
     }
     /**
      * Delete selected orders
@@ -566,15 +539,13 @@ class HomeController extends Controller
      */
     public function adminOrdersDel(Request $request)
     {
-        if (Gate::allows('superadmin')) {
-            for ($i = 0; $i < count($request->orders); $i++) {
-                DB::table('orders')->where('id', '=', $request->orders[$i])->delete();
-                DB::table('order_items')->where('order_id', '=', $request->orders[$i])->delete();
-                DB::table('verification_codes')->where('order_id', '=', $request->orders[$i])->delete();
-            }
-
-            return response("Orders Deleted Successfully");
+        for ($i = 0; $i < count($request->orders); $i++) {
+            DB::table('orders')->where('id', '=', $request->orders[$i])->delete();
+            DB::table('order_items')->where('order_id', '=', $request->orders[$i])->delete();
+            DB::table('verification_codes')->where('order_id', '=', $request->orders[$i])->delete();
         }
+
+        return response("Orders Deleted Successfully");
     }
     /**
      * It will show withdrawls to seller/admin
@@ -646,10 +617,11 @@ class HomeController extends Controller
     public function completeOrders()
     {
         $orders = DB::table('orders')
-            ->leftJoin('users', 'orders.customer_id', '=', 'users.id')
+            ->leftJoin('users', 'orders.created_by_id', '=', 'users.id')
             ->LeftJoin('drivers', 'orders.driver_id', '=', 'drivers.id')
-            ->where('delivery_status', '=', 'complete')
-            ->where('order_status', '=', 'complete')
+            ->where('created_by_type', (new User())->getMorphClass())
+            ->where('delivery_status', '=', DeliveryStatusEnum::COMPLETE)
+            ->where('order_status', '=', OrderStatusEnum::COMPLETE)
             ->select(
                 'drivers.f_name',
                 'drivers.l_name',
