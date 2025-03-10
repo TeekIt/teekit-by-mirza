@@ -25,11 +25,12 @@ class CreateOrdersTable extends Migration
             $table->decimal('customer_lon', 11, 8)->nullable();
             $table->string('device', 7)->nullable()->comment('iPhone, Android');
             $table->enum('type', ['delivery', 'self-pickup'])->default('delivery');
-            $table->string('customer_name', 191)->nullable();
-            $table->string('phone_number', 191)->nullable();
-            $table->string('address', 191)->nullable();
-            $table->string('house_no', 191)->nullable();
-            $table->string('flat', 191)->nullable();
+            $table->string('customer_name')->nullable();
+            $table->string('country_code', 4)->nullable();
+            $table->string('phone_number')->nullable();
+            $table->string('address')->nullable();
+            $table->string('house_no')->nullable();
+            $table->string('flat')->nullable();
             $table->string('country', 70)->nullable();
             $table->string('state', 70)->nullable();
             $table->string('city', 70)->nullable();

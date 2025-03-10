@@ -98,10 +98,12 @@ final class OrderServices
 
     public static function sendBulkSms(
         User $seller,
+        string $buyerCountryCode,
         string $buyerNumber,
         int $orderId,
         string $verificationCode
     ): void {
+        $buyerNumber = $buyerCountryCode . $buyerNumber;
         /* Msg for sending SMS notification of this "New Order" */
         $messageForAdmin = "A new order #" . $orderId . " has been received. 
         Please check Teek It's seller dashboard, or SignIn here now:https://app.teekit.co.uk/login";

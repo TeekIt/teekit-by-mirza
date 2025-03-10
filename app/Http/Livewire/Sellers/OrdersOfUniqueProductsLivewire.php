@@ -19,6 +19,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Exception;
 
+/** @deprecated */
 class OrdersOfUniqueProductsLivewire extends Component
 {
     use WithPagination;

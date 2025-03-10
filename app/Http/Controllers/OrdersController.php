@@ -174,6 +174,7 @@ class OrdersController extends Controller
                 if (app()->environment('production')) {
                     OrderServices::sendBulkSms(
                         $seller,
+                        $request->countryCode,
                         $request->phone,
                         $orderId,
                         $verificationCode
@@ -340,6 +341,7 @@ class OrdersController extends Controller
             if (app()->environment('production')) {
                 OrderServices::sendBulkSms(
                     $seller,
+                    $request->countryCode,
                     $request->phone,
                     $orderId,
                     $verificationCode

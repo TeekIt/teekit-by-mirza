@@ -114,6 +114,7 @@ class Orders extends Model
         $order->customer_lat = $request->lat;
         $order->customer_lon = $request->lon;
         $order->customer_name = $request->fName . " " .  $request->lName;
+        $order->country_code = $request->countryCode;
         $order->phone_number = $request->phone;
         $order->address = $request->fullAddress;
         $order->house_no = $request->houseNo;
@@ -246,7 +247,7 @@ class Orders extends Model
             ->paginate(10);
     }
 
-    public static function getOrdersForView(int|null $orderId = null, int $sellerId, string $orderBy): LengthAwarePaginator
+    public static function getOrdersForView(int $sellerId, string $orderBy, ?int $orderId = null,): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) static::isViewed($orderId);

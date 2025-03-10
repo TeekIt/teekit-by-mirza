@@ -80,10 +80,11 @@ class OrdersFromOtherSeller extends Model
         ?float $customerLat = null,
         ?float $customerLon = null,
         string $receiverName,
+        string $countryCode,
         string $phoneNumber,
         string $address,
-        string $houseNo = null,
-        string $flat = null,
+        ?string $houseNo = null,
+        ?string $flat = null,
         string $country,
         string $state,
         string $city,
@@ -92,7 +93,7 @@ class OrdersFromOtherSeller extends Model
         float $driverCharges = 0.0,
         ?float $deliveryCharges = null,
         ?float $serviceCharges = null,
-        string $device = null,
+        ?string $device = null,
         string $type,
         ?string $description = null,
         string $paymentStatus = "hidden",
@@ -125,6 +126,7 @@ class OrdersFromOtherSeller extends Model
         $model->customer_lat = $customerLat;
         $model->customer_lon = $customerLon;
         $model->customer_name = $receiverName;
+        $model->country_code = $countryCode;
         $model->phone_number = $phoneNumber;
         $model->address = $address;
         $model->house_no = $houseNo;
