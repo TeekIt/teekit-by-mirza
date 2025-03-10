@@ -81,7 +81,7 @@ class RunRawQueries extends Command
                     //     ADD COLUMN city VARCHAR(70) NULL AFTER state,
                     //     ADD COLUMN postcode VARCHAR(11) NULL AFTER city;
                     // ");
-`
+
                     // DB::statement("ALTER TABLE orders_from_other_sellers
                     //     ADD COLUMN country VARCHAR(70) NULL AFTER flat,
                     //     ADD COLUMN state VARCHAR(70) NULL AFTER country,
