@@ -281,7 +281,7 @@
             </div>
             <!-- /Single Order Content -->
         @empty
-            <h2>No orders from other stores yet... 🥺</h2>
+            <p class="text-dark text-center p-2 fs-3">No Orders From Other Sellers Yet 🥺</p>
         @endforelse
 
         {{-- @if (!empty($data))

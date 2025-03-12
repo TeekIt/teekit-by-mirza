@@ -188,24 +188,24 @@ class User extends Authenticatable implements JWTSubject
 
     public static function updateInfo(
         int $id,
-        string $name = null,
-        string $lName = null,
-        string $email = null,
-        string $phone = null,
-        string $fullAddress = null,
-        string $unitAddress = null,
-        string $country = null,
-        string $state = null,
-        string $city = null,
-        string $postcode = null,
-        string $lat = null,
-        string $lon = null,
-        string $businessName = null,
-        string $businessPhone = null,
-        string $password = null,
+        ?string $name = null,
+        ?string $lName = null,
+        ?string $email = null,
+        ?string $phone = null,
+        ?string $fullAddress = null,
+        ?string $unitAddress = null,
+        ?string $country = null,
+        ?string $state = null,
+        ?string $city = null,
+        ?string $postcode = null,
+        ?string $lat = null,
+        ?string $lon = null,
+        ?string $businessName = null,
+        ?string $businessPhone = null,
+        ?string $password = null,
         array $hours = [],
-        string $userImg = null,
-        string $stripeAccountId = null
+        ?string $userImg = null,
+        ?string $stripeAccountId = null
     ): bool {
         $user = self::findOrFail($id);
         if (!is_null($name)) $user->name = $name;
@@ -233,7 +233,7 @@ class User extends Authenticatable implements JWTSubject
     public static function updateStoreLocation(
         int $user_id,
         string $full_address,
-        string|null $unit_address,
+        ?string $unit_address,
         string $country,
         string $state,
         string $city,
