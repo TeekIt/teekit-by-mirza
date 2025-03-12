@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-md-12">
                 <h1 class="text-white text-center">{{ __('Sign Up') }}</h1>
-                <form id="sign_up_form" style="margin-bottom: 100px;" onsubmit="return false">
+                <form style="margin-bottom: 100px;" onsubmit="return false">
                     <div class="form-group row">
                         <div class="col-md-12">
                             <input id="name" type="text" placeholder="Name" class="form-control signup-input-fields{{ $errors->has('name') ? ' is-invalid' : '' }}" name="name" value="{{ old('name') }}" autofocus>
@@ -127,7 +127,7 @@
     </div>
     <script>
         const signUp = () => {
-            let spinner = '<div class="d-flex justify-content-center text-white"><div class="spinner-border myspinner"role="status"><span class="sr-only">Loading...</span></div></div>';
+            let spinner = '<div class="d-flex justify-content-center text-white"><div class="spinner-border myspinner"role="status"></div></div>';
             let name = $('#name').val();
             let email = $('#email').val();
             let password = $('#password').val();
