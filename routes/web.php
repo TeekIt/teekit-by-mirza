@@ -152,6 +152,14 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
 
     Route::controller(HomeController::class)->group(function () {
         Route::post('/update/pages', 'updatePages')->name('admin.update.pages');
+
+        Route::prefix('orders')->group(function () {
+            Route::get('/verified', 'adminOrdersVerified')->name('admin.orders.verified');
+            Route::get('/unverified', 'adminOrdersUnverified')->name('admin.orders.unverified');
+            Route::get('/complete', 'completeOrders')->name('admin.orders.complete');
+            Route::get('/delete', 'adminOrdersDel')->name('admin.del.orders');
+            Route::get('/', 'adminOrders')->name('admin.orders');
+        });
     });
 });
 
@@ -169,11 +177,6 @@ Route::prefix('promocodes')->controller(PromoCodesController::class)->group(func
     Route::post('/{id}/update', 'promoCodesUpdate')->name('admin.promocodes.update');
 });
 
-Route::get('/aorders', [HomeController::class, 'adminOrders'])->name('admin.orders');
-Route::get('/aorders/verified', [HomeController::class, 'adminOrdersVerified'])->name('admin.orders.verified');
-Route::get('/aorders/unverified', [HomeController::class, 'adminOrdersUnverified'])->name('admin.orders.unverified');
-Route::get('/aorders/delete', [HomeController::class, 'adminOrdersDel'])->name('admin.del.orders');
-Route::get('/complete-orders', [HomeController::class, 'completeOrders'])->name('complete.order');
 Route::get('/mark-complete-order/{id}', [HomeController::class, 'markCompleteOrder'])->name('mark.complete.order');
 Route::get('/acategories', [HomeController::class, 'allCat'])->name('admin.categories');
 Route::post('/acategories/{id}/update', [HomeController::class, 'updateCat'])->name('update_cat');

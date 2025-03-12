@@ -402,115 +402,115 @@ class ProductsController extends Controller
      * View products in bulk with array of given ids
      * @author Muhammad Abdullah Mirza
      */
-    public function bulkView(Request $request)
-    {
-        $ids = explode(',', $request->ids);
-        $products = Products::query()->whereIn('id', $ids)->paginate();
-        $pagination = $products->toArray();
-        if (!empty($products)) {
-            $products_data = [];
-            foreach ($products as $product) {
-                $products_data[] = Products::getProductInfo($product->id);
-            }
-            unset($pagination['data']);
-            return JsonResponseServices::getApiResponseExtention(
-                $products_data,
-                config('constants.TRUE_STATUS'),
-                '',
-                'pagination',
-                $pagination,
-                config('constants.HTTP_OK')
-            );
-        } else {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_OK')
-            );
-        }
-    }
+    // public function bulkView(Request $request)
+    // {
+    //     $ids = explode(',', $request->ids);
+    //     $products = Products::query()->whereIn('id', $ids)->paginate();
+    //     $pagination = $products->toArray();
+    //     if (!empty($products)) {
+    //         $products_data = [];
+    //         foreach ($products as $product) {
+    //             $products_data[] = Products::getProductInfo($product->id);
+    //         }
+    //         unset($pagination['data']);
+    //         return JsonResponseServices::getApiResponseExtention(
+    //             $products_data,
+    //             config('constants.TRUE_STATUS'),
+    //             '',
+    //             'pagination',
+    //             $pagination,
+    //             config('constants.HTTP_OK')
+    //         );
+    //     } else {
+    //         return JsonResponseServices::getApiResponse(
+    //             [],
+    //             config('constants.FALSE_STATUS'),
+    //             config('constants.NO_RECORD'),
+    //             config('constants.HTTP_OK')
+    //         );
+    //     }
+    // }
     /**
      *It will sort the products by price
      * @version 1.0.0
      */
-    public function sortByPrice()
-    {
-        try {
-            $products = Products::paginate()->sortBy('price');
-            $pagination = $products->toArray();
-            if (!$products->isEmpty()) {
-                $products_data = [];
-                foreach ($products as $product) {
-                    $products_data[] = Products::getProductInfo($product->id);
-                }
+    // public function sortByPrice()
+    // {
+    //     try {
+    //         $products = Products::paginate()->sortBy('price');
+    //         $pagination = $products->toArray();
+    //         if (!$products->isEmpty()) {
+    //             $products_data = [];
+    //             foreach ($products as $product) {
+    //                 $products_data[] = Products::getProductInfo($product->id);
+    //             }
 
-                unset($pagination['data']);
-                return JsonResponseServices::getApiResponseExtention(
-                    $products_data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
-            } else {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    config('constants.NO_RECORD'),
-                    config('constants.HTTP_OK')
-                );
-            }
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
-        }
-    }
+    //             unset($pagination['data']);
+    //             return JsonResponseServices::getApiResponseExtention(
+    //                 $products_data,
+    //                 config('constants.TRUE_STATUS'),
+    //                 '',
+    //                 'pagination',
+    //                 $pagination,
+    //                 config('constants.HTTP_OK')
+    //             );
+    //         } else {
+    //             return JsonResponseServices::getApiResponse(
+    //                 [],
+    //                 config('constants.FALSE_STATUS'),
+    //                 config('constants.NO_RECORD'),
+    //                 config('constants.HTTP_OK')
+    //             );
+    //         }
+    //     } catch (Throwable $error) {
+    //         report($error);
+    //         return JsonResponseServices::getApiResponse(
+    //             [],
+    //             config('constants.FALSE_STATUS'),
+    //             $error,
+    //             config('constants.HTTP_SERVER_ERROR')
+    //         );
+    //     }
+    // }
     /**
      *It will sort the products by location
      * @version 1.0.0
      */
-    public function sortByLocation(Request $request)
-    {
-        $latitude = $request->get('lat');
-        $longitude = $request->get('lon');
-        $products = Products::select(DB::raw('*, ( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( lat ) ) * cos( radians( lon ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( lat ) ) ) ) AS distance'))->paginate()->sortBy('distance');
-        $pagination = $products->toArray();
-        if (!empty($products)) {
-            $products_data = [];
-            $i = 0;
-            foreach ($products as $product) {
-                if ($i == 50) {
-                    continue;
-                }
-                $i = $i + 1;
-                $t = Products::getProductInfo($product->id);
-                $t->distance = $product->distance;
-                //$t->distance = round($product->distance);
-                $products_data[] = $t;
-            }
-            unset($pagination['data']);
-            return JsonResponseServices::getApiResponse(
-                $products_data,
-                config('constants.TRUE_STATUS'),
-                '',
-                config('constants.HTTP_OK')
-            );
-        } else {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_OK')
-            );
-        }
-    }
+    // public function sortByLocation(Request $request)
+    // {
+    //     $latitude = $request->get('lat');
+    //     $longitude = $request->get('lon');
+    //     $products = Products::select(DB::raw('*, ( 6367 * acos( cos( radians(' . $latitude . ') ) * cos( radians( lat ) ) * cos( radians( lon ) - radians(' . $longitude . ') ) + sin( radians(' . $latitude . ') ) * sin( radians( lat ) ) ) ) AS distance'))->paginate()->sortBy('distance');
+    //     $pagination = $products->toArray();
+    //     if (!empty($products)) {
+    //         $products_data = [];
+    //         $i = 0;
+    //         foreach ($products as $product) {
+    //             if ($i == 50) {
+    //                 continue;
+    //             }
+    //             $i = $i + 1;
+    //             $t = Products::getProductInfo($product->id);
+    //             $t->distance = $product->distance;
+    //             //$t->distance = round($product->distance);
+    //             $products_data[] = $t;
+    //         }
+    //         unset($pagination['data']);
+    //         return JsonResponseServices::getApiResponse(
+    //             $products_data,
+    //             config('constants.TRUE_STATUS'),
+    //             '',
+    //             config('constants.HTTP_OK')
+    //         );
+    //     } else {
+    //         return JsonResponseServices::getApiResponse(
+    //             [],
+    //             config('constants.FALSE_STATUS'),
+    //             config('constants.NO_RECORD'),
+    //             config('constants.HTTP_OK')
+    //         );
+    //     }
+    // }
     /**
      * This function will return back store open/close & product qty status
      * Along with this information it will also send store_id & product_id
@@ -620,92 +620,83 @@ class ProductsController extends Controller
     // {
     //     return Products::find($product_id)->delete();
     // }
-    /**
-     * It will delete the image of the given product
-     * @author Huzaifa Haleem
-     * @version 1.0.0
-     */
-    public function deleteImage($image_id, $product_id)
-    {
-        productImages::find($image_id)->delete();
-        return Products::getProductInfo($product_id);
-    }
+
     /**
      * It list the featured products
      * @author Muhammad Abdullah Mirza
      * @version 1.0.0
      */
-    public function featuredProducts(Request $request)
-    {
-        try {
-            $featured_products = (new Products())->getFeaturedProducts($request->store_id);
-            $pagination = $featured_products->toArray();
-            if (!$featured_products->isEmpty()) {
-                $products_data = [];
-                foreach ($featured_products as $product) {
-                    $data = Products::getProductInfo($product->id);
-                    $data->store = User::find($product->user_id);
-                    $products_data[] = $data;
-                }
-                unset($pagination['data']);
-                return JsonResponseServices::getApiResponseExtention(
-                    $products_data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
-            } else {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    config('constants.NO_RECORD'),
-                    config('constants.HTTP_OK')
-                );
-            }
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
-        }
-    }
+    // public function featuredProducts(Request $request)
+    // {
+    //     try {
+    //         $featured_products = (new Products())->getFeaturedProducts($request->store_id);
+    //         $pagination = $featured_products->toArray();
+    //         if (!$featured_products->isEmpty()) {
+    //             $products_data = [];
+    //             foreach ($featured_products as $product) {
+    //                 $data = Products::getProductInfo($product->id);
+    //                 $data->store = User::find($product->user_id);
+    //                 $products_data[] = $data;
+    //             }
+    //             unset($pagination['data']);
+    //             return JsonResponseServices::getApiResponseExtention(
+    //                 $products_data,
+    //                 config('constants.TRUE_STATUS'),
+    //                 '',
+    //                 'pagination',
+    //                 $pagination,
+    //                 config('constants.HTTP_OK')
+    //             );
+    //         } else {
+    //             return JsonResponseServices::getApiResponse(
+    //                 [],
+    //                 config('constants.FALSE_STATUS'),
+    //                 config('constants.NO_RECORD'),
+    //                 config('constants.HTTP_OK')
+    //             );
+    //         }
+    //     } catch (Throwable $error) {
+    //         report($error);
+    //         return JsonResponseServices::getApiResponse(
+    //             [],
+    //             config('constants.FALSE_STATUS'),
+    //             $error,
+    //             config('constants.HTTP_SERVER_ERROR')
+    //         );
+    //     }
+    // }
     /**
      *It will export products into csv
      * @version 1.0.0
      */
-    public function exportProducts()
-    {
-        $user_id = Auth::id();
-        $products = Products::getParentSellerProductsAsc($user_id);
-        $all_products = [];
-        foreach ($products as $product) {
-            $pt = json_decode(json_encode(Products::getProductInfo($product->id)->toArray()));
-            unset($pt->category);
-            unset($pt->ratting);
-            unset($pt->id);
-            unset($pt->user_id);
-            unset($pt->created_at);
-            unset($pt->updated_at);
-            $temp_img = [];
-            if (isset($pt->images)) {
-                foreach ($pt->images as $img)
-                    $temp_img[] = $img->product_image;
-            }
-            $pt->images = implode(',', $temp_img);
-            $all_products[] = $pt;
-        }
-        $destinationPath = public_path() . "/upload/csv/";
-        if (!is_dir($destinationPath)) {
-            mkdir($destinationPath, 0777, true);
-        }
-        $file = time() . '_export.csv';
-        return $this->jsonToCsv(json_encode($all_products), $destinationPath . $file, true);
-    }
+    // public function exportProducts()
+    // {
+    //     $user_id = Auth::id();
+    //     $products = Products::getParentSellerProductsAsc($user_id);
+    //     $all_products = [];
+    //     foreach ($products as $product) {
+    //         $pt = json_decode(json_encode(Products::getProductInfo($product->id)->toArray()));
+    //         unset($pt->category);
+    //         unset($pt->ratting);
+    //         unset($pt->id);
+    //         unset($pt->user_id);
+    //         unset($pt->created_at);
+    //         unset($pt->updated_at);
+    //         $temp_img = [];
+    //         if (isset($pt->images)) {
+    //             foreach ($pt->images as $img)
+    //                 $temp_img[] = $img->product_image;
+    //         }
+    //         $pt->images = implode(',', $temp_img);
+    //         $all_products[] = $pt;
+    //     }
+    //     $destinationPath = public_path() . "/upload/csv/";
+    //     if (!is_dir($destinationPath)) {
+    //         mkdir($destinationPath, 0777, true);
+    //     }
+    //     $file = time() . '_export.csv';
+    //     return $this->jsonToCsv(json_encode($all_products), $destinationPath . $file, true);
+    // }
     /**
      *helper function for exporting products
      * @version 1.0.0
@@ -751,10 +742,12 @@ class ProductsController extends Controller
                 'productName' => 'required|string',
                 'sellerIds' => 'required|string',
                 'scoutPage' => 'required|integer',
+                'sortBy' => 'string',
             ]);
             if ($validatedData->fails()) {
                 return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
             }
+            $validatedData = (object) $validatedData->validated();
 
             $userLat = $request->lat;
             $userLon = $request->lon;
@@ -763,15 +756,15 @@ class ProductsController extends Controller
                 $nearBySellerIds = $this->searchWrtNearByStores($userLat, $userLon, $miles);
 
             $products = Products::searchProducts(
-                $request->productName,
-                (isset($nearBySellerIds['ids'])) ? $nearBySellerIds['ids'] : json_decode($request->sellerIds),
-                $request->categoryId,
-                // json_decode($request->sellerIds),
-                $request->brand,
-                $request->minPrice,
-                $request->maxPrice,
-                $request->minWeight,
-                $request->maxWeight
+                $validatedData->productName,
+                (isset($nearBySellerIds['ids'])) ? $nearBySellerIds['ids'] : json_decode($validatedData->sellerIds),
+                $validatedData->categoryId ?? null,
+                $validatedData->brand ?? null,
+                $validatedData->minPrice ?? null,
+                $validatedData->maxPrice ?? null,
+                $validatedData->minWeight ?? null,
+                $validatedData->maxWeight ?? null,
+                $validatedData->sortBy ?? null,
             );
 
             /*

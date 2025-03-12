@@ -266,6 +266,7 @@ class OrdersHeader extends Component
                 (float) $this->selectedOrder->customer_lat ?? null,
                 (float) $this->selectedOrder->customer_lon ?? null,
                 $this->selectedOrder->customer_name,
+                $this->order->country_code,
                 $this->selectedOrder->phone_number,
                 $this->selectedOrder->address,
                 $this->selectedOrder->house_no,
