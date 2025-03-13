@@ -228,6 +228,7 @@ class AuthController extends Controller
             'roles' => $user->role()->pluck('name'),
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
         ];
+        
         return JsonResponseServices::getApiResponse(
             $data,
             config('constants.TRUE_STATUS'),
