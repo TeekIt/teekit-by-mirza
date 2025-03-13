@@ -91,9 +91,9 @@ class RunRawQueries extends Command
 
                     /* Above queries are already executed on all ENVs */
 
-                    // DB::statement('ALTER TABLE `orders` ADD `country_code` VARCHAR(4) NULL DEFAULT NULL AFTER `customer_name`');
-                    // DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `country_code` VARCHAR(4) NULL DEFAULT NULL AFTER `customer_name`');
-                    // DB::statement('ALTER TABLE `users` ADD `country_code` VARCHAR(4) NULL DEFAULT NULL AFTER `password`');
+                    DB::statement('ALTER TABLE `orders` ADD `country_code` VARCHAR(4) NULL DEFAULT NULL AFTER `customer_name`');
+                    DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `country_code` VARCHAR(4) NULL DEFAULT NULL AFTER `customer_name`');
+                    DB::statement('ALTER TABLE `users` ADD `country_code` VARCHAR(4) NULL DEFAULT NULL AFTER `password`');
                     
                     /* Above queries are already executed on local ENV */
 
