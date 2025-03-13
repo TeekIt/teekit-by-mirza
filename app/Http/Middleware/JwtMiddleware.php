@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\JsonResponseServices;
 use Closure;
 use Exception;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
@@ -21,16 +22,28 @@ class JwtMiddleware
     {
         try {
             JWTAuth::parseToken()->authenticate();
-        } catch (Exception $e) {
-            if ($e instanceof TokenInvalidException) {
-                $response = array('data' => [], 'status' => false, 'message' => 'Token is Invalid');
-                return response()->json($response, 401);
-            } else if ($e instanceof TokenExpiredException) {
-                $response = array('data' => [], 'status' => false, 'message' => 'Token is Expired');
-                return response()->json($response, 401);
+        } catch (Exception $error) {
+            if ($error instanceof TokenInvalidException) {
+                return JsonResponseServices::getApiResponse(
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    'Token is Invalid',
+                    config('constants.HTTP_UNAUTHORIZED')
+                );
+            } else if ($error instanceof TokenExpiredException) {
+                return JsonResponseServices::getApiResponse(
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    'Token is Expired',
+                    config('constants.HTTP_UNAUTHORIZED')
+                );
             } else {
-                $response = array('data' => [], 'status' => false, 'message' => 'Authorization Token not found');
-                return response()->json($response, 401);
+                return JsonResponseServices::getApiResponse(
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    'Authorization Token not found',
+                    config('constants.HTTP_UNAUTHORIZED')
+                );
             }
         }
 

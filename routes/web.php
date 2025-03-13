@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\UserAndRoleController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CategoriesController;
 use App\Http\Livewire\Admin\ParentSellersLivewire;
 use App\Http\Livewire\Admin\ReferralCodesLivewire;
 use App\Http\Livewire\Sellers\InventoryLivewire;
@@ -11,6 +12,7 @@ use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PromoCodesController;
 use App\Http\Controllers\StuartDeliveryController;
 use App\Http\Controllers\UsersController;
+use App\Http\Livewire\Admin\CategoriesLivewire;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
@@ -136,6 +138,11 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
     Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
     Route::get('/drivers', DriversLivewire::class)->name('admin.test.drivers');
 
+    Route::prefix('categories')->group(function () {
+        Route::get('/', CategoriesLivewire::class)->name('admin.categories.new');
+        Route::get('/delete', [CategoriesController::class, 'destroy'])->name('admin.categories.del');
+    });
+
     Route::prefix('notification')->controller(NotificationsController::class)->group(function () {
         Route::get('/home', 'notificationHome')->name('admin.notification.home');
         Route::post('/send', 'notificationSend')->name('admin.notification.send');
@@ -178,10 +185,14 @@ Route::prefix('promocodes')->controller(PromoCodesController::class)->group(func
 });
 
 Route::get('/mark-complete-order/{id}', [HomeController::class, 'markCompleteOrder'])->name('mark.complete.order');
+
+/* Old categories routes - begins */
 Route::get('/acategories', [HomeController::class, 'allCat'])->name('admin.categories');
 Route::post('/acategories/{id}/update', [HomeController::class, 'updateCat'])->name('update_cat');
 Route::post('/acategories/add_cat', [HomeController::class, 'addCat'])->name('add_cat');
 Route::get('/acategories/delete_cat/{id}', [HomeController::class, 'deleteCat'])->name('delete_cat');
+/* Old categories routes - ends */
+
 Route::get('/queries', [HomeController::class, 'adminQueries'])->name('admin.queries');
 Route::get('/store/application-fee/{user_id}/{application_fee}', [UserAndRoleController::class, 'updateApplicationFee'])->name('application_fee');
 Route::get('/users/{user_id}/status/{status}', [HomeController::class, 'changeUserStatus'])->name('change_user_status');

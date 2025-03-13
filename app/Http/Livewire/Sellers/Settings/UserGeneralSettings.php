@@ -35,7 +35,8 @@ class UserGeneralSettings extends Component
 
     public function resetModal()
     {
-        $this->resetAllErrors();
+        $this->resetValidation();
+
         $this->reset([
             'name',
             'email',
@@ -47,12 +48,6 @@ class UserGeneralSettings extends Component
             'user_img',
             'image_to_upload',
         ]);
-    }
-
-    public function resetAllErrors()
-    {
-        $this->resetErrorBag();
-        $this->resetValidation();
     }
 
     public function updateImage()
@@ -107,7 +102,7 @@ class UserGeneralSettings extends Component
                     session()->flash('error', config('constants.UPDATION_FAILED'));
                 }
             } else {
-                session()->flash('error', 'Your old password is incorrect.');
+                session()->flash('error', 'Your old password is incorrect');
             }
         } catch (Exception $error) {
             session()->flash('error', $error);
@@ -244,12 +239,14 @@ class UserGeneralSettings extends Component
         $this->business_phone = $user->business_phone;
         $this->phone = $user->phone;
         $this->user_img = $user->user_img;
+        
         return $user;
     }
 
     public function render()
     {
         $user = $this->setUserInfo($this->user_id);
+
         return view('livewire.sellers.settings.user-general-settings', compact('user'));
     }
 }

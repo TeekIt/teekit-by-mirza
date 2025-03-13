@@ -311,7 +311,7 @@
                                                             <span class="spinner-border spinner-border-sm text-light" role="status"></span>
                                                         </span>
                                                     </button> -->
-                                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#gophrModal"
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#gophrModal"
                                     wire:click="renderOrderId({{ $order->id }})"
                                     wire:target="renderOrderId({{ $order->id }})" wire:loading.class="btn-dark"
                                     wire:loading.class.remove="btn-warning" wire:loading.attr="disabled"
@@ -424,7 +424,7 @@
 
             <tr>
                 <td><b>Order Total</b></td>
-                <td>£{{ $order->initial_total }}</td>
+                <td>£{{ $order->current_total }}</td>
                 <td><b>Payment Status</b></td>
                 <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
             </tr>

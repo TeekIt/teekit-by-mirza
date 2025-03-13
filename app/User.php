@@ -452,7 +452,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $user = self::with('referralRelations')->where('id', $user_id)->first();
         if ($user) {
-            return array(
+            return [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
@@ -466,7 +466,7 @@ class User extends Authenticatable implements JWTSubject
                 'user_img' => $user->user_img,
                 'referral_code' => $user->referral_code,
                 'referral_relation_details' => ($user->referralRelations) ? [$user->referralRelations] : null
-            );
+            ];
         }
         return null;
     }
