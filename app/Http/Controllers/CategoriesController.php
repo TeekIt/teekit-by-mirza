@@ -110,7 +110,7 @@ class CategoriesController extends Controller
             );
         /*
         * Just creating this variable so we don't have to call the "isEmpty()" function again & again
-        * Which will obviouly reduce the API response speed
+        * Which will obviouly increase the API response speed
         */
         $data_is_empty = $data->isEmpty();
         return JsonResponseServices::getApiResponse(
@@ -172,7 +172,7 @@ class CategoriesController extends Controller
 
         /*
         * Just creating this variable so we don't have to call the "empty()" function again & again
-        * Which will obviouly reduce the API response speed
+        * Which will obviouly increase the API response speed
         */
         $dataIsEmpty = empty($data);
         return JsonResponseServices::getApiResponseExtention(

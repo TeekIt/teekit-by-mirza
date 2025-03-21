@@ -5,6 +5,7 @@ namespace App;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicle;
+use App\Enums\UserMorphTypeEnum;
 use App\Models\ProductsByBuyer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -225,6 +226,20 @@ class Orders extends Model
         return self::where('order_status', '=', $status)->where('seller_id', '=', $seller_id)->get();
     }
 
+    public static function getLoggedinBuyerOrders(
+        ?OrderStatusEnum $orderStatus,
+        array $columns = ['*']
+    ): LengthAwarePaginator {
+        return self::select($columns)
+            ->with(['order_items.product.store'])
+            ->when($orderStatus, function ($query) use ($orderStatus) {
+                return $query->where('order_status', '=', $orderStatus);
+            })
+            ->where('created_by_type', UserMorphTypeEnum::USER)
+            ->where('created_by_id', '=', auth()->id())
+            ->paginate(20);
+    }
+
     public static function getOrdersOfUniqueProductsForView(
         int $sellerId,
         string $orderBy,
@@ -273,8 +288,8 @@ class Orders extends Model
 
     public static function getRecentOrderByCustomerId(
         int $customerId,
-        int|null $productsLimit = null,
-        int|null $sellerId = null
+        ?int $productsLimit = null,
+        ?int $sellerId = null
     ): ?Orders {
         return self::with([
             'products' => function ($query) use ($productsLimit) {

@@ -592,7 +592,7 @@ class ProductsController extends Controller
 
             /*
             * Just creating this variable so we don't have to call the "empty()" function again & again
-            * Which will obviouly reduce the API response speed
+            * Which will obviouly increase the API response speed
             */
             $dataIsEmpty = empty($data);
             return JsonResponseServices::getApiResponse(
@@ -769,7 +769,7 @@ class ProductsController extends Controller
 
             /*
             * Just creating this variable so we don't have to call the "empty()" function again & again
-            * Which will obviouly reduce the API response speed
+            * Which will obviouly increase the API response speed
             */
             $dataIsEmpty = $products['data']->isEmpty();
             return JsonResponseServices::getApiResponseExtention(

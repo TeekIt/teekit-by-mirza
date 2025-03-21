@@ -359,40 +359,41 @@ class OrdersController extends Controller
         );
     }
     /**
-     * @author Huzaifa Haleem
+     * @author Muhammad Abdullah Mirza
      */
     public function showLoggedinBuyerOrders(Request $request)
     {
-        $orders = Orders::select('id')
-            ->where('created_by_type', '=', UserMorphTypeEnum::USER)
-            ->where('created_by_id', '=', Auth::id())
-            ->when($request->orderStatus, function ($query) use ($request) {
-                return $query->where('order_status', '=', $request->orderStatus);
-            })
-            ->orderByDesc('id')
-            ->paginate(20);
+        $validatedData = Validator::make($request->all(), [
+            'orderStatus' => [
+                Rule::in(array_column(OrderStatusEnum::cases(), 'value')),
+            ],
+            'page' => 'integer',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+        $validatedData = (object) $validatedData->validated();
 
-        $pagination = $orders->toArray();
-        unset($pagination['data']);
-
-        if (!$orders->isEmpty()) {
-            $orderData = [];
-            foreach ($orders as $order) $orderData[] = $this->getOrderDetails($order->id);
-
-            return JsonResponseServices::getApiResponseExtention(
-                $orderData,
-                config('constants.TRUE_STATUS'),
-                '',
-                'pagination',
-                $pagination,
-                config('constants.HTTP_OK')
-            );
+        if (isset($validatedData->orderStatus)) {
+            $orderStatus = OrderStatusEnum::from($validatedData->orderStatus);
         }
 
-        return JsonResponseServices::getApiResponse(
-            [],
-            config('constants.FALSE_STATUS'),
-            config('constants.NO_RECORD'),
+        $orders = Orders::getLoggedinBuyerOrders($orderStatus ?? null)->toArray();
+
+        $data = $orders['data'];
+        $pagination = $orders;
+        unset($pagination['data']);
+        /*
+        * Just creating this variable so we don't have to call the "empty()" function again & again
+        * Which will obviouly increase the API response speed
+        */
+        $dataIsEmpty = empty($data);
+        return JsonResponseServices::getApiResponseExtention(
+            ($dataIsEmpty) ? [] : $data,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+            'pagination',
+            ($dataIsEmpty) ? [] : $pagination,
             config('constants.HTTP_OK')
         );
     }
@@ -419,7 +420,7 @@ class OrdersController extends Controller
             );
             /*
             * Just creating this variable so we don't have to call the "empty()" function again & again
-            * Which will obviouly reduce the API response speed
+            * Which will obviouly increase the API response speed
             */
             $dataIsEmpty = empty($recentOrderProdsData);
             return JsonResponseServices::getApiResponse(
@@ -697,7 +698,7 @@ class OrdersController extends Controller
             if ($order->order_status == OrderStatusEnum::PENDING->value) {
                 $order->order_status = OrderStatusEnum::CANCELLED->value;
                 $order->save();
-               
+
                 return response()->json([
                     'data' => $order,
                     'status' => true,
@@ -710,7 +711,7 @@ class OrdersController extends Controller
             else if ($order->order_status == OrderStatusEnum::ACCEPTED->value || $order->order_status == OrderStatusEnum::READY->value) {
                 $order->order_status = OrderStatusEnum::CANCELLED->value;
                 $order->save();
-               
+
                 return response()->json([
                     'data' => $order,
                     'status' => true,
@@ -723,7 +724,7 @@ class OrdersController extends Controller
             else if ($order->order_status == OrderStatusEnum::ON_THE_WAY->value) {
                 $order->order_status = OrderStatusEnum::CANCELLED->value;
                 $order->save();
-               
+
                 return response()->json([
                     'data' => $order,
                     'status' => true,
