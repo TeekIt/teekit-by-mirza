@@ -150,9 +150,9 @@
                             <p class="fw-bold">Customer Name: {{ $customerName }}</p>
                             <p class="fw-bold">Customer Contact: {{ $phoneNumber }}</p>
                         </div>
-                        <div class=" d-flex justify-content-center">
+                        <div class="d-flex justify-content-center">
                             <div class="d-flex justify-content-center col-8 col-sm-6">
-                                <select class="form-select" aria-label="Default select example">
+                                <select class="form-select">
                                     <option value="1">Search Alternative</option>
                                     <option value="2">Remove Product</option>
                                     <option value="3">Cancel</option>
@@ -346,7 +346,7 @@
             </div>
             <!-- /Single Order Content -->
         @empty
-            <p class="fs-1">No orders yet... 🥺</p>
+            <p class="text-dark text-center p-2 fs-3">No Orders Yet 🥺</p>
         @endforelse
     </div>
 

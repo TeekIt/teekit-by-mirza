@@ -76,7 +76,7 @@ final class GophrServices
         ];
 
         $curl = curl_init();
-        curl_setopt_array($curl, array(
+        curl_setopt_array($curl, [
             CURLOPT_URL => static::getApiUrl() . '/jobs?XDEBUG_SESSION=1',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
@@ -86,12 +86,12 @@ final class GophrServices
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => json_encode($formData),
-            CURLOPT_HTTPHEADER => array(
+            CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Accept: application/json',
                 'Api-Key:' . static::getApiKey(),
-            ),
-        ));
+            ],
+        ]);
 
         $response = curl_exec($curl);
 
@@ -103,7 +103,7 @@ final class GophrServices
     public static function getJob(string $jobId): stdClass
     {
         $curl = curl_init();
-        curl_setopt_array($curl, array(
+        curl_setopt_array($curl, [
             CURLOPT_URL => static::getApiUrl() . '/jobs/' . $jobId,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
@@ -112,11 +112,11 @@ final class GophrServices
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'GET',
-            CURLOPT_HTTPHEADER => array(
+            CURLOPT_HTTPHEADER => [
                 'Accept: application/json',
                 'Api-Key:' . static::getApiKey(),
-            ),
-        ));
+            ],
+        ]);
 
         $response = curl_exec($curl);
 
@@ -132,7 +132,7 @@ final class GophrServices
         ];
 
         $curl = curl_init();
-        curl_setopt_array($curl, array(
+        curl_setopt_array($curl, [
             CURLOPT_URL => static::getApiUrl() . '/jobs/'. $jobId .'/cancel',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
@@ -142,12 +142,12 @@ final class GophrServices
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => json_encode($formData),
-            CURLOPT_HTTPHEADER => array(
+            CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Accept: application/json',
                 'Api-Key:' . static::getApiKey(),
-            ),
-        ));
+            ],
+        ]);
 
         $response = curl_exec($curl);
 

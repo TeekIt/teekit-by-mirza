@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserRole;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\UsersController;
@@ -36,18 +37,21 @@ class AuthController extends Controller
             'l_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|max:50',
-            'phone' => 'required|string|max:13'
+            'countryCode' => 'required|string|max:4',
+            'phone' => 'required|string|max:13',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
-
+        $validatedData = (object) $validatedData->validated();
+        
         $user = User::createBuyer(
-            $request->name,
-            $request->l_name,
-            $request->email,
-            $request->password,
-            $request->phone,
+            $validatedData->name,
+            $validatedData->l_name,
+            $validatedData->email,
+            $validatedData->password,
+            $validatedData->countryCode,
+            $validatedData->phone,
             User::ACTIVE,
             Str::uuid()
         );
@@ -202,7 +206,7 @@ class AuthController extends Controller
     public function me()
     {
         $user = JWTAuth::user();
-        $data = array(
+        $data = [
             'id' => $user->id,
             'name' => $user->name,
             'l_name' => $user->l_name,
@@ -223,7 +227,8 @@ class AuthController extends Controller
             'last_login' => $user->last_login,
             'roles' => $user->role()->pluck('name'),
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
-        );
+        ];
+        
         return JsonResponseServices::getApiResponse(
             $data,
             config('constants.TRUE_STATUS'),
@@ -458,10 +463,10 @@ class AuthController extends Controller
                 'lon' => $request->lon,
                 'postcode' => $request->postcode,
                 'contact' => $request->contact,
-                'role_id' => 3,
+                'role_id' => UserRole::BUYER,
             ]);
             $user = User::where('email', '=', $user->email)->first();
-            $data_info = array(
+            $data_info = [
                 'id' => $user->id,
                 'name' => $user->name,
                 'l_name' => $user->l_name,
@@ -484,7 +489,7 @@ class AuthController extends Controller
                     'buyer'
                 ],
                 'expires_in' => JWTAuth::factory()->getTTL() * 60,
-            );
+            ];
             $token = JWTAuth::fromUser($user);
             return response()->json([
                 'data' => [
@@ -531,7 +536,7 @@ class AuthController extends Controller
                     'message' =>  config('constants.INVALID_CREDENTIALS')
                 ], 401);
             }
-            $data_info = array(
+            $data_info = [
                 'id' => $user->id,
                 'name' => $user->name,
                 'l_name' => $user->l_name,
@@ -554,7 +559,7 @@ class AuthController extends Controller
                     'buyer'
                 ],
                 'expires_in' => JWTAuth::factory()->getTTL() * 60,
-            );
+            ];
             $token = JWTAuth::fromUser($user);
             return response()->json([
                 'data' => [

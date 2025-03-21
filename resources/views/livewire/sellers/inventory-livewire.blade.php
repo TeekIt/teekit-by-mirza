@@ -261,7 +261,7 @@
                                 </div>
                             @endif
                         @empty
-                            <h4 class="text-dark text-center p-2">No Products Found 🥺</h4>
+                            <p class="text-dark text-center p-2 fs-3">No Products Found 🥺</p>
                         @endforelse
                     </div>
                     <div class="row">

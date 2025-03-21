@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
+use stdClass;
 
 class OrdersHeader extends Component
 {
@@ -46,13 +47,17 @@ class OrdersHeader extends Component
 
     protected $paginationTheme = 'bootstrap';
 
+    protected $listeners = [
+        'refreshThisComponent' => '$refresh',
+    ];
+
     public function mount(Orders $order)
     {
         $this->sellerId = auth()->user()->id;
         $this->order = $order;
     }
     /* 
-     * Helpers
+     * Custom Helpers
      */
     public function resetModal()
     {
@@ -90,7 +95,6 @@ class OrdersHeader extends Component
 
         $this->selectedOrder = Orders::getById($orderId);
 
-        $this->emit('askParentToRefreshChildComponent');
         $this->dispatchBrowserEvent('show-modal', ['id' => 'acceptCustomProductOrderModal']);
     }
 
@@ -193,8 +197,7 @@ class OrdersHeader extends Component
             $updated = Orders::updateOrderStatus($this->orderId, OrderStatusEnum::ON_THE_WAY);
             /* Operation finished */
             sleep(1);
-            $this->emit('askParentToRefreshChildComponent');
-            $this->render();
+            $this->emitSelf('refreshThisComponent');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'gophrModal']);
 
             if ($updated && isset($response->data)) {
@@ -236,7 +239,7 @@ class OrdersHeader extends Component
         try {
             /* Perform some operation */
             $this->selectedOrder = Orders::getById($orderId);
-           
+
             $orderTotalPrice = $this->selectedOrder->order_items[0]->product_price * $this->selectedOrder->order_items[0]->product_qty;
             /* Get sellers who belongs to the city of this store owner */
             $sellersOfTheSameCity = $this->getSellersOfSameCity();
@@ -266,6 +269,7 @@ class OrdersHeader extends Component
                 (float) $this->selectedOrder->customer_lat ?? null,
                 (float) $this->selectedOrder->customer_lon ?? null,
                 $this->selectedOrder->customer_name,
+                $this->order->country_code,
                 $this->selectedOrder->phone_number,
                 $this->selectedOrder->address,
                 $this->selectedOrder->house_no,
@@ -289,11 +293,11 @@ class OrdersHeader extends Component
             );
             /* Remove the whole order in case of custom product order's */
             $removed = Orders::remove($this->selectedOrder->id);
-           
+
             info('The current order has been sent to seller: ' . $nearbySellers[$randomIndex]['id']);
             /* Operation finished */
             sleep(1);
-            $this->emit('askParentToRefreshChildComponent');
+            $this->emitSelf('refreshThisComponent');
 
             if ($removed) {
                 session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
@@ -324,7 +328,7 @@ class OrdersHeader extends Component
             $newOrderTotal = $this->priceBySeller * $this->selectedOrder->order_items[0]->product_qty;
 
             $response = $this->capturePayment($newOrderTotal);
-
+        
             $updated = Orders::updateInfo(
                 id: $this->selectedOrder->id,
                 currentTotal: $newOrderTotal,
@@ -332,8 +336,7 @@ class OrdersHeader extends Component
             );
             /* Operation finished */
             sleep(1);
-            $this->emit('askParentToRefreshChildComponent');
-            $this->render();
+            $this->emitSelf('refreshThisComponent');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'acceptCustomProductOrderModal']);
 
             if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
@@ -342,6 +345,8 @@ class OrdersHeader extends Component
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
         } catch (Exception $error) {
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'acceptCustomProductOrderModal']);
+
             report($error);
             session()->flash('error', $error->getMessage());
         }
@@ -365,7 +370,7 @@ class OrdersHeader extends Component
             $updated = Orders::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
             /* Operation finished */
             sleep(1);
-            $this->emit('askParentToRefreshChildComponent');
+            $this->emitSelf('refreshThisComponent');
 
             if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -413,7 +418,7 @@ class OrdersHeader extends Component
             EmailServices::sendOrderHasBeenCancelledMail($this->selectedOrder);
             /* Operation finished */
             sleep(1);
-            $this->emit('askParentToRefreshChildComponent');
+            $this->emitSelf('refreshThisComponent');
 
             if ($cancelled && $refunded->status === PaymentIntentStatusEnum::CANCELED->value) {
                 session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));

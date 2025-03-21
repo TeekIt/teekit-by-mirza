@@ -80,11 +80,13 @@ class PromoCodesController extends Controller
                 for ($i = 0; $i < count($request->promocodes); $i++) {
                     PromoCodes::where('id', '=', $request->promocodes[$i])->delete();
                 }
+
                 return response("Promocodes Deleted Successfully");
             }
         } catch (Throwable $error) {
             report($error);
-            flash('Failed to delete promo code due to some internal error.')->error();
+            flash('Failed to delete promo code due to some internal error')->error();
+            
             return back();
         }
     }

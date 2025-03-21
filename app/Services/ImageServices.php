@@ -19,10 +19,9 @@ final class ImageServices
      * @author Muhammad Abdullah Mirza
      * @return fileName|false 
      */
-    public static function uploadImg(object $request, string $imgKeyName, int $id)
+    public static function uploadImg(object $request, string $imgKeyName, ?int $id = null): string|bool
     {
         $file = $request->file($imgKeyName);
-
         /* Creating a unique file name */
         $fileName = uniqid($id . '_') . "." . $file->getClientOriginalExtension();
 
@@ -33,7 +32,7 @@ final class ImageServices
         return (Storage::disk('spaces')->exists($fileName)) ? $fileName : false;
     }
 
-    public static function uploadLivewireImg(object $img, int $id)
+    public static function uploadLivewireImg(object $img, ?int $id = null): string|bool
     {
         /* Creating a unique file name */
         $fileName = uniqid($id . '_') . "." . $img->getClientOriginalExtension();

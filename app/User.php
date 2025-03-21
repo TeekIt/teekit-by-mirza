@@ -17,7 +17,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -36,6 +35,7 @@ class User extends Authenticatable implements JWTSubject
         'l_name',
         'email',
         'password',
+        'country_code',
         'phone',
         'business_name',
         'business_phone',
@@ -82,6 +82,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
@@ -188,24 +189,24 @@ class User extends Authenticatable implements JWTSubject
 
     public static function updateInfo(
         int $id,
-        string $name = null,
-        string $lName = null,
-        string $email = null,
-        string $phone = null,
-        string $fullAddress = null,
-        string $unitAddress = null,
-        string $country = null,
-        string $state = null,
-        string $city = null,
-        string $postcode = null,
-        string $lat = null,
-        string $lon = null,
-        string $businessName = null,
-        string $businessPhone = null,
-        string $password = null,
+        ?string $name = null,
+        ?string $lName = null,
+        ?string $email = null,
+        ?string $phone = null,
+        ?string $fullAddress = null,
+        ?string $unitAddress = null,
+        ?string $country = null,
+        ?string $state = null,
+        ?string $city = null,
+        ?string $postcode = null,
+        ?string $lat = null,
+        ?string $lon = null,
+        ?string $businessName = null,
+        ?string $businessPhone = null,
+        ?string $password = null,
         array $hours = [],
-        string $userImg = null,
-        string $stripeAccountId = null
+        ?string $userImg = null,
+        ?string $stripeAccountId = null
     ): bool {
         $user = self::findOrFail($id);
         if (!is_null($name)) $user->name = $name;
@@ -233,7 +234,7 @@ class User extends Authenticatable implements JWTSubject
     public static function updateStoreLocation(
         int $user_id,
         string $full_address,
-        string|null $unit_address,
+        ?string $unit_address,
         string $country,
         string $state,
         string $city,
@@ -258,6 +259,7 @@ class User extends Authenticatable implements JWTSubject
         string $lastName,
         string $email,
         string $password,
+        string $countryCode,
         string $phoneNumber,
         int $isActive,
         string $referralCode
@@ -267,6 +269,7 @@ class User extends Authenticatable implements JWTSubject
             'l_name' => $lastName,
             'email' => $email,
             'password' => Hash::make($password),
+            'country_code' => $countryCode,
             'phone' => $phoneNumber,
             'country' => 'NA',
             'state' => 'NA',
@@ -281,9 +284,10 @@ class User extends Authenticatable implements JWTSubject
         string $name,
         string $email,
         string $password,
+        string $countryCode,
         string $phone,
         string $address,
-        string|null $unit_address,
+        ?string $unit_address,
         string $postcode,
         string $country,
         string $state,
@@ -294,15 +298,16 @@ class User extends Authenticatable implements JWTSubject
         float $lon,
         string $business_hours,
         UserRole $role_id,
-        int|null $parent_store_id = null
+        ?int $parent_store_id = null
     ): self {
         return self::create([
             'name' => $name,
             'email' => $email,
             'password' => Hash::make($password),
-            'phone' => '+44' . $phone,
+            'country_code' => $countryCode,
+            'phone' => $phone,
             'business_name' => $business_name,
-            'business_phone' => '+44' . $business_phone,
+            'business_phone' => $business_phone,
             'business_hours' => $business_hours,
             'full_address' => $address,
             'unit_address' => $unit_address,
@@ -447,7 +452,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $user = self::with('referralRelations')->where('id', $user_id)->first();
         if ($user) {
-            return array(
+            return [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
@@ -461,7 +466,7 @@ class User extends Authenticatable implements JWTSubject
                 'user_img' => $user->user_img,
                 'referral_code' => $user->referral_code,
                 'referral_relation_details' => ($user->referralRelations) ? [$user->referralRelations] : null
-            );
+            ];
         }
         return null;
     }

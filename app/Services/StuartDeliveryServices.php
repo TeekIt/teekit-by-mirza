@@ -33,7 +33,6 @@ final class StuartDeliveryServices
     /**
      * It will get a fresh token for hitting Stuart delivery API
      * @author Muhammad Abdullah Mirza
-     * @author Muhammad Abdullah Mirza
      */
     public static function stuartSandboxAccessToken()
     {
@@ -44,6 +43,7 @@ final class StuartDeliveryServices
             'scope' => 'api'
         ]);
         $stuart_auth = $stuart_auth->json();
+
         return $stuart_auth['access_token'];
     }
     /**
@@ -58,6 +58,7 @@ final class StuartDeliveryServices
             'scope' => 'api'
         ]);
         $stuart_auth = $stuart_auth->json();
+
         return $stuart_auth['access_token'];
     }
     /**
@@ -80,6 +81,7 @@ final class StuartDeliveryServices
     public static function stuartSandboxJobStatus(string $access_token, array $job_id)
     {
         $response = Http::withToken($access_token)->patch('' . self::getSandBoxJobsUrl() . '/' . $job_id);
+
         return $response->json();
     }
     /**
@@ -88,6 +90,7 @@ final class StuartDeliveryServices
     public static function stuartProductionJobStatus(string $access_token, array $job_id)
     {
         $response = Http::withToken($access_token)->patch('' . self::getProductionJobsUrl() . '/' . $job_id);
+        
         return $response->json();
     }
     /**
@@ -150,12 +153,12 @@ final class StuartDeliveryServices
             } else {
                 $message = $data['error'] . ': ' . $data['message'];
                 if ($data['error'] == 'JOB_DISTANCE_NOT_ALLOWED') $message = $message . " " . $transport_type;
-                // WebResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $message);
+
                 return 'StuartErrorA: ' . $message;
             }
         } catch (Throwable $error) {
             report($error);
-            // WebResponseServices::getWebResponse(config('constants.FALSE_STATUS'), $data['message']);
+
             return 'StuartErrorB: ' . $data['error'] . ': ' . $data['message'];
         }
     }

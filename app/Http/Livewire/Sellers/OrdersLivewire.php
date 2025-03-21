@@ -48,7 +48,6 @@ class OrdersLivewire extends Component
     protected $listeners = [
         'alternativeProductIncluded' => 'render',
         'callParentResetModal' => 'resetModal',
-        'askParentToRefreshChildComponent' => '$refresh',
     ];
 
     public function mount(Request $request)
@@ -58,7 +57,9 @@ class OrdersLivewire extends Component
 
         $this->resetAllPaginators();
     }
-
+    /* 
+     * Custom Helpers
+     */
     public function resetModal()
     {
         $this->resetValidation();
@@ -140,8 +141,9 @@ class OrdersLivewire extends Component
             true
         );
     }
-
-
+    /* 
+     * CRUD Methods
+     */
     public function assignToGophrDriver()
     {
         try {
@@ -228,6 +230,7 @@ class OrdersLivewire extends Component
                 isset($this->order->customer_lat) ? (float) $this->order->customer_lat : null,
                 isset($this->order->customer_lon) ? (float) $this->order->customer_lon : null,
                 $this->order->customer_name,
+                $this->order->country_code,
                 $this->order->phone_number,
                 $this->order->address,
                 $this->order->house_no,

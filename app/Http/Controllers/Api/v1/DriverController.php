@@ -144,7 +144,7 @@ class DriverController extends Controller
         $user_id = auth()->guard('rider')->user()->id;
         $withdrawals = WithdrawalRequests::where('user_id', '=', $user_id)
             ->orderByDesc('created_at')->get();
-        $data = array();
+        $data = [];
         foreach ($withdrawals as $key => $withdrawal) {
             $data[$key]['id'] = $withdrawal->id;
             $data[$key]['user_id'] = $withdrawal->user_id;
@@ -343,7 +343,7 @@ class DriverController extends Controller
             $driver_info = Drivers::where('email', $credentials['email'])->first();
             if (Hash::check($credentials['password'], $driver_info->password)) {
                 $token = auth('rider')->attempt($credentials);
-                $data_info = array(
+                $data_info = [
                     'id' => $driver_info->id,
                     'f_name' => $driver_info->f_name,
                     'l_name' => $driver_info->l_name,
@@ -365,7 +365,7 @@ class DriverController extends Controller
                     'access_token' => $token,
                     'token_type' => 'bearer',
                     'expires_in' => JWTAuth::factory()->getTTL() * 60,
-                );
+                ];
                 return response()->json([
                     'data' => $data_info,
                     'status' => true,
