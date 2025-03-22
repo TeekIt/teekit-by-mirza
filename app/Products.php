@@ -283,7 +283,11 @@ class Products extends Model
         ?float $maxWeight,
         ?string $sortBy,
     ): array {
-        $scoutData = self::search($productName)->paginate(20, 'scoutPage')->toArray();
+        $scoutData = self::search($productName)
+            ->whereIn('seller_id', $sellerIds)
+            ->paginate(20, 'scoutPage')
+            ->toArray();
+
         $productIds = array_column($scoutData['data'], 'id');
         unset($scoutData['data']);
         $pagination = $scoutData;
@@ -327,7 +331,7 @@ class Products extends Model
                     $storeQuery->WhereUserIsActive();
                 });
         })->when($categoryId, function ($query) use ($categoryId) {
-            return $query->where('category_id', $categoryId);
+            return $query->where('category_id', '=',$categoryId);
         })->when($brand, function ($query) use ($brand) {
             return $query->where('brand', $brand);
         })->when($minPrice, function ($query) use ($minPrice) {
@@ -525,23 +529,23 @@ class Products extends Model
         return self::WhereProductIsEnable()->where('seller_id', '=', $seller_id)->orderBy('id', 'asc')->get();
     }
 
-    public static function getParentSellerProductsForView(int $seller_id, string $search = '', int $category_id = null, string $order_by): LengthAwarePaginator
+    public static function getParentSellerProductsForView(int $sellerId, string $search = '', ?int $categoryId = null, string $orderBy = 'desc'): LengthAwarePaginator
     {
         return self::with('category')
             ->withAvg('rattings:ratting', 'average_ratting')
             ->where('product_name', 'LIKE', "%{$search}%")
-            ->where('seller_id', '=', $seller_id)
-            ->when($category_id, function ($query, $category_id) {
-                return $query->where('category_id', '=', $category_id);
+            ->where('seller_id', '=', $sellerId)
+            ->when($categoryId, function ($query, $categoryId) {
+                return $query->where('category_id', '=', $categoryId);
             })
-            ->orderBy('id', $order_by)
+            ->orderBy('id', $orderBy)
             ->paginate(12);
     }
 
     public static function getChildSellerProductsForView(
         int $child_seller_id,
         string $search = '',
-        int $category_id = null
+        ?int $category_id = null
     ): LengthAwarePaginator {
         $parent_seller_id = User::find($child_seller_id)->parent_store_id;
         $qty = Qty::where('seller_id', $child_seller_id)->first();

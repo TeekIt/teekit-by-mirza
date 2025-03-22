@@ -703,6 +703,15 @@ class ProductsController extends Controller
         $validatedData = Validator::make($request->all(), [
             'productName' => 'required|string',
             'sellerIds' => 'required|string',
+            'categoryId' => 'integer',
+            'minPrice' => 'integer',
+            'maxPrice' => 'integer',
+            'minWeight' => 'numeric',
+            'maxWeight' => 'numeric',
+            'brand' => 'string',
+            'lat' => 'numeric|between:-90,90',
+            'lon' => 'numeric|between:-180,180',
+            'miles' => 'integer',
             'scoutPage' => 'required|integer',
             'sortBy' => [
                 'string',
@@ -712,11 +721,12 @@ class ProductsController extends Controller
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+        
         $validatedData = (object) $validatedData->validated();
 
-        $userLat = $request->lat;
-        $userLon = $request->lon;
-        $miles = $request->miles;
+        $userLat = $validatedData->lat ?? null;
+        $userLon = $validatedData->lon ?? null;
+        $miles = $validatedData->miles ?? null;
         if (isset($miles))
             $nearBySellerIds = $this->searchWrtNearByStores($userLat, $userLon, $miles);
 

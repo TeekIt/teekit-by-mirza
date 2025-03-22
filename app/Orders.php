@@ -243,7 +243,7 @@ class Orders extends Model
     public static function getOrdersOfUniqueProductsForView(
         int $sellerId,
         string $orderBy,
-        int|null $orderId = null,
+        ?int $orderId = null,
         array $columns = ['*'],
     ): LengthAwarePaginator {
         /* First we will update the "is_viewed" column if the order is searched by ID */
