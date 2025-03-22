@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Categories;
-use App\Enums\ProductStatus;
+use App\Enums\SortByEnum;
 use App\Enums\TransportVehicle;
 use App\Enums\UserRole;
 use App\Imports\ProductsImport;
@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddOrUpdateProductRequest;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\User;
@@ -21,10 +20,8 @@ use App\Qty;
 use App\Services\ImageServices;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
-use Throwable;
 use App\Services\JsonResponseServices;
 use App\Services\ProductServices;
-use App\Services\WebResponseServices;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
@@ -222,14 +219,17 @@ class ProductsController extends Controller
                     $product_images->save();
                 }
             }
+
             foreach ($data as $key => $value) {
                 if ($key == 'vehicle')
                     continue;
                 $product->$key = ($key == 'contact') ? '+44' . $value : $value;
             }
             $product->save();
+
             flash('Inventory updated successfully.')->success();
-            return \redirect()->route('inventory');
+
+            return redirect()->route('inventory');
         }
     }
     /**
@@ -239,6 +239,7 @@ class ProductsController extends Controller
     public function deleteImg($image_id)
     {
         productImages::deleteById($image_id);
+
         return redirect()->back();
     }
     /**
@@ -247,42 +248,32 @@ class ProductsController extends Controller
      */
     public function importProductsAPI(Request $request)
     {
-        try {
-            $validatedData = Validator::make(
-                $request->all(),
-                rules: [
-                    'file' => 'required|file',
-                    'seller_id' => [
-                        'required',
-                        'integer',
-                        Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRole::SELLER)),
-                    ],
+        $validatedData = Validator::make(
+            $request->all(),
+            rules: [
+                'file' => 'required|file',
+                'seller_id' => [
+                    'required',
+                    'integer',
+                    Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRole::SELLER)),
                 ],
-                messages: [
-                    'seller_id.exists' => 'The given :attribute either does not exist in our system or its a child seller',
-                ]
-            );
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-            }
-
-            Excel::import(new ProductsImport($request->seller_id), $request->file('file'), readerType: ExcelConstants::CSV);
-
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.DATA_INSERTION_SUCCESS'),
-                config('constants.HTTP_OK')
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
+            ],
+            messages: [
+                'seller_id.exists' => 'The given :attribute either does not exist in our system or its a child seller',
+            ]
+        );
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+
+        Excel::import(new ProductsImport($request->seller_id), $request->file('file'), readerType: ExcelConstants::CSV);
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.DATA_INSERTION_SUCCESS'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      *It will update a single product
@@ -300,7 +291,9 @@ class ProductsController extends Controller
                 config('constants.HTTP_UNPROCESSABLE_REQUEST')
             );
         }
-        $user_id = Auth::id();
+
+        $user_id = auth()->id();
+
         $product = Products::find($id);
         if (empty($product)) {
             return JsonResponseServices::getApiResponse(
@@ -338,13 +331,13 @@ class ProductsController extends Controller
             }
         }
         $product->save();
-        //this function will update qty in it's particular table with given data
-        $product_id = $product->id;
+
+        /* this function will update qty in it's particular table with given data */
         $product_quantity = $request->qty;
-        $this->updateProductQty($product_id, $user_id, $product_quantity);
-        $product = Products::getProductInfo($user_id, $product->id, ['*']);
+        $this->updateProductQty($product->id, $user_id, $product_quantity);
+
         return JsonResponseServices::getApiResponse(
-            $product,
+            Products::getProductInfo($user_id, $product->id, ['*']),
             config('constants.TRUE_STATUS'),
             config('constants.DATA_UPDATED_SUCCESS'),
             config('constants.HTTP_OK')
@@ -357,46 +350,34 @@ class ProductsController extends Controller
      */
     public function all(Request $request)
     {
-        try {
-            $validate = Validator::make($request->all(), [
-                'page' => 'required|integer'
-            ]);
-            if ($validate->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validate->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
-            }
-            $pagination = Products::getAllProducts()->toArray();
-            $data = $pagination['data'];
-            unset($pagination['data']);
-            if (!empty($data)) {
-                return JsonResponseServices::getApiResponseExtention(
-                    $data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
-            }
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
+        $validatedData = Validator::make($request->all(), [
+            'page' => 'required|integer'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        $pagination = Products::getAllProducts()->toArray();
+        $data = $pagination['data'];
+        unset($pagination['data']);
+
+        if (!empty($data)) {
+            return JsonResponseServices::getApiResponseExtention(
+                $data,
+                config('constants.TRUE_STATUS'),
+                '',
+                'pagination',
+                $pagination,
                 config('constants.HTTP_OK')
             );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * View products in bulk with array of given ids
@@ -520,54 +501,46 @@ class ProductsController extends Controller
      */
     public function recheckProducts(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'items' => 'required|array',
-                'day' => 'required|string',
-                'time' => 'required|string'
-            ]);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
-            }
-            $i = 0;
-            foreach ($request->items as $item) {
-                $open_time = User::select('business_hours->time->' . $request->day . '->open as open')
-                    ->where('id', '=', $item['store_id'])
-                    ->where('is_active', '=', 1)
-                    ->get();
-
-                $close_time = User::select('business_hours->time->' . $request->day . '->close as close')
-                    ->where('id', '=', $item['store_id'])
-                    ->where('is_active', '=', 1)
-                    ->get();
-
-                $qty = Products::select('qty')
-                    ->where('id', '=', $item['product_id'])
-                    ->where('user_id', '=', $item['store_id'])
-                    ->where('status', '=', 1)
-                    ->get();
-
-                $order_data[$i]['store_id'] = $item['store_id'];
-                $order_data[$i]['product_id'] = $item['product_id'];
-                $order_data[$i]['closed'] = (strtotime($request->time) >= strtotime($open_time[0]->open) && strtotime($request->time) <= strtotime($close_time[0]->close)) ? "No" : "Yes";
-                $order_data[$i]['qty'] = (isset($qty[0]->qty)) ? $qty[0]->qty : NULL;
-                $i++;
-            }
-            return JsonResponseServices::getApiResponse(
-                $order_data,
-                config('constants.TRUE_STATUS'),
-                '',
-                config('constants.HTTP_OK')
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
+        $validatedData = Validator::make($request->all(), [
+            'items' => 'required|array',
+            'day' => 'required|string',
+            'time' => 'required|string'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
         }
+
+        $i = 0;
+        foreach ($request->items as $item) {
+            $open_time = User::select('business_hours->time->' . $request->day . '->open as open')
+                ->where('id', '=', $item['store_id'])
+                ->where('is_active', '=', 1)
+                ->get();
+
+            $close_time = User::select('business_hours->time->' . $request->day . '->close as close')
+                ->where('id', '=', $item['store_id'])
+                ->where('is_active', '=', 1)
+                ->get();
+
+            $qty = Products::select('qty')
+                ->where('id', '=', $item['product_id'])
+                ->where('user_id', '=', $item['store_id'])
+                ->where('status', '=', 1)
+                ->get();
+
+            $order_data[$i]['store_id'] = $item['store_id'];
+            $order_data[$i]['product_id'] = $item['product_id'];
+            $order_data[$i]['closed'] = (strtotime($request->time) >= strtotime($open_time[0]->open) && strtotime($request->time) <= strtotime($close_time[0]->close)) ? "No" : "Yes";
+            $order_data[$i]['qty'] = (isset($qty[0]->qty)) ? $qty[0]->qty : NULL;
+            $i++;
+        }
+
+        return JsonResponseServices::getApiResponse(
+            $order_data,
+            config('constants.TRUE_STATUS'),
+            '',
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * View product w.r.t ID
@@ -575,41 +548,31 @@ class ProductsController extends Controller
      */
     public function view(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'sellerId' => 'required|integer',
-                'productId' => 'required|integer'
-            ]);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-            }
-
-            $data = Products::getProductInfo(
-                $request->sellerId,
-                $request->productId,
-                Products::getCommonColumns(),
-            );
-
-            /*
-            * Just creating this variable so we don't have to call the "empty()" function again & again
-            * Which will obviouly increase the API response speed
-            */
-            $dataIsEmpty = empty($data);
-            return JsonResponseServices::getApiResponse(
-                ($dataIsEmpty) ? [] : $data,
-                ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-                ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
-                config('constants.HTTP_OK'),
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
+        $validatedData = Validator::make($request->all(), [
+            'sellerId' => 'required|integer',
+            'productId' => 'required|integer'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+
+        $data = Products::getProductInfo(
+            $request->sellerId,
+            $request->productId,
+            Products::getCommonColumns(),
+        );
+
+        /*
+        * Just creating this variable so we don't have to call the "empty()" function again & again
+        * Which will obviouly increase the API response speed
+        */
+        $dataIsEmpty = empty($data);
+        return JsonResponseServices::getApiResponse(
+            ($dataIsEmpty) ? [] : $data,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+            config('constants.HTTP_OK'),
+        );
     }
     /**
      * It will delete the given product
@@ -737,80 +700,50 @@ class ProductsController extends Controller
      */
     public function search(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'productName' => 'required|string',
-                'sellerIds' => 'required|string',
-                'scoutPage' => 'required|integer',
-                'sortBy' => 'string',
-            ]);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-            }
-            $validatedData = (object) $validatedData->validated();
-
-            $userLat = $request->lat;
-            $userLon = $request->lon;
-            $miles = $request->miles;
-            if (isset($miles))
-                $nearBySellerIds = $this->searchWrtNearByStores($userLat, $userLon, $miles);
-
-            $products = Products::searchProducts(
-                $validatedData->productName,
-                (isset($nearBySellerIds['ids'])) ? $nearBySellerIds['ids'] : json_decode($validatedData->sellerIds),
-                $validatedData->categoryId ?? null,
-                $validatedData->brand ?? null,
-                $validatedData->minPrice ?? null,
-                $validatedData->maxPrice ?? null,
-                $validatedData->minWeight ?? null,
-                $validatedData->maxWeight ?? null,
-                $validatedData->sortBy ?? null,
-            );
-
-            /*
-            * Just creating this variable so we don't have to call the "empty()" function again & again
-            * Which will obviouly increase the API response speed
-            */
-            $dataIsEmpty = $products['data']->isEmpty();
-            return JsonResponseServices::getApiResponseExtention(
-                ($dataIsEmpty) ? [] : $products['data'],
-                ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-                ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
-                'pagination',
-                ($dataIsEmpty) ? [] : $products['pagination'],
-                config('constants.HTTP_OK')
-            );
-
-            // $pagination = $products->toArray();
-            // $data = $pagination['data'];
-            // unset($pagination['data']);
-
-            // if (!$products->isEmpty()) {
-            //     return JsonResponseServices::getApiResponseExtention(
-            //         $data,
-            //         config('constants.TRUE_STATUS'),
-            //         '',
-            //         'pagination',
-            //         $pagination,
-            //         config('constants.HTTP_OK')
-            //     );
-            // }
-
-            // return JsonResponseServices::getApiResponse(
-            //     [],
-            //     config('constants.FALSE_STATUS'),
-            //     config('constants.NO_RECORD'),
-            //     config('constants.HTTP_OK')
-            // );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
+        $validatedData = Validator::make($request->all(), [
+            'productName' => 'required|string',
+            'sellerIds' => 'required|string',
+            'scoutPage' => 'required|integer',
+            'sortBy' => [
+                'string',
+                Rule::in(array_column(SortByEnum::cases(), 'value')),
+            ],
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+        $validatedData = (object) $validatedData->validated();
+
+        $userLat = $request->lat;
+        $userLon = $request->lon;
+        $miles = $request->miles;
+        if (isset($miles))
+            $nearBySellerIds = $this->searchWrtNearByStores($userLat, $userLon, $miles);
+
+        $products = Products::searchProducts(
+            $validatedData->productName,
+            (isset($nearBySellerIds['ids'])) ? $nearBySellerIds['ids'] : json_decode($validatedData->sellerIds),
+            $validatedData->categoryId ?? null,
+            $validatedData->brand ?? null,
+            $validatedData->minPrice ?? null,
+            $validatedData->maxPrice ?? null,
+            $validatedData->minWeight ?? null,
+            $validatedData->maxWeight ?? null,
+            $validatedData->sortBy ?? null,
+        );
+        /*
+        * Just creating this variable so we don't have to call the "empty()" function again & again
+        * Which will obviouly increase the API response speed
+        */
+        $dataIsEmpty = $products['data']->isEmpty();
+        return JsonResponseServices::getApiResponseExtention(
+            ($dataIsEmpty) ? [] : $products['data'],
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+            'pagination',
+            ($dataIsEmpty) ? (object) [] : $products['pagination'],
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * It takes lat,lon  from user and store,converts them into distaance
@@ -829,6 +762,7 @@ class ProductsController extends Controller
             }
         }
         $pm = $this->getDurationBetweenPointsNew($user_lat, $user_lon, $latitude2, $longitude2);
+
         return [
             'ids' => $store_ids,
             'time' => $pm,
@@ -918,126 +852,105 @@ class ProductsController extends Controller
     public function updatePriceAndQtyBulk(Request $request, $delimiter = ',', $filename = '', $batchSize = 1000)
     {
         ini_set('max_execution_time', 120);
-        try {
-            $validator = Validator::make($request->all(), [
-                'file' => 'required',
-                'store_id' => 'required',
-            ]);
-            if ($validator->fails()) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $validator->errors(),
-                    config('constants.HTTP_UNPROCESSABLE_REQUEST')
-                );
-            }
-            if ($request->hasFile('file')) {
-                $file = $request->file('file');
-                // File Details
-                $filename = $file->getClientOriginalName();
-                $location = public_path('upload/csv');
-                $file->move($location, $filename);
-                $filepath = $location . "/" . $filename;
-                // Reading file
-                $file = fopen($filepath, "r");
-                $i = 0;
-                while (($filedata = fgetcsv($file, 1000, $delimiter)) !== FALSE) {
-                    if ($i == 0) {
-                        $i++;
-                        continue;
-                    }
-                    $catgory_id = $filedata[0];
-                    $sku = $filedata[1];
-                    $price = $filedata[2];
-                    $qty = $filedata[3];
-                    // Find product by sku, user_id, category_id and update price and quantity
-                    $product = (new Products)->getProductsByParameters($request->store_id, $sku, $catgory_id);
-                    if ($product) {
-                        $product->price = $price;
-                        $product->save();
-                        $productQty = (new Qty())->getQtybyStoreAndProductId($request->store_id, $product->id);
-                        if (!empty($productQty)) {
-                            $productQty->qty = $qty;
-                            $productQty->save();
-                        }
-                    }
+
+        $validatedData = Validator::make($request->all(), [
+            'file' => 'required',
+            'store_id' => 'required',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            // File Details
+            $filename = $file->getClientOriginalName();
+            $location = public_path('upload/csv');
+            $file->move($location, $filename);
+            $filepath = $location . "/" . $filename;
+            // Reading file
+            $file = fopen($filepath, "r");
+            $i = 0;
+            while (($filedata = fgetcsv($file, 1000, $delimiter)) !== FALSE) {
+                if ($i == 0) {
                     $i++;
-                    if ($i % $batchSize == 0) {
-                        usleep(500000); // Wait for 0.5 seconds between batches to avoid overwhelming the database
+                    continue;
+                }
+                $catgory_id = $filedata[0];
+                $sku = $filedata[1];
+                $price = $filedata[2];
+                $qty = $filedata[3];
+                // Find product by sku, user_id, category_id and update price and quantity
+                $product = (new Products)->getProductsByParameters($request->store_id, $sku, $catgory_id);
+                if ($product) {
+                    $product->price = $price;
+                    $product->save();
+                    $productQty = (new Qty())->getQtybyStoreAndProductId($request->store_id, $product->id);
+                    if (!empty($productQty)) {
+                        $productQty->qty = $qty;
+                        $productQty->save();
                     }
                 }
-
-                fclose($file);
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.TRUE_STATUS'),
-                    config('constants.DATA_UPDATED_SUCCESS'),
-                    config('constants.HTTP_OK')
-                );
+                $i++;
+                if ($i % $batchSize == 0) {
+                    usleep(500000); // Wait for 0.5 seconds between batches to avoid overwhelming the database
+                }
             }
-        } catch (Throwable $error) {
-            report($error);
+
+            fclose($file);
+
             return JsonResponseServices::getApiResponse(
                 [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
+                config('constants.TRUE_STATUS'),
+                config('constants.DATA_UPDATED_SUCCESS'),
+                config('constants.HTTP_OK')
             );
         }
     }
     /**
-     * Listing of all products w.r.t Seller/Store 'id'
+     * Listing of all products w.r.t Seller 'id'
      * @author Muhammad Abdullah Mirza
      */
     public function sellerProducts(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'sellerId' => 'required|integer',
-                'page' => 'required|integer'
-            ]);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        $validatedData = Validator::make($request->all(), [
+            'sellerId' => 'required|integer',
+            'page' => 'required|integer'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        $pagination = Cache::remember(
+            'sellerProducts' . $request->sellerId . $request->page,
+            now()->addDay(),
+            function () use ($request) {
+                return Products::getProductsInfoBySellerId(
+                    $request->sellerId,
+                    Products::getCommonColumns(),
+                )->toArray();
             }
+        );
 
-            $pagination = Cache::remember(
-                'sellerProducts' . $request->sellerId . $request->page,
-                now()->addDay(),
-                function () use ($request) {
-                    return Products::getProductsInfoBySellerId(
-                        $request->sellerId,
-                        Products::getCommonColumns(),
-                    )->toArray();
-                }
-            );
+        $data = $pagination['data'];
+        unset($pagination['data']);
 
-            $data = $pagination['data'];
-            unset($pagination['data']);
-
-            if (!empty($data)) {
-                return JsonResponseServices::getApiResponseExtention(
-                    $data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
-            }
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
+        if (!empty($data)) {
+            return JsonResponseServices::getApiResponseExtention(
+                $data,
+                config('constants.TRUE_STATUS'),
+                '',
+                'pagination',
+                $pagination,
                 config('constants.HTTP_OK')
             );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
 }

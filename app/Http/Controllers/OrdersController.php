@@ -393,7 +393,7 @@ class OrdersController extends Controller
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
             ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
             'pagination',
-            ($dataIsEmpty) ? [] : $pagination,
+            ($dataIsEmpty) ? (object) [] : $pagination,
             config('constants.HTTP_OK')
         );
     }
@@ -433,7 +433,7 @@ class OrdersController extends Controller
 
         return JsonResponseServices::getApiResponse(
             [],
-            false,
+            config('constants.FALSE_STATUS'),
             config('constants.NO_RECORD'),
             config('constants.HTTP_OK')
         );

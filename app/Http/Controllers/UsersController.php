@@ -255,8 +255,6 @@ class UsersController extends Controller
 
         $data = Cache::remember('sellers' . $request->state . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
             $sellers = User::getParentAndChildSellersByState($request->state);
-            // $pagination = $sellers->toArray();
-            // unset($pagination['data']);
             if (!$sellers->isEmpty()) {
                 return GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
             }
@@ -277,15 +275,6 @@ class UsersController extends Controller
             '',
             config('constants.HTTP_OK'),
         );
-
-        // return JsonResponseServices::getApiResponseExtention(
-        //     $data,
-        //     config('constants.TRUE_STATUS'),
-        //     '',
-        //     'pagination',
-        //     $pagination,
-        //     config('constants.HTTP_OK')
-        // );
     }
     /**
      * Search products w.r.t Seller/Store 'id' & Product Name
@@ -300,11 +289,13 @@ class UsersController extends Controller
             ->where('status', 1);
         $products = $article->paginate(20);
         $pagination = $products->toArray();
+
         if (!$products->isEmpty()) {
             foreach ($products as $product) {
                 $data[] = Products::getProductInfo($seller_id, $product->id, ['*']);
             }
             unset($pagination['data']);
+            
             return JsonResponseServices::getApiResponseExtention(
                 $data,
                 config('constants.TRUE_STATUS'),

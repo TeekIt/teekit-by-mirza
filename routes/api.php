@@ -81,7 +81,7 @@ Route::prefix('category')->controller(CategoriesController::class)->group(functi
     Route::post('add', 'add');
     Route::post('update/{product_id}', 'update');
     Route::get('{categoryId}/products', 'productsByCategory');
-    Route::get('get-stores-by-category', 'stores');
+    Route::get('get-stores-by-category', 'sellers');
     Route::get('all', 'all');
 });
 /*
