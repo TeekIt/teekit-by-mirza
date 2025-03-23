@@ -27,12 +27,12 @@ class DriverFactory extends Factory
             'lat' => $this->faker->latitude(),
             'lon' => $this->faker->longitude(),
             'account_holders_name' => $this->faker->name(),
-            'bank_name' => $this->faker->bank(),
+            'bank_name' => $this->faker->company(),
             'sort_code' => $this->faker->randomNumber(8),
-            'account_number' => $this->faker->randomNumber(10),
+            'account_number' => $this->faker->randomNumber(8),
             'driving_licence_name' => $this->faker->name(),
             'dob' => $this->faker->date(),
-            'driving_licence_number' => $this->faker->randomNumber(16),
+            'driving_licence_number' => $this->faker->randomNumber(8),
             'is_active' => $this->faker->boolean(),
         ];
     }

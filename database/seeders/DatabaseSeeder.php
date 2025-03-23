@@ -3,9 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use QtySeeder;
-use DriverDocumentsSeeder;
-use DriverSeeder;
 
 class DatabaseSeeder extends Seeder
 {
