@@ -1,8 +1,8 @@
 <?php
 
-// namespace Database\Seeders;
+namespace Database\Seeders;
 
-use App\DriverDocuments;
+use App\Models\DriverDocument;
 use Illuminate\Database\Seeder;
 
 class DriverDocumentsSeeder extends Seeder
@@ -14,6 +14,6 @@ class DriverDocumentsSeeder extends Seeder
      */
     public function run()
     {
-        DriverDocuments::factory()->count(5)->create();
+        DriverDocument::factory()->count(5)->create();
     }
 }
