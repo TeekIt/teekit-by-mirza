@@ -331,9 +331,9 @@ class Products extends Model
                     $storeQuery->WhereUserIsActive();
                 });
         })->when($categoryId, function ($query) use ($categoryId) {
-            return $query->where('category_id', '=',$categoryId);
+            return $query->where('category_id', '=', $categoryId);
         })->when($brand, function ($query) use ($brand) {
-            return $query->where('brand', $brand);
+            return $query->where('brand', '=', $brand);
         })->when($minPrice, function ($query) use ($minPrice) {
             return $query->where('price', '>=', $minPrice);
         })->when($maxPrice, function ($query) use ($maxPrice) {
