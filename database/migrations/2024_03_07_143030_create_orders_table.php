@@ -55,7 +55,6 @@ class CreateOrdersTable extends Migration
             /**
              * Indexes
              */
-            $table->index('customer_id');
             $table->index('seller_id');
             $table->index('order_status');
             $table->index('delivery_status');

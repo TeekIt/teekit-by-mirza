@@ -26,7 +26,6 @@ class CreateOrderItemsTable extends Migration
              * Indexes
              */
             $table->index('order_id');
-            $table->index('product_id');
         });
     }
 

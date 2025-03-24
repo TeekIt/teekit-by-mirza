@@ -15,11 +15,10 @@ return new class extends Migration
     {
         Schema::create('orders_from_other_sellers', function (Blueprint $table) {
             $table->bigIncrements('id');
-            // $table->foreignId('customer_id')->constrained(table:'users')->cascadeOnDelete();
-            $table->morphs('created_by'); /* This column can either belong to "users" or "guest_buyers" */
+            $table->morphs('created_by', 'orders_from_other_sellers_created_by'); /* This column can either belong to "users" or "guest_buyers" */
             $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
             $table->foreignId('parent_order_id')->constrained(table:'orders')->cascadeOnDelete();
-            $table->morphs('product_belongs_to'); /* This column can either belong to "products" or "products_by_buyers" */
+            $table->morphs('product_belongs_to', 'order_from_other_sellers_product_belongs_to'); /* This column can either belong to "products" or "products_by_buyers" */
             $table->float('product_price');
             $table->integer('product_qty');
             $table->float('initial_total');
@@ -60,9 +59,7 @@ return new class extends Migration
             /**
              * Indexes
              */
-            $table->index('created_by_id');
             $table->index('seller_id');
-            $table->index('product_belongs_to_id');
             $table->index('payment_intent_id');
             $table->index('driver_id');
         });
