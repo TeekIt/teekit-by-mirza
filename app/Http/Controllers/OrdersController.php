@@ -6,7 +6,6 @@ use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicle;
 use App\Enums\UserChoicesEnum;
-use App\Enums\UserMorphTypeEnum;
 use App\Enums\UserRole;
 use App\Models\GuestBuyer;
 use App\Models\ProductsByBuyer;
@@ -14,6 +13,8 @@ use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Qty;
+use App\Services\EmailServices;
+use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
 use App\Services\OrderServices;
@@ -21,13 +22,13 @@ use App\Services\ProductServices;
 use App\User;
 use App\Services\VerificationCodeServices;
 use App\VerificationCodes;
+use Google\Service\CloudAlloyDBAdmin\Resource\ProjectsLocationsClustersUsers;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Throwable;
 
 class OrdersController extends Controller
 {
@@ -298,13 +299,16 @@ class OrdersController extends Controller
         $sellerId = $request->sellerId;
         $initialTotal = $request->maxPrice * $request->qty;
         $totalItems = $request->qty;
-
+        /* Fetch seller details against whom the order is being placed */
+        $seller = User::getUserByID($sellerId, [
+            'id',
+            'business_phone',
+            'city',
+            'lat',
+            'lon'
+        ]);
+        
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
-            $seller = User::getUserByID($sellerId, [
-                'business_phone',
-                'lat',
-                'lon'
-            ]);
             $driverCharges = OrderServices::getDriverCharges(
                 $seller->lat,
                 $seller->lon,
@@ -315,7 +319,7 @@ class OrdersController extends Controller
             );
         }
         /* Create order */
-        $orderId = Orders::add(
+        $order = Orders::add(
             $createdByType,
             $createdById,
             $sellerId,
@@ -323,10 +327,10 @@ class OrdersController extends Controller
             $totalItems,
             $driverCharges ?? 0.00,
             $request
-        )->id;
+        );
         /* Insert order items */
         OrderItems::add(
-            $orderId,
+            $order->id,
             $productByBuyer->getMorphClass(),
             $productByBuyer->id,
             $productByBuyer->max_price,
@@ -336,20 +340,37 @@ class OrdersController extends Controller
 
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
             $verificationCode = VerificationCodeServices::generateCode();
-            VerificationCodes::add($orderId, $verificationCode);
+            VerificationCodes::add($order->id, $verificationCode);
 
             if (app()->environment('production')) {
                 OrderServices::sendBulkSms(
                     $seller,
                     $request->countryCode,
                     $request->phone,
-                    $orderId,
+                    $order->id,
                     $verificationCode
                 );
             }
         }
-
-        $idsArray[] = $orderId;
+        /* Email order details to nearby sellers */
+        /**
+         * @todo: Select nearby sellers
+         * @todo: Send them bulk email about the order details
+         */
+        dd(User::getParentAndChildSellersByCity($seller->city, 25));
+        $nearbySellers = GoogleMapServices::getNearBySellers(
+            $request->lat,
+            $request->lon,
+            User::getParentAndChildSellersByCity($seller->city, 500),
+            $seller->id
+        );
+        // dd($nearbySellers);
+        EmailServices::sendCustomProductOrderDetailsToNearBySellersMail(
+            array_column($nearbySellers, 'email'),
+            $order
+        );
+        
+        $idsArray[] = $order->id;
 
         return JsonResponseServices::getApiResponse(
             Orders::getByIds($idsArray),

@@ -210,7 +210,7 @@ class CategoriesController extends Controller
             // $pagination = $stores->toArray();
             // unset($pagination['data']);
 
-            $data = GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $stores, 25);
+            $data = GoogleMapServices::findNearByUsersByMakingChunks($request->lat, $request->lon, $stores, 25);
             /*
             * Just creating this variable so we don't have to call the "empty()" function again & again
             * Because it will increase the API response time
