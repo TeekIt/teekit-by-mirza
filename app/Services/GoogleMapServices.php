@@ -28,8 +28,7 @@ final class GoogleMapServices
             Carbon::now()->addDay(),
             function () use ($buyerLat, $buyerLon, $sellersOfSameCity) {
                 /* 
-                 * Add this function when moving to production/staging
-                 * Bcz this function will not work with "faker" generated 
+                 * This function will not work with "faker" generated 
                  * customer lat, lon
                  */
                 return static::findNearByUsersByMakingChunks(

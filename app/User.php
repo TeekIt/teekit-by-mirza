@@ -335,7 +335,7 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function getParentAndChildSellersByCity(string $city, int $numberOfSellers = 25): Collection
+    public static function getParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
     {
         return self::WhereUserIsActive()
             ->whereNotNull('lat')
@@ -343,11 +343,11 @@ class User extends Authenticatable implements JWTSubject
             ->where('city', '=', $city)
             ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
-            ->take($numberOfSellers)
+            ->take($numberOfRows)
             ->get();
     }
 
-    public static function getParentAndChildSellersByState(string $state, int $numberOfSellers = 25): Collection
+    public static function getParentAndChildSellersByState(string $state, int $numberOfRows = 25): Collection
     {
         return self::WhereUserIsActive()
             ->whereNotNull('lat')
@@ -355,7 +355,7 @@ class User extends Authenticatable implements JWTSubject
             ->where('state', '=', $state)
             ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
-            ->take($numberOfSellers)
+            ->take($numberOfRows)
             ->get();
     }
 

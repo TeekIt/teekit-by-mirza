@@ -353,18 +353,13 @@ class OrdersController extends Controller
             }
         }
         /* Email order details to nearby sellers */
-        /**
-         * @todo: Select nearby sellers
-         * @todo: Send them bulk email about the order details
-         */
-        dd(User::getParentAndChildSellersByCity($seller->city, 25));
         $nearbySellers = GoogleMapServices::getNearBySellers(
             $request->lat,
             $request->lon,
-            User::getParentAndChildSellersByCity($seller->city, 500),
+            User::getParentAndChildSellersByCity($seller->city),
             $seller->id
         );
-        // dd($nearbySellers);
+
         EmailServices::sendCustomProductOrderDetailsToNearBySellersMail(
             array_column($nearbySellers, 'email'),
             $order
