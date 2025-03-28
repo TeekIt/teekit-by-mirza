@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Qty;
 use Illuminate\Database\Seeder;
 

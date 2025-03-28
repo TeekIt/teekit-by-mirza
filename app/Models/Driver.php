@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Services\ImageServices;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
-class Drivers extends Authenticatable implements JWTSubject
+class Driver extends Authenticatable implements JWTSubject
 {
     use Notifiable, HasFactory, SoftDeletes;
     /**
@@ -97,6 +97,7 @@ class Drivers extends Authenticatable implements JWTSubject
     {
         $driver->profile_img = ImageServices::uploadImg($request, $img_key_name, $driver->id);
         $driver->save();
+        
         return $driver;
     }
 
