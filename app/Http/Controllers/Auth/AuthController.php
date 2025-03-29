@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\UsersController;
 use App\Http\Resources\BuyerResource;
 use App\Keys;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Crypt;
 use Jenssegers\Agent\Agent;
 use App\Models\JwtToken;
@@ -18,12 +17,10 @@ use Illuminate\Http\Request;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
-use Google\Service\AdExchangeBuyerII\Buyer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Throwable;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -73,45 +70,35 @@ class AuthController extends Controller
      */
     public function loginBuyer(Request $request)
     {
-        try {
-            $credentials = $request->only('email', 'password');
-            if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json([
-                    'data' => [],
-                    'status' => config('constants.FALSE_STATUS'),
-                    'message' => config('constants.INVALID_CREDENTIALS')
-                ], 401);
-            }
-
-            $user = JWTAuth::user();
-            if ($user->email_verified_at == null) {
-                return response()->json([
-                    'data' => [],
-                    'status' => config('constants.FALSE_STATUS'),
-                    'message' => config('constants.EMAIL_NOT_VERIFIED')
-                ], 401);
-            }
-
-            if ($user->is_active == 0) {
-                return response()->json([
-                    'data' => [],
-                    'status' => config('constants.FALSE_STATUS'),
-                    'message' => config('constants.ACCOUNT_DEACTIVATED')
-                ], 401);
-            }
-
-            $this->authenticated($request, $user, $token);
-
-            return $this->respondWithToken($token);
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
+        $credentials = $request->only('email', 'password');
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json([
+                'data' => [],
+                'status' => config('constants.FALSE_STATUS'),
+                'message' => config('constants.INVALID_CREDENTIALS')
+            ], 401);
         }
+
+        $user = JWTAuth::user();
+        if ($user->email_verified_at == null) {
+            return response()->json([
+                'data' => [],
+                'status' => config('constants.FALSE_STATUS'),
+                'message' => config('constants.EMAIL_NOT_VERIFIED')
+            ], 401);
+        }
+
+        if ($user->is_active == 0) {
+            return response()->json([
+                'data' => [],
+                'status' => config('constants.FALSE_STATUS'),
+                'message' => config('constants.ACCOUNT_DEACTIVATED')
+            ], 401);
+        }
+
+        $this->authenticated($request, $user, $token);
+
+        return $this->respondWithToken($token);
     }
 
     public function verify(Request $request)
@@ -247,6 +234,7 @@ class AuthController extends Controller
     public function logout()
     {
         JWTAuth::parseToken()->invalidate();
+
         return response()->json([
             'data' => [],
             'status' => config('constants.TRUE_STATUS'),
@@ -343,26 +331,18 @@ class AuthController extends Controller
 
     public function deliveryBoys()
     {
-        try {
-            $users = User::query()->where('seller_id', '=', Auth::id())->get();
-            $data = [];
-            foreach ($users as $user) {
-                if (Gate::allows('delivery_boy')) $data[] = UsersController::getSellerInfo($user);
-            }
-            return response()->json([
-                'data' => $data,
-                'status' => config('constants.TRUE_STATUS'),
-                'message' => ''
-            ], config('constants.HTTP_OK'));
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
+        $users = User::query()->where('seller_id', '=', Auth::id())->get();
+
+        $data = [];
+        foreach ($users as $user) {
+            if (Gate::allows('delivery_boy')) $data[] = UsersController::getSellerInfo($user);
         }
+
+        return response()->json([
+            'data' => $data,
+            'status' => config('constants.TRUE_STATUS'),
+            'message' => ''
+        ], config('constants.HTTP_OK'));
     }
     /**
      * Get user details w.r.t 'id'
@@ -372,6 +352,7 @@ class AuthController extends Controller
     public function getUserDetails($user_id)
     {
         $data = User::getUserInfo($user_id);
+
         return JsonResponseServices::getApiResponse(
             (empty($data)) ? [] : $data,
             (empty($data)) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
@@ -385,21 +366,11 @@ class AuthController extends Controller
      */
     public function keys()
     {
-        try {
-            return response()->json([
-                'data' => Keys::all(),
-                'status' => config('constants.TRUE_STATUS'),
-                'message' => ''
-            ], config('constants.HTTP_OK'));
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
-        }
+        return response()->json([
+            'data' => Keys::all(),
+            'status' => config('constants.TRUE_STATUS'),
+            'message' => ''
+        ], config('constants.HTTP_OK'));
     }
     /**
      * It will delete user from users table by id
@@ -408,36 +379,28 @@ class AuthController extends Controller
      */
     public function deleteUser(Request $request)
     {
-        try {
-            $user = User::find(Auth::id());
-            if (!empty($user)) {
-                DB::table('deleted_users')->insert([
-                    'user_id' =>  $user->id,
-                    'postcode' =>  $user->postcode,
-                    'created_at' =>   Carbon::now(),
-                    'updated_at' =>   Carbon::now()
-                ]);
-                $user->delete();
-                return response()->json([
-                    'data' => [],
-                    'status' => config('constants.TRUE_STATUS'),
-                    'message' => config('constants.ITEM_DELETED'),
-                ], config('constants.HTTP_OK'));
-            }
+        $user = User::find(Auth::id());
+        if (!empty($user)) {
+            DB::table('deleted_users')->insert([
+                'user_id' =>  $user->id,
+                'postcode' =>  $user->postcode,
+                'created_at' =>   Carbon::now(),
+                'updated_at' =>   Carbon::now()
+            ]);
+            $user->delete();
+
             return response()->json([
                 'data' => [],
-                'status' => config('constants.FALSE_STATUS'),
-                'message' => config('constants.NO_RECORD')
+                'status' => config('constants.TRUE_STATUS'),
+                'message' => config('constants.ITEM_DELETED'),
             ], config('constants.HTTP_OK'));
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
         }
+
+        return response()->json([
+            'data' => [],
+            'status' => config('constants.FALSE_STATUS'),
+            'message' => config('constants.NO_RECORD')
+        ], config('constants.HTTP_OK'));
     }
     /**
      * Google register
@@ -498,8 +461,8 @@ class AuthController extends Controller
         $validatedData = (object) $validatedData->validated();
 
         $buyer = User::getBuyerByEmail($validatedData->email);
-        if (!$buyer) {
-            JsonResponseServices::getApiResponse(
+        if (! $buyer) {
+            return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
                 config('constants.INVALID_CREDENTIALS'),
