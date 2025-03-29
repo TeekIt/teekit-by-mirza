@@ -811,7 +811,7 @@ class OrdersController extends Controller
     /**
      * It will get order details via given id
      */
-    public function getOrderDetailsTwo(Request $request)
+    public function getOrderDetailsForApi(Request $request)
     {
         $validatedData = Validator::make($request->route()->parameters(), [
             'id' => 'required|integer'
@@ -820,8 +820,8 @@ class OrdersController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
         }
 
-        $validatedData = (object) $validatedData->safe()->all();
-
+        $validatedData = (object) $validatedData->validated();
+        
         if (!Orders::checkIfOrderExists($validatedData->id)) {
             return JsonResponseServices::getApiResponse(
                 [],

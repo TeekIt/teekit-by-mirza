@@ -22,6 +22,10 @@ class Orders extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['*'];
+
+    // protected $hidden = [
+    //     'deleted_at',
+    // ];
     /**
      * Relations
      */
@@ -187,7 +191,7 @@ class Orders extends Model
 
     public static function checkIfOrderExists(int $id): bool
     {
-        return self::where('id', $id)->exists();
+        return self::where('id', '=', $id)->exists();
     }
 
     public static function checkTotalOrders(int $customerId): int

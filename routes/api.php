@@ -145,8 +145,9 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::withoutMiddleware(['jwt.verify'])->group(function () {
             Route::post('new', 'new');
             Route::post('product_by_buyer', 'orderProductByBuyer');
+            Route::get('get-order-details/{id}', 'getOrderDetailsForApi');
         });
-        
+
         Route::get('/logged_in/buyer', 'showLoggedinBuyerOrders');
         Route::get('seller', 'sellerOrders');
         Route::get('driver_orders/{driver_id}', 'driverOrders');
@@ -156,7 +157,6 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('customer_cancel_order', 'customerCancelOrder');
         Route::post('update', 'updateOrder');
         Route::post('estimated-time/{id}', 'storeEstimatedTime');
-        Route::get('get-order-details/{id}', 'getOrderDetailsTwo');
         Route::get('products-of-recent-order', 'productsOfRecentOrder');
     });
 
