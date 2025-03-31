@@ -9,7 +9,6 @@ use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Throwable;
 use App\Services\JsonResponseServices;
 use Illuminate\Support\Facades\Cache;
 
@@ -50,27 +49,18 @@ class CategoriesController extends Controller
      */
     public function update(Request $request, $category_id)
     {
-        try {
-            // $validatedData = Categories::validator($request);
-            // if ($validatedData->fails()) {
-            //     return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-            // }
-            $category = Categories::updateCategory($request, $category_id);
-            return JsonResponseServices::getApiResponse(
-                $category,
-                config('constants.TRUE_STATUS'),
-                config('constants.DATA_UPDATED_SUCCESS'),
-                config('constants.HTTP_OK')
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
-        }
+        // $validatedData = Categories::validator($request);
+        // if ($validatedData->fails()) {
+        //     return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        // }
+        $category = Categories::updateCategory($request, $category_id);
+
+        return JsonResponseServices::getApiResponse(
+            $category,
+            config('constants.TRUE_STATUS'),
+            config('constants.DATA_UPDATED_SUCCESS'),
+            config('constants.HTTP_OK')
+        );
     }
 
     public function destroy(Request $request)
@@ -143,12 +133,6 @@ class CategoriesController extends Controller
         // else
         //     $data = Categories::getProducts($request->categoryId);
 
-        // dd(Products::getProductsInfoByCategoryId(
-        //     $request->categoryId,
-        //     $request->sellerId,
-        //     Products::getCommonColumns(),
-        // ));
-
         $pagination = Cache::remember(
             'productsByCategory' . $request->categoryId . $request->sellerId . $request->page,
             now()->addDay(),
@@ -160,12 +144,6 @@ class CategoriesController extends Controller
                 )->toArray();
             }
         );
-
-        // $pagination = Products::getProductsInfoByCategoryId(
-        //     $request->categoryId,
-        //     $request->sellerId,
-        //     Products::getCommonColumns(),
-        // )->toArray();
 
         $data = $pagination['data'];
         unset($pagination['data']);
@@ -180,65 +158,48 @@ class CategoriesController extends Controller
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
             ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
             'pagination',
-            ($dataIsEmpty) ? [] : $pagination,
+            ($dataIsEmpty) ? (object) [] : $pagination,
             config('constants.HTTP_OK')
         );
     }
     /**
-     * It will get the stores w.r.t category id
+     * It will get the sellers w.r.t category id
      * @version 1.0.0
      */
-    public function stores(Request $request)
+    public function sellers(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->query(), [
-                'category_id' => 'required|integer',
-                'lat' => 'required|numeric|between:-90,90',
-                'lon' => 'required|numeric|between:-180,180',
-                'state' => 'required|string'
-                // 'page' => 'required|numeric'
-            ]);
-            if ($validatedData->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-            }
-
-            $stores = Cache::remember('get-stores-by-category' . $request->category_id . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
-                return Qty::getSellersByGivenParams($request->category_id, $request->state);
-            });
-
-            // $stores = Categories::stores($request->category_id, $request->city);
-            // $pagination = $stores->toArray();
-            // unset($pagination['data']);
-
-            $data = GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $stores, 25);
-            /*
-            * Just creating this variable so we don't have to call the "empty()" function again & again
-            * Because it will increase the API response time
-            */
-            $data_is_empty = empty($data);
-            // return JsonResponseServices::getApiResponseExtention(
-            //     ($data_is_empty) ? [] : $data,
-            //     ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            //     ($data_is_empty) ? config('constants.NO_RECORD') : '',
-            //     'pagination',
-            //     ($data_is_empty) ? [] : $pagination,
-            //     config('constants.HTTP_OK')
-            // );
-
-            return JsonResponseServices::getApiResponse(
-                ($data_is_empty) ? [] : $data,
-                ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-                ($data_is_empty) ? config('constants.NO_RECORD') : '',
-                config('constants.HTTP_OK')
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
+        $validatedData = Validator::make($request->query(), [
+            'category_id' => 'required|integer',
+            'lat' => 'required|numeric|between:-90,90',
+            'lon' => 'required|numeric|between:-180,180',
+            'state' => 'required|string'
+            // 'page' => 'required|numeric'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+
+        $validatedData = (object) $validatedData->validated();
+
+        $sellers = Cache::remember(
+            'get-sellers-by-category' . $validatedData->category_id . $validatedData->lat . $validatedData->lon,
+            now()->addDay(),
+            function () use ($validatedData) {
+                return Qty::getSellersByGivenParams($validatedData->category_id, $validatedData->state);
+            }
+        );
+
+        $data = GoogleMapServices::findDistanceByMakingChunks($validatedData->lat, $validatedData->lon, $sellers, 25);
+        /*
+        * Just creating this variable so we don't have to call the "empty()" function again & again
+        * Because it will increase the API response time
+        */
+        $dataIsEmpty = empty($data);
+        return JsonResponseServices::getApiResponse(
+            ($dataIsEmpty) ? [] : $data,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+            config('constants.HTTP_OK')
+        );
     }
 }

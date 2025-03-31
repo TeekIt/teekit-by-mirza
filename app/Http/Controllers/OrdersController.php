@@ -393,7 +393,7 @@ class OrdersController extends Controller
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
             ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
             'pagination',
-            ($dataIsEmpty) ? [] : $pagination,
+            ($dataIsEmpty) ? (object) [] : $pagination,
             config('constants.HTTP_OK')
         );
     }
@@ -433,7 +433,7 @@ class OrdersController extends Controller
 
         return JsonResponseServices::getApiResponse(
             [],
-            false,
+            config('constants.FALSE_STATUS'),
             config('constants.NO_RECORD'),
             config('constants.HTTP_OK')
         );
@@ -811,7 +811,7 @@ class OrdersController extends Controller
     /**
      * It will get order details via given id
      */
-    public function getOrderDetailsTwo(Request $request)
+    public function getOrderDetailsForApi(Request $request)
     {
         $validatedData = Validator::make($request->route()->parameters(), [
             'id' => 'required|integer'
@@ -820,8 +820,8 @@ class OrdersController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
         }
 
-        $validatedData = (object) $validatedData->safe()->all();
-
+        $validatedData = (object) $validatedData->validated();
+        
         if (!Orders::checkIfOrderExists($validatedData->id)) {
             return JsonResponseServices::getApiResponse(
                 [],
