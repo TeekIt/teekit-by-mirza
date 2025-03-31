@@ -817,7 +817,7 @@ class OrdersController extends Controller
             'id' => 'required|integer'
         ]);
         if ($validatedData->fails()) {
-            return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
         $validatedData = (object) $validatedData->validated();
