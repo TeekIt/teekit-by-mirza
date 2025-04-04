@@ -81,6 +81,7 @@ return [
     'ACCOUNT_DEACTIVATED' => 'Your account has been deactivated, Please contact the admin',
     'NO_RECORD' => 'No Record Found',
     'NO_SELLER' => 'No seller found against this id',
+    'NO_NEAR_BY_SELLERS' => 'No nearby sellers found',
     'NO_STORES_FOUND' => 'No stores found in this area',
     'ORDER_CANCELLED' => 'Cancelled',
     'INVALID_PROMOCODE' => 'Invalid promo code',

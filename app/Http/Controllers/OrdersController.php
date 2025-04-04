@@ -7,6 +7,7 @@ use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicle;
 use App\Enums\UserChoicesEnum;
 use App\Enums\UserRole;
+use App\Jobs\SendCustomProductOrderDetailsToNearBySellersJob;
 use App\Models\GuestBuyer;
 use App\Models\ProductsByBuyer;
 use App\OrderItems;
@@ -306,7 +307,7 @@ class OrdersController extends Controller
             'lat',
             'lon'
         ]);
-        
+
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
             $driverCharges = OrderServices::getDriverCharges(
                 $seller->lat,
@@ -351,19 +352,15 @@ class OrdersController extends Controller
                 );
             }
         }
+
         /* Email order details to nearby sellers */
-        $nearbySellers = GoogleMapServices::getNearBySellers(
+        SendCustomProductOrderDetailsToNearBySellersJob::dispatch(
             $request->lat,
             $request->lon,
-            User::getParentAndChildSellersByCity($seller->city),
-            $seller->id
-        );
-
-        EmailServices::sendCustomProductOrderDetailsToNearBySellersMail(
-            array_column($nearbySellers, 'email'),
+            $seller,
             $order
         );
-        
+
         $idsArray[] = $order->id;
 
         return JsonResponseServices::getApiResponse(
@@ -836,7 +833,7 @@ class OrdersController extends Controller
         }
 
         $validatedData = (object) $validatedData->validated();
-        
+
         if (!Orders::checkIfOrderExists($validatedData->id)) {
             return JsonResponseServices::getApiResponse(
                 [],
