@@ -385,29 +385,29 @@ class User extends Authenticatable implements JWTSubject
     public static function getCustomers(string $search = ''): LengthAwarePaginator
     {
         return self::where('name', 'like', '%' . $search . '%')
-            ->where('role_id', UserRole::BUYER)
+            ->where('role_id', '=', UserRole::BUYER)
             ->orderByDesc('created_at')
             ->paginate(9);
     }
 
     public static function getAllCustomers(): Collection
     {
-        return self::where('role_id', UserRole::BUYER)->get();
+        return self::where('role_id', '=', UserRole::BUYER)->get();
     }
 
     public static function getBuyersWithReferralCode(): LengthAwarePaginator
     {
-        return self::where('role_id', UserRole::BUYER)->whereNotNull('referral_code')->paginate(10);
+        return self::where('role_id', '=', UserRole::BUYER)->whereNotNull('referral_code')->paginate(10);
     }
 
     public static function getBuyerByEmail(string $email, array $columns = ['*']): ?User
     {
-        return self::select($columns)->where('email', $email)->where('role_id', UserRole::BUYER)->first();
+        return self::select($columns)->where('email', '=', $email)->where('role_id', '=', UserRole::BUYER)->first();
     }
 
-    public static function getSellerByBusinessName(string $business_name): ?User
+    public static function getSellerByBusinessName(string $businessName): ?User
     {
-        return self::where('business_name', $business_name)->first();
+        return self::where('business_name', '=', $businessName)->first();
     }
 
     public static function getUserByID(int $id, array $columns = ['*']): ?User

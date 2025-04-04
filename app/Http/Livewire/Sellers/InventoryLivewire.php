@@ -137,7 +137,7 @@ class InventoryLivewire extends Component
         $this->category_id = ($this->category_id == 0) ? null : $this->category_id;
 
         if (Gate::allows('seller')) {
-            $data = Products::getParentSellerProductsForView(auth()->id(), $this->search, $this->category_id, order_by: 'desc');
+            $data = Products::getParentSellerProductsForView(auth()->id(), $this->search, $this->category_id, orderBy: 'desc');
             $featured = $this->getFeaturedProducts($data);
         } elseif (Gate::allows('child_seller')) {
             /*
