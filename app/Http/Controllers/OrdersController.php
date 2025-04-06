@@ -359,7 +359,7 @@ class OrdersController extends Controller
             $request->lon,
             $seller,
             $order
-        );
+        )->onQueue('high');
 
         $idsArray[] = $order->id;
 

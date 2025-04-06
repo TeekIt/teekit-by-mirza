@@ -6,6 +6,7 @@ use App\Orders;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
 use App\User;
+use DateTime;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -61,7 +62,15 @@ class SendCustomProductOrderDetailsToNearBySellersJob implements ShouldQueue
             );
         }
     }
-    
+
+    /**
+     * Determine the time at which the job should timeout.
+     */
+    public function retryUntil(): DateTime
+    {
+        return now()->addMinutes(10);
+    }
+
     /**
      * Handle a job failure.
      */
