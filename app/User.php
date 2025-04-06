@@ -335,25 +335,27 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function getParentAndChildSellersByCity(string $city): LengthAwarePaginator
+    public static function getParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
     {
         return self::WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('city', $city)
+            ->where('city', '=', $city)
             ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
-            ->paginate(10);
+            ->take($numberOfRows)
+            ->get();
     }
 
-    public static function getParentAndChildSellersByState(string $state): Collection
+    public static function getParentAndChildSellersByState(string $state, int $numberOfRows = 25): Collection
     {
         return self::WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('state', $state)
+            ->where('state', '=', $state)
             ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
+            ->take($numberOfRows)
             ->get();
     }
 

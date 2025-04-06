@@ -2,13 +2,14 @@
 
 namespace App\Services;
 
-use App\Drivers;
 use App\Mail\BuyerVerificationMail;
+use App\Mail\CustomProductOrderDetailsToNearBySellersMail;
 use App\Mail\NewSellerRegistrationMail;
 use App\Mail\OrderIsCanceledMail;
 use App\Mail\OrderIsReadyForPickupMail;
 use App\Mail\SellerApprovedMail;
 use App\Mail\StoreRegisterMail;
+use App\Models\Driver;
 use App\Models\OrdersFromOtherSeller;
 use App\Orders;
 use App\User;
@@ -20,6 +21,11 @@ final class EmailServices
     public static function getVerificationLink($verificationCode)
     {
         return url('/') . '/auth/verify?token=' . $verificationCode;
+    }
+
+    public static function sendCustomProductOrderDetailsToNearBySellersMail(array $nearBySellersEmails, Orders $order)
+    {
+        Mail::to($nearBySellersEmails)->send(new CustomProductOrderDetailsToNearBySellersMail($order));
     }
 
     public static function sendBuyerAccVerificationMail(User $user)
@@ -40,7 +46,7 @@ final class EmailServices
         );
     }
 
-    public static function sendDriverAccVerificationMail(Drivers $driver)
+    public static function sendDriverAccVerificationMail(Driver $driver)
     {
         // $verificationCode = Crypt::encrypt($driver->email);
         // $accountVerificationLink = self::getVerificationLink($verificationCode);
