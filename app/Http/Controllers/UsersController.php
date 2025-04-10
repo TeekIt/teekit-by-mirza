@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Drivers;
+use App\Models\Driver;
 use App\Pages;
 use App\Products;
 use App\Services\GoogleMapServices;
@@ -119,7 +119,7 @@ class UsersController extends Controller
      */
     public function adminDriversDel(Request $request)
     {
-        Drivers::adminDriversDel($request);
+        Driver::adminDriversDel($request);
 
         return response(config('constants.DRIVERS_DELETION_SUCCESS'));
     }
@@ -160,7 +160,7 @@ class UsersController extends Controller
      * Fetch seller information w.r.t ID
      * @author Muhammad Abdullah Mirza
      */
-    public static function getSellerInfo(object $seller_info, array $map_api_result = null)
+    public static function getSellerInfo(object $seller_info, ?array $map_api_result = null)
     {
         $data = [
             'id' => $seller_info->id,
@@ -184,10 +184,12 @@ class UsersController extends Controller
             'roles' => ($seller_info->role_id == 2) ? ['sellers'] : ['child_sellers'],
             'stripe_account_id' => $seller_info->stripe_account_id,
         ];
+
         if (!empty($map_api_result)) {
             $data['distance'] = $map_api_result['distance'];
             $data['duration'] = $map_api_result['duration'];
         }
+
         return $data;
     }
 
@@ -256,7 +258,7 @@ class UsersController extends Controller
         $data = Cache::remember('sellers' . $request->state . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
             $sellers = User::getParentAndChildSellersByState($request->state);
             if (!$sellers->isEmpty()) {
-                return GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
+                return GoogleMapServices::findNearByUsersByMakingChunks($request->lat, $request->lon, $sellers, 25);
             }
         });
 

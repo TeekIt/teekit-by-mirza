@@ -7,7 +7,7 @@ use App\Orders;
 use stdClass;
 use Illuminate\Support\Str;
 
-final class GophrServices
+final class GophrDeliveryServices
 {
     public static function getApiKey(): string
     {

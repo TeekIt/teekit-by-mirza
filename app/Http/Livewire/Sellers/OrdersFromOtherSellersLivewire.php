@@ -56,9 +56,9 @@ class OrdersFromOtherSellersLivewire extends Component
                 * Add this function when moving to production/staging
                 * Bcz this function will not work with "faker" generated 
                 * customer lat, lon
-                * $nearby_sellers = GoogleMapServices::findDistanceByMakingChunks($customer_lat, $customer_lon, $sellers_of_same_city, 10);
+                * $nearby_sellers = GoogleMapServices::findNearByUsersByMakingChunks($customer_lat, $customer_lon, $sellers_of_same_city, 10);
                 */
-                return GoogleMapServices::findDistanceByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellers_of_same_city, 10);
+                return GoogleMapServices::findNearByUsersByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellers_of_same_city, 10);
             }
         );
     }

@@ -189,7 +189,7 @@ class CategoriesController extends Controller
             }
         );
 
-        $data = GoogleMapServices::findDistanceByMakingChunks($validatedData->lat, $validatedData->lon, $sellers, 25);
+        $data = GoogleMapServices::findNearByUsersByMakingChunks($validatedData->lat, $validatedData->lon, $sellers, 25);
         /*
         * Just creating this variable so we don't have to call the "empty()" function again & again
         * Because it will increase the API response time

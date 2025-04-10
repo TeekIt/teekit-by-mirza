@@ -170,7 +170,7 @@ class ProductsController extends Controller
         $data['bike'] = ($data['vehicle'] == TransportVehicle::BIKE->value) ? 1 : 0;
         $data['car'] = ($data['vehicle'] == TransportVehicle::CAR->value) ? 1 : 0;
         $data['van'] = ($data['vehicle'] == TransportVehicle::VAN->value) ? 1 : 0;
-        $data['discount_percentage'] = (!isset($data['discount_percentage'])) ? 0.00 : $data['discount_percentage'];
+        $data['discount_percentage'] = $data['discount_percentage'] ?? 0.00;
         $data['contact'] = '+44' . $data['contact'];
         $data['seller_id'] = Auth::id();
         $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
@@ -182,37 +182,34 @@ class ProductsController extends Controller
         unset($data['vehicle']);
 
         Qty::where('product_id', $product_id)
-            ->where('seller_id', Auth::id())
+            ->where('seller_id', $data['seller_id'])
             ->update([
                 'qty' => $data['qty'],
             ]);
         unset($data['qty']);
+
         $product = Products::find($product_id);
         if (!empty($product)) {
             $filename = $product->feature_img;
             if ($request->hasFile('feature_img')) {
                 $file = $request->file('feature_img');
-                $filename = uniqid($product->id . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
+                $filename = uniqid($product->id . '_') . "." . $file->getClientOriginalExtension();
                 Storage::disk('spaces')->put($filename, File::get($file));
-                if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
+                if (Storage::disk('spaces')->exists($filename)) {  
                     info("file is stored successfully : " . $filename);
                 } else {
                     info("file is not found :- " . $filename);
                 }
             }
             $data['feature_img'] = $filename;
-            $user_id = Auth::id();
+
             if ($request->hasFile('gallery')) {
                 $images = $request->file('gallery');
                 foreach ($images as $image) {
                     $file = $image;
-                    $filename = uniqid($user_id . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension(); //create unique file name...
+                    $filename = uniqid($data['seller_id'] . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension();
                     Storage::disk('spaces')->put($filename, File::get($file));
-                    if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
-                        info("file is stored successfully : " . $filename);
-                    } else {
-                        info("file is not found :- " . $filename);
-                    }
+
                     $product_images = new productImages();
                     $product_images->product_id = $product->id;
                     $product_images->product_image = $filename;
@@ -221,15 +218,17 @@ class ProductsController extends Controller
             }
 
             foreach ($data as $key => $value) {
-                if ($key == 'vehicle')
-                    continue;
+
+                if ($key == 'vehicle') continue;
+
                 $product->$key = ($key == 'contact') ? '+44' . $value : $value;
             }
+
             $product->save();
 
             flash('Inventory updated successfully.')->success();
 
-            return redirect()->route('inventory');
+            return redirect()->route('seller.edit.inventory.form');
         }
     }
     /**
@@ -721,7 +720,7 @@ class ProductsController extends Controller
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
-        
+
         $validatedData = (object) $validatedData->validated();
 
         $userLat = $validatedData->lat ?? null;
