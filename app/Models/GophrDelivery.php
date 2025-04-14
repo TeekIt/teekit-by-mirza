@@ -29,8 +29,8 @@ class GophrDelivery extends Model
         array $columns = ['*']
     ): GophrDelivery {
         return self::select($columns)
-            ->where('order_belongs_to_type', $orderBelongsToType)
-            ->where('order_belongs_to_id', $orderBelongsToId)
+            ->where('order_belongs_to_type', '=', $orderBelongsToType)
+            ->where('order_belongs_to_id', '=', $orderBelongsToId)
             ->first();
     }
 
