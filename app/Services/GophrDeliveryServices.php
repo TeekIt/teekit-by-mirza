@@ -26,7 +26,6 @@ final class GophrDeliveryServices
         return Str::uuid();
     }
 
-
     public static function createJob(Orders|OrdersFromOtherSeller $order, string $parcelDescription): stdClass
     {
         $parcelData = [
