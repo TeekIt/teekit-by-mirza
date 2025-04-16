@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\User;
 use App\Qty;
+use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -195,7 +196,7 @@ class ProductsController extends Controller
                 $file = $request->file('feature_img');
                 $filename = uniqid($product->id . '_') . "." . $file->getClientOriginalExtension();
                 Storage::disk('spaces')->put($filename, File::get($file));
-                if (Storage::disk('spaces')->exists($filename)) {  
+                if (Storage::disk('spaces')->exists($filename)) {
                     info("file is stored successfully : " . $filename);
                 } else {
                     info("file is not found :- " . $filename);
@@ -708,9 +709,10 @@ class ProductsController extends Controller
             'minWeight' => 'numeric',
             'maxWeight' => 'numeric',
             'brand' => 'string',
-            'lat' => 'numeric|between:-90,90',
-            'lon' => 'numeric|between:-180,180',
             'miles' => 'integer',
+            'lat' => 'required_with:miles|numeric|between:-90,90',
+            'lon' => 'required_with:miles|numeric|between:-180,180',
+            'city' => 'required_with:miles|string',
             'scoutPage' => 'required|integer',
             'sortBy' => [
                 'string',
@@ -723,15 +725,21 @@ class ProductsController extends Controller
 
         $validatedData = (object) $validatedData->validated();
 
-        $userLat = $validatedData->lat ?? null;
-        $userLon = $validatedData->lon ?? null;
-        $miles = $validatedData->miles ?? null;
-        if (isset($miles))
-            $nearBySellerIds = $this->searchWrtNearByStores($userLat, $userLon, $miles);
+        if (isset($validatedData->miles)) {
+            $nearBySellersIds = array_column(
+                GoogleMapServices::findNearByUsersByMakingChunks(
+                    $validatedData->lat,
+                    $validatedData->lon,
+                    User::getParentAndChildSellersByCity($validatedData->city),
+                    nearByMiles: $validatedData->miles,
+                ),
+                'id'
+            );
+        }
 
         $products = Products::searchProducts(
             $validatedData->productName,
-            (isset($nearBySellerIds['ids'])) ? $nearBySellerIds['ids'] : json_decode($validatedData->sellerIds),
+            (isset($nearBySellersIds)) ? $nearBySellersIds : json_decode($validatedData->sellerIds),
             $validatedData->categoryId ?? null,
             $validatedData->brand ?? null,
             $validatedData->minPrice ?? null,
@@ -758,22 +766,22 @@ class ProductsController extends Controller
      * It takes lat,lon  from user and store,converts them into distaance
      * and gives all store ids within given miles
      */
-    public function searchWrtNearByStores($user_lat, $user_lon, $miles)
+    public function searchWrtNearByStores($userLat, $userLon, $miles)
     {
         $radius = 3958.8;
-        $store_data = (new User())->nearbyUsers($user_lat, $user_lon, $radius);
+        $storeData = (new User())->nearbyUsers($userLat, $userLon, $radius);
 
-        foreach ($store_data as $data) {
+        foreach ($storeData as $data) {
             if ($data->distance <= $miles) {
-                $store_ids[] = $data->id;
+                $storeIds[] = $data->id;
                 $latitude2[] = $data->lat;
                 $longitude2[] = $data->lon;
             }
         }
-        $pm = $this->getDurationBetweenPointsNew($user_lat, $user_lon, $latitude2, $longitude2);
+        $pm = $this->getDurationBetweenPointsNew($userLat, $userLon, $latitude2, $longitude2);
 
         return [
-            'ids' => $store_ids,
+            'ids' => $storeIds,
             'time' => $pm,
         ];
     }

@@ -284,10 +284,9 @@ class Products extends Model
         ?string $sortBy,
     ): array {
         $scoutData = self::search($productName)
-            ->whereIn('seller_id', $sellerIds)
             ->paginate(20, 'scoutPage')
             ->toArray();
-
+        // dd($sellerIds);
         $productIds = array_column($scoutData['data'], 'id');
         unset($scoutData['data']);
         $pagination = $scoutData;
