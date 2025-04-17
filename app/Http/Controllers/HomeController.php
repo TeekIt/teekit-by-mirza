@@ -10,7 +10,7 @@ use App\Pages;
 use App\Enums\DeliveryStatusEnum;
 use App\Enums\OrderStatusEnum;
 use App\Enums\UserRole;
-use App\productImages;
+use App\Models\ProductImage;
 use App\Products;
 use App\Qty;
 use App\Services\TwilioSmsService;
@@ -282,7 +282,7 @@ class HomeController extends Controller
                 $product_id = (int) $product->id;
                 $product_quantity = ($importData[3] == "") ? 0 : $importData[3];
                 Qty::add($user_id, $product_id, $product->category_id, $product_quantity);
-                productImages::add((int) $product->id, $importData[18]);
+                ProductImage::add((int) $product->id, $importData[18]);
                 $j++;
             }
         }

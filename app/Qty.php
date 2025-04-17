@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use App\Models\ProductImage;
 
 class Qty extends Model
 {
@@ -35,7 +36,7 @@ class Qty extends Model
 
     public function productImage(): HasMany
     {
-        return $this->hasMany(productImages::class, 'product_id', 'product_id');
+        return $this->hasMany(ProductImage::class, 'product_id', 'product_id');
     }
     /**
      * Helpers

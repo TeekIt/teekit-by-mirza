@@ -7,7 +7,7 @@ use App\Enums\SortByEnum;
 use App\Enums\TransportVehicle;
 use App\Enums\UserRole;
 use App\Imports\ProductsImport;
-use App\productImages;
+use App\Models\ProductImage;
 use App\Products;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -82,7 +82,7 @@ class ProductsController extends Controller
                 } else {
                     info("file is not found :- " . $filename);
                 }
-                $product_images = new productImages();
+                $product_images = new ProductImage();
                 $product_images->product_id = $product->id;
                 $product_images->product_image = $filename;
                 $product_images->save();
@@ -135,7 +135,7 @@ class ProductsController extends Controller
 
                 ImageServices::createUploadLog('spaces', $fileName);
 
-                productImages::add($product->id, $fileName);
+                ProductImage::add($product->id, $fileName);
             }
         }
 
@@ -211,7 +211,7 @@ class ProductsController extends Controller
                     $filename = uniqid($data['seller_id'] . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension();
                     Storage::disk('spaces')->put($filename, File::get($file));
 
-                    $product_images = new productImages();
+                    $product_images = new ProductImage();
                     $product_images->product_id = $product->id;
                     $product_images->product_image = $filename;
                     $product_images->save();
@@ -238,7 +238,7 @@ class ProductsController extends Controller
      */
     public function deleteImg($image_id)
     {
-        productImages::deleteById($image_id);
+        ProductImage::deleteById($image_id);
 
         return redirect()->back();
     }
@@ -324,7 +324,7 @@ class ProductsController extends Controller
                 } else {
                     info("file is not found :- " . $filename);
                 }
-                $product_images = new productImages();
+                $product_images = new ProductImage();
                 $product_images->product_id = $product->id;
                 $product_images->product_image = $filename;
                 $product_images->save();
@@ -378,81 +378,7 @@ class ProductsController extends Controller
             config('constants.NO_RECORD'),
             config('constants.HTTP_OK')
         );
-    }
-    /**
-     * View products in bulk with array of given ids
-     * @author Muhammad Abdullah Mirza
-     */
-    // public function bulkView(Request $request)
-    // {
-    //     $ids = explode(',', $request->ids);
-    //     $products = Products::query()->whereIn('id', $ids)->paginate();
-    //     $pagination = $products->toArray();
-    //     if (!empty($products)) {
-    //         $products_data = [];
-    //         foreach ($products as $product) {
-    //             $products_data[] = Products::getProductInfo($product->id);
-    //         }
-    //         unset($pagination['data']);
-    //         return JsonResponseServices::getApiResponseExtention(
-    //             $products_data,
-    //             config('constants.TRUE_STATUS'),
-    //             '',
-    //             'pagination',
-    //             $pagination,
-    //             config('constants.HTTP_OK')
-    //         );
-    //     } else {
-    //         return JsonResponseServices::getApiResponse(
-    //             [],
-    //             config('constants.FALSE_STATUS'),
-    //             config('constants.NO_RECORD'),
-    //             config('constants.HTTP_OK')
-    //         );
-    //     }
-    // }
-    /**
-     *It will sort the products by price
-     * @version 1.0.0
-     */
-    // public function sortByPrice()
-    // {
-    //     try {
-    //         $products = Products::paginate()->sortBy('price');
-    //         $pagination = $products->toArray();
-    //         if (!$products->isEmpty()) {
-    //             $products_data = [];
-    //             foreach ($products as $product) {
-    //                 $products_data[] = Products::getProductInfo($product->id);
-    //             }
-
-    //             unset($pagination['data']);
-    //             return JsonResponseServices::getApiResponseExtention(
-    //                 $products_data,
-    //                 config('constants.TRUE_STATUS'),
-    //                 '',
-    //                 'pagination',
-    //                 $pagination,
-    //                 config('constants.HTTP_OK')
-    //             );
-    //         } else {
-    //             return JsonResponseServices::getApiResponse(
-    //                 [],
-    //                 config('constants.FALSE_STATUS'),
-    //                 config('constants.NO_RECORD'),
-    //                 config('constants.HTTP_OK')
-    //             );
-    //         }
-    //     } catch (Throwable $error) {
-    //         report($error);
-    //         return JsonResponseServices::getApiResponse(
-    //             [],
-    //             config('constants.FALSE_STATUS'),
-    //             $error,
-    //             config('constants.HTTP_SERVER_ERROR')
-    //         );
-    //     }
-    // }
+    }  
     /**
      *It will sort the products by location
      * @version 1.0.0
@@ -573,93 +499,7 @@ class ProductsController extends Controller
             ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
             config('constants.HTTP_OK'),
         );
-    }
-    /**
-     * It will delete the given product
-     * @author Huzaifa Haleem
-     * @version 1.0.0
-     */
-    // public function delete($product_id)
-    // {
-    //     return Products::find($product_id)->delete();
-    // }
-
-    /**
-     * It list the featured products
-     * @author Muhammad Abdullah Mirza
-     * @version 1.0.0
-     */
-    // public function featuredProducts(Request $request)
-    // {
-    //     try {
-    //         $featured_products = (new Products())->getFeaturedProducts($request->store_id);
-    //         $pagination = $featured_products->toArray();
-    //         if (!$featured_products->isEmpty()) {
-    //             $products_data = [];
-    //             foreach ($featured_products as $product) {
-    //                 $data = Products::getProductInfo($product->id);
-    //                 $data->store = User::find($product->user_id);
-    //                 $products_data[] = $data;
-    //             }
-    //             unset($pagination['data']);
-    //             return JsonResponseServices::getApiResponseExtention(
-    //                 $products_data,
-    //                 config('constants.TRUE_STATUS'),
-    //                 '',
-    //                 'pagination',
-    //                 $pagination,
-    //                 config('constants.HTTP_OK')
-    //             );
-    //         } else {
-    //             return JsonResponseServices::getApiResponse(
-    //                 [],
-    //                 config('constants.FALSE_STATUS'),
-    //                 config('constants.NO_RECORD'),
-    //                 config('constants.HTTP_OK')
-    //             );
-    //         }
-    //     } catch (Throwable $error) {
-    //         report($error);
-    //         return JsonResponseServices::getApiResponse(
-    //             [],
-    //             config('constants.FALSE_STATUS'),
-    //             $error,
-    //             config('constants.HTTP_SERVER_ERROR')
-    //         );
-    //     }
-    // }
-    /**
-     *It will export products into csv
-     * @version 1.0.0
-     */
-    // public function exportProducts()
-    // {
-    //     $user_id = Auth::id();
-    //     $products = Products::getParentSellerProductsAsc($user_id);
-    //     $all_products = [];
-    //     foreach ($products as $product) {
-    //         $pt = json_decode(json_encode(Products::getProductInfo($product->id)->toArray()));
-    //         unset($pt->category);
-    //         unset($pt->ratting);
-    //         unset($pt->id);
-    //         unset($pt->user_id);
-    //         unset($pt->created_at);
-    //         unset($pt->updated_at);
-    //         $temp_img = [];
-    //         if (isset($pt->images)) {
-    //             foreach ($pt->images as $img)
-    //                 $temp_img[] = $img->product_image;
-    //         }
-    //         $pt->images = implode(',', $temp_img);
-    //         $all_products[] = $pt;
-    //     }
-    //     $destinationPath = public_path() . "/upload/csv/";
-    //     if (!is_dir($destinationPath)) {
-    //         mkdir($destinationPath, 0777, true);
-    //     }
-    //     $file = time() . '_export.csv';
-    //     return $this->jsonToCsv(json_encode($all_products), $destinationPath . $file, true);
-    // }
+    }  
     /**
      *helper function for exporting products
      * @version 1.0.0
@@ -761,55 +601,7 @@ class ProductsController extends Controller
             ($dataIsEmpty) ? (object) [] : $products['pagination'],
             config('constants.HTTP_OK')
         );
-    }
-    /**
-     * It takes lat,lon  from user and store,converts them into distaance
-     * and gives all store ids within given miles
-     */
-    public function searchWrtNearByStores($userLat, $userLon, $miles)
-    {
-        $radius = 3958.8;
-        $storeData = (new User())->nearbyUsers($userLat, $userLon, $radius);
-
-        foreach ($storeData as $data) {
-            if ($data->distance <= $miles) {
-                $storeIds[] = $data->id;
-                $latitude2[] = $data->lat;
-                $longitude2[] = $data->lon;
-            }
-        }
-        $pm = $this->getDurationBetweenPointsNew($userLat, $userLon, $latitude2, $longitude2);
-
-        return [
-            'ids' => $storeIds,
-            'time' => $pm,
-        ];
-    }
-    /**
-     *It will get the duration between given
-     *lat,lon
-     * @version 1.0.0
-     */
-    public function getDurationBetweenPointsNew($latitude1, $longitude1, $latitude2, $longitude2)
-    {
-        $count = count($longitude2);
-        for ($i = 0; $i < $count; $i++) {
-            $address2 = $latitude2[$i] . ',' . $longitude2[$i];
-            $address1 = $latitude1 . ',' . $longitude1;
-            //  $address2 = $latitude2 . ',' . $longitude2;
-            $url = "https://maps.googleapis.com/maps/api/directions/json?origin=" . urlencode($address1) . "&destination=" . urlencode($address2) . "&transit_routing_preference=fewer_transfers&key=AIzaSyBFDmGYlVksc--o1jpEXf9jVQrhwmGPxkM";
-            $query = file_get_contents($url);
-            $results = json_decode($query, true);
-            $distanceString[] = explode(' ', $results['routes'][0]['legs'][0]['distance']['text']);
-            $durationString = explode(' ', $results['routes'][0]['legs'][0]['duration']['text']);
-            $miles[] = (int) $distanceString[0] * 0.621371;
-            $duration[] = implode(",", $durationString);
-        }
-        // Google Distance Matrix
-        // $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$latitude1.",".$longitude1."&destinations=".$latitude2.",".$longitude2."&mode=driving&key=AIzaSyBFDmGYlVksc--o1jpEXf9jVQrhwmGPxkM";
-        // return $miles > 1 ? $miles : 1;
-        return $duration;
-    }
+    }  
     /**
      * Update product price from csv file w.r.t their SKU and store_id
      * @author Muhammad Abdullah Mirza
