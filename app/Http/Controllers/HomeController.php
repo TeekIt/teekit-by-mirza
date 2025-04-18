@@ -3,17 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Categories;
-use App\Mail\OrderIsCompletedMail;
 use App\OrderItems;
 use App\Orders;
 use App\Pages;
 use App\Enums\DeliveryStatusEnum;
 use App\Enums\OrderStatusEnum;
-use App\Enums\UserRole;
-use App\productImages;
+use App\Models\ProductImage;
 use App\Products;
 use App\Qty;
-use App\Services\TwilioSmsService;
 use App\User;
 use App\VerificationCodes;
 use App\WithdrawalRequests;
@@ -24,10 +21,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 use Throwable;
 
 class HomeController extends Controller
@@ -54,59 +51,7 @@ class HomeController extends Controller
         } else {
             return $this->adminHome();
         }
-    }
-    /**
-     * It will redirect us to add
-     * inventory page
-     * @version 1.0.0
-     */
-    public function inventoryAdd(Request $request)
-    {
-        $categories = Categories::all();
-        $inventory = new Products();
-
-        return view('shopkeeper.inventory.add', compact('inventory', 'categories'));
-    }
-    /**
-     * It will redirect us to add
-     * inventory in bilk qty page
-     * @version 1.0.0
-     */
-    public function inventoryAddBulk(Request $request)
-    {
-        if (Gate::allows('seller')) {
-            return view('shopkeeper.inventory.add_bulk');
-        } else {
-            abort(404);
-        }
-    }
-
-    /**
-     * It updates/uploads user image
-     * @author Muhammad Abdullah Mirza
-     * @version 1.1.0
-     */
-    public function userImgUpdate(Request $request)
-    {
-        $user = User::find(\auth()->id());
-        $filename = \auth()->user()->name;
-        if ($request->hasFile('user_img')) {
-            $file = $request->file('user_img');
-            $filename = uniqid($user->id . '_' . $user->name . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
-            Storage::disk('spaces')->put($filename, File::get($file));
-            if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
-                info("file is stored successfully : " . $filename);
-            } else {
-                info("file is not found :- " . $filename);
-            }
-        }
-        $user->user_img = $filename;
-        $user->save();
-
-        flash('Store Image Successfully Updated')->success();
-
-        return redirect()->back();
-    }
+    }    
     /**
      * Changes user setting provided in the parameter
      * @author Muhammad Abdullah Mirza
@@ -282,7 +227,7 @@ class HomeController extends Controller
                 $product_id = (int) $product->id;
                 $product_quantity = ($importData[3] == "") ? 0 : $importData[3];
                 Qty::add($user_id, $product_id, $product->category_id, $product_quantity);
-                productImages::add((int) $product->id, $importData[18]);
+                ProductImage::add((int) $product->id, $importData[18]);
                 $j++;
             }
         }
@@ -363,6 +308,7 @@ class HomeController extends Controller
     public function allCat()
     {
         $categories = Categories::paginate();
+
         return view('admin.categories', compact('categories'));
     }
     /**
@@ -547,15 +493,11 @@ class HomeController extends Controller
      * based on their auth id
      * @version 1.0.0
      */
-    public function withdrawals()
+    public function withdrawals(): View
     {
-        if (Gate::allows('superadmin')) {
-            $transactions = WithdrawalRequests::whereHas('user', function ($query) {
-                $query->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER]);
-            })->get();
+        $transactions = WithdrawalRequests::getParentAndChildSellersWithdrawalRequests();
 
-            return view('admin.withdrawal', compact('transactions'));
-        }
+        return view('admin.withdrawal', compact('transactions'));
     }
     /**
      * It will show driver withdrawls
@@ -563,15 +505,7 @@ class HomeController extends Controller
      */
     public function withdrawalDrivers()
     {
-        if (Gate::allows('seller')) {
-            $transactions = WithdrawalRequests::where('user_id', '=', Auth::id())->get();
-
-            return view('shopkeeper.withdrawal', compact('transactions'));
-        }
-
-        if (Gate::allows('superadmin')) {
-            return view('admin.withdrawal-drivers');
-        }
+        return view('admin.withdrawal-drivers');
     }
     /**
      * It will show seller withdrawls requests
@@ -631,31 +565,6 @@ class HomeController extends Controller
             ->paginate(10);
 
         return view('admin.complete-orders', compact('orders'));
-    }
-    /**
-     * @throws \Twilio\Exceptions\TwilioException
-     * @throws \Twilio\Exceptions\ConfigurationException
-     * It will mark the order as complete
-     * @version 1.0.0
-     */
-    public function markCompleteOrder($order_id)
-    {
-        $order = Orders::with(['user', 'delivery_boy', 'store'])
-            ->where('id', $order_id)->first();
-        $order->delivery_status = 'complete';
-        $order->save();
-        // (new OrdersController())->calculateDriverFair($order, $order->store);
-        flash('Order is successfully completed')->success();
-        $message = "Thanks for your order " . $order->user->name . ".
-            Your order from " . $order->store->name . " has successfully been delivered.
-            If you have experienced any issues with your order, please contact us via email at:
-            admin@teekit.co.uk";
-        TwilioSmsService::sendSms($order->user->phone, $message);
-        Mail::to([$order->user->email])
-            ->send(new OrderIsCompletedMail('user'));
-        Mail::to([$order->delivery_boy->email])
-            ->send(new OrderIsCompletedMail('driver'));
-        return \redirect()->route('complete.order');
     }
     /**
      * It will remove a single product from the given order

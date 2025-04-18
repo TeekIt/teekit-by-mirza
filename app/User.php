@@ -112,8 +112,7 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Custom Properties
      */
-    public const ACTIVE = 1,
-        BLOCK = 0;
+    public const ACTIVE = 1, BLOCK = 0;
     /**
      * Relations
      */
@@ -415,7 +414,7 @@ class User extends Authenticatable implements JWTSubject
         return self::select($columns)->find($id);
     }
 
-    public function nearbyUsers($user_lat, $user_lon, $radius): object
+    public function nearbyUsers($user_lat, $user_lon, $radius): User
     {
         return self::selectRaw("*, (  3961 * acos( cos( radians(" . $user_lat . ") ) *
                                 cos( radians(users.lat) ) *

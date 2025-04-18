@@ -109,8 +109,13 @@ final class GoogleMapServices
      * $chunk_size > 25 is not allowed
      * Because Google distance matrix API does not support destinations more then 25
      */
-    public static function findNearByUsersByMakingChunks(float $lat, float $lon, Collection $users, int $chunkSize = 25): array
-    {
+    public static function findNearByUsersByMakingChunks(
+        float $lat,
+        float $lon,
+        Collection $users,
+        int $chunkSize = 25,
+        int $nearByMiles = 5
+    ): array {
         if ($chunkSize > 25) return [];
 
         $allUserData = [];
@@ -122,7 +127,7 @@ final class GoogleMapServices
                 'users_coordinates' => $chunk->map(fn($user) => "{$user->lat},{$user->lon}")->values()->toArray(),
             ];
 
-            $temp = self::getNearByUsersFromMultipleDestinations($lat, $lon, $destinationData, 5);
+            $temp = self::getNearByUsersFromMultipleDestinations($lat, $lon, $destinationData, $nearByMiles);
             $allUserData = array_merge($allUserData, $temp);
         }
 

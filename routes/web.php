@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\UserAndRoleController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Livewire\Admin\ParentSellersLivewire;
@@ -52,7 +51,6 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::prefix('settings')->middleware(['auth', 'auth.sellers'])->controller(HomeController::class)->group(function () {
     Route::get('/payment', 'paymentSettings')->name('setting.payment');
     Route::post('/payment/update', 'paymentSettingsUpdate')->name('payment_settings_update');
-    Route::post('/user_img/update', 'userImgUpdate')->name('user_img_update');
     Route::post('/password/update', 'adminPasswordUpdate')->name('password_update');
     Route::get('/change_settings/{setting_name}/{value}', 'changeSettings')->name('change_settings')->where(['setting_name' => '^[a-z_]*$', 'value' => '[0-9]+']);
 });
@@ -83,16 +81,14 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         Route::get('/', InventoryLivewire::class)->name('seller.inventory');
 
         Route::controller(ProductsController::class)->group(function () {
+            Route::get('/add', 'addSingleInventoryForm')->name('seller.add.single.inventory.form');
             Route::post('/add', 'addSingleInventory')->name('seller.add.single.inventory');
             Route::get('/edit/{product_id}', 'editInventoryView')->name('seller.edit.inventory.form');
             Route::post('/update/{product_id}', 'updateInventory')->name('seller.edit.inventory');
+            Route::get('/add_bulk', 'inventoryAddBulk')->name('seller.add.bulk.inventory');
             Route::get('/image/delete/{image_id}', 'deleteImg')->name('seller.deleteImg');
         });
 
-        Route::controller(HomeController::class)->group(function () {
-            Route::get('/add', 'inventoryAdd')->name('seller.add.single.inventory.form');
-            Route::get('/add_bulk', 'inventoryAddBulk')->name('seller.add.bulk.inventory');
-        });
         // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
     });
 
@@ -139,7 +135,7 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
     Route::get('/drivers', DriversLivewire::class)->name('admin.test.drivers');
 
     Route::prefix('categories')->group(function () {
-        Route::get('/', CategoriesLivewire::class)->name('admin.categories.new');
+        Route::get('/', CategoriesLivewire::class)->name('admin.categories');
         Route::get('/delete', [CategoriesController::class, 'destroy'])->name('admin.categories.del');
     });
 
@@ -187,13 +183,12 @@ Route::prefix('promocodes')->controller(PromoCodesController::class)->group(func
 Route::get('/mark-complete-order/{id}', [HomeController::class, 'markCompleteOrder'])->name('mark.complete.order');
 
 /* Old categories routes - begins */
-Route::get('/acategories', [HomeController::class, 'allCat'])->name('admin.categories');
-Route::post('/acategories/{id}/update', [HomeController::class, 'updateCat'])->name('update_cat');
-Route::post('/acategories/add_cat', [HomeController::class, 'addCat'])->name('add_cat');
-Route::get('/acategories/delete_cat/{id}', [HomeController::class, 'deleteCat'])->name('delete_cat');
+// Route::get('/acategories', [HomeController::class, 'allCat'])->name('admin.categories');
+// Route::post('/acategories/{id}/update', [HomeController::class, 'updateCat'])->name('update_cat');
+// Route::post('/acategories/add_cat', [HomeController::class, 'addCat'])->name('add_cat');
+// Route::get('/acategories/delete_cat/{id}', [HomeController::class, 'deleteCat'])->name('delete_cat');
 /* Old categories routes - ends */
 
 Route::get('/queries', [HomeController::class, 'adminQueries'])->name('admin.queries');
-Route::get('/store/application-fee/{user_id}/{application_fee}', [UserAndRoleController::class, 'updateApplicationFee'])->name('application_fee');
 Route::get('/users/{user_id}/status/{status}', [HomeController::class, 'changeUserStatus'])->name('change_user_status');
 Route::post('/store_info/update', [HomeController::class, 'updateStoreInfo'])->name('admin.image.update');

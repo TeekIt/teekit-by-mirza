@@ -4,6 +4,7 @@ namespace App;
 
 use App\Enums\ProductStatus;
 use App\Enums\SortByEnum;
+use App\Models\ProductImage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -79,7 +80,7 @@ class Products extends Model
         return [
             'id' => $this->id,
             'product_name' => $this->product_name,
-            'seller_id' => $this->seller_id,
+            'seller_ids' => $this->qty()->pluck('seller_id')->toArray(),
             'category_id' => $this->category_id,
             'price' => $this->price,
             'status' => $this->status,
@@ -150,7 +151,7 @@ class Products extends Model
 
     public function images(): HasMany
     {
-        return $this->hasMany(productImages::class, 'product_id');
+        return $this->hasMany(ProductImage::class, 'product_id');
     }
 
     public function rattings(): HasMany
@@ -170,20 +171,20 @@ class Products extends Model
     /**
      * Validators
      */
-    public static function validator(Request $request): object
-    {
-        return Validator::make($request->all(), [
-            'category_id' => 'required',
-            'product_name' => 'required|string|max:255',
-            'product_description' => 'required|string',
-            'color' => 'required|string|max:255',
-            'size' => 'required|string|max:255',
-            'lat' => 'required|string|max:255',
-            'lon' => 'required|string|max:255',
-            'price' => 'required|string|max:255',
-            'qty' => 'required|string|max:255'
-        ]);
-    }
+    // public static function validator(Request $request): object
+    // {
+    //     return Validator::make($request->all(), [
+    //         'category_id' => 'required',
+    //         'product_name' => 'required|string|max:255',
+    //         'product_description' => 'required|string',
+    //         'color' => 'required|string|max:255',
+    //         'size' => 'required|string|max:255',
+    //         'lat' => 'required|string|max:255',
+    //         'lon' => 'required|string|max:255',
+    //         'price' => 'required|string|max:255',
+    //         'qty' => 'required|string|max:255'
+    //     ]);
+    // }
     /**
      * Scopes
      */
@@ -284,7 +285,7 @@ class Products extends Model
         ?string $sortBy,
     ): array {
         $scoutData = self::search($productName)
-            ->whereIn('seller_id', $sellerIds)
+            ->whereIn('seller_ids', $sellerIds)
             ->paginate(20, 'scoutPage')
             ->toArray();
 
@@ -325,12 +326,7 @@ class Products extends Model
             },
             'images:id,product_id,product_image',
             'category:id,category_name,category_image'
-        ])->whereHas('qty', function ($qtyQuery) use ($sellerIds) {
-            $qtyQuery->whereIn('seller_id', $sellerIds)
-                ->whereHas('store', function ($storeQuery) {
-                    $storeQuery->WhereUserIsActive();
-                });
-        })->when($categoryId, function ($query) use ($categoryId) {
+        ])->when($categoryId, function ($query) use ($categoryId) {
             return $query->where('category_id', '=', $categoryId);
         })->when($brand, function ($query) use ($brand) {
             return $query->where('brand', '=', $brand);
@@ -347,7 +343,12 @@ class Products extends Model
                 SortByEnum::PriceLowToHigh->value => $query->orderBy('price', 'asc'),
                 SortByEnum::PriceHighToLow->value => $query->orderBy('price', 'desc'),
             };
-        })
+        })->whereHas('qty', function ($qtyRelation) use ($sellerIds) {
+                $qtyRelation->whereIn('seller_id', $sellerIds)
+                    ->whereHas('store', function ($storeQuery) {
+                        $storeQuery->WhereUserIsActive();
+                    });
+            })
             ->whereIn('products.id', $productIds)
             ->get();
 
@@ -431,21 +432,6 @@ class Products extends Model
             })
             ->paginate(20);
     }
-
-    // public static function getProductsByCategoryId(int $category_id, array $columns): LengthAwarePaginator
-    // {
-    //     return self::select($columns)
-    //         ->with([
-    //             'store:id,business_name,business_hours,full_address,country,state,city,lat,lon,user_img',
-    //             'qty' => function ($query) use ($category_id) {
-    //                 $query->select('id', 'product_id', 'qty')->where('category_id', $category_id);
-    //             },
-    //             'images:id,product_id,product_image',
-    //             'category:id,category_name,category_image'
-    //         ])->where('category_id', $category_id)
-    //         ->WhereProductIsEnable()
-    //         ->paginate(10);
-    // }
 
     public static function getProductsInfoByCategoryId(int $categoryId, int $sellerId, array $columns): LengthAwarePaginator
     {
@@ -584,6 +570,7 @@ class Products extends Model
     public static function getProductPrice(int $product_id): float
     {
         $product = self::find($product_id);
+        /* Due to some unknown reason this line was previously written for getting discounted price */
         // return ($product->discount_percentage > 0) ? $product->discount_percentage * 1.2 : $product->price * 1.2;
         return $product->price * 1.2;
     }
@@ -624,14 +611,14 @@ class Products extends Model
     /**
      * SAP == Search Alternative Product
      */
-    public static function getProductsForSAPModal(int $seller_id, string $search = ''): Paginator
+    public static function getProductsForSAPModal(int $sellerId, string $search = ''): Paginator
     {
         if (!empty($search))
             $search = str_replace(' ', '%', $search);
         return self::join('qty', 'products.id', '=', 'qty.product_id')
             ->select('products.id as prod_id', 'products.product_name', 'qty.qty', 'products.price')
-            ->where('qty.seller_id', $seller_id)
-            ->where('products.seller_id', $seller_id)
+            ->where('qty.seller_id', $sellerId)
+            ->where('products.seller_id', $sellerId)
             ->when($search, function ($query, $search) {
                 return $query->where('products.product_name', 'LIKE', "%{$search}%");
             })

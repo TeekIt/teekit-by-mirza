@@ -63,10 +63,12 @@ class NotificationsController extends Controller
             'title' => 'required|string',
             'body' => 'required|string',
         ]);
-        if ($validatedData->fails()) return WebResponseServices::getResponseRedirectBack(
-            'error',
-            $validatedData->errors()->first(),
-        );
+        if ($validatedData->fails()) {
+            return WebResponseServices::getResponseRedirectBack(
+                'error',
+                $validatedData->errors()->first(),
+            );
+        }
 
         try {
             /* Path to your service account JSON key file */
@@ -79,7 +81,6 @@ class NotificationsController extends Controller
             $firebaseTokens = DeviceToken::whereNotNull('device_token')->pluck('device_token')->all();
             if (empty($firebaseTokens)) {
                 return back()->with('error', 'No valid device tokens available');
-                // return response()->json(['error' => 'No valid device tokens available'], 400);
             }
 
             $message = [
@@ -104,17 +105,12 @@ class NotificationsController extends Controller
                     }
 
                     return back()->with('error', 'Failed to send notification: ' . $response['error']['message']);
-                    // return response()->json(['error' => 'Failed to send notification: ' . $response['error']['message']], 400);
                 }
             }
 
-            // If successful, return the response
-            return back()->with('success', 'Notification sent successfully');
-            // return response()->json(['success' => 'Notification sent successfully', 'response' => $response]);
-
+            return back()->with('success', 'Notification sent successfully');            
         } catch (Throwable $error) {
             report($error);
-            // return response()->json(['error' => 'Failed to send the notification due to an internal error.'], 500);
             return back()->with('error', 'Failed to send the notification due to some internal error');
         }
     }

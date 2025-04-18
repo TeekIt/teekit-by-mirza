@@ -42,7 +42,7 @@ class AddOrUpdateProductRequest extends FormRequest
             ],
             'contact' => 'required|min:10|max:10',
             'colors' => 'nullable|array',
-            'feature_img' => 'required|image|max:2048',
+            'feature_img' => 'required|image|max:1048',
             'gallery' => 'nullable|array',
             'vehicle' => [
                 'required',

@@ -91,7 +91,6 @@ Route::prefix('category')->controller(CategoriesController::class)->group(functi
 */
 Route::prefix('sellers')->controller(UsersController::class)->group(function () {
     Route::get('/', 'sellers');
-    Route::get('{seller_id}/{product_name}', 'searchSellerProducts');
 });
 /*
 |--------------------------------------------------------------------------
@@ -120,7 +119,6 @@ Route::middleware(['jwt.verify'])->group(function () {
                 Route::get('all', 'all');
                 Route::post('search', 'search');
                 Route::get('view', 'view');
-                Route::post('view/bulk', 'bulkView');
                 Route::get('seller', 'sellerProducts');
                 Route::get('sortbyprice', 'sortByPrice');
                 Route::get('sortByLocation', 'sortByLocation');
@@ -131,7 +129,6 @@ Route::middleware(['jwt.verify'])->group(function () {
 
         Route::prefix('ratings')->controller(RattingsController::class)->group(function () {
             Route::post('add', 'add');
-            Route::post('update', 'update');
             Route::get('delete/{ratting_id}', 'delete');
         });
     });

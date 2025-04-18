@@ -1,13 +1,14 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
+use App\Products;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class productImages extends Model
+class ProductImage extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -30,7 +31,7 @@ class productImages extends Model
         return self::find($id)->delete();
     }
 
-    public static function add(int $id, string $imageName): productImages
+    public static function add(int $id, string $imageName): ProductImage
     {
         return self::create([
             'product_id' => $id,
