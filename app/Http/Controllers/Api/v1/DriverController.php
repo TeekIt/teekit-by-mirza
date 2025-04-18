@@ -337,53 +337,45 @@ class DriverController extends Controller
                 'message' => $validatedData->errors()
             ], 422);
         }
-        try {
-            $credentials = request(['email', 'password']);
-            $driver_info = [];
-            $driver_info = Driver::where('email', $credentials['email'])->first();
-            if (Hash::check($credentials['password'], $driver_info->password)) {
-                $token = auth('rider')->attempt($credentials);
-                $data_info = [
-                    'id' => $driver_info->id,
-                    'f_name' => $driver_info->f_name,
-                    'l_name' => $driver_info->l_name,
-                    'email' => $driver_info->email,
-                    'phone' => $driver_info->phone,
-                    'profile_img' => $driver_info->profile_img,
-                    'vehicle_type' => $driver_info->vehicle_type,
-                    'vehicle_number' => $driver_info->vehicle_number,
-                    'area' => $driver_info->area,
-                    'lat' => $driver_info->lat,
-                    'lon' => $driver_info->lon,
-                    'account_holders_name' => $driver_info->account_holders_name,
-                    'bank_name' => $driver_info->bank_name,
-                    'sort_code' => $driver_info->sort_code,
-                    'account_number' => $driver_info->account_number,
-                    'driving_licence_name' => $driver_info->driving_licence_name,
-                    'dob' => $driver_info->dob,
-                    'driving_licence_number' => $driver_info->driving_licence_number,
-                    'access_token' => $token,
-                    'token_type' => 'bearer',
-                    'expires_in' => JWTAuth::factory()->getTTL() * 60,
-                ];
-                return response()->json([
-                    'data' => $data_info,
-                    'status' => true,
-                    'message' =>  config('constants.LOGIN_SUCCESS')
-                ], 200);
-            } else {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' =>  config('constants.INVALID_CREDENTIALS')
-                ], 401);
-            }
-        } catch (Throwable $error) {
-            report($error);
+        
+        $credentials = request(['email', 'password']);
+        $driver_info = [];
+        $driver_info = Driver::where('email', $credentials['email'])->first();
+        if (Hash::check($credentials['password'], $driver_info->password)) {
+            $token = auth('rider')->attempt($credentials);
+            $data_info = [
+                'id' => $driver_info->id,
+                'f_name' => $driver_info->f_name,
+                'l_name' => $driver_info->l_name,
+                'email' => $driver_info->email,
+                'phone' => $driver_info->phone,
+                'profile_img' => $driver_info->profile_img,
+                'vehicle_type' => $driver_info->vehicle_type,
+                'vehicle_number' => $driver_info->vehicle_number,
+                'area' => $driver_info->area,
+                'lat' => $driver_info->lat,
+                'lon' => $driver_info->lon,
+                'account_holders_name' => $driver_info->account_holders_name,
+                'bank_name' => $driver_info->bank_name,
+                'sort_code' => $driver_info->sort_code,
+                'account_number' => $driver_info->account_number,
+                'driving_licence_name' => $driver_info->driving_licence_name,
+                'dob' => $driver_info->dob,
+                'driving_licence_number' => $driver_info->driving_licence_number,
+                'access_token' => $token,
+                'token_type' => 'bearer',
+                'expires_in' => JWTAuth::factory()->getTTL() * 60,
+            ];
+            return response()->json([
+                'data' => $data_info,
+                'status' => true,
+                'message' =>  config('constants.LOGIN_SUCCESS')
+            ], 200);
+        } else {
             return response()->json([
                 'data' => [],
                 'status' => false,
-                'message' => config('constants.INVALID_CREDENTIALS')
+                'message' =>  config('constants.INVALID_CREDENTIALS')
             ], 401);
         }
     }

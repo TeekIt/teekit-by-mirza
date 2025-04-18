@@ -278,41 +278,4 @@ class UsersController extends Controller
             config('constants.HTTP_OK'),
         );
     }
-    /**
-     * Search products w.r.t Seller/Store 'id' & Product Name
-     * @author Muhammad Abdullah Mirza
-     * @version 1.4.0
-     */
-    public function searchSellerProducts($seller_id, $product_name)
-    {
-        $data = [];
-        $article = Products::search($product_name)
-            ->where('user_id', $seller_id)
-            ->where('status', 1);
-        $products = $article->paginate(20);
-        $pagination = $products->toArray();
-
-        if (!$products->isEmpty()) {
-            foreach ($products as $product) {
-                $data[] = Products::getProductInfo($seller_id, $product->id, ['*']);
-            }
-            unset($pagination['data']);
-            
-            return JsonResponseServices::getApiResponseExtention(
-                $data,
-                config('constants.TRUE_STATUS'),
-                '',
-                'pagination',
-                $pagination,
-                config('constants.HTTP_OK')
-            );
-        }
-
-        return JsonResponseServices::getApiResponse(
-            [],
-            config('constants.FALSE_STATUS'),
-            config('constants.NO_RECORD'),
-            config('constants.HTTP_OK')
-        );
-    }
 }

@@ -194,6 +194,6 @@ Route::get('/acategories/delete_cat/{id}', [HomeController::class, 'deleteCat'])
 /* Old categories routes - ends */
 
 Route::get('/queries', [HomeController::class, 'adminQueries'])->name('admin.queries');
-Route::get('/store/application-fee/{user_id}/{application_fee}', [UserAndRoleController::class, 'updateApplicationFee'])->name('application_fee');
+// Route::get('/store/application-fee/{user_id}/{application_fee}', [UserAndRoleController::class, 'updateApplicationFee'])->name('application_fee');
 Route::get('/users/{user_id}/status/{status}', [HomeController::class, 'changeUserStatus'])->name('change_user_status');
 Route::post('/store_info/update', [HomeController::class, 'updateStoreInfo'])->name('admin.image.update');

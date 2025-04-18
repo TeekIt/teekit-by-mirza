@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Enums\ProductStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use App\Models\ProductImage;
+use Google\Service\AndroidEnterprise\Resource\Users;
 
 class Qty extends Model
 {
@@ -69,7 +71,7 @@ class Qty extends Model
         ");
     }
 
-    public static function getSellersByGivenParams(int $categoryId, string $state): object
+    public static function getSellersByGivenParams(int $categoryId, string $state): ?Qty
     {
         return self::select([
             'users.id',
@@ -95,8 +97,8 @@ class Qty extends Model
             ->join('products', 'products.id', '=', 'qty.product_id')
             ->where('qty.qty', '>', 0) // Products should be in stock
             ->where('qty.category_id', '=', $categoryId)
-            ->where('products.status', '=', '1') // Products should be live
-            ->where('users.is_active', '=', 1) // Sellers should be active
+            ->where('products.status', '=', ProductStatus::ENABLE) // Products should be live
+            ->where('users.is_active', '=', User::ACTIVE) // Sellers should be active
             ->where('users.state', '=', $state)
             ->distinct() // Use distinct to select only unique stores
             ->get();

@@ -112,8 +112,7 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Custom Properties
      */
-    public const ACTIVE = 1,
-        BLOCK = 0;
+    public const ACTIVE = 1, BLOCK = 0;
     /**
      * Relations
      */

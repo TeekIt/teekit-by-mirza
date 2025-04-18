@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,33 +24,31 @@ class WithdrawalRequests extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // public function role(): BelongsTo
-    // {
-    //     return $this->belongsTo('App\Role');
-    // }
-
-    public static function getWithdrawalResquests(int $user_id, string $search = null, int $amount = null, string $created_at = null)
-    {
-        return self::select('id', 'amount', 'status', 'transaction_id', 'created_at')
-            ->where('user_id', $user_id)
-            ->when($search, function ($query, $search) {
-                return $query->where('status', $search);
-            })
-            ->when($amount, function ($query, $amount) {
-                return $query->where('amount', $amount);
-            })
-            ->when($created_at, function ($query, $created_at) {
-                return $query->whereDate('created_at', $created_at);
-            });
+    public static function getWithdrawalRequests(
+        int $userId,
+        ?string $search = null,
+        ?int $amount = null,
+        ?string $createdAt = null
+    ): Builder {
+        return self::query()
+            ->select('id', 'amount', 'status', 'transaction_id', 'created_at')
+            ->where('user_id', $userId)
+            ->when($search, fn($query) => $query->where('status', $search))
+            ->when($amount, fn($query) => $query->where('amount', $amount))
+            ->when($createdAt, fn($query) => $query->whereDate('created_at', $createdAt));
     }
 
-    public static function add(int $user_id, int $amount, string $status, string $bank_details): WithdrawalRequests
-    {
+    public static function add(
+        int $userId, 
+        int $amount, 
+        string $status, 
+        string $bankDetails
+    ): WithdrawalRequests {
         return self::create([
-            'user_id' => $user_id,
+            'user_id' => $userId,
             'amount' => $amount,
             'status' => $status,
-            'bank_detail' => $bank_details,
+            'bank_detail' => $bankDetails,
         ]);
     }
 }

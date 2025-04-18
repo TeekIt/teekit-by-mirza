@@ -20,11 +20,11 @@ class StuartDelivery extends Model
     /**
      * Helpers
      */
-    public static function insertInfo(int $order_id, int $job_id): StuartDelivery
+    public static function insertInfo(int $orderId, int $jobId): StuartDelivery
     {
         return self::create([
-            'order_id' => $order_id,
-            'job_id' => $job_id
+            'order_id' => $orderId,
+            'job_id' => $jobId,
         ]);
     }
 }

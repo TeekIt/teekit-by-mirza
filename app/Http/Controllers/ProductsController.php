@@ -39,64 +39,6 @@ class ProductsController extends Controller
         Qty::updateProductQty($product_id, $user_id, $product_quantity);
     }
     /**
-     *It will insert a single product
-     *and insert it's given qty to qty table
-     * @version 1.0.0
-     */
-    public function add(Request $request)
-    {
-        $validate = Products::validator($request);
-        if ($validate->fails()) {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $validate->errors(),
-                config('constants.HTTP_UNPROCESSABLE_REQUEST')
-            );
-        }
-        $user_id = Auth::id();
-        $product = new Products();
-        $product->category_id = $request->category_id;
-        $product->product_name = $request->product_name;
-        $product->product_description = $request->product_description;
-        $product->color = $request->color;
-        $product->size = $request->size;
-        $product->lat = $request->lat;
-        $product->lon = $request->lon;
-        $product->price = $request->price;
-        $product->qty = $request->qty;
-        $product->user_id = $user_id;
-        $product->save();
-        //this function will add qty to it's particular table
-        $product_id = $product->id;
-        $product_quantity = $request->qty;
-        Qty::add($user_id, $product_id, $product->category_id, $product_quantity);
-        if ($request->hasFile('images')) {
-            $images = $request->file('images');
-            foreach ($images as $image) {
-                $file = $image;
-                $filename = uniqid($user_id . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension(); //create unique file name..
-                Storage::disk('user_public')->put($filename, File::get($file));
-                if (Storage::disk('user_public')->exists($filename)) {
-                    info("file is store successfully : " . $filename);
-                } else {
-                    info("file is not found :- " . $filename);
-                }
-                $product_images = new ProductImage();
-                $product_images->product_id = $product->id;
-                $product_images->product_image = $filename;
-                $product_images->save();
-            }
-        }
-        $product = Products::getProductInfo($user_id, $product->id, ['*']);
-        return JsonResponseServices::getApiResponse(
-            $product,
-            config('constants.TRUE_STATUS'),
-            config('constants.DATA_INSERTION_SUCCESS'),
-            config('constants.HTTP_OK')
-        );
-    }
-    /**
      * @author Muhammad Abdullah Mirza
      */
     public function addSingleInventory(AddOrUpdateProductRequest $request)
@@ -272,74 +214,6 @@ class ProductsController extends Controller
             [],
             config('constants.FALSE_STATUS'),
             config('constants.DATA_INSERTION_SUCCESS'),
-            config('constants.HTTP_OK')
-        );
-    }
-    /**
-     *It will update a single product
-     *and update the given qty in qty table
-     * @version 1.0.0
-     */
-    public function update(Request $request, $id)
-    {
-        $validate = Products::validator($request);
-        if ($validate->fails()) {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $validate->errors(),
-                config('constants.HTTP_UNPROCESSABLE_REQUEST')
-            );
-        }
-
-        $user_id = auth()->id();
-
-        $product = Products::find($id);
-        if (empty($product)) {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_INVALID_ARGUMENTS')
-            );
-        }
-        $product->category_id = $request->category_id;
-        $product->product_name = $request->product_name;
-        $product->product_description = $request->product_description;
-        $product->color = $request->color;
-        $product->size = $request->size;
-        $product->lat = $request->lat;
-        $product->lon = $request->lon;
-        $product->price = $request->price;
-        // $product->qty = $request->qty;
-        $product->user_id = $user_id;
-        if ($request->hasFile('images')) {
-            $images = $request->file('images');
-            foreach ($images as $image) {
-                $file = $image;
-                $filename = uniqid($user_id . "_" . $product->id . "_" . $product->product_name . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
-                Storage::disk('user_public')->put($filename, File::get($file));
-                if (Storage::disk('user_public')->exists($filename)) {  // check file exists in directory or not
-                    info("file is store successfully : " . $filename);
-                } else {
-                    info("file is not found :- " . $filename);
-                }
-                $product_images = new ProductImage();
-                $product_images->product_id = $product->id;
-                $product_images->product_image = $filename;
-                $product_images->save();
-            }
-        }
-        $product->save();
-
-        /* this function will update qty in it's particular table with given data */
-        $product_quantity = $request->qty;
-        $this->updateProductQty($product->id, $user_id, $product_quantity);
-
-        return JsonResponseServices::getApiResponse(
-            Products::getProductInfo($user_id, $product->id, ['*']),
-            config('constants.TRUE_STATUS'),
-            config('constants.DATA_UPDATED_SUCCESS'),
             config('constants.HTTP_OK')
         );
     }
