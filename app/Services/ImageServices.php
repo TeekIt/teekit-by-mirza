@@ -26,8 +26,8 @@ final class ImageServices
         ?int $id = null,
         ?object $imageFile = null
     ): string|bool {
+
         $file = $imgKeyName ? $request->file($imgKeyName) : $imageFile;
-        // $file = $request->file($imgKeyName);
         /* Creating a unique file name */
         $fileName = uniqid($id . '_') . "." . $file->getClientOriginalExtension();
 
