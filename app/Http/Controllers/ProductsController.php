@@ -39,6 +39,17 @@ class ProductsController extends Controller
         Qty::updateProductQty($product_id, $user_id, $product_quantity);
     }
     /**
+     * It will redirect us to add
+     * inventory page
+     * @version 1.0.0
+     */
+    public function addSingleInventoryForm(Request $request)
+    {
+        $categories = Categories::all();
+
+        return view('shopkeeper.inventory.add', compact('categories'));
+    }
+    /**
      * @author Muhammad Abdullah Mirza
      */
     public function addSingleInventory(AddOrUpdateProductRequest $request)
@@ -54,7 +65,7 @@ class ProductsController extends Controller
         $data['van'] = ($data['vehicle'] == TransportVehicle::VAN->value) ? 1 : 0;
         $data['discount_percentage'] = (!isset($data['discount_percentage'])) ? 0.00 : $data['discount_percentage'];
         $data['contact'] = '+44' . $data['contact'];
-        $data['seller_id'] = Auth::id();
+        $data['seller_id'] = auth()->id();
         $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
 
         unset($data['_token']);
@@ -65,26 +76,16 @@ class ProductsController extends Controller
 
         $product = Products::add($data);
 
-        Qty::add($data['seller_id'], $product->id, $data['category_id'], $request->qty);
+        Qty::add($data['seller_id'], $product->id, $data['category_id'], $request->safe()->only(['qty'])['qty']);
 
         if ($request->hasFile('gallery')) {
             foreach ($request->file('gallery') as $singleImage) {
-                $file = $singleImage;
-                /* Creating a unique file name */
-                $fileName = uniqid($data['seller_id'] . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension();
-
-                Storage::disk('spaces')->put($fileName, File::get($file));
-
-                ImageServices::createUploadLog('spaces', $fileName);
+                $uniqueId = $data['seller_id'] . $product->id;
+                $fileName = ImageServices::uploadImg(id: $uniqueId, imageFile: $singleImage);
 
                 ProductImage::add($product->id, $fileName);
             }
         }
-
-        // WebResponseServices::getWebResponse(
-        //     config('constants.TRUE_STATUS'),
-        //     config('constants.DATA_INSERTION_SUCCESS')
-        // );
 
         return redirect()->route('seller.inventory');
     }
@@ -174,6 +175,10 @@ class ProductsController extends Controller
             return redirect()->route('seller.edit.inventory.form');
         }
     }
+    public function inventoryAddBulk()
+    {
+        return view('shopkeeper.inventory.add_bulk');
+    }
     /**
      * It will delete the product image
      * @version 1.0.0
@@ -252,7 +257,7 @@ class ProductsController extends Controller
             config('constants.NO_RECORD'),
             config('constants.HTTP_OK')
         );
-    }  
+    }
     /**
      *It will sort the products by location
      * @version 1.0.0
@@ -373,7 +378,7 @@ class ProductsController extends Controller
             ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
             config('constants.HTTP_OK'),
         );
-    }  
+    }
     /**
      *helper function for exporting products
      * @version 1.0.0
@@ -475,7 +480,7 @@ class ProductsController extends Controller
             ($dataIsEmpty) ? (object) [] : $products['pagination'],
             config('constants.HTTP_OK')
         );
-    }  
+    }
     /**
      * Update product price from csv file w.r.t their SKU and store_id
      * @author Muhammad Abdullah Mirza
@@ -537,58 +542,56 @@ class ProductsController extends Controller
         ini_set('max_execution_time', 120);
 
         $validatedData = Validator::make($request->all(), [
-            'file' => 'required',
-            'store_id' => 'required',
+            'file' => 'required|file|mimes:csv',
+            'store_id' => 'required|integer',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            // File Details
-            $filename = $file->getClientOriginalName();
-            $location = public_path('upload/csv');
-            $file->move($location, $filename);
-            $filepath = $location . "/" . $filename;
-            // Reading file
-            $file = fopen($filepath, "r");
-            $i = 0;
-            while (($filedata = fgetcsv($file, 1000, $delimiter)) !== FALSE) {
-                if ($i == 0) {
-                    $i++;
-                    continue;
-                }
-                $catgory_id = $filedata[0];
-                $sku = $filedata[1];
-                $price = $filedata[2];
-                $qty = $filedata[3];
-                // Find product by sku, user_id, category_id and update price and quantity
-                $product = (new Products)->getProductsByParameters($request->store_id, $sku, $catgory_id);
-                if ($product) {
-                    $product->price = $price;
-                    $product->save();
-                    $productQty = (new Qty())->getQtybyStoreAndProductId($request->store_id, $product->id);
-                    if (!empty($productQty)) {
-                        $productQty->qty = $qty;
-                        $productQty->save();
-                    }
-                }
+        $file = $request->file('file');
+        // File Details
+        $filename = $file->getClientOriginalName();
+        $location = public_path('upload/csv');
+        $file->move($location, $filename);
+        $filepath = $location . "/" . $filename;
+        // Reading file
+        $file = fopen($filepath, "r");
+        $i = 0;
+        while (($filedata = fgetcsv($file, 1000, $delimiter)) !== FALSE) {
+            if ($i == 0) {
                 $i++;
-                if ($i % $batchSize == 0) {
-                    usleep(500000); // Wait for 0.5 seconds between batches to avoid overwhelming the database
+                continue;
+            }
+            $catgory_id = $filedata[0];
+            $sku = $filedata[1];
+            $price = $filedata[2];
+            $qty = $filedata[3];
+            // Find product by sku, user_id, category_id and update price and quantity
+            $product = (new Products)->getProductsByParameters($request->store_id, $sku, $catgory_id);
+            if ($product) {
+                $product->price = $price;
+                $product->save();
+                $productQty = (new Qty())->getQtybyStoreAndProductId($request->store_id, $product->id);
+                if (!empty($productQty)) {
+                    $productQty->qty = $qty;
+                    $productQty->save();
                 }
             }
-
-            fclose($file);
-
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.TRUE_STATUS'),
-                config('constants.DATA_UPDATED_SUCCESS'),
-                config('constants.HTTP_OK')
-            );
+            $i++;
+            if ($i % $batchSize == 0) {
+                usleep(500000); // Wait for 0.5 seconds between batches to avoid overwhelming the database
+            }
         }
+
+        fclose($file);
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.TRUE_STATUS'),
+            config('constants.DATA_UPDATED_SUCCESS'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * Listing of all products w.r.t Seller 'id'
@@ -606,7 +609,7 @@ class ProductsController extends Controller
 
         $pagination = Cache::remember(
             'sellerProducts' . $request->sellerId . $request->page,
-            now()->addDay(),
+            now()->addHour(),
             function () use ($request) {
                 return Products::getProductsInfoBySellerId(
                     $request->sellerId,

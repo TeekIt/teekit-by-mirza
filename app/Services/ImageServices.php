@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,9 +20,14 @@ final class ImageServices
      * @author Muhammad Abdullah Mirza
      * @return fileName|false 
      */
-    public static function uploadImg(object $request, string $imgKeyName, ?int $id = null): string|bool
-    {
-        $file = $request->file($imgKeyName);
+    public static function uploadImg(
+        ?Request $request = null,
+        ?string $imgKeyName = null,
+        ?int $id = null,
+        ?object $imageFile = null
+    ): string|bool {
+        $file = $imgKeyName ? $request->file($imgKeyName) : $imageFile;
+        // $file = $request->file($imgKeyName);
         /* Creating a unique file name */
         $fileName = uniqid($id . '_') . "." . $file->getClientOriginalExtension();
 

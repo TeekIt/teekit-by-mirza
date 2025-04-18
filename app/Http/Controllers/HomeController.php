@@ -56,32 +56,6 @@ class HomeController extends Controller
         }
     }
     /**
-     * It will redirect us to add
-     * inventory page
-     * @version 1.0.0
-     */
-    public function inventoryAdd(Request $request)
-    {
-        $categories = Categories::all();
-        $inventory = new Products();
-
-        return view('shopkeeper.inventory.add', compact('inventory', 'categories'));
-    }
-    /**
-     * It will redirect us to add
-     * inventory in bilk qty page
-     * @version 1.0.0
-     */
-    public function inventoryAddBulk(Request $request)
-    {
-        if (Gate::allows('seller')) {
-            return view('shopkeeper.inventory.add_bulk');
-        } else {
-            abort(404);
-        }
-    }
-
-    /**
      * It updates/uploads user image
      * @author Muhammad Abdullah Mirza
      * @version 1.1.0
