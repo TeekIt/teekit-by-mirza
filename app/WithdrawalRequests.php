@@ -2,7 +2,9 @@
 
 namespace App;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,10 +20,21 @@ class WithdrawalRequests extends Model
         'status',
         'bank_detail',
     ];
-
+    /**
+     * Relations
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+    /**
+     * Helpers
+     */
+    public static function getParentAndChildSellersWithdrawalRequests(): Collection
+    {
+        return  self::whereHas('user', function ($query) {
+            $query->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER]);
+        })->get();
     }
 
     public static function getWithdrawalRequests(

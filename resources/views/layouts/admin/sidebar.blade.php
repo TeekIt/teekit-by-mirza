@@ -172,20 +172,12 @@
                       </ul>
                   </li>
                   <li class="nav-item">
-                      <a href="{{ route('admin.categories.new') }}"
-                          class="nav-link {{ request()->routeIs('admin.categories.new') ? 'active' : '' }}">
+                      <a href="{{ route('admin.categories') }}"
+                          class="nav-link {{ request()->routeIs('admin.categories') ? 'active' : '' }}">
                           <i class="nav-icon fas fa-clipboard-list"></i>
                           <p class="ml-2">
                               Categories
                               <span class="badge badge-warning text-light">new</span>
-                          </p>
-                      </a>
-                  </li>
-                  <li class="nav-item">
-                      <a class="nav-link {{ request()->is('acategories') ? 'active' : '' }}" href="/acategories">
-                          <i class="nav-icon fas fa-clipboard-list"></i>
-                          <p class="ml-2">
-                              Categories
                           </p>
                       </a>
                   </li>
