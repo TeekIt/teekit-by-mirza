@@ -326,9 +326,9 @@ class AuthController extends Controller
      * @author Muhammad Abdullah Mirza
      * @version 1.4.0
      */
-    public function getUserDetails($user_id)
+    public function getUserDetails($userId)
     {
-        $data = User::getUserInfo($user_id);
+        $data = User::getUserInfo($userId);
 
         return JsonResponseServices::getApiResponse(
             (empty($data)) ? [] : $data,

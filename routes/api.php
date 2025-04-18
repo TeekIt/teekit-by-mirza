@@ -50,7 +50,7 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
         Route::post('refresh', 'refresh');
         Route::post('updateStatus', 'updateStatus');
         Route::get('delivery_boys', 'deliveryBoys');
-        Route::get('get_user/{user_id}', 'getUserDetails');
+        Route::get('get_user/{userId}', 'getUserDetails');
         Route::post('user/delete', 'deleteUser');
         Route::get('me', 'me');
     });

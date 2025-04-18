@@ -449,9 +449,10 @@ class User extends Authenticatable implements JWTSubject
         return self::where('id', $user_id)->pluck('role_id');
     }
 
-    public static function getUserInfo(int $user_id): array|null
+    public static function getUserInfo(int $userId): ?array
     {
-        $user = self::with('referralRelations')->where('id', $user_id)->first();
+        $user = self::with('referralRelations')->where('id', '=', $userId)->first();
+        
         if ($user) {
             return [
                 'id' => $user->id,
@@ -469,6 +470,7 @@ class User extends Authenticatable implements JWTSubject
                 'referral_relation_details' => ($user->referralRelations) ? [$user->referralRelations] : null
             ];
         }
+
         return null;
     }
 
