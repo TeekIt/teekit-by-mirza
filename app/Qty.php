@@ -12,6 +12,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use App\Models\ProductImage;
 use Google\Service\AndroidEnterprise\Resource\Users;
+use Illuminate\Database\Eloquent\Collection;
 
 class Qty extends Model
 {
@@ -71,7 +72,7 @@ class Qty extends Model
         ");
     }
 
-    public static function getSellersByGivenParams(int $categoryId, string $state): ?Qty
+    public static function getSellersByGivenParams(int $categoryId, string $state): ?Collection
     {
         return self::select([
             'users.id',

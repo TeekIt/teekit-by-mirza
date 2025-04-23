@@ -62,14 +62,14 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('seller.request.delivery') ? 'active' : '' }}" href="{{ route('seller.request.delivery') }}">
                         <i class="nav-icon fas fa-truck-loading"></i>
                         <p class="ml-2">
                             Request Delivery
                         </p>
                     </a>
-                </li>
+                </li> --}}
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-cogs"></i>

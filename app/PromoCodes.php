@@ -21,4 +21,10 @@ class PromoCodes extends Model
         'store_id',
         'expiry_dt'
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at'
+    ];
 }

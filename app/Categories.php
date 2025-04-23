@@ -4,8 +4,6 @@ namespace App;
 
 use App\Models\SubCategory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
 use App\Products;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -22,11 +20,22 @@ class Categories extends Model
         'category_image',
     ];
     /**
+     * The relations to eager load on every query.
+     *
+     * @var array
+     */
+    protected $with = ['subCategories'];
+    /**
      * Relations
      */
     public function subCategories(): HasMany
     {
-        return $this->hasMany(SubCategory::class, 'parent_category_id');
+        return $this->hasMany(SubCategory::class, 'parent_category_id')
+            ->select(
+                'id',
+                'name',
+                'parent_category_id',
+            );
     }
 
     public function products(): HasMany
@@ -41,20 +50,6 @@ class Categories extends Model
     /**
      * Helpers
      */
-    // public static function uploadImg(object $request, string $category_name): string
-    // {
-    //     $file = $request->file('category_image');
-    //     $cat_name = str_replace(' ', '_', $category_name);
-    //     $filename = uniqid("Category_" . $cat_name . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
-    //     Storage::disk('spaces')->put($filename, File::get($file));
-    //     if (Storage::disk('spaces')->exists($filename)) { // check file exists in directory or not
-    //         info("file is stored successfully : " . $filename);
-    //     } else {
-    //         info("file is not found :- " . $filename);
-    //     }
-    //     return $filename;
-    // }
-
     public static function add(string $categoryName, string $categoryImage): Categories
     {
         return self::create([
@@ -76,18 +71,6 @@ class Categories extends Model
         return $category->save();
     }
 
-    // public static function updateCategory(object $request, $category_id): Categories
-    // {
-    //     $category = self::find($category_id);
-    //     $category->category_name = $request->category_name;
-    //     if ($request->hasFile('category_image'))
-    //         $category->category_image = static::uploadImg($request, $category->category_name);
-    //     else
-    //         info("Category image is missing");
-    //     $category->save();
-    //     return $category;
-    // }
-
     public static function getAllCategoriesBySellerId(int $sellerId, array $columns): Collection
     {
         return self::select($columns)
@@ -99,7 +82,6 @@ class Categories extends Model
     public static function getCategoriesForView(array $columns = ['*'], string $orderBy = 'desc', int $perPage = 10): LengthAwarePaginator
     {
         return self::select($columns)
-            ->with('subCategories')
             ->orderBy('created_at', $orderBy)
             ->paginate($perPage);
     }
