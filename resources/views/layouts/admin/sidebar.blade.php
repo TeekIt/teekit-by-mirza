@@ -118,28 +118,29 @@
                       </a>
                       <ul class="nav nav-treeview">
                           <li class="nav-item">
-                              <a href="/aorders" class="nav-link @if (request()->is('aorders')) active @endif">
+                              <a href="{{ route('admin.orders') }}"
+                                  class="nav-link {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>All</p>
                               </a>
                           </li>
                           <li class="nav-item">
-                              <a href="/aorders/verified"
-                                  class="nav-link @if (request()->is('aorders/verified')) active @endif">
+                              <a href="{{ route('admin.orders.verified') }}"
+                                  class="nav-link {{ request()->routeIs('admin.orders.verified') ? 'active' : '' }}">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>Verified</p>
                               </a>
                           </li>
                           <li class="nav-item">
-                              <a href="/aorders/unverified"
-                                  class="nav-link @if (request()->is('aorders/unverified')) active @endif">
+                              <a href="{{ route('admin.orders.unverified') }}"
+                                  class="nav-link {{ request()->routeIs('admin.orders.unverified') ? 'active' : '' }}">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>Unverified</p>
                               </a>
                           </li>
                           <li class="nav-item">
-                              <a href="/complete-orders"
-                                  class="nav-link @if (request()->is('complete-orders')) active @endif">
+                              <a href="{{ route('admin.orders.complete') }}"
+                                  class="nav-link {{ request()->routeIs('admin.orders.complete') ? 'active' : '' }}">
                                   <i class="fas fa-money nav-icon"></i>
                                   <p>Completed</p>
                               </a>
@@ -171,20 +172,12 @@
                       </ul>
                   </li>
                   <li class="nav-item">
-                      <a href="{{ route('admin.categories.new') }}"
-                          class="nav-link {{ request()->routeIs('admin.categories.new') ? 'active' : '' }}">
+                      <a href="{{ route('admin.categories') }}"
+                          class="nav-link {{ request()->routeIs('admin.categories') ? 'active' : '' }}">
                           <i class="nav-icon fas fa-clipboard-list"></i>
                           <p class="ml-2">
                               Categories
                               <span class="badge badge-warning text-light">new</span>
-                          </p>
-                      </a>
-                  </li>
-                  <li class="nav-item">
-                      <a class="nav-link {{ request()->is('acategories') ? 'active' : '' }}" href="/acategories">
-                          <i class="nav-icon fas fa-clipboard-list"></i>
-                          <p class="ml-2">
-                              Categories
                           </p>
                       </a>
                   </li>

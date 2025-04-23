@@ -19,6 +19,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Exception;
 
+/** @deprecated */
 class OrdersOfUniqueProductsLivewire extends Component
 {
     use WithPagination;
@@ -87,14 +88,14 @@ class OrdersOfUniqueProductsLivewire extends Component
                  * Bcz this function will not work with "faker" generated 
                  * customer lat, lon
                  */
-                return GoogleMapServices::findDistanceByMakingChunks(
+                return GoogleMapServices::findNearByUsersByMakingChunks(
                     $customerLat,
                     $customerLon,
                     $sellersOfSameCity,
                     10
                 );
 
-                // return GoogleMapServices::findDistanceByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellersOfSameCity, 10);
+                // return GoogleMapServices::findNearByUsersByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellersOfSameCity, 10);
             }
         );
     }

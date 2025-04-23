@@ -4,6 +4,8 @@ namespace App;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
+use App\Enums\TransportVehicle;
+use App\Enums\UserMorphTypeEnum;
 use App\Models\ProductsByBuyer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +22,10 @@ class Orders extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['*'];
+
+    // protected $hidden = [
+    //     'deleted_at',
+    // ];
     /**
      * Relations
      */
@@ -113,6 +119,7 @@ class Orders extends Model
         $order->customer_lat = $request->lat;
         $order->customer_lon = $request->lon;
         $order->customer_name = $request->fName . " " .  $request->lName;
+        $order->country_code = $request->countryCode;
         $order->phone_number = $request->phone;
         $order->address = $request->fullAddress;
         $order->house_no = $request->houseNo;
@@ -153,7 +160,7 @@ class Orders extends Model
     }
 
 
-    public static function fetchTransportType(int $order_id = null): string
+    public static function fetchTransportType(?int $order_id = null): string
     {
         $transposrt_type = [];
         $product_ids = OrderItems::where('order_id', '=', $order_id)->pluck('product_id');
@@ -163,28 +170,28 @@ class Orders extends Model
          */
         foreach ($products as $single_product) {
             if ($single_product->van)
-                array_push($transposrt_type, "van");
+                array_push($transposrt_type, TransportVehicle::VAN->value);
             elseif ($single_product->car)
-                array_push($transposrt_type, "car");
+                array_push($transposrt_type, TransportVehicle::CAR->value);
             elseif ($single_product->bike)
-                array_push($transposrt_type, "bike");
+                array_push($transposrt_type, TransportVehicle::BIKE->value);
         }
         /**
          * Now if any product contains "van" then the function should return "van"
          * If any product contains "car" then return "car"
          * Otherwise "bike"
          */
-        if (in_array("van", $transposrt_type))
-            return "van";
-        elseif (in_array("car", $transposrt_type))
-            return "car";
-        elseif (in_array("bike", $transposrt_type))
-            return "bike";
+        if (in_array(TransportVehicle::VAN->value, $transposrt_type))
+            return TransportVehicle::VAN->value;
+        elseif (in_array(TransportVehicle::CAR->value, $transposrt_type))
+            return TransportVehicle::CAR->value;
+        else
+            return TransportVehicle::BIKE->value;
     }
 
     public static function checkIfOrderExists(int $id): bool
     {
-        return self::where('id', $id)->exists();
+        return self::where('id', '=', $id)->exists();
     }
 
     public static function checkTotalOrders(int $customerId): int
@@ -223,10 +230,24 @@ class Orders extends Model
         return self::where('order_status', '=', $status)->where('seller_id', '=', $seller_id)->get();
     }
 
+    public static function getLoggedinBuyerOrders(
+        ?OrderStatusEnum $orderStatus,
+        array $columns = ['*']
+    ): LengthAwarePaginator {
+        return self::select($columns)
+            ->with(['order_items.product.store'])
+            ->when($orderStatus, function ($query) use ($orderStatus) {
+                return $query->where('order_status', '=', $orderStatus);
+            })
+            ->where('created_by_type', UserMorphTypeEnum::USER)
+            ->where('created_by_id', '=', auth()->id())
+            ->paginate(20);
+    }
+
     public static function getOrdersOfUniqueProductsForView(
         int $sellerId,
         string $orderBy,
-        int|null $orderId = null,
+        ?int $orderId = null,
         array $columns = ['*'],
     ): LengthAwarePaginator {
         /* First we will update the "is_viewed" column if the order is searched by ID */
@@ -245,7 +266,7 @@ class Orders extends Model
             ->paginate(10);
     }
 
-    public static function getOrdersForView(int|null $orderId = null, int $sellerId, string $orderBy): LengthAwarePaginator
+    public static function getOrdersForView(int $sellerId, string $orderBy, ?int $orderId = null,): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) static::isViewed($orderId);
@@ -271,8 +292,8 @@ class Orders extends Model
 
     public static function getRecentOrderByCustomerId(
         int $customerId,
-        int|null $productsLimit = null,
-        int|null $sellerId = null
+        ?int $productsLimit = null,
+        ?int $sellerId = null
     ): ?Orders {
         return self::with([
             'products' => function ($query) use ($productsLimit) {

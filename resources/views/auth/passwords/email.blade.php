@@ -19,7 +19,7 @@
         }
     </style>
     <div class="container">
-        <div class="row">
+        <div class="row" style="margin-top: 11vh">
             <div class="col-md-12">
                 <h1 class="text-white fs-3">Reset Password Email</h1>
 

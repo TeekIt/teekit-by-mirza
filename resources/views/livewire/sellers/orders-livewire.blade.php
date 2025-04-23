@@ -346,7 +346,7 @@
             </div>
             <!-- /Single Order Content -->
         @empty
-            <p class="fs-1">No orders yet... 🥺</p>
+            <p class="text-dark text-center p-2 fs-3">No Orders Yet 🥺</p>
         @endforelse
     </div>
 

@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicle;
 use App\Enums\UserChoicesEnum;
-use App\Enums\UserMorphTypeEnum;
 use App\Enums\UserRole;
+use App\Jobs\SendCustomProductOrderDetailsToNearBySellersJob;
 use App\Models\GuestBuyer;
 use App\Models\ProductsByBuyer;
 use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Qty;
+use App\Services\EmailServices;
+use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
 use App\Services\OrderServices;
@@ -26,7 +29,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Throwable;
 
 class OrdersController extends Controller
 {
@@ -120,7 +122,7 @@ class OrdersController extends Controller
                 'weight' => $product->weight,
             ];
         }
-        $orderArr = [];
+        $idsArray = [];
         foreach ($groupedSellers as $sellerId => $order) {
             $totalWeight = OrderServices::getTotalWeight($order);
             $totalVolume = OrderServices::getTotalOfGivenVolume($order);
@@ -173,6 +175,7 @@ class OrdersController extends Controller
                 if (app()->environment('production')) {
                     OrderServices::sendBulkSms(
                         $seller,
+                        $request->countryCode,
                         $request->phone,
                         $orderId,
                         $verificationCode
@@ -180,13 +183,13 @@ class OrdersController extends Controller
                 }
             }
 
-            $orderArr[] = $orderId;
+            $idsArray[] = $orderId;
         }
 
         if ($request->walletFlag == 1) User::deductFromWallet($createdById, $request->walletDeductionAmount);
 
         return JsonResponseServices::getApiResponse(
-            $this->getOrdersFromIds($orderArr),
+            Orders::getByIds($idsArray),
             config('constants.TRUE_STATUS'),
             config('constants.ORDER_PLACED_SUCCESSFULLY'),
             config('constants.HTTP_OK')
@@ -266,13 +269,13 @@ class OrdersController extends Controller
         $createdById = $buyer?->id ?? $guestBuyer->id;
         $createdByType = $buyer?->getMorphClass() ?? $guestBuyer->getMorphClass();
 
+        $colors = null;
         if ($request->has('colors')) {
             $colors = ProductServices::jsonEncodeColors($request->colors);
         }
 
-        if ($request->hasFile('featureImg')) {
-            $fileName = ImageServices::uploadImg($request, 'featureImg', $createdById);
-        }
+        $fileName = ImageServices::uploadImg($request, 'featureImg', $createdById);
+
         /* Create the cutomer given product */
         $productByBuyer = ProductsByBuyer::add(
             $createdByType,
@@ -286,7 +289,7 @@ class OrdersController extends Controller
             $request->partNumber,
             $colors,
             $request->transportVehicle,
-            $fileName ?? null,
+            $fileName,
             $request->height,
             $request->width,
             $request->length
@@ -296,13 +299,16 @@ class OrdersController extends Controller
         $sellerId = $request->sellerId;
         $initialTotal = $request->maxPrice * $request->qty;
         $totalItems = $request->qty;
+        /* Fetch seller details against whom the order is being placed */
+        $seller = User::getUserByID($sellerId, [
+            'id',
+            'business_phone',
+            'city',
+            'lat',
+            'lon'
+        ]);
 
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
-            $seller = User::getUserByID($sellerId, [
-                'business_phone',
-                'lat',
-                'lon'
-            ]);
             $driverCharges = OrderServices::getDriverCharges(
                 $seller->lat,
                 $seller->lon,
@@ -313,7 +319,7 @@ class OrdersController extends Controller
             );
         }
         /* Create order */
-        $orderId = Orders::add(
+        $order = Orders::add(
             $createdByType,
             $createdById,
             $sellerId,
@@ -321,10 +327,10 @@ class OrdersController extends Controller
             $totalItems,
             $driverCharges ?? 0.00,
             $request
-        )->id;
+        );
         /* Insert order items */
         OrderItems::add(
-            $orderId,
+            $order->id,
             $productByBuyer->getMorphClass(),
             $productByBuyer->id,
             $productByBuyer->max_price,
@@ -334,19 +340,28 @@ class OrdersController extends Controller
 
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
             $verificationCode = VerificationCodeServices::generateCode();
-            VerificationCodes::add($orderId, $verificationCode);
+            VerificationCodes::add($order->id, $verificationCode);
 
             if (app()->environment('production')) {
                 OrderServices::sendBulkSms(
                     $seller,
+                    $request->countryCode,
                     $request->phone,
-                    $orderId,
+                    $order->id,
                     $verificationCode
                 );
             }
         }
 
-        $idsArray[] = $orderId;
+        /* Email order details to nearby sellers */
+        SendCustomProductOrderDetailsToNearBySellersJob::dispatch(
+            $request->lat,
+            $request->lon,
+            $seller,
+            $order
+        )->onQueue('high');
+
+        $idsArray[] = $order->id;
 
         return JsonResponseServices::getApiResponse(
             Orders::getByIds($idsArray),
@@ -356,40 +371,41 @@ class OrdersController extends Controller
         );
     }
     /**
-     * @author Huzaifa Haleem
+     * @author Muhammad Abdullah Mirza
      */
     public function showLoggedinBuyerOrders(Request $request)
     {
-        $orders = Orders::select('id')
-            ->where('created_by_type', '=', UserMorphTypeEnum::USER)
-            ->where('created_by_id', '=', Auth::id())
-            ->when($request->orderStatus, function ($query) use ($request) {
-                return $query->where('order_status', '=', $request->orderStatus);
-            })
-            ->orderByDesc('id')
-            ->paginate(20);
+        $validatedData = Validator::make($request->all(), [
+            'orderStatus' => [
+                Rule::in(array_column(OrderStatusEnum::cases(), 'value')),
+            ],
+            'page' => 'integer',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+        $validatedData = (object) $validatedData->validated();
 
-        $pagination = $orders->toArray();
-        unset($pagination['data']);
-
-        if (!$orders->isEmpty()) {
-            $orderData = [];
-            foreach ($orders as $order) $orderData[] = $this->getOrderDetails($order->id);
-
-            return JsonResponseServices::getApiResponseExtention(
-                $orderData,
-                config('constants.TRUE_STATUS'),
-                '',
-                'pagination',
-                $pagination,
-                config('constants.HTTP_OK')
-            );
+        if (isset($validatedData->orderStatus)) {
+            $orderStatus = OrderStatusEnum::from($validatedData->orderStatus);
         }
 
-        return JsonResponseServices::getApiResponse(
-            [],
-            config('constants.FALSE_STATUS'),
-            config('constants.NO_RECORD'),
+        $orders = Orders::getLoggedinBuyerOrders($orderStatus ?? null)->toArray();
+
+        $data = $orders['data'];
+        $pagination = $orders;
+        unset($pagination['data']);
+        /*
+        * Just creating this variable so we don't have to call the "empty()" function again & again
+        * Which will obviouly increase the API response speed
+        */
+        $dataIsEmpty = empty($data);
+        return JsonResponseServices::getApiResponseExtention(
+            ($dataIsEmpty) ? [] : $data,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+            'pagination',
+            ($dataIsEmpty) ? (object) [] : $pagination,
             config('constants.HTTP_OK')
         );
     }
@@ -416,7 +432,7 @@ class OrdersController extends Controller
             );
             /*
             * Just creating this variable so we don't have to call the "empty()" function again & again
-            * Which will obviouly reduce the API response speed
+            * Which will obviouly increase the API response speed
             */
             $dataIsEmpty = empty($recentOrderProdsData);
             return JsonResponseServices::getApiResponse(
@@ -429,7 +445,7 @@ class OrdersController extends Controller
 
         return JsonResponseServices::getApiResponse(
             [],
-            false,
+            config('constants.FALSE_STATUS'),
             config('constants.NO_RECORD'),
             config('constants.HTTP_OK')
         );
@@ -691,12 +707,10 @@ class OrdersController extends Controller
             /**
              * Order cenceled by user & not accepted by store then full refund
              */
-            if ($order->order_status == "pending") {
-                $order->order_status = 'cancelled';
+            if ($order->order_status == OrderStatusEnum::PENDING->value) {
+                $order->order_status = OrderStatusEnum::CANCELLED->value;
                 $order->save();
-                // foreach ($product_ids as $product_id) {
-                //     $count++;
-                // }
+
                 return response()->json([
                     'data' => $order,
                     'status' => true,
@@ -706,12 +720,10 @@ class OrdersController extends Controller
             /**
              * Order cenceled by user & accepted by store but not picked by the driver then deduct handling charges
              */
-            else if ($order->order_status == "accepted" || $order->order_status == "ready") {
-                $order->order_status = 'cancelled';
+            else if ($order->order_status == OrderStatusEnum::ACCEPTED->value || $order->order_status == OrderStatusEnum::READY->value) {
+                $order->order_status = OrderStatusEnum::CANCELLED->value;
                 $order->save();
-                // foreach ($product_ids as $product_id) {
-                //     $count++;
-                // }
+
                 return response()->json([
                     'data' => $order,
                     'status' => true,
@@ -721,12 +733,10 @@ class OrdersController extends Controller
             /**
              * Order cenceled by user, accepted by store & picked by the driver then multiply driver's fee by 2 plus add handling charge & service fee
              */
-            else if ($order->order_status == "onTheWay") {
-                $order->order_status = 'cancelled';
+            else if ($order->order_status == OrderStatusEnum::ON_THE_WAY->value) {
+                $order->order_status = OrderStatusEnum::CANCELLED->value;
                 $order->save();
-                // foreach ($product_ids as $product_id) {
-                //     $count++;
-                // }
+
                 return response()->json([
                     'data' => $order,
                     'status' => true,
@@ -781,7 +791,7 @@ class OrdersController extends Controller
             $count++;
         }
         return response()->json([
-            'data' => $this->getOrdersFromIds($order_arr),
+            'data' => Orders::getByIds($order_arr),
             'status' => true,
             'message' => 'Order Added Successfully'
         ], 200);
@@ -790,13 +800,13 @@ class OrdersController extends Controller
      * It is used to fetch the information of multiple orders w.r.t their ID's
      * @author Huzaif Haleem
      */
-    public function getOrdersFromIds(array $ids)
-    {
-        $orders = [];
-        foreach ($ids as $orderId) $orders[] = $this->getOrderDetails($orderId);
+    // public function getOrdersFromIds(array $ids)
+    // {
+    //     $orders = [];
+    //     foreach ($ids as $orderId) $orders[] = $this->getOrderDetails($orderId);
 
-        return $orders;
-    }
+    //     return $orders;
+    // }
     /**
      * It is used to fetch the information of a single order w.r.t it's ID
      * @author Huzaifa Haleem
@@ -813,16 +823,16 @@ class OrdersController extends Controller
     /**
      * It will get order details via given id
      */
-    public function getOrderDetailsTwo(Request $request)
+    public function getOrderDetailsForApi(Request $request)
     {
         $validatedData = Validator::make($request->route()->parameters(), [
             'id' => 'required|integer'
         ]);
         if ($validatedData->fails()) {
-            return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        $validatedData = (object) $validatedData->safe()->all();
+        $validatedData = (object) $validatedData->validated();
 
         if (!Orders::checkIfOrderExists($validatedData->id)) {
             return JsonResponseServices::getApiResponse(

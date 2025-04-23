@@ -1,5 +1,7 @@
+/.phpunit.cache
 /node_modules
 /public/hot
+/public/build
 /public/storage
 /public/upload
 /storage/*.key
@@ -11,3 +13,4 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
+worker.log

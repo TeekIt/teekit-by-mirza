@@ -11,7 +11,7 @@ use App\OrderItems;
 use App\Orders;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
-use App\Services\GophrServices;
+use App\Services\GophrDeliveryServices;
 use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
 use App\User;
@@ -137,7 +137,7 @@ class OrdersLivewire extends Component
     {
         $gophrDelivery = GophrDelivery::getByOrderId((new Orders)->getMorphClass(), $orderId, ['job_id']);
         $this->selectedDeliveryDetails = json_decode(
-            json_encode(GophrServices::getJob($gophrDelivery->job_id)),
+            json_encode(GophrDeliveryServices::getJob($gophrDelivery->job_id)),
             true
         );
     }
@@ -152,7 +152,7 @@ class OrdersLivewire extends Component
 
             $parcelDescription = $this->additionalParcelDescription ?? "Please pickup your order ASAP";
 
-            $response = GophrServices::createJob($order, $parcelDescription);
+            $response = GophrDeliveryServices::createJob($order, $parcelDescription);
 
             if (isset($response->errors)) {
                 Log::error($response->errors);
@@ -230,6 +230,7 @@ class OrdersLivewire extends Component
                 isset($this->order->customer_lat) ? (float) $this->order->customer_lat : null,
                 isset($this->order->customer_lon) ? (float) $this->order->customer_lon : null,
                 $this->order->customer_name,
+                $this->order->country_code,
                 $this->order->phone_number,
                 $this->order->address,
                 $this->order->house_no,

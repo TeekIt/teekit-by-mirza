@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\PasswordReset;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use App\User;
 // use Illuminate\Auth\Events\PasswordReset;

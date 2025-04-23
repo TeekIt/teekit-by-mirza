@@ -131,6 +131,7 @@ class RegisterController extends Controller
             $data['name'],
             strtolower($data['email']),
             $data['password'],
+            '+44',
             $data['phone'],
             $data['address'],
             $data['unit_address'],

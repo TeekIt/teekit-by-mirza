@@ -76,13 +76,8 @@ return [
         'riders' => [
             'driver' => 'eloquent',
             'model' => App\Drivers::class,
-            // 'table' => 'drivers',
+            'table' => 'drivers',
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     /*

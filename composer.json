@@ -1,14 +1,11 @@
 {
     "name": "laravel/laravel",
     "type": "project",
-    "description": "The Laravel Framework.",
-    "keywords": [
-        "framework",
-        "laravel"
-    ],
+    "description": "The skeleton application for the Laravel framework.",
+    "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.0.2",
+        "php": "^8.1",
         "fakerphp/faker": "^1.23",
         "garygreen/pretty-routes": "^1.0",
         "google/apiclient": "^2.17",
@@ -16,11 +13,11 @@
         "http-interop/http-factory-guzzle": "^1.2",
         "jenssegers/agent": "^2.6",
         "laracasts/flash": "^3.1",
-        "laravel/framework": "^9.0",
+        "laravel/framework": "^10.48.28",
         "laravel/scout": "^9.6",
-        "laravel/tinker": "^2.5",
+        "laravel/tinker": "^2.8",
         "laravel/ui": "^4.0.0",
-        "lcobucci/jwt": "4.1.0",
+        "lcobucci/jwt": "^4.3.0",
         "league/flysystem-aws-s3-v3": "^3.0",
         "livewire/livewire": "^2.12",
         "maatwebsite/excel": "^3.1",
@@ -30,15 +27,15 @@
         "symfony/mailgun-mailer": "^6.3",
         "symfony/postmark-mailer": "^6.3",
         "twilio/sdk": "^6.28",
-        "tymon/jwt-auth": "^1.0"
+        "tymon/jwt-auth": "^2.2"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.9",
         "beyondcode/laravel-dump-server": "^1.0",
         "filp/whoops": "^2.0",
         "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^6.1",
-        "phpunit/phpunit": "^9.5.10"
+        "nunomaduro/collision": "^7.0",
+        "phpunit/phpunit": "^10.1"
     },
     "config": {
         "optimize-autoloader": true,
@@ -65,12 +62,13 @@
             "Tests\\": "tests/"
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php artisan vendor:publish --force --tag=livewire:assets --ansi"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""

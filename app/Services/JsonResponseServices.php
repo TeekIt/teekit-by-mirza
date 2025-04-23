@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use Illuminate\Http\JsonResponse;
+
 final class JsonResponseServices
 {
-    public static function getApiValidationFailedResponse($errors)
+    public static function getApiValidationFailedResponse(mixed $errors): JsonResponse
     {
         return response()->json([
             'data' => [],
@@ -13,7 +15,7 @@ final class JsonResponseServices
         ], config('constants.HTTP_UNPROCESSABLE_REQUEST'));
     }
 
-    public static function getApiResponse($data, $status, $message, $httpCode)
+    public static function getApiResponse(mixed $data, bool $status, mixed $message, int $httpCode): JsonResponse
     {
         return response()->json([
             'data' => $data,
@@ -22,8 +24,14 @@ final class JsonResponseServices
         ], $httpCode);
     }
 
-    public static function getApiResponseExtention($data, $status, $message, $extraKey, $extraKeyData, $httpCode)
-    {
+    public static function getApiResponseExtention(
+        mixed $data,
+        bool $status,
+        mixed $message,
+        mixed $extraKey,
+        mixed $extraKeyData,
+        int $httpCode
+    ): JsonResponse {
         return response()->json([
             'data' => $data,
             'status' => $status,

@@ -17,7 +17,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -36,6 +35,7 @@ class User extends Authenticatable implements JWTSubject
         'l_name',
         'email',
         'password',
+        'country_code',
         'phone',
         'business_name',
         'business_phone',
@@ -82,6 +82,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
@@ -111,8 +112,7 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Custom Properties
      */
-    public const ACTIVE = 1,
-        BLOCK = 0;
+    public const ACTIVE = 1, BLOCK = 0;
     /**
      * Relations
      */
@@ -188,24 +188,24 @@ class User extends Authenticatable implements JWTSubject
 
     public static function updateInfo(
         int $id,
-        string $name = null,
-        string $lName = null,
-        string $email = null,
-        string $phone = null,
-        string $fullAddress = null,
-        string $unitAddress = null,
-        string $country = null,
-        string $state = null,
-        string $city = null,
-        string $postcode = null,
-        string $lat = null,
-        string $lon = null,
-        string $businessName = null,
-        string $businessPhone = null,
-        string $password = null,
+        ?string $name = null,
+        ?string $lName = null,
+        ?string $email = null,
+        ?string $phone = null,
+        ?string $fullAddress = null,
+        ?string $unitAddress = null,
+        ?string $country = null,
+        ?string $state = null,
+        ?string $city = null,
+        ?string $postcode = null,
+        ?string $lat = null,
+        ?string $lon = null,
+        ?string $businessName = null,
+        ?string $businessPhone = null,
+        ?string $password = null,
         array $hours = [],
-        string $userImg = null,
-        string $stripeAccountId = null
+        ?string $userImg = null,
+        ?string $stripeAccountId = null
     ): bool {
         $user = self::findOrFail($id);
         if (!is_null($name)) $user->name = $name;
@@ -233,7 +233,7 @@ class User extends Authenticatable implements JWTSubject
     public static function updateStoreLocation(
         int $user_id,
         string $full_address,
-        string|null $unit_address,
+        ?string $unit_address,
         string $country,
         string $state,
         string $city,
@@ -258,6 +258,7 @@ class User extends Authenticatable implements JWTSubject
         string $lastName,
         string $email,
         string $password,
+        string $countryCode,
         string $phoneNumber,
         int $isActive,
         string $referralCode
@@ -267,6 +268,7 @@ class User extends Authenticatable implements JWTSubject
             'l_name' => $lastName,
             'email' => $email,
             'password' => Hash::make($password),
+            'country_code' => $countryCode,
             'phone' => $phoneNumber,
             'country' => 'NA',
             'state' => 'NA',
@@ -281,9 +283,10 @@ class User extends Authenticatable implements JWTSubject
         string $name,
         string $email,
         string $password,
+        string $countryCode,
         string $phone,
         string $address,
-        string|null $unit_address,
+        ?string $unit_address,
         string $postcode,
         string $country,
         string $state,
@@ -294,15 +297,16 @@ class User extends Authenticatable implements JWTSubject
         float $lon,
         string $business_hours,
         UserRole $role_id,
-        int|null $parent_store_id = null
+        ?int $parent_store_id = null
     ): self {
         return self::create([
             'name' => $name,
             'email' => $email,
             'password' => Hash::make($password),
-            'phone' => '+44' . $phone,
+            'country_code' => $countryCode,
+            'phone' => $phone,
             'business_name' => $business_name,
-            'business_phone' => '+44' . $business_phone,
+            'business_phone' => $business_phone,
             'business_hours' => $business_hours,
             'full_address' => $address,
             'unit_address' => $unit_address,
@@ -330,25 +334,27 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function getParentAndChildSellersByCity(string $city): LengthAwarePaginator
+    public static function getParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
     {
         return self::WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('city', $city)
+            ->where('city', '=', $city)
             ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
-            ->paginate(10);
+            ->take($numberOfRows)
+            ->get();
     }
 
-    public static function getParentAndChildSellersByState(string $state): Collection
+    public static function getParentAndChildSellersByState(string $state, int $numberOfRows = 25): Collection
     {
         return self::WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('state', $state)
+            ->where('state', '=', $state)
             ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
+            ->take($numberOfRows)
             ->get();
     }
 
@@ -378,29 +384,29 @@ class User extends Authenticatable implements JWTSubject
     public static function getCustomers(string $search = ''): LengthAwarePaginator
     {
         return self::where('name', 'like', '%' . $search . '%')
-            ->where('role_id', UserRole::BUYER)
+            ->where('role_id', '=', UserRole::BUYER)
             ->orderByDesc('created_at')
             ->paginate(9);
     }
 
     public static function getAllCustomers(): Collection
     {
-        return self::where('role_id', UserRole::BUYER)->get();
+        return self::where('role_id', '=', UserRole::BUYER)->get();
     }
 
     public static function getBuyersWithReferralCode(): LengthAwarePaginator
     {
-        return self::where('role_id', UserRole::BUYER)->whereNotNull('referral_code')->paginate(10);
+        return self::where('role_id', '=', UserRole::BUYER)->whereNotNull('referral_code')->paginate(10);
     }
 
     public static function getBuyerByEmail(string $email, array $columns = ['*']): ?User
     {
-        return self::select($columns)->where('email', $email)->where('role_id', UserRole::BUYER)->first();
+        return self::select($columns)->where('email', '=', $email)->where('role_id', '=', UserRole::BUYER)->first();
     }
 
-    public static function getSellerByBusinessName(string $business_name): ?User
+    public static function getSellerByBusinessName(string $businessName): ?User
     {
-        return self::where('business_name', $business_name)->first();
+        return self::where('business_name', '=', $businessName)->first();
     }
 
     public static function getUserByID(int $id, array $columns = ['*']): ?User
@@ -408,7 +414,7 @@ class User extends Authenticatable implements JWTSubject
         return self::select($columns)->find($id);
     }
 
-    public function nearbyUsers($user_lat, $user_lon, $radius): object
+    public function nearbyUsers($user_lat, $user_lon, $radius): User
     {
         return self::selectRaw("*, (  3961 * acos( cos( radians(" . $user_lat . ") ) *
                                 cos( radians(users.lat) ) *
@@ -443,9 +449,10 @@ class User extends Authenticatable implements JWTSubject
         return self::where('id', $user_id)->pluck('role_id');
     }
 
-    public static function getUserInfo(int $user_id): array|null
+    public static function getUserInfo(int $userId): ?array
     {
-        $user = self::with('referralRelations')->where('id', $user_id)->first();
+        $user = self::with('referralRelations')->where('id', '=', $userId)->first();
+        
         if ($user) {
             return [
                 'id' => $user->id,
@@ -463,6 +470,7 @@ class User extends Authenticatable implements JWTSubject
                 'referral_relation_details' => ($user->referralRelations) ? [$user->referralRelations] : null
             ];
         }
+
         return null;
     }
 

@@ -17,7 +17,6 @@ use App\Http\Controllers\RattingsController;
 use App\Http\Controllers\ReferralCodeRelationController;
 use App\Http\Controllers\StripeContorller;
 use App\Http\Controllers\WithdrawalRequestsController;
-use App\Services\StripeServices;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
@@ -51,7 +50,7 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
         Route::post('refresh', 'refresh');
         Route::post('updateStatus', 'updateStatus');
         Route::get('delivery_boys', 'deliveryBoys');
-        Route::get('get_user/{user_id}', 'getUserDetails');
+        Route::get('get_user/{userId}', 'getUserDetails');
         Route::post('user/delete', 'deleteUser');
         Route::get('me', 'me');
     });
@@ -82,7 +81,7 @@ Route::prefix('category')->controller(CategoriesController::class)->group(functi
     Route::post('add', 'add');
     Route::post('update/{product_id}', 'update');
     Route::get('{categoryId}/products', 'productsByCategory');
-    Route::get('get-stores-by-category', 'stores');
+    Route::get('get-stores-by-category', 'sellers');
     Route::get('all', 'all');
 });
 /*
@@ -92,7 +91,6 @@ Route::prefix('category')->controller(CategoriesController::class)->group(functi
 */
 Route::prefix('sellers')->controller(UsersController::class)->group(function () {
     Route::get('/', 'sellers');
-    Route::get('{seller_id}/{product_name}', 'searchSellerProducts');
 });
 /*
 |--------------------------------------------------------------------------
@@ -121,7 +119,6 @@ Route::middleware(['jwt.verify'])->group(function () {
                 Route::get('all', 'all');
                 Route::post('search', 'search');
                 Route::get('view', 'view');
-                Route::post('view/bulk', 'bulkView');
                 Route::get('seller', 'sellerProducts');
                 Route::get('sortbyprice', 'sortByPrice');
                 Route::get('sortByLocation', 'sortByLocation');
@@ -132,7 +129,6 @@ Route::middleware(['jwt.verify'])->group(function () {
 
         Route::prefix('ratings')->controller(RattingsController::class)->group(function () {
             Route::post('add', 'add');
-            Route::post('update', 'update');
             Route::get('delete/{ratting_id}', 'delete');
         });
     });
@@ -146,8 +142,9 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::withoutMiddleware(['jwt.verify'])->group(function () {
             Route::post('new', 'new');
             Route::post('product_by_buyer', 'orderProductByBuyer');
+            Route::get('get-order-details/{id}', 'getOrderDetailsForApi');
         });
-        
+
         Route::get('/logged_in/buyer', 'showLoggedinBuyerOrders');
         Route::get('seller', 'sellerOrders');
         Route::get('driver_orders/{driver_id}', 'driverOrders');
@@ -157,7 +154,6 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('customer_cancel_order', 'customerCancelOrder');
         Route::post('update', 'updateOrder');
         Route::post('estimated-time/{id}', 'storeEstimatedTime');
-        Route::get('get-order-details/{id}', 'getOrderDetailsTwo');
         Route::get('products-of-recent-order', 'productsOfRecentOrder');
     });
 

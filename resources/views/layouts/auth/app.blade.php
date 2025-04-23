@@ -5,6 +5,26 @@
     @include('layouts.header-links')
 </head>
 
+<style>
+    .border {
+        border: 1px solid red;
+    }
+
+    @media screen and (max-width: 769px) {
+        .cstm-container-sm {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0px 20px;
+        }
+
+        .mobile-login-btn {
+            border: none !important;
+            color: #3663ae !important;
+        }
+    }
+</style>
+
 <body class="hold-transition main-pages-bg-img">
     <div class="wrapper">
         <!-- Navbar -->
@@ -12,7 +32,8 @@
             <div class="container">
                 <div class="cstm-container-sm">
                     <a class="navbar-brand" target="_blank" href="{{ config('constants.LIVE_WEBSITE_URL') }}">
-                        <img style="max-height: 50px;" src="{{ asset('images/logo.webp') }}" alt="{{ config('app.name') }} - Logo">
+                        <img style="max-height: 50px;" src="{{ asset('images/logo.webp') }}"
+                            alt="{{ config('app.name') }} - Logo">
                     </a>
                     <!-- Toggle Button For Mobiles - Begins -->
                     <button class="navbar-toggler mobile-login-btn" type="button" data-bs-toggle="collapse"
@@ -74,11 +95,12 @@
                 </div>
             @endif
 
-            <div class="row" style="margin-top: 20vh">
-                <div class="col-md-6 col-lg-8">
-                    <img src="{{ asset('images/backgrounds/bike.webp') }}" class="bg-img" alt="{{ asset('images/backgrounds/bike.webp') }}">
+            <div class="row">
+                <div class="col-md-6 col-lg-8" style="margin-top: 20vh">
+                    <img src="{{ asset('images/backgrounds/bike.webp') }}" style="width:100%; max-width: 500px; max-height: 540px; display: block; margin: 0px auto;"
+                        alt="{{ config('app.name') }} - Bike Image">
                 </div>
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-4" style="margin-top: 11vh">
                     @yield('content')
                 </div>
             </div>
@@ -88,35 +110,5 @@
     <!-- /.content-wrapper -->
     @include('layouts.scripts')
 </body>
-
-<style>
-    .border {
-        border: 1px solid red;
-    }
-
-    .bg-img {
-        max-height: 540px;
-        margin: 0 auto;
-        display: block;
-        max-width: 500px;
-        height: 100%;
-        width: 100%;
-        object-fit: contain;
-    }
-
-    @media screen and (max-width: 769px) {
-        .cstm-container-sm {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0px 20px;
-        }
-
-        .mobile-login-btn {
-            border: none !important;
-            color: #3663ae !important;
-        }
-    }
-</style>
 
 </html>

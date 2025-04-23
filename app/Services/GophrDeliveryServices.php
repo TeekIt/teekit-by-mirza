@@ -7,7 +7,7 @@ use App\Orders;
 use stdClass;
 use Illuminate\Support\Str;
 
-final class GophrServices
+final class GophrDeliveryServices
 {
     public static function getApiKey(): string
     {
@@ -25,7 +25,6 @@ final class GophrServices
     {
         return Str::uuid();
     }
-
 
     public static function createJob(Orders|OrdersFromOtherSeller $order, string $parcelDescription): stdClass
     {

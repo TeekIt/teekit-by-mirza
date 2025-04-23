@@ -2,17 +2,16 @@
 
 namespace App\Http\Resources;
 
+use App\User;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class SellerResource extends JsonResource
 {
-    private $user;
-    private $distance_data;
 
-    public function __construct($user, $distance_data = null)
+    public function __construct(private User $user, private array $distanceData = [])
     {
         $this->user = $user;
-        $this->distance_data = $distance_data;
+        $this->distanceData = $distanceData;
     }
 
     /**
@@ -43,8 +42,8 @@ class SellerResource extends JsonResource
             'parent_store_id' => $this->user->parent_store_id,
             'is_online' => $this->user->is_online,
             'roles' => ($this->user->role_id == 2) ? ['sellers'] : ['child_sellers'],
-            'distance' => (empty($this->distance_data)) ? null : $this->distance_data['distance'],
-            'duration' => (empty($this->distance_data)) ? null : $this->distance_data['duration']
+            'distance' => (empty($this->distanceData)) ? null : $this->distanceData['distance'],
+            'duration' => (empty($this->distanceData)) ? null : $this->distanceData['duration'],
         ];
     }
 }
