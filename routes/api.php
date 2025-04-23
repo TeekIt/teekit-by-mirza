@@ -20,6 +20,7 @@ use App\Http\Controllers\WithdrawalRequestsController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use App\Services\JsonResponseServices;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -220,35 +221,37 @@ Route::prefix('stripe')->controller(StripeContorller::class)->group(function () 
 });
 
 Route::get('env', function () {
-    return response()->json([
-        'data' => [
-            'current_env' => App::environment(),
-        ],
-        'status' => config('constants.TRUE_STATUS'),
-        'message' => ''
-    ], config('constants.HTTP_OK'));
+    return JsonResponseServices::getApiResponse(
+        ['current_env' => App::environment()],
+        config('constants.TRUE_STATUS'),
+        '',
+        config('constants.HTTP_OK')
+    );
 });
 
 Route::get('generate_hash', function () {
-    return response()->json([
-        'data' => Hash::make($_REQUEST['password']),
-        'status' => config('constants.TRUE_STATUS'),
-        'message' => ''
-    ], config('constants.HTTP_OK'));
+    return JsonResponseServices::getApiResponse(
+        Hash::make($_REQUEST['password']),
+        config('constants.TRUE_STATUS'),
+        '',
+        config('constants.HTTP_OK')
+    );
 });
 
 Route::get('cache/remove', function () {
-    return response()->json([
-        'data' => [],
-        'status' => config('constants.TRUE_STATUS'),
-        'message' => (Cache::flush()) ? config('constants.CACHE_REMOVED_SUCCESSFULLY') : config('constants.CACHE_REMOVED_FAILED')
-    ], config('constants.HTTP_OK'));
+    return JsonResponseServices::getApiResponse(
+        [],
+        config('constants.TRUE_STATUS'),
+        (dd(Cache::flush())) ? config('constants.CACHE_REMOVED_SUCCESSFULLY') : config('constants.CACHE_REMOVED_FAILED'),
+        config('constants.HTTP_OK')
+    );
 });
 
 Route::fallback(function () {
-    return response()->json([
-        'data' => [],
-        'status' => config('constants.FALSE_STATUS'),
-        'message' => 'API Not Found.'
-    ], config('constants.HTTP_NOT_FOUND'));
+    return JsonResponseServices::getApiResponse(
+        [],
+        config('constants.FALSE_STATUS'),
+        'API Not Found.',
+        config('constants.HTTP_NOT_FOUND')
+    );
 });
