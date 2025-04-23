@@ -343,11 +343,11 @@ class Products extends Model
                 SortByEnum::PriceHighToLow->value => $query->orderBy('price', 'desc'),
             };
         })->whereHas('qty', function ($qtyRelation) use ($sellerIds) {
-                $qtyRelation->whereIn('seller_id', $sellerIds)
-                    ->whereHas('store', function ($storeQuery) {
-                        $storeQuery->WhereUserIsActive();
-                    });
-            })
+            $qtyRelation->whereIn('seller_id', $sellerIds)
+                ->whereHas('store', function ($storeQuery) {
+                    $storeQuery->WhereUserIsActive();
+                });
+        })
             ->whereIn('products.id', $productIds)
             ->get();
 
@@ -432,7 +432,7 @@ class Products extends Model
             ->paginate(20);
     }
 
-    public static function getProductsInfoByCategoryId(int $categoryId, int $sellerId, array $columns): LengthAwarePaginator
+    public static function getProductsInfoByCategoryId(int $categoryId, int $sellerId, array $columns = ['*']): LengthAwarePaginator
     {
         return self::select($columns)
             ->with([
@@ -448,7 +448,8 @@ class Products extends Model
                 'category:id,category_name,category_image'
             ])
             ->whereHas('qty', function ($qtyRelation) use ($sellerId, $categoryId) {
-                $qtyRelation->where('seller_id', $sellerId)->where('category_id', $categoryId);
+                $qtyRelation->where('seller_id', '=', $sellerId)
+                    ->where('category_id', '=', $categoryId);
             })
             ->WhereProductIsEnable()
             ->paginate(20);
