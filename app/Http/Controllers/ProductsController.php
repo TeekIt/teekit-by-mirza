@@ -34,10 +34,10 @@ class ProductsController extends Controller
      * This will help us to update the qty with the given details
      * @version 1.0.0
      */
-    public function updateProductQty($product_id, $user_id, $product_quantity)
-    {
-        Qty::updateProductQty($product_id, $user_id, $product_quantity);
-    }
+    // public function updateProductQty($product_id, $user_id, $product_quantity)
+    // {
+    //     Qty::updateProductQty($product_id, $user_id, $product_quantity);
+    // }
     /**
      * It will redirect us to add
      * inventory page
