@@ -454,6 +454,17 @@ class ProductsController extends Controller
                 ),
                 'id'
             );
+
+            if (empty($nearBySellersIds)) {
+                return JsonResponseServices::getApiResponseExtention(
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    config('constants.NO_RECORD'),
+                    'pagination',
+                    [],
+                    config('constants.HTTP_OK')
+                );
+            }
         }
 
         $products = Products::searchProducts(
