@@ -34,10 +34,10 @@ class ProductsController extends Controller
      * This will help us to update the qty with the given details
      * @version 1.0.0
      */
-    public function updateProductQty($product_id, $user_id, $product_quantity)
-    {
-        Qty::updateProductQty($product_id, $user_id, $product_quantity);
-    }
+    // public function updateProductQty($product_id, $user_id, $product_quantity)
+    // {
+    //     Qty::updateProductQty($product_id, $user_id, $product_quantity);
+    // }
     /**
      * It will redirect us to add
      * inventory page
@@ -454,6 +454,17 @@ class ProductsController extends Controller
                 ),
                 'id'
             );
+
+            if (empty($nearBySellersIds)) {
+                return JsonResponseServices::getApiResponseExtention(
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    config('constants.NO_RECORD'),
+                    'pagination',
+                    [],
+                    config('constants.HTTP_OK')
+                );
+            }
         }
 
         $products = Products::searchProducts(
