@@ -387,33 +387,9 @@ class HomeController extends Controller
      */
     public function adminOrders(Request $request)
     {
-        $return_arr = [];
-        $orders = Orders::where('payment_status', '!=', 'hidden')->orderByDesc('id');
-        if ($request->search) {
-            $orders = $orders->where('id', '=', $request->search);
-        }
-        if ($request->customer_id) {
-            $orders = $orders->where('customer_id', '=', $request->customer_id);
-        }
-        if ($request->store_id) {
-            $orders = $orders->where('seller_id', '=', $request->store_id);
-        }
-        $orders = $orders->paginate(10);
-        $orders_p = $orders;
-        foreach ($orders as $order) {
-            $items = OrderItems::where('order_id', '=', $order->id)->get();
-            $item_arr = [];
-            foreach ($items as $item) {
-                $product = Products::getProductInfo($order->seller_id, $item->product_belongs_to_id, ['*']);
-                $item['product'] = $product;
-                $item_arr[] = $item;
-            }
-            $order['items'] = $item_arr;
-            $return_arr[] = $order;
-        }
-        $orders = $return_arr;
+        $orders = Orders::getOrdersForSuperAdminView(orderBy: 'desc');
 
-        return view('admin.orders', compact('orders', 'orders_p'));
+        return view('admin.orders', compact('orders'));
     }
     /**
      * Render verified orders listing view for admin

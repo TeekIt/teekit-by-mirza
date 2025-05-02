@@ -94,7 +94,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
 
     Route::prefix('orders')->group(function () {
         Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
-        Route::get('/of-unique-products', OrdersOfUniqueProductsLivewire::class)->name('seller.orders.of.unique.products');
+        // Route::get('/of-unique-products', OrdersOfUniqueProductsLivewire::class)->name('seller.orders.of.unique.products');
         Route::get('/count', [HomeController::class, 'countSellerOrders'])->name('seller.orders.count');
         Route::get('/{requestOrderId?}', OrdersLivewire::class)->name('seller.orders');
     });
@@ -157,6 +157,7 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
         Route::post('/update/pages', 'updatePages')->name('admin.update.pages');
 
         Route::prefix('orders')->group(function () {
+            Route::get('/all', 'adminOrders')->name('admin.orders');
             Route::get('/verified', 'adminOrdersVerified')->name('admin.orders.verified');
             Route::get('/unverified', 'adminOrdersUnverified')->name('admin.orders.unverified');
             Route::get('/complete', 'completeOrders')->name('admin.orders.complete');

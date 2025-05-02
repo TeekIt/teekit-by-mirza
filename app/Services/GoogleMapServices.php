@@ -9,14 +9,16 @@ use Illuminate\Support\Facades\Cache;
 
 final class GoogleMapServices
 {
-    /* Rameesha's URL */
     private const GOOGLE_DISTANCEMATRIX_API_URL = 'https://maps.googleapis.com/maps/api/distancematrix/json';
 
-    private const GOOGLE_DISTANCEMATRIX_API_KEY = 'AIzaSyD_7jrpEkUDW7pxLBm91Z0K-U9Q5gK-10U';
+    public static function getApiKey(): string
+    {
+        return config('google.GOOGLE_DISTANCEMATRIX_API_KEY');
+    }
 
     public static function generateUrl($originAddress, $destinationAddress)
     {
-        return self::GOOGLE_DISTANCEMATRIX_API_URL . '?units=imperial&origins=' . urlencode($originAddress) . '&destinations=' . urlencode($destinationAddress) . '&mode=driving&key=' . self::GOOGLE_DISTANCEMATRIX_API_KEY;
+        return self::GOOGLE_DISTANCEMATRIX_API_URL . '?units=imperial&origins=' . urlencode($originAddress) . '&destinations=' . urlencode($destinationAddress) . '&mode=driving&key=' . self::getApiKey();
     }
     /**
      * @param Collection<User> $sellersOfSameCity

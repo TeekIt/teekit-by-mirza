@@ -102,7 +102,7 @@
                                         <hr>
                                     </div>
                                     <div class="col-md-12">
-                                        @foreach ($order->items as $item)
+                                        @foreach ($order->order_items as $item)
                                             <div class="row mb-2">
                                                 <div class="col-md-2">
                                                     <span class="img-container">
@@ -127,7 +127,7 @@
                                                 </div>
                                                 <div class="col-md-6 mt-5">
                                                     <strong class="text-site-primary"> Receiver Name: </strong>
-                                                    {{ $order->receiver_name }} <br>
+                                                    {{ $order->customer_name }} <br>
                                                     <strong class="text-site-primary"> Contact: </strong>
                                                     {{ $order->phone_number }}
                                                     <br>
@@ -161,12 +161,6 @@
                                                     @elseif ($item->user_choice == 4)
                                                         {{-- 4 == Request a call from the store --}}
                                                         <b>Call the user if this product is out of stock</b>
-                                                    @elseif ($item->user_choice == 5)
-                                                        <b>Cancel the order if this product is out of stock</b>
-                                                        <a href="{{ route('cancel_order', ['order_id' => $order->id]) }}"
-                                                            class="d-block btn btn-danger" onclick="cancelOrder(event)">
-                                                            Cancel Order
-                                                        </a>
                                                     @endif
                                                 </div>
                                                 <div class="col-md-12"><br></div>
@@ -222,7 +216,7 @@
             <!-- /.row -->
             <div class="row">
                 <div class="col-md-12">
-                    {{ $orders_p->links() }}
+                    {{ $orders->links() }}
                 </div>
             </div>
         </div><!-- /.container-fluid -->
