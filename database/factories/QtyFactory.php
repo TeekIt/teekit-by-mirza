@@ -14,12 +14,13 @@ class QtyFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition()
-    {
-        return [
-            'seller_id' => $this->faker->numberBetween(1, 5000000),
-            'product_id' => $this->faker->numberBetween(1, 1000000),
-            'qty' => $this->faker->randomDigit()
-        ];
-    }
+        public function definition()
+        {
+            return [
+                'seller_id' => $this->faker->numberBetween(1, 5000000),
+                'product_id' => $this->faker->numberBetween(1, 1000000),
+                'category_id' => $this->faker->numberBetween(1, 100),
+                'qty' => $this->faker->randomDigit()
+            ];
+        }
 }
