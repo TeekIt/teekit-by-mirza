@@ -17,10 +17,6 @@ return new class extends Migration
             $table->uuid('job_id');
             $table->timestamps();
             $table->softDeletes();
-             /**
-             * Indexes
-             */
-            $table->index('job_id');
         });
     }
 
