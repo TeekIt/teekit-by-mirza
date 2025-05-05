@@ -153,7 +153,7 @@ class OrdersHeader extends Component
 
         $currentTotalAmount = round($currentTotal + $this->selectedOrder->service_charges + $currentDeliveryCharges);
         $initialTotalAmount = round($this->selectedOrder->initial_total + $this->selectedOrder->service_charges + $this->selectedOrder->delivery_charges);
-
+        // dd($initialTotalAmount);
         if ($currentTotalAmount <= $initialTotalAmount) {
             $response = StripeServices::capturePaymentIntent(
                 $this->selectedOrder->payment_intent_id,

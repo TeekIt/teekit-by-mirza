@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use App\Services\JsonResponseServices;
+use Illuminate\Support\Facades\Http;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -242,7 +244,7 @@ Route::get('cache/remove', function () {
     return JsonResponseServices::getApiResponse(
         [],
         config('constants.TRUE_STATUS'),
-        (dd(Cache::flush())) ? config('constants.CACHE_REMOVED_SUCCESSFULLY') : config('constants.CACHE_REMOVED_FAILED'),
+        (Cache::flush()) ? config('constants.CACHE_REMOVED_SUCCESSFULLY') : config('constants.CACHE_REMOVED_FAILED'),
         config('constants.HTTP_OK')
     );
 });
