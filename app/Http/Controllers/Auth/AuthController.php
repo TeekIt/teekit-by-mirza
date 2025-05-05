@@ -106,15 +106,9 @@ class AuthController extends Controller
         $validate = Validator::make($request->all(), [
             'token' => 'required'
         ]);
-        if ($validate->fails()) { {
-                echo "Validation error";
+        if ($validate->fails()) {
+            echo "Validation error";
                 return;
-            }
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.FALSE_STATUS'),
-                'message' => $validate->errors()
-            ], 422);
         }
         $verification_token = Crypt::decrypt($request->token);
 
@@ -124,11 +118,6 @@ class AuthController extends Controller
             if ($user->email_verified_at != null) {
                 echo "Account Already verified";
                 return;
-                return response()->json([
-                    'data' => [],
-                    'status' => config('constants.FALSE_STATUS'),
-                    'message' => 'Account Already verified'
-                ], config('constants.HTTP_OK'));
             }
             $user->email_verified_at = Carbon::now();
             $user->is_active = 1;
@@ -136,21 +125,9 @@ class AuthController extends Controller
 
             echo "Account successfully verified";
             return;
-
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.TRUE_STATUS'),
-                'message' => 'Account successfully verified'
-            ], config('constants.HTTP_OK'));
         } else {
             echo "Invalid verification token";
             return;
-
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.FALSE_STATUS'),
-                'message' => 'Invalid verification token'
-            ], 401);
         }
     }
     /**
@@ -349,9 +326,9 @@ class AuthController extends Controller
      * @author Muhammad Abdullah Mirza
      * @version 1.4.0
      */
-    public function getUserDetails($user_id)
+    public function getUserDetails($userId)
     {
-        $data = User::getUserInfo($user_id);
+        $data = User::getUserInfo($userId);
 
         return JsonResponseServices::getApiResponse(
             (empty($data)) ? [] : $data,

@@ -19,9 +19,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
     @php
-        $google_map_routes = ['login', 'seller/settings/general'];
+        $googleMapRoutes = ['login', 'seller/settings/general'];
     @endphp
-    @if (in_array(Route::current()->uri, $google_map_routes))
+    @if (in_array(Route::current()->uri, $googleMapRoutes))
         @include('javascript.google-map-js')
     @endif
 

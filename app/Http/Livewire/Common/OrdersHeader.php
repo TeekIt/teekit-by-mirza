@@ -10,7 +10,7 @@ use App\Models\OrdersFromOtherSeller;
 use App\Orders;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
-use App\Services\GophrServices;
+use App\Services\GophrDeliveryServices;
 use App\Services\OrderServices;
 use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
@@ -103,7 +103,7 @@ class OrdersHeader extends Component
         try {
             $gophrDelivery = GophrDelivery::getByOrderId((new Orders)->getMorphClass(), $orderId, ['job_id']);
 
-            $response = GophrServices::getJob($gophrDelivery->job_id);
+            $response = GophrDeliveryServices::getJob($gophrDelivery->job_id);
             if (isset($response->errors)) {
                 $this->dispatchBrowserEvent('close-modal', ['id' => 'trackGophrDeliveryModal']);
 
@@ -153,7 +153,7 @@ class OrdersHeader extends Component
 
         $currentTotalAmount = round($currentTotal + $this->selectedOrder->service_charges + $currentDeliveryCharges);
         $initialTotalAmount = round($this->selectedOrder->initial_total + $this->selectedOrder->service_charges + $this->selectedOrder->delivery_charges);
-
+        // dd($initialTotalAmount);
         if ($currentTotalAmount <= $initialTotalAmount) {
             $response = StripeServices::capturePaymentIntent(
                 $this->selectedOrder->payment_intent_id,
@@ -179,7 +179,7 @@ class OrdersHeader extends Component
 
             $parcelDescription = $this->additionalParcelDescription ?? "Please pickup your order ASAP";
 
-            $response = GophrServices::createJob($order, $parcelDescription);
+            $response = GophrDeliveryServices::createJob($order, $parcelDescription);
             if (isset($response->errors)) {
                 $this->dispatchBrowserEvent('close-modal', ['id' => 'gophrModal']);
 

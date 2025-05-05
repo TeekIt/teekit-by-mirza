@@ -6,14 +6,16 @@ use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicle;
 use App\Enums\UserChoicesEnum;
-use App\Enums\UserMorphTypeEnum;
 use App\Enums\UserRole;
+use App\Jobs\SendCustomProductOrderDetailsToNearBySellersJob;
 use App\Models\GuestBuyer;
 use App\Models\ProductsByBuyer;
 use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Qty;
+use App\Services\EmailServices;
+use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
 use App\Services\OrderServices;
@@ -27,7 +29,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Throwable;
 
 class OrdersController extends Controller
 {
@@ -298,13 +299,16 @@ class OrdersController extends Controller
         $sellerId = $request->sellerId;
         $initialTotal = $request->maxPrice * $request->qty;
         $totalItems = $request->qty;
+        /* Fetch seller details against whom the order is being placed */
+        $seller = User::getUserByID($sellerId, [
+            'id',
+            'business_phone',
+            'city',
+            'lat',
+            'lon'
+        ]);
 
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
-            $seller = User::getUserByID($sellerId, [
-                'business_phone',
-                'lat',
-                'lon'
-            ]);
             $driverCharges = OrderServices::getDriverCharges(
                 $seller->lat,
                 $seller->lon,
@@ -315,7 +319,7 @@ class OrdersController extends Controller
             );
         }
         /* Create order */
-        $orderId = Orders::add(
+        $order = Orders::add(
             $createdByType,
             $createdById,
             $sellerId,
@@ -323,10 +327,10 @@ class OrdersController extends Controller
             $totalItems,
             $driverCharges ?? 0.00,
             $request
-        )->id;
+        );
         /* Insert order items */
         OrderItems::add(
-            $orderId,
+            $order->id,
             $productByBuyer->getMorphClass(),
             $productByBuyer->id,
             $productByBuyer->max_price,
@@ -336,20 +340,28 @@ class OrdersController extends Controller
 
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
             $verificationCode = VerificationCodeServices::generateCode();
-            VerificationCodes::add($orderId, $verificationCode);
+            VerificationCodes::add($order->id, $verificationCode);
 
             if (app()->environment('production')) {
                 OrderServices::sendBulkSms(
                     $seller,
                     $request->countryCode,
                     $request->phone,
-                    $orderId,
+                    $order->id,
                     $verificationCode
                 );
             }
         }
 
-        $idsArray[] = $orderId;
+        /* Email order details to nearby sellers */
+        // SendCustomProductOrderDetailsToNearBySellersJob::dispatch(
+        //     $request->lat,
+        //     $request->lon,
+        //     $seller,
+        //     $order
+        // )->onQueue('high');
+
+        $idsArray[] = $order->id;
 
         return JsonResponseServices::getApiResponse(
             Orders::getByIds($idsArray),
@@ -410,7 +422,7 @@ class OrdersController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
         }
 
-        $order = Orders::getRecentOrderByCustomerId(Auth::id(), $request->productsLimit, $request->sellerId);
+        $order = Orders::getRecentOrderByCustomerId(auth()->id(), $request->productsLimit, $request->sellerId);
         if (!empty($order)) {
             $recentOrderProdsData = [];
             foreach ($order->products as $product) $recentOrderProdsData[] = Products::getProductInfo(
@@ -443,131 +455,131 @@ class OrdersController extends Controller
      * for a specific delivery boy
      * @author Huzaifa Haleem
      */
-    public function sellerOrders(Request $request)
-    {
-        $lat = \auth()->user()->lat;
-        $lon = \auth()->user()->lon;
-        $orders = [];
-        if ($request->has('order_status') && $request->order_status == 'delivered') {
-            $orders = Orders::query();
-            $orders = $orders->where('order_status', '=', 'delivered');
-            $orders = $orders->orderByDesc('created_at')->paginate();
-            $pagination = $orders->toArray();
-        } elseif ($request->has('order_status') && $request->order_status == 'ready') {
-            $assignedOrders = Orders::where('driver_id', \auth()->id())->where('delivery_status', 'assigned')->get();
-            if (count($assignedOrders) == 0) {
-                $users = DB::table("users")
-                    ->select(
-                        "users.id",
-                        "users.name",
-                        DB::raw("3959 * acos(cos(radians(" . $lat . "))
-                            * cos(radians(users.lat))
-                            * cos(radians(users.lon) - radians(" . $lon . "))
-                            + sin(radians(" . $lat . "))
-                            * sin(radians(users.lat))) AS distance")
-                    )
-                    ->join('role_user', 'users.id', '=', 'role_user.user_id')
-                    ->join('roles', 'roles.id', '=', 'role_user.role_id')
-                    ->where('roles.id', 2)
-                    ->whereNotNull('lat')
-                    ->having('distance', '<', 6)
-                    ->having('distance', '>', 0.0)
-                    ->orderBy('distance')
-                    ->get()
-                    ->pluck('id')
-                    ->toArray();
-                $orders = Orders::query();
-                if (!empty($request->order_status)) {
-                    $orders = $orders->where('order_status', '=', $request->order_status);
-                    $orders = $orders
-                        ->whereHas('order_items.product', function ($q) use ($users) {
-                            $q->whereHas('user', function ($w) use ($users) {
-                                $w->whereIn('id', $users);
-                            });
-                        });
-                    if (\auth()->user()->vehicle_type == 'bike') {
-                        $orders = $orders->whereHas('order_items.product', function ($q) {
-                            return $q->where('bike', 1);
-                        });
-                    }
-                }
-                $orders = $orders->where('type', 'delivery')
-                    ->orderByDesc('created_at')->paginate();
-                $pagination = $orders->toArray();
-            } else {
-                $assignedOrders = $assignedOrders[0];
-                $nearbyOrders = DB::table("orders")
-                    ->select(
-                        "orders.id",
-                        DB::raw("3959 * acos(cos(radians(" . $assignedOrders->lat . "))
-                        * cos(radians(orders.lat))
-                        * cos(radians(orders.lon) - radians(" . $assignedOrders->lon . "))
-                        + sin(radians(" . $assignedOrders->lat . "))
-                        * sin(radians(orders.lat))) AS distance")
-                    )
-                    ->where(function ($q) {
-                        $q->where('order_status', 'pending')
-                            ->orWhere('order_status', 'ready');
-                    })
-                    ->whereNotNull('lat')
-                    ->having('distance', '<', 2)
-                    ->having('distance', '>', 0.0)
-                    ->orderBy('distance')
-                    ->get()
-                    ->pluck('id')
-                    ->toArray();
-                $orders = Orders::query();
-                $orders = $orders->where('order_status', '=', $request->order_status)
-                    ->where('driver_id', \auth()->id());
-                $orders = $orders->orWhere(function ($q) use ($nearbyOrders) {
-                    $q->whereIn('id', $nearbyOrders);
-                    if (\auth()->user()->vehicle_type == 'bike') {
-                        $q->whereHas('order_items.product', function ($query) {
-                            return $query->where('bike', 1);
-                        });
-                    }
-                });
-                $orders = $orders->where('type', 'delivery')
-                    ->orderByDesc('created_at')->paginate();
-                $pagination = $orders->toArray();
-            }
-        } elseif ($request->has('order_status') && $request->order_status == 'complete') {
-            $orders = Orders::query();
-            $orders = $orders->where('type', '=', 'delivery')
-                ->where('order_status', 'complete')
-                ->whereNotNull('driver_id')
-                ->orderByDesc('created_at')
-                ->paginate();
-            $pagination = $orders->toArray();
-        } else {
-            $orders = Orders::query();
-            $orders = $orders->where('type', '=', 'delivery')
-                ->where('order_status', 'ready')
-                ->where('driver_id', NULL)
-                ->orderByDesc('created_at')
-                ->paginate();
-            $pagination = $orders->toArray();
-        }
-        if (!$orders->isEmpty()) {
-            $order_data = [];
-            foreach ($orders as $order) {
-                $order_data[] = $this->getOrderDetails($order->id);
-            }
-            unset($pagination['data']);
-            return response()->json([
-                'data' => $order_data,
-                'status' => true,
-                'message' => '',
-                'pagination' => $pagination
-            ], 200);
-        } else {
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => config('constants.NO_RECORD')
-            ], 200);
-        }
-    }
+    // public function sellerOrders(Request $request)
+    // {
+    //     $lat = \auth()->user()->lat;
+    //     $lon = \auth()->user()->lon;
+    //     $orders = [];
+    //     if ($request->has('order_status') && $request->order_status == 'delivered') {
+    //         $orders = Orders::query();
+    //         $orders = $orders->where('order_status', '=', 'delivered');
+    //         $orders = $orders->orderByDesc('created_at')->paginate();
+    //         $pagination = $orders->toArray();
+    //     } elseif ($request->has('order_status') && $request->order_status == 'ready') {
+    //         $assignedOrders = Orders::where('driver_id', \auth()->id())->where('delivery_status', 'assigned')->get();
+    //         if (count($assignedOrders) == 0) {
+    //             $users = DB::table("users")
+    //                 ->select(
+    //                     "users.id",
+    //                     "users.name",
+    //                     DB::raw("3959 * acos(cos(radians(" . $lat . "))
+    //                         * cos(radians(users.lat))
+    //                         * cos(radians(users.lon) - radians(" . $lon . "))
+    //                         + sin(radians(" . $lat . "))
+    //                         * sin(radians(users.lat))) AS distance")
+    //                 )
+    //                 ->join('role_user', 'users.id', '=', 'role_user.user_id')
+    //                 ->join('roles', 'roles.id', '=', 'role_user.role_id')
+    //                 ->where('roles.id', 2)
+    //                 ->whereNotNull('lat')
+    //                 ->having('distance', '<', 6)
+    //                 ->having('distance', '>', 0.0)
+    //                 ->orderBy('distance')
+    //                 ->get()
+    //                 ->pluck('id')
+    //                 ->toArray();
+    //             $orders = Orders::query();
+    //             if (!empty($request->order_status)) {
+    //                 $orders = $orders->where('order_status', '=', $request->order_status);
+    //                 $orders = $orders
+    //                     ->whereHas('order_items.product', function ($q) use ($users) {
+    //                         $q->whereHas('user', function ($w) use ($users) {
+    //                             $w->whereIn('id', $users);
+    //                         });
+    //                     });
+    //                 if (\auth()->user()->vehicle_type == 'bike') {
+    //                     $orders = $orders->whereHas('order_items.product', function ($q) {
+    //                         return $q->where('bike', 1);
+    //                     });
+    //                 }
+    //             }
+    //             $orders = $orders->where('type', 'delivery')
+    //                 ->orderByDesc('created_at')->paginate();
+    //             $pagination = $orders->toArray();
+    //         } else {
+    //             $assignedOrders = $assignedOrders[0];
+    //             $nearbyOrders = DB::table("orders")
+    //                 ->select(
+    //                     "orders.id",
+    //                     DB::raw("3959 * acos(cos(radians(" . $assignedOrders->lat . "))
+    //                     * cos(radians(orders.lat))
+    //                     * cos(radians(orders.lon) - radians(" . $assignedOrders->lon . "))
+    //                     + sin(radians(" . $assignedOrders->lat . "))
+    //                     * sin(radians(orders.lat))) AS distance")
+    //                 )
+    //                 ->where(function ($q) {
+    //                     $q->where('order_status', 'pending')
+    //                         ->orWhere('order_status', 'ready');
+    //                 })
+    //                 ->whereNotNull('lat')
+    //                 ->having('distance', '<', 2)
+    //                 ->having('distance', '>', 0.0)
+    //                 ->orderBy('distance')
+    //                 ->get()
+    //                 ->pluck('id')
+    //                 ->toArray();
+    //             $orders = Orders::query();
+    //             $orders = $orders->where('order_status', '=', $request->order_status)
+    //                 ->where('driver_id', \auth()->id());
+    //             $orders = $orders->orWhere(function ($q) use ($nearbyOrders) {
+    //                 $q->whereIn('id', $nearbyOrders);
+    //                 if (\auth()->user()->vehicle_type == 'bike') {
+    //                     $q->whereHas('order_items.product', function ($query) {
+    //                         return $query->where('bike', 1);
+    //                     });
+    //                 }
+    //             });
+    //             $orders = $orders->where('type', 'delivery')
+    //                 ->orderByDesc('created_at')->paginate();
+    //             $pagination = $orders->toArray();
+    //         }
+    //     } elseif ($request->has('order_status') && $request->order_status == 'complete') {
+    //         $orders = Orders::query();
+    //         $orders = $orders->where('type', '=', 'delivery')
+    //             ->where('order_status', 'complete')
+    //             ->whereNotNull('driver_id')
+    //             ->orderByDesc('created_at')
+    //             ->paginate();
+    //         $pagination = $orders->toArray();
+    //     } else {
+    //         $orders = Orders::query();
+    //         $orders = $orders->where('type', '=', 'delivery')
+    //             ->where('order_status', 'ready')
+    //             ->where('driver_id', NULL)
+    //             ->orderByDesc('created_at')
+    //             ->paginate();
+    //         $pagination = $orders->toArray();
+    //     }
+    //     if (!$orders->isEmpty()) {
+    //         $order_data = [];
+    //         foreach ($orders as $order) {
+    //             $order_data[] = $this->getOrderDetails($order->id);
+    //         }
+    //         unset($pagination['data']);
+    //         return response()->json([
+    //             'data' => $order_data,
+    //             'status' => true,
+    //             'message' => '',
+    //             'pagination' => $pagination
+    //         ], 200);
+    //     } else {
+    //         return response()->json([
+    //             'data' => [],
+    //             'status' => false,
+    //             'message' => config('constants.NO_RECORD')
+    //         ], 200);
+    //     }
+    // }
     /**
      * List all (assigned,complete,pending_approval,cancelled) orders
      * for a specific delivery boy
@@ -785,17 +797,6 @@ class OrdersController extends Controller
         ], 200);
     }
     /**
-     * It is used to fetch the information of multiple orders w.r.t their ID's
-     * @author Huzaif Haleem
-     */
-    // public function getOrdersFromIds(array $ids)
-    // {
-    //     $orders = [];
-    //     foreach ($ids as $orderId) $orders[] = $this->getOrderDetails($orderId);
-
-    //     return $orders;
-    // }
-    /**
      * It is used to fetch the information of a single order w.r.t it's ID
      * @author Huzaifa Haleem
      */
@@ -821,7 +822,7 @@ class OrdersController extends Controller
         }
 
         $validatedData = (object) $validatedData->validated();
-        
+
         if (!Orders::checkIfOrderExists($validatedData->id)) {
             return JsonResponseServices::getApiResponse(
                 [],

@@ -43,26 +43,7 @@ class CategoriesController extends Controller
             config('constants.HTTP_OK')
         );
     }
-    /**
-     * Update category
-     * @version 1.2.0
-     */
-    public function update(Request $request, $category_id)
-    {
-        // $validatedData = Categories::validator($request);
-        // if ($validatedData->fails()) {
-        //     return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-        // }
-        $category = Categories::updateCategory($request, $category_id);
-
-        return JsonResponseServices::getApiResponse(
-            $category,
-            config('constants.TRUE_STATUS'),
-            config('constants.DATA_UPDATED_SUCCESS'),
-            config('constants.HTTP_OK')
-        );
-    }
-
+    
     public function destroy(Request $request)
     {
         for ($i = 0; $i < count($request->categories); $i++) {
@@ -78,22 +59,24 @@ class CategoriesController extends Controller
     public function all(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
-            'store_id' => 'integer',
+            'sellerId' => 'integer',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        if ($request->store_id)
+        $validatedData = (object) $validatedData->validated();
+
+        if (isset($validatedData->sellerId))
             $data =  Categories::getAllCategoriesBySellerId(
-                $request->store_id,
-                ['id as category_id', 'category_name', 'category_image']
+                $validatedData->sellerId,
+                ['id', 'category_name', 'category_image']
             );
         else
             $data = Cache::rememberForever(
                 'allCategories',
                 fn() => Categories::allCategories([
-                    'id as category_id',
+                    'id',
                     'category_name',
                     'category_image'
                 ])
@@ -102,11 +85,12 @@ class CategoriesController extends Controller
         * Just creating this variable so we don't have to call the "isEmpty()" function again & again
         * Which will obviouly increase the API response speed
         */
-        $data_is_empty = $data->isEmpty();
+        $dataIsEmpty = $data->isEmpty();
+        
         return JsonResponseServices::getApiResponse(
-            ($data_is_empty) ? [] : $data,
-            ($data_is_empty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            ($data_is_empty) ? config('constants.NO_RECORD') : '',
+            ($dataIsEmpty) ? [] : $data,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
             config('constants.HTTP_OK')
         );
     }
@@ -128,18 +112,15 @@ class CategoriesController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        // if ($request->sellerId)
-        //      $data = Qty::getProductsByGivenIds($request->categoryId, $request->sellerId);
-        // else
-        //     $data = Categories::getProducts($request->categoryId);
-
+        $validatedData = (object) $validatedData->validated();
+        
         $pagination = Cache::remember(
-            'productsByCategory' . $request->categoryId . $request->sellerId . $request->page,
+            'productsByCategory' . $validatedData->categoryId . $validatedData->sellerId . $validatedData->page,
             now()->addDay(),
-            function () use ($request) {
+            function () use ($validatedData) {
                 return Products::getProductsInfoByCategoryId(
-                    $request->categoryId,
-                    $request->sellerId,
+                    $validatedData->categoryId,
+                    $validatedData->sellerId,
                     Products::getCommonColumns(),
                 )->toArray();
             }
@@ -169,11 +150,10 @@ class CategoriesController extends Controller
     public function sellers(Request $request)
     {
         $validatedData = Validator::make($request->query(), [
-            'category_id' => 'required|integer',
+            'categoryId' => 'required|integer',
             'lat' => 'required|numeric|between:-90,90',
             'lon' => 'required|numeric|between:-180,180',
-            'state' => 'required|string'
-            // 'page' => 'required|numeric'
+            'state' => 'required|string',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -182,14 +162,14 @@ class CategoriesController extends Controller
         $validatedData = (object) $validatedData->validated();
 
         $sellers = Cache::remember(
-            'get-sellers-by-category' . $validatedData->category_id . $validatedData->lat . $validatedData->lon,
+            'get-sellers-by-category' . $validatedData->categoryId . $validatedData->lat . $validatedData->lon,
             now()->addDay(),
             function () use ($validatedData) {
-                return Qty::getSellersByGivenParams($validatedData->category_id, $validatedData->state);
+                return Qty::getSellersByGivenParams($validatedData->categoryId, $validatedData->state);
             }
         );
 
-        $data = GoogleMapServices::findDistanceByMakingChunks($validatedData->lat, $validatedData->lon, $sellers, 25);
+        $data = GoogleMapServices::findNearByUsersByMakingChunks($validatedData->lat, $validatedData->lon, $sellers, 25);
         /*
         * Just creating this variable so we don't have to call the "empty()" function again & again
         * Because it will increase the API response time

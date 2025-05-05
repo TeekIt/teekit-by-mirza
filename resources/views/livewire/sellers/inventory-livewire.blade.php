@@ -292,7 +292,7 @@
                                         <img class="img-fluid rounded standard-img-size"
                                             src="{{ asset($inventory->feature_img) }}">
                                     @else
-                                        <img class="img-fluid rounded-pill standard-img-size "
+                                        <img class="img-fluid rounded-pill standard-img-size"
                                             src="{{ asset(config('constants.BUCKET') . $inventory->feature_img) }}">
                                     @endif
                                 </td>

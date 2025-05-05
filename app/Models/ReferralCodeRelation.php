@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ReferralCodeRelation extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'referred_by',
         'user_id'
@@ -23,27 +25,29 @@ class ReferralCodeRelation extends Model
     /**
      * Helpers
      */
-    public static function usingReferalFirstTime(int $user_id)
+    public static function usingReferralFirstTime(int $userId): bool
     {
-        $data = self::where('user_id', $user_id)->first();
-        return (is_null($data)) ? true :  false;
+        $data = self::where('user_id', '=', $userId)->first();
+
+        return is_null($data);
     }
 
-    public static function insertReferralRelation(int $referred_by, int $user_id)
+    public static function insertReferralRelation(int $referredBy, int $userId): ReferralCodeRelation
     {
         return self::create([
-            'referred_by' => $referred_by,
-            'user_id'   => $user_id
+            'referred_by' => $referredBy,
+            'user_id' => $userId
         ]);
     }
 
-    public static function getReferralRelationDetails(int $referral_relation_id)
+    public static function getReferralRelationDetails(int $referralRelationId): Collection
     {
-        return self::with('referredByUser')->where('id', $referral_relation_id)->get();
+        return self::with('referredByUser')->where('id', '=', $referralRelationId)->get();
     }
 
-    public static function updateReferralRelationStatus(int $referral_relation_id, int $referral_useable)
+    public static function updateReferralRelationStatus(int $referralRelationId, int $referralUseable): int
     {
-        return self::where('id', $referral_relation_id)->update(['referral_useable' => $referral_useable]);
+        return self::where('id', $referralRelationId)
+            ->update(['referral_useable' => $referralUseable]);
     }
 }

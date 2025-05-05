@@ -7,7 +7,7 @@ use App\Enums\SortByEnum;
 use App\Enums\TransportVehicle;
 use App\Enums\UserRole;
 use App\Imports\ProductsImport;
-use App\productImages;
+use App\Models\ProductImage;
 use App\Products;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\User;
 use App\Qty;
+use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -33,67 +34,20 @@ class ProductsController extends Controller
      * This will help us to update the qty with the given details
      * @version 1.0.0
      */
-    public function updateProductQty($product_id, $user_id, $product_quantity)
-    {
-        Qty::updateProductQty($product_id, $user_id, $product_quantity);
-    }
+    // public function updateProductQty($product_id, $user_id, $product_quantity)
+    // {
+    //     Qty::updateProductQty($product_id, $user_id, $product_quantity);
+    // }
     /**
-     *It will insert a single product
-     *and insert it's given qty to qty table
+     * It will redirect us to add
+     * inventory page
      * @version 1.0.0
      */
-    public function add(Request $request)
+    public function addSingleInventoryForm(Request $request)
     {
-        $validate = Products::validator($request);
-        if ($validate->fails()) {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $validate->errors(),
-                config('constants.HTTP_UNPROCESSABLE_REQUEST')
-            );
-        }
-        $user_id = Auth::id();
-        $product = new Products();
-        $product->category_id = $request->category_id;
-        $product->product_name = $request->product_name;
-        $product->product_description = $request->product_description;
-        $product->color = $request->color;
-        $product->size = $request->size;
-        $product->lat = $request->lat;
-        $product->lon = $request->lon;
-        $product->price = $request->price;
-        $product->qty = $request->qty;
-        $product->user_id = $user_id;
-        $product->save();
-        //this function will add qty to it's particular table
-        $product_id = $product->id;
-        $product_quantity = $request->qty;
-        Qty::add($user_id, $product_id, $product->category_id, $product_quantity);
-        if ($request->hasFile('images')) {
-            $images = $request->file('images');
-            foreach ($images as $image) {
-                $file = $image;
-                $filename = uniqid($user_id . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension(); //create unique file name..
-                Storage::disk('user_public')->put($filename, File::get($file));
-                if (Storage::disk('user_public')->exists($filename)) {
-                    info("file is store successfully : " . $filename);
-                } else {
-                    info("file is not found :- " . $filename);
-                }
-                $product_images = new productImages();
-                $product_images->product_id = $product->id;
-                $product_images->product_image = $filename;
-                $product_images->save();
-            }
-        }
-        $product = Products::getProductInfo($user_id, $product->id, ['*']);
-        return JsonResponseServices::getApiResponse(
-            $product,
-            config('constants.TRUE_STATUS'),
-            config('constants.DATA_INSERTION_SUCCESS'),
-            config('constants.HTTP_OK')
-        );
+        $categories = Categories::all();
+
+        return view('shopkeeper.inventory.add', compact('categories'));
     }
     /**
      * @author Muhammad Abdullah Mirza
@@ -111,7 +65,7 @@ class ProductsController extends Controller
         $data['van'] = ($data['vehicle'] == TransportVehicle::VAN->value) ? 1 : 0;
         $data['discount_percentage'] = (!isset($data['discount_percentage'])) ? 0.00 : $data['discount_percentage'];
         $data['contact'] = '+44' . $data['contact'];
-        $data['seller_id'] = Auth::id();
+        $data['seller_id'] = auth()->id();
         $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
 
         unset($data['_token']);
@@ -122,26 +76,16 @@ class ProductsController extends Controller
 
         $product = Products::add($data);
 
-        Qty::add($data['seller_id'], $product->id, $data['category_id'], $request->qty);
+        Qty::add($data['seller_id'], $product->id, $data['category_id'], $request->safe()->only(['qty'])['qty']);
 
         if ($request->hasFile('gallery')) {
             foreach ($request->file('gallery') as $singleImage) {
-                $file = $singleImage;
-                /* Creating a unique file name */
-                $fileName = uniqid($data['seller_id'] . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension();
+                $uniqueId = $data['seller_id'] . $product->id;
+                $fileName = ImageServices::uploadImg(id: $uniqueId, imageFile: $singleImage);
 
-                Storage::disk('spaces')->put($fileName, File::get($file));
-
-                ImageServices::createUploadLog('spaces', $fileName);
-
-                productImages::add($product->id, $fileName);
+                ProductImage::add($product->id, $fileName);
             }
         }
-
-        // WebResponseServices::getWebResponse(
-        //     config('constants.TRUE_STATUS'),
-        //     config('constants.DATA_INSERTION_SUCCESS')
-        // );
 
         return redirect()->route('seller.inventory');
     }
@@ -170,7 +114,7 @@ class ProductsController extends Controller
         $data['bike'] = ($data['vehicle'] == TransportVehicle::BIKE->value) ? 1 : 0;
         $data['car'] = ($data['vehicle'] == TransportVehicle::CAR->value) ? 1 : 0;
         $data['van'] = ($data['vehicle'] == TransportVehicle::VAN->value) ? 1 : 0;
-        $data['discount_percentage'] = (!isset($data['discount_percentage'])) ? 0.00 : $data['discount_percentage'];
+        $data['discount_percentage'] = $data['discount_percentage'] ?? 0.00;
         $data['contact'] = '+44' . $data['contact'];
         $data['seller_id'] = Auth::id();
         $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
@@ -182,38 +126,35 @@ class ProductsController extends Controller
         unset($data['vehicle']);
 
         Qty::where('product_id', $product_id)
-            ->where('seller_id', Auth::id())
+            ->where('seller_id', $data['seller_id'])
             ->update([
                 'qty' => $data['qty'],
             ]);
         unset($data['qty']);
+
         $product = Products::find($product_id);
         if (!empty($product)) {
             $filename = $product->feature_img;
             if ($request->hasFile('feature_img')) {
                 $file = $request->file('feature_img');
-                $filename = uniqid($product->id . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
+                $filename = uniqid($product->id . '_') . "." . $file->getClientOriginalExtension();
                 Storage::disk('spaces')->put($filename, File::get($file));
-                if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
+                if (Storage::disk('spaces')->exists($filename)) {
                     info("file is stored successfully : " . $filename);
                 } else {
                     info("file is not found :- " . $filename);
                 }
             }
             $data['feature_img'] = $filename;
-            $user_id = Auth::id();
+
             if ($request->hasFile('gallery')) {
                 $images = $request->file('gallery');
                 foreach ($images as $image) {
                     $file = $image;
-                    $filename = uniqid($user_id . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension(); //create unique file name...
+                    $filename = uniqid($data['seller_id'] . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension();
                     Storage::disk('spaces')->put($filename, File::get($file));
-                    if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
-                        info("file is stored successfully : " . $filename);
-                    } else {
-                        info("file is not found :- " . $filename);
-                    }
-                    $product_images = new productImages();
+
+                    $product_images = new ProductImage();
                     $product_images->product_id = $product->id;
                     $product_images->product_image = $filename;
                     $product_images->save();
@@ -221,16 +162,22 @@ class ProductsController extends Controller
             }
 
             foreach ($data as $key => $value) {
-                if ($key == 'vehicle')
-                    continue;
+
+                if ($key == 'vehicle') continue;
+
                 $product->$key = ($key == 'contact') ? '+44' . $value : $value;
             }
+
             $product->save();
 
             flash('Inventory updated successfully.')->success();
 
-            return redirect()->route('inventory');
+            return redirect()->route('seller.edit.inventory.form');
         }
+    }
+    public function inventoryAddBulk()
+    {
+        return view('shopkeeper.inventory.add_bulk');
     }
     /**
      * It will delete the product image
@@ -238,7 +185,7 @@ class ProductsController extends Controller
      */
     public function deleteImg($image_id)
     {
-        productImages::deleteById($image_id);
+        ProductImage::deleteById($image_id);
 
         return redirect()->back();
     }
@@ -272,74 +219,6 @@ class ProductsController extends Controller
             [],
             config('constants.FALSE_STATUS'),
             config('constants.DATA_INSERTION_SUCCESS'),
-            config('constants.HTTP_OK')
-        );
-    }
-    /**
-     *It will update a single product
-     *and update the given qty in qty table
-     * @version 1.0.0
-     */
-    public function update(Request $request, $id)
-    {
-        $validate = Products::validator($request);
-        if ($validate->fails()) {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $validate->errors(),
-                config('constants.HTTP_UNPROCESSABLE_REQUEST')
-            );
-        }
-
-        $user_id = auth()->id();
-
-        $product = Products::find($id);
-        if (empty($product)) {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_INVALID_ARGUMENTS')
-            );
-        }
-        $product->category_id = $request->category_id;
-        $product->product_name = $request->product_name;
-        $product->product_description = $request->product_description;
-        $product->color = $request->color;
-        $product->size = $request->size;
-        $product->lat = $request->lat;
-        $product->lon = $request->lon;
-        $product->price = $request->price;
-        // $product->qty = $request->qty;
-        $product->user_id = $user_id;
-        if ($request->hasFile('images')) {
-            $images = $request->file('images');
-            foreach ($images as $image) {
-                $file = $image;
-                $filename = uniqid($user_id . "_" . $product->id . "_" . $product->product_name . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
-                Storage::disk('user_public')->put($filename, File::get($file));
-                if (Storage::disk('user_public')->exists($filename)) {  // check file exists in directory or not
-                    info("file is store successfully : " . $filename);
-                } else {
-                    info("file is not found :- " . $filename);
-                }
-                $product_images = new productImages();
-                $product_images->product_id = $product->id;
-                $product_images->product_image = $filename;
-                $product_images->save();
-            }
-        }
-        $product->save();
-
-        /* this function will update qty in it's particular table with given data */
-        $product_quantity = $request->qty;
-        $this->updateProductQty($product->id, $user_id, $product_quantity);
-
-        return JsonResponseServices::getApiResponse(
-            Products::getProductInfo($user_id, $product->id, ['*']),
-            config('constants.TRUE_STATUS'),
-            config('constants.DATA_UPDATED_SUCCESS'),
             config('constants.HTTP_OK')
         );
     }
@@ -379,80 +258,6 @@ class ProductsController extends Controller
             config('constants.HTTP_OK')
         );
     }
-    /**
-     * View products in bulk with array of given ids
-     * @author Muhammad Abdullah Mirza
-     */
-    // public function bulkView(Request $request)
-    // {
-    //     $ids = explode(',', $request->ids);
-    //     $products = Products::query()->whereIn('id', $ids)->paginate();
-    //     $pagination = $products->toArray();
-    //     if (!empty($products)) {
-    //         $products_data = [];
-    //         foreach ($products as $product) {
-    //             $products_data[] = Products::getProductInfo($product->id);
-    //         }
-    //         unset($pagination['data']);
-    //         return JsonResponseServices::getApiResponseExtention(
-    //             $products_data,
-    //             config('constants.TRUE_STATUS'),
-    //             '',
-    //             'pagination',
-    //             $pagination,
-    //             config('constants.HTTP_OK')
-    //         );
-    //     } else {
-    //         return JsonResponseServices::getApiResponse(
-    //             [],
-    //             config('constants.FALSE_STATUS'),
-    //             config('constants.NO_RECORD'),
-    //             config('constants.HTTP_OK')
-    //         );
-    //     }
-    // }
-    /**
-     *It will sort the products by price
-     * @version 1.0.0
-     */
-    // public function sortByPrice()
-    // {
-    //     try {
-    //         $products = Products::paginate()->sortBy('price');
-    //         $pagination = $products->toArray();
-    //         if (!$products->isEmpty()) {
-    //             $products_data = [];
-    //             foreach ($products as $product) {
-    //                 $products_data[] = Products::getProductInfo($product->id);
-    //             }
-
-    //             unset($pagination['data']);
-    //             return JsonResponseServices::getApiResponseExtention(
-    //                 $products_data,
-    //                 config('constants.TRUE_STATUS'),
-    //                 '',
-    //                 'pagination',
-    //                 $pagination,
-    //                 config('constants.HTTP_OK')
-    //             );
-    //         } else {
-    //             return JsonResponseServices::getApiResponse(
-    //                 [],
-    //                 config('constants.FALSE_STATUS'),
-    //                 config('constants.NO_RECORD'),
-    //                 config('constants.HTTP_OK')
-    //             );
-    //         }
-    //     } catch (Throwable $error) {
-    //         report($error);
-    //         return JsonResponseServices::getApiResponse(
-    //             [],
-    //             config('constants.FALSE_STATUS'),
-    //             $error,
-    //             config('constants.HTTP_SERVER_ERROR')
-    //         );
-    //     }
-    // }
     /**
      *It will sort the products by location
      * @version 1.0.0
@@ -575,92 +380,6 @@ class ProductsController extends Controller
         );
     }
     /**
-     * It will delete the given product
-     * @author Huzaifa Haleem
-     * @version 1.0.0
-     */
-    // public function delete($product_id)
-    // {
-    //     return Products::find($product_id)->delete();
-    // }
-
-    /**
-     * It list the featured products
-     * @author Muhammad Abdullah Mirza
-     * @version 1.0.0
-     */
-    // public function featuredProducts(Request $request)
-    // {
-    //     try {
-    //         $featured_products = (new Products())->getFeaturedProducts($request->store_id);
-    //         $pagination = $featured_products->toArray();
-    //         if (!$featured_products->isEmpty()) {
-    //             $products_data = [];
-    //             foreach ($featured_products as $product) {
-    //                 $data = Products::getProductInfo($product->id);
-    //                 $data->store = User::find($product->user_id);
-    //                 $products_data[] = $data;
-    //             }
-    //             unset($pagination['data']);
-    //             return JsonResponseServices::getApiResponseExtention(
-    //                 $products_data,
-    //                 config('constants.TRUE_STATUS'),
-    //                 '',
-    //                 'pagination',
-    //                 $pagination,
-    //                 config('constants.HTTP_OK')
-    //             );
-    //         } else {
-    //             return JsonResponseServices::getApiResponse(
-    //                 [],
-    //                 config('constants.FALSE_STATUS'),
-    //                 config('constants.NO_RECORD'),
-    //                 config('constants.HTTP_OK')
-    //             );
-    //         }
-    //     } catch (Throwable $error) {
-    //         report($error);
-    //         return JsonResponseServices::getApiResponse(
-    //             [],
-    //             config('constants.FALSE_STATUS'),
-    //             $error,
-    //             config('constants.HTTP_SERVER_ERROR')
-    //         );
-    //     }
-    // }
-    /**
-     *It will export products into csv
-     * @version 1.0.0
-     */
-    // public function exportProducts()
-    // {
-    //     $user_id = Auth::id();
-    //     $products = Products::getParentSellerProductsAsc($user_id);
-    //     $all_products = [];
-    //     foreach ($products as $product) {
-    //         $pt = json_decode(json_encode(Products::getProductInfo($product->id)->toArray()));
-    //         unset($pt->category);
-    //         unset($pt->ratting);
-    //         unset($pt->id);
-    //         unset($pt->user_id);
-    //         unset($pt->created_at);
-    //         unset($pt->updated_at);
-    //         $temp_img = [];
-    //         if (isset($pt->images)) {
-    //             foreach ($pt->images as $img)
-    //                 $temp_img[] = $img->product_image;
-    //         }
-    //         $pt->images = implode(',', $temp_img);
-    //         $all_products[] = $pt;
-    //     }
-    //     $destinationPath = public_path() . "/upload/csv/";
-    //     if (!is_dir($destinationPath)) {
-    //         mkdir($destinationPath, 0777, true);
-    //     }
-    //     $file = time() . '_export.csv';
-    //     return $this->jsonToCsv(json_encode($all_products), $destinationPath . $file, true);
-    // }
-    /**
      *helper function for exporting products
      * @version 1.0.0
      */
@@ -709,9 +428,10 @@ class ProductsController extends Controller
             'minWeight' => 'numeric',
             'maxWeight' => 'numeric',
             'brand' => 'string',
-            'lat' => 'numeric|between:-90,90',
-            'lon' => 'numeric|between:-180,180',
             'miles' => 'integer',
+            'lat' => 'required_with:miles|numeric|between:-90,90',
+            'lon' => 'required_with:miles|numeric|between:-180,180',
+            'city' => 'required_with:miles|string',
             'scoutPage' => 'required|integer',
             'sortBy' => [
                 'string',
@@ -721,18 +441,35 @@ class ProductsController extends Controller
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
-        
+
         $validatedData = (object) $validatedData->validated();
 
-        $userLat = $validatedData->lat ?? null;
-        $userLon = $validatedData->lon ?? null;
-        $miles = $validatedData->miles ?? null;
-        if (isset($miles))
-            $nearBySellerIds = $this->searchWrtNearByStores($userLat, $userLon, $miles);
+        if (isset($validatedData->miles)) {
+            $nearBySellersIds = array_column(
+                GoogleMapServices::findNearByUsersByMakingChunks(
+                    $validatedData->lat,
+                    $validatedData->lon,
+                    User::getParentAndChildSellersByCity($validatedData->city),
+                    nearByMiles: $validatedData->miles,
+                ),
+                'id'
+            );
+
+            if (empty($nearBySellersIds)) {
+                return JsonResponseServices::getApiResponseExtention(
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    config('constants.NO_RECORD'),
+                    'pagination',
+                    [],
+                    config('constants.HTTP_OK')
+                );
+            }
+        }
 
         $products = Products::searchProducts(
             $validatedData->productName,
-            (isset($nearBySellerIds['ids'])) ? $nearBySellerIds['ids'] : json_decode($validatedData->sellerIds),
+            (isset($nearBySellersIds)) ? $nearBySellersIds : json_decode($validatedData->sellerIds),
             $validatedData->categoryId ?? null,
             $validatedData->brand ?? null,
             $validatedData->minPrice ?? null,
@@ -754,54 +491,6 @@ class ProductsController extends Controller
             ($dataIsEmpty) ? (object) [] : $products['pagination'],
             config('constants.HTTP_OK')
         );
-    }
-    /**
-     * It takes lat,lon  from user and store,converts them into distaance
-     * and gives all store ids within given miles
-     */
-    public function searchWrtNearByStores($user_lat, $user_lon, $miles)
-    {
-        $radius = 3958.8;
-        $store_data = (new User())->nearbyUsers($user_lat, $user_lon, $radius);
-
-        foreach ($store_data as $data) {
-            if ($data->distance <= $miles) {
-                $store_ids[] = $data->id;
-                $latitude2[] = $data->lat;
-                $longitude2[] = $data->lon;
-            }
-        }
-        $pm = $this->getDurationBetweenPointsNew($user_lat, $user_lon, $latitude2, $longitude2);
-
-        return [
-            'ids' => $store_ids,
-            'time' => $pm,
-        ];
-    }
-    /**
-     *It will get the duration between given
-     *lat,lon
-     * @version 1.0.0
-     */
-    public function getDurationBetweenPointsNew($latitude1, $longitude1, $latitude2, $longitude2)
-    {
-        $count = count($longitude2);
-        for ($i = 0; $i < $count; $i++) {
-            $address2 = $latitude2[$i] . ',' . $longitude2[$i];
-            $address1 = $latitude1 . ',' . $longitude1;
-            //  $address2 = $latitude2 . ',' . $longitude2;
-            $url = "https://maps.googleapis.com/maps/api/directions/json?origin=" . urlencode($address1) . "&destination=" . urlencode($address2) . "&transit_routing_preference=fewer_transfers&key=AIzaSyBFDmGYlVksc--o1jpEXf9jVQrhwmGPxkM";
-            $query = file_get_contents($url);
-            $results = json_decode($query, true);
-            $distanceString[] = explode(' ', $results['routes'][0]['legs'][0]['distance']['text']);
-            $durationString = explode(' ', $results['routes'][0]['legs'][0]['duration']['text']);
-            $miles[] = (int) $distanceString[0] * 0.621371;
-            $duration[] = implode(",", $durationString);
-        }
-        // Google Distance Matrix
-        // $url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$latitude1.",".$longitude1."&destinations=".$latitude2.",".$longitude2."&mode=driving&key=AIzaSyBFDmGYlVksc--o1jpEXf9jVQrhwmGPxkM";
-        // return $miles > 1 ? $miles : 1;
-        return $duration;
     }
     /**
      * Update product price from csv file w.r.t their SKU and store_id
@@ -864,58 +553,56 @@ class ProductsController extends Controller
         ini_set('max_execution_time', 120);
 
         $validatedData = Validator::make($request->all(), [
-            'file' => 'required',
-            'store_id' => 'required',
+            'file' => 'required|file|mimes:csv',
+            'store_id' => 'required|integer',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            // File Details
-            $filename = $file->getClientOriginalName();
-            $location = public_path('upload/csv');
-            $file->move($location, $filename);
-            $filepath = $location . "/" . $filename;
-            // Reading file
-            $file = fopen($filepath, "r");
-            $i = 0;
-            while (($filedata = fgetcsv($file, 1000, $delimiter)) !== FALSE) {
-                if ($i == 0) {
-                    $i++;
-                    continue;
-                }
-                $catgory_id = $filedata[0];
-                $sku = $filedata[1];
-                $price = $filedata[2];
-                $qty = $filedata[3];
-                // Find product by sku, user_id, category_id and update price and quantity
-                $product = (new Products)->getProductsByParameters($request->store_id, $sku, $catgory_id);
-                if ($product) {
-                    $product->price = $price;
-                    $product->save();
-                    $productQty = (new Qty())->getQtybyStoreAndProductId($request->store_id, $product->id);
-                    if (!empty($productQty)) {
-                        $productQty->qty = $qty;
-                        $productQty->save();
-                    }
-                }
+        $file = $request->file('file');
+        // File Details
+        $filename = $file->getClientOriginalName();
+        $location = public_path('upload/csv');
+        $file->move($location, $filename);
+        $filepath = $location . "/" . $filename;
+        // Reading file
+        $file = fopen($filepath, "r");
+        $i = 0;
+        while (($filedata = fgetcsv($file, 1000, $delimiter)) !== FALSE) {
+            if ($i == 0) {
                 $i++;
-                if ($i % $batchSize == 0) {
-                    usleep(500000); // Wait for 0.5 seconds between batches to avoid overwhelming the database
+                continue;
+            }
+            $catgory_id = $filedata[0];
+            $sku = $filedata[1];
+            $price = $filedata[2];
+            $qty = $filedata[3];
+            // Find product by sku, user_id, category_id and update price and quantity
+            $product = (new Products)->getProductsByParameters($request->store_id, $sku, $catgory_id);
+            if ($product) {
+                $product->price = $price;
+                $product->save();
+                $productQty = (new Qty())->getQtybyStoreAndProductId($request->store_id, $product->id);
+                if (!empty($productQty)) {
+                    $productQty->qty = $qty;
+                    $productQty->save();
                 }
             }
-
-            fclose($file);
-
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.TRUE_STATUS'),
-                config('constants.DATA_UPDATED_SUCCESS'),
-                config('constants.HTTP_OK')
-            );
+            $i++;
+            if ($i % $batchSize == 0) {
+                usleep(500000); // Wait for 0.5 seconds between batches to avoid overwhelming the database
+            }
         }
+
+        fclose($file);
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.TRUE_STATUS'),
+            config('constants.DATA_UPDATED_SUCCESS'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * Listing of all products w.r.t Seller 'id'
@@ -933,7 +620,7 @@ class ProductsController extends Controller
 
         $pagination = Cache::remember(
             'sellerProducts' . $request->sellerId . $request->page,
-            now()->addDay(),
+            now()->addHour(),
             function () use ($request) {
                 return Products::getProductsInfoBySellerId(
                     $request->sellerId,

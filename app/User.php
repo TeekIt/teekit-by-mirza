@@ -112,8 +112,7 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Custom Properties
      */
-    public const ACTIVE = 1,
-        BLOCK = 0;
+    public const ACTIVE = 1, BLOCK = 0;
     /**
      * Relations
      */
@@ -335,25 +334,27 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function getParentAndChildSellersByCity(string $city): LengthAwarePaginator
+    public static function getParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
     {
         return self::WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('city', $city)
+            ->where('city', '=', $city)
             ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
-            ->paginate(10);
+            ->take($numberOfRows)
+            ->get();
     }
 
-    public static function getParentAndChildSellersByState(string $state): Collection
+    public static function getParentAndChildSellersByState(string $state, int $numberOfRows = 25): Collection
     {
         return self::WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('state', $state)
+            ->where('state', '=', $state)
             ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
+            ->take($numberOfRows)
             ->get();
     }
 
@@ -413,7 +414,7 @@ class User extends Authenticatable implements JWTSubject
         return self::select($columns)->find($id);
     }
 
-    public function nearbyUsers($user_lat, $user_lon, $radius): object
+    public function nearbyUsers($user_lat, $user_lon, $radius): User
     {
         return self::selectRaw("*, (  3961 * acos( cos( radians(" . $user_lat . ") ) *
                                 cos( radians(users.lat) ) *
@@ -448,9 +449,10 @@ class User extends Authenticatable implements JWTSubject
         return self::where('id', $user_id)->pluck('role_id');
     }
 
-    public static function getUserInfo(int $user_id): array|null
+    public static function getUserInfo(int $userId): ?array
     {
-        $user = self::with('referralRelations')->where('id', $user_id)->first();
+        $user = self::with('referralRelations')->where('id', '=', $userId)->first();
+        
         if ($user) {
             return [
                 'id' => $user->id,
@@ -468,6 +470,7 @@ class User extends Authenticatable implements JWTSubject
                 'referral_relation_details' => ($user->referralRelations) ? [$user->referralRelations] : null
             ];
         }
+
         return null;
     }
 
