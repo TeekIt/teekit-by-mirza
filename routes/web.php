@@ -83,10 +83,10 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         Route::controller(ProductsController::class)->group(function () {
             Route::get('/add', 'addSingleInventoryForm')->name('seller.add.single.inventory.form');
             Route::post('/add', 'addSingleInventory')->name('seller.add.single.inventory');
-            Route::get('/edit/{product_id}', 'editInventoryView')->name('seller.edit.inventory.form');
-            Route::post('/update/{product_id}', 'updateInventory')->name('seller.edit.inventory');
+            Route::get('/edit/{productId}', 'editInventoryView')->name('seller.edit.inventory.form');
+            Route::post('/update/{productId}', 'updateInventory')->name('seller.edit.inventory');
             Route::get('/add_bulk', 'inventoryAddBulk')->name('seller.add.bulk.inventory');
-            Route::get('/image/delete/{image_id}', 'deleteImg')->name('seller.deleteImg');
+            Route::get('/delete/image/{imageId}', 'deleteImg')->name('seller.delete.img');
         });
 
         // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');

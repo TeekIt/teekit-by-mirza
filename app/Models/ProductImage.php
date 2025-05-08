@@ -31,10 +31,10 @@ class ProductImage extends Model
         return self::find($id)->delete();
     }
 
-    public static function add(int $id, string $imageName): ProductImage
+    public static function add(int $productId, string $imageName): ProductImage
     {
         return self::create([
-            'product_id' => $id,
+            'product_id' => $productId,
             'product_image' => $imageName
         ]);
     }
