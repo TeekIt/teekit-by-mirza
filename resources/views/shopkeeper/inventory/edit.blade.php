@@ -1,4 +1,9 @@
+@php
+    use App\Products;
+@endphp
+
 @extends('layouts.shopkeeper.app')
+
 @section('styles')
     <style>
         .select2-container--default .select2-selection--multiple .select2-selection__choice {
@@ -6,6 +11,7 @@
         }
     </style>
 @endsection
+
 @section('content')
     <div class="content">
 
@@ -49,11 +55,11 @@
                                                             <select class="form-control" required name="category_id">
                                                                 <option value="">Category*</option>
                                                                 @foreach ($categories as $cat)
-
                                                                     <option
                                                                         @if ($cat->id == $inventory->category_id) selected @endif
                                                                         value="{{ $cat->id }}">
-                                                                        {{ $cat->category_name }}</option>
+                                                                        {{ $cat->category_name }}
+                                                                    </option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -128,12 +134,6 @@
                                                                 placeholder="Brand" value="{{ $inventory->brand }}">
                                                         </div>
                                                     </div>
-                                                    <!-- <div class="col-md-6">
-                                                                                                        <div class="form-group">
-                                                                                                            <label class="text-left d-block">Size</label>
-                                                                                                            <input type="text" class="form-control" name="size" placeholder="Size" value="{{ $inventory->size }}">
-                                                                                                        </div>
-                                                                                                    </div> -->
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <label class="text-left d-block">Status</label>
@@ -168,75 +168,94 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-6 text-left">
-                                                        <?php
-                                                        $all_colors = [
-                                                            'red' => 'Red',
-                                                            'green' => 'Green',
-                                                            'yellow' => 'Yellow',
-                                                            'blue' => 'Blue',
-                                                            'white' => 'White',
-                                                            'black' => 'Black',
-                                                            'orange' => 'Orange',
-                                                            'pink' => 'Pink',
-                                                            'brown' => 'Brown',
-                                                            'indigo' => 'Indigo',
-                                                            'purple' => 'Purple',
-                                                            'gray' => 'Gray',
-                                                            'silver' => 'Silver',
-                                                        ];
-                                                        if ($inventory->colors) {
-                                                            $colors = json_decode($inventory->colors, true);
-                                                            $colors = array_keys($colors);
-                                                        }
-                                                        ?>
+                                                    <div class="col-md-12 text-left">
+                                                        @php
+                                                            if ($inventory->colors) {
+                                                                $colors = array_keys(
+                                                                    json_decode($inventory->colors, true),
+                                                                );
+                                                            }
+                                                        @endphp
                                                         <select class="colors form-control" name="colors[]"
                                                             multiple="multiple">
-                                                            @foreach ($all_colors as $key => $color)
-                                                                <option value="{{ $key }}"
-                                                                    @isset($colors) @if (in_array($key, $colors))selected @endif @endif>
-                                                                    {{ $color }}
+                                                            @foreach (Products::getCommonColors() as $singleColor)
+                                                                <option value="{{ $singleColor }}"
+                                                                    @isset($colors) 
+                                                                        @if (in_array($singleColor, $colors)) selected @endif
+                                                                    @endisset>
+                                                                    {{ $singleColor }}
                                                                 </option>
                                                             @endforeach
                                                         </select>
-                                                    <div class="row">
-                                                        <div class="col-md-12 text-left">
-                                                            <p>Upload Image Gallery: &emsp;
-                                                                <input type="file" accept="image/*" name="gallery[]" multiple>
-                                                            </p>
-                                                            <div class="img-to-del-container">
-                                                                @if ($inventory->images)
-                                                                @foreach ($inventory->images as $img)
-                                                                <div class="img-to-del d-inline-block position-relative" style="max-width: 80px">
-                                                                    <a href="/inventory/image/delete/{{ $img->id }}" class="text-sm position-absolute"><i class="fas fa-trash"></i></a>
-                                                                    <img class="img-fluid" src="{{ asset($img->product_image) }}">
-                                                                </div>
-                                                                @endforeach
-                                                                @endif
+                                                    </div>
+                                                    <div class="col-md-6 text-left">
+                                                        <div class="form-group mt-3">
+                                                            <label class="text-left d-block">Edit Feature Image</label>
+                                                            <div>
+                                                                <input type="file" accept="image/*"
+                                                                    name="feature_img">
+                                                            </div>
+                                                            <div class="img-to-del d-inline-block position-relative"
+                                                                style="max-width: 150px">
+                                                                @php
+                                                                    if (
+                                                                        str_contains(
+                                                                            $inventory->feature_img,
+                                                                            'https://',
+                                                                        )
+                                                                    ) {
+                                                                        $featureImageUrl = $inventory->feature_img;
+                                                                    } else {
+                                                                        $featureImageUrl =
+                                                                            config('constants.BUCKET') .
+                                                                            $inventory->feature_img;
+                                                                    }
+                                                                @endphp
+                                                                <img class="img-fluid" src="{{ $featureImageUrl }}">
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-6 text-left">
-                                                    <p>Upload Feature Image:
-                                                        <input type="file" accept="image/*" name="feature_img" required>
-                                                    </p>
-                                                    <div class="img-to-del d-inline-block position-relative" style="max-width: 150px">
-                                                        <img class="img-fluid" src="{{ asset($inventory->feature_img) }}">
+                                                    <div class="col-md-6 text-left">
+                                                        <div class="row mt-3">
+                                                            <div class="col-md-12 text-left">
+                                                                <label class="text-left d-block">
+                                                                    Edit Image Gallery
+                                                                </label>
+                                                                <div>
+                                                                    <input type="file" accept="image/*"
+                                                                        name="gallery[]" multiple>
+                                                                </div>
+                                                                <div class="img-to-del-container">
+                                                                    @if ($inventory->images)
+                                                                        @foreach ($inventory->images as $img)
+                                                                            <div class="img-to-del d-inline-block position-relative"
+                                                                                style="max-width: 80px">
+                                                                                <a href="{{ route('seller.delete.img', ['imageId' => $img->id]) }}"
+                                                                                    class="text-sm position-absolute">
+                                                                                    <i
+                                                                                        class="fas fa-trash text-danger"></i>
+                                                                                </a>
+                                                                                <img class="img-fluid p-2"
+                                                                                    src="{{ config('constants.BUCKET') . $img->product_image }}">
+                                                                            </div>
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-6 offset-md-3 text-center">
-                                                    <p>
-                                                        <input @if ($inventory->bike == 1) checked @endif
-                                                            type="radio" name="vehicle" value="bike"
-                                                            required> Cycle/Bike &emsp;
-                                                        <input @if ($inventory->car == 1) checked @endif
-                                                            type="radio" name="vehicle" value="car"
-                                                            required> Car &emsp;
-                                                        <input @if ($inventory->van == 1) checked @endif
-                                                                    type="radio" name="vehicle" value="van"
-                                                                    required> Van &emsp;
-                                                                    </p>
+                                                    <div class="col-md-6 offset-md-3 text-center">
+                                                        <p>
+                                                            <input @if ($inventory->bike == 1) checked @endif
+                                                                type="radio" name="vehicle" value="bike" required>
+                                                            Cycle/Bike &emsp;
+                                                            <input @if ($inventory->car == 1) checked @endif
+                                                                type="radio" name="vehicle" value="car" required>
+                                                            Car &emsp;
+                                                            <input @if ($inventory->van == 1) checked @endif
+                                                                type="radio" name="vehicle" value="van" required>
+                                                            Van &emsp;
+                                                        </p>
                                                     </div>
                                                     <div class="col-md-6 offset-md-3 text-center">
                                                         <button style="background: #ffcf42;color:black;font-weight: 600"

@@ -44,18 +44,12 @@ class Qty extends Model
     /**
      * Helpers
      */
-    // public static function updateProductQty(int $productId, int $sellerId, int $productQuantity)
-    // {
-    //     if (!empty($sellerId)) {
-    //         self::where('product_id', $productId)
-    //             ->where('seller_id', $sellerId)
-    //             ->update(['qty' => $productQuantity]);
-    //     } else if (empty($sellerId)) {
-    //         self::where('product_id', $productId)
-    //             ->decrement(['qty' => $productQuantity]);
-    //     }
-    //     return true;
-    // }
+    public static function updateQty(int $productId, int $sellerId, int $productQuantity): int
+    {
+        return self::where('product_id', $productId)
+            ->where('seller_id', $sellerId)
+            ->update(['qty' => $productQuantity]);
+    }
 
     public static function getTotalProductsCountBySellerId(int $sellerId): int
     {

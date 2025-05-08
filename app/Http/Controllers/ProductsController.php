@@ -34,9 +34,9 @@ class ProductsController extends Controller
      * This will help us to update the qty with the given details
      * @version 1.0.0
      */
-    // public function updateProductQty($product_id, $user_id, $product_quantity)
+    // public function updateQty($product_id, $user_id, $product_quantity)
     // {
-    //     Qty::updateProductQty($product_id, $user_id, $product_quantity);
+    //     Qty::updateQty($product_id, $user_id, $product_quantity);
     // }
     /**
      * It will redirect us to add
@@ -92,23 +92,25 @@ class ProductsController extends Controller
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public function editInventoryView($product_id)
+    public function editInventoryView($productId)
     {
         $categories = Categories::all();
 
-        $inventory = Products::getProductInfo(Auth::id(), $product_id, ['*']);
+        $inventory = Products::getProductInfoEvenDisabled(auth()->id(), $productId, ['*']);
 
         return view('shopkeeper.inventory.edit', compact('inventory', 'categories'));
     }
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public function updateInventory(AddOrUpdateProductRequest $request, $product_id)
+    public function updateInventory(AddOrUpdateProductRequest $request, $productId)
     {
         $data = $request->validated();
 
-        if ($request->has('colors')) {
-            $data['colors'] = json_encode(array_fill_keys($data['colors'], true));
+        $data['colors'] = ($request->has('colors')) ? ProductServices::jsonEncodeColors($data['colors']) : null;
+
+        if ($request->hasFile('feature_img')) {
+            $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
         }
 
         $data['bike'] = ($data['vehicle'] == TransportVehicle::BIKE->value) ? 1 : 0;
@@ -116,8 +118,7 @@ class ProductsController extends Controller
         $data['van'] = ($data['vehicle'] == TransportVehicle::VAN->value) ? 1 : 0;
         $data['discount_percentage'] = $data['discount_percentage'] ?? 0.00;
         $data['contact'] = '+44' . $data['contact'];
-        $data['seller_id'] = Auth::id();
-        $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
+        $data['seller_id'] = auth()->id();
 
         unset($data['_token']);
         unset($data['color']);
@@ -125,56 +126,32 @@ class ProductsController extends Controller
         unset($data['qty']);
         unset($data['vehicle']);
 
-        Qty::where('product_id', $product_id)
-            ->where('seller_id', $data['seller_id'])
-            ->update([
-                'qty' => $data['qty'],
-            ]);
-        unset($data['qty']);
+        Qty::updateQty($productId, $data['seller_id'], $request->safe()->only(['qty'])['qty']);
 
-        $product = Products::find($product_id);
+        $product = Products::findOrFail($productId);
         if (!empty($product)) {
-            $filename = $product->feature_img;
-            if ($request->hasFile('feature_img')) {
-                $file = $request->file('feature_img');
-                $filename = uniqid($product->id . '_') . "." . $file->getClientOriginalExtension();
-                Storage::disk('spaces')->put($filename, File::get($file));
-                if (Storage::disk('spaces')->exists($filename)) {
-                    info("file is stored successfully : " . $filename);
-                } else {
-                    info("file is not found :- " . $filename);
-                }
-            }
-            $data['feature_img'] = $filename;
 
             if ($request->hasFile('gallery')) {
-                $images = $request->file('gallery');
-                foreach ($images as $image) {
-                    $file = $image;
-                    $filename = uniqid($data['seller_id'] . "_" . $product->id . "_") . "." . $file->getClientOriginalExtension();
-                    Storage::disk('spaces')->put($filename, File::get($file));
-
-                    $product_images = new ProductImage();
-                    $product_images->product_id = $product->id;
-                    $product_images->product_image = $filename;
-                    $product_images->save();
+                foreach ($request->file('gallery') as $image) {
+                    $fileName = ImageServices::uploadImg(id: $productId, imageFile: $image);
+                    ProductImage::add($productId, $fileName);
                 }
             }
 
             foreach ($data as $key => $value) {
-
-                if ($key == 'vehicle') continue;
-
                 $product->$key = ($key == 'contact') ? '+44' . $value : $value;
             }
 
-            $product->save();
+            $updated = $product->save();
 
-            flash('Inventory updated successfully.')->success();
-
-            return redirect()->route('seller.edit.inventory.form');
+            if ($updated) {
+                flash('Inventory updated successfully')->success();
+            }
         }
+
+        return redirect()->back();
     }
+
     public function inventoryAddBulk()
     {
         return view('shopkeeper.inventory.add_bulk');
@@ -183,9 +160,11 @@ class ProductsController extends Controller
      * It will delete the product image
      * @version 1.0.0
      */
-    public function deleteImg($image_id)
+    public function deleteImg($imageId)
     {
-        ProductImage::deleteById($image_id);
+        if (ProductImage::deleteById($imageId)) {
+            flash('Image deleted successfully')->success();
+        }
 
         return redirect()->back();
     }
@@ -217,7 +196,7 @@ class ProductsController extends Controller
 
         return JsonResponseServices::getApiResponse(
             [],
-            config('constants.FALSE_STATUS'),
+            config('constants.TRUE_STATUS'),
             config('constants.DATA_INSERTION_SUCCESS'),
             config('constants.HTTP_OK')
         );
@@ -461,7 +440,7 @@ class ProductsController extends Controller
                     config('constants.FALSE_STATUS'),
                     config('constants.NO_RECORD'),
                     'pagination',
-                    [],
+                    (object) [],
                     config('constants.HTTP_OK')
                 );
             }

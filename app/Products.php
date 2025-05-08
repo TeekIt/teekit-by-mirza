@@ -168,23 +168,6 @@ class Products extends Model
         return $this->quantities();
     }
     /**
-     * Validators
-     */
-    // public static function validator(Request $request): object
-    // {
-    //     return Validator::make($request->all(), [
-    //         'category_id' => 'required',
-    //         'product_name' => 'required|string|max:255',
-    //         'product_description' => 'required|string',
-    //         'color' => 'required|string|max:255',
-    //         'size' => 'required|string|max:255',
-    //         'lat' => 'required|string|max:255',
-    //         'lon' => 'required|string|max:255',
-    //         'price' => 'required|string|max:255',
-    //         'qty' => 'required|string|max:255'
-    //     ]);
-    // }
-    /**
      * Scopes
      */
     public function scopeParentSellerProducts(Builder $query): void
@@ -477,6 +460,28 @@ class Products extends Model
             ->paginate(20);
     }
 
+    public static function getProductInfoEvenDisabled(int $sellerId, int $productId, array $columns): Products
+    {
+        return self::select($columns)
+        ->with([
+            'sellers' => function ($sellersRelation) use ($sellerId) {
+                $sellersRelation->select(
+                    User::getSellerCommonColumns()
+                )->where('seller_id', '=', $sellerId);
+            },
+            'qty' => function ($qtyRelation) use ($sellerId) {
+                $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', '=', $sellerId);
+            },
+            'images:id,product_id,product_image',
+            'category:id,category_name,category_image'
+        ])
+        ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
+            $qtyRelation->where('seller_id', '=', $sellerId);
+        })
+        ->where('id', '=', $productId)
+        ->firstOrFail();
+    }
+
     public static function getProductInfo(int $sellerId, int $productId, array $columns): Products
     {
         return self::select($columns)
@@ -493,9 +498,9 @@ class Products extends Model
                 'category:id,category_name,category_image'
             ])
             ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
-                $qtyRelation->where('seller_id', $sellerId);
+                $qtyRelation->where('seller_id', '=', $sellerId);
             })
-            ->where('id', $productId)
+            ->where('id', '=', $productId)
             ->WhereProductIsEnable()
             ->firstOrFail();
     }
