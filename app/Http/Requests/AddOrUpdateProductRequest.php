@@ -42,8 +42,9 @@ class AddOrUpdateProductRequest extends FormRequest
             ],
             'contact' => 'required|min:10|max:10',
             'colors' => 'nullable|array',
-            'feature_img' => 'required|image|max:1048',
+            'feature_img' => 'image|max:1024|mimes:jpeg,jpg,png',
             'gallery' => 'nullable|array',
+            'gallery.*' => 'image|max:1024|mimes:jpeg,jpg,png',
             'vehicle' => [
                 'required',
                 Rule::in(array_column(TransportVehicle::cases(), 'value')),

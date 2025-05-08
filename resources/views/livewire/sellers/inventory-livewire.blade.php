@@ -1,6 +1,7 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     @php
         use Illuminate\Support\Str;
+        use App\Enums\ProductStatus;
     @endphp
 
     <x-session-messages />
@@ -58,17 +59,17 @@
         <div class="container-xxl flex-grow-1 container-p-y">
             <section class="section-products">
                 <div class="container">
-                    {{-- Featured Products - Begins --}}
-                    @if (count($featured_products) > 0)
+                    <!-- Featured Products - Begins -->
+                    @if (count($featuredProducts) > 0)
                         <div class="row">
                             <div class="col-lg-12 col-sm-12 col-md-12">
                                 <h4 class="py-4 my-1 text-site-primary">Featured</h4>
                             </div>
-                            @foreach ($featured_products as $inventory)
+                            @foreach ($featuredProducts as $inventory)
                                 <!-- Single Product -->
                                 <div class="col-md-6 col-lg-4 col-xl-3 p-2">
                                     <div id="productItem"
-                                        class="single-product bg-white p-2 rounded @if ($inventory->status == 0) disabled-product @endif">
+                                        class="single-product bg-white p-2 rounded @if ($inventory->status->value == ProductStatus::DISABLE->value) disabled-product @endif">
                                         @php
                                             if (str_contains($inventory->feature_img, 'https://')) {
                                                 $featureImageUrl = $inventory->feature_img;
@@ -79,7 +80,7 @@
                                         <div class="part-1"
                                             style="background:url('{{ $featureImageUrl }}') no-repeat center; ">
                                             <ul>
-                                                @if ($inventory->status == 0)
+                                                @if ($inventory->status->value == ProductStatus::DISABLE->value)
                                                     <li>
                                                         <a wire:click="toggleProduct('{{ $inventory->id }}', 1)"
                                                             wire:target="toggleProduct('{{ $inventory->id }}', 1)"
@@ -94,7 +95,7 @@
                                                             </span>
                                                         </a>
                                                     </li>
-                                                @elseif($inventory->status == 1)
+                                                @elseif ($inventory->status->value == ProductStatus::ENABLE->value)
                                                     <li>
                                                         <a wire:click="toggleProduct('{{ $inventory->id }}', 0)"
                                                             wire:target="toggleProduct('{{ $inventory->id }}', 0)"
@@ -112,7 +113,7 @@
                                                     </li>
                                                 @endif
                                                 <li>
-                                                    <a href="{{ route('seller.edit.inventory.form', ['product_id' => $inventory->id]) }}"
+                                                    <a href="{{ route('seller.edit.inventory.form', ['productId' => $inventory->id]) }}"
                                                         title="Edit Product">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
@@ -170,7 +171,7 @@
                             @if ($inventory->featured === 0)
                                 <div class="col-md-6 col-lg-4 col-xl-3 p-2">
                                     <div id="productItem"
-                                        class="single-product bg-white p-2 rounded @if ($inventory->status == 0) disabled-product @endif">
+                                        class="single-product bg-white p-2 rounded @if ($inventory->status->value == ProductStatus::DISABLE->value) disabled-product @endif">
                                         @php
                                             if (str_contains($inventory->feature_img, 'https://')) {
                                                 $featureImageUrl = $inventory->feature_img;
@@ -179,11 +180,11 @@
                                             }
                                         @endphp
                                         <div class="part-1"
-                                            style="background:url('{{ $featureImageUrl }}') no-repeat center; ">
+                                            style="background:url('{{ $featureImageUrl }}') no-repeat center;">
                                             {{-- <span class="discount">15% off</span>
                                                <span class="new">new</span> --}}
                                             <ul>
-                                                @if ($inventory->status == 0)
+                                                @if ($inventory->status->value == ProductStatus::DISABLE->value)
                                                     <li>
                                                         <a wire:click="toggleProduct('{{ $inventory->id }}', 1)"
                                                             wire:target="toggleProduct('{{ $inventory->id }}', 1)"
@@ -199,7 +200,7 @@
                                                             </span>
                                                         </a>
                                                     </li>
-                                                @elseif($inventory->status == 1)
+                                                @elseif($inventory->status->value == ProductStatus::ENABLE->value)
                                                     <li>
                                                         <a wire:click="toggleProduct('{{ $inventory->id }}', 0)"
                                                             wire:target="toggleProduct('{{ $inventory->id }}', 0)"
@@ -217,7 +218,7 @@
                                                     </li>
                                                 @endif
                                                 <li>
-                                                    <a href="{{ route('seller.edit.inventory.form', ['product_id' => $inventory->id]) }}"
+                                                    <a href="{{ route('seller.edit.inventory.form', ['productId' => $inventory->id]) }}"
                                                         title="Edit Product">
                                                         <i class="fa fa-edit"></i>
                                                     </a>

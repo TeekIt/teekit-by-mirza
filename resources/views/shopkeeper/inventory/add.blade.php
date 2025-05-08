@@ -1,7 +1,9 @@
 @php
     use App\Products;
 @endphp
+
 @extends('layouts.shopkeeper.app')
+
 @section('styles')
     <style>
         .select2-container--default .select2-selection--multiple .select2-selection__choice {
@@ -13,6 +15,7 @@
         }
     </style>
 @endsection
+
 @section('content')
     <div class="content">
 
@@ -144,7 +147,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-6 text-left">
+                                                    <div class="col-md-12 text-left">
                                                         <select class="colors form-control" name="colors[]" multiple>
                                                             @foreach (Products::getCommonColors() as $singleColor)
                                                                 <option value="{{ $singleColor }}"
@@ -155,15 +158,23 @@
                                                         </select>
                                                     </div>
                                                     <div class="col-md-6 text-left">
-                                                        <p>Upload Feature Image:
-                                                            <input type="file" accept="image/*" name="feature_img" value="{{ old('feature_img') }}" required>
-                                                        </p>
+                                                        <div class="form-group mt-3">
+                                                            <label class="text-left d-block">Upload Feature Image*</label>
+                                                            <div>
+                                                                <input type="file" accept="image/*" name="feature_img" value="{{ old('feature_img') }}" required>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div class="col-md-12 text-left">
-                                                        <p>Upload Image Gallery:
-                                                            <input type="file" accept="image/*" name="gallery[]"
-                                                                multiple>
-                                                        </p>
+                                                    <div class="col-md-6 text-left">
+                                                        <div class="row mt-3">
+                                                            <label class="text-left d-block">
+                                                                Upload Image Gallery
+                                                            </label>
+                                                            <div>
+                                                                <input type="file" accept="image/*"
+                                                                    name="gallery[]" multiple>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <div class="col-md-6 offset-md-3 text-center">
                                                         <p>

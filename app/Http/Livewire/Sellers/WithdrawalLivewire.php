@@ -93,7 +93,7 @@ class WithdrawalLivewire extends Component
 
     public function render()
     {
-        $data = WithdrawalRequests::getWithdrawalResquests(
+        $data = WithdrawalRequests::getWithdrawalRequests(
             User::getSellerID(),
             $this->search,
             $this->isAmountByIdSet(),

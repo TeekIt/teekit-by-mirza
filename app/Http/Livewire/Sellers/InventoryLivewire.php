@@ -133,12 +133,12 @@ class InventoryLivewire extends Component
     public function render()
     {
         $categories = Categories::allCategories(['id', 'category_name']);
-        $featured = [];
+        $featuredProducts = [];
         $this->category_id = ($this->category_id == 0) ? null : $this->category_id;
 
         if (Gate::allows('seller')) {
             $data = Products::getParentSellerProductsForView(auth()->id(), $this->search, $this->category_id, orderBy: 'desc');
-            $featured = $this->getFeaturedProducts($data);
+            $featuredProducts = $this->getFeaturedProducts($data);
         } elseif (Gate::allows('child_seller')) {
             /*
             1st scenario when a child store will come he will have parent products with "0" Qty
@@ -151,7 +151,7 @@ class InventoryLivewire extends Component
         return view('livewire.sellers.inventory-livewire', [
             'data' => $data,
             'categories' => $categories,
-            'featured_products' => $featured
+            'featuredProducts' => $featuredProducts
         ]);
     }
 }
