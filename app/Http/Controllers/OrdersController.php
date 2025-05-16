@@ -354,12 +354,12 @@ class OrdersController extends Controller
         }
 
         /* Email order details to nearby sellers */
-        // SendCustomProductOrderDetailsToNearBySellersJob::dispatch(
-        //     $request->lat,
-        //     $request->lon,
-        //     $seller,
-        //     $order
-        // )->onQueue('high');
+        SendCustomProductOrderDetailsToNearBySellersJob::dispatch(
+            $request->lat,
+            $request->lon,
+            $seller,
+            $order
+        )->onQueue('high');
 
         $idsArray[] = $order->id;
 

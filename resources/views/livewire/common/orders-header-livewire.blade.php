@@ -265,7 +265,7 @@
                                     </span>
                                 </button>
                             @endif
-                            
+
                             @if ($order->order_items[0]->product_belongs_to_type === (new ProductsByBuyer())->getMorphClass())
                                 <button class="btn btn-success"
                                     wire:click="renderCustomProductOrderModal({{ $order->id }})"
@@ -311,8 +311,8 @@
                                                             <span class="spinner-border spinner-border-sm text-light" role="status"></span>
                                                         </span>
                                                     </button> -->
-                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#gophrModal"
-                                    wire:click="renderOrderId({{ $order->id }})"
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal"
+                                    data-bs-target="#gophrModal" wire:click="renderOrderId({{ $order->id }})"
                                     wire:target="renderOrderId({{ $order->id }})" wire:loading.class="btn-dark"
                                     wire:loading.class.remove="btn-warning" wire:loading.attr="disabled"
                                     title="Assign this order to delivery boy">
@@ -450,4 +450,5 @@
             </tr>
         </tbody>
     </table>
+
 </div>
