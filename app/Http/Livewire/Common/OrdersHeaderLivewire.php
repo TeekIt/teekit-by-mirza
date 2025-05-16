@@ -21,9 +21,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
-use stdClass;
 
-class OrdersHeader extends Component
+class OrdersHeaderLivewire extends Component
 {
     use WithPagination;
 
@@ -433,6 +432,6 @@ class OrdersHeader extends Component
 
     public function render()
     {
-        return view('livewire.common.orders-header');
+        return view('livewire.common.orders-header-livewire');
     }
 }

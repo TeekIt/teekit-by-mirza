@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Http\Livewire\Sellers\Settings;
+namespace App\Http\Livewire\Sellers;
+
+use Livewire\Component;
 
 use App\Products;
 use App\Services\CsvFileServices;
 use App\Services\ImageServices;
 use App\User;
-use Livewire\Component;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Livewire\WithFileUploads;
 
-class UserGeneralSettings extends Component
+class GeneralSettingsLivewire extends Component
 {
     use WithFileUploads;
 
@@ -247,6 +248,6 @@ class UserGeneralSettings extends Component
     {
         $user = $this->setUserInfo($this->user_id);
 
-        return view('livewire.sellers.settings.user-general-settings', compact('user'));
+        return view('livewire.sellers.general-settings-livewire', compact('user'));
     }
 }

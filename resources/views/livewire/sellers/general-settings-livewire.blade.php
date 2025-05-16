@@ -3,7 +3,7 @@
         use Illuminate\Support\Str;
     @endphp
     <div class="content">
-        
+
         <x-session-messages />
 
         {{-- ************************************ Google Map Modal ************************************ --}}
@@ -13,8 +13,7 @@
                     <!-- Modal Header -->
                     <div class="modal-header">
                         <h4 class="modal-title">Add Location</h4>
-                        <button type="button" id="locationModel" class="close"
-                            data-bs-dismiss="modal">&times;</button>
+                        <button type="button" id="locationModel" class="close" data-bs-dismiss="modal">&times;</button>
                     </div>
                     <!-- Modal body -->
                     <div class="modal-body">
@@ -23,7 +22,8 @@
                             <div class="p-3">
                                 <div class="col-md-12 my-2">
                                     <label for="full_address">Address 1</label>
-                                    <input type="text" class="form-control" name="full_address" id="modal_address" value="{{ Str::limit($user->full_address, 50) }}"/>
+                                    <input type="text" class="form-control" name="full_address" id="modal_address"
+                                        value="{{ Str::limit($user->full_address, 50) }}" />
                                     <small class="text-danger">
                                         @error('full_address')
                                             {{ $message }}
@@ -110,7 +110,8 @@
                     </div>
                     <!-- Modal footer -->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary rounded-pill px-5 py-2" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary rounded-pill px-5 py-2"
+                            data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -256,7 +257,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-12 col-sm-6 col-md-4">
-                        <h4 class="py-2 my-1 text-site-primary">General Settings</h4>
+                        <h4 class="py-2 my-1 text-site-primary">NEW General Settings</h4>
                     </div>
                 </div>
             </div>
