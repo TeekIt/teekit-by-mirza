@@ -224,8 +224,8 @@
                     <div class="card-body py-1 px-2">
                         <!-- Order Header -->
                         <div class="p-2 mb-2">
-                            <livewire:common.orders-header :order="$order"
-                                wire:key="orders-header-{{ $order->id }}" />
+                            <livewire:common.orders-header-livewire :order="$order"
+                                wire:key="orders-header-livewire-{{ $order->id }}" />
                         </div>
                         <!-- /Order Header -->
                         <div class="card-text">

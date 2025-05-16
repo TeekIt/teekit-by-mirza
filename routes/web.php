@@ -20,7 +20,7 @@ use App\Http\Livewire\Sellers\OrdersLivewire;
 use App\Http\Livewire\Sellers\OrdersOfUniqueProductsLivewire;
 use App\Http\Livewire\Sellers\RequestDeliveryLivewire;
 use App\Http\Livewire\Sellers\SellerDashboardLivewire;
-use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
+use App\Http\Livewire\Sellers\GeneralSettingsLivewire;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -104,7 +104,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
     Route::get('/request-delivery', RequestDeliveryLivewire::class)->name('seller.request.delivery');
 
     Route::prefix('settings')->group(function () {
-        Route::get('/general', UserGeneralSettings::class)->name('seller.settings.general');
+        Route::get('/general', GeneralSettingsLivewire::class)->name('seller.settings.general');
 
         Route::controller(UsersController::class)->group(function () {
             Route::post('/update-location', 'updateStoreLocation')->name('seller.settings.update.location');
