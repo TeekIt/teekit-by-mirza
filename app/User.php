@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -336,10 +337,12 @@ class User extends Authenticatable implements JWTSubject
 
     public static function getParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
     {
+        $city = explode(' ', $city);
+
         return self::WhereUserIsActive()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('city', '=', $city)
+            ->whereIn('city', $city)
             ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
@@ -452,7 +455,7 @@ class User extends Authenticatable implements JWTSubject
     public static function getUserInfo(int $userId): ?array
     {
         $user = self::with('referralRelations')->where('id', '=', $userId)->first();
-        
+
         if ($user) {
             return [
                 'id' => $user->id,
