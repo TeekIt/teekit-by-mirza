@@ -244,7 +244,7 @@ Route::get('cache/remove', function () {
     return JsonResponseServices::getApiResponse(
         [],
         config('constants.TRUE_STATUS'),
-        (Cache::flush()) ? config('constants.CACHE_REMOVED_SUCCESSFULLY') : config('constants.CACHE_REMOVED_FAILED'),
+        (dd(Cache::flush())) ? config('constants.CACHE_REMOVED_SUCCESSFULLY') : config('constants.CACHE_REMOVED_FAILED'),
         config('constants.HTTP_OK')
     );
 });
