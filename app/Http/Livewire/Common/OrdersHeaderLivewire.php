@@ -260,6 +260,7 @@ class OrdersHeaderLivewire extends Component
                 $this->selectedOrder->created_by_type,
                 $this->selectedOrder->created_by_id,
                 $nearbySellers[$randomIndex]['id'],
+                $this->selectedOrder->id,
                 $this->selectedOrder->order_items[0]->product_belongs_to_type,
                 $this->selectedOrder->order_items[0]->product_belongs_to_id,
                 $this->selectedOrder->order_items[0]->product_price,
