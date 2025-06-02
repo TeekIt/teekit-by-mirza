@@ -42,7 +42,7 @@ class OrdersHeaderLivewire extends Component
 
     public $order;
 
-    protected $sellerId;
+    public $sellerId;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -238,7 +238,7 @@ class OrdersHeaderLivewire extends Component
         try {
             /* Perform some operation */
             $this->selectedOrder = Orders::getById($orderId);
-
+           
             $orderTotalPrice = $this->selectedOrder->order_items[0]->product_price * $this->selectedOrder->order_items[0]->product_qty;
             /* Get sellers who belongs to the city of this store owner */
             $sellersOfTheSameCity = $this->getSellersOfSameCity();
