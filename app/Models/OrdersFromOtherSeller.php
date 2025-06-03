@@ -107,7 +107,7 @@ class OrdersFromOtherSeller extends Model
         $model->created_by_type = $createdByType;
         $model->created_by_id = $createdById;
         $model->seller_id = $sellerId;
-        $model->parent_order_id = $parentOrderId; // Assuming this is a new order, set to 0 or adjust as needed
+        $model->parent_order_id = $parentOrderId;
         $model->product_belongs_to_type = $productBelongsToType;
         $model->product_belongs_to_id = $productBelongsToId;
         $model->product_price = $productPrice;
