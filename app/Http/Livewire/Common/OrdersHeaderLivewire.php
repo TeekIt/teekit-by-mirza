@@ -130,6 +130,15 @@ class OrdersHeaderLivewire extends Component
         );
     }
 
+    // public function getSellersOfSameCityAndCategory()
+    // {
+    //     return Cache::remember(
+    //         'getSellersOfSameCityAndCategory' . $this->sellerId,
+    //         Carbon::now()->addDay(),
+    //         fn() => User::getParentAndChildSellersByCityAndCategory(auth()->user()->city)
+    //     );
+    // }
+
     public function noNearBySellers($orderId)
     {
         $this->orderId = $orderId;

@@ -141,6 +141,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Products::class);
     }
+
+    public function qty(): HasMany
+    {
+        return $this->hasMany(Qty::class, 'seller_id');
+    }
     /**
      * Validators
      */
@@ -332,6 +337,23 @@ class User extends Authenticatable implements JWTSubject
             ->whereNotNull('lon')
             ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
+            ->get();
+    }
+
+    public static function getParentAndChildSellersByCityAndCategory(string $city, int $categoryId, int $numberOfRows = 25): Collection
+    {
+        $city = explode(' ', $city);
+
+        return self::WhereUserIsActive()
+            ->whereHas('qty', function ($qtyRelation) use ($categoryId) {
+                $qtyRelation->where('category_id', '=', $categoryId);
+            })
+            ->whereNotNull('lat')
+            ->whereNotNull('lon')
+            ->whereIn('city', $city)
+            ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
+            ->orderBy('business_name', 'asc')
+            ->take($numberOfRows)
             ->get();
     }
 

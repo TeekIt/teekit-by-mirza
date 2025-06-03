@@ -6,6 +6,7 @@
         use App\Enums\OrderTypeEnum;
         use App\Models\ProductsByBuyer;
         use App\Products;
+        use App\Services\DateTimeServices;
     @endphp
 
     <x-session-messages />
@@ -409,28 +410,81 @@
         </thead>
         <tbody>
             <tr>
+                <td colspan="8">
+                    <div class="accordion" id="accordionExample">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed text-site-primary" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse{{ $order->id }}"
+                                    aria-expanded="false" aria-controls="collapse{{ $order->id }}">
+                                    <h5>Customer Details</h5>
+                                </button>
+                            </h2>
+                            <div id="collapse{{ $order->id }}" class="accordion-collapse collapse"
+                                aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    <div class="">
+                                        <table class="table table-striped table-responsive-sm">
+                                            <tr>
+                                                <td><b>Name</b></td>
+                                                <td>{{ $order->customer_name }}</td>
+                                                <td><b>Contact</b></td>
+                                                <td>{{ $order->phone_number }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Address</b></td>
+                                                <td colspan="3">{{ $order->address }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <th colspan="8">
+                    <h5 class="text-site-primary">Order Details</h5>
+                </th>
+            </tr>
+
+            <tr>
                 <td><b>Order#</b></td>
                 <td>{{ $order->id }}</td>
-                <td><b>Order Status</b></td>
-                <td><span class="badge badge-warning">{{ $order->order_status }}</span></td>
-            </tr>
-
-            <tr>
-                <td><b>Placed At</b></td>
-                <td>{{ $order->created_at }}</td>
-                <td><b>Order Type</b></td>
-                <td><span class="badge badge-info">{{ $order->type }}</span></td>
-            </tr>
-
-            <tr>
                 <td><b>Order Total</b></td>
                 <td>£{{ $order->current_total }}</td>
-                <td><b>Payment Status</b></td>
-                <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
+                <td><b>Date</b></td>
+                <td>{{ DateTimeServices::getDateOnly($order->created_at) }}</td>
+                <td><b>Time</b></td>
+                <td>{{ DateTimeServices::getTimeOnlyWithOutSeconds($order->created_at) }}</td>
+                {{-- <td><b>Order Status</b></td>
+                <td><span class="badge badge-warning">{{ $order->order_status }}</span></td> --}}
             </tr>
 
             <tr>
-                <th class="text-center site-primary-bg text-light" colspan="4">Customer Details</th>
+                {{-- <td><b>Placed At</b></td>
+                <td>{{ $order->created_at }}</td> --}}
+                <td><b>Order Type</b></td>
+                <td><span class="badge badge-info">{{ $order->type }}</span></td>
+                <td><b>Order Status</b></td>
+                <td><span class="badge badge-warning">{{ $order->order_status }}</span></td>
+                <td colspan="2"><b>Payment Status</b></td>
+                <td colspan="2"><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
+            </tr>
+
+            <tr>
+                {{-- <td><b>Order Total</b></td>
+                <td>£{{ $order->current_total }}</td> --}}
+                {{-- <td><b>Payment Status</b></td>
+                <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td> --}}
+            </tr>
+
+            {{-- <tr>
+                <th colspan="4">
+                    <h5>Customer Details</h5>
+                </th>
             </tr>
 
             <tr>
@@ -439,14 +493,15 @@
                 <td><b>Contact</b></td>
                 <td>{{ $order->phone_number }}</td>
             </tr>
-
             <tr>
                 <td><b>Address</b></td>
                 <td colspan="3">{{ $order->address }}</td>
-            </tr>
+            </tr> --}}
 
             <tr>
-                <th class="text-center site-primary-bg text-light" colspan="4">Order Items</th>
+                <th colspan="8">
+                    <h5 class="text-site-primary">Order Items</h5>
+                </th>
             </tr>
         </tbody>
     </table>

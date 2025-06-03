@@ -6,6 +6,7 @@
         use App\Enums\OrderTypeEnum;
         use App\Models\ProductsByBuyer;
         use App\Products;
+        use App\Services\ProductServices;
     @endphp
 
     <x-session-messages />
@@ -247,14 +248,15 @@
                                         <table class="table">
                                             <tr>
                                                 <td class="col-4 text-site-primary"><b>Product Name</b></td>
-                                                <td class="col-8">{{ $orderItem->product->product_name }}</td>
+                                                <td class="col-8"><b>{{ $orderItem->product->product_name }}</b></td>
                                             </tr>
 
                                             @if ($orderItem->product_belongs_to_type === (new Products())->getMorphClass())
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Category</b></td>
                                                     <td class="col-8">
-                                                        {{ $orderItem->product->category->category_name }}</td>
+                                                        {{ $orderItem->product->category->category_name }}
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>SKU</b></td>
@@ -263,7 +265,7 @@
                                             @endif
 
                                             <tr>
-                                                <td class="col-4 text-site-primary"><b>QTY</b></td>
+                                                <td class="col-4 text-site-primary"><b>Qty</b></td>
                                                 <td class="col-8"> {{ $orderItem->product_qty }} </td>
                                             </tr>
 
@@ -333,6 +335,39 @@
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Price</b></td>
                                                     <td class="col-8"> £{{ $orderItem->product->max_price }} </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="col-4 text-site-primary"><b>Weight</b></td>
+                                                    <td class="col-8"> {{ $orderItem->product->weight }}kg </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col-4 text-site-primary"><b>Brand</b></td>
+                                                    <td class="col-8"> {{ $orderItem->product->brand }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col-4 text-site-primary"><b>Part Nnumber</b></td>
+                                                    <td class="col-8"> {{ $orderItem->product->part_number }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col-4 text-site-primary"><b>Colors</b></td>
+                                                    <td class="col-8"> {{ ProductServices::jsonDecodeColors($orderItem->product->colors) }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col-4 text-site-primary"><b>Transport Vehicle</b></td>
+                                                    <td class="col-8"> {{ $orderItem->product->transport_vehicle }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col-4 text-site-primary"><b>Height</b></td>
+                                                    <td class="col-8"> {{ $orderItem->product->height }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col-4 text-site-primary"><b>Width</b></td>
+                                                    <td class="col-8"> {{ $orderItem->product->width }} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col-4 text-site-primary"><b>Length</b></td>
+                                                    <td class="col-8"> {{ $orderItem->product->length }} </td>
                                                 </tr>
                                             @endif
                                         </table>
