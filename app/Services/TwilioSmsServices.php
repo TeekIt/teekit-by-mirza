@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Twilio\Rest\Client;
 
-final class TwilioSmsService
+final class TwilioSmsServices
 {
     /**
      * @throws \Twilio\Exceptions\TwilioException
