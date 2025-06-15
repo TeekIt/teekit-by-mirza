@@ -116,19 +116,19 @@ final class OrderServices
         /* To restrict "New Order" SMS notifications only for UK numbers */
         if (str_contains($seller->business_phone, '+44')) {
             /* Seller Number */
-            TwilioSmsService::sendSms($seller->business_phone, $messageForAdmin);
+            TwilioSmsServices::sendSms($seller->business_phone, $messageForAdmin);
         }
         /* Customer Number */
-        TwilioSmsService::sendSms($buyerNumber, $messageForBuyer);
+        TwilioSmsServices::sendSms($buyerNumber, $messageForBuyer);
         /* Rameesha Number */
-        TwilioSmsService::sendSms('+923362451199', $messageForBuyer);
+        TwilioSmsServices::sendSms('+923362451199', $messageForBuyer);
         /* Azim Number */
-        TwilioSmsService::sendSms('+447976621849', $messageForAdmin);
+        TwilioSmsServices::sendSms('+447976621849', $messageForAdmin);
         /* Eesa Number */
-        TwilioSmsService::sendSms('+447490020063', $messageForAdmin);
+        TwilioSmsServices::sendSms('+447490020063', $messageForAdmin);
         /* Junaid Number */
-        TwilioSmsService::sendSms('+447817332090', $messageForAdmin);
+        TwilioSmsServices::sendSms('+447817332090', $messageForAdmin);
         /* Mirza Number */
-        TwilioSmsService::sendSms('+923170155625', $messageForAdmin);
+        TwilioSmsServices::sendSms('+923170155625', $messageForAdmin);
     }
 }
