@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Models\Driver;
 use App\Pages;
-use App\Products;
 use App\Services\GoogleMapServices;
 use App\User;
 use Illuminate\Support\Facades\Validator;
@@ -12,12 +12,56 @@ use Throwable;
 use Illuminate\Http\Request;
 use App\Services\JsonResponseServices;
 use App\Services\WebResponseServices;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UsersController extends Controller
 {
+
+    public function saveStripeAccountId(Request $request)
+    {
+        $validatedData = Validator::make($request->all(), [
+            'email' => [
+                'required',
+                'email',
+                Rule::exists('users', 'email')
+                ->where(fn(Builder $query) => $query->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])),
+            ],
+            'stripeAccountId' => 'required|string',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        $validatedData = (object) $validatedData->validated();
+
+        $user = User::getParentOrChildSellerByEmail($validatedData->email, ['id']);
+
+        $updated = User::updateInfo(
+            id: $user->id,
+            stripeAccountId: $validatedData->stripeAccountId
+        );
+
+        if ($updated) {
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.TRUE_STATUS'),
+                config('constants.UPDATION_SUCCESS'),
+                config('constants.HTTP_OK'),
+            );
+        }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.UPDATION_FAILED'),
+            config('constants.HTTP_OK')
+        );
+    }
+
     /**
      * Return's admin settings view
      * @author Muhammad Abdullah Mirza

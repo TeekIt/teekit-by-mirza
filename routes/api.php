@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use App\Services\JsonResponseServices;
-use Illuminate\Support\Facades\Http;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,7 +51,6 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
         Route::post('logout', 'logout');
         Route::post('refresh', 'refresh');
         Route::post('updateStatus', 'updateStatus');
-        Route::get('delivery_boys', 'deliveryBoys');
         Route::get('get_user/{userId}', 'getUserDetails');
         Route::post('user/delete', 'deleteUser');
         Route::get('me', 'me');
@@ -63,8 +61,11 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
 | Registration, confirmations and verification
 |--------------------------------------------------------------------------
 */
-Route::post('password/email', [ForgotPasswordController::class, 'getResetToken']);
-Route::post('password/reset', [ResetPasswordController::class, 'reset']);
+Route::prefix('password')->group(function() {
+    Route::post('email', [ForgotPasswordController::class, 'getResetToken']);
+    Route::post('reset', [ResetPasswordController::class, 'reset']);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Qty API Routes
@@ -94,6 +95,7 @@ Route::prefix('category')->controller(CategoriesController::class)->group(functi
 */
 Route::prefix('sellers')->controller(UsersController::class)->group(function () {
     Route::get('/', 'sellers');
+    Route::post('save/stripe_account_id', 'saveStripeAccountId');
 });
 /*
 |--------------------------------------------------------------------------
@@ -111,9 +113,7 @@ Route::prefix('notifications')->controller(NotificationsController::class)->grou
 Route::middleware(['jwt.verify'])->group(function () {
     Route::prefix('product')->group(function () {
         Route::controller(ProductsController::class)->group(function () {
-            Route::post('add', 'add');
             Route::post('add/bulk', 'importProductsAPI');
-            Route::post('update/{product_id}', 'update');
             Route::post('update_price_qty/bulk', 'updatePriceAndQtyBulk');
             Route::get('delete/{product_id}', 'delete');
             Route::get('delete_image/{image_id}/{product_id}', 'deleteImage');
@@ -148,7 +148,7 @@ Route::middleware(['jwt.verify'])->group(function () {
             Route::get('get-order-details/{id}', 'getOrderDetailsForApi');
         });
 
-        Route::get('/logged_in/buyer', 'showLoggedinBuyerOrders');
+        Route::get('logged_in/buyer', 'showLoggedinBuyerOrders');
         Route::get('seller', 'sellerOrders');
         Route::get('driver_orders/{driver_id}', 'driverOrders');
         Route::get('assign_order', 'assignOrder');
@@ -212,14 +212,14 @@ Route::get('page', [PagesController::class, 'getPage']);
 */
 Route::prefix('stripe')->controller(StripeContorller::class)->group(function () {
     Route::prefix('payment_intent')->group(function () {
-        Route::get('/create', 'createPaymentIntent');
-        Route::get('/capture', 'capturePaymentIntent');
-        Route::get('/refund', 'refundPaymentIntent');
+        Route::get('create', 'createPaymentIntent');
+        Route::get('capture', 'capturePaymentIntent');
+        Route::get('refund', 'refundPaymentIntent');
     });
 
-    Route::get('/request_payment_authorization', 'requestPaymentAuthorization');
-    Route::get('/request_incremental_authorization_support', 'requestIncrementalAuthorizationSupport');
-    Route::get('/perform_incremental_authorization', 'performIncrementalAuthorization');
+    Route::get('request_payment_authorization', 'requestPaymentAuthorization');
+    Route::get('request_incremental_authorization_support', 'requestIncrementalAuthorizationSupport');
+    Route::get('perform_incremental_authorization', 'performIncrementalAuthorization');
 });
 
 Route::get('env', function () {

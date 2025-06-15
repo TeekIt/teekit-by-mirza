@@ -178,21 +178,23 @@ class ProductsController extends Controller
             $request->all(),
             rules: [
                 'file' => 'required|file',
-                'seller_id' => [
+                'sellerId' => [
                     'required',
                     'integer',
                     Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRole::SELLER)),
                 ],
             ],
             messages: [
-                'seller_id.exists' => 'The given :attribute either does not exist in our system or its a child seller',
+                'sellerId.exists' => 'The given :attribute either does not exist in our system or its a child seller',
             ]
         );
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        Excel::import(new ProductsImport($request->seller_id), $request->file('file'), readerType: ExcelConstants::CSV);
+        $validatedData = (object) $validatedData->validated();
+
+        Excel::import(new ProductsImport($validatedData->sellerId), $request->file('file'), readerType: ExcelConstants::CSV);
 
         return JsonResponseServices::getApiResponse(
             [],
@@ -348,9 +350,10 @@ class ProductsController extends Controller
 
         /*
         * Just creating this variable so we don't have to call the "empty()" function again & again
-        * Which will obviouly increase the API response speed
+        * Which will obviouly decrease the API response speed
         */
         $dataIsEmpty = empty($data);
+
         return JsonResponseServices::getApiResponse(
             ($dataIsEmpty) ? [] : $data,
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
@@ -459,9 +462,10 @@ class ProductsController extends Controller
         );
         /*
         * Just creating this variable so we don't have to call the "empty()" function again & again
-        * Which will obviouly increase the API response speed
+        * Which will obviouly decrease the API response speed
         */
         $dataIsEmpty = $products['data']->isEmpty();
+        
         return JsonResponseServices::getApiResponseExtention(
             ($dataIsEmpty) ? [] : $products['data'],
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),

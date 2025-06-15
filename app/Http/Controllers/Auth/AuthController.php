@@ -306,21 +306,6 @@ class AuthController extends Controller
         return $this->me();
     }
 
-    public function deliveryBoys()
-    {
-        $users = User::query()->where('seller_id', '=', Auth::id())->get();
-
-        $data = [];
-        foreach ($users as $user) {
-            if (Gate::allows('delivery_boy')) $data[] = UsersController::getSellerInfo($user);
-        }
-
-        return response()->json([
-            'data' => $data,
-            'status' => config('constants.TRUE_STATUS'),
-            'message' => ''
-        ], config('constants.HTTP_OK'));
-    }
     /**
      * Get user details w.r.t 'id'
      * @author Muhammad Abdullah Mirza
@@ -329,12 +314,17 @@ class AuthController extends Controller
     public function getUserDetails($userId)
     {
         $data = User::getUserInfo($userId);
+        /*
+        * Just creating this variable so we don't have to call the "empty()" function again & again
+        * Which will obviouly decrease the API response speed
+        */
+        $dataIsEmpty = empty($data);
 
         return JsonResponseServices::getApiResponse(
-            (empty($data)) ? [] : $data,
-            (empty($data)) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            (empty($data)) ? config('constants.NO_RECORD') : '',
-            (empty($data)) ? config('constants.HTTP_UNPROCESSABLE_REQUEST') : config('constants.HTTP_OK')
+            ($dataIsEmpty) ? [] : $data,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+            ($dataIsEmpty) ? config('constants.HTTP_UNPROCESSABLE_REQUEST') : config('constants.HTTP_OK')
         );
     }
     /**

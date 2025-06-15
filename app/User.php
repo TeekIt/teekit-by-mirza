@@ -424,6 +424,14 @@ class User extends Authenticatable implements JWTSubject
         return self::where('role_id', '=', UserRole::BUYER)->whereNotNull('referral_code')->paginate(10);
     }
 
+    public static function getParentOrChildSellerByEmail(string $email, array $columns = ['*']): ?User
+    {
+        return self::select($columns)
+            ->where('email', '=', $email)
+            ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])
+            ->first();
+    }
+
     public static function getBuyerByEmail(string $email, array $columns = ['*']): ?User
     {
         return self::select($columns)->where('email', '=', $email)->where('role_id', '=', UserRole::BUYER)->first();

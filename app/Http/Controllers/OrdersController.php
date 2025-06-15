@@ -397,9 +397,10 @@ class OrdersController extends Controller
         unset($pagination['data']);
         /*
         * Just creating this variable so we don't have to call the "empty()" function again & again
-        * Which will obviouly increase the API response speed
+        * Which will obviouly decrease the API response speed
         */
         $dataIsEmpty = empty($data);
+
         return JsonResponseServices::getApiResponseExtention(
             ($dataIsEmpty) ? [] : $data,
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
@@ -432,9 +433,10 @@ class OrdersController extends Controller
             );
             /*
             * Just creating this variable so we don't have to call the "empty()" function again & again
-            * Which will obviouly increase the API response speed
+            * Which will obviouly decrease the API response speed
             */
             $dataIsEmpty = empty($recentOrderProdsData);
+            
             return JsonResponseServices::getApiResponse(
                 ($dataIsEmpty) ? [] : $recentOrderProdsData,
                 ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
