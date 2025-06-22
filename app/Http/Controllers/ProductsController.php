@@ -10,11 +10,8 @@ use App\Imports\ProductsImport;
 use App\Models\ProductImage;
 use App\Products;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddOrUpdateProductRequest;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use App\User;
 use App\Qty;
 use App\Services\GoogleMapServices;
@@ -544,12 +541,11 @@ class ProductsController extends Controller
         }
 
         $file = $request->file('file');
-        // File Details
         $filename = $file->getClientOriginalName();
         $location = public_path('upload/csv');
         $file->move($location, $filename);
-        $filepath = $location . "/" . $filename;
-        // Reading file
+        $filepath = $location . "/" . $filename;        
+        /* Reading file */
         $file = fopen($filepath, "r");
         $i = 0;
         while (($filedata = fgetcsv($file, 1000, $delimiter)) !== FALSE) {
@@ -561,8 +557,8 @@ class ProductsController extends Controller
             $sku = $filedata[1];
             $price = $filedata[2];
             $qty = $filedata[3];
-            // Find product by sku, user_id, category_id and update price and quantity
-            $product = (new Products)->getProductsByParameters($request->store_id, $sku, $catgory_id);
+            /* Find product by sku, user_id, category_id and update price and quantity */
+            $product = Products::getProductsByParameters($request->store_id, $sku, $catgory_id);
             if ($product) {
                 $product->price = $price;
                 $product->save();
@@ -574,7 +570,8 @@ class ProductsController extends Controller
             }
             $i++;
             if ($i % $batchSize == 0) {
-                usleep(500000); // Wait for 0.5 seconds between batches to avoid overwhelming the database
+                /* Wait for 0.5 seconds between batches to avoid overwhelming the database */
+                usleep(500000);
             }
         }
 
