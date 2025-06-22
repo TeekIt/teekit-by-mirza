@@ -550,7 +550,7 @@ class Products extends Model
             ->paginate(20);
     }
 
-    public function getProductsByParameters(int $seller_id, string $sku, int $catgory_id): Products
+    public static function getProductsByParameters(int $seller_id, string $sku, int $catgory_id): Products
     {
         return self::where('seller_id', '=', $seller_id)
             ->where('sku', '=', $sku)

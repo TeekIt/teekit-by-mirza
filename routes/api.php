@@ -123,7 +123,6 @@ Route::middleware(['jwt.verify'])->group(function () {
                 Route::post('search', 'search');
                 Route::get('view', 'view');
                 Route::get('seller', 'sellerProducts');
-                Route::get('sortbyprice', 'sortByPrice');
                 Route::get('sortByLocation', 'sortByLocation');
                 Route::post('recheck_products', 'recheckProducts');
                 Route::get('featured/{store_id}', 'featuredProducts');
