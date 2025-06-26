@@ -208,7 +208,7 @@ class Qty extends Model
      */
     public static function add(int $sellerId, int $productId, int $categoryId, int $productQuantity): bool
     {
-        $quantity = new Qty();
+        $quantity = new self();
         $quantity->seller_id = $sellerId;
         $quantity->product_id = $productId;
         $quantity->category_id = $categoryId;

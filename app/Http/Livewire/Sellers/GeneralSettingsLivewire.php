@@ -4,8 +4,6 @@ namespace App\Http\Livewire\Sellers;
 
 use Livewire\Component;
 
-use App\Products;
-use App\Services\CsvFileServices;
 use App\Services\ImageServices;
 use App\User;
 use Exception;
@@ -28,12 +26,16 @@ class GeneralSettingsLivewire extends Component
         $new_password,
         $user_img,
         $image_to_upload;
-
+    /* 
+     * Lifecycle Hooks
+     */
     public function mount()
     {
         $this->user_id = auth()->id();
     }
-
+     /* 
+     * Helpers
+     */
     public function resetModal()
     {
         $this->resetValidation();
@@ -50,7 +52,9 @@ class GeneralSettingsLivewire extends Component
             'image_to_upload',
         ]);
     }
-
+    /*
+    * CRUD Methods
+    */
     public function updateImage()
     {
         $this->validate([

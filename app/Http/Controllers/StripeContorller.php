@@ -18,6 +18,7 @@ class StripeContorller extends Controller
             'savePaymentMethod' => 'nullable|boolean',
             'name' => 'nullable|string|required_if_accepted:savePaymentMethod,true',
             'email' => ['nullable', 'email', new BuyerEmail, 'required_if_accepted:savePaymentMethod,true'],
+            'paymentMethodId' => 'nullable|string|required_if_accepted:savePaymentMethod,true',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());

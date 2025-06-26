@@ -12,63 +12,19 @@
     var map;
     var marker;
 
+    function initializeMap(canvasId) {
+        return new google.maps.Map(document.getElementById(canvasId), {
+            zoom: 12
+        })
+    }
+
     function initialize() {
 
-        var mapOptions = {
-            zoom: 12
-        };
-        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+        const map = initializeMap('map-canvas')
 
-        /* Get Geolocation */
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var pos = new google.maps.LatLng(position.coords.latitude,
-                    position.coords.longitude);
+        setGeoLocator(map);
 
-                map.setCenter(pos);
-            }, function() {
-                handleNoGeolocation(true);
-            });
-        } else {
-            /* Browser doesn't support Geolocation */
-            handleNoGeolocation(false);
-        }
-
-        function handleNoGeolocation(errorFlag) {
-            if (errorFlag) {
-                var content = 'Error: The Geolocation service failed.';
-            } else {
-                var content = 'Error: Your browser doesn\'t support geolocation.';
-            }
-
-            var options = {
-                map: map,
-                position: new google.maps.LatLng(60, 105),
-                content: content
-            };
-
-            map.setCenter(options.position);
-            marker = new google.maps.Marker({
-                position: options.position,
-                map: map,
-                draggable: true
-            });
-        }
-
-        /* Get places auto-complete when user type in modal_address */
-        var address = /** @type {HTMLInputElement} */ (document.getElementById('modal_address'));
-
-        var autocomplete = new google.maps.places.Autocomplete(address, {
-            componentRestrictions: {
-                country: ["uk", "pk"]
-            },
-            fields: ["address_components", "geometry"]
-        });
-        autocomplete.bindTo('bounds', map);
-
-        var infowindow = new google.maps.InfoWindow();
-
-        marker = new google.maps.Marker({
+        const marker = getMarker({
             map: map,
             anchorPoint: new google.maps.Point(0, -29),
             draggable: true
@@ -81,6 +37,9 @@
             setLatLong(lat, long);
         });
 
+        const autocomplete = handleAutoComplete();
+        autocomplete.bindTo('bounds', map);
+        const infowindow = getInfoWindow();
         google.maps.event.addListener(autocomplete, 'place_changed', function() {
             infowindow.close();
             marker.setVisible(true);
@@ -162,6 +121,64 @@
                 ].join(' ');
             }
         });
+    }
+
+    function setGeoLocator(map) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                map.setCenter(pos);
+            }, function() {
+                handleNoGeolocation(true, map);
+            });
+        } else {
+            /* Browser doesn't support Geolocation */
+            handleNoGeolocation(false, map);
+        }
+    }
+
+    function handleNoGeolocation(errorFlag, map) {
+        if (errorFlag) {
+            let content = 'Error: The Geolocation service failed.';
+        } else {
+            let content = 'Error: Your browser doesn\'t support geolocation.';
+        }
+
+        const options = {
+            map: map,
+            position: new google.maps.LatLng(60, 105),
+            content: content
+        };
+
+        map.setCenter(options.position);
+
+        getMarker({
+            map: map,
+            position: options.position,
+            draggable: true
+        })
+    }
+
+    function getMarker(markerOptions) {
+        return new google.maps.Marker(markerOptions)
+    }
+
+    function getInfoWindow() {
+        return new google.maps.InfoWindow();
+    }
+
+    function handleAutoComplete() {
+        /* Get places auto-complete when user types-in */
+        var address = /** @type {HTMLInputElement} */ (document.getElementById('modal_address'));
+
+        var autocomplete = new google.maps.places.Autocomplete(address, {
+            componentRestrictions: {
+                country: ["uk", "pk"]
+            },
+            fields: ["address_components", "geometry"]
+        });
+
+        return autocomplete;
     }
 
     const setLatLong = (lat, lng) => {
