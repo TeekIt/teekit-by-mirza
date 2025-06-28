@@ -1,5 +1,8 @@
 <?php
 
+use App\Enums\PackagePickUpVehicleEnum;
+use App\Enums\PackageTransportTypeEnum;
+use App\Enums\PackageWeightEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,10 +19,12 @@ return new class extends Migration
             $table->foreignId('creator_id')->constrained(table:'users')->cascadeOnDelete();
             $table->text('pickup_address');
             $table->text('dropoff_address');
+            $table->text('unit_address')->nullable();
             $table->string('receiver_name');
             $table->string('receiver_phone');
-            $table->enum('package_size', ['Moped', 'Car Boot', 'Small Van', 'Big Van']);
-            $table->enum('package_weight', ['< 5Kg', '< 10Kg', '< 15Kg', '> 15Kg']);
+            $table->string('receiver_email');
+            $table->enum('package_transport_type', array_column(PackageTransportTypeEnum::cases(), 'value'));
+            $table->enum('package_weight', array_column(PackageWeightEnum::cases(), 'value'));
             $table->timestamps();
             $table->softDeletes();
         });

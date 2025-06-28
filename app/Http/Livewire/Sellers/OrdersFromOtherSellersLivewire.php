@@ -21,7 +21,6 @@ class OrdersFromOtherSellersLivewire extends Component
         $orderId;
 
     public int $orderHoldingMinutes = 2;
-
     /* 
     * Lifecycle Hooks
     */

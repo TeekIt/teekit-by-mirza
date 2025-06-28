@@ -2,8 +2,11 @@
 
 namespace App\Http\Livewire\Sellers;
 
+use App\Enums\PackageTransportTypeEnum;
+use App\Enums\PackageWeightEnum;
 use App\Models\RequestedDelivery;
 use Exception;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class RequestDeliveryLivewire extends Component
@@ -12,10 +15,36 @@ class RequestDeliveryLivewire extends Component
         $sellerId,
         $pickupAddress,
         $dropoffAddress,
+        $unitAddress,
         $receiverName,
         $receiverPhone,
-        $packageSize,
+        $receiverEmail,
+        $packageTransportType,
         $packageWeight;
+
+    // protected $rules = [
+    //     'pickupAddress' => 'required|string',
+    //     'dropoffAddress' => 'required|string',
+    //     'unitAddress' => 'nullable|string',
+    //     'receiverName' => 'required|string',
+    //     'receiverPhone' => 'required|numeric',
+    //     'receiverEmail' => 'required|email',
+    //     'packageTransportType' => ['required', Rule::enum(PackageTransportTypeEnum::class)],
+    //     'packageWeight' => ['required', Rule::enum(PackageWeightEnum::class)],
+    // ];
+    protected function rules()
+    {
+        return [
+            'pickupAddress' => 'required|string',
+            'dropoffAddress' => 'required|string',
+            'unitAddress' => 'nullable|string',
+            'receiverName' => 'required|string',
+            'receiverPhone' => 'required|numeric',
+            'receiverEmail' => 'required|email',
+            'packageTransportType' => ['required', Rule::enum(PackageTransportTypeEnum::class)],
+            'packageWeight' => ['required', Rule::enum(PackageWeightEnum::class)],
+        ];
+    }
     /* 
      * Lifecycle Hooks
      */
@@ -33,9 +62,11 @@ class RequestDeliveryLivewire extends Component
         $this->reset([
             'pickupAddress',
             'dropoffAddress',
+            'unitAddress',
             'receiverName',
             'receiverPhone',
-            'packageSize',
+            'receiverEmail',
+            'packageTransportType',
             'packageWeight',
         ]);
     }
@@ -44,16 +75,20 @@ class RequestDeliveryLivewire extends Component
     */
     public function requestDelivery()
     {
+        $this->validate();
+        
         try {
             /* Perform some operation */
             $inserted =  RequestedDelivery::add(
                 creatorId: $this->sellerId,
                 pickupAddress: $this->pickupAddress,
                 dropoffAddress: $this->dropoffAddress,
+                unitAddress: $this->unitAddress,
                 receiverName: $this->receiverName,
                 receiverPhone: $this->receiverPhone,
-                packageSize: $this->packageSize,
-                packageWeight: $this->packageWeight
+                receiverEmail: $this->receiverEmail,
+                packageTransportType: PackageTransportTypeEnum::from($this->packageTransportType),
+                packageWeight: PackageWeightEnum::from($this->packageWeight)
             );
             /* Operation finished */
             sleep(1);

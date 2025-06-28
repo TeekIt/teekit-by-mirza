@@ -1,5 +1,10 @@
 <div class="content">
 
+    @php
+        use App\Enums\PackageWeightEnum;
+        use App\Enums\PackageTransportTypeEnum;
+    @endphp
+
     <x-session-messages />
 
     <!-- Main content -->
@@ -8,81 +13,224 @@
             <div class="row">
                 <div class="offset-xl-2 col-lg-12 col-xl-8 py-4">
                     <div class="card-body">
-                        <div class="d-block text-right">
+                        <div class="d-block">
                             <div class="card-text">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <h4 class="text-center text-site-primary">Request Delivery For Buyer</h4>
                                     </div>
                                     <div class="col-md-12">
-                                        <form wire:submit.prevent="requestDelivery" method="POST" enctype="multipart/form-data">
+                                        <form wire:submit.prevent="requestDelivery" method="POST"
+                                            enctype="multipart/form-data">
                                             {{ csrf_field() }}
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <input type="text" class="form-control" wire:model.defer="pickupAddress"
-                                                            id="pickupAddress" placeholder="Pickup Address*"
-                                                            value="" required>
+                                            <div class="my-3">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control"
+                                                                wire:model.defer="pickupAddress" id="pickupAddress"
+                                                                placeholder="Pickup Address*" value="" required>
+                                                        </div>
+                                                        <small class="text-danger">
+                                                            @error('pickupAddress')
+                                                                {{ $message }}
+                                                            @enderror
+                                                        </small>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-12">
-                                                    <div class="form-group">
-                                                        <input type="text" class="form-control" wire:model.defer="dropoffAddress"
-                                                            placeholder="Dropoff Address*" value="" required>
+                                                    <div class="col-md-12 mt-3">
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control"
+                                                                wire:model.defer="dropoffAddress" id="dropoffAddress"
+                                                                placeholder="Dropoff Address*" value="" required>
+                                                        </div>
+                                                        <small class="text-danger">
+                                                            @error('dropoffAddress')
+                                                                {{ $message }}
+                                                            @enderror
+                                                        </small>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <input type="text" class="form-control" wire:model.defer="receiverName"
-                                                            placeholder="Buyer Name*" value="" required>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <input type="number" class="form-control" wire:model.defer="receiverPhone"
-                                                            placeholder="Buyer Contact*" value="" required>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <select class="form-control" wire:model.defer="packageSize" required>
-                                                            <option value="">Package Size*</option>
-                                                            <option vlaue="Moped">Moped</option>
-                                                            <option vlaue="Car Boot">Car Boot</option>
-                                                            <option vlaue="Small Van">Small Van</option>
-                                                            <option vlaue="Big Van">Big Van</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <select class="form-control" wire:model.defer="packageWeight" required>
-                                                            <option value="">Package Weight (Kg)*</option>
-                                                            <option value="< 5Kg">
-                                                                < 5Kg </option>
-                                                            <option value="< 10Kg">
-                                                                < 10Kg </option>
-                                                            <option value="< 15Kg">
-                                                                < 15Kg </option>
-                                                            <option value="> 15Kg">
-                                                                > 15Kg
-                                                            </option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-12">
-                                                    <div class="p-3 text-center">
-                                                        <p class="fs-5">Total Cost: Coming Soon{{-- £30 --}}</p>
+                                                    <div class="col-md-12 mb-3">
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control"
+                                                                wire:model.defer="unitAddress"
+                                                                placeholder="Unit Address (e.g Flat#)" value="">
+                                                        </div>
+                                                        <small class="text-danger">
+                                                            @error('unitAddress')
+                                                                {{ $message }}
+                                                            @enderror
+                                                        </small>
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <div class="my-3">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control"
+                                                                wire:model.defer="receiverName"
+                                                                placeholder="Buyer Name*" value="" required>
+                                                        </div>
+                                                        <small class="text-danger">
+                                                            @error('receiverName')
+                                                                {{ $message }}
+                                                            @enderror
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <input type="number" class="form-control"
+                                                                wire:model.defer="receiverPhone"
+                                                                placeholder="Buyer Contact*" value="" required>
+                                                        </div>
+                                                        <small class="text-danger">
+                                                            @error('receiverPhone')
+                                                                {{ $message }}
+                                                            @enderror
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <input type="email" class="form-control"
+                                                                wire:model.defer="receiverEmail"
+                                                                placeholder="Buyer Email*" value="" required>
+                                                        </div>
+                                                        <small class="text-danger">
+                                                            @error('receiverEmail')
+                                                                {{ $message }}
+                                                            @enderror
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="my-3">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <select class="form-control"
+                                                                wire:model.defer="packageTransportType" required>
+                                                                <option value="">
+                                                                    Package Transport Type*
+                                                                </option>
+                                                                <option vlaue="{{ PackageTransportTypeEnum::MOPED }}">
+                                                                    Moped
+                                                                </option>
+                                                                <option
+                                                                    vlaue="{{ PackageTransportTypeEnum::CAR_BOOT }}">
+                                                                    Car Boot
+                                                                </option>
+                                                                <option
+                                                                    vlaue="{{ PackageTransportTypeEnum::SMALL_VAN }}">
+                                                                    Small Van
+                                                                </option>
+                                                                <option
+                                                                    vlaue="{{ PackageTransportTypeEnum::BIG_VAN }}">
+                                                                    Big Van
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                        <small class="text-danger">
+                                                            @error('packageTransportType')
+                                                                {{ $message }}
+                                                            @enderror
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <select class="form-control"
+                                                                wire:model.defer="packageWeight" required>
+                                                                <option value="">Package Weight (Kg)*</option>
+                                                                <optgroup label="Small">
+                                                                    <option value="{{ PackageWeightEnum::SMALL }}">
+                                                                        W20cm x D15cm x H40cm <b>(Up to 8kg)</b>
+                                                                    </option>
+                                                                </optgroup>
+                                                                <optgroup label="Medium">
+                                                                    <option value="{{ PackageWeightEnum::MEDIUM }}">
+                                                                        W30cm x D30cm x H50cm <b>(Up to 12kg)</b>
+                                                                    </option>
+                                                                </optgroup>
+                                                                <optgroup label="Large">
+                                                                    <option value="{{ PackageWeightEnum::LARGE }}">
+                                                                        W65cm x D50cm x H90cm <b>(Up to 40kg)</b>
+                                                                    </option>
+                                                                </optgroup>
+                                                                <optgroup label="Extra Large">
+                                                                    <option
+                                                                        value="{{ PackageWeightEnum::EXTRA_LARGE }}">
+                                                                        W90cm x D50cm x H100cm <b>(Up to 70kg)</b>
+                                                                    </option>
+                                                                </optgroup>
+                                                            </select>
+                                                        </div>
+                                                        <small class="text-danger">
+                                                            @error('packageWeight')
+                                                                {{ $message }}
+                                                            @enderror
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-12">
+                                                <div class="p-3 text-center">
+                                                    <p class="fs-5">Total Cost: Coming Soon{{-- £30 --}}
+                                                    </p>
+                                                </div>
+                                            </div>
+
                                             <div class="col-md-6 offset-md-3 text-center">
                                                 <button type="submit"
-                                                    class="btn site-primary-yellow-bg rounded-pill px-5 py-2 font-weight-bold">
-                                                    Request
+                                                    class="btn site-primary-yellow-bg rounded-pill px-5 py-2 font-weight-bold"
+                                                    wire:target="requestDelivery" wire:loading.class="btn-dark"
+                                                    wire:loading.class.remove="site-primary-yellow-bg"
+                                                    wire:loading.attr="disabled">
+                                                    <span wire:target="requestDelivery" wire:loading.remove>
+                                                        Request
+                                                    </span>
+                                                    <span wire:target="requestDelivery" wire:loading>
+                                                        <span class="spinner-border spinner-border-sm text-light"
+                                                            role="status" aria-hidden="true"></span>
+                                                    </span>
                                                 </button>
                                             </div>
                                         </form>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="my-5">
+                                            <h4 class="text-center text-site-primary my-3">
+                                                Package Size and Transport Types
+                                            </h4>
+
+                                            <p>
+                                                All packages have different dimensions and weights. However, the main
+                                                sizes are:
+                                            </p>
+
+                                            <ul>
+                                                <li>
+                                                    <strong>S:</strong> W20cm x D15cm x H40cm (1/2 of a thermal bag),
+                                                    8/12 kg, depending on bag*
+                                                </li>
+                                                <li>
+                                                    <strong>M:</strong> W30cm x D30cm x H50cm (1 thermal bag), 8/12 kg,
+                                                    depending on bag*
+                                                </li>
+                                                <li>
+                                                    <strong>L:</strong> W65cm x D50cm x H90cm (2 thermal bags), 40kg
+                                                </li>
+                                                <li>
+                                                    <strong>XL:</strong> W90cm x D50cm x H100cm (4 Thermal bags), 70kg
+                                                </li>
+                                            </ul>
+
+                                            <p>
+                                                <strong>S/M</strong> packages can fit on moped (motorbike).<br>
+                                                <strong>L/XL</strong> packages can be delivered only by car boot/van.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -99,28 +247,4 @@
             padding: 30px 50px !important;
         }
     </style>
-
-    <script
-        src="https://maps.googleapis.com/maps/api/js?libraries=geometry,places&key={{ config('google.GOOGLE_PLACES_API_KEY') }}">
-    </script>
-
-    <script>
-        function handleAutoComplete() {
-            /* Get places auto-complete when user types-in */
-            var address = /** @type {HTMLInputElement} */ (document.getElementById('pickupAddress'));
-
-            var autocomplete = new google.maps.places.Autocomplete(address, {
-                componentRestrictions: {
-                    country: ["uk", "pk"]
-                },
-                fields: ["address_components", "geometry"]
-            });
-
-            return autocomplete;
-        }
-
-        window.addEventListener('load', handleAutoComplete());
-        /* Google Map Code - Ends */
-    </script>
-
 </div>

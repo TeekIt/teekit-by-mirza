@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\PackageTransportTypeEnum;
+use App\Enums\PackageWeightEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -18,9 +20,11 @@ class RequestedDelivery extends Model
         'creator_id',
         'pickup_address',
         'dropoff_address',
+        'unit_address',
         'receiver_name',
         'receiver_phone',
-        'package_size',
+        'receiver_email',
+        'package_transport_type',
         'package_weight',
     ];
     /**
@@ -30,18 +34,22 @@ class RequestedDelivery extends Model
         int $creatorId,
         string $pickupAddress,
         string $dropoffAddress,
+        ?string $unitAddress = null,
         string $receiverName,
         int $receiverPhone,
-        string $packageSize,
-        string $packageWeight
+        string $receiverEmail,
+        PackageTransportTypeEnum $packageTransportType,
+        PackageWeightEnum $packageWeight
     ): RequestedDelivery {
         return self::create([
             'creator_id' => $creatorId,
             'pickup_address' => $pickupAddress,
             'dropoff_address' => $dropoffAddress,
+            'unit_address' => $unitAddress,
             'receiver_name' => $receiverName,
             'receiver_phone' => $receiverPhone,
-            'package_size' => $packageSize,
+            'receiver_email' => $receiverEmail,
+            'package_transport_type' => $packageTransportType,
             'package_weight' => $packageWeight
         ]);
     }
