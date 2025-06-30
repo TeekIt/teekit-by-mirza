@@ -1,4 +1,4 @@
-{{-- <div class="content">
+<div class="content">
 
     @php
         use App\Enums\PackageWeightEnum;
@@ -248,4 +248,4 @@
             padding: 30px 50px !important;
         }
     </style>
-</div> --}}
+</div>

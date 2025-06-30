@@ -44,7 +44,7 @@
                     </span>
                 </button>
                 <a type="button" href="{{ route('seller.add.single.inventory.form') }}"
-                    class="btn btn-primary my-4 py-3 w-100 mx-1 px-0 " title="Add New">
+                    class="btn btn-primary my-4 py-3 w-100 mx-1 px-0" title="Add New">
                     <span class="fas fa-plus"></span>
                 </a>
                 {{-- <a type="button" href="{{ route('seller.add.bulk.inventory') }}" class="btn btn-primary my-4 py-3 w-100 mx-1 px-0" title="Add Bulk">

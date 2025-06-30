@@ -7,6 +7,7 @@ use App\Enums\PackageWeightEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class RequestedDelivery extends Model
 {
@@ -30,6 +31,23 @@ class RequestedDelivery extends Model
     /**
      * Helpers
      */
+    public static function getForView(
+        string $orderBy,
+        ?string $createdAt = null,
+        ?int $creatorId = null,
+        array $columns = ['*']
+    ): LengthAwarePaginator {
+        return self::select($columns)
+            ->when($creatorId, function ($query, $creatorId) {
+                return $query->where('creator_id', '=', $creatorId);
+            })
+            ->when($createdAt, function ($query, $createdAt) {
+                return $query->where('created_at', '=', $createdAt);
+            })
+            ->orderBy('created_at', $orderBy)
+            ->paginate(10);
+    }
+
     public static function add(
         int $creatorId,
         string $pickupAddress,

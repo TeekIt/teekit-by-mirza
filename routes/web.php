@@ -21,6 +21,8 @@ use App\Http\Livewire\Sellers\OrdersOfUniqueProductsLivewire;
 use App\Http\Livewire\Sellers\RequestDeliveryLivewire;
 use App\Http\Livewire\Sellers\SellerDashboardLivewire;
 use App\Http\Livewire\Sellers\GeneralSettingsLivewire;
+use App\Http\Livewire\Sellers\RequestDeliveryFormLivewire;
+use App\Http\Livewire\Sellers\RequestedDeliveriesLivewire;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
@@ -101,7 +103,10 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
 
     Route::get('/withdrawal', WithdrawalLivewire::class)->name('seller.withdrawal');
 
-    Route::get('/request-delivery', RequestDeliveryLivewire::class)->name('seller.request.delivery');
+    Route::prefix('delivery')->group(function () {
+        Route::get('/', RequestedDeliveriesLivewire::class)->name('seller.requested.deliveries');
+        Route::get('/request_form', RequestDeliveryFormLivewire::class)->name('seller.request.delivery.form');
+    });
 
     Route::prefix('settings')->group(function () {
         Route::get('/general', GeneralSettingsLivewire::class)->name('seller.settings.general');
@@ -181,13 +186,6 @@ Route::prefix('promocodes')->controller(PromoCodesController::class)->group(func
 });
 
 Route::get('/mark-complete-order/{id}', [HomeController::class, 'markCompleteOrder'])->name('mark.complete.order');
-
-/* Old categories routes - begins */
-// Route::get('/acategories', [HomeController::class, 'allCat'])->name('admin.categories');
-// Route::post('/acategories/{id}/update', [HomeController::class, 'updateCat'])->name('update_cat');
-// Route::post('/acategories/add_cat', [HomeController::class, 'addCat'])->name('add_cat');
-// Route::get('/acategories/delete_cat/{id}', [HomeController::class, 'deleteCat'])->name('delete_cat');
-/* Old categories routes - ends */
 
 Route::get('/queries', [HomeController::class, 'adminQueries'])->name('admin.queries');
 Route::get('/users/{user_id}/status/{status}', [HomeController::class, 'changeUserStatus'])->name('change_user_status');

@@ -63,10 +63,10 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('seller.request.delivery') ? 'active' : '' }}" href="{{ route('seller.request.delivery') }}">
+                    <a class="nav-link {{ request()->routeIs('seller.requested.deliveries') ? 'active' : '' }}" href="{{ route('seller.requested.deliveries') }}">
                         <i class="nav-icon fas fa-truck-loading"></i>
                         <p class="ml-2">
-                            Request Delivery
+                            Requested Deliveries
                         </p>
                     </a>
                 </li>

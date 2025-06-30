@@ -56,7 +56,7 @@
     @endif
 
     @php
-        $requestDeliveryRoutes = [route('seller.request.delivery')];
+        $requestDeliveryRoutes = [route('seller.request.delivery.form')];
     @endphp
     @if (in_array(URL::current(), $requestDeliveryRoutes))
         <script>

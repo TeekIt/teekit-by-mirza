@@ -1,4 +1,4 @@
-<!-- <?php
+<?php
 
 namespace App\Http\Livewire\Sellers;
 
@@ -9,7 +9,8 @@ use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Exception;
 
-class RequestDeliveryLivewire extends Component
+
+class RequestDeliveryFormLivewire extends Component
 {
     public
         $sellerId,
@@ -114,6 +115,6 @@ class RequestDeliveryLivewire extends Component
 
     public function render()
     {
-        return view('livewire.sellers.request-delivery-livewire');
+        return view('livewire.sellers.request-delivery-form-livewire');
     }
-} -->
+}
