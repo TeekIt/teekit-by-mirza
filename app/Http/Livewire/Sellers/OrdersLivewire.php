@@ -383,7 +383,7 @@ class OrdersLivewire extends Component
         $this->resetPage();
 
         $this->reset([
-            'requestOrderId'
+            'requestOrderId',
         ]);
     }
 

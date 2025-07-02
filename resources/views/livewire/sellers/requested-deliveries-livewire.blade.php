@@ -1,6 +1,41 @@
 <div>
 
+    @php
+        use App\Enums\PackageWeightEnum;
+        use App\Enums\PackageTransportTypeEnum;
+    @endphp
+
     <x-session-messages />
+
+    {{-- ************************************ Cancel Requested Delivery Model ************************************ --}}
+    <x-custom-sweet-alert-modal
+        :alertIconHTML="'<i class=\'fas fa-exclamation-circle text-warning\'></i>'" :alertHeading="'Alert!'"
+        :msg="'Are you sure you want to cancel this requested delivery?'" :confirmButtonText="'Yes'"
+        :cancelButtonText="'No'" 
+        :confirmButtonFunction="'cancelDelivery(' . $requestedDeliveryId . ')'"
+        :cancelButtonFunction="'closeModal(\'customSweetAlertModal\')'"
+    />
+
+    {{-- <div wire:ignore.self class="modal fade" id="editRequestedDeliveryModal" tabindex="-1"
+        aria-labelledby="editRequestedDeliveryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body d-flex justify-content-between align-items-center">
+                    <div class="text-center p-4">
+                        <h2 class="text-dark mb-3">Warning!</h2>
+                        <p class="mb-4 fs-5">Are you sure you want to cancel this requested delivery?</p>
+                        <div class="d-flex justify-content-center gap-1">
+                            @php
+                                $variable = 'cancelRequestedDelivery';
+                            @endphp
+                            <button class="btn btn-site-primary py-2 px-4" wire:click="{{ $variable }}">Yes</button>
+                            <button class="btn btn-secondary py-2 px-4">No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> --}}
 
     <div class="content">
         <div class="content-header">
@@ -12,7 +47,7 @@
                                 <div class="col-lg-8 col-sm-12 col-md-8">
                                     <div class="row">
                                         <div class="col-12 col-sm-12">
-                                            <input type="date" wire:model.defer="amount" class="form-control mb-2">
+                                            <input type="date" wire:model.defer="search" class="form-control mb-2">
                                         </div>
                                     </div>
                                 </div>
@@ -76,6 +111,8 @@
                                     <th scope="col">Transport Type</th>
                                     <th scope="col">Package Weight</th>
                                     <th scope="col">Created At</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Options</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -91,9 +128,19 @@
                                         <td>{{ $singleIndex->package_transport_type }}</td>
                                         <td>{{ $singleIndex->package_weight }}</td>
                                         <td>{{ $singleIndex->created_at }}</td>
+                                        <td>
+                                            <span class="badge badge-primary">inProgress</span>
+                                        </td>
+                                        <td>
+                                            <button data-bs-toggle="modal" data-bs-target="#customSweetAlertModal"
+                                                wire:click="renderCancelRequestedDeliveryModal({{ $singleIndex->id }})"
+                                                class="btn text-site-primary" title="Cancel delivery">
+                                                <i class="far fa-window-close"></i>
+                                            </button>
+                                        </td>
                                     </tr>
                                 @empty
-                                    <td colspan="10">
+                                    <td colspan="12">
                                         <p class="text-dark text-center p-2 fs-3">
                                             {{ config('constants.NO_RECORD') }} 🥺
                                         </p>

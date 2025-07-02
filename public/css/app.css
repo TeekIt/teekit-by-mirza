@@ -2,7 +2,7 @@
 
 :root {
     --primary-bg: #3a4b83;
-    --primary-yellow:#ffcf42;
+    --primary-yellow: #ffcf42;
 }
 
 body {
@@ -84,6 +84,10 @@ nav.main-header a {
 
 .brand-link .brand-image {
     padding-top: 25px;
+}
+
+.main-sidebar-width {
+    width: 250px;
 }
 
 .sidebar-mini.sidebar-collapse .main-sidebar.sidebar-focused .brand-link,

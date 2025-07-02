@@ -42,7 +42,7 @@ class RequestedDelivery extends Model
                 return $query->where('creator_id', '=', $creatorId);
             })
             ->when($createdAt, function ($query, $createdAt) {
-                return $query->where('created_at', '=', $createdAt);
+                return $query->whereDate('created_at', $createdAt);
             })
             ->orderBy('created_at', $orderBy)
             ->paginate(10);

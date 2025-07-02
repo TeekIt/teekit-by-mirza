@@ -12,7 +12,17 @@ class RequestedDeliveriesLivewire extends Component
 
     public
         $sellerId,
-        $createdAt = '';
+        $createdAt,
+        $requestedDeliveryId,
+        $pickupAddress,
+        $dropoffAddress,
+        $unitAddress,
+        $receiverName,
+        $receiverPhone,
+        $receiverEmail,
+        $packageTransportType,
+        $packageWeight,
+        $search = '';
 
     protected $paginationTheme = 'bootstrap';
     /* 
@@ -30,11 +40,37 @@ class RequestedDeliveriesLivewire extends Component
         $this->reset(['search']);
     }
 
+    public function closeModal($modalId)
+    {
+        $this->dispatchBrowserEvent('close-modal', ['id' => $modalId]);
+    }
+    /* 
+     * CRUD Methods
+     */
+    public function cancelDelivery($id)
+    {
+        dd('Cancelling...' . $id);
+    }
+
+    public function renderCancelRequestedDeliveryModal($id)
+    {
+        $requestedDelivery = RequestedDelivery::find($id);
+        $this->requestedDeliveryId    = $requestedDelivery->id;
+        // $this->pickupAddress          = $requestedDelivery->pickup_address;
+        // $this->dropoffAddress         = $requestedDelivery->dropoff_address;
+        // $this->unitAddress            = $requestedDelivery->unit_address;
+        // $this->receiverName           = $requestedDelivery->receiver_name;
+        // $this->receiverPhone          = $requestedDelivery->receiver_phone;
+        // $this->receiverEmail          = $requestedDelivery->receiver_email;
+        // $this->packageTransportType   = $requestedDelivery->package_transport_type;
+        // $this->packageWeight          = $requestedDelivery->package_weight;
+    }
+
     public function render()
     {
         $data = RequestedDelivery::getForView(
             'desc',
-            $createdAt = '',
+            $this->search,
             $this->sellerId,
             [
                 'id',

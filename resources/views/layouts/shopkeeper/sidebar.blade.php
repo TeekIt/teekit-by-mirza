@@ -1,4 +1,4 @@
-<aside class="main-sidebar sidebar-dark-primary" style="overflow: initial;">
+<aside class="main-sidebar sidebar-dark-primary main-sidebar-width" style="overflow: initial;">
     <!-- Brand Logo -->
     <a class="nav-link nav-sidebar-arrow" onclick="jQuery('.navbar-nav>.nav-item>.nav-link').click();"> 
         <img src="{{ asset('images/icons/arrow.png') }}">
@@ -66,6 +66,7 @@
                     <a class="nav-link {{ request()->routeIs('seller.requested.deliveries') ? 'active' : '' }}" href="{{ route('seller.requested.deliveries') }}">
                         <i class="nav-icon fas fa-truck-loading"></i>
                         <p class="ml-2">
+                            {{-- Orders From Sellers --}}
                             Requested Deliveries
                         </p>
                     </a>
