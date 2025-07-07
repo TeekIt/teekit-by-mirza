@@ -21,11 +21,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
+use Laravel\Cashier\Billable;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use Notifiable, HasFactory, SoftDeletes;
+    use Notifiable, HasFactory, SoftDeletes, Billable;
     /**
      * The attributes that are mass assignable.
      *

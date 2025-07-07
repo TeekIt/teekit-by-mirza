@@ -86,27 +86,49 @@ class RequestDeliveryFormLivewire extends Component
         $this->validate();
 
         try {
-            /* Perform some operation */
-            $inserted =  RequestedDelivery::add(
-                creatorId: $this->sellerId,
-                pickupAddress: $this->pickupAddress,
-                dropoffAddress: $this->dropoffAddress,
-                unitAddress: $this->unitAddress,
-                receiverName: $this->receiverName,
-                receiverPhone: $this->receiverPhone,
-                receiverEmail: $this->receiverEmail,
-                packageTransportType: PackageTransportTypeEnum::from($this->packageTransportType),
-                packageWeight: PackageWeightEnum::from($this->packageWeight)
-            );
-            /* Operation finished */
-            sleep(1);
+            // redirect()->route('stripe.checkout.charge', [
+            //     'pickupAddress' => $this->pickupAddress,
+            //     'dropoffAddress' => $this->dropoffAddress,
+            //     'unitAddress' => $this->unitAddress,
+            //     'receiverName' => $this->receiverName,
+            //     'receiverPhone' => $this->receiverPhone,
+            //     'receiverEmail' => $this->receiverEmail,
+            //     'packageTransportType' => $this->packageTransportType,
+            //     'packageWeight' => $this->packageWeight
+            // ]);
 
-            if ($inserted) {
-                session()->flash('success', config('constants.DATA_INSERTION_SUCCESS'));
-                $this->resetModal();
-            } else {
-                session()->flash('error', config('constants.INSERTION_FAILED'));
-            }
+            redirect()->route('stripe.checkout.charge', [
+                'pickupAddress' => $this->pickupAddress,
+                'dropoffAddress' => $this->dropoffAddress,
+                'unitAddress' => $this->unitAddress,
+                'receiverName' => $this->receiverName,
+                'receiverPhone' => $this->receiverPhone,
+                'receiverEmail' => $this->receiverEmail,
+                'packageTransportType' => $this->packageTransportType,
+                'packageWeight' => $this->packageWeight
+            ]);
+            
+            /* Perform some operation */
+            // $inserted =  RequestedDelivery::add(
+            //     creatorId: $this->sellerId,
+            //     pickupAddress: $this->pickupAddress,
+            //     dropoffAddress: $this->dropoffAddress,
+            //     unitAddress: $this->unitAddress,
+            //     receiverName: $this->receiverName,
+            //     receiverPhone: $this->receiverPhone,
+            //     receiverEmail: $this->receiverEmail,
+            //     packageTransportType: PackageTransportTypeEnum::from($this->packageTransportType),
+            //     packageWeight: PackageWeightEnum::from($this->packageWeight)
+            // );
+            // /* Operation finished */
+            // sleep(1);
+
+            // if ($inserted) {
+            //     session()->flash('success', config('constants.DATA_INSERTION_SUCCESS'));
+            //     $this->resetModal();
+            // } else {
+            //     session()->flash('error', config('constants.INSERTION_FAILED'));
+            // }
         } catch (Exception $error) {
             report($error);
             session()->flash('error', $error->getMessage());

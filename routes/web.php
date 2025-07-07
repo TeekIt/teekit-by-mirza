@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PromoCodesController;
+use App\Http\Controllers\StripeContorller;
 use App\Http\Controllers\StuartDeliveryController;
 use App\Http\Controllers\UsersController;
 use App\Http\Livewire\Admin\CategoriesLivewire;
@@ -169,6 +170,12 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
             Route::get('/', 'adminOrders')->name('admin.orders');
         });
     });
+});
+
+Route::prefix('stripe')->middleware(['auth'])->controller(StripeContorller::class)->group(function () {
+    Route::get('/checkout-charge', function () {
+        return request()->user()->checkoutCharge(1200, 'requested-delivery', 1);
+    })->name('stripe.checkout.charge');
 });
 
 Route::prefix('stuart')->controller(StuartDeliveryController::class)->group(function () {

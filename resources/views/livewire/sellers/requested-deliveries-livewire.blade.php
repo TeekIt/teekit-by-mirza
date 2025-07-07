@@ -16,27 +16,6 @@
         :cancelButtonFunction="'closeModal(\'customSweetAlertModal\')'"
     />
 
-    {{-- <div wire:ignore.self class="modal fade" id="editRequestedDeliveryModal" tabindex="-1"
-        aria-labelledby="editRequestedDeliveryModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-body d-flex justify-content-between align-items-center">
-                    <div class="text-center p-4">
-                        <h2 class="text-dark mb-3">Warning!</h2>
-                        <p class="mb-4 fs-5">Are you sure you want to cancel this requested delivery?</p>
-                        <div class="d-flex justify-content-center gap-1">
-                            @php
-                                $variable = 'cancelRequestedDelivery';
-                            @endphp
-                            <button class="btn btn-site-primary py-2 px-4" wire:click="{{ $variable }}">Yes</button>
-                            <button class="btn btn-secondary py-2 px-4">No</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> --}}
-
     <div class="content">
         <div class="content-header">
             <div class="container pt-4">

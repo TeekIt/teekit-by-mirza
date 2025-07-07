@@ -9,6 +9,25 @@
 
     <!-- Main content -->
     <div class="content">
+        <div class="content-header">
+            <div class="container pt-4">
+                <form wire:submit.prevent="render">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row">
+                                <div class="col-sm-0 col-md-10"></div>
+                                <div class="col-sm-12 col-md-2 d-flex flex-sm-row">
+                                    <a type="button" href="{{ route('seller.requested.deliveries') }}"
+                                        class="btn btn-primary py-3 px-0 w-100 mx-1" title="View Requested Deliveries">
+                                        <span class="fas fa-eye"></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
         <div class="container-fluid">
             <div class="row">
                 <div class="offset-xl-2 col-lg-12 col-xl-8 py-4">
