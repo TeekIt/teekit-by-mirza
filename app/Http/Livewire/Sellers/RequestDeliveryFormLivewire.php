@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Sellers;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use App\Models\RequestedDelivery;
+use App\Services\StuartDeliveryServices;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Exception;
@@ -21,7 +22,10 @@ class RequestDeliveryFormLivewire extends Component
         $receiverPhone,
         $receiverEmail,
         $packageTransportType,
-        $packageWeight;
+        $packageWeight,
+        $deliveryCost = 0,
+        $currency,
+        $disableRequestDeliveryButton = true;
 
     protected function rules()
     {
@@ -47,7 +51,7 @@ class RequestDeliveryFormLivewire extends Component
     /* 
      * Helpers
      */
-    public function resetModal()
+    public function resetComponent()
     {
         $this->resetValidation();
 
@@ -78,6 +82,52 @@ class RequestDeliveryFormLivewire extends Component
                 $this->packageWeight = PackageWeightEnum::EXTRA_LARGE->value;
         }
     }
+
+    public function calculateDeliveryCost()
+    {
+        $this->validate();
+        // dd($this->pickupAddress);
+        try {
+            $deliveryCost = StuartDeliveryServices::getDeliveryJobPricing(
+                StuartDeliveryServices::getAccessToken(),
+                [
+                    'job' => [
+                        'pickup_at' => now()->addMinutes(10),
+                        'assignment_code' => $this->sellerId,
+                        'pickups' => [
+                            [
+                                'address' => $this->pickupAddress,
+                                'contact' => [
+                                    'firstname' => auth()->user()->name,
+                                    'phone' => auth()->user()->business_phone,
+                                    'email' => auth()->user()->email,
+                                ]
+                            ]
+                        ],
+                        'dropoffs' => [
+                            [
+                                'package_type' => 'medium',
+                                'client_reference' => (string) $this->sellerId,
+                                'address' => $this->dropoffAddress,
+                                'contact' => [
+                                    'firstname' => $this->receiverName,
+                                    'phone' => $this->receiverPhone,
+                                    'email' => $this->receiverEmail,
+                                ]
+                            ]
+                        ],
+                    ]
+                ]
+            );
+
+            $this->currency = $deliveryCost['currency'] ?? 'GBP';
+            $this->deliveryCost = $deliveryCost['amount_with_tax'];
+            $this->disableRequestDeliveryButton = false;
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
+    }
     /*
     * CRUD Methods
     */
@@ -86,6 +136,11 @@ class RequestDeliveryFormLivewire extends Component
         $this->validate();
 
         try {
+
+            redirect()->route('stripe.checkout.charge', [
+                'totalCharge' => (int) $this->deliveryCost,
+            ]);
+
             // redirect()->route('stripe.checkout.charge', [
             //     'pickupAddress' => $this->pickupAddress,
             //     'dropoffAddress' => $this->dropoffAddress,
@@ -97,17 +152,6 @@ class RequestDeliveryFormLivewire extends Component
             //     'packageWeight' => $this->packageWeight
             // ]);
 
-            redirect()->route('stripe.checkout.charge', [
-                'pickupAddress' => $this->pickupAddress,
-                'dropoffAddress' => $this->dropoffAddress,
-                'unitAddress' => $this->unitAddress,
-                'receiverName' => $this->receiverName,
-                'receiverPhone' => $this->receiverPhone,
-                'receiverEmail' => $this->receiverEmail,
-                'packageTransportType' => $this->packageTransportType,
-                'packageWeight' => $this->packageWeight
-            ]);
-            
             /* Perform some operation */
             // $inserted =  RequestedDelivery::add(
             //     creatorId: $this->sellerId,
@@ -125,7 +169,7 @@ class RequestDeliveryFormLivewire extends Component
 
             // if ($inserted) {
             //     session()->flash('success', config('constants.DATA_INSERTION_SUCCESS'));
-            //     $this->resetModal();
+            //     $this->resetComponent();
             // } else {
             //     session()->flash('error', config('constants.INSERTION_FAILED'));
             // }

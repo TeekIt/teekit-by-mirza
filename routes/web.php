@@ -25,6 +25,7 @@ use App\Http\Livewire\Sellers\GeneralSettingsLivewire;
 use App\Http\Livewire\Sellers\RequestDeliveryFormLivewire;
 use App\Http\Livewire\Sellers\RequestedDeliveriesLivewire;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
+use App\Services\StripeServices;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 /*
@@ -173,8 +174,16 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
 });
 
 Route::prefix('stripe')->middleware(['auth'])->controller(StripeContorller::class)->group(function () {
-    Route::get('/checkout-charge', function () {
-        return request()->user()->checkoutCharge(1200, 'requested-delivery', 1);
+    Route::get('/checkout-charge/{totalCharge}', function () {
+        return request()->user()->checkoutCharge(
+            StripeServices::calculateCharge(request('totalCharge')),
+            'requested-delivery',
+            1,
+            [
+                'success_url' => route('seller.requested.deliveries'),
+                'cancel_url' => route('seller.request.delivery.form'),
+            ]
+        );
     })->name('stripe.checkout.charge');
 });
 

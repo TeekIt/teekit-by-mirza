@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Laravel\Cashier\Checkout;
 use stdClass;
 
 final class StripeServices
@@ -14,6 +15,30 @@ final class StripeServices
     public static function getPublishKey(): string
     {
         return config('stripe.STRIPE_PUBLISH_KEY');
+    }
+
+    public static function calculateCharge(int $amount, string $currency = 'GBP'): int
+    {
+        /* Convert to Cents or lowest unit of given Currency according to Stripe standards */
+        return bcmul($amount, 100, 0);
+    }
+
+    public static function getSingleChargeCheckoutForm(
+        int $totalCharge,
+        string $productName,
+        int $qty,
+        string $successUrl,
+        string $cancelUrl
+    ): Checkout {
+        return request()->user()->checkoutCharge(
+            static::calculateCharge($totalCharge),
+            $productName,
+            $qty,
+            [
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
+            ]
+        );
     }
 
     public static function createCustomer(string $name, string $email): stdClass

@@ -5,115 +5,68 @@ namespace App\Services;
 use App\Enums\OrderStatusEnum;
 use App\Models\StuartDelivery;
 use App\Orders;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 use Illuminate\Support\Carbon;
 
 final class StuartDeliveryServices
 {
-    public static function getSandBoxJobsUrl()
+    public static function getJobsUrl()
     {
-        return 'https://api.sandbox.stuart.com/v2/jobs';
+        return (app()->environment('production')) ? 'https://api.stuart.com/v2/jobs' : 'https://api.sandbox.stuart.com/v2/jobs';
     }
 
-    public static function getSandBoxTokenUrl()
+    public static function getJobPricingUrl()
     {
-        return 'https://api.sandbox.stuart.com/oauth/token';
+        return (app()->environment('production'))
+            ? 'https://api.stuart.com/v2/jobs/pricing' :
+            'https://api.sandbox.stuart.com/v2/jobs/pricing';
     }
 
-    public static function getProductionJobsUrl()
+    public static function getTokenUrl()
     {
-        return 'https://api.stuart.com/v2/jobs';
-    }
-
-    public static function getProductionTokenUrl()
-    {
-        return 'https://api.stuart.com/oauth/token';
+        return (app()->environment('production')) ? 'https://api.stuart.com/oauth/token' : 'https://api.sandbox.stuart.com/oauth/token';
     }
     /**
-     * It will get a fresh token for hitting Stuart delivery API
+     * It will get a fresh token for hitting Stuart delivery APIs
      * @author Muhammad Abdullah Mirza
      */
-    public static function stuartAccessToken()
+    public static function getAccessToken()
     {
-        $url = (app()->environment('production')) ? self::getProductionTokenUrl() : self::getSandBoxTokenUrl();
-
-        return Http::asForm()->post($url, [
+        return Http::asForm()->post(static::getTokenUrl(), [
             'client_id' => config('stuart.STUART_CLIENT_ID'),
             'client_secret' => config('stuart.STUART_CLIENT_SECRET'),
             'grant_type' => 'client_credentials',
             'scope' => 'api'
         ])->json()['access_token'];
-
-        // $stuartAuth = Http::asForm()->post($url, [
-        //     'client_id' => env('STUART_CLIENT_ID'),
-        //     'client_secret' => env('STUART_CLIENT_SECRET'),
-        //     'grant_type' => 'client_credentials',
-        //     'scope' => 'api'
-        // ]);
-        // $stuartAuth = $stuartAuth->json();
-
-        // return $stuartAuth['access_token'];
-    }
-
-    public static function stuartSandboxAccessToken()
-    {
-        $stuartAuth = Http::asForm()->post(self::getSandBoxTokenUrl(), [
-            'client_id' => env('STUART_CLIENT_ID'),
-            'client_secret' => env('STUART_CLIENT_SECRET'),
-            'grant_type' => 'client_credentials',
-            'scope' => 'api'
-        ]);
-        $stuartAuth = $stuartAuth->json();
-
-        return $stuartAuth['access_token'];
     }
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public static function stuartProductionAccessToken()
+    public static function createDeliveryJob(string $accessToken, array $job)
     {
-        $stuartAuth = Http::asForm()->post(self::getProductionTokenUrl(), [
-            'client_id' => env('STUART_PRODUCTION_CLIENT_ID'),
-            'client_secret' => env('STUART_PRODUCTION_CLIENT_SECRET'),
-            'grant_type' => 'client_credentials',
-            'scope' => 'api'
-        ]);
-        $stuartAuth = $stuartAuth->json();
-
-        return $stuartAuth['access_token'];
+        return Http::withToken($accessToken)->post(self::getJobsUrl(), $job)->json();
     }
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public static function stuartSandboxJobCreation(string $accessToken, array $job)
+    public static function getDeliveryJobPricing(string $accessToken, array $job): array
     {
-        return Http::withToken($accessToken)->post(self::getSandBoxJobsUrl(), $job)->json();
-    }
-    /**
-     * @author Muhammad Abdullah Mirza
-     */
-    public static function stuartProductionJobCreation(string $accessToken, array $job)
-    {
-        return Http::withToken($accessToken)->post(self::getProductionJobsUrl(), $job)->json();
-    }
-    /**
-     * @author Muhammad Abdullah Mirza
-     */
-    public static function stuartSandboxJobStatus(string $accessToken, $jobId)
-    {
-        $response = Http::withToken($accessToken)->patch(self::getSandBoxJobsUrl() . '/' . $jobId);
-
-        return $response->json();
-    }
-    /**
-     * @author Muhammad Abdullah Mirza
-     */
-    public static function stuartProductionJobStatus(string $accessToken, $jobId)
-    {
-        $response = Http::withToken($accessToken)->patch(self::getProductionJobsUrl() . '/' . $jobId);
+        $response = Http::withToken($accessToken)->post(self::getJobPricingUrl(), $job)->json();
         
-        return $response->json();
+        if (isset($response['error'])) {
+            throw new Exception($response['message']);
+        }
+
+        return $response;
+    }
+    /**
+     * @author Muhammad Abdullah Mirza
+     */
+    public static function getDeliveryJobStatus(string $accessToken, $jobId)
+    {
+        return Http::withToken($accessToken)->patch(self::getJobsUrl() . '/' . $jobId)->json();
     }
     /**
      * Creates a stuart delivery job for a livewire component
@@ -124,7 +77,7 @@ final class StuartDeliveryServices
         try {
             $orderDetails = Orders::getById($orderId);
             $transportType = Orders::fetchTransportType($orderId);
-            $accessToken = (app()->environment('production')) ? static::stuartProductionAccessToken() : static::stuartSandboxAccessToken();
+            $accessToken = static::getAccessToken();
 
             $job = [
                 'job' => [
@@ -165,7 +118,7 @@ final class StuartDeliveryServices
                 ]
             ];
 
-            $data = (app()->environment('production')) ? static::stuartProductionJobCreation($accessToken, $job) : static::stuartSandboxJobCreation($accessToken, $job);
+            $data = static::createDeliveryJob($accessToken, $job);
             if ($data && !isset($data['error'])) {
                 StuartDelivery::insertInfo($orderId, $data['id']);
 

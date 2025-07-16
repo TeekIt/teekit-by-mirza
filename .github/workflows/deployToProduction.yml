@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Git checkout@v3 For Code Checkout
-        uses: actions/checkout@v3
+      - name: Git Checkout Action For Code Checkout
+        uses: actions/checkout@v4
 
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.3

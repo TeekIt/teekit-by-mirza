@@ -194,9 +194,27 @@
                                                 </div>
                                             </div>
 
+                                            <div class="col-md-6 offset-md-3 text-center my-3">
+                                                <button type="button"
+                                                    class="btn site-primary-yellow-bg rounded-pill px-5 py-2 font-weight-bold"
+                                                    wire:click="calculateDeliveryCost"
+                                                    wire:target="calculateDeliveryCost" wire:loading.class="btn-dark"
+                                                    wire:loading.class.remove="site-primary-yellow-bg"
+                                                    wire:loading.attr="disabled">
+                                                    <span wire:target="calculateDeliveryCost" wire:loading.remove>
+                                                        Calculate Delivery Cost
+                                                    </span>
+                                                    <span wire:target="calculateDeliveryCost" wire:loading>
+                                                        <span class="spinner-border spinner-border-sm text-light"
+                                                            role="status" aria-hidden="true"></span>
+                                                    </span>
+                                                </button>
+                                            </div>
+
                                             <div class="col-md-12">
                                                 <div class="p-3 text-center">
-                                                    <p class="fs-5">Total Cost: Coming Soon{{-- £30 --}}
+                                                    <p class="fs-5">
+                                                        Total Cost: {{ $deliveryCost }} {{ $currency }}
                                                     </p>
                                                 </div>
                                             </div>
@@ -206,7 +224,8 @@
                                                     class="btn site-primary-yellow-bg rounded-pill px-5 py-2 font-weight-bold"
                                                     wire:target="requestDelivery" wire:loading.class="btn-dark"
                                                     wire:loading.class.remove="site-primary-yellow-bg"
-                                                    wire:loading.attr="disabled">
+                                                    wire:loading.attr="disabled"
+                                                    @if ($disableRequestDeliveryButton) disabled @endif>
                                                     <span wire:target="requestDelivery" wire:loading.remove>
                                                         Request
                                                     </span>
