@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DeliveryProviderEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,6 +20,8 @@ class RequestedDelivery extends Model
      */
     protected $fillable = [
         'creator_id',
+        'delivery_provider',
+        'delivery_id',
         'pickup_address',
         'dropoff_address',
         'unit_address',
@@ -50,6 +53,8 @@ class RequestedDelivery extends Model
 
     public static function add(
         int $creatorId,
+        DeliveryProviderEnum $deliveryProvider,
+        string $deliveryId,
         string $pickupAddress,
         string $dropoffAddress,
         ?string $unitAddress = null,
@@ -61,6 +66,8 @@ class RequestedDelivery extends Model
     ): RequestedDelivery {
         return self::create([
             'creator_id' => $creatorId,
+            'delivery_provider' => $deliveryProvider,
+            'delivery_id' => $deliveryId,
             'pickup_address' => $pickupAddress,
             'dropoff_address' => $dropoffAddress,
             'unit_address' => $unitAddress,
@@ -72,24 +79,24 @@ class RequestedDelivery extends Model
         ]);
     }
 
-    public static function updateInfo(
-        int $id,
-        string $pickupAddress,
-        string $dropoffAddress,
-        string $receiverName,
-        int $receiverPhone,
-        string $packageSize,
-        string $packageWeight
-    ): bool {
-        $delivery = self::findOrFail($id);
+    // public static function updateInfo(
+    //     int $id,
+    //     string $pickupAddress,
+    //     string $dropoffAddress,
+    //     string $receiverName,
+    //     int $receiverPhone,
+    //     string $packageSize,
+    //     string $packageWeight
+    // ): bool {
+    //     $delivery = self::findOrFail($id);
 
-        $delivery->pickup_address = $pickupAddress;
-        $delivery->dropoff_address = $dropoffAddress;
-        $delivery->receiver_name = $receiverName;
-        $delivery->receiver_phone = $receiverPhone;
-        $delivery->package_size = $packageSize;
-        $delivery->package_weight = $packageWeight;
+    //     $delivery->pickup_address = $pickupAddress;
+    //     $delivery->dropoff_address = $dropoffAddress;
+    //     $delivery->receiver_name = $receiverName;
+    //     $delivery->receiver_phone = $receiverPhone;
+    //     $delivery->package_size = $packageSize;
+    //     $delivery->package_weight = $packageWeight;
 
-        return $delivery->save();
-    }
+    //     return $delivery->save();
+    // }
 }

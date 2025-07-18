@@ -190,7 +190,7 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $stuartMessage = StuartDeliveryServices::stuartJobCreationLivewire(
+            $stuartMessage = StuartDeliveryServices::createJobForLivewire(
                 $this->orderId,
                 $this->customOrderId
             );

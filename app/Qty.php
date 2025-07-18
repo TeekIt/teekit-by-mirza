@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Enums\ProductStatus;
+use App\Enums\ProductStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -92,7 +92,7 @@ class Qty extends Model
             ->join('products', 'products.id', '=', 'qty.product_id')
             ->where('qty.qty', '>', 0) // Products should be in stock
             ->where('qty.category_id', '=', $categoryId)
-            ->where('products.status', '=', ProductStatus::ENABLE) // Products should be live
+            ->where('products.status', '=', ProductStatusEnum::ENABLE) // Products should be live
             ->where('users.is_active', '=', User::ACTIVE) // Sellers should be active
             ->where('users.state', '=', $state)
             ->distinct() // Use distinct to select only unique stores

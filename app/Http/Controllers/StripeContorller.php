@@ -10,6 +10,16 @@ use Illuminate\Support\Facades\Validator;
 
 class StripeContorller extends Controller
 {
+    public function getCheckoutFormForRequestedDelivery(Request $request)
+    {
+        return StripeServices::getSingleChargeCheckoutForm(
+            totalCharge: $request->route('totalCharge'),
+            productName: $request->route('productName'),
+            successUrl: route('seller.requested.deliveries'),
+            cancelUrl: route('seller.request.delivery.form')
+        );
+    }
+
     public function createPaymentIntent(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
@@ -25,7 +35,7 @@ class StripeContorller extends Controller
         }
 
         $validatedData = (object) $validatedData->validated();
-        
+
         if (isset($validatedData->savePaymentMethod)) {
             $response = StripeServices::createPaymentIntentAndSavePaymentMethod();
         } else {
@@ -74,9 +84,9 @@ class StripeContorller extends Controller
         $error = isset($response->error);
 
         return JsonResponseServices::getApiResponse(
-            $response,
+            ($error) ? [] : $response,
             ($error) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            '',
+            ($error) ? $response->error : '',
             ($error) ? config('constants.HTTP_UNPROCESSABLE_REQUEST') : config('constants.HTTP_OK')
         );
     }
@@ -94,9 +104,9 @@ class StripeContorller extends Controller
         $error = isset($response->error);
 
         return JsonResponseServices::getApiResponse(
-            $response,
+            ($error) ? [] : $response,
             ($error) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            '',
+            ($error) ? $response->error : '',
             ($error) ? config('constants.HTTP_UNPROCESSABLE_REQUEST') : config('constants.HTTP_OK')
         );
     }

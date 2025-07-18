@@ -47,7 +47,8 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
-                                                                wire:model.defer="pickupAddress" id="pickupAddress"
+                                                                wire:model.defer="pickupAddress"
+                                                                wire:change="inputFieldChanged" id="pickupAddress"
                                                                 placeholder="Pickup Address*" value="" required>
                                                         </div>
                                                         <small class="text-danger">
@@ -59,7 +60,8 @@
                                                     <div class="col-md-12 mt-3">
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
-                                                                wire:model.defer="dropoffAddress" id="dropoffAddress"
+                                                                wire:model.defer="dropoffAddress"
+                                                                wire:change="inputFieldChanged" id="dropoffAddress"
                                                                 placeholder="Dropoff Address*" value="" required>
                                                         </div>
                                                         <small class="text-danger">
@@ -160,7 +162,8 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <select class="form-control"
-                                                                wire:model.defer="packageWeight" required>
+                                                                wire:model.defer="packageWeight"
+                                                                wire:change="inputFieldChanged" required>
                                                                 <option value="">Package Weight (Kg)*</option>
                                                                 <optgroup label="Small">
                                                                     <option value="{{ PackageWeightEnum::SMALL }}">

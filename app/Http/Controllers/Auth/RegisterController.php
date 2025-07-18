@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Enums\UserRole;
+use App\Enums\UserRoleEnum;
 use App\User;
 use App\Http\Controllers\Controller;
 use App\Services\EmailServices;
@@ -144,7 +144,7 @@ class RegisterController extends Controller
             $data['lat'],
             $data['lon'],
             $businessHours,
-            $request->input('parent_store') ? UserRole::CHILD_SELLER : UserRole::SELLER,
+            $request->input('parent_store') ? UserRoleEnum::CHILD_SELLER : UserRoleEnum::SELLER,
             $parentStoreId
         );
 
@@ -154,8 +154,8 @@ class RegisterController extends Controller
 
         EmailServices::sendNewSellerMail(
             $user,
-            ($user->role_id === UserRole::SELLER) ? 'Parent' : 'Child',
-            ($user->role_id === UserRole::CHILD_SELLER) ? $request->input('parent_store') : null,
+            ($user->role_id === UserRoleEnum::SELLER) ? 'Parent' : 'Child',
+            ($user->role_id === UserRoleEnum::CHILD_SELLER) ? $request->input('parent_store') : null,
         );
     }
 }

@@ -26,9 +26,9 @@ final class StripeServices
     public static function getSingleChargeCheckoutForm(
         int $totalCharge,
         string $productName,
-        int $qty,
         string $successUrl,
-        string $cancelUrl
+        string $cancelUrl,
+        int $qty = 1
     ): Checkout {
         return request()->user()->checkoutCharge(
             static::calculateCharge($totalCharge),

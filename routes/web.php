@@ -56,7 +56,8 @@ Route::prefix('settings')->middleware(['auth', 'auth.sellers'])->controller(Home
     Route::get('/payment', 'paymentSettings')->name('setting.payment');
     Route::post('/payment/update', 'paymentSettingsUpdate')->name('payment_settings_update');
     Route::post('/password/update', 'adminPasswordUpdate')->name('password_update');
-    Route::get('/change_settings/{setting_name}/{value}', 'changeSettings')->name('change_settings')->where(['setting_name' => '^[a-z_]*$', 'value' => '[0-9]+']);
+    Route::get('/change_settings/{setting_name}/{value}', 'changeSettings')->name('change_settings')
+        ->where(['setting_name' => '^[a-z_]*$', 'value' => '[0-9]+']);
 });
 /*
 |--------------------------------------------------------------------------
@@ -73,7 +74,8 @@ Route::post('/importProducts', [HomeController::class, 'importProducts'])->name(
 Route::prefix('orders')->controller(HomeController::class)->group(function () {
     Route::get('/mark_as_delivered/{order_id}', 'markAsDelivered')->name('mark_as_delivered');
     Route::get('/mark_as_completed/{order_id}', 'markAsCompleted')->name('mark_as_completed');
-    Route::get('/{order_id}/remove/{item_id}/product/{product_price}/{product_qty}', 'removeProductFromOrder')->name('remove_order_product');
+    Route::get('/{order_id}/remove/{item_id}/product/{product_price}/{product_qty}', 'removeProductFromOrder')
+        ->name('remove_order_product');
     Route::get('/verify/{order_id}', 'clickToVerify')->name('verify_order');
 });
 
@@ -174,17 +176,8 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
 });
 
 Route::prefix('stripe')->middleware(['auth'])->controller(StripeContorller::class)->group(function () {
-    Route::get('/checkout-charge/{totalCharge}', function () {
-        return request()->user()->checkoutCharge(
-            StripeServices::calculateCharge(request('totalCharge')),
-            'requested-delivery',
-            1,
-            [
-                'success_url' => route('seller.requested.deliveries'),
-                'cancel_url' => route('seller.request.delivery.form'),
-            ]
-        );
-    })->name('stripe.checkout.charge');
+    Route::get('requested_delivery/checkout_charge/{totalCharge}/{productName}', 'getCheckoutFormForRequestedDelivery')
+        ->name('stripe.requested.delivery.checkout.form');
 });
 
 Route::prefix('stuart')->controller(StuartDeliveryController::class)->group(function () {

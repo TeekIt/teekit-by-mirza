@@ -270,7 +270,7 @@ class OrdersOfUniqueProductsLivewire extends Component
             if ($currentTotalAmount <= $initialTotalAmount) {
                 $response = StripeServices::capturePaymentIntent(
                     $this->selectedOrder->payment_intent_id,
-                    bcmul($currentTotalAmount, 100),
+                    StripeServices::calculateCharge($currentTotalAmount),
                 );
                 if (isset($response->error)) {
                     throw new Exception($response->error->message);

@@ -1,7 +1,7 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     @php
         use Illuminate\Support\Str;
-        use App\Enums\ProductStatus;
+        use App\Enums\ProductStatusEnum;
     @endphp
 
     <x-session-messages />
@@ -69,7 +69,7 @@
                                 <!-- Single Product -->
                                 <div class="col-md-6 col-lg-4 col-xl-3 p-2">
                                     <div id="productItem"
-                                        class="single-product bg-white p-2 rounded @if ($inventory->status->value == ProductStatus::DISABLE->value) disabled-product @endif">
+                                        class="single-product bg-white p-2 rounded @if ($inventory->status->value == ProductStatusEnum::DISABLE->value) disabled-product @endif">
                                         @php
                                             if (str_contains($inventory->feature_img, 'https://')) {
                                                 $featureImageUrl = $inventory->feature_img;
@@ -80,7 +80,7 @@
                                         <div class="part-1"
                                             style="background:url('{{ $featureImageUrl }}') no-repeat center; ">
                                             <ul>
-                                                @if ($inventory->status->value == ProductStatus::DISABLE->value)
+                                                @if ($inventory->status->value == ProductStatusEnum::DISABLE->value)
                                                     <li>
                                                         <a wire:click="toggleProduct('{{ $inventory->id }}', 1)"
                                                             wire:target="toggleProduct('{{ $inventory->id }}', 1)"
@@ -95,7 +95,7 @@
                                                             </span>
                                                         </a>
                                                     </li>
-                                                @elseif ($inventory->status->value == ProductStatus::ENABLE->value)
+                                                @elseif ($inventory->status->value == ProductStatusEnum::ENABLE->value)
                                                     <li>
                                                         <a wire:click="toggleProduct('{{ $inventory->id }}', 0)"
                                                             wire:target="toggleProduct('{{ $inventory->id }}', 0)"
@@ -171,7 +171,7 @@
                             @if ($inventory->featured === 0)
                                 <div class="col-md-6 col-lg-4 col-xl-3 p-2">
                                     <div id="productItem"
-                                        class="single-product bg-white p-2 rounded @if ($inventory->status->value == ProductStatus::DISABLE->value) disabled-product @endif">
+                                        class="single-product bg-white p-2 rounded @if ($inventory->status->value == ProductStatusEnum::DISABLE->value) disabled-product @endif">
                                         @php
                                             if (str_contains($inventory->feature_img, 'https://')) {
                                                 $featureImageUrl = $inventory->feature_img;
@@ -184,7 +184,7 @@
                                             {{-- <span class="discount">15% off</span>
                                                <span class="new">new</span> --}}
                                             <ul>
-                                                @if ($inventory->status->value == ProductStatus::DISABLE->value)
+                                                @if ($inventory->status->value == ProductStatusEnum::DISABLE->value)
                                                     <li>
                                                         <a wire:click="toggleProduct('{{ $inventory->id }}', 1)"
                                                             wire:target="toggleProduct('{{ $inventory->id }}', 1)"
@@ -200,7 +200,7 @@
                                                             </span>
                                                         </a>
                                                     </li>
-                                                @elseif($inventory->status->value == ProductStatus::ENABLE->value)
+                                                @elseif($inventory->status->value == ProductStatusEnum::ENABLE->value)
                                                     <li>
                                                         <a wire:click="toggleProduct('{{ $inventory->id }}', 0)"
                                                             wire:target="toggleProduct('{{ $inventory->id }}', 0)"

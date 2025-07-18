@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Categories;
 use App\Enums\SortByEnum;
-use App\Enums\TransportVehicle;
-use App\Enums\UserRole;
+use App\Enums\TransportVehicleEnum;
+use App\Enums\UserRoleEnum;
 use App\Imports\ProductsImport;
 use App\Models\ProductImage;
 use App\Products;
@@ -57,9 +57,9 @@ class ProductsController extends Controller
             $data['colors'] = ProductServices::jsonEncodeColors($data['colors']);
         }
 
-        $data['bike'] = ($data['vehicle'] == TransportVehicle::BIKE->value) ? 1 : 0;
-        $data['car'] = ($data['vehicle'] == TransportVehicle::CAR->value) ? 1 : 0;
-        $data['van'] = ($data['vehicle'] == TransportVehicle::VAN->value) ? 1 : 0;
+        $data['bike'] = ($data['vehicle'] == TransportVehicleEnum::BIKE->value) ? 1 : 0;
+        $data['car'] = ($data['vehicle'] == TransportVehicleEnum::CAR->value) ? 1 : 0;
+        $data['van'] = ($data['vehicle'] == TransportVehicleEnum::VAN->value) ? 1 : 0;
         $data['discount_percentage'] = (!isset($data['discount_percentage'])) ? 0.00 : $data['discount_percentage'];
         $data['contact'] = '+44' . $data['contact'];
         $data['seller_id'] = auth()->id();
@@ -110,9 +110,9 @@ class ProductsController extends Controller
             $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
         }
 
-        $data['bike'] = ($data['vehicle'] == TransportVehicle::BIKE->value) ? 1 : 0;
-        $data['car'] = ($data['vehicle'] == TransportVehicle::CAR->value) ? 1 : 0;
-        $data['van'] = ($data['vehicle'] == TransportVehicle::VAN->value) ? 1 : 0;
+        $data['bike'] = ($data['vehicle'] == TransportVehicleEnum::BIKE->value) ? 1 : 0;
+        $data['car'] = ($data['vehicle'] == TransportVehicleEnum::CAR->value) ? 1 : 0;
+        $data['van'] = ($data['vehicle'] == TransportVehicleEnum::VAN->value) ? 1 : 0;
         $data['discount_percentage'] = $data['discount_percentage'] ?? 0.00;
         $data['contact'] = '+44' . $data['contact'];
         $data['seller_id'] = auth()->id();
@@ -178,7 +178,7 @@ class ProductsController extends Controller
                 'sellerId' => [
                     'required',
                     'integer',
-                    Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRole::SELLER)),
+                    Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRoleEnum::SELLER)),
                 ],
             ],
             messages: [

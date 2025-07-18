@@ -53,7 +53,7 @@
                                         </span>
                                     </button>
                                     <a type="button" href="{{ route('seller.request.delivery.form') }}"
-                                        class="btn btn-primary pt-2 px-1 w-100 mx-1" title="Add New">
+                                        class="btn btn-primary pt-2 px-1 w-100 mx-1" title="Request New">
                                         <span class="fas fa-plus"></span>
                                     </a>
                                 </div>

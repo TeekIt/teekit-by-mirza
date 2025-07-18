@@ -21,16 +21,11 @@ final class GophrDeliveryServices
             'https://api-sandbox.gophr.com/v2-commercial-api';
     }
 
-    public static function generateUuid(): string
-    {
-        return Str::uuid();
-    }
-
     public static function createJob(Orders|OrdersFromOtherSeller $order, string $parcelDescription): stdClass
     {
         $parcelData = [
-            "parcel_external_id" => static::generateUuid(),
-            "parcel_reference_number" => static::generateUuid(),
+            "parcel_external_id" => UUIDServices::generateUUID(),
+            "parcel_reference_number" => UUIDServices::generateUUID(),
             "parcel_description" => $parcelDescription,
             "width" => OrderServices::getTotalWidth($order),
             "length" => OrderServices::getTotalLength($order),
@@ -40,7 +35,7 @@ final class GophrDeliveryServices
 
         $formData = [
             "is_confirmed" => 1,
-            "external_id" => static::generateUuid(),
+            "external_id" => UUIDServices::generateUUID(),
             "pickups" => [
                 [
                     "pickup_address1" => $order->seller->full_address,

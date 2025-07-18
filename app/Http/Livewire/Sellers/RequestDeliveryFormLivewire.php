@@ -4,8 +4,11 @@ namespace App\Http\Livewire\Sellers;
 
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
+use App\Enums\StuartPackageTypeEnum;
 use App\Models\RequestedDelivery;
+use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
+use App\Services\UUIDServices;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Exception;
@@ -51,23 +54,10 @@ class RequestDeliveryFormLivewire extends Component
     /* 
      * Helpers
      */
-    public function resetComponent()
-    {
-        $this->resetValidation();
-
-        $this->reset([
-            'dropoffAddress',
-            'unitAddress',
-            'receiverName',
-            'receiverPhone',
-            'receiverEmail',
-            'packageTransportType',
-            'packageWeight',
-        ]);
-    }
-
     public function changePackageWeight()
     {
+        $this->inputFieldChanged();
+
         switch ($this->packageTransportType) {
             case PackageTransportTypeEnum::MOPED->value:
                 $this->packageWeight = PackageWeightEnum::SMALL->value;
@@ -83,45 +73,73 @@ class RequestDeliveryFormLivewire extends Component
         }
     }
 
+    public function mapPkgWeightWithStuartPkgType()
+    {
+        switch ($this->packageWeight) {
+            case PackageWeightEnum::SMALL->value:
+                return StuartPackageTypeEnum::SMALL->value;
+            case PackageWeightEnum::MEDIUM->value:
+                return StuartPackageTypeEnum::MEDIUM->value;
+            case PackageWeightEnum::LARGE->value:
+                return StuartPackageTypeEnum::LARGE->value;
+            case PackageWeightEnum::EXTRA_LARGE->value:
+                return StuartPackageTypeEnum::EXTRA_LARGE->value;
+        }
+    }
+
+    public function inputFieldChanged()
+    {
+        $this->disableRequestDeliveryButton = true;
+        $this->deliveryCost = 0;
+        $this->currency = '';
+    }
+
+    public function prepareStuartJobArray()
+    {
+        $assignmentCode = UUIDServices::generateUUID();
+
+        return [
+            'job' => [
+                'pickup_at' => now()->addMinutes(15),
+                'assignment_code' => $assignmentCode,
+                'pickups' => [
+                    [
+                        'address' => $this->pickupAddress,
+                        'contact' => [
+                            'firstname' => auth()->user()->name,
+                            'phone' => auth()->user()->business_phone,
+                            'email' => auth()->user()->email,
+                        ]
+                    ]
+                ],
+                'dropoffs' => [
+                    [
+                        'package_type' => $this->mapPkgWeightWithStuartPkgType(),
+                        'client_reference' => $assignmentCode,
+                        'address' => $this->dropoffAddress,
+                        'comment' => $this->unitAddress,
+                        'contact' => [
+                            'firstname' => $this->receiverName,
+                            'phone' => $this->receiverPhone,
+                            'email' => $this->receiverEmail,
+                        ]
+                    ]
+                ],
+            ]
+        ];
+    }
+
     public function calculateDeliveryCost()
     {
         $this->validate();
-        // dd($this->pickupAddress);
+
         try {
-            $deliveryCost = StuartDeliveryServices::getDeliveryJobPricing(
-                StuartDeliveryServices::getAccessToken(),
-                [
-                    'job' => [
-                        'pickup_at' => now()->addMinutes(10),
-                        'assignment_code' => $this->sellerId,
-                        'pickups' => [
-                            [
-                                'address' => $this->pickupAddress,
-                                'contact' => [
-                                    'firstname' => auth()->user()->name,
-                                    'phone' => auth()->user()->business_phone,
-                                    'email' => auth()->user()->email,
-                                ]
-                            ]
-                        ],
-                        'dropoffs' => [
-                            [
-                                'package_type' => 'medium',
-                                'client_reference' => (string) $this->sellerId,
-                                'address' => $this->dropoffAddress,
-                                'contact' => [
-                                    'firstname' => $this->receiverName,
-                                    'phone' => $this->receiverPhone,
-                                    'email' => $this->receiverEmail,
-                                ]
-                            ]
-                        ],
-                    ]
-                ]
+            $deliveryCost = StuartDeliveryServices::getJobPricing(
+                $this->prepareStuartJobArray()
             );
 
-            $this->currency = $deliveryCost['currency'] ?? 'GBP';
-            $this->deliveryCost = $deliveryCost['amount_with_tax'];
+            $this->currency = $deliveryCost['currency'];
+            $this->deliveryCost = round($deliveryCost['amount_with_tax']);
             $this->disableRequestDeliveryButton = false;
         } catch (Exception $error) {
             report($error);
@@ -134,45 +152,19 @@ class RequestDeliveryFormLivewire extends Component
     public function requestDelivery()
     {
         $this->validate();
+        $this->disableRequestDeliveryButton = true;
 
         try {
-
-            redirect()->route('stripe.checkout.charge', [
-                'totalCharge' => (int) $this->deliveryCost,
+            request()->session()->put('stuartDeliveryDetails', [
+                'jobArray' => $this->prepareStuartJobArray(),
+                'packageTransportType' => $this->packageTransportType,
+                'packageWeight' => $this->packageWeight,
             ]);
 
-            // redirect()->route('stripe.checkout.charge', [
-            //     'pickupAddress' => $this->pickupAddress,
-            //     'dropoffAddress' => $this->dropoffAddress,
-            //     'unitAddress' => $this->unitAddress,
-            //     'receiverName' => $this->receiverName,
-            //     'receiverPhone' => $this->receiverPhone,
-            //     'receiverEmail' => $this->receiverEmail,
-            //     'packageTransportType' => $this->packageTransportType,
-            //     'packageWeight' => $this->packageWeight
-            // ]);
-
-            /* Perform some operation */
-            // $inserted =  RequestedDelivery::add(
-            //     creatorId: $this->sellerId,
-            //     pickupAddress: $this->pickupAddress,
-            //     dropoffAddress: $this->dropoffAddress,
-            //     unitAddress: $this->unitAddress,
-            //     receiverName: $this->receiverName,
-            //     receiverPhone: $this->receiverPhone,
-            //     receiverEmail: $this->receiverEmail,
-            //     packageTransportType: PackageTransportTypeEnum::from($this->packageTransportType),
-            //     packageWeight: PackageWeightEnum::from($this->packageWeight)
-            // );
-            // /* Operation finished */
-            // sleep(1);
-
-            // if ($inserted) {
-            //     session()->flash('success', config('constants.DATA_INSERTION_SUCCESS'));
-            //     $this->resetComponent();
-            // } else {
-            //     session()->flash('error', config('constants.INSERTION_FAILED'));
-            // }
+            redirect()->route('stripe.requested.delivery.checkout.form', [
+                'totalCharge' => $this->deliveryCost,
+                'productName' => uniqid('requested-delivery-')
+            ]);
         } catch (Exception $error) {
             report($error);
             session()->flash('error', $error->getMessage());

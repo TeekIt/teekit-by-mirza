@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 final class StuartDeliveryServices
 {
@@ -44,16 +45,16 @@ final class StuartDeliveryServices
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public static function createDeliveryJob(string $accessToken, array $job)
+    public static function createJob(array $job): array
     {
-        return Http::withToken($accessToken)->post(self::getJobsUrl(), $job)->json();
+        return Http::withToken(static::getAccessToken())->post(static::getJobsUrl(), $job)->json();
     }
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public static function getDeliveryJobPricing(string $accessToken, array $job): array
+    public static function getJobPricing(array $job): array
     {
-        $response = Http::withToken($accessToken)->post(self::getJobPricingUrl(), $job)->json();
+        $response = Http::withToken(static::getAccessToken())->post(static::getJobPricingUrl(), $job)->json();
         
         if (isset($response['error'])) {
             throw new Exception($response['message']);
@@ -64,20 +65,19 @@ final class StuartDeliveryServices
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public static function getDeliveryJobStatus(string $accessToken, $jobId)
+    public static function getJobStatus(string $jobId)
     {
-        return Http::withToken($accessToken)->patch(self::getJobsUrl() . '/' . $jobId)->json();
+        return Http::withToken(static::getAccessToken())->patch(static::getJobsUrl() . '/' . $jobId)->json();
     }
     /**
      * Creates a stuart delivery job for a livewire component
      * @author Muhammad Abdullah Mirza
      */
-    public static function stuartJobCreationLivewire($orderId, $customOrderId = null)
+    public static function createJobForLivewire($orderId, $customOrderId = null)
     {
         try {
             $orderDetails = Orders::getById($orderId);
             $transportType = Orders::fetchTransportType($orderId);
-            $accessToken = static::getAccessToken();
 
             $job = [
                 'job' => [
@@ -118,7 +118,7 @@ final class StuartDeliveryServices
                 ]
             ];
 
-            $data = static::createDeliveryJob($accessToken, $job);
+            $data = static::createJob($job);
             if ($data && !isset($data['error'])) {
                 StuartDelivery::insertInfo($orderId, $data['id']);
 

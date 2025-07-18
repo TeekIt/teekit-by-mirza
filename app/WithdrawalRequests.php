@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Enums\UserRole;
+use App\Enums\UserRoleEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -33,7 +33,7 @@ class WithdrawalRequests extends Model
     public static function getParentAndChildSellersWithdrawalRequests(): Collection
     {
         return  self::whereHas('user', function ($query) {
-            $query->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER]);
+            $query->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER]);
         })->get();
     }
 

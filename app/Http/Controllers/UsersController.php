@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\UserRole;
+use App\Enums\UserRoleEnum;
 use App\Models\Driver;
 use App\Pages;
 use App\Services\GoogleMapServices;
@@ -28,7 +28,7 @@ class UsersController extends Controller
                 'required',
                 'email',
                 Rule::exists('users', 'email')
-                ->where(fn(Builder $query) => $query->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])),
+                ->where(fn(Builder $query) => $query->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
             ],
             'stripeAccountId' => 'required|string',
         ]);
