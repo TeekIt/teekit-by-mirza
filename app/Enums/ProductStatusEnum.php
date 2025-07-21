@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum ProductStatus: string
+enum ProductStatusEnum: string
 {
     case DISABLE = '0';
     case ENABLE = '1';

@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\UserRole;
+use App\Enums\UserRoleEnum;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +18,7 @@ class AuthenticateParentChildSeller
      */
     public function handle(Request $request, Closure $next)
     {
-        if (in_array(Auth::user()->role_id, [UserRole::SELLER->value, UserRole::CHILD_SELLER->value])) {
+        if (in_array(Auth::user()->role_id, [UserRoleEnum::SELLER->value, UserRoleEnum::CHILD_SELLER->value])) {
             return $next($request);
         }
 

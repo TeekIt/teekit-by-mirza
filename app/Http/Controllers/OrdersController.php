@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
-use App\Enums\TransportVehicle;
+use App\Enums\TransportVehicleEnum;
 use App\Enums\UserChoicesEnum;
-use App\Enums\UserRole;
+use App\Enums\UserRoleEnum;
 use App\Jobs\SendCustomProductOrderDetailsToNearBySellersJob;
 use App\Models\GuestBuyer;
 use App\Models\ProductsByBuyer;
@@ -206,7 +206,7 @@ class OrdersController extends Controller
                 'integer',
                 Rule::exists('users', 'id')
                     ->where(fn(Builder $query) => $query
-                        ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])),
+                        ->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
             ],
             'productName' => 'required|string|max:255',
             'qty' => 'required|integer',
@@ -217,7 +217,7 @@ class OrdersController extends Controller
             'colors' => 'nullable|array',
             'transportVehicle' => [
                 'required',
-                Rule::in(array_column(TransportVehicle::cases(), 'value')),
+                Rule::in(array_column(TransportVehicleEnum::cases(), 'value')),
             ],
             'featureImg' => 'required|image|max:2048',
             'height' => 'nullable|numeric|min:0',

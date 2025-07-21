@@ -4,7 +4,7 @@ namespace App;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
-use App\Enums\TransportVehicle;
+use App\Enums\TransportVehicleEnum;
 use App\Enums\UserMorphTypeEnum;
 use App\Models\ProductsByBuyer;
 use Illuminate\Database\Eloquent\Collection;
@@ -170,23 +170,23 @@ class Orders extends Model
          */
         foreach ($products as $single_product) {
             if ($single_product->van)
-                array_push($transposrt_type, TransportVehicle::VAN->value);
+                array_push($transposrt_type, TransportVehicleEnum::VAN->value);
             elseif ($single_product->car)
-                array_push($transposrt_type, TransportVehicle::CAR->value);
+                array_push($transposrt_type, TransportVehicleEnum::CAR->value);
             elseif ($single_product->bike)
-                array_push($transposrt_type, TransportVehicle::BIKE->value);
+                array_push($transposrt_type, TransportVehicleEnum::BIKE->value);
         }
         /**
          * Now if any product contains "van" then the function should return "van"
          * If any product contains "car" then return "car"
          * Otherwise "bike"
          */
-        if (in_array(TransportVehicle::VAN->value, $transposrt_type))
-            return TransportVehicle::VAN->value;
-        elseif (in_array(TransportVehicle::CAR->value, $transposrt_type))
-            return TransportVehicle::CAR->value;
+        if (in_array(TransportVehicleEnum::VAN->value, $transposrt_type))
+            return TransportVehicleEnum::VAN->value;
+        elseif (in_array(TransportVehicleEnum::CAR->value, $transposrt_type))
+            return TransportVehicleEnum::CAR->value;
         else
-            return TransportVehicle::BIKE->value;
+            return TransportVehicleEnum::BIKE->value;
     }
 
     public static function checkIfOrderExists(int $id): bool

@@ -9,8 +9,6 @@ class UberDelivery extends Model
 {
     use HasFactory;
 
-    protected $table = 'uber_deliveries';
-
     protected $fillable = [
         'job_id',
         'order_belongs_to_id',

@@ -49,7 +49,9 @@ class OrdersLivewire extends Component
         'alternativeProductIncluded' => 'render',
         'callParentResetModal' => 'resetModal',
     ];
-
+    /*
+    * Lifecycle Hooks
+    */
     public function mount(Request $request)
     {
         $this->sellerId = auth()->id();
@@ -188,7 +190,7 @@ class OrdersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $stuartMessage = StuartDeliveryServices::stuartJobCreationLivewire(
+            $stuartMessage = StuartDeliveryServices::createJobForLivewire(
                 $this->orderId,
                 $this->customOrderId
             );
@@ -222,6 +224,7 @@ class OrdersLivewire extends Component
                 $this->order->created_by_type,
                 $this->order->created_by_id,
                 $selectedSeller->id,
+                $this->order->id,
                 $this->orderItem->product_belongs_to_type,
                 $this->orderItem->product_belongs_to_id,
                 $this->orderItem->product_price,
@@ -380,7 +383,7 @@ class OrdersLivewire extends Component
         $this->resetPage();
 
         $this->reset([
-            'requestOrderId'
+            'requestOrderId',
         ]);
     }
 

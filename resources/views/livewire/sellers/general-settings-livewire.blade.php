@@ -13,7 +13,7 @@
                     <!-- Modal Header -->
                     <div class="modal-header">
                         <h4 class="modal-title">Add Location</h4>
-                        <button type="button" id="locationModel" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" id="closeLocationModel" class="close" data-bs-dismiss="modal">&times;</button>
                     </div>
                     <!-- Modal body -->
                     <div class="modal-body">

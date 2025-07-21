@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Enums\ProductStatus;
+use App\Enums\ProductStatusEnum;
 use App\Enums\SortByEnum;
 use App\Models\ProductImage;
 use Illuminate\Database\Eloquent\Builder;
@@ -54,7 +54,7 @@ class Products extends Model
      * @var array
      */
     protected $casts = [
-        'status' => ProductStatus::class
+        'status' => ProductStatusEnum::class
     ];
     /**
      * Laravel Built-In Helpers
@@ -92,7 +92,7 @@ class Products extends Model
      */
     public function shouldBeSearchable(): bool
     {
-        return $this->status === ProductStatus::ENABLE;
+        return $this->status === ProductStatusEnum::ENABLE;
     }
     /**
      * Modify the query used to retrieve models when making all of the models searchable.
@@ -201,7 +201,7 @@ class Products extends Model
 
     public function scopeWhereProductIsEnable(Builder $query): void
     {
-        $query->where('status', ProductStatus::ENABLE);
+        $query->where('status', ProductStatusEnum::ENABLE);
     }
     /**
      * Helpers

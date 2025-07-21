@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Enums\UserRole;
+use App\Enums\UserRoleEnum;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\UsersController;
@@ -394,7 +394,7 @@ class AuthController extends Controller
             'lon' => $request->lon,
             'postcode' => $request->postcode,
             'contact' => $request->contact,
-            'role_id' => UserRole::BUYER,
+            'role_id' => UserRoleEnum::BUYER,
         ]);
 
         $buyer = User::getBuyerByEmail($buyer->email);

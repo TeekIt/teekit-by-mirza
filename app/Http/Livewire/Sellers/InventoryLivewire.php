@@ -26,7 +26,24 @@ class InventoryLivewire extends Component
         $search = '';
 
     protected $paginationTheme = 'bootstrap';
+    /*
+    * Helpers
+    */
+    public function getFeaturedProducts(object $products)
+    {
+        $data = [];
+        foreach ($products as $product) if ($product->featured === 1) array_push($data, $product);
+        
+        return $data;
+    }
 
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+    /*
+    * CRUD Methods
+    */
     public function toggleProduct($id, $status)
     {
         try {
@@ -116,18 +133,6 @@ class InventoryLivewire extends Component
                 'qty' => ($product->child_seller_id === null) ? 0 : $product->qty
             ];
         });
-    }
-
-    public function getFeaturedProducts(object $products)
-    {
-        $data = [];
-        foreach ($products as $product) if ($product->featured === 1) array_push($data, $product);
-        return $data;
-    }
-
-    public function updatingSearch()
-    {
-        $this->resetPage();
     }
 
     public function render()

@@ -161,11 +161,11 @@ class OrdersHeaderLivewire extends Component
 
         $currentTotalAmount = round($currentTotal + $this->selectedOrder->service_charges + $currentDeliveryCharges);
         $initialTotalAmount = round($this->selectedOrder->initial_total + $this->selectedOrder->service_charges + $this->selectedOrder->delivery_charges);
-        // dd($initialTotalAmount);
+        
         if ($currentTotalAmount <= $initialTotalAmount) {
             $response = StripeServices::capturePaymentIntent(
                 $this->selectedOrder->payment_intent_id,
-                bcmul($currentTotalAmount, 100),
+                StripeServices::calculateCharge($currentTotalAmount),
             );
             if (isset($response->error)) {
                 throw new Exception($response->error->message);
@@ -223,7 +223,7 @@ class OrdersHeaderLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $stuartMessage = StuartDeliveryServices::stuartJobCreationLivewire(
+            $stuartMessage = StuartDeliveryServices::createJobForLivewire(
                 $this->orderId,
                 $this->customOrderId
             );

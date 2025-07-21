@@ -17,12 +17,57 @@
     <!-- Sweet Alerts -->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <!-- Google Maps -->
+    <script
+        src="https://maps.googleapis.com/maps/api/js?libraries=geometry,places&key={{ config('google.GOOGLE_PLACES_API_KEY') }}">
+    </script>
+    <script src="{{ asset('js/custom/CustomGoogleMapsClass.js') }}"></script>
 
     @php
         $googleMapRoutes = [route('seller.settings.general'), route('login')];
     @endphp
     @if (in_array(URL::current(), $googleMapRoutes))
-        @include('javascript.google-map-js')
+        <script>
+            new CustomGoogleMapsClass({
+                mapCanvasId: 'map-canvas',
+                mapAutoCompleteAddressId: 'modal_address',
+                mapLatId: 'modal_lat',
+                mapLongId: 'modal_long',
+                mapCountryId: 'modal_country',
+                mapStateId: 'modal_state',
+                mapCityId: 'modal_city',
+                mapPostcodeId: 'modal_postcode',
+            }).initialize();
+
+            const submitLocation = () => {
+                document.getElementById("display_location").innerHTML = document.getElementById("modal_address").value;
+                document.getElementById("address").value = document.getElementById("modal_address").value;
+                document.getElementById("unit_address").value = document.getElementById("modal_unit_address").value;
+                document.getElementById("postcode").value = document.getElementById("modal_postcode").value;
+                document.getElementById("country").value = document.getElementById("modal_country").value;
+                document.getElementById("state").value = document.getElementById("modal_state").value;
+                document.getElementById("city").value = document.getElementById("modal_city").value;
+                document.getElementById("address[lat]").value = document.getElementById("modal_lat").value;
+                document.getElementById("address[lon]").value = document.getElementById("modal_long").value;
+
+                $("#closeLocationModel").click();
+            }
+        </script>
+    @endif
+
+    @php
+        $requestDeliveryRoutes = [route('seller.request.delivery.form')];
+    @endphp
+    @if (in_array(URL::current(), $requestDeliveryRoutes))
+        <script>
+            new CustomGoogleMapsClass({
+                mapAutoCompleteAddressId: 'pickupAddress'
+            }).handleAutoComplete();
+
+            new CustomGoogleMapsClass({
+                mapAutoCompleteAddressId: 'dropoffAddress'
+            }).handleAutoComplete();
+        </script>
     @endif
 
     <script !src="">

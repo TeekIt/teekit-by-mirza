@@ -1,4 +1,4 @@
-<aside class="main-sidebar sidebar-dark-primary" style="overflow: initial;">
+<aside class="main-sidebar sidebar-dark-primary main-sidebar-width" style="overflow: initial;">
     <!-- Brand Logo -->
     <a class="nav-link nav-sidebar-arrow" onclick="jQuery('.navbar-nav>.nav-item>.nav-link').click();"> 
         <img src="{{ asset('images/icons/arrow.png') }}">
@@ -62,14 +62,14 @@
                         </p>
                     </a>
                 </li>
-                {{-- <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('seller.request.delivery') ? 'active' : '' }}" href="{{ route('seller.request.delivery') }}">
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('seller.request.delivery.form') ? 'active' : '' }}" href="{{ route('seller.request.delivery.form') }}">
                         <i class="nav-icon fas fa-truck-loading"></i>
                         <p class="ml-2">
                             Request Delivery
                         </p>
                     </a>
-                </li> --}}
+                </li>
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-cogs"></i>

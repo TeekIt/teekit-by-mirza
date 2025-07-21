@@ -24,13 +24,17 @@ class WithdrawalLivewire extends Component
     protected $rules = [
         'amount' => 'numeric|between:0,999999.99'
     ];
-
+    /* 
+     * Lifecycle Hooks
+     */
     public function mount()
     {
         $this->seller_id = User::getSellerID();
         $this->resetAllPaginators();
     }
-
+    /* 
+     * Helpers
+     */
     public function updatedAmount($value)
     {
         $this->validateOnly('amount');
@@ -58,7 +62,9 @@ class WithdrawalLivewire extends Component
         if ($amount != 0) $this->resetPage();
         return $amount;
     }
-
+    /* 
+     * CRUD Methods
+     */
     public function withdrawRequest()
     {
         $user = User::find(auth()->user()->id);

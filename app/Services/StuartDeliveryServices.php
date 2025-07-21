@@ -5,119 +5,93 @@ namespace App\Services;
 use App\Enums\OrderStatusEnum;
 use App\Models\StuartDelivery;
 use App\Orders;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 use Illuminate\Support\Carbon;
 
 final class StuartDeliveryServices
 {
-    public static function getSandBoxJobsUrl()
+    public static function getJobsUrl()
     {
-        return 'https://api.sandbox.stuart.com/v2/jobs';
+        return (app()->environment('production')) ? 'https://api.stuart.com/v2/jobs' : 'https://api.sandbox.stuart.com/v2/jobs';
     }
 
-    public static function getSandBoxTokenUrl()
+    public static function getJobPricingUrl()
     {
-        return 'https://api.sandbox.stuart.com/oauth/token';
+        return (app()->environment('production'))
+            ? 'https://api.stuart.com/v2/jobs/pricing' :
+            'https://api.sandbox.stuart.com/v2/jobs/pricing';
     }
 
-    public static function getProductionJobsUrl()
+    public static function getTokenUrl()
     {
-        return 'https://api.stuart.com/v2/jobs';
-    }
-
-    public static function getProductionTokenUrl()
-    {
-        return 'https://api.stuart.com/oauth/token';
+        return (app()->environment('production')) ? 'https://api.stuart.com/oauth/token' : 'https://api.sandbox.stuart.com/oauth/token';
     }
     /**
-     * It will get a fresh token for hitting Stuart delivery API
+     * It will get a fresh token for hitting Stuart delivery APIs
      * @author Muhammad Abdullah Mirza
      */
-    public static function stuartSandboxAccessToken()
+    public static function getAccessToken()
     {
-        $stuart_auth = Http::asForm()->post('' . self::getSandBoxTokenUrl() . '', [
-            'client_id' => env('STUART_SANDBOX_CLIENT_ID'),
-            'client_secret' => env('STUART_SANDBOX_CLIENT_SECRET'),
+        return Http::asForm()->post(static::getTokenUrl(), [
+            'client_id' => config('stuart.STUART_CLIENT_ID'),
+            'client_secret' => config('stuart.STUART_CLIENT_SECRET'),
             'grant_type' => 'client_credentials',
             'scope' => 'api'
-        ]);
-        $stuart_auth = $stuart_auth->json();
-
-        return $stuart_auth['access_token'];
+        ])->json()['access_token'];
     }
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public static function stuartProductionAccessToken()
+    public static function createJob(array $job): array
     {
-        $stuart_auth = Http::asForm()->post('' . self::getProductionTokenUrl() . '', [
-            'client_id' => env('STUART_PRODUCTION_CLIENT_ID'),
-            'client_secret' => env('STUART_PRODUCTION_CLIENT_SECRET'),
-            'grant_type' => 'client_credentials',
-            'scope' => 'api'
-        ]);
-        $stuart_auth = $stuart_auth->json();
-
-        return $stuart_auth['access_token'];
+        return Http::withToken(static::getAccessToken())->post(static::getJobsUrl(), $job)->json();
     }
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public static function stuartSandboxJobCreation(string $access_token, array $job)
+    public static function getJobPricing(array $job): array
     {
-        return Http::withToken($access_token)->post('' . self::getSandBoxJobsUrl() . '', $job)->json();
-    }
-    /**
-     * @author Muhammad Abdullah Mirza
-     */
-    public static function stuartProductionJobCreation(string $access_token, array $job)
-    {
-        return Http::withToken($access_token)->post('' . self::getProductionJobsUrl() . '', $job)->json();
-    }
-    /**
-     * @author Muhammad Abdullah Mirza
-     */
-    public static function stuartSandboxJobStatus(string $access_token, array $job_id)
-    {
-        $response = Http::withToken($access_token)->patch('' . self::getSandBoxJobsUrl() . '/' . $job_id);
-
-        return $response->json();
-    }
-    /**
-     * @author Muhammad Abdullah Mirza
-     */
-    public static function stuartProductionJobStatus(string $access_token, array $job_id)
-    {
-        $response = Http::withToken($access_token)->patch('' . self::getProductionJobsUrl() . '/' . $job_id);
+        $response = Http::withToken(static::getAccessToken())->post(static::getJobPricingUrl(), $job)->json();
         
-        return $response->json();
+        if (isset($response['error'])) {
+            throw new Exception($response['message']);
+        }
+
+        return $response;
+    }
+    /**
+     * @author Muhammad Abdullah Mirza
+     */
+    public static function getJobStatus(string $jobId)
+    {
+        return Http::withToken(static::getAccessToken())->patch(static::getJobsUrl() . '/' . $jobId)->json();
     }
     /**
      * Creates a stuart delivery job for a livewire component
      * @author Muhammad Abdullah Mirza
      */
-    public static function stuartJobCreationLivewire($order_id, $custom_order_id = null)
+    public static function createJobForLivewire($orderId, $customOrderId = null)
     {
         try {
-            $order_details = Orders::getById($order_id);
-            $transport_type = Orders::fetchTransportType($order_id);
-            $access_token = (url('/') == 'https://app.teekit.co.uk') ? static::stuartProductionAccessToken() : static::stuartSandboxAccessToken();
+            $orderDetails = Orders::getById($orderId);
+            $transportType = Orders::fetchTransportType($orderId);
 
             $job = [
                 'job' => [
                     'pickup_at' => Carbon::now()->addMinutes(10),
-                    'assignment_code' => $order_id,
+                    'assignment_code' => $orderId,
                     'pickups' => [
                         [
-                            'address' => $order_details->store->full_address,
+                            'address' => $orderDetails->store->full_address,
                             'comment' => 'Please come at the pickup point as early as possible. Also call us to confirm the order package type.',
                             'contact' => [
-                                'firstname' => $order_details->store->name,
+                                'firstname' => $orderDetails->store->name,
                                 // 'lastname' => 'null',
-                                'phone' => $order_details->store->business_phone,
-                                'email' => $order_details->store->email,
-                                'company' => $order_details->store->business_name
+                                'phone' => $orderDetails->store->business_phone,
+                                'email' => $orderDetails->store->email,
+                                'company' => $orderDetails->store->business_name
                             ]
                         ]
                     ],
@@ -125,16 +99,16 @@ final class StuartDeliveryServices
                         [
                             'package_type' => 'medium',
                             'package_description' => 'Package purchased from Teek it.',
-                            'transport_type' => $transport_type,
-                            'client_reference' => ($custom_order_id) ? $custom_order_id : $order_id,
-                            'address' => $order_details->address . ' House#' . $order_details->house_no,
+                            'transport_type' => $transportType,
+                            'client_reference' => ($customOrderId) ? $customOrderId : $orderId,
+                            'address' => $orderDetails->address . ' House#' . $orderDetails->house_no,
                             'comment' => 'Please try to call the customer before reaching the destination.',
                             // 'end_customer_time_window_start' => '2021-12-12T11:00:00.000+02:00',
                             // 'end_customer_time_window_end' => '2021-12-12T13:00:00.000+02:00',
                             'contact' => [
-                                'firstname' => $order_details->receiver_name,
+                                'firstname' => $orderDetails->receiver_name,
                                 // 'lastname' => 'null',
-                                'phone' => $order_details->phone_number,
+                                'phone' => $orderDetails->phone_number,
                                 // 'email' => 'client3@email.com',
                                 // 'company' => 'Sample Company Inc.'
                             ]
@@ -143,16 +117,16 @@ final class StuartDeliveryServices
                 ]
             ];
 
-            $data = (url('/') == 'https://app.teekit.co.uk') ? static::stuartProductionJobCreation($access_token, $job) : static::stuartSandboxJobCreation($access_token, $job);
+            $data = static::createJob($job);
             if ($data && !isset($data['error'])) {
-                StuartDelivery::insertInfo($order_id, $data['id']);
+                StuartDelivery::insertInfo($orderId, $data['id']);
 
-                Orders::updateOrderStatus($order_id, OrderStatusEnum::STUART_DELIVERY);
+                Orders::updateOrderStatus($orderId, OrderStatusEnum::STUART_DELIVERY);
 
                 return 'JobCreated';
             } else {
                 $message = $data['error'] . ': ' . $data['message'];
-                if ($data['error'] == 'JOB_DISTANCE_NOT_ALLOWED') $message = $message . " " . $transport_type;
+                if ($data['error'] == 'JOB_DISTANCE_NOT_ALLOWED') $message = $message . " " . $transportType;
 
                 return 'StuartErrorA: ' . $message;
             }
