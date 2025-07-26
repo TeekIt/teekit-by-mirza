@@ -105,30 +105,30 @@ final class OrderServices
     ): void {
         $buyerNumber = $buyerCountryCode . $buyerNumber;
         /* Msg for sending SMS notification of this "New Order" */
-        $messageForAdmin = "A new order #" . $orderId . " has been received. 
-        Please check Teek It's seller dashboard, or SignIn here now:https://app.teekit.co.uk/login";
+        $messageForSeller = "A new order #" . $orderId . " has been received. 
+        Please visit Teek It's seller dashboard:https://app.teekit.co.uk/login";
 
         $messageForBuyer = "Thanks for your order! 
-        Your order has been accepted by the store. 
+        Your order has been delivered to the store. 
         Please quote verification code: " . $verificationCode . " on delivery. 
-        TeekIt";
+        (TeekIt)";
 
         /* To restrict "New Order" SMS notifications only for UK numbers */
         if (str_contains($seller->business_phone, '+44')) {
             /* Seller Number */
-            TwilioSmsServices::sendSms($seller->business_phone, $messageForAdmin);
+            TwilioSmsServices::sendSms($seller->business_phone, $messageForSeller);
         }
         /* Customer Number */
         TwilioSmsServices::sendSms($buyerNumber, $messageForBuyer);
         /* Rameesha Number */
         TwilioSmsServices::sendSms('+923362451199', $messageForBuyer);
         /* Azim Number */
-        TwilioSmsServices::sendSms('+447976621849', $messageForAdmin);
+        TwilioSmsServices::sendSms('+447976621849', $messageForSeller);
         /* Eesa Number */
-        TwilioSmsServices::sendSms('+447490020063', $messageForAdmin);
+        TwilioSmsServices::sendSms('+447490020063', $messageForSeller);
         /* Junaid Number */
-        TwilioSmsServices::sendSms('+447817332090', $messageForAdmin);
+        TwilioSmsServices::sendSms('+447817332090', $messageForSeller);
         /* Mirza Number */
-        TwilioSmsServices::sendSms('+923170155625', $messageForAdmin);
+        TwilioSmsServices::sendSms('+923170155625', $messageForSeller);
     }
 }

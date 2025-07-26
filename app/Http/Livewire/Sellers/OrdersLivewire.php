@@ -405,9 +405,9 @@ class OrdersLivewire extends Component
     {
         try {
             $data = Orders::getOrdersForView(
-                orderBy: 'desc',
-                sellerId: $this->sellerId,
                 orderId: $this->isSearchByIdSet(),
+                sellerId: $this->sellerId,
+                orderBy: 'desc',
             );
 
             return view('livewire.sellers.orders-livewire', compact('data'));

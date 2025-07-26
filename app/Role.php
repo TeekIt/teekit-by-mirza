@@ -12,11 +12,10 @@ class Role extends Model
         'display_name',
         'description',
     ];
-    /**
-     * Relations
-     */
-    public function permissions(): BelongsToMany
-    {
-        return $this->belongsToMany(Permission::class);
-    }
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 }

@@ -10,6 +10,12 @@ class PromoCodesUsageLimit extends Model
     use HasFactory;
 
     protected $table = 'promo_codes_usage_limit';
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */

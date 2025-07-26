@@ -19,6 +19,12 @@ class Categories extends Model
         'category_name',
         'category_image',
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * The relations to eager load on every query.
      *

@@ -23,9 +23,10 @@ class Orders extends Model
 
     protected $fillable = ['*'];
 
-    // protected $hidden = [
-    //     'deleted_at',
-    // ];
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */
@@ -277,7 +278,11 @@ class Orders extends Model
             })
             ->orderBy('created_at', $orderBy)
             ->paginate(10);
-        /* Load 'category' for products where 'product_belongs_to_type' is 'Product' */
+        /* 
+        * Load 'category' for products where 'product_belongs_to_type' is 'Product'
+        * Means if the product has been created by a 'seller' not a 'buyer' 
+        * Because only seller products have 'category'
+        */
         $orders->each(function ($order) {
             $order->order_items->each(function ($orderItem) {
                 if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
@@ -289,7 +294,7 @@ class Orders extends Model
         return $orders;
     }
 
-    public static function getOrdersForView(int|null $orderId = null, int $sellerId, string $orderBy): LengthAwarePaginator
+    public static function getOrdersForView(int $sellerId, string $orderBy, int|null $orderId = null): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) static::isViewed($orderId);
@@ -301,7 +306,11 @@ class Orders extends Model
             ->where('seller_id', '=', $sellerId)
             ->orderBy('created_at', $orderBy)
             ->paginate(10);
-        /* Load 'category' for products where 'product_belongs_to_type' is 'Product' */
+        /* 
+        * Load 'category' for products where 'product_belongs_to_type' is 'Product'
+        * Means if the product has been created by a 'seller' not a 'buyer' 
+        * Because only seller products have 'category'
+        */
         $orders->each(function ($order) {
             $order->order_items->each(function ($orderItem) {
                 if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
@@ -313,8 +322,8 @@ class Orders extends Model
         return $orders;
     }
 
-    public static function getRecentOrderByCustomerId(
-        int $customerId,
+    public static function getRecentOrderByBuyerId(
+        int $buyerId,
         ?int $productsLimit = null,
         ?int $sellerId = null
     ): ?Orders {
@@ -323,8 +332,8 @@ class Orders extends Model
                 if ($productsLimit !== null) $query->take($productsLimit);
             }
         ])
-            ->when($sellerId, fn($query) => $query->where('seller_id', $sellerId))
-            ->where('customer_id', $customerId)
+            ->when($sellerId, fn($query) => $query->where('seller_id', '=', $sellerId))
+            ->where('created_by_id', '=', $buyerId)
             ->latest()
             ->first();
     }

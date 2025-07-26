@@ -31,6 +31,11 @@ class RequestedDelivery extends Model
         'package_transport_type',
         'package_weight',
     ];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Helpers
      */

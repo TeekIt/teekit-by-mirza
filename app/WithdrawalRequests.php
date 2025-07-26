@@ -20,6 +20,11 @@ class WithdrawalRequests extends Model
         'status',
         'bank_detail',
     ];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */

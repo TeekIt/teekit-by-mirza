@@ -263,16 +263,6 @@
             }
         }
 
-        const checkbox = () => {
-            $("#chkSelect").change(function() {
-                if ($(this).is(":checked")) {
-                    $("#content").show();
-                } else {
-                    $("#content").hide();
-                }
-            });
-        }
-
         const selectAll = () => {
             const checkboxes = document.querySelectorAll('.select-checkbox');
             for (let i = 0; i < checkboxes.length; i++) {

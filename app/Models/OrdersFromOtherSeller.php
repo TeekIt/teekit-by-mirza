@@ -17,6 +17,11 @@ class OrdersFromOtherSeller extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['*'];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */

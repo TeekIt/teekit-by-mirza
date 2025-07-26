@@ -17,6 +17,12 @@ class CommissionAndServiceFee extends Model
         'commission',
         'service_fee',
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */
