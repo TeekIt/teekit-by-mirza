@@ -53,7 +53,7 @@ class ProductsController extends Controller
     {
         $data = $request->validated();
 
-        if ($request->has('colors')) {
+        if (request()->has('colors')) {
             $data['colors'] = ProductServices::jsonEncodeColors($data['colors']);
         }
 
@@ -63,7 +63,7 @@ class ProductsController extends Controller
         $data['discount_percentage'] = (!isset($data['discount_percentage'])) ? 0.00 : $data['discount_percentage'];
         $data['contact'] = '+44' . $data['contact'];
         $data['seller_id'] = auth()->id();
-        $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
+        $data['feature_img'] = ImageServices::uploadImg(request(), 'feature_img', $data['seller_id']);
 
         unset($data['_token']);
         unset($data['color']);
@@ -73,10 +73,10 @@ class ProductsController extends Controller
 
         $product = Products::add($data);
 
-        Qty::add($data['seller_id'], $product->id, $data['category_id'], $request->safe()->only(['qty'])['qty']);
+        Qty::add($data['seller_id'], $product->id, $data['category_id'], request()->safe()->only(['qty'])['qty']);
 
-        if ($request->hasFile('gallery')) {
-            foreach ($request->file('gallery') as $singleImage) {
+        if (request()->hasFile('gallery')) {
+            foreach (request()->file('gallery') as $singleImage) {
                 $uniqueId = $data['seller_id'] . $product->id;
                 $fileName = ImageServices::uploadImg(id: $uniqueId, imageFile: $singleImage);
 
@@ -104,10 +104,10 @@ class ProductsController extends Controller
     {
         $data = $request->validated();
 
-        $data['colors'] = ($request->has('colors')) ? ProductServices::jsonEncodeColors($data['colors']) : null;
+        $data['colors'] = (request()->has('colors')) ? ProductServices::jsonEncodeColors($data['colors']) : null;
 
-        if ($request->hasFile('feature_img')) {
-            $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
+        if (request()->hasFile('feature_img')) {
+            $data['feature_img'] = ImageServices::uploadImg(request(), 'feature_img', $data['seller_id']);
         }
 
         $data['bike'] = ($data['vehicle'] == TransportVehicleEnum::BIKE->value) ? 1 : 0;
@@ -123,13 +123,13 @@ class ProductsController extends Controller
         unset($data['qty']);
         unset($data['vehicle']);
 
-        Qty::updateQty($productId, $data['seller_id'], $request->safe()->only(['qty'])['qty']);
+        Qty::updateQty($productId, $data['seller_id'], request()->safe()->only(['qty'])['qty']);
 
         $product = Products::findOrFail($productId);
         if (!empty($product)) {
 
-            if ($request->hasFile('gallery')) {
-                foreach ($request->file('gallery') as $image) {
+            if (request()->hasFile('gallery')) {
+                foreach (request()->file('gallery') as $image) {
                     $fileName = ImageServices::uploadImg(id: $productId, imageFile: $image);
                     ProductImage::add($productId, $fileName);
                 }
