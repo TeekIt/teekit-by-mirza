@@ -15,6 +15,12 @@ class ReferralCodeRelation extends Model
         'referred_by',
         'user_id'
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */
@@ -27,9 +33,7 @@ class ReferralCodeRelation extends Model
      */
     public static function usingReferralFirstTime(int $userId): bool
     {
-        $data = self::where('user_id', '=', $userId)->first();
-
-        return is_null($data);
+        return is_null(self::where('user_id', '=', $userId)->first());
     }
 
     public static function insertReferralRelation(int $referredBy, int $userId): ReferralCodeRelation

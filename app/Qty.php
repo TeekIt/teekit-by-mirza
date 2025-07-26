@@ -19,6 +19,19 @@ class Qty extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'qty';
+
+    protected $fillable = [
+        'seller_id',
+        'product_id',
+        'category_id',
+        'qty',
+    ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */

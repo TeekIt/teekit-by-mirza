@@ -13,6 +13,11 @@ class StuartDelivery extends Model
         'order_id',
         'job_id'
     ];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */

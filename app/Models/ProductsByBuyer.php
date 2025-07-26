@@ -36,6 +36,11 @@ class ProductsByBuyer extends Model
         'width',
         'length',
     ];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */

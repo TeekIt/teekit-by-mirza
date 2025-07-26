@@ -20,6 +20,12 @@ class DriverDocument extends Model
         'front_img',
         'back_img'
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */

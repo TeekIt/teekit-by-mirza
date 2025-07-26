@@ -2,9 +2,9 @@
 
 namespace App\Mail;
 
+use App\Enums\UserRoleEnum;
 use App\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -14,6 +14,7 @@ class NewSellerRegistrationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    protected readonly string $sellerRoleName;
     /**
      * Create a new message instance.
      *
@@ -21,10 +22,17 @@ class NewSellerRegistrationMail extends Mailable
      */
     public function __construct(
         public User $user,
-        public string $sellerType,
+        public UserRoleEnum $sellerType,
         public string $accountVerificationLink,
         public ?string $parentSeller = null,
-    ) {}
+    ) {
+        $this->sellerRoleName = $this->getSellerRoleName($this->sellerType);
+    }
+
+    public function getSellerRoleName(UserRoleEnum $sellerType): string
+    {
+        return ($sellerType === UserRoleEnum::SELLER) ? 'Parent' : 'Child';
+    }
 
     /**
      * Get the message envelope.
@@ -34,7 +42,7 @@ class NewSellerRegistrationMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'A New ' . $this->sellerType . ' Seller Has Been Registered 🥳 - Verification Required',
+            subject: 'A New ' . $this->sellerRoleName . ' Seller Has Been Registered 🥳 - Verification Required',
         );
     }
 
@@ -49,7 +57,7 @@ class NewSellerRegistrationMail extends Mailable
             markdown: 'emails.new_seller_registration',
             with: [
                 'seller' => $this->user,
-                'sellerType' => $this->sellerType,
+                'sellerRoleName' => $this->sellerRoleName,
                 'accountVerificationLink' => $this->accountVerificationLink,
                 'parentSeller' => $this->parentSeller,
             ]

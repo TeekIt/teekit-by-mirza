@@ -44,7 +44,10 @@ class Driver extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $hidden = [
-        'password'
+        'password',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     public function getJWTIdentifier()

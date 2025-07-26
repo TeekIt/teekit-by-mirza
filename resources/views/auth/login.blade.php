@@ -5,6 +5,12 @@
 @endphp
 
 @section('content')
+    <style>
+        .country-code {
+            max-width: 64px;
+        }
+    </style>
+
     @include('components.google-map-modal')
     <div class="rounded-5 px-5 pt-4 mb-5 bg-light shadow">
         <div class="row">
@@ -51,10 +57,12 @@
                         <p id="password" class="text-danger password error"></p>
                     </div>
                     <div class="form-group row">
-                        <div class="col-md-12 input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">+44</span>
-                            </div>
+                        <div class="col-12 input-group">
+                            <select class="form-control country-code" name="country_code" id="country_code"
+                                onchange="countryCodeChanged(this.value)">
+                                <option value="+44">+44</option>
+                                <option value="+92">+92</option>
+                            </select>
                             <input type="text"
                                 oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');"
                                 maxlength="10" placeholder="Phone Number"
@@ -66,10 +74,11 @@
                                 </span>
                             @endif
                         </div>
-                        <p id="phone" class="text-danger phone error"></p>
+                        <p class="text-danger country_code error"></p>
+                        <p class="text-danger phone error"></p>
                     </div>
                     <div class="form-group row">
-                        <div class="col-md-12">
+                        <div class="col-12">
                             <input type="text" placeholder="Business Name"
                                 class="form-control {{ $errors->has('business_name') ? ' is-invalid' : '' }}"
                                 id="business_name" name="business_name" value="{{ old('business_name') }}" autofocus>
@@ -82,10 +91,9 @@
                         <p class="text-danger business_name error"></p>
                     </div>
                     <div class="form-group row">
-                        <div class="col-md-12 input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">+44</span>
-                            </div>
+                        <div class="col-12 input-group">
+                            <input type="text" class="form-control country-code" id="business_phone_country_code"
+                                value="+44" disabled>
                             <input type="text" placeholder="Business Phone"
                                 oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');"
                                 maxlength="10"
@@ -100,7 +108,7 @@
                         <p class="text-danger business_phone error"></p>
                     </div>
                     <div class="form-group row">
-                        <div class="col-md-12">
+                        <div class="col-12">
                             <div class="form-group" data-bs-toggle="modal" data-bs-target="#map_modal"
                                 style="cursor: pointer;">
                                 <i class="fas fa-map-marked-alt text-site-primary fa-2x"></i>
@@ -118,13 +126,14 @@
                         </div>
                         <p class="text-danger location error"></p>
                     </div>
-                    <label for="chkSelect">
-                        <input type="checkbox" name="checked_value" id="chkSelect" onclick="return checkbox()" />
+                    <label for="is_child_seller">
+                        <input type="checkbox" name="is_child_seller" id="is_child_seller"
+                            onclick="checkbox()" />
                         I'm a child store
                     </label>
                     <div class="form-group row">
-                        <div class="col-md-12 mt-0">
-                            <div class="form-group" id="content" style="display:none">
+                        <div class="col-12 mt-0">
+                            <div class="form-group" id="parent_stores_list" style="display:none">
                                 <select class="form-control" id="parent_store" name="parent_store">
                                     <option value="" selected>Select your parent store</option>
                                     @foreach (User::getParentSellersSpecificColumns(['business_name']) as $store)
@@ -136,9 +145,9 @@
                         <p class="text-danger parent_store error"></p>
                     </div>
                     <div class="form-group row mb-0">
-                        <div class="col-md-12">
-                            <button class="btn btn-outline-primary my-2 my-sm-0 signup-btn" type="submit" id="signup"
-                                onclick="signUp()">
+                        <div class="col-12">
+                            <button class="btn btn-outline-primary my-2 my-sm-0 signup-btn" type="submit"
+                                id="signup-btn" onclick="signUp()">
                                 Sign Up
                             </button>
                         </div>
@@ -148,12 +157,27 @@
         </div>
     </div>
     <script>
+        const checkbox = () => {
+            $("#is_child_seller").change(function() {
+                if ($(this).is(":checked")) {
+                    $("#parent_stores_list").show();
+                } else {
+                    $("#parent_stores_list").hide();
+                }
+            });
+        }
+
+        const countryCodeChanged = (selectedCountryCode) => {
+            document.getElementById('business_phone_country_code').value = selectedCountryCode;
+        }
+
         const signUp = () => {
             let spinner =
                 '<div class="d-flex justify-content-center text-white"><div class="spinner-border myspinner"role="status"></div></div>';
             let name = $('#name').val();
             let email = $('#email').val();
             let password = $('#password').val();
+            let country_code = $('#country_code').val();
             let phone = $('#phone').val();
             let business_name = $('#business_name').val();
             let business_phone = $('#business_phone').val();
@@ -166,11 +190,14 @@
             let lat = $('input[id="address[lat]"]').val();
             let lon = $('input[id="address[lon]"]').val();
             let parent_store = $('#parent_store').val();
-            let checked_value = 0;
-            if ($('#chkSelect').is(':checked')) {
-                checked_value = 1;
+            let is_child_seller = 0;
+
+            if ($('#is_child_seller').is(':checked')) {
+                is_child_seller = 1;
             }
-            $('#signup').html(spinner);
+
+            $('#signup-btn').html(spinner);
+
             $.ajax({
                 url: "{{ route('register') }}",
                 type: "post",
@@ -179,6 +206,7 @@
                     name: name,
                     email: email,
                     password: password,
+                    country_code: country_code,
                     phone: phone,
                     business_name: business_name,
                     business_phone: business_phone,
@@ -191,10 +219,10 @@
                     lat: lat,
                     lon: lon,
                     parent_store: parent_store,
-                    checked_value: checked_value
+                    is_child_seller: is_child_seller
                 },
                 success: function(response) {
-                    $('#signup').text('Sign up');
+                    $('#signup-btn').text('Sign Up');
                     if (response == "User Created") {
                         Swal.fire({
                             title: 'Success!',
@@ -206,44 +234,32 @@
                         });
                     } else {
                         $('.error').html('');
-                        if (response.errors.name) {
-                            $('.name').html('');
-                            $('.name').html(response.errors.name[0]);
-                        }
-                        if (response.errors.email) {
-                            $('.email').html(response.errors.email[0]);
-                        }
-                        if (response.errors.password) {
-                            $('.password').html(response.errors.password[0]);
-                        }
-                        if (response.errors.phone) {
-                            $('.phone').html(response.errors.phone[0]);
-                        }
-                        if (response.errors.business_name) {
-                            $('.business_name').html(response.errors.business_name[0]);
-                        }
-                        if (response.errors.business_phone) {
-                            $('.business_phone').html(response.errors.business_phone[0]);
-                        }
-                        if (response.errors.address) {
-                            $('.location').html(response.errors.address[0]);
-                        }
-                        if (response.errors.postcode) {
-                            $('.location').html(response.errors.postcode[0]);
-                        }
-                        if (response.errors.country) {
-                            $('.location').html(response.errors.country[0]);
-                        }
-                        if (response.errors.state) {
-                            $('.location').html(response.errors.state[0]);
-                        }
-                        if (response.errors.city) {
-                            $('.location').html(response.errors.city[0]);
-                        }
-                        if ($('#chkSelect').is(":checked")) {
-                            if (response.errors.parent_store) {
-                                $('.parent_store').html(response.errors.parent_store[0]);
+
+                        const errors = response.message;
+
+                        const errorMap = {
+                            name: '.name',
+                            email: '.email',
+                            password: '.password',
+                            country_code: '.country_code',
+                            phone: '.phone',
+                            business_name: '.business_name',
+                            business_phone: '.business_phone',
+                            address: '.location',
+                            postcode: '.location',
+                            country: '.location',
+                            state: '.location',
+                            city: '.location'
+                        };
+
+                        Object.keys(errorMap).forEach(field => {
+                            if (errors[field]) {
+                                $(errorMap[field]).html(errors[field][0]);
                             }
+                        });
+
+                        if ($('#is_child_seller').is(':checked') && errors.parent_store) {
+                            $('.parent_store').html(errors.parent_store[0]);
                         }
                     }
                 }

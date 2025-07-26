@@ -17,4 +17,9 @@ class JwtToken extends Model
         'desktop',
         'phone'
     ];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
 }

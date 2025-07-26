@@ -131,7 +131,7 @@ class OrdersController extends Controller
             /* Adding amount into seller's wallet */
             User::addIntoWallet($sellerId, $initialTotal);
 
-            if ($request->type == 'delivery') {
+            if ($request->type == OrderTypeEnum::DELIVERY->value) {
                 $seller = User::getUserByID($sellerId, [
                     'business_phone',
                     'lat',
@@ -167,7 +167,7 @@ class OrdersController extends Controller
                     UserChoicesEnum::from($orderItem['user_choice'])
                 );
             }
-
+            
             if ($request->type == OrderTypeEnum::DELIVERY->value) {
                 $verificationCode = VerificationCodeServices::generateCode();
                 VerificationCodes::add($orderId, $verificationCode);
@@ -341,7 +341,7 @@ class OrdersController extends Controller
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
             $verificationCode = VerificationCodeServices::generateCode();
             VerificationCodes::add($order->id, $verificationCode);
-
+            
             if (app()->environment('production')) {
                 OrderServices::sendBulkSms(
                     $seller,
@@ -423,7 +423,7 @@ class OrdersController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
         }
 
-        $order = Orders::getRecentOrderByCustomerId(auth()->id(), $request->productsLimit, $request->sellerId);
+        $order = Orders::getRecentOrderByBuyerId(auth()->id(), $request->productsLimit, $request->sellerId);
         if (!empty($order)) {
             $recentOrderProdsData = [];
             foreach ($order->products as $product) $recentOrderProdsData[] = Products::getProductInfo(

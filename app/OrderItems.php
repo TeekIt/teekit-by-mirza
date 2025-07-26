@@ -21,6 +21,12 @@ class OrderItems extends Model
         'product_qty',
         'user_choice'
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */

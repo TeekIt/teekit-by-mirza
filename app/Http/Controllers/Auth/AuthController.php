@@ -212,11 +212,12 @@ class AuthController extends Controller
     {
         JWTAuth::parseToken()->invalidate();
 
-        return response()->json([
-            'data' => [],
-            'status' => config('constants.TRUE_STATUS'),
-            'message' =>  'Successfully logged out.'
-        ], config('constants.HTTP_OK'));
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.TRUE_STATUS'),
+            'Successfully logged out.',
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * It will Refresh a token.
@@ -331,14 +332,14 @@ class AuthController extends Controller
      * Listing of all SECRET KEYS
      * @version 1.0.0
      */
-    public function keys()
-    {
-        return response()->json([
-            'data' => Keys::all(),
-            'status' => config('constants.TRUE_STATUS'),
-            'message' => ''
-        ], config('constants.HTTP_OK'));
-    }
+    // public function keys()
+    // {
+    //     return response()->json([
+    //         'data' => Keys::all(),
+    //         'status' => config('constants.TRUE_STATUS'),
+    //         'message' => ''
+    //     ], config('constants.HTTP_OK'));
+    // }
     /**
      * It will delete user from users table by id
      * It will insert the deleted user data into 'Deleted_users' table
