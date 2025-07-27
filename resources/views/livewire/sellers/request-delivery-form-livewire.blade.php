@@ -3,6 +3,7 @@
     @php
         use App\Enums\PackageWeightEnum;
         use App\Enums\PackageTransportTypeEnum;
+        use App\Enums\DeliveryProviderEnum;
     @endphp
 
     <x-session-messages />
@@ -240,17 +241,16 @@
                                                         </span>
                                                     </button>
                                                     <ul class="dropdown-menu col-12">
-                                                        <li class="dropdown-item cursor-pointer" wire:click="calculateDeliveryCost('stuart')"
-                                                            wire:target="calculateDeliveryCost">
+                                                        <li class="dropdown-item cursor-pointer p-3 border-bottom"
+                                                            wire:click="calculateDeliveryCost('{{ DeliveryProviderEnum::STUART }}')">
                                                             Stuart Delivery Charges
                                                         </li>
-                                                        {{-- <li class="dropdown-item" wire:click="calculateDeliveryCost"
-                                                            wire:target="calculateDeliveryCost">
+                                                        <li class="dropdown-item cursor-pointer p-3"
+                                                            wire:click="calculateDeliveryCost('{{ DeliveryProviderEnum::GOPHR }}')">
                                                             Gophr Delivery Charges
-                                                        </li> --}}
+                                                        </li>
                                                     </ul>
                                                 </div>
-
                                             </div>
 
                                             <div class="col-md-12">

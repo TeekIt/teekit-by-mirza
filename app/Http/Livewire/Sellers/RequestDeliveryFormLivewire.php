@@ -6,11 +6,15 @@ use App\Enums\DeliveryProviderEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use App\Enums\StuartPackageTypeEnum;
+use App\Services\CompanyStandardsServices;
+use App\Services\DeliveryServices;
+use App\Services\GophrDeliveryServices;
 use App\Services\StuartDeliveryServices;
 use App\Services\UUIDServices;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class RequestDeliveryFormLivewire extends Component
 {
@@ -136,6 +140,57 @@ class RequestDeliveryFormLivewire extends Component
         ];
     }
 
+    public function prepareGophrJobArray()
+    {
+        $parcelData = [
+            'parcel_external_id' => UUIDServices::generateUUID(),
+            'parcel_reference_number' => UUIDServices::generateUUID(),
+            'parcel_description' => 'Please pickup your order ASAP',
+            'width' => 0,
+            'length' => 0,
+            'height' => 0,
+            'weight' => 0,
+        ];
+
+        return [
+            'is_confirmed' => 1,
+            'external_id' => UUIDServices::generateUUID(),
+            'pickups' => [
+                [
+                    'pickup_address1' => $this->pickupAddress,
+                    'pickup_city' => auth()->user()->city,
+                    'pickup_postcode' => auth()->user()->postcode,
+                    'pickup_country_code' => 'GB',
+                    'pickup_location_lat' => auth()->user()->lat,
+                    'pickup_location_lng' => auth()->user()->lon,
+                    'pickup_person_name' => auth()->user()->name,
+                    'pickup_mobile_number' => auth()->user()->business_phone,
+                    'parcels' => [
+                        $parcelData
+                    ]
+                ]
+            ],
+            'dropoffs' => [
+                [
+                    'dropoff_address1' => $this->dropoffAddress,
+                    'dropoff_city' => auth()->user()->city,
+                    'dropoff_postcode' => auth()->user()->postcode,
+                    'dropoff_country_code' => 'GB',
+                    // 'dropoff_location_lat' => ,
+                    // 'dropoff_location_lng' => ,
+                    'dropoff_person_name' => $this->receiverName,
+                    'dropoff_email' => $this->receiverEmail,
+                    'dropoff_mobile_number' => $this->receiverPhone,
+                    'dropoff_instructions' => $this->unitAddress,
+                    'dropoff_deadline' => CompanyStandardsServices::getStandardDeliveryDeadline()->toIso8601String(),
+                    'parcels' => [
+                        $parcelData
+                    ]
+                ]
+            ]
+        ];
+    }
+
     public function calculateTotalCost()
     {
         return round($this->deliveryCharges + $this->serviceCharges + $this->tax);
@@ -163,13 +218,35 @@ class RequestDeliveryFormLivewire extends Component
                 $response = StuartDeliveryServices::getJobPricing(
                     $this->prepareStuartJobArray()
                 );
+
+                $this->currency = $response['currency'];
+                $this->deliveryCharges = $response['amount'];
+                $this->serviceCharges = CompanyStandardsServices::$standardServiceCharges;
+                $this->tax = $response['amount_with_tax'] - $response['amount'];
+                $this->totalCost = $this->calculateTotalCost();
             }
 
-            $this->currency = $response['currency'];
-            $this->deliveryCharges = $response['amount'];
-            $this->serviceCharges = 1.99;
-            $this->tax = $response['amount_with_tax'] - $response['amount'];
-            $this->totalCost = $this->calculateTotalCost();
+            if ($this->deliveryServiceName === DeliveryProviderEnum::GOPHR->value) {
+                $this->requestDeliveryButtonTxt = 'Request Gophr Delivery';
+
+                $response = GophrDeliveryServices::getJobPricing(
+                    $this->prepareGophrJobArray()
+                );
+                if (isset($response->errors)) {
+                    Log::error($response->errors);
+
+                    throw new Exception(json_encode($response->errors[0]->message));
+                }
+
+                $response = json_decode(json_encode($response->data), true);
+
+                $this->currency = $response['price_net']['currency'];
+                $this->deliveryCharges = $response['price_net']['amount'];
+                $this->serviceCharges = CompanyStandardsServices::$standardServiceCharges;
+                $this->tax = $response['price_gross']['amount'] - $response['price_net']['amount'];
+                $this->totalCost = $this->calculateTotalCost();
+            }
+
             $this->disableRequestDeliveryButton = false;
         } catch (Exception $error) {
             report($error);
@@ -185,11 +262,21 @@ class RequestDeliveryFormLivewire extends Component
         $this->disableRequestDeliveryButton = true;
 
         try {
-            request()->session()->put('stuartDeliveryDetails', [
-                'jobArray' => $this->prepareStuartJobArray(),
-                'packageTransportType' => $this->packageTransportType,
-                'packageWeight' => $this->packageWeight,
-            ]);
+            if ($this->deliveryServiceName === DeliveryProviderEnum::STUART->value) {
+                request()->session()->put('stuartDeliveryDetails', [
+                    'jobArray' => $this->prepareStuartJobArray(),
+                    'packageTransportType' => $this->packageTransportType,
+                    'packageWeight' => $this->packageWeight,
+                ]);
+            }
+
+            if ($this->deliveryServiceName === DeliveryProviderEnum::GOPHR->value) {
+                request()->session()->put('gophrDeliveryDetails', [
+                    'jobArray' => $this->prepareGophrJobArray(),
+                    'packageTransportType' => $this->packageTransportType,
+                    'packageWeight' => $this->packageWeight,
+                ]);
+            }
 
             redirect()->route('stripe.requested.delivery.checkout.form', [
                 'totalCharge' => $this->totalCost,

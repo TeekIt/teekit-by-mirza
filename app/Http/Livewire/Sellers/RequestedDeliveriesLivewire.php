@@ -6,8 +6,10 @@ use App\Enums\DeliveryProviderEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use App\Models\RequestedDelivery;
+use App\Services\GophrDeliveryServices;
 use App\Services\StuartDeliveryServices;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -25,10 +27,17 @@ class RequestedDeliveriesLivewire extends Component
         $receiverName,
         $receiverPhone,
         $receiverEmail,
-        $packageTransportType,
-        $packageWeight,
+        $selectedDeliveryDetails,
+        $deliveryServiceName,
         $stuartJobArray = [],
+        $gophrJobArray = [],
         $search = '';
+
+    public PackageTransportTypeEnum $packageTransportType = PackageTransportTypeEnum::SMALL_VAN;
+
+    public PackageWeightEnum $packageWeight = PackageWeightEnum::SMALL;
+
+    public DeliveryProviderEnum $deliveryProvider = DeliveryProviderEnum::STUART;
 
     protected $paginationTheme = 'bootstrap';
     /* 
@@ -39,8 +48,10 @@ class RequestedDeliveriesLivewire extends Component
         $this->sellerId = auth()->id();
 
         if (request()->session()->get('stuartDeliveryDetails')) {
-            $this->packageTransportType = request()->session()->get('stuartDeliveryDetails')['packageTransportType'];
-            $this->packageWeight = request()->session()->get('stuartDeliveryDetails')['packageWeight'];
+            $this->deliveryProvider = DeliveryProviderEnum::STUART;
+
+            $this->packageTransportType = PackageTransportTypeEnum::from(request()->session()->get('stuartDeliveryDetails')['packageTransportType']);
+            $this->packageWeight = PackageWeightEnum::from(request()->session()->get('stuartDeliveryDetails')['packageWeight']);
             $this->stuartJobArray = request()->session()->get('stuartDeliveryDetails')['jobArray'];
 
             $this->pickupAddress = $this->stuartJobArray['job']['pickups'][0]['address'];
@@ -54,20 +65,29 @@ class RequestedDeliveriesLivewire extends Component
 
             $this->createStuartDelivery();
         }
+
+        if (request()->session()->get('gophrDeliveryDetails')) {
+            $this->deliveryProvider = DeliveryProviderEnum::GOPHR;
+
+            $this->packageTransportType = PackageTransportTypeEnum::from(request()->session()->get('gophrDeliveryDetails')['packageTransportType']);
+            $this->packageWeight = PackageWeightEnum::from(request()->session()->get('gophrDeliveryDetails')['packageWeight']);
+            $this->gophrJobArray = request()->session()->get('gophrDeliveryDetails')['jobArray'];
+
+            $this->pickupAddress = $this->gophrJobArray['pickups'][0]['pickup_address1'];
+            $this->dropoffAddress = $this->gophrJobArray['dropoffs'][0]['dropoff_address1'];
+            $this->unitAddress = $this->gophrJobArray['dropoffs'][0]['dropoff_instructions'];
+            $this->receiverName = $this->gophrJobArray['dropoffs'][0]['dropoff_person_name'];
+            $this->receiverPhone = $this->gophrJobArray['dropoffs'][0]['dropoff_mobile_number'];
+            $this->receiverEmail = $this->gophrJobArray['dropoffs'][0]['dropoff_email'];
+
+            request()->session()->forget('gophrDeliveryDetails');
+
+            $this->createGophrDelivery();
+        }
     }
     /*
     * Helpers
     */
-    public function resetThisPage()
-    {
-        $this->reset(['search']);
-    }
-
-    public function closeModal($modalId)
-    {
-        $this->dispatchBrowserEvent('close-modal', ['id' => $modalId]);
-    }
-
     public function resetComponent()
     {
         $this->resetValidation();
@@ -83,9 +103,50 @@ class RequestedDeliveriesLivewire extends Component
             'receiverEmail',
             'packageTransportType',
             'packageWeight',
+            'deliveryProvider',
+            'selectedDeliveryDetails',
+            'deliveryServiceName',
             'stuartJobArray',
+            'gophrJobArray',
             'search',
         ]);
+    }
+
+    public function resetThisPage()
+    {
+        $this->reset(['search']);
+    }
+
+    public function showModal($modalId)
+    {
+        $this->dispatchBrowserEvent('show-modal', ['id' => $modalId]);
+    }
+
+    public function closeModal($modalId)
+    {
+        $this->dispatchBrowserEvent('close-modal', ['id' => $modalId]);
+    }
+
+    public function renderTrackDeliveryModal($deliveryId, $deliveryServiceName)
+    {
+        $this->deliveryServiceName = $deliveryServiceName;
+
+        if ($deliveryServiceName === DeliveryProviderEnum::STUART->value) {
+            $this->selectedDeliveryDetails = StuartDeliveryServices::getJob($deliveryId);
+            $this->showModal('trackStuartDeliveryModal');
+        }
+
+        if ($deliveryServiceName === DeliveryProviderEnum::GOPHR->value) {
+            $response = GophrDeliveryServices::getJob($deliveryId);
+            if (isset($response->errors)) {
+                Log::error($response->errors);
+
+                throw new Exception(json_encode($response->errors[0]->message));
+            }
+
+            $this->selectedDeliveryDetails = json_decode(json_encode($response), true);
+            $this->showModal('trackGophrDeliveryModal');
+        }
     }
     /* 
      * CRUD Methods
@@ -97,20 +158,9 @@ class RequestedDeliveriesLivewire extends Component
             $response = StuartDeliveryServices::createJob(
                 $this->stuartJobArray
             );
+            $this->requestedDeliveryId = $response['id'];
 
-            $inserted =  RequestedDelivery::add(
-                creatorId: $this->sellerId,
-                deliveryProvider: DeliveryProviderEnum::STUART,
-                deliveryId: $response['id'],
-                pickupAddress: $this->pickupAddress,
-                dropoffAddress: $this->dropoffAddress,
-                unitAddress: $this->unitAddress,
-                receiverName: $this->receiverName,
-                receiverPhone: $this->receiverPhone,
-                receiverEmail: $this->receiverEmail,
-                packageTransportType: PackageTransportTypeEnum::from($this->packageTransportType),
-                packageWeight: PackageWeightEnum::from($this->packageWeight)
-            );
+            $inserted = $this->addDeliveryDetailsIntoDatabase();
             /* Operation finished */
             sleep(1);
 
@@ -126,17 +176,59 @@ class RequestedDeliveriesLivewire extends Component
         }
     }
 
-    public function cancelDelivery($id)
+    public function createGophrDelivery()
     {
-        dd('Cancelling...' . $id);
+        try {
+            /* Perform some operation */
+            $response = GophrDeliveryServices::createJob(
+                $this->gophrJobArray
+            );
+            $this->requestedDeliveryId = $response->data->job_id;
+
+            $inserted = $this->addDeliveryDetailsIntoDatabase();
+            /* Operation finished */
+            sleep(1);
+
+            if ($inserted) {
+                session()->flash('success', config('constants.DATA_INSERTION_SUCCESS'));
+                $this->resetComponent();
+            } else {
+                session()->flash('error', config('constants.INSERTION_FAILED'));
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
     }
 
-    public function renderCancelRequestedDeliveryModal($id)
+    public function addDeliveryDetailsIntoDatabase()
     {
-        $requestedDelivery = RequestedDelivery::find($id);
-
-        $this->requestedDeliveryId    = $requestedDelivery->id;
+        return RequestedDelivery::add(
+            creatorId: $this->sellerId,
+            deliveryProvider: $this->deliveryProvider,
+            deliveryId: $this->requestedDeliveryId,
+            pickupAddress: $this->pickupAddress,
+            dropoffAddress: $this->dropoffAddress,
+            unitAddress: $this->unitAddress,
+            receiverName: $this->receiverName,
+            receiverPhone: $this->receiverPhone,
+            receiverEmail: $this->receiverEmail,
+            packageTransportType: $this->packageTransportType,
+            packageWeight: $this->packageWeight
+        );
     }
+
+    // public function cancelDelivery($id)
+    // {
+    //     dd('Cancelling...' . $id);
+    // }
+
+    // public function renderCancelRequestedDeliveryModal($id)
+    // {
+    //     $requestedDelivery = RequestedDelivery::find($id);
+
+    //     $this->requestedDeliveryId    = $requestedDelivery->id;
+    // }
 
     public function render()
     {
@@ -146,6 +238,8 @@ class RequestedDeliveriesLivewire extends Component
             creatorId: $this->sellerId,
             columns: [
                 'id',
+                'delivery_provider',
+                'delivery_id',
                 'pickup_address',
                 'dropoff_address',
                 'unit_address',

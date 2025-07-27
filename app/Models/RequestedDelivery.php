@@ -62,12 +62,12 @@ class RequestedDelivery extends Model
         string $deliveryId,
         string $pickupAddress,
         string $dropoffAddress,
-        ?string $unitAddress = null,
         string $receiverName,
         int $receiverPhone,
         string $receiverEmail,
         PackageTransportTypeEnum $packageTransportType,
-        PackageWeightEnum $packageWeight
+        PackageWeightEnum $packageWeight,
+        ?string $unitAddress = null,
     ): RequestedDelivery {
         return self::create([
             'creator_id' => $creatorId,

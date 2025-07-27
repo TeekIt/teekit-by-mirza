@@ -204,32 +204,28 @@
     <div wire:ignore.self class="modal fade" id="trackGophrDeliveryModal" tabindex="-1">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
-                <form wire:submit.prevent="assignToGophrDriver">
-                    {{ csrf_field() }}
-                    <div class="modal-header">
-                        <h5 class="modal-title display-center">Live Delivery Tracking</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
-                            wire:click="resetModal">
-                            <span>×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        @if (isset($selectedDeliveryDetails))
-                            <div class="row" style="height: 100vh;">
-                                <iframe
-                                    src="{{ $selectedDeliveryDetails['data']['deliveries'][0]['public_tracker_url'] }}"
-                                    class="col-12">
-                                </iframe>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="modal-footer hidden">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                            wire:click="resetModal">
-                            Close
-                        </button>
-                    </div>
-                </form>
+                <div class="modal-header">
+                    <h5 class="modal-title display-center">Live Delivery Tracking</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                        wire:click="resetModal">
+                        <span>×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @if (isset($selectedDeliveryDetails))
+                        <div class="row" style="height: 100vh;">
+                            <iframe src="{{ $selectedDeliveryDetails['data']['deliveries'][0]['public_tracker_url'] }}"
+                                class="col-12">
+                            </iframe>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer hidden">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        wire:click="resetModal">
+                        Close
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -240,7 +236,7 @@
                 <div class="d-flex flex-column-reverse flex-md-row justify-content-between pb-4 gap-1">
                     <div>
                         @if ($order->order_status === OrderStatusEnum::PENDING->value)
-                            @if ($order->order_items[0]->product_belongs_to_type === (new Products())->getMorphClass())
+                            @if ($order->order_items[0]->product_belongs_to_type === new Products()->getMorphClass())
                                 <button class="btn btn-success" wire:click="orderIsAccepted({{ $order->id }})"
                                     wire:target="orderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark"
                                     wire:loading.class.remove="btn-success" wire:loading.attr="disabled"
@@ -267,7 +263,7 @@
                                 </button>
                             @endif
 
-                            @if ($order->order_items[0]->product_belongs_to_type === (new ProductsByBuyer())->getMorphClass())
+                            @if ($order->order_items[0]->product_belongs_to_type === new ProductsByBuyer()->getMorphClass())
                                 <button class="btn btn-success"
                                     wire:click="renderCustomProductOrderModal({{ $order->id }})"
                                     wire:loading.class="btn-dark" wire:loading.class.remove="btn-success"
@@ -397,7 +393,7 @@
                     </div>
 
                     <div>
-                        @if ($order->order_items[0]->product_belongs_to_type == (new ProductsByBuyer())->getMorphClass())
+                        @if ($order->order_items[0]->product_belongs_to_type == new ProductsByBuyer()->getMorphClass())
                             <button type="button" class="btn btn-primary"
                                 title="This is a custom product order created by the buyer. You may not uploaded it into our system but if you have it in your physical warehouse then you can accept this order happily & make money 😉">
                                 <i class="fas fa-fingerprint"></i>

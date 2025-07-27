@@ -30,7 +30,7 @@ class OrdersOfUniqueProductsLivewire extends Component
         $selectedOrder,
         $orderId;
 
-    public $orderHoldingMinutes = 2;
+    public int $orderHoldingMinutes = 2;
 
     protected $paginationTheme = 'bootstrap';
     /* 

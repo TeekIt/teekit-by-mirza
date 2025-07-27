@@ -64,9 +64,15 @@ final class StuartDeliveryServices
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public static function getJobStatus(string $jobId)
+    public static function getJob(string $jobId): array
     {
-        return Http::withToken(static::getAccessToken())->patch(static::getJobsUrl() . '/' . $jobId)->json();
+        $response = Http::withToken(static::getAccessToken())->get(static::getJobsUrl() . '/' . $jobId)->json();
+
+        if (isset($response['error'])) {
+            throw new Exception($response['message']);
+        }
+
+        return $response;
     }
     /**
      * Creates a stuart delivery job for a livewire component
