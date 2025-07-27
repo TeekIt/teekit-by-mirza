@@ -2,17 +2,15 @@
 
 namespace App\Http\Livewire\Sellers;
 
+use App\Enums\DeliveryProviderEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use App\Enums\StuartPackageTypeEnum;
-use App\Models\RequestedDelivery;
-use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
 use App\Services\UUIDServices;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Exception;
-
 
 class RequestDeliveryFormLivewire extends Component
 {
@@ -26,9 +24,14 @@ class RequestDeliveryFormLivewire extends Component
         $receiverEmail,
         $packageTransportType,
         $packageWeight,
-        $deliveryCost = 0,
+        $deliveryCharges = 0,
+        $serviceCharges = 0,
+        $tax = 0,
+        $totalCost = 0,
         $currency,
-        $disableRequestDeliveryButton = true;
+        $disableRequestDeliveryButton = true,
+        $requestDeliveryButtonTxt = 'Request',
+        $deliveryServiceName;
 
     protected function rules()
     {
@@ -89,8 +92,12 @@ class RequestDeliveryFormLivewire extends Component
 
     public function inputFieldChanged()
     {
+        $this->requestDeliveryButtonTxt = 'Request';
         $this->disableRequestDeliveryButton = true;
-        $this->deliveryCost = 0;
+        $this->deliveryCharges = 0;
+        $this->serviceCharges = 0;
+        $this->tax = 0;
+        $this->totalCost = 0;
         $this->currency = '';
     }
 
@@ -129,17 +136,40 @@ class RequestDeliveryFormLivewire extends Component
         ];
     }
 
-    public function calculateDeliveryCost()
+    public function calculateTotalCost()
+    {
+        return round($this->deliveryCharges + $this->serviceCharges + $this->tax);
+    }
+
+    public function setDeliveryServiceName($deliveryServiceName)
+    {
+        if (!in_array($deliveryServiceName, array_column(DeliveryProviderEnum::cases(), 'value'))) {
+            throw new Exception('Invalid delivery provider');
+        }
+
+        $this->deliveryServiceName = $deliveryServiceName;
+    }
+
+    public function calculateDeliveryCost($deliveryServiceName)
     {
         $this->validate();
 
         try {
-            $deliveryCost = StuartDeliveryServices::getJobPricing(
-                $this->prepareStuartJobArray()
-            );
+            $this->setDeliveryServiceName($deliveryServiceName);
 
-            $this->currency = $deliveryCost['currency'];
-            $this->deliveryCost = round($deliveryCost['amount_with_tax']);
+            if ($this->deliveryServiceName === DeliveryProviderEnum::STUART->value) {
+                $this->requestDeliveryButtonTxt = 'Request Staurt Delivery';
+
+                $response = StuartDeliveryServices::getJobPricing(
+                    $this->prepareStuartJobArray()
+                );
+            }
+
+            $this->currency = $response['currency'];
+            $this->deliveryCharges = $response['amount'];
+            $this->serviceCharges = 1.99;
+            $this->tax = $response['amount_with_tax'] - $response['amount'];
+            $this->totalCost = $this->calculateTotalCost();
             $this->disableRequestDeliveryButton = false;
         } catch (Exception $error) {
             report($error);
@@ -162,7 +192,7 @@ class RequestDeliveryFormLivewire extends Component
             ]);
 
             redirect()->route('stripe.requested.delivery.checkout.form', [
-                'totalCharge' => $this->deliveryCost,
+                'totalCharge' => $this->totalCost,
                 'productName' => uniqid('requested-delivery-')
             ]);
         } catch (Exception $error) {
