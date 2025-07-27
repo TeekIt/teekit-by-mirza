@@ -169,12 +169,6 @@
                                         <td>{{ $singleIndex->delivery_provider }}</td>
                                         <td>{{ $singleIndex->created_at }}</td>
                                         <td>
-                                            {{-- <button type="button"
-                                                wire:click="renderTrackDeliveryModal('{{ $singleIndex->delivery_id }}', '{{ $singleIndex->delivery_provider }}')"
-                                                class="btn text-site-primary" title="Track delivery">
-                                                <i class="far fa-eye"></i>
-                                            </button> --}}
-
                                             <button type="button" class="btn text-site-primary"
                                                 wire:click="renderTrackDeliveryModal('{{ $singleIndex->delivery_id }}', '{{ $singleIndex->delivery_provider }}')"
                                                 wire:target="renderTrackDeliveryModal('{{ $singleIndex->delivery_id }}', '{{ $singleIndex->delivery_provider }}')"
