@@ -3,9 +3,20 @@
     @php
         use App\Enums\PackageWeightEnum;
         use App\Enums\PackageTransportTypeEnum;
+        use App\Enums\DeliveryProviderEnum;
     @endphp
 
     <x-session-messages />
+
+    <style>
+        .table {
+            --bs-table-bg: transparent !important;
+        }
+
+        .cursor-pointer {
+            cursor: pointer !important;
+        }
+    </style>
 
     <!-- Main content -->
     <div class="content">
@@ -198,31 +209,94 @@
                                             </div>
 
                                             <div class="col-md-6 offset-md-3 text-center my-3">
-                                                <button type="button"
-                                                    class="btn site-primary-yellow-bg rounded-pill px-5 py-2 font-weight-bold"
+                                                {{-- <button type="button"
+                                                    class="btn site-primary-yellow-bg rounded-pill px-5 py-2 font-weight-bold dropdown-toggle"
+                                                    data-bs-toggle="dropdown" aria-expanded="false"
                                                     wire:click="calculateDeliveryCost"
                                                     wire:target="calculateDeliveryCost" wire:loading.class="btn-dark"
                                                     wire:loading.class.remove="site-primary-yellow-bg"
                                                     wire:loading.attr="disabled">
                                                     <span wire:target="calculateDeliveryCost" wire:loading.remove>
-                                                        Calculate Delivery Cost
+                                                        Calculate Delivery Charges
                                                     </span>
                                                     <span wire:target="calculateDeliveryCost" wire:loading>
                                                         <span class="spinner-border spinner-border-sm text-light"
                                                             role="status" aria-hidden="true"></span>
                                                     </span>
-                                                </button>
-                                            </div>
+                                                </button> --}}
 
-                                            <div class="col-md-12">
-                                                <div class="p-3 text-center">
-                                                    <p class="fs-5">
-                                                        Total Cost: {{ $deliveryCost }} {{ $currency }}
-                                                    </p>
+                                                <div class="btn-group">
+                                                    <button type="button"
+                                                        class="btn site-primary-yellow-bg rounded-pill px-5 py-2 font-weight-bold dropdown-toggle"
+                                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                                        wire:loading.class="btn-dark"
+                                                        wire:loading.class.remove="site-primary-yellow-bg"
+                                                        wire:loading.attr="disabled">
+                                                        <span wire:target="calculateDeliveryCost" wire:loading.remove>
+                                                            Calculate Delivery Charges
+                                                        </span>
+                                                        <span wire:target="calculateDeliveryCost" wire:loading>
+                                                            <span class="spinner-border spinner-border-sm text-light"
+                                                                role="status" aria-hidden="true"></span>
+                                                        </span>
+                                                    </button>
+                                                    <ul class="dropdown-menu col-12">
+                                                        <li class="dropdown-item cursor-pointer p-3 border-bottom"
+                                                            wire:click="calculateDeliveryCost('{{ DeliveryProviderEnum::STUART }}')">
+                                                            Stuart Delivery Charges
+                                                        </li>
+                                                        <li class="dropdown-item cursor-pointer p-3"
+                                                            wire:click="calculateDeliveryCost('{{ DeliveryProviderEnum::GOPHR }}')">
+                                                            Gophr Delivery Charges
+                                                        </li>
+                                                    </ul>
                                                 </div>
                                             </div>
 
-                                            <div class="col-md-6 offset-md-3 text-center">
+                                            <div class="col-md-12">
+                                                <div class="d-flex justify-content-center">
+                                                    <div class="col-12 col-sm-6 table-responsive">
+                                                        <table class="table">
+                                                            <tbody>
+                                                                <tr class="p-3 border-bottom">
+                                                                    <td class="fs-5 py-2 text-start">
+                                                                        Delivery Charges:
+                                                                    </td>
+                                                                    <td class="fs-5 py-2 text-end">
+                                                                        {{ $currency }} {{ $deliveryCharges }}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="p-3 border-bottom">
+                                                                    <td class="fs-5 py-2 text-start">
+                                                                        Service Charges:
+                                                                    </td>
+                                                                    <td class="fs-5 py-2 text-end">
+                                                                        {{ $currency }} {{ $serviceCharges }}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="p-3 border-bottom">
+                                                                    <td class="fs-5 py-2 text-start">
+                                                                        Tax:
+                                                                    </td>
+                                                                    <td class="fs-5 py-2 text-end">
+                                                                        {{ $currency }} {{ $tax }}
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class="p-3">
+                                                                    <td class="fs-5 py-2 text-start fw-bold">
+                                                                        Total Cost:
+                                                                    </td>
+                                                                    <td class="fs-5 py-2 text-end fw-bold">
+                                                                        {{ $currency }} {{ $totalCost }}
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 offset-md-3 text-center my-3">
                                                 <button type="submit"
                                                     class="btn site-primary-yellow-bg rounded-pill px-5 py-2 font-weight-bold"
                                                     wire:target="requestDelivery" wire:loading.class="btn-dark"
@@ -230,7 +304,7 @@
                                                     wire:loading.attr="disabled"
                                                     @if ($disableRequestDeliveryButton) disabled @endif>
                                                     <span wire:target="requestDelivery" wire:loading.remove>
-                                                        Request
+                                                        {{ $requestDeliveryButtonTxt }}
                                                     </span>
                                                     <span wire:target="requestDelivery" wire:loading>
                                                         <span class="spinner-border spinner-border-sm text-light"

@@ -3,18 +3,76 @@
     @php
         use App\Enums\PackageWeightEnum;
         use App\Enums\PackageTransportTypeEnum;
+        use App\Enums\DeliveryProviderEnum;
     @endphp
 
     <x-session-messages />
 
     {{-- ************************************ Cancel Requested Delivery Model ************************************ --}}
-    <x-custom-sweet-alert-modal
-        :alertIconHTML="'<i class=\'fas fa-exclamation-circle text-warning\'></i>'" :alertHeading="'Alert!'"
+    {{-- <x-custom-sweet-alert-modal :alertIconHTML="'<i class=\'fas fa-exclamation-circle text-warning\'></i>'" :alertHeading="'Alert!'"
         :msg="'Are you sure you want to cancel this requested delivery?'" :confirmButtonText="'Yes'"
-        :cancelButtonText="'No'" 
-        :confirmButtonFunction="'cancelDelivery(' . $requestedDeliveryId . ')'"
-        :cancelButtonFunction="'closeModal(\'customSweetAlertModal\')'"
-    />
+        :cancelButtonText="'No'" :confirmButtonFunction="'cancelDelivery('.$requestedDeliveryId.
+        ')'"
+        :cancelButtonFunction="'closeModal(\'customSweetAlertModal\')'" /> --}}
+
+    {{-- ************************************ Track Gophr Delivery Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="trackGophrDeliveryModal" tabindex="-1">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title display-center">Live Delivery Tracking</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                        wire:click="resetComponent">
+                        <span>×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @if (isset($selectedDeliveryDetails) && $deliveryServiceName === DeliveryProviderEnum::GOPHR->value)
+                        <div class="row" style="height: 100vh;">
+                            <iframe src="{{ $selectedDeliveryDetails['data']['deliveries'][0]['public_tracker_url'] }}"
+                                class="col-12">
+                            </iframe>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer hidden">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        wire:click="resetComponent">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- ************************************ Track Stuart Delivery Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="trackStuartDeliveryModal" tabindex="-1">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title display-center">Live Delivery Tracking</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                        wire:click="resetComponent">
+                        <span>×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @if (isset($selectedDeliveryDetails) && $deliveryServiceName === DeliveryProviderEnum::STUART->value)
+                        <div class="row" style="height: 100vh;">
+                            <iframe src="{{ $selectedDeliveryDetails['deliveries'][0]['tracking_url'] }}"
+                                class="col-12">
+                            </iframe>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer hidden">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        wire:click="resetComponent">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="content">
         <div class="content-header">
@@ -89,8 +147,9 @@
                                     <th scope="col">Buyer Email</th>
                                     <th scope="col">Transport Type</th>
                                     <th scope="col">Package Weight</th>
-                                    <th scope="col">Created At</th>
                                     <th scope="col">Status</th>
+                                    <th scope="col">Delivery Provider</th>
+                                    <th scope="col">Created At</th>
                                     <th scope="col">Options</th>
                                 </tr>
                             </thead>
@@ -106,15 +165,26 @@
                                         <td>{{ $singleIndex->receiver_email }}</td>
                                         <td>{{ $singleIndex->package_transport_type }}</td>
                                         <td>{{ $singleIndex->package_weight }}</td>
+                                        <td><span class="badge badge-primary">inProgress</span></td>
+                                        <td>{{ $singleIndex->delivery_provider }}</td>
                                         <td>{{ $singleIndex->created_at }}</td>
                                         <td>
-                                            <span class="badge badge-primary">inProgress</span>
-                                        </td>
-                                        <td>
-                                            <button data-bs-toggle="modal" data-bs-target="#customSweetAlertModal"
-                                                wire:click="renderCancelRequestedDeliveryModal({{ $singleIndex->id }})"
-                                                class="btn text-site-primary" title="Cancel delivery">
-                                                <i class="far fa-window-close"></i>
+                                            <button type="button" class="btn text-site-primary"
+                                                wire:click="renderTrackDeliveryModal('{{ $singleIndex->delivery_id }}', '{{ $singleIndex->delivery_provider }}')"
+                                                wire:target="renderTrackDeliveryModal('{{ $singleIndex->delivery_id }}', '{{ $singleIndex->delivery_provider }}')"
+                                                wire:loading.class="btn-dark" wire:loading.class.remove=""
+                                                wire:loading.attr="disabled" title="Track delivery">
+                                                <span
+                                                    wire:target="renderTrackDeliveryModal('{{ $singleIndex->delivery_id }}', '{{ $singleIndex->delivery_provider }}')"
+                                                    wire:loading.remove>
+                                                    <i class="far fa-eye"></i>
+                                                </span>
+                                                <span
+                                                    wire:target="renderTrackDeliveryModal('{{ $singleIndex->delivery_id }}', '{{ $singleIndex->delivery_provider }}')"
+                                                    wire:loading>
+                                                    <span class="spinner-border spinner-border-sm text-light"
+                                                        role="status"></span>
+                                                </span>
                                             </button>
                                         </td>
                                     </tr>

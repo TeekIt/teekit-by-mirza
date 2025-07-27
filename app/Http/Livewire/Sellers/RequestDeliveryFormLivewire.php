@@ -2,17 +2,19 @@
 
 namespace App\Http\Livewire\Sellers;
 
+use App\Enums\DeliveryProviderEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use App\Enums\StuartPackageTypeEnum;
-use App\Models\RequestedDelivery;
-use App\Services\StripeServices;
+use App\Services\CompanyStandardsServices;
+use App\Services\DeliveryServices;
+use App\Services\GophrDeliveryServices;
 use App\Services\StuartDeliveryServices;
 use App\Services\UUIDServices;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Exception;
-
+use Illuminate\Support\Facades\Log;
 
 class RequestDeliveryFormLivewire extends Component
 {
@@ -26,9 +28,14 @@ class RequestDeliveryFormLivewire extends Component
         $receiverEmail,
         $packageTransportType,
         $packageWeight,
-        $deliveryCost = 0,
+        $deliveryCharges = 0,
+        $serviceCharges = 0,
+        $tax = 0,
+        $totalCost = 0,
         $currency,
-        $disableRequestDeliveryButton = true;
+        $disableRequestDeliveryButton = true,
+        $requestDeliveryButtonTxt = 'Request',
+        $deliveryServiceName;
 
     protected function rules()
     {
@@ -89,8 +96,12 @@ class RequestDeliveryFormLivewire extends Component
 
     public function inputFieldChanged()
     {
+        $this->requestDeliveryButtonTxt = 'Request';
         $this->disableRequestDeliveryButton = true;
-        $this->deliveryCost = 0;
+        $this->deliveryCharges = 0;
+        $this->serviceCharges = 0;
+        $this->tax = 0;
+        $this->totalCost = 0;
         $this->currency = '';
     }
 
@@ -129,17 +140,113 @@ class RequestDeliveryFormLivewire extends Component
         ];
     }
 
-    public function calculateDeliveryCost()
+    public function prepareGophrJobArray()
+    {
+        $parcelData = [
+            'parcel_external_id' => UUIDServices::generateUUID(),
+            'parcel_reference_number' => UUIDServices::generateUUID(),
+            'parcel_description' => 'Please pickup your order ASAP',
+            'width' => 0,
+            'length' => 0,
+            'height' => 0,
+            'weight' => 0,
+        ];
+
+        return [
+            'is_confirmed' => 1,
+            'external_id' => UUIDServices::generateUUID(),
+            'pickups' => [
+                [
+                    'pickup_address1' => $this->pickupAddress,
+                    'pickup_city' => auth()->user()->city,
+                    'pickup_postcode' => auth()->user()->postcode,
+                    'pickup_country_code' => 'GB',
+                    'pickup_location_lat' => auth()->user()->lat,
+                    'pickup_location_lng' => auth()->user()->lon,
+                    'pickup_person_name' => auth()->user()->name,
+                    'pickup_mobile_number' => auth()->user()->business_phone,
+                    'parcels' => [
+                        $parcelData
+                    ]
+                ]
+            ],
+            'dropoffs' => [
+                [
+                    'dropoff_address1' => $this->dropoffAddress,
+                    'dropoff_city' => auth()->user()->city,
+                    'dropoff_postcode' => auth()->user()->postcode,
+                    'dropoff_country_code' => 'GB',
+                    // 'dropoff_location_lat' => ,
+                    // 'dropoff_location_lng' => ,
+                    'dropoff_person_name' => $this->receiverName,
+                    'dropoff_email' => $this->receiverEmail,
+                    'dropoff_mobile_number' => $this->receiverPhone,
+                    'dropoff_instructions' => $this->unitAddress,
+                    'dropoff_deadline' => CompanyStandardsServices::getStandardDeliveryDeadline()->toIso8601String(),
+                    'parcels' => [
+                        $parcelData
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    public function calculateTotalCost()
+    {
+        return round($this->deliveryCharges + $this->serviceCharges + $this->tax);
+    }
+
+    public function setDeliveryServiceName($deliveryServiceName)
+    {
+        if (!in_array($deliveryServiceName, array_column(DeliveryProviderEnum::cases(), 'value'))) {
+            throw new Exception('Invalid delivery provider');
+        }
+
+        $this->deliveryServiceName = $deliveryServiceName;
+    }
+
+    public function calculateDeliveryCost($deliveryServiceName)
     {
         $this->validate();
 
         try {
-            $deliveryCost = StuartDeliveryServices::getJobPricing(
-                $this->prepareStuartJobArray()
-            );
+            $this->setDeliveryServiceName($deliveryServiceName);
 
-            $this->currency = $deliveryCost['currency'];
-            $this->deliveryCost = round($deliveryCost['amount_with_tax']);
+            if ($this->deliveryServiceName === DeliveryProviderEnum::STUART->value) {
+                $this->requestDeliveryButtonTxt = 'Request Staurt Delivery';
+
+                $response = StuartDeliveryServices::getJobPricing(
+                    $this->prepareStuartJobArray()
+                );
+
+                $this->currency = $response['currency'];
+                $this->deliveryCharges = $response['amount'];
+                $this->serviceCharges = CompanyStandardsServices::$standardServiceCharges;
+                $this->tax = $response['amount_with_tax'] - $response['amount'];
+                $this->totalCost = $this->calculateTotalCost();
+            }
+
+            if ($this->deliveryServiceName === DeliveryProviderEnum::GOPHR->value) {
+                $this->requestDeliveryButtonTxt = 'Request Gophr Delivery';
+
+                $response = GophrDeliveryServices::getJobPricing(
+                    $this->prepareGophrJobArray()
+                );
+                if (isset($response->errors)) {
+                    Log::error($response->errors);
+
+                    throw new Exception(json_encode($response->errors[0]->message));
+                }
+
+                $response = json_decode(json_encode($response->data), true);
+
+                $this->currency = $response['price_net']['currency'];
+                $this->deliveryCharges = $response['price_net']['amount'];
+                $this->serviceCharges = CompanyStandardsServices::$standardServiceCharges;
+                $this->tax = $response['price_gross']['amount'] - $response['price_net']['amount'];
+                $this->totalCost = $this->calculateTotalCost();
+            }
+
             $this->disableRequestDeliveryButton = false;
         } catch (Exception $error) {
             report($error);
@@ -155,14 +262,24 @@ class RequestDeliveryFormLivewire extends Component
         $this->disableRequestDeliveryButton = true;
 
         try {
-            request()->session()->put('stuartDeliveryDetails', [
-                'jobArray' => $this->prepareStuartJobArray(),
-                'packageTransportType' => $this->packageTransportType,
-                'packageWeight' => $this->packageWeight,
-            ]);
+            if ($this->deliveryServiceName === DeliveryProviderEnum::STUART->value) {
+                request()->session()->put('stuartDeliveryDetails', [
+                    'jobArray' => $this->prepareStuartJobArray(),
+                    'packageTransportType' => $this->packageTransportType,
+                    'packageWeight' => $this->packageWeight,
+                ]);
+            }
+
+            if ($this->deliveryServiceName === DeliveryProviderEnum::GOPHR->value) {
+                request()->session()->put('gophrDeliveryDetails', [
+                    'jobArray' => $this->prepareGophrJobArray(),
+                    'packageTransportType' => $this->packageTransportType,
+                    'packageWeight' => $this->packageWeight,
+                ]);
+            }
 
             redirect()->route('stripe.requested.delivery.checkout.form', [
-                'totalCharge' => $this->deliveryCost,
+                'totalCharge' => $this->totalCost,
                 'productName' => uniqid('requested-delivery-')
             ]);
         } catch (Exception $error) {

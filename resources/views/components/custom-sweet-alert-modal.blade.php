@@ -1,3 +1,13 @@
+{{-- 
+    How you can call this component example:
+    <x-custom-sweet-alert-modal
+            :alertIconHTML="'<i class=\'fas fa-exclamation-circle text-warning\'></i>'" :alertHeading="'Alert!'"
+            :msg="'Are you sure you want to cancel this requested delivery?'" :confirmButtonText="'Yes'"
+            :cancelButtonText="'No'" 
+            :confirmButtonFunction="'cancelDelivery(' . $requestedDeliveryId . ')'"
+            :cancelButtonFunction="'closeModal(\'customSweetAlertModal\')'"
+        /> 
+--}}
 <div wire:ignore.self class="modal fade" id="customSweetAlertModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
