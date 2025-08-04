@@ -42,7 +42,7 @@ class RequestDeliveryFormLivewire extends Component
         return [
             'pickupAddress' => 'required|string',
             'dropoffAddress' => 'required|string',
-            'unitAddress' => 'nullable|string',
+            'unitAddress' => 'required|string',
             'receiverName' => 'required|string',
             'receiverPhone' => 'required|numeric',
             'receiverEmail' => 'required|email',
@@ -174,14 +174,14 @@ class RequestDeliveryFormLivewire extends Component
                 [
                     'dropoff_address1' => $this->dropoffAddress,
                     'dropoff_city' => auth()->user()->city,
-                    'dropoff_postcode' => auth()->user()->postcode,
+                    'dropoff_postcode' => $this->unitAddress,
                     'dropoff_country_code' => 'GB',
                     // 'dropoff_location_lat' => ,
                     // 'dropoff_location_lng' => ,
                     'dropoff_person_name' => $this->receiverName,
                     'dropoff_email' => $this->receiverEmail,
                     'dropoff_mobile_number' => $this->receiverPhone,
-                    'dropoff_instructions' => $this->unitAddress,
+                    'dropoff_instructions' => 'Make the delivery possible ASAP',
                     'dropoff_deadline' => CompanyStandardsServices::getStandardDeliveryDeadline()->toIso8601String(),
                     'parcels' => [
                         $parcelData

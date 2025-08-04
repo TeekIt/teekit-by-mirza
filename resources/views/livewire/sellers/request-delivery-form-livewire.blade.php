@@ -85,7 +85,7 @@
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
                                                                 wire:model.defer="unitAddress"
-                                                                placeholder="Unit Address (e.g Flat#)" value="">
+                                                                placeholder="Unit Address (e.g Flat#)" value="" required>
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('unitAddress')
