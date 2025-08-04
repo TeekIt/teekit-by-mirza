@@ -4,7 +4,7 @@ namespace App;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
-use App\Enums\TransportVehicle;
+use App\Enums\TransportVehicleEnum;
 use App\Enums\UserMorphTypeEnum;
 use App\Models\ProductsByBuyer;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,9 +23,10 @@ class Orders extends Model
 
     protected $fillable = ['*'];
 
-    // protected $hidden = [
-    //     'deleted_at',
-    // ];
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */
@@ -170,23 +171,23 @@ class Orders extends Model
          */
         foreach ($products as $single_product) {
             if ($single_product->van)
-                array_push($transposrt_type, TransportVehicle::VAN->value);
+                array_push($transposrt_type, TransportVehicleEnum::VAN->value);
             elseif ($single_product->car)
-                array_push($transposrt_type, TransportVehicle::CAR->value);
+                array_push($transposrt_type, TransportVehicleEnum::CAR->value);
             elseif ($single_product->bike)
-                array_push($transposrt_type, TransportVehicle::BIKE->value);
+                array_push($transposrt_type, TransportVehicleEnum::BIKE->value);
         }
         /**
          * Now if any product contains "van" then the function should return "van"
          * If any product contains "car" then return "car"
          * Otherwise "bike"
          */
-        if (in_array(TransportVehicle::VAN->value, $transposrt_type))
-            return TransportVehicle::VAN->value;
-        elseif (in_array(TransportVehicle::CAR->value, $transposrt_type))
-            return TransportVehicle::CAR->value;
+        if (in_array(TransportVehicleEnum::VAN->value, $transposrt_type))
+            return TransportVehicleEnum::VAN->value;
+        elseif (in_array(TransportVehicleEnum::CAR->value, $transposrt_type))
+            return TransportVehicleEnum::CAR->value;
         else
-            return TransportVehicle::BIKE->value;
+            return TransportVehicleEnum::BIKE->value;
     }
 
     public static function checkIfOrderExists(int $id): bool
@@ -277,7 +278,11 @@ class Orders extends Model
             })
             ->orderBy('created_at', $orderBy)
             ->paginate(10);
-        /* Load 'category' for products where 'product_belongs_to_type' is 'Product' */
+        /* 
+        * Load 'category' for products where 'product_belongs_to_type' is 'Product'
+        * Means if the product has been created by a 'seller' not a 'buyer' 
+        * Because only seller products have 'category'
+        */
         $orders->each(function ($order) {
             $order->order_items->each(function ($orderItem) {
                 if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
@@ -289,7 +294,7 @@ class Orders extends Model
         return $orders;
     }
 
-    public static function getOrdersForView(int|null $orderId = null, int $sellerId, string $orderBy): LengthAwarePaginator
+    public static function getOrdersForView(int $sellerId, string $orderBy, int|null $orderId = null): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) static::isViewed($orderId);
@@ -301,7 +306,11 @@ class Orders extends Model
             ->where('seller_id', '=', $sellerId)
             ->orderBy('created_at', $orderBy)
             ->paginate(10);
-        /* Load 'category' for products where 'product_belongs_to_type' is 'Product' */
+        /* 
+        * Load 'category' for products where 'product_belongs_to_type' is 'Product'
+        * Means if the product has been created by a 'seller' not a 'buyer' 
+        * Because only seller products have 'category'
+        */
         $orders->each(function ($order) {
             $order->order_items->each(function ($orderItem) {
                 if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
@@ -313,8 +322,8 @@ class Orders extends Model
         return $orders;
     }
 
-    public static function getRecentOrderByCustomerId(
-        int $customerId,
+    public static function getRecentOrderByBuyerId(
+        int $buyerId,
         ?int $productsLimit = null,
         ?int $sellerId = null
     ): ?Orders {
@@ -323,8 +332,8 @@ class Orders extends Model
                 if ($productsLimit !== null) $query->take($productsLimit);
             }
         ])
-            ->when($sellerId, fn($query) => $query->where('seller_id', $sellerId))
-            ->where('customer_id', $customerId)
+            ->when($sellerId, fn($query) => $query->where('seller_id', '=', $sellerId))
+            ->where('created_by_id', '=', $buyerId)
             ->latest()
             ->first();
     }

@@ -6,7 +6,6 @@ use App\OrderItems;
 use App\Orders;
 use App\Products;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -37,7 +36,9 @@ class SearchAlternativeProductModal extends Component
         'selectedQty.required' => 'Please enter the qty',
         'selectedQty.integer' => 'The qty must be a integer value'
     ];
-
+    /*
+     * Lifecycle Hooks
+     */
     public function mount($orderId, $currentProdId, $currentProdQty, $customerName, $phoneNumber)
     {
         $this->resetAllPaginators();
@@ -47,9 +48,11 @@ class SearchAlternativeProductModal extends Component
         $this->currentProdQty = $currentProdQty;
         $this->customerName = $customerName;
         $this->phoneNumber = $phoneNumber;
-        $this->sellerId = Auth::id();
+        $this->sellerId = auth()->id();
     }
-
+    /*
+     * Helpers
+     */
     public function resetChildModal()
     {
         $this->resetAllErrors();
@@ -86,7 +89,9 @@ class SearchAlternativeProductModal extends Component
     {
         $this->productDetails = null;
     }
-
+    /*
+     * CRUD Methods
+     */
     public function addProduct($productId)
     {
         try {

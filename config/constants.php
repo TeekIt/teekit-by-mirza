@@ -110,7 +110,7 @@ return [
     | Digital Ocean Bucket
     |--------------------------------------------------------------------------
     */
-    'BUCKET' => 'https://user-imgs.sgp1.digitaloceanspaces.com/',
+    'BUCKET' => 'https://teekit-production-bucket.lon1.digitaloceanspaces.com/',
     /*
     |--------------------------------------------------------------------------
     | Admin Email

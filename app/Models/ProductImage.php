@@ -16,6 +16,12 @@ class ProductImage extends Model
         'product_id',
         'product_image'
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */

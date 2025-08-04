@@ -6,10 +6,6 @@
 </head>
 
 <style>
-    .border {
-        border: 1px solid red;
-    }
-
     @media screen and (max-width: 769px) {
         .cstm-container-sm {
             width: 100%;
@@ -21,6 +17,12 @@
         .mobile-login-btn {
             border: none !important;
             color: #3663ae !important;
+        }
+    }
+
+    @media screen and (max-width: 450px) {
+        .left-container {
+            display: none;
         }
     }
 </style>
@@ -45,7 +47,8 @@
                     <!-- Toggle Button For Mobiles - Ends -->
                 </div>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent" aria-current="true" role="navigation">
+                <div class="collapse navbar-collapse px-3" id="navbarSupportedContent" aria-current="true"
+                    role="navigation">
                     <form class="my-2 my-lg-0 ml-auto w-lg-50" style="min-width: 45vw;" method="POST"
                         action="{{ route('login') }}">
                         <div class="row">
@@ -87,20 +90,15 @@
         <!-- /Navbar -->
         <div class="container">
 
-            @include('flash::message')
-
-            @if (session('status'))
-                <div class="alert alert-success" role="alert">
-                    {{ session('status') }}
-                </div>
-            @endif
+            <x-session-messages />
 
             <div class="row">
-                <div class="col-md-6 col-lg-8" style="margin-top: 20vh">
-                    <img src="{{ asset('images/backgrounds/bike.webp') }}" style="width:100%; max-width: 500px; max-height: 540px; display: block; margin: 0px auto;"
+                <div class="col-md-6 col-lg-7 left-container" style="margin-top: 20vh">
+                    <img src="{{ asset('images/backgrounds/bike.webp') }}"
+                        style="width:100%; max-width: 500px; max-height: 540px; display: block; margin: 0px auto;"
                         alt="{{ config('app.name') }} - Bike Image">
                 </div>
-                <div class="col-md-6 col-lg-4" style="margin-top: 11vh">
+                <div class="col-md-6 col-lg-5" style="margin-top: 11vh">
                     @yield('content')
                 </div>
             </div>

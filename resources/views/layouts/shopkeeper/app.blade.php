@@ -17,7 +17,7 @@
                 <div class="col-md-12">
                     
                     <div class="container pt-4">
-                        @include('flash::message')
+                        {{-- @include('flash::message') --}}
                     </div>
 
                     @if (session('status'))
@@ -29,9 +29,6 @@
                                     aria-label="Close"></button>
                             </div>
                         </div>
-                        {{-- <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div> --}}
                     @endif
                 </div>
             </div>

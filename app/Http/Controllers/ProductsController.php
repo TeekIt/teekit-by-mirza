@@ -4,17 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Categories;
 use App\Enums\SortByEnum;
-use App\Enums\TransportVehicle;
-use App\Enums\UserRole;
+use App\Enums\TransportVehicleEnum;
+use App\Enums\UserRoleEnum;
 use App\Imports\ProductsImport;
 use App\Models\ProductImage;
 use App\Products;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AddOrUpdateProductRequest;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use App\User;
 use App\Qty;
 use App\Services\GoogleMapServices;
@@ -56,17 +53,17 @@ class ProductsController extends Controller
     {
         $data = $request->validated();
 
-        if ($request->has('colors')) {
+        if (request()->has('colors')) {
             $data['colors'] = ProductServices::jsonEncodeColors($data['colors']);
         }
 
-        $data['bike'] = ($data['vehicle'] == TransportVehicle::BIKE->value) ? 1 : 0;
-        $data['car'] = ($data['vehicle'] == TransportVehicle::CAR->value) ? 1 : 0;
-        $data['van'] = ($data['vehicle'] == TransportVehicle::VAN->value) ? 1 : 0;
+        $data['bike'] = ($data['vehicle'] == TransportVehicleEnum::BIKE->value) ? 1 : 0;
+        $data['car'] = ($data['vehicle'] == TransportVehicleEnum::CAR->value) ? 1 : 0;
+        $data['van'] = ($data['vehicle'] == TransportVehicleEnum::VAN->value) ? 1 : 0;
         $data['discount_percentage'] = (!isset($data['discount_percentage'])) ? 0.00 : $data['discount_percentage'];
         $data['contact'] = '+44' . $data['contact'];
         $data['seller_id'] = auth()->id();
-        $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
+        $data['feature_img'] = ImageServices::uploadImg(request(), 'feature_img', $data['seller_id']);
 
         unset($data['_token']);
         unset($data['color']);
@@ -76,10 +73,10 @@ class ProductsController extends Controller
 
         $product = Products::add($data);
 
-        Qty::add($data['seller_id'], $product->id, $data['category_id'], $request->safe()->only(['qty'])['qty']);
+        Qty::add($data['seller_id'], $product->id, $data['category_id'], request()->safe()->only(['qty'])['qty']);
 
-        if ($request->hasFile('gallery')) {
-            foreach ($request->file('gallery') as $singleImage) {
+        if (request()->hasFile('gallery')) {
+            foreach (request()->file('gallery') as $singleImage) {
                 $uniqueId = $data['seller_id'] . $product->id;
                 $fileName = ImageServices::uploadImg(id: $uniqueId, imageFile: $singleImage);
 
@@ -107,15 +104,15 @@ class ProductsController extends Controller
     {
         $data = $request->validated();
 
-        $data['colors'] = ($request->has('colors')) ? ProductServices::jsonEncodeColors($data['colors']) : null;
+        $data['colors'] = (request()->has('colors')) ? ProductServices::jsonEncodeColors($data['colors']) : null;
 
-        if ($request->hasFile('feature_img')) {
-            $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
+        if (request()->hasFile('feature_img')) {
+            $data['feature_img'] = ImageServices::uploadImg(request(), 'feature_img', $data['seller_id']);
         }
 
-        $data['bike'] = ($data['vehicle'] == TransportVehicle::BIKE->value) ? 1 : 0;
-        $data['car'] = ($data['vehicle'] == TransportVehicle::CAR->value) ? 1 : 0;
-        $data['van'] = ($data['vehicle'] == TransportVehicle::VAN->value) ? 1 : 0;
+        $data['bike'] = ($data['vehicle'] == TransportVehicleEnum::BIKE->value) ? 1 : 0;
+        $data['car'] = ($data['vehicle'] == TransportVehicleEnum::CAR->value) ? 1 : 0;
+        $data['van'] = ($data['vehicle'] == TransportVehicleEnum::VAN->value) ? 1 : 0;
         $data['discount_percentage'] = $data['discount_percentage'] ?? 0.00;
         $data['contact'] = '+44' . $data['contact'];
         $data['seller_id'] = auth()->id();
@@ -126,13 +123,13 @@ class ProductsController extends Controller
         unset($data['qty']);
         unset($data['vehicle']);
 
-        Qty::updateQty($productId, $data['seller_id'], $request->safe()->only(['qty'])['qty']);
+        Qty::updateQty($productId, $data['seller_id'], request()->safe()->only(['qty'])['qty']);
 
         $product = Products::findOrFail($productId);
         if (!empty($product)) {
 
-            if ($request->hasFile('gallery')) {
-                foreach ($request->file('gallery') as $image) {
+            if (request()->hasFile('gallery')) {
+                foreach (request()->file('gallery') as $image) {
                     $fileName = ImageServices::uploadImg(id: $productId, imageFile: $image);
                     ProductImage::add($productId, $fileName);
                 }
@@ -178,21 +175,23 @@ class ProductsController extends Controller
             $request->all(),
             rules: [
                 'file' => 'required|file',
-                'seller_id' => [
+                'sellerId' => [
                     'required',
                     'integer',
-                    Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRole::SELLER)),
+                    Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRoleEnum::SELLER)),
                 ],
             ],
             messages: [
-                'seller_id.exists' => 'The given :attribute either does not exist in our system or its a child seller',
+                'sellerId.exists' => 'The given :attribute either does not exist in our system or its a child seller',
             ]
         );
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        Excel::import(new ProductsImport($request->seller_id), $request->file('file'), readerType: ExcelConstants::CSV);
+        $validatedData = (object) $validatedData->validated();
+
+        Excel::import(new ProductsImport($validatedData->sellerId), $request->file('file'), readerType: ExcelConstants::CSV);
 
         return JsonResponseServices::getApiResponse(
             [],
@@ -348,9 +347,10 @@ class ProductsController extends Controller
 
         /*
         * Just creating this variable so we don't have to call the "empty()" function again & again
-        * Which will obviouly increase the API response speed
+        * Which will obviouly decrease the API response speed
         */
         $dataIsEmpty = empty($data);
+
         return JsonResponseServices::getApiResponse(
             ($dataIsEmpty) ? [] : $data,
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
@@ -459,9 +459,10 @@ class ProductsController extends Controller
         );
         /*
         * Just creating this variable so we don't have to call the "empty()" function again & again
-        * Which will obviouly increase the API response speed
+        * Which will obviouly decrease the API response speed
         */
         $dataIsEmpty = $products['data']->isEmpty();
+        
         return JsonResponseServices::getApiResponseExtention(
             ($dataIsEmpty) ? [] : $products['data'],
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
@@ -540,12 +541,11 @@ class ProductsController extends Controller
         }
 
         $file = $request->file('file');
-        // File Details
         $filename = $file->getClientOriginalName();
         $location = public_path('upload/csv');
         $file->move($location, $filename);
-        $filepath = $location . "/" . $filename;
-        // Reading file
+        $filepath = $location . "/" . $filename;        
+        /* Reading file */
         $file = fopen($filepath, "r");
         $i = 0;
         while (($filedata = fgetcsv($file, 1000, $delimiter)) !== FALSE) {
@@ -557,8 +557,8 @@ class ProductsController extends Controller
             $sku = $filedata[1];
             $price = $filedata[2];
             $qty = $filedata[3];
-            // Find product by sku, user_id, category_id and update price and quantity
-            $product = (new Products)->getProductsByParameters($request->store_id, $sku, $catgory_id);
+            /* Find product by sku, user_id, category_id and update price and quantity */
+            $product = Products::getProductsByParameters($request->store_id, $sku, $catgory_id);
             if ($product) {
                 $product->price = $price;
                 $product->save();
@@ -570,7 +570,8 @@ class ProductsController extends Controller
             }
             $i++;
             if ($i % $batchSize == 0) {
-                usleep(500000); // Wait for 0.5 seconds between batches to avoid overwhelming the database
+                /* Wait for 0.5 seconds between batches to avoid overwhelming the database */
+                usleep(500000);
             }
         }
 

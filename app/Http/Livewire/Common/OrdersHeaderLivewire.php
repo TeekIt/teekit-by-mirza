@@ -8,12 +8,15 @@ use App\Models\GophrDelivery;
 use App\Enums\PaymentIntentStatusEnum;
 use App\Models\OrdersFromOtherSeller;
 use App\Orders;
+use App\Services\CompanyStandardsServices;
+use App\Services\DeliveryServices;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
 use App\Services\GophrDeliveryServices;
 use App\Services\OrderServices;
 use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
+use App\Services\UUIDServices;
 use App\User;
 use Carbon\Carbon;
 use Exception;
@@ -21,9 +24,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
-use stdClass;
 
-class OrdersHeader extends Component
+class OrdersHeaderLivewire extends Component
 {
     use WithPagination;
 
@@ -43,7 +45,7 @@ class OrdersHeader extends Component
 
     public $order;
 
-    protected $sellerId;
+    public $sellerId;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -131,6 +133,15 @@ class OrdersHeader extends Component
         );
     }
 
+    // public function getSellersOfSameCityAndCategory()
+    // {
+    //     return Cache::remember(
+    //         'getSellersOfSameCityAndCategory' . $this->sellerId,
+    //         Carbon::now()->addDay(),
+    //         fn() => User::getParentAndChildSellersByCityAndCategory(auth()->user()->city)
+    //     );
+    // }
+
     public function noNearBySellers($orderId)
     {
         $this->orderId = $orderId;
@@ -153,11 +164,11 @@ class OrdersHeader extends Component
 
         $currentTotalAmount = round($currentTotal + $this->selectedOrder->service_charges + $currentDeliveryCharges);
         $initialTotalAmount = round($this->selectedOrder->initial_total + $this->selectedOrder->service_charges + $this->selectedOrder->delivery_charges);
-        // dd($initialTotalAmount);
+        
         if ($currentTotalAmount <= $initialTotalAmount) {
             $response = StripeServices::capturePaymentIntent(
                 $this->selectedOrder->payment_intent_id,
-                bcmul($currentTotalAmount, 100),
+                StripeServices::calculateCharge($currentTotalAmount),
             );
             if (isset($response->error)) {
                 throw new Exception($response->error->message);
@@ -167,6 +178,55 @@ class OrdersHeader extends Component
         }
 
         return $response;
+    }
+
+    public function prepareGophrJobArray(Orders|OrdersFromOtherSeller $order, string $parcelDescription)
+    {
+        $parcelData = [
+            "parcel_external_id" => UUIDServices::generateUUID(),
+            "parcel_reference_number" => UUIDServices::generateUUID(),
+            "parcel_description" => $parcelDescription,
+            "width" => OrderServices::getTotalWidth($order),
+            "length" => OrderServices::getTotalLength($order),
+            "height" => OrderServices::getTotalHeight($order),
+            "weight" => OrderServices::getTotalWeight($order),
+        ];
+
+        return [
+            "is_confirmed" => 1,
+            "external_id" => UUIDServices::generateUUID(),
+            "pickups" => [
+                [
+                    "pickup_address1" => $order->seller->full_address,
+                    "pickup_city" => $order->seller->city,
+                    "pickup_postcode" => $order->seller->postcode,
+                    "pickup_country_code" => "GB",
+                    "pickup_location_lat" => $order->seller->lat,
+                    "pickup_location_lng" => $order->seller->lon,
+                    "pickup_person_name" => $order->seller->name,
+                    "pickup_mobile_number" => $order->seller->business_phone,
+                    "parcels" => [
+                        $parcelData
+                    ]
+                ]
+            ],
+            "dropoffs" => [
+                [
+                    "dropoff_address1" => $order->address,
+                    "dropoff_city" => $order->city,
+                    "dropoff_postcode" => $order->postcode,
+                    "dropoff_country_code" => "GB",
+                    "dropoff_location_lat" => $order->customer_lat,
+                    "dropoff_location_lng" => $order->customer_lon,
+                    "dropoff_person_name" => $order->customer_name,
+                    "dropoff_mobile_number" => $order->phone_number,
+                    "dropoff_deadline" => CompanyStandardsServices::getStandardDeliveryDeadline()->toIso8601String(),
+                    "parcels" => [
+                        $parcelData
+                    ]
+                ]
+            ]
+        ];
     }
     /* 
      * CRUD Methods
@@ -179,7 +239,9 @@ class OrdersHeader extends Component
 
             $parcelDescription = $this->additionalParcelDescription ?? "Please pickup your order ASAP";
 
-            $response = GophrDeliveryServices::createJob($order, $parcelDescription);
+            $response = GophrDeliveryServices::createJob(
+                $this->prepareGophrJobArray($order, $parcelDescription)
+            );
             if (isset($response->errors)) {
                 $this->dispatchBrowserEvent('close-modal', ['id' => 'gophrModal']);
 
@@ -215,7 +277,7 @@ class OrdersHeader extends Component
     {
         try {
             /* Perform some operation */
-            $stuartMessage = StuartDeliveryServices::stuartJobCreationLivewire(
+            $stuartMessage = StuartDeliveryServices::createJobForLivewire(
                 $this->orderId,
                 $this->customOrderId
             );
@@ -239,7 +301,7 @@ class OrdersHeader extends Component
         try {
             /* Perform some operation */
             $this->selectedOrder = Orders::getById($orderId);
-
+           
             $orderTotalPrice = $this->selectedOrder->order_items[0]->product_price * $this->selectedOrder->order_items[0]->product_qty;
             /* Get sellers who belongs to the city of this store owner */
             $sellersOfTheSameCity = $this->getSellersOfSameCity();
@@ -261,6 +323,7 @@ class OrdersHeader extends Component
                 $this->selectedOrder->created_by_type,
                 $this->selectedOrder->created_by_id,
                 $nearbySellers[$randomIndex]['id'],
+                $this->selectedOrder->id,
                 $this->selectedOrder->order_items[0]->product_belongs_to_type,
                 $this->selectedOrder->order_items[0]->product_belongs_to_id,
                 $this->selectedOrder->order_items[0]->product_price,
@@ -433,6 +496,6 @@ class OrdersHeader extends Component
 
     public function render()
     {
-        return view('livewire.common.orders-header');
+        return view('livewire.common.orders-header-livewire');
     }
 }

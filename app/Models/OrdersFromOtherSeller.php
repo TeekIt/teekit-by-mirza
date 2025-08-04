@@ -17,6 +17,11 @@ class OrdersFromOtherSeller extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['*'];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */
@@ -72,6 +77,7 @@ class OrdersFromOtherSeller extends Model
         string $createdByType,
         int $createdById,
         int $sellerId,
+        int $parentOrderId,
         string $productBelongsToType,
         int $productBelongsToId,
         float $productPrice,
@@ -106,6 +112,7 @@ class OrdersFromOtherSeller extends Model
         $model->created_by_type = $createdByType;
         $model->created_by_id = $createdById;
         $model->seller_id = $sellerId;
+        $model->parent_order_id = $parentOrderId;
         $model->product_belongs_to_type = $productBelongsToType;
         $model->product_belongs_to_id = $productBelongsToId;
         $model->product_price = $productPrice;

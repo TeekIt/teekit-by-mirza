@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Laravel\Cashier\Checkout;
 use stdClass;
 
 final class StripeServices
@@ -16,20 +17,44 @@ final class StripeServices
         return config('stripe.STRIPE_PUBLISH_KEY');
     }
 
-    public static function createPaymentIntent()
+    public static function calculateCharge(int $amount, string $currency = 'GBP'): int
+    {
+        /* Convert to Cents or lowest unit of given Currency according to Stripe standards */
+        return bcmul($amount, 100, 0);
+    }
+
+    public static function getSingleChargeCheckoutForm(
+        int $totalCharge,
+        string $productName,
+        string $successUrl,
+        string $cancelUrl,
+        int $qty = 1
+    ): Checkout {
+        return request()->user()->checkoutCharge(
+            static::calculateCharge($totalCharge),
+            $productName,
+            $qty,
+            [
+                'success_url' => $successUrl,
+                'cancel_url' => $cancelUrl,
+            ]
+        );
+    }
+
+    public static function createCustomer(string $name, string $email): stdClass
     {
         $curl = curl_init();
 
         $formData = [
-            'amount' => $_REQUEST['amount'],
-            'currency' => $_REQUEST['currency'],
+            'name' => $name,
+            'email' => $email,
         ];
 
-        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/customers');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, static::getPublishKey());
+        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
 
         $data = curl_exec($curl);
 
@@ -41,17 +66,23 @@ final class StripeServices
         return json_decode($data);
     }
 
-    public static function requestPaymentAuthorization()
+    public static function createPaymentIntentAndSavePaymentMethod(): stdClass
     {
         $curl = curl_init();
 
+        $customer = static::createCustomer($_REQUEST['name'], $_REQUEST['email']);
+
         $formData = [
+            'customer' => $customer->id,
             'amount' => $_REQUEST['amount'],
             'currency' => $_REQUEST['currency'],
-            'payment_method_types' => ['card'],
-            'capture_method' => 'manual',
+            'setup_future_usage' => 'off_session',
+            'off_session' => 'true',
+            'confirm' => 'true',
+            'automatic_payment_methods[enabled]' => "true",
+            'payment_method' => $_REQUEST['paymentMethodId'],
         ];
-        
+
         curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
@@ -68,7 +99,59 @@ final class StripeServices
         return json_decode($data);
     }
 
-    public static function requestIncrementalAuthorizationSupport()
+    public static function createPaymentIntent(): stdClass
+    {
+        $curl = curl_init();
+
+        $formData = [
+            'amount' => $_REQUEST['amount'],
+            'currency' => $_REQUEST['currency'],
+        ];
+
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
+        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
+
+        $data = curl_exec($curl);
+
+        if (curl_errno($curl))
+            echo 'Error:' . curl_error($curl);
+
+        curl_close($curl);
+
+        return json_decode($data);
+    }
+
+    public static function requestPaymentAuthorization(): stdClass
+    {
+        $curl = curl_init();
+
+        $formData = [
+            'amount' => $_REQUEST['amount'],
+            'currency' => $_REQUEST['currency'],
+            'payment_method_types' => ['card'],
+            'capture_method' => 'manual',
+        ];
+
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
+        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
+
+        $data = curl_exec($curl);
+
+        if (curl_errno($curl))
+            echo 'Error:' . curl_error($curl);
+
+        curl_close($curl);
+
+        return json_decode($data);
+    }
+
+    public static function requestIncrementalAuthorizationSupport(): stdClass
     {
         $curl = curl_init();
         $formData = [
@@ -98,7 +181,7 @@ final class StripeServices
         return json_decode($data);
     }
 
-    public static function performIncrementalAuthorization(string $paymentIntentId = null, int $amount = null)
+    public static function performIncrementalAuthorization(?string $paymentIntentId = null, ?int $amount = null): stdClass
     {
         $paymentIntentId = $_REQUEST['paymentIntentId'] ?? $paymentIntentId;
         $formData = [
@@ -122,7 +205,7 @@ final class StripeServices
         return json_decode($data);
     }
 
-    public static function capturePaymentIntent(string $paymentIntentId = null, int $amount = null): string|stdClass
+    public static function capturePaymentIntent(?string $paymentIntentId = null, ?int $amount = null): string|stdClass
     {
         $paymentIntentId = $_REQUEST['paymentIntentId'] ?? $paymentIntentId;
 
@@ -147,12 +230,12 @@ final class StripeServices
         return json_decode($data);
     }
 
-    public static function refundPaymentIntent(string $paymentIntentId = null): string|stdClass
+    public static function refundPaymentIntent(?string $paymentIntentId = null): string|stdClass
     {
         $paymentIntentId = $_REQUEST['paymentIntentId'] ?? $paymentIntentId;
 
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/'. $paymentIntentId .'/cancel');
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $paymentIntentId . '/cancel');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());

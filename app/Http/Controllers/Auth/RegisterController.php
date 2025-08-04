@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Enums\UserRole;
+use App\Enums\UserRoleEnum;
 use App\User;
 use App\Http\Controllers\Controller;
 use App\Services\EmailServices;
+use App\Services\JsonResponseServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -54,9 +55,10 @@ class RegisterController extends Controller
             'name' => 'required|string|max:80',
             'email' => 'required|string|email|max:80|unique:users',
             'password' => 'required|string|min:8|max:50',
-            'phone' => 'required|string|min:10|max:10',
+            'country_code' => 'required|string',
+            'phone' => 'required|string|min:8',
             'business_name' => 'required|string|max:80|unique:users,business_name',
-            'business_phone' => 'required|string|min:10|max:10',
+            'business_phone' => 'required|string|min:8',
             'address' => 'required|string',
             'postcode' => 'required|string',
             'country' => 'required|string',
@@ -64,7 +66,7 @@ class RegisterController extends Controller
             'city' => 'required|string'
         ];
 
-        if ($data['checked_value'] != 0) $rules['parent_store'] = 'required|exists:users,business_name';
+        if ($data['is_child_seller'] != 0) $rules['parent_store'] = 'required|exists:users,business_name';
 
         return Validator::make($data, $rules);
     }
@@ -77,14 +79,18 @@ class RegisterController extends Controller
      */
     protected function register(Request $request)
     {
-        $validator = $this->validator($request->all());
-        if ($validator->fails()) {
-            return response()->json([
-                'errors' => $validator->errors(),
-            ], config('constants.HTTP_OK'));
+        $validatedData = $this->validator($request->all());
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $validatedData->errors(),
+                config('constants.HTTP_OK')
+            );
         }
 
         $data = $request->toArray();
+
         $businessHours = '{
             "time": {
                 "Monday": {
@@ -125,13 +131,14 @@ class RegisterController extends Controller
             },
             "submitted" : null
         }';
-        $parentStoreId = ($request->input('parent_store')) ? User::getSellerByBusinessName($request->input('parent_store'))->id : null;
         
+        $parentStoreId = ($request->input('parent_store')) ? User::getSellerByBusinessName($request->input('parent_store'))->id : null;
+
         $user = User::createStore(
             $data['name'],
             strtolower($data['email']),
             $data['password'],
-            '+44',
+            $data['country_code'],
             $data['phone'],
             $data['address'],
             $data['unit_address'],
@@ -144,18 +151,18 @@ class RegisterController extends Controller
             $data['lat'],
             $data['lon'],
             $businessHours,
-            $request->input('parent_store') ? UserRole::CHILD_SELLER : UserRole::SELLER,
+            $request->input('parent_store') ? UserRoleEnum::CHILD_SELLER : UserRoleEnum::SELLER,
             $parentStoreId
         );
 
         if ($user) {
             echo "User Created";
-        }
 
-        EmailServices::sendNewSellerMail(
-            $user,
-            ($user->role_id === UserRole::SELLER) ? 'Parent' : 'Child',
-            ($user->role_id === UserRole::CHILD_SELLER) ? $request->input('parent_store') : null,
-        );
+            EmailServices::sendNewSellerMail(
+                $user,
+                $user->role_id,
+                ($user->role_id === UserRoleEnum::CHILD_SELLER) ? $request->input('parent_store') : null,
+            );
+        }
     }
 }

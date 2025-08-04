@@ -191,7 +191,7 @@
                                                     </div>
                                                     <div class="col-md-6 offset-md-3 text-center">
                                                         <button style="background: #ffcf42;color:black;font-weight: 600"
-                                                            class="pl-5 pr-5 pt-2 pb-2 border-0 btn btn-secondary rounded-pill"
+                                                            class="px-5 py-2 border-0 btn btn-secondary rounded-pill"
                                                             type="submit">
                                                             Add
                                                         </button>

@@ -23,8 +23,8 @@ class StuartDeliveryController extends Controller
     public function stuartSandboxAccessToken()
     {
         $stuart_auth = Http::asForm()->post('' . config("constants.STUART_SANDBOX_TOKEN_URL") . '', [
-            'client_id' => config('constants.STUART_SANDBOX_CLIENT_ID'),
-            'client_secret' => config('constants.STUART_SANDBOX_CLIENT_SECRET'),
+            'client_id' => config('constants.STUART_CLIENT_ID'),
+            'client_secret' => config('constants.STUART_CLIENT_SECRET'),
             'grant_type' => 'client_credentials',
             'scope' => 'api'
         ]);

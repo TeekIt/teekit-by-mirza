@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('uber_delivery', function (Blueprint $table) {
+        Schema::create('uber_deliveries', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->morphs('order_belongs_to');  /* This column can either belong to "orders" or "orders_from_other_sellers" */
             $table->uuid('job_id');

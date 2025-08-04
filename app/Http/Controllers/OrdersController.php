@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
-use App\Enums\TransportVehicle;
+use App\Enums\TransportVehicleEnum;
 use App\Enums\UserChoicesEnum;
-use App\Enums\UserRole;
+use App\Enums\UserRoleEnum;
 use App\Jobs\SendCustomProductOrderDetailsToNearBySellersJob;
 use App\Models\GuestBuyer;
 use App\Models\ProductsByBuyer;
@@ -131,7 +131,7 @@ class OrdersController extends Controller
             /* Adding amount into seller's wallet */
             User::addIntoWallet($sellerId, $initialTotal);
 
-            if ($request->type == 'delivery') {
+            if ($request->type == OrderTypeEnum::DELIVERY->value) {
                 $seller = User::getUserByID($sellerId, [
                     'business_phone',
                     'lat',
@@ -167,7 +167,7 @@ class OrdersController extends Controller
                     UserChoicesEnum::from($orderItem['user_choice'])
                 );
             }
-
+            
             if ($request->type == OrderTypeEnum::DELIVERY->value) {
                 $verificationCode = VerificationCodeServices::generateCode();
                 VerificationCodes::add($orderId, $verificationCode);
@@ -206,7 +206,7 @@ class OrdersController extends Controller
                 'integer',
                 Rule::exists('users', 'id')
                     ->where(fn(Builder $query) => $query
-                        ->whereIn('role_id', [UserRole::SELLER, UserRole::CHILD_SELLER])),
+                        ->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
             ],
             'productName' => 'required|string|max:255',
             'qty' => 'required|integer',
@@ -217,7 +217,7 @@ class OrdersController extends Controller
             'colors' => 'nullable|array',
             'transportVehicle' => [
                 'required',
-                Rule::in(array_column(TransportVehicle::cases(), 'value')),
+                Rule::in(array_column(TransportVehicleEnum::cases(), 'value')),
             ],
             'featureImg' => 'required|image|max:2048',
             'height' => 'nullable|numeric|min:0',
@@ -341,7 +341,7 @@ class OrdersController extends Controller
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
             $verificationCode = VerificationCodeServices::generateCode();
             VerificationCodes::add($order->id, $verificationCode);
-
+            
             if (app()->environment('production')) {
                 OrderServices::sendBulkSms(
                     $seller,
@@ -354,12 +354,12 @@ class OrdersController extends Controller
         }
 
         /* Email order details to nearby sellers */
-        // SendCustomProductOrderDetailsToNearBySellersJob::dispatch(
-        //     $request->lat,
-        //     $request->lon,
-        //     $seller,
-        //     $order
-        // )->onQueue('high');
+        SendCustomProductOrderDetailsToNearBySellersJob::dispatch(
+            $request->lat,
+            $request->lon,
+            $seller,
+            $order
+        )->onQueue('high');
 
         $idsArray[] = $order->id;
 
@@ -397,9 +397,10 @@ class OrdersController extends Controller
         unset($pagination['data']);
         /*
         * Just creating this variable so we don't have to call the "empty()" function again & again
-        * Which will obviouly increase the API response speed
+        * Which will obviouly decrease the API response speed
         */
         $dataIsEmpty = empty($data);
+
         return JsonResponseServices::getApiResponseExtention(
             ($dataIsEmpty) ? [] : $data,
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
@@ -422,7 +423,7 @@ class OrdersController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
         }
 
-        $order = Orders::getRecentOrderByCustomerId(auth()->id(), $request->productsLimit, $request->sellerId);
+        $order = Orders::getRecentOrderByBuyerId(auth()->id(), $request->productsLimit, $request->sellerId);
         if (!empty($order)) {
             $recentOrderProdsData = [];
             foreach ($order->products as $product) $recentOrderProdsData[] = Products::getProductInfo(
@@ -432,9 +433,10 @@ class OrdersController extends Controller
             );
             /*
             * Just creating this variable so we don't have to call the "empty()" function again & again
-            * Which will obviouly increase the API response speed
+            * Which will obviouly decrease the API response speed
             */
             $dataIsEmpty = empty($recentOrderProdsData);
+            
             return JsonResponseServices::getApiResponse(
                 ($dataIsEmpty) ? [] : $recentOrderProdsData,
                 ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),

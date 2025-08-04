@@ -32,7 +32,9 @@ class CategoriesLivewire extends Component
             'name',
         ]);
     }
-
+    /* 
+     * CRUD Methods
+     */
     public function renderEditCategoryModal($id)
     {
         $category = Categories::find($id);
@@ -40,9 +42,7 @@ class CategoriesLivewire extends Component
         $this->name = $category->category_name;
         $this->image = $category->category_image;
     }
-    /* 
-     * CRUD Methods
-     */
+    
     public function addCategory()
     {
         $validatedData = $this->validate([

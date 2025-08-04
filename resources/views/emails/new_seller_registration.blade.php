@@ -1,6 +1,6 @@
 <x-mail::message>
 
-We are pleased to inform you that a new <b>{{ $sellerType }} Seller</b> has just signed up on our platform. <br>
+We are pleased to inform you that a new <b>{{ $sellerRoleName }} Seller</b> has just signed up on our platform. <br>
 Please review their details provided below & proceed with the verification process to determine whether to approve or disapprove this seller on our platform.
 
 <x-mail::table>
@@ -12,7 +12,7 @@ Please review their details provided below & proceed with the verification proce
 | <b>Store</b>      | {{ $seller->business_name }}|
 | <b>Owner</b>      | {{ $seller->name }} |
 | <b>Email</b>      | {{ $seller->email }} |
-| <b>Contact</b>    | {{ $seller->business_phone }}|
+| <b>Contact</b>    | {{ $seller->country_code }} {{ $seller->business_phone }}|
 | <b>Address</b>    | {{ $seller->full_address }}|
 </x-mail::table>
 

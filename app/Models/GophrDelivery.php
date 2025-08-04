@@ -15,6 +15,11 @@ class GophrDelivery extends Model
         'order_belongs_to_id',
         'job_id',
     ];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */

@@ -1,17 +1,16 @@
 <?php
 
-namespace App\Http\Livewire\Sellers\Settings;
+namespace App\Http\Livewire\Sellers;
 
-use App\Products;
-use App\Services\CsvFileServices;
+use Livewire\Component;
+
 use App\Services\ImageServices;
 use App\User;
-use Livewire\Component;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Livewire\WithFileUploads;
 
-class UserGeneralSettings extends Component
+class GeneralSettingsLivewire extends Component
 {
     use WithFileUploads;
 
@@ -27,12 +26,16 @@ class UserGeneralSettings extends Component
         $new_password,
         $user_img,
         $image_to_upload;
-
+    /* 
+     * Lifecycle Hooks
+     */
     public function mount()
     {
         $this->user_id = auth()->id();
     }
-
+     /* 
+     * Helpers
+     */
     public function resetModal()
     {
         $this->resetValidation();
@@ -49,7 +52,9 @@ class UserGeneralSettings extends Component
             'image_to_upload',
         ]);
     }
-
+    /*
+    * CRUD Methods
+    */
     public function updateImage()
     {
         $this->validate([
@@ -247,6 +252,6 @@ class UserGeneralSettings extends Component
     {
         $user = $this->setUserInfo($this->user_id);
 
-        return view('livewire.sellers.settings.user-general-settings', compact('user'));
+        return view('livewire.sellers.general-settings-livewire', compact('user'));
     }
 }

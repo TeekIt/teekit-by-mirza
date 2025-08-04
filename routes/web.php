@@ -9,6 +9,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PromoCodesController;
+use App\Http\Controllers\StripeContorller;
 use App\Http\Controllers\StuartDeliveryController;
 use App\Http\Controllers\UsersController;
 use App\Http\Livewire\Admin\CategoriesLivewire;
@@ -20,8 +21,11 @@ use App\Http\Livewire\Sellers\OrdersLivewire;
 use App\Http\Livewire\Sellers\OrdersOfUniqueProductsLivewire;
 use App\Http\Livewire\Sellers\RequestDeliveryLivewire;
 use App\Http\Livewire\Sellers\SellerDashboardLivewire;
-use App\Http\Livewire\Sellers\Settings\UserGeneralSettings;
+use App\Http\Livewire\Sellers\GeneralSettingsLivewire;
+use App\Http\Livewire\Sellers\RequestDeliveryFormLivewire;
+use App\Http\Livewire\Sellers\RequestedDeliveriesLivewire;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
+use App\Services\StripeServices;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 /*
@@ -52,7 +56,8 @@ Route::prefix('settings')->middleware(['auth', 'auth.sellers'])->controller(Home
     Route::get('/payment', 'paymentSettings')->name('setting.payment');
     Route::post('/payment/update', 'paymentSettingsUpdate')->name('payment_settings_update');
     Route::post('/password/update', 'adminPasswordUpdate')->name('password_update');
-    Route::get('/change_settings/{setting_name}/{value}', 'changeSettings')->name('change_settings')->where(['setting_name' => '^[a-z_]*$', 'value' => '[0-9]+']);
+    Route::get('/change_settings/{setting_name}/{value}', 'changeSettings')->name('change_settings')
+        ->where(['setting_name' => '^[a-z_]*$', 'value' => '[0-9]+']);
 });
 /*
 |--------------------------------------------------------------------------
@@ -69,7 +74,8 @@ Route::post('/importProducts', [HomeController::class, 'importProducts'])->name(
 Route::prefix('orders')->controller(HomeController::class)->group(function () {
     Route::get('/mark_as_delivered/{order_id}', 'markAsDelivered')->name('mark_as_delivered');
     Route::get('/mark_as_completed/{order_id}', 'markAsCompleted')->name('mark_as_completed');
-    Route::get('/{order_id}/remove/{item_id}/product/{product_price}/{product_qty}', 'removeProductFromOrder')->name('remove_order_product');
+    Route::get('/{order_id}/remove/{item_id}/product/{product_price}/{product_qty}', 'removeProductFromOrder')
+        ->name('remove_order_product');
     Route::get('/verify/{order_id}', 'clickToVerify')->name('verify_order');
 });
 
@@ -101,10 +107,13 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
 
     Route::get('/withdrawal', WithdrawalLivewire::class)->name('seller.withdrawal');
 
-    Route::get('/request-delivery', RequestDeliveryLivewire::class)->name('seller.request.delivery');
+    Route::prefix('delivery')->group(function () {
+        Route::get('/', RequestedDeliveriesLivewire::class)->name('seller.requested.deliveries');
+        Route::get('/request_form', RequestDeliveryFormLivewire::class)->name('seller.request.delivery.form');
+    });
 
     Route::prefix('settings')->group(function () {
-        Route::get('/general', UserGeneralSettings::class)->name('seller.settings.general');
+        Route::get('/general', GeneralSettingsLivewire::class)->name('seller.settings.general');
 
         Route::controller(UsersController::class)->group(function () {
             Route::post('/update-location', 'updateStoreLocation')->name('seller.settings.update.location');
@@ -166,6 +175,11 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
     });
 });
 
+Route::prefix('stripe')->middleware(['auth'])->controller(StripeContorller::class)->group(function () {
+    Route::get('requested_delivery/checkout_charge/{totalCharge}/{productName}', 'getCheckoutFormForRequestedDelivery')
+        ->name('stripe.requested.delivery.checkout.form');
+});
+
 Route::prefix('stuart')->controller(StuartDeliveryController::class)->group(function () {
     Route::prefix('job')->group(function () {
         Route::post('/creation', 'stuartJobCreation')->name('stuart.job.creation');
@@ -181,13 +195,6 @@ Route::prefix('promocodes')->controller(PromoCodesController::class)->group(func
 });
 
 Route::get('/mark-complete-order/{id}', [HomeController::class, 'markCompleteOrder'])->name('mark.complete.order');
-
-/* Old categories routes - begins */
-// Route::get('/acategories', [HomeController::class, 'allCat'])->name('admin.categories');
-// Route::post('/acategories/{id}/update', [HomeController::class, 'updateCat'])->name('update_cat');
-// Route::post('/acategories/add_cat', [HomeController::class, 'addCat'])->name('add_cat');
-// Route::get('/acategories/delete_cat/{id}', [HomeController::class, 'deleteCat'])->name('delete_cat');
-/* Old categories routes - ends */
 
 Route::get('/queries', [HomeController::class, 'adminQueries'])->name('admin.queries');
 Route::get('/users/{user_id}/status/{status}', [HomeController::class, 'changeUserStatus'])->name('change_user_status');

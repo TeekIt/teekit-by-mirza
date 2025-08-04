@@ -15,7 +15,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="container pt-4">
-                        @include('flash::message')
+                        {{-- @include('flash::message') --}}
                         @if (session('status'))
                             <div class="alert alert-success" role="alert">
                                 {{ session('status') }}

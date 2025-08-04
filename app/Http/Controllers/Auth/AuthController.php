@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Enums\UserRole;
+use App\Enums\UserRoleEnum;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\UsersController;
@@ -212,11 +212,12 @@ class AuthController extends Controller
     {
         JWTAuth::parseToken()->invalidate();
 
-        return response()->json([
-            'data' => [],
-            'status' => config('constants.TRUE_STATUS'),
-            'message' =>  'Successfully logged out.'
-        ], config('constants.HTTP_OK'));
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.TRUE_STATUS'),
+            'Successfully logged out.',
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * It will Refresh a token.
@@ -306,21 +307,6 @@ class AuthController extends Controller
         return $this->me();
     }
 
-    public function deliveryBoys()
-    {
-        $users = User::query()->where('seller_id', '=', Auth::id())->get();
-
-        $data = [];
-        foreach ($users as $user) {
-            if (Gate::allows('delivery_boy')) $data[] = UsersController::getSellerInfo($user);
-        }
-
-        return response()->json([
-            'data' => $data,
-            'status' => config('constants.TRUE_STATUS'),
-            'message' => ''
-        ], config('constants.HTTP_OK'));
-    }
     /**
      * Get user details w.r.t 'id'
      * @author Muhammad Abdullah Mirza
@@ -329,26 +315,31 @@ class AuthController extends Controller
     public function getUserDetails($userId)
     {
         $data = User::getUserInfo($userId);
+        /*
+        * Just creating this variable so we don't have to call the "empty()" function again & again
+        * Which will obviouly decrease the API response speed
+        */
+        $dataIsEmpty = empty($data);
 
         return JsonResponseServices::getApiResponse(
-            (empty($data)) ? [] : $data,
-            (empty($data)) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            (empty($data)) ? config('constants.NO_RECORD') : '',
-            (empty($data)) ? config('constants.HTTP_UNPROCESSABLE_REQUEST') : config('constants.HTTP_OK')
+            ($dataIsEmpty) ? [] : $data,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+            ($dataIsEmpty) ? config('constants.HTTP_UNPROCESSABLE_REQUEST') : config('constants.HTTP_OK')
         );
     }
     /**
      * Listing of all SECRET KEYS
      * @version 1.0.0
      */
-    public function keys()
-    {
-        return response()->json([
-            'data' => Keys::all(),
-            'status' => config('constants.TRUE_STATUS'),
-            'message' => ''
-        ], config('constants.HTTP_OK'));
-    }
+    // public function keys()
+    // {
+    //     return response()->json([
+    //         'data' => Keys::all(),
+    //         'status' => config('constants.TRUE_STATUS'),
+    //         'message' => ''
+    //     ], config('constants.HTTP_OK'));
+    // }
     /**
      * It will delete user from users table by id
      * It will insert the deleted user data into 'Deleted_users' table
@@ -404,7 +395,7 @@ class AuthController extends Controller
             'lon' => $request->lon,
             'postcode' => $request->postcode,
             'contact' => $request->contact,
-            'role_id' => UserRole::BUYER,
+            'role_id' => UserRoleEnum::BUYER,
         ]);
 
         $buyer = User::getBuyerByEmail($buyer->email);

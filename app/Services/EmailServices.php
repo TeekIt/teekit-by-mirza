@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\UserRoleEnum;
 use App\Mail\BuyerVerificationMail;
 use App\Mail\CustomProductOrderDetailsToNearBySellersMail;
 use App\Mail\NewSellerRegistrationMail;
@@ -36,7 +37,7 @@ final class EmailServices
         Mail::to($user->email)->send(new BuyerVerificationMail($user, $accountVerificationLink));
     }
 
-    public static function sendNewSellerMail(User $user, string $sellerType, ?string $parentSeller = null)
+    public static function sendNewSellerMail(User $user, UserRoleEnum $sellerType, ?string $parentSeller = null)
     {
         $verificationCode = Crypt::encrypt($user->email);
         $accountVerificationLink = self::getVerificationLink($verificationCode);

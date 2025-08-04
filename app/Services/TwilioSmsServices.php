@@ -4,13 +4,13 @@ namespace App\Services;
 
 use Twilio\Rest\Client;
 
-final class TwilioSmsService
+final class TwilioSmsServices
 {
     /**
      * @throws \Twilio\Exceptions\TwilioException
      * @throws \Twilio\Exceptions\ConfigurationException
      */
-    public static function sendSms($receiverNumber, $message)
+    public static function sendSms(string $receiverNumber, string $message)
     {
         $sid = config('twilio.TWILIO_SID');
         $token = config('twilio.TWILIO_TOKEN');

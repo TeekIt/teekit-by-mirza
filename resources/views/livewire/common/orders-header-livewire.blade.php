@@ -6,6 +6,7 @@
         use App\Enums\OrderTypeEnum;
         use App\Models\ProductsByBuyer;
         use App\Products;
+        use App\Services\DateTimeServices;
     @endphp
 
     <x-session-messages />
@@ -203,32 +204,28 @@
     <div wire:ignore.self class="modal fade" id="trackGophrDeliveryModal" tabindex="-1">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
-                <form wire:submit.prevent="assignToGophrDriver">
-                    {{ csrf_field() }}
-                    <div class="modal-header">
-                        <h5 class="modal-title display-center">Live Delivery Tracking</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
-                            wire:click="resetModal">
-                            <span>×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        @if (isset($selectedDeliveryDetails))
-                            <div class="row" style="height: 100vh;">
-                                <iframe
-                                    src="{{ $selectedDeliveryDetails['data']['deliveries'][0]['public_tracker_url'] }}"
-                                    class="col-12">
-                                </iframe>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="modal-footer hidden">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                            wire:click="resetModal">
-                            Close
-                        </button>
-                    </div>
-                </form>
+                <div class="modal-header">
+                    <h5 class="modal-title display-center">Live Delivery Tracking</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
+                        wire:click="resetModal">
+                        <span>×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @if (isset($selectedDeliveryDetails))
+                        <div class="row" style="height: 100vh;">
+                            <iframe src="{{ $selectedDeliveryDetails['data']['deliveries'][0]['public_tracker_url'] }}"
+                                class="col-12">
+                            </iframe>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer hidden">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        wire:click="resetModal">
+                        Close
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -239,7 +236,7 @@
                 <div class="d-flex flex-column-reverse flex-md-row justify-content-between pb-4 gap-1">
                     <div>
                         @if ($order->order_status === OrderStatusEnum::PENDING->value)
-                            @if ($order->order_items[0]->product_belongs_to_type === (new Products())->getMorphClass())
+                            @if ($order->order_items[0]->product_belongs_to_type === new Products()->getMorphClass())
                                 <button class="btn btn-success" wire:click="orderIsAccepted({{ $order->id }})"
                                     wire:target="orderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark"
                                     wire:loading.class.remove="btn-success" wire:loading.attr="disabled"
@@ -265,8 +262,8 @@
                                     </span>
                                 </button>
                             @endif
-                            
-                            @if ($order->order_items[0]->product_belongs_to_type === (new ProductsByBuyer())->getMorphClass())
+
+                            @if ($order->order_items[0]->product_belongs_to_type === new ProductsByBuyer()->getMorphClass())
                                 <button class="btn btn-success"
                                     wire:click="renderCustomProductOrderModal({{ $order->id }})"
                                     wire:loading.class="btn-dark" wire:loading.class.remove="btn-success"
@@ -311,8 +308,8 @@
                                                             <span class="spinner-border spinner-border-sm text-light" role="status"></span>
                                                         </span>
                                                     </button> -->
-                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#gophrModal"
-                                    wire:click="renderOrderId({{ $order->id }})"
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal"
+                                    data-bs-target="#gophrModal" wire:click="renderOrderId({{ $order->id }})"
                                     wire:target="renderOrderId({{ $order->id }})" wire:loading.class="btn-dark"
                                     wire:loading.class.remove="btn-warning" wire:loading.attr="disabled"
                                     title="Assign this order to delivery boy">
@@ -396,7 +393,7 @@
                     </div>
 
                     <div>
-                        @if ($order->order_items[0]->product_belongs_to_type == (new ProductsByBuyer())->getMorphClass())
+                        @if ($order->order_items[0]->product_belongs_to_type == new ProductsByBuyer()->getMorphClass())
                             <button type="button" class="btn btn-primary"
                                 title="This is a custom product order created by the buyer. You may not uploaded it into our system but if you have it in your physical warehouse then you can accept this order happily & make money 😉">
                                 <i class="fas fa-fingerprint"></i>
@@ -409,28 +406,81 @@
         </thead>
         <tbody>
             <tr>
+                <td colspan="8">
+                    <div class="accordion" id="accordionExample">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed text-site-primary" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapse{{ $order->id }}"
+                                    aria-expanded="false" aria-controls="collapse{{ $order->id }}">
+                                    <h5>Customer Details</h5>
+                                </button>
+                            </h2>
+                            <div id="collapse{{ $order->id }}" class="accordion-collapse collapse"
+                                aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    <div class="">
+                                        <table class="table table-striped table-responsive-sm">
+                                            <tr>
+                                                <td><b>Name</b></td>
+                                                <td>{{ $order->customer_name }}</td>
+                                                <td><b>Contact</b></td>
+                                                <td>{{ $order->phone_number }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><b>Address</b></td>
+                                                <td colspan="3">{{ $order->address }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <th colspan="8">
+                    <h5 class="text-site-primary">Order Details</h5>
+                </th>
+            </tr>
+
+            <tr>
                 <td><b>Order#</b></td>
                 <td>{{ $order->id }}</td>
-                <td><b>Order Status</b></td>
-                <td><span class="badge badge-warning">{{ $order->order_status }}</span></td>
-            </tr>
-
-            <tr>
-                <td><b>Placed At</b></td>
-                <td>{{ $order->created_at }}</td>
-                <td><b>Order Type</b></td>
-                <td><span class="badge badge-info">{{ $order->type }}</span></td>
-            </tr>
-
-            <tr>
                 <td><b>Order Total</b></td>
                 <td>£{{ $order->current_total }}</td>
-                <td><b>Payment Status</b></td>
-                <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
+                <td><b>Date</b></td>
+                <td>{{ DateTimeServices::getDateOnly($order->created_at) }}</td>
+                <td><b>Time</b></td>
+                <td>{{ DateTimeServices::getTimeOnlyWithOutSeconds($order->created_at) }}</td>
+                {{-- <td><b>Order Status</b></td>
+                <td><span class="badge badge-warning">{{ $order->order_status }}</span></td> --}}
             </tr>
 
             <tr>
-                <th class="text-center site-primary-bg text-light" colspan="4">Customer Details</th>
+                {{-- <td><b>Placed At</b></td>
+                <td>{{ $order->created_at }}</td> --}}
+                <td><b>Order Type</b></td>
+                <td><span class="badge badge-info">{{ $order->type }}</span></td>
+                <td><b>Order Status</b></td>
+                <td><span class="badge badge-warning">{{ $order->order_status }}</span></td>
+                <td colspan="2"><b>Payment Status</b></td>
+                <td colspan="2"><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
+            </tr>
+
+            <tr>
+                {{-- <td><b>Order Total</b></td>
+                <td>£{{ $order->current_total }}</td> --}}
+                {{-- <td><b>Payment Status</b></td>
+                <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td> --}}
+            </tr>
+
+            {{-- <tr>
+                <th colspan="4">
+                    <h5>Customer Details</h5>
+                </th>
             </tr>
 
             <tr>
@@ -439,15 +489,17 @@
                 <td><b>Contact</b></td>
                 <td>{{ $order->phone_number }}</td>
             </tr>
-
             <tr>
                 <td><b>Address</b></td>
                 <td colspan="3">{{ $order->address }}</td>
-            </tr>
+            </tr> --}}
 
             <tr>
-                <th class="text-center site-primary-bg text-light" colspan="4">Order Items</th>
+                <th colspan="8">
+                    <h5 class="text-site-primary">Order Items</h5>
+                </th>
             </tr>
         </tbody>
     </table>
+
 </div>
