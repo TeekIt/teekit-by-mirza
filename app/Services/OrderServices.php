@@ -121,11 +121,11 @@ final class OrderServices
         /* Customer Number */
         TwilioSmsServices::sendSms($buyerNumber, $messageForBuyer);
         /* Rameesha Number */
-        TwilioSmsServices::sendSms('+923362451199', $messageForBuyer);
+        // TwilioSmsServices::sendSms('+923362451199', $messageForBuyer);
         /* Azim Number */
         TwilioSmsServices::sendSms('+447976621849', $messageForSeller);
         /* Eesa Number */
-        TwilioSmsServices::sendSms('+447490020063', $messageForSeller);
+        // TwilioSmsServices::sendSms('+447490020063', $messageForSeller);
         /* Junaid Number */
         TwilioSmsServices::sendSms('+447817332090', $messageForSeller);
         /* Mirza Number */
