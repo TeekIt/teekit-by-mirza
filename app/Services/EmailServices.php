@@ -26,8 +26,7 @@ final class EmailServices
 
     public static function sendCustomProductOrderDetailsToNearBySellersMail(array $nearBySellersEmails, Orders $order)
     {
-        // Mail::to($nearBySellersEmails)->send(new CustomProductOrderDetailsToNearBySellersMail($order));
-        Mail::bcc($nearBySellersEmails)->send(new CustomProductOrderDetailsToNearBySellersMail($order));
+        Mail::to('azim@teekit.co.uk')->bcc($nearBySellersEmails)->send(new CustomProductOrderDetailsToNearBySellersMail($order));
     }
 
     public static function sendBuyerAccVerificationMail(User $user)
