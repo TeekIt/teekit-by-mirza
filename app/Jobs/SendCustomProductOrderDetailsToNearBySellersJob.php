@@ -70,6 +70,7 @@ class SendCustomProductOrderDetailsToNearBySellersJob implements ShouldQueue
 
             EmailServices::sendCustomProductOrderDetailsToNearBySellersMail(
                 [
+                    'zim_raja@hotmail.com',
                     'mirzaabdullahizhar@gmail.com',
                     'azim.the.g8@googlemail.com',
                     'info@msauctions.co.uk',

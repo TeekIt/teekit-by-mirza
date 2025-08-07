@@ -27,8 +27,7 @@ final class EmailServices
     public static function sendCustomProductOrderDetailsToNearBySellersMail(array $nearBySellersEmails, Orders $order)
     {
         // Mail::to($nearBySellersEmails)->send(new CustomProductOrderDetailsToNearBySellersMail($order));
-        Mail::to('zim_raja@hotmail.com')
-            ->bcc($nearBySellersEmails)
+        Mail::bcc($nearBySellersEmails)
             ->send(new CustomProductOrderDetailsToNearBySellersMail($order));
     }
 

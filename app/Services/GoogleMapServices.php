@@ -29,10 +29,6 @@ final class GoogleMapServices
             'getNearBySellers' . $currentSellerId . $buyerLat . $buyerLon,
             Carbon::now()->addDay(),
             function () use ($buyerLat, $buyerLon, $sellersOfSameCity) {
-                /* 
-                 * This function will not work with "faker" generated 
-                 * customer lat, lon
-                 */
                 return static::findNearByUsersByMakingChunks(
                     $buyerLat,
                     $buyerLon,
@@ -108,8 +104,10 @@ final class GoogleMapServices
         return $userData;
     }
     /*
-     * $chunk_size > 25 is not allowed
-     * Because Google distance matrix API does not support destinations more then 25
+     * $chunkSize > 25 is not allowed because Google distance matrix API does not support destinations more then 25
+     * 
+     * -----NOTE-----
+     * This function will not work with "faker" generated lat, lon
      */
     public static function findNearByUsersByMakingChunks(
         float $lat,
