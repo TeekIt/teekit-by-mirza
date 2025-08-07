@@ -56,29 +56,22 @@ class SendCustomProductOrderDetailsToNearBySellersJob implements ShouldQueue
         );
 
         if ($nearbySellers) {
+            EmailServices::sendCustomProductOrderDetailsToNearBySellersMail(
+                array_merge(array_column($nearbySellers, 'email')),
+                $this->order
+            );
+
             // EmailServices::sendCustomProductOrderDetailsToNearBySellersMail(
-            //     array_merge(array_column($nearbySellers, 'email'), [
+            //     [
+            //         'zim_raja@hotmail.com',
             //         'mirzaabdullahizhar@gmail.com',
             //         'azim.the.g8@googlemail.com',
-            //         'zim_raja@hotmail.com',
             //         'info@msauctions.co.uk',
             //         'meeshatariq@gmail.com',
             //         'yasirtariqg@gmail.com',
-            //     ]),
+            //     ],
             //     $this->order
             // );
-
-            EmailServices::sendCustomProductOrderDetailsToNearBySellersMail(
-                [
-                    'zim_raja@hotmail.com',
-                    'mirzaabdullahizhar@gmail.com',
-                    'azim.the.g8@googlemail.com',
-                    'info@msauctions.co.uk',
-                    'meeshatariq@gmail.com',
-                    'yasirtariqg@gmail.com',
-                ],
-                $this->order
-            );
         }
     }
 
