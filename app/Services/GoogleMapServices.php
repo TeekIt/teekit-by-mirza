@@ -116,7 +116,7 @@ final class GoogleMapServices
         float $lon,
         Collection $users,
         int $chunkSize = 25,
-        int $nearByMiles = 5
+        int $nearByMiles = 3
     ): array {
         if ($chunkSize > 25) return [];
 
