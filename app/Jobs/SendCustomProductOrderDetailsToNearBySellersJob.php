@@ -72,7 +72,6 @@ class SendCustomProductOrderDetailsToNearBySellersJob implements ShouldQueue
                 [
                     'mirzaabdullahizhar@gmail.com',
                     'azim.the.g8@googlemail.com',
-                    'zim_raja@hotmail.com',
                     'info@msauctions.co.uk',
                     'meeshatariq@gmail.com',
                     'yasirtariqg@gmail.com',
