@@ -3,28 +3,52 @@
 namespace App\Services;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\PackageWeightEnum;
+use App\Enums\StuartPackageTypeEnum;
 use App\Models\StuartDelivery;
 use App\Orders;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 use Illuminate\Support\Carbon;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 final class StuartDeliveryServices
 {
-    public static function getJobsUrl()
+    public static function mapPkgWeightWithStuartPkgType(PackageWeightEnum $packageWeight): string
+    {
+        switch ($packageWeight) {
+            case PackageWeightEnum::SMALL:
+                return StuartPackageTypeEnum::SMALL->value;
+            case PackageWeightEnum::MEDIUM:
+                return StuartPackageTypeEnum::MEDIUM->value;
+            case PackageWeightEnum::LARGE:
+                return StuartPackageTypeEnum::LARGE->value;
+            case PackageWeightEnum::EXTRA_LARGE:
+                return StuartPackageTypeEnum::EXTRA_LARGE->value;
+            default:
+                throw new Exception('Invalid package weight provided');
+        }
+    }
+
+    public static function getStandardPickUpTime(): string
+    {
+        return now()->addMinutes(15)->toDateTimeString();
+    }
+
+    public static function getJobsUrl(): string
     {
         return (app()->environment('production')) ? 'https://api.stuart.com/v2/jobs' : 'https://api.sandbox.stuart.com/v2/jobs';
     }
 
-    public static function getJobPricingUrl()
+    public static function getJobPricingUrl(): string
     {
         return (app()->environment('production'))
             ? 'https://api.stuart.com/v2/jobs/pricing' :
             'https://api.sandbox.stuart.com/v2/jobs/pricing';
     }
 
-    public static function getTokenUrl()
+    public static function getTokenUrl(): string
     {
         return (app()->environment('production')) ? 'https://api.stuart.com/oauth/token' : 'https://api.sandbox.stuart.com/oauth/token';
     }
@@ -32,21 +56,20 @@ final class StuartDeliveryServices
      * It will get a fresh token for hitting Stuart delivery APIs
      * @author Muhammad Abdullah Mirza
      */
-    public static function getAccessToken()
+    public static function getAccessToken(): string
     {
-        return Http::asForm()->post(static::getTokenUrl(), [
+        $response = Http::asForm()->post(static::getTokenUrl(), [
             'client_id' => config('stuart.STUART_CLIENT_ID'),
             'client_secret' => config('stuart.STUART_CLIENT_SECRET'),
             'grant_type' => 'client_credentials',
             'scope' => 'api'
-        ])->json()['access_token'];
-    }
-    /**
-     * @author Muhammad Abdullah Mirza
-     */
-    public static function createJob(array $job): array
-    {
-        return Http::withToken(static::getAccessToken())->post(static::getJobsUrl(), $job)->json();
+        ])->json();
+
+        if (isset($response['error'])) {
+            throw new Exception($response['error_description']);
+        }
+
+        return $response['access_token'];
     }
     /**
      * @author Muhammad Abdullah Mirza
@@ -54,7 +77,7 @@ final class StuartDeliveryServices
     public static function getJobPricing(array $job): array
     {
         $response = Http::withToken(static::getAccessToken())->post(static::getJobPricingUrl(), $job)->json();
-        
+
         if (isset($response['error'])) {
             throw new Exception($response['message']);
         }
@@ -67,6 +90,19 @@ final class StuartDeliveryServices
     public static function getJob(string $jobId): array
     {
         $response = Http::withToken(static::getAccessToken())->get(static::getJobsUrl() . '/' . $jobId)->json();
+
+        if (isset($response['error'])) {
+            throw new Exception($response['message']);
+        }
+
+        return $response;
+    }
+    /**
+     * @author Muhammad Abdullah Mirza
+     */
+    public static function createJob(array $job): array
+    {
+        $response = Http::withToken(static::getAccessToken())->post(static::getJobsUrl(), $job)->json();
 
         if (isset($response['error'])) {
             throw new Exception($response['message']);

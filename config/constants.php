@@ -31,7 +31,7 @@ return [
     'DRIVERS_DELETION_SUCCESS' => 'Drivers deleted successfully',
     'LOGIN_SUCCESS' => 'You have logged in successfully',
     'REGISTER_SUCCESS' => 'You have registered successfully',
-    'DRIVER_REGISTERATION_MSG' => 'You have registered successfully. We have sent you a verification email please verify.',
+    'DRIVER_REGISTERATION_MSG' => 'You have registered successfully. We have sent you a verification email please verify',
     'DATA_INSERTION_SUCCESS' => 'Data inserted successfully',
     'DATA_UPDATED_SUCCESS' => 'Data updated successfully',
     'ORDER_CANCELLATION_SUCCESS' => 'Your order has been cancelled successfully',

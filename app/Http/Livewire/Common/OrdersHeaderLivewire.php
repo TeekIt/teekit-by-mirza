@@ -9,7 +9,6 @@ use App\Enums\PaymentIntentStatusEnum;
 use App\Models\OrdersFromOtherSeller;
 use App\Orders;
 use App\Services\CompanyStandardsServices;
-use App\Services\DeliveryServices;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
 use App\Services\GophrDeliveryServices;

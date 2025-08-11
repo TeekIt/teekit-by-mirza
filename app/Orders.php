@@ -197,12 +197,12 @@ class Orders extends Model
 
     public static function checkTotalOrders(int $customerId): int
     {
-        return self::where('customer_id', $customerId)->count();
+        return self::where('customer_id', '=', $customerId)->count();
     }
 
     public static function updateOrderStatus(int $id, OrderStatusEnum $status): int
     {
-        return self::where('id', $id)->update([
+        return self::where('id', '=', $id)->update([
             'order_status' => $status
         ]);
     }

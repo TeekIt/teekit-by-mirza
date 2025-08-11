@@ -182,8 +182,7 @@ Route::prefix('stripe')->middleware(['auth'])->controller(StripeContorller::clas
 
 Route::prefix('stuart')->controller(StuartDeliveryController::class)->group(function () {
     Route::prefix('job')->group(function () {
-        Route::post('/creation', 'stuartJobCreation')->name('stuart.job.creation');
-        Route::post('/status', 'stuartJobStatus')->name('stuart.job.status');
+        Route::post('/creation', 'stuartJobCreationForWeb')->name('stuart.job.creation');
     });
 });
 

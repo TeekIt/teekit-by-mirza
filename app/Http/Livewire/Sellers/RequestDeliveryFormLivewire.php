@@ -7,8 +7,8 @@ use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use App\Enums\StuartPackageTypeEnum;
 use App\Services\CompanyStandardsServices;
-use App\Services\DeliveryServices;
 use App\Services\GophrDeliveryServices;
+use App\Services\JsonParsingServices;
 use App\Services\StuartDeliveryServices;
 use App\Services\UUIDServices;
 use Illuminate\Validation\Rule;
@@ -80,20 +80,6 @@ class RequestDeliveryFormLivewire extends Component
         }
     }
 
-    public function mapPkgWeightWithStuartPkgType()
-    {
-        switch ($this->packageWeight) {
-            case PackageWeightEnum::SMALL->value:
-                return StuartPackageTypeEnum::SMALL->value;
-            case PackageWeightEnum::MEDIUM->value:
-                return StuartPackageTypeEnum::MEDIUM->value;
-            case PackageWeightEnum::LARGE->value:
-                return StuartPackageTypeEnum::LARGE->value;
-            case PackageWeightEnum::EXTRA_LARGE->value:
-                return StuartPackageTypeEnum::EXTRA_LARGE->value;
-        }
-    }
-
     public function inputFieldChanged()
     {
         $this->requestDeliveryButtonTxt = 'Request';
@@ -111,7 +97,7 @@ class RequestDeliveryFormLivewire extends Component
 
         return [
             'job' => [
-                'pickup_at' => now()->addMinutes(15),
+                'pickup_at' => StuartDeliveryServices::getStandardPickUpTime(),
                 'assignment_code' => $assignmentCode,
                 'pickups' => [
                     [
@@ -125,7 +111,7 @@ class RequestDeliveryFormLivewire extends Component
                 ],
                 'dropoffs' => [
                     [
-                        'package_type' => $this->mapPkgWeightWithStuartPkgType(),
+                        'package_type' => StuartDeliveryServices::mapPkgWeightWithStuartPkgType($this->packageWeight),
                         'client_reference' => $assignmentCode,
                         'address' => $this->dropoffAddress,
                         'comment' => $this->unitAddress,
@@ -232,13 +218,7 @@ class RequestDeliveryFormLivewire extends Component
                 $response = GophrDeliveryServices::getJobPricing(
                     $this->prepareGophrJobArray()
                 );
-                if (isset($response->errors)) {
-                    Log::error($response->errors);
-
-                    throw new Exception(json_encode($response->errors[0]->message));
-                }
-
-                $response = json_decode(json_encode($response->data), true);
+                $response = JsonParsingServices::convertStdClassToArray($response->data);
 
                 $this->currency = $response['price_net']['currency'];
                 $this->deliveryCharges = $response['price_net']['amount'];

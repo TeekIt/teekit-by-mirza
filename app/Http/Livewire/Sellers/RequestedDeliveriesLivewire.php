@@ -7,6 +7,7 @@ use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use App\Models\RequestedDelivery;
 use App\Services\GophrDeliveryServices;
+use App\Services\JsonParsingServices;
 use App\Services\StuartDeliveryServices;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -137,14 +138,7 @@ class RequestedDeliveriesLivewire extends Component
         }
 
         if ($deliveryServiceName === DeliveryProviderEnum::GOPHR->value) {
-            $response = GophrDeliveryServices::getJob($deliveryId);
-            if (isset($response->errors)) {
-                Log::error($response->errors);
-
-                throw new Exception(json_encode($response->errors[0]->message));
-            }
-
-            $this->selectedDeliveryDetails = json_decode(json_encode($response), true);
+            $this->selectedDeliveryDetails = JsonParsingServices::convertStdClassToArray(GophrDeliveryServices::getJob($deliveryId));
             $this->showModal('trackGophrDeliveryModal');
         }
     }
