@@ -68,7 +68,7 @@ class StuartDeliveryController extends Controller
         return JsonResponseServices::getApiResponse(
             $response,
             config('constants.TRUE_STATUS'),
-            config('constants.STUART_DELIVERY_SUCCESS'),
+            '',
             config('constants.HTTP_OK')
         );
     }
