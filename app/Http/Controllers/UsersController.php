@@ -20,7 +20,6 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UsersController extends Controller
 {
-
     public function saveStripeAccountId(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
@@ -28,7 +27,7 @@ class UsersController extends Controller
                 'required',
                 'email',
                 Rule::exists('users', 'email')
-                ->where(fn(Builder $query) => $query->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
+                    ->where(fn(Builder $query) => $query->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
             ],
             'stripeAccountId' => 'required|string',
         ]);
@@ -292,33 +291,33 @@ class UsersController extends Controller
         $validatedData = Validator::make($request->query(), [
             'lat' => 'required|numeric|between:-90,90',
             'lon' => 'required|numeric|between:-180,180',
-            'state' => 'required|string',
-            // 'page' => 'required|numeric',
+            'city' => 'required|string',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        $data = Cache::remember('sellers' . $request->state . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
-            $sellers = User::getParentAndChildSellersByState($request->state);
+        $data = Cache::remember('sellers' . $request->city . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
+            $sellers = User::getParentAndChildSellersByCity(city: $request->city, numberOfRows: 100);
             if (!$sellers->isEmpty()) {
-                return GoogleMapServices::findNearByUsersByMakingChunks($request->lat, $request->lon, $sellers, 25);
+                return GoogleMapServices::findNearByUsersByMakingChunks(
+                    lat: $request->lat,
+                    lon: $request->lon,
+                    users: $sellers
+                );
             }
         });
 
-        if (empty($data)) {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_STORES_FOUND'),
-                config('constants.HTTP_OK')
-            );
-        }
+        /*
+        * Just creating this variable so we don't have to call the "empty()" function again & again
+        * Which will obviouly decrease the API response speed
+        */
+        $dataIsEmpty = empty($data);
 
         return JsonResponseServices::getApiResponse(
-            $data,
-            config('constants.TRUE_STATUS'),
-            '',
+            ($dataIsEmpty) ? [] : $data,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_STORES_FOUND') : '',
             config('constants.HTTP_OK'),
         );
     }

@@ -8,8 +8,9 @@ use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\Api\v1\DriverController;
+use App\Http\Controllers\Api\v2\GophrDeliveryController;
+use App\Http\Controllers\Api\v2\StuartDeliveryController;
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\GophrDeliveryController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProductsController;
@@ -17,7 +18,6 @@ use App\Http\Controllers\PromoCodesController;
 use App\Http\Controllers\RattingsController;
 use App\Http\Controllers\ReferralCodeRelationController;
 use App\Http\Controllers\StripeContorller;
-use App\Http\Controllers\StuartDeliveryController;
 use App\Http\Controllers\WithdrawalRequestsController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
@@ -215,16 +215,20 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::patch('update', 'updateBuyer');
     });
 
-    Route::prefix('stuart/delivery/job')->controller(StuartDeliveryController::class)->group(function () {
-        Route::post('create', 'updateBuyer');
-        Route::get('pricing', 'updateBuyer');
-        Route::get('track/{job_id}', 'updateBuyer');
+    Route::prefix('stuart')->controller(StuartDeliveryController::class)->group(function () {
+        Route::prefix('delivery/job')->group(function () {
+            Route::post('create', 'createDeliveryJob');
+            Route::get('pricing', 'getDeliveryJobPricing');
+            Route::get('track/{job_id}', 'trackDeliveryJob');
+        });
     });
 
-    Route::prefix('gophr/delivery/job')->controller(GophrDeliveryController::class)->group(function () {
-        Route::post('create', 'updateBuyer');
-        Route::get('pricing', 'updateBuyer');
-        Route::get('track/{job_id}', 'updateBuyer');
+    Route::prefix('gophr')->controller(GophrDeliveryController::class)->group(function () {
+        Route::prefix('delivery/job')->group(function () {
+            Route::post('create', 'createDeliveryJob');
+            Route::get('pricing', 'getDeliveryJobPricing');
+            Route::get('track/{job_id}', 'trackDeliveryJob');
+        });
     });
 
     // Route::get('keys', [AuthController::class, 'keys']);

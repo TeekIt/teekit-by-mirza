@@ -2,10 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\OrdersFromOtherSeller;
-use App\Orders;
+use Exception;
 use stdClass;
-use Illuminate\Support\Str;
 
 final class GophrDeliveryServices
 {
@@ -19,6 +17,11 @@ final class GophrDeliveryServices
         return (app()->environment('production')) ?
             'https://api.gophr.com/v2-commercial-api' :
             'https://api-sandbox.gophr.com/v2-commercial-api';
+    }
+
+    public static function prepareJobArray(): array
+    {
+        return [];
     }
 
     public static function createJob(array $job): stdClass
@@ -45,7 +48,13 @@ final class GophrDeliveryServices
 
         curl_close($curl);
 
-        return json_decode($response);
+        $response = json_decode($response);
+
+        if (isset($response->errors)) {
+            throw new Exception($response->errors[0]->message);
+        }
+
+        return $response;
     }
 
     /**
@@ -75,7 +84,13 @@ final class GophrDeliveryServices
 
         curl_close($curl);
 
-        return json_decode($response);
+        $response = json_decode($response);
+
+        if (isset($response->errors)) {
+            throw new Exception($response->errors[0]->message);
+        }
+
+        return $response;
     }
 
     public static function getJob(string $jobId): stdClass
@@ -100,7 +115,13 @@ final class GophrDeliveryServices
 
         curl_close($curl);
 
-        return json_decode($response);
+        $response = json_decode($response);
+
+        if (isset($response->errors)) {
+            throw new Exception($response->errors[0]->message);
+        }
+
+        return $response;
     }
 
     public static function cancelJob(string $jobId): stdClass
@@ -111,7 +132,7 @@ final class GophrDeliveryServices
 
         $curl = curl_init();
         curl_setopt_array($curl, [
-            CURLOPT_URL => static::getApiUrl() . '/jobs/'. $jobId .'/cancel',
+            CURLOPT_URL => static::getApiUrl() . '/jobs/' . $jobId . '/cancel',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -131,6 +152,12 @@ final class GophrDeliveryServices
 
         curl_close($curl);
 
-        return json_decode($response);
+        $response = json_decode($response);
+
+        if (isset($response->errors)) {
+            throw new Exception($response->errors[0]->message);
+        }
+
+        return $response;
     }
 }
