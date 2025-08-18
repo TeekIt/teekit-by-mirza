@@ -7,6 +7,79 @@ use stdClass;
 
 final class GophrDeliveryServices
 {
+    public static function prepareJobArray(
+        string $externalId,
+        string $pickupAddress,
+        string $pickupCity,
+        string $pickupPostcode,
+        float $pickupLat,
+        float $pickupLon,
+        string $pickupPersonName,
+        string $pickupMobileNumber,
+        string $parcelExternalId,
+        string $parcelReferenceNumber,
+        string $parcelDescription,
+        float $width,
+        float $length,
+        float $height,
+        float $weight,
+        string $dropoffAddress,
+        string $dropoffCity,
+        string $dropoffPostcode,
+        float $dropoffLat,
+        float $dropoffLon,
+        string $dropoffPersonName,
+        string $dropoffEmail,
+        string $dropoffMobileNumber,
+        string $instructions = 'Make the delivery possible ASAP',
+        string $countryCode = 'GB',
+        bool $isConfirmed = true
+    ): array {
+        $parcelData = [
+            'parcel_external_id' => $parcelExternalId,
+            'parcel_reference_number' => $parcelReferenceNumber,
+            'parcel_description' => $parcelDescription,
+            'width' => $width,
+            'length' => $length,
+            'height' => $height,
+            'weight' => $weight,
+        ];
+
+        return [
+            'is_confirmed' => $isConfirmed ? 1 : 0,
+            'external_id' => $externalId,
+            'pickups' => [
+                [
+                    'pickup_address1' => $pickupAddress,
+                    'pickup_city' => $pickupCity,
+                    'pickup_postcode' => $pickupPostcode,
+                    'pickup_country_code' => $countryCode,
+                    'pickup_location_lat' => $pickupLat,
+                    'pickup_location_lng' => $pickupLon,
+                    'pickup_person_name' => $pickupPersonName, 
+                    'pickup_mobile_number' => $pickupMobileNumber, 
+                    'parcels' => [$parcelData]
+                ]
+            ],
+            'dropoffs' => [
+                [
+                    'dropoff_address1' => $dropoffAddress,
+                    'dropoff_city' => $dropoffCity,
+                    'dropoff_postcode' => $dropoffPostcode,
+                    'dropoff_country_code' => $countryCode,
+                    'dropoff_location_lat' => $dropoffLat,
+                    'dropoff_location_lng' => $dropoffLon,
+                    'dropoff_person_name' => $dropoffPersonName, 
+                    'dropoff_email' => $dropoffEmail, 
+                    'dropoff_mobile_number' => $dropoffMobileNumber, 
+                    'dropoff_instructions' => $instructions,
+                    'dropoff_deadline' => CompanyStandardsServices::getStandardDeliveryDeadline()->toIso8601String(),
+                    'parcels' => [$parcelData]
+                ]
+            ]
+        ];
+    }
+
     public static function getApiKey(): string
     {
         return config('gophr.GOPHR_API_KEY');
@@ -17,11 +90,6 @@ final class GophrDeliveryServices
         return (app()->environment('production')) ?
             'https://api.gophr.com/v2-commercial-api' :
             'https://api-sandbox.gophr.com/v2-commercial-api';
-    }
-
-    public static function prepareJobArray(): array
-    {
-        return [];
     }
 
     public static function createJob(array $job): stdClass
@@ -116,7 +184,7 @@ final class GophrDeliveryServices
         curl_close($curl);
 
         $response = json_decode($response);
-
+        
         if (isset($response->errors)) {
             throw new Exception($response->errors[0]->message);
         }

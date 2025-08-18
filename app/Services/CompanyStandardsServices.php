@@ -13,6 +13,11 @@ final class CompanyStandardsServices
 {
     public static float $standardServiceCharges = 1.99;
 
+    public static function getStandardPickUpTime(): string
+    {
+        return now()->addMinutes(15)->toDateTimeString();
+    }
+    
     public static function getStandardDeliveryDeadline(): Carbon
     {
         return now()->addHour();
