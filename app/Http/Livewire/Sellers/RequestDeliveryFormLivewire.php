@@ -5,7 +5,6 @@ namespace App\Http\Livewire\Sellers;
 use App\Enums\DeliveryProviderEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
-use App\Enums\StuartPackageTypeEnum;
 use App\Services\CompanyStandardsServices;
 use App\Services\GophrDeliveryServices;
 use App\Services\JsonParsingServices;
@@ -14,7 +13,6 @@ use App\Services\UUIDServices;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Exception;
-use Illuminate\Support\Facades\Log;
 
 class RequestDeliveryFormLivewire extends Component
 {
@@ -23,6 +21,8 @@ class RequestDeliveryFormLivewire extends Component
         $pickupAddress,
         $dropoffAddress,
         $unitAddress,
+        $dropoffLat,
+        $dropoffLon,
         $receiverName,
         $receiverPhone,
         $receiverEmail,
@@ -93,88 +93,49 @@ class RequestDeliveryFormLivewire extends Component
 
     public function prepareStuartJobArray()
     {
-        $assignmentCode = UUIDServices::generateUUID();
-
-        return [
-            'job' => [
-                'pickup_at' => StuartDeliveryServices::getStandardPickUpTime(),
-                'assignment_code' => $assignmentCode,
-                'pickups' => [
-                    [
-                        'address' => $this->pickupAddress,
-                        'contact' => [
-                            'firstname' => auth()->user()->name,
-                            'phone' => auth()->user()->business_phone,
-                            'email' => auth()->user()->email,
-                        ]
-                    ]
-                ],
-                'dropoffs' => [
-                    [
-                        'package_type' => StuartDeliveryServices::mapPkgWeightWithStuartPkgType($this->packageWeight),
-                        'client_reference' => $assignmentCode,
-                        'address' => $this->dropoffAddress,
-                        'comment' => $this->unitAddress,
-                        'contact' => [
-                            'firstname' => $this->receiverName,
-                            'phone' => $this->receiverPhone,
-                            'email' => $this->receiverEmail,
-                        ]
-                    ]
-                ],
-            ]
-        ];
+        return StuartDeliveryServices::prepareJobArray(
+            pickupAt: CompanyStandardsServices::getStandardPickUpTime(),
+            assignmentCode: UUIDServices::generateUUID(),
+            pickupAddress: $this->pickupAddress,
+            senderName: auth()->user()->name,
+            senderPhone: auth()->user()->business_phone,
+            senderEmail: auth()->user()->email,
+            packageType: StuartDeliveryServices::mapPkgWeightWithStuartPkgType($this->packageWeight),
+            dropoffAddress: $this->dropoffAddress,
+            unitAddress: $this->unitAddress,
+            receiverName: $this->receiverName,
+            receiverPhone: $this->receiverPhone,
+            receiverEmail: $this->receiverEmail
+        );
     }
 
     public function prepareGophrJobArray()
     {
-        $parcelData = [
-            'parcel_external_id' => UUIDServices::generateUUID(),
-            'parcel_reference_number' => UUIDServices::generateUUID(),
-            'parcel_description' => 'Please pickup your order ASAP',
-            'width' => 0,
-            'length' => 0,
-            'height' => 0,
-            'weight' => 0,
-        ];
-
-        return [
-            'is_confirmed' => 1,
-            'external_id' => UUIDServices::generateUUID(),
-            'pickups' => [
-                [
-                    'pickup_address1' => $this->pickupAddress,
-                    'pickup_city' => auth()->user()->city,
-                    'pickup_postcode' => auth()->user()->postcode,
-                    'pickup_country_code' => 'GB',
-                    'pickup_location_lat' => auth()->user()->lat,
-                    'pickup_location_lng' => auth()->user()->lon,
-                    'pickup_person_name' => auth()->user()->name,
-                    'pickup_mobile_number' => auth()->user()->business_phone,
-                    'parcels' => [
-                        $parcelData
-                    ]
-                ]
-            ],
-            'dropoffs' => [
-                [
-                    'dropoff_address1' => $this->dropoffAddress,
-                    'dropoff_city' => auth()->user()->city,
-                    'dropoff_postcode' => $this->unitAddress,
-                    'dropoff_country_code' => 'GB',
-                    // 'dropoff_location_lat' => ,
-                    // 'dropoff_location_lng' => ,
-                    'dropoff_person_name' => $this->receiverName,
-                    'dropoff_email' => $this->receiverEmail,
-                    'dropoff_mobile_number' => $this->receiverPhone,
-                    'dropoff_instructions' => 'Make the delivery possible ASAP',
-                    'dropoff_deadline' => CompanyStandardsServices::getStandardDeliveryDeadline()->toIso8601String(),
-                    'parcels' => [
-                        $parcelData
-                    ]
-                ]
-            ]
-        ];
+        return GophrDeliveryServices::prepareJobArray(
+            externalId: UUIDServices::generateUUID(),
+            pickupAddress: $this->pickupAddress,
+            pickupCity: auth()->user()->city,
+            pickupPostcode: auth()->user()->postcode,
+            pickupLat: auth()->user()->lat,
+            pickupLon: auth()->user()->lon,
+            pickupPersonName: auth()->user()->name,
+            pickupMobileNumber: auth()->user()->business_phone,
+            parcelExternalId: UUIDServices::generateUUID(),
+            parcelReferenceNumber: UUIDServices::generateUUID(),
+            parcelDescription: 'Please pickup your order ASAP',
+            width: 0,
+            length: 0,
+            height: 0,
+            weight: 0,
+            dropoffAddress: $this->dropoffAddress,
+            dropoffCity: auth()->user()->city,
+            dropoffPostcode: $this->unitAddress,
+            dropoffLat: $this->dropoffLat,
+            dropoffLon: $this->dropoffLon,
+            dropoffPersonName: $this->receiverName,
+            dropoffEmail: $this->receiverEmail,
+            dropoffMobileNumber: $this->receiverPhone
+        );
     }
 
     public function calculateTotalCost()

@@ -14,6 +14,7 @@ use App\Services\GoogleMapServices;
 use App\Services\GophrDeliveryServices;
 use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
+use App\Services\UUIDServices;
 use App\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -154,7 +155,35 @@ class OrdersLivewire extends Component
 
             $parcelDescription = $this->additionalParcelDescription ?? "Please pickup your order ASAP";
 
-            $response = GophrDeliveryServices::createJob($order, $parcelDescription);
+            // $response = GophrDeliveryServices::createJob($order, $parcelDescription);
+            $response = GophrDeliveryServices::createJob(
+                GophrDeliveryServices::prepareJobArray(
+                    externalId: UUIDServices::generateUUID(),
+                    pickupAddress: $order->seller->full_address,
+                    pickupCity: $order->seller->city,     
+                    pickupPostcode: $order->seller->postcode, 
+                    pickupLat: $order->seller->lat,   
+                    pickupLon: $order->seller->lon,  
+                    pickupPersonName: $order->seller->name,
+                    pickupMobileNumber: $order->seller->phone,
+                    parcelExternalId: UUIDServices::generateUUID(),
+                    parcelReferenceNumber: 'ORD#' . $order->id,
+                    parcelDescription: $parcelDescription,
+                    width: 0,
+                    length: 0,
+                    height: 0,
+                    weight: $order->total_items * 0.5,
+                    dropoffAddress: $order->address,
+                    dropoffCity: $order->city,
+                    dropoffPostcode: $order->postcode,
+                    dropoffLat: $order->customer_lat,
+                    dropoffLon: $order->customer_lon,
+                    dropoffPersonName: $order->customer_name,
+                    dropoffEmail: $order->buyer->email,
+                    dropoffMobileNumber: $order->country_code . $order->phone_number,
+                    instructions: $order->description ?? 'Standard delivery'
+                )
+            );
 
             if (isset($response->errors)) {
                 Log::error($response->errors);

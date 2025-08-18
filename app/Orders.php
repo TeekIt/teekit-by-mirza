@@ -350,7 +350,7 @@ class Orders extends Model
     {
         return self::select($columns)
             ->with(['order_items.product', 'buyer', 'seller'])
-            ->where('id', $id)
+            ->where('id', '=', $id)
             ->first();
     }
 }
