@@ -172,7 +172,7 @@ class OrdersLivewire extends Component
                     width: 0,
                     length: 0,
                     height: 0,
-                    weight: $order->total_items * 0.5,
+                    weight: 0,
                     dropoffAddress: $order->address,
                     dropoffCity: $order->city,
                     dropoffPostcode: $order->postcode,
