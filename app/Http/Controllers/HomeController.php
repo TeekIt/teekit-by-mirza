@@ -25,7 +25,6 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
-use Throwable;
 
 class HomeController extends Controller
 {
@@ -236,48 +235,6 @@ class HomeController extends Controller
         return redirect()->back();
     }
     /**
-     * Change's order status to "delivered"
-     * @author Muhammad Abdullah Mirza
-     * @version 1.0.0
-     */
-    public function markAsDelivered($order_id)
-    {
-        Orders::where('id', '=', $order_id)->update(['order_status' => 'delivered']);
-
-        flash('This Order Has Been Marked As Delivered')->success();
-
-        return redirect()->back();
-    }
-    /**
-     * It change's the order_status & delivery_status to "complete"
-     * Only if the driver is failed to enter the correct verification code
-     * @author Muhammad Abdullah Mirza
-     * @version 1.1.0
-     */
-    public function markAsCompleted($order_id)
-    {
-        $verificationCodes = VerificationCodes::query()
-            ->select('code->driver_failed_to_enter_code as driver_failed_to_enter_code')
-            ->where('order_id', '=', $order_id)
-            ->get();
-
-        if (
-            json_decode($verificationCodes)[0]->driver_failed_to_enter_code == "Yes" ||
-            json_decode($verificationCodes)[0]->driver_failed_to_enter_code == "NULL"
-        ) {
-            Orders::where('id', '=', $order_id)->update([
-                'order_status' => OrderStatusEnum::COMPLETE,
-                'delivery_status' => DeliveryStatusEnum::COMPLETE,
-            ]);
-
-            flash('This Order Has Been Marked As Completed')->success();
-        } elseif (json_decode($verificationCodes)[0]->driver_failed_to_enter_code == "No") {
-            flash('This Order Is Already Marked As Completed')->success();
-        }
-
-        return redirect()->back();
-    }
-    /**
      * Return's admin home view
      * @author Huzaifa Haleem
      * @version 1.0.0
@@ -379,17 +336,6 @@ class HomeController extends Controller
         flash('Updated')->success();
 
         return Redirect::back();
-    }
-    /**
-     * Render orders listing view for admin
-     * @author Huzaifa Haleem
-     * @version 1.0.0
-     */
-    public function adminOrders(Request $request)
-    {
-        $orders = Orders::getOrdersForSuperAdminView(orderBy: 'desc');
-
-        return view('admin.orders', compact('orders'));
     }
     /**
      * Render verified orders listing view for admin
@@ -501,20 +447,6 @@ class HomeController extends Controller
         }
     }
     /**
-     * It will show the order count
-     * @version 1.0.0
-     */
-    public function countSellerOrders()
-    {
-        $total_orders = Orders::where('seller_id', '=', Auth::id())->where('payment_status', '=', 'paid')->count();
-        $user_settings = User::select('settings')->where('id', '=', Auth::id())->get();
-
-        return response()->json([
-            'total_orders' => $total_orders,
-            'user_settings' => $user_settings
-        ]);
-    }
-    /**
      * It will show complete orders
      * based on the given criteria
      * @version 1.0.0
@@ -541,32 +473,6 @@ class HomeController extends Controller
             ->paginate(10);
 
         return view('admin.complete-orders', compact('orders'));
-    }
-    /**
-     * It will remove a single product from the given order
-     * @version 1.0.0
-     */
-    public function removeProductFromOrder($order_id, $item_id, $product_price, $product_qty)
-    {
-        try {
-            $order = Orders::find($order_id);
-            $order->initial_total -= $product_price;
-            $order->total_items -= $product_qty;
-            $order->save();
-            /* Now remove the product from order items table */
-            $removed = OrderItems::where('id', '=', $item_id)->delete();
-            if ($removed) {
-                flash('Product Has Been Removed Successfully')->success();
-
-                return redirect()->back();
-            }
-        } catch (Throwable $error) {
-            report($error);
-
-            flash('Error In Removing The Product')->error();
-
-            return redirect()->back();
-        }
     }
     /**
      * it will update the store info via popup modal

@@ -283,18 +283,18 @@ class Orders extends Model
         * Means if the product has been created by a 'seller' not a 'buyer' 
         * Because only seller products have 'category'
         */
-        $orders->each(function ($order) {
-            $order->order_items->each(function ($orderItem) {
-                if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
-                    $orderItem->product->load('category');
-                }
-            });
-        });
+        // $orders->each(function ($order) {
+        //     $order->order_items->each(function ($orderItem) {
+        //         if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
+        //             $orderItem->product->load('category');
+        //         }
+        //     });
+        // });
 
         return $orders;
     }
 
-    public static function getOrdersForView(int $sellerId, string $orderBy, int|null $orderId = null): LengthAwarePaginator
+    public static function getOrdersForView(string $orderBy, int $sellerId, int|null $orderId = null): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) static::isViewed($orderId);

@@ -28,44 +28,6 @@ class GophrDeliveryController extends Controller
             'weight' => 0,
         ];
 
-        // $response = GophrDeliveryServices::createJob([
-        //     'is_confirmed' => 1,
-        //     'external_id' => UUIDServices::generateUUID(),
-        //     'pickups' => [
-        //         [
-        //             'pickup_address1' => $validatedData->pickupAddress,
-        //             'pickup_city' => $validatedData->pickupCity,
-        //             'pickup_postcode' => $validatedData->pickupPostcode,
-        //             'pickup_country_code' => 'GB',
-        //             'pickup_location_lat' => $validatedData->pickupLat,
-        //             'pickup_location_lng' => $validatedData->pickupLon,
-        //             'pickup_person_name' => $validatedData->senderName,
-        //             'pickup_mobile_number' => $validatedData->senderPhone,
-        //             'parcels' => [
-        //                 $parcelData
-        //             ]
-        //         ]
-        //     ],
-        //     'dropoffs' => [
-        //         [
-        //             'dropoff_address1' => $validatedData->dropoffAddress,
-        //             'dropoff_city' => $validatedData->dropOffCity,
-        //             'dropoff_postcode' => $validatedData->dropOffPostCode,
-        //             'dropoff_country_code' => 'GB',
-        //             'dropoff_location_lat' => $validatedData->dropoffLat,
-        //             'dropoff_location_lng' => $validatedData->dropoffLon,
-        //             'dropoff_person_name' => auth()->user()->name,
-        //             'dropoff_email' => auth()->user()->email,
-        //             'dropoff_mobile_number' => auth()->user()->country_code . auth()->user()->phone,
-        //             'dropoff_instructions' => 'Make the delivery possible ASAP',
-        //             'dropoff_deadline' => CompanyStandardsServices::getStandardDeliveryDeadline()->toIso8601String(),
-        //             'parcels' => [
-        //                 $parcelData
-        //             ]
-        //         ]
-        //     ]
-        // ]);
-
         $response = GophrDeliveryServices::createJob(
             GophrDeliveryServices::prepareJobArray(
                 externalId: UUIDServices::generateUUID(),

@@ -139,7 +139,7 @@
                     url: "{{ route('seller.orders.count') }}",
                     method: "GET",
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                     },
                     success: (data) => {
                         this.currentOrdersData = data;
@@ -156,7 +156,7 @@
                     url: "{{ route('seller.orders.count') }}",
                     method: "GET",
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                     },
                     success: (newOrdersData) => {
 

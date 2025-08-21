@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Livewire\Sellers;
+namespace App\Http\Livewire\Common;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
@@ -55,7 +55,10 @@ class OrdersLivewire extends Component
     */
     public function mount(Request $request)
     {
-        $this->sellerId = auth()->id();
+        if (!User::isSuperAdmin()) {
+            $this->sellerId = auth()->id();
+        }
+
         $this->requestOrderId = $request->requestOrderId;
 
         $this->resetAllPaginators();
@@ -160,10 +163,10 @@ class OrdersLivewire extends Component
                 GophrDeliveryServices::prepareJobArray(
                     externalId: UUIDServices::generateUUID(),
                     pickupAddress: $order->seller->full_address,
-                    pickupCity: $order->seller->city,     
-                    pickupPostcode: $order->seller->postcode, 
-                    pickupLat: $order->seller->lat,   
-                    pickupLon: $order->seller->lon,  
+                    pickupCity: $order->seller->city,
+                    pickupPostcode: $order->seller->postcode,
+                    pickupLat: $order->seller->lat,
+                    pickupLon: $order->seller->lon,
                     pickupPersonName: $order->seller->name,
                     pickupMobileNumber: $order->seller->phone,
                     parcelExternalId: UUIDServices::generateUUID(),
@@ -433,20 +436,27 @@ class OrdersLivewire extends Component
     public function render()
     {
         try {
-            $data = Orders::getOrdersForView(
-                orderId: $this->isSearchByIdSet(),
-                sellerId: $this->sellerId,
-                orderBy: 'desc',
-            );
+            if (!User::isSuperAdmin()) {
+                $data = Orders::getOrdersForView(
+                    orderId: $this->isSearchByIdSet(),
+                    sellerId: $this->sellerId,
+                    orderBy: 'desc',
+                );
+            } else {
+                $data = Orders::getOrdersForSuperAdminView(
+                    orderId: $this->isSearchByIdSet(),
+                    orderBy: 'desc',
+                );
+            }
 
-            return view('livewire.sellers.orders-livewire', compact('data'));
+            return view('livewire.common.orders-livewire', compact('data'));
         } catch (Exception $error) {
             report($error);
             session()->flash('error', config('constants.SEARCH_FAILED'));
 
             $data = [];
 
-            return view('livewire.sellers.orders-livewire', compact('data'));
+            return view('livewire.common.orders-livewire', compact('data'));
         }
     }
 }

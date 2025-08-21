@@ -10,22 +10,20 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PromoCodesController;
 use App\Http\Controllers\StripeContorller;
-use App\Http\Controllers\StuartDeliveryController;
+use App\Http\Controllers\Web\StuartDeliveryController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\Web\OrdersController;
 use App\Http\Livewire\Admin\CategoriesLivewire;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
 use App\Http\Livewire\Sellers\OrdersFromOtherSellersLivewire;
-use App\Http\Livewire\Sellers\OrdersLivewire;
-use App\Http\Livewire\Sellers\OrdersOfUniqueProductsLivewire;
-use App\Http\Livewire\Sellers\RequestDeliveryLivewire;
+use App\Http\Livewire\Common\OrdersLivewire;
 use App\Http\Livewire\Sellers\SellerDashboardLivewire;
 use App\Http\Livewire\Sellers\GeneralSettingsLivewire;
 use App\Http\Livewire\Sellers\RequestDeliveryFormLivewire;
 use App\Http\Livewire\Sellers\RequestedDeliveriesLivewire;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
-use App\Services\StripeServices;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 /*
@@ -71,7 +69,7 @@ Route::post('/importProducts', [HomeController::class, 'importProducts'])->name(
 | Orders Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('orders')->controller(HomeController::class)->group(function () {
+Route::prefix('orders')->controller(OrdersController::class)->group(function () {
     Route::get('/mark_as_delivered/{order_id}', 'markAsDelivered')->name('mark_as_delivered');
     Route::get('/mark_as_completed/{order_id}', 'markAsCompleted')->name('mark_as_completed');
     Route::get('/{order_id}/remove/{item_id}/product/{product_price}/{product_qty}', 'removeProductFromOrder')
@@ -99,9 +97,9 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
     });
 
     Route::prefix('orders')->group(function () {
+        Route::get('count', [OrdersController::class, 'countSellerOrders'])->name('seller.orders.count');
         Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
         // Route::get('/of-unique-products', OrdersOfUniqueProductsLivewire::class)->name('seller.orders.of.unique.products');
-        Route::get('/count', [HomeController::class, 'countSellerOrders'])->name('seller.orders.count');
         Route::get('/{requestOrderId?}', OrdersLivewire::class)->name('seller.orders');
     });
 
@@ -142,6 +140,7 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
     Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
     Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
     Route::get('/drivers', DriversLivewire::class)->name('admin.test.drivers');
+    Route::get('/orders', OrdersLivewire::class)->name('admin.orders');
 
     Route::prefix('categories')->group(function () {
         Route::get('/', CategoriesLivewire::class)->name('admin.categories');
@@ -170,7 +169,6 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
             Route::get('/unverified', 'adminOrdersUnverified')->name('admin.orders.unverified');
             Route::get('/complete', 'completeOrders')->name('admin.orders.complete');
             Route::get('/delete', 'adminOrdersDel')->name('admin.del.orders');
-            Route::get('/', 'adminOrders')->name('admin.orders');
         });
     });
 });

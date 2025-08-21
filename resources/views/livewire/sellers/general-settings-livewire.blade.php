@@ -257,7 +257,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-12 col-sm-6 col-md-4">
-                        <h4 class="py-2 my-1 text-site-primary">NEW General Settings</h4>
+                        <h4 class="py-2 my-1 text-site-primary">General Settings</h4>
                     </div>
                 </div>
             </div>
