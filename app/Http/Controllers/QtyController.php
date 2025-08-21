@@ -31,21 +31,19 @@ class QtyController extends Controller
 
         if (!is_null($qty)) {
             return JsonResponseServices::getApiResponse(
-                Qty::where('seller_id', $request->store_id)
-                    ->where('product_id', $request->prod_id)
-                    ->get(),
+                $qty,
                 config('constants.TRUE_STATUS'),
                 '',
                 config('constants.HTTP_OK')
             );
-        } else {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.TRUE_STATUS'),
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_OK')
-            );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.TRUE_STATUS'),
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * It is used to test API's respose time
@@ -87,7 +85,7 @@ class QtyController extends Controller
         for ($a = 0; $a < count($ch); $a++)
             curl_multi_remove_handle($mh, $ch[$a]);
         curl_multi_close($mh);
-       
+
         return JsonResponseServices::getApiResponse(
             $mh,
             config('constants.TRUE_STATUS'),

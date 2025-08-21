@@ -8,7 +8,6 @@ use App\Models\GophrDelivery;
 use App\Enums\PaymentIntentStatusEnum;
 use App\Models\OrdersFromOtherSeller;
 use App\Orders;
-use App\Services\CompanyStandardsServices;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
 use App\Services\GophrDeliveryServices;
@@ -149,7 +148,7 @@ class OrdersHeaderLivewire extends Component
 
     public function capturePayment($currentTotal = null)
     {
-        $totalWeight = $this->selectedOrder->order_items[0]->product->weight;
+        $totalWeight = OrderServices::getTotalWeight($this->selectedOrder);
 
         $currentDeliveryCharges = OrderServices::getTotalDeliveryCharges(
             $this->selectedOrder->seller->lat,
@@ -163,7 +162,7 @@ class OrdersHeaderLivewire extends Component
 
         $currentTotalAmount = round($currentTotal + $this->selectedOrder->service_charges + $currentDeliveryCharges);
         $initialTotalAmount = round($this->selectedOrder->initial_total + $this->selectedOrder->service_charges + $this->selectedOrder->delivery_charges);
-        
+
         if ($currentTotalAmount <= $initialTotalAmount) {
             $response = StripeServices::capturePaymentIntent(
                 $this->selectedOrder->payment_intent_id,
@@ -179,54 +178,35 @@ class OrdersHeaderLivewire extends Component
         return $response;
     }
 
-    public function prepareGophrJobArray(Orders|OrdersFromOtherSeller $order, string $parcelDescription)
+    public function prepareGophrJobArray(Orders|OrdersFromOtherSeller $order, string $parcelDescription): array
     {
-        $parcelData = [
-            "parcel_external_id" => UUIDServices::generateUUID(),
-            "parcel_reference_number" => UUIDServices::generateUUID(),
-            "parcel_description" => $parcelDescription,
-            "width" => OrderServices::getTotalWidth($order),
-            "length" => OrderServices::getTotalLength($order),
-            "height" => OrderServices::getTotalHeight($order),
-            "weight" => OrderServices::getTotalWeight($order),
-        ];
-
-        return [
-            "is_confirmed" => 1,
-            "external_id" => UUIDServices::generateUUID(),
-            "pickups" => [
-                [
-                    "pickup_address1" => $order->seller->full_address,
-                    "pickup_city" => $order->seller->city,
-                    "pickup_postcode" => $order->seller->postcode,
-                    "pickup_country_code" => "GB",
-                    "pickup_location_lat" => $order->seller->lat,
-                    "pickup_location_lng" => $order->seller->lon,
-                    "pickup_person_name" => $order->seller->name,
-                    "pickup_mobile_number" => $order->seller->business_phone,
-                    "parcels" => [
-                        $parcelData
-                    ]
-                ]
-            ],
-            "dropoffs" => [
-                [
-                    "dropoff_address1" => $order->address,
-                    "dropoff_city" => $order->city,
-                    "dropoff_postcode" => $order->postcode,
-                    "dropoff_country_code" => "GB",
-                    "dropoff_location_lat" => $order->customer_lat,
-                    "dropoff_location_lng" => $order->customer_lon,
-                    "dropoff_person_name" => $order->customer_name,
-                    "dropoff_mobile_number" => $order->phone_number,
-                    "dropoff_deadline" => CompanyStandardsServices::getStandardDeliveryDeadline()->toIso8601String(),
-                    "parcels" => [
-                        $parcelData
-                    ]
-                ]
-            ]
-        ];
+        return GophrDeliveryServices::prepareJobArray(
+            externalId: UUIDServices::generateUUID(),
+            pickupAddress: $order->seller->full_address,
+            pickupCity: $order->seller->city,
+            pickupPostcode: $order->seller->postcode,
+            pickupLat: (float) $order->seller->lat,
+            pickupLon: (float) $order->seller->lon,
+            pickupPersonName: $order->seller->name,
+            pickupMobileNumber: $order->seller->business_phone,
+            parcelExternalId: UUIDServices::generateUUID(),
+            parcelReferenceNumber: UUIDServices::generateUUID(),
+            parcelDescription: $parcelDescription,
+            width: OrderServices::getTotalWidth($order),
+            length: OrderServices::getTotalLength($order),
+            height: OrderServices::getTotalHeight($order),
+            weight: OrderServices::getTotalWeight($order),
+            dropoffAddress: $order->address,
+            dropoffCity: $order->city,
+            dropoffPostcode: $order->postcode,
+            dropoffLat: (float) $order->customer_lat,
+            dropoffLon: (float) $order->customer_lon,
+            dropoffPersonName: $order->customer_name,
+            dropoffEmail: '',
+            dropoffMobileNumber: $order->phone_number,
+        );
     }
+
     /* 
      * CRUD Methods
      */
@@ -300,7 +280,7 @@ class OrdersHeaderLivewire extends Component
         try {
             /* Perform some operation */
             $this->selectedOrder = Orders::getById($orderId);
-           
+
             $orderTotalPrice = $this->selectedOrder->order_items[0]->product_price * $this->selectedOrder->order_items[0]->product_qty;
             /* Get sellers who belongs to the city of this store owner */
             $sellersOfTheSameCity = $this->getSellersOfSameCity();
@@ -390,7 +370,7 @@ class OrdersHeaderLivewire extends Component
             $newOrderTotal = $this->priceBySeller * $this->selectedOrder->order_items[0]->product_qty;
 
             $response = $this->capturePayment($newOrderTotal);
-        
+
             $updated = Orders::updateInfo(
                 id: $this->selectedOrder->id,
                 currentTotal: $newOrderTotal,

@@ -6,6 +6,7 @@
         use App\Enums\OrderTypeEnum;
         use App\Models\ProductsByBuyer;
         use App\Products;
+        use App\User;
         use App\Services\ProductServices;
     @endphp
 
@@ -274,7 +275,7 @@
                                                     <td class="col-4 text-site-primary"><b>Price</b></td>
                                                     <td class="col-8"> £{{ $orderItem->product->price }} </td>
                                                 </tr>
-                                                @if ($order->order_status == OrderStatusEnum::PENDING->value)
+                                                @if ($order->order_status == OrderStatusEnum::PENDING->value && !User::isSuperAdmin())
                                                     <tr>
                                                         <td class="col-4 text-site-primary">
                                                             <b>I don't have this product!</b>
@@ -351,11 +352,14 @@
                                                 </tr>
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Colors</b></td>
-                                                    <td class="col-8"> {{ ProductServices::jsonDecodeColors($orderItem->product->colors) }} </td>
+                                                    <td class="col-8">
+                                                        {{ ProductServices::jsonDecodeColors($orderItem->product->colors) }}
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Transport Vehicle</b></td>
-                                                    <td class="col-8"> {{ $orderItem->product->transport_vehicle }} </td>
+                                                    <td class="col-8"> {{ $orderItem->product->transport_vehicle }}
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Height</b></td>

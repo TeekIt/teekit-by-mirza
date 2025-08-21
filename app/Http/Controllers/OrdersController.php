@@ -14,8 +14,6 @@ use App\OrderItems;
 use App\Orders;
 use App\Products;
 use App\Qty;
-use App\Services\EmailServices;
-use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
 use App\Services\OrderServices;
@@ -26,7 +24,6 @@ use App\VerificationCodes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -167,7 +164,7 @@ class OrdersController extends Controller
                     UserChoicesEnum::from($orderItem['user_choice'])
                 );
             }
-            
+
             if ($request->type == OrderTypeEnum::DELIVERY->value) {
                 $verificationCode = VerificationCodeServices::generateCode();
                 VerificationCodes::add($orderId, $verificationCode);
@@ -341,7 +338,7 @@ class OrdersController extends Controller
         if ($request->type == OrderTypeEnum::DELIVERY->value) {
             $verificationCode = VerificationCodeServices::generateCode();
             VerificationCodes::add($order->id, $verificationCode);
-            
+
             if (app()->environment('production')) {
                 OrderServices::sendBulkSms(
                     $seller,
@@ -436,7 +433,7 @@ class OrdersController extends Controller
             * Which will obviouly decrease the API response speed
             */
             $dataIsEmpty = empty($recentOrderProdsData);
-            
+
             return JsonResponseServices::getApiResponse(
                 ($dataIsEmpty) ? [] : $recentOrderProdsData,
                 ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
@@ -601,19 +598,20 @@ class OrdersController extends Controller
                 $order_data[] = $this->getOrderDetails($order->id);
             }
             unset($pagination['data']);
+
             return response()->json([
                 'data' => $order_data,
                 'status' => true,
                 'message' => '',
                 'pagination' => $pagination
             ], 200);
-        } else {
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => config('constants.NO_RECORD')
-            ], 200);
         }
+
+        return response()->json([
+            'data' => [],
+            'status' => false,
+            'message' => config('constants.NO_RECORD')
+        ], 200);
     }
     /**
      * Assigns an order to a specific delivery boy
@@ -792,6 +790,7 @@ class OrdersController extends Controller
             $order->save();
             $count++;
         }
+
         return response()->json([
             'data' => Orders::getByIds($order_arr),
             'status' => true,
@@ -852,6 +851,7 @@ class OrdersController extends Controller
         $order = Orders::findOrFail($id);
         $order->estimated_time = request()->estimated_time;
         $order->save();
+
         return $order->toArray();
     }
     /**

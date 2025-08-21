@@ -6,6 +6,7 @@
         use App\Enums\OrderTypeEnum;
         use App\Models\ProductsByBuyer;
         use App\Products;
+        use App\User;
         use App\Services\DateTimeServices;
     @endphp
 
@@ -280,21 +281,23 @@
                                             aria-hidden="true"></span>
                                     </span>
                                 </button>
-                                <button class="btn btn-danger"
-                                    wire:click="sendCustomProductOrderToAnOtherSeller({{ $order->id }})"
-                                    wire:target="sendCustomProductOrderToAnOtherSeller({{ $order->id }})"
-                                    wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger"
-                                    wire:loading.attr="disabled" title="Send this order to another nearby seller">
-                                    <span wire:target="sendCustomProductOrderToAnOtherSeller({{ $order->id }})"
-                                        wire:loading.remove>
-                                        Send To Other Sellers
-                                    </span>
-                                    <span wire:target="sendCustomProductOrderToAnOtherSeller({{ $order->id }})"
-                                        wire:loading>
-                                        <span class="spinner-border spinner-border-sm text-light" role="status"
-                                            aria-hidden="true"></span>
-                                    </span>
-                                </button>
+                                @if (!User::isSuperAdmin())
+                                    <button class="btn btn-danger"
+                                        wire:click="sendCustomProductOrderToAnOtherSeller({{ $order->id }})"
+                                        wire:target="sendCustomProductOrderToAnOtherSeller({{ $order->id }})"
+                                        wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger"
+                                        wire:loading.attr="disabled" title="Send this order to another nearby seller">
+                                        <span wire:target="sendCustomProductOrderToAnOtherSeller({{ $order->id }})"
+                                            wire:loading.remove>
+                                            Send To Other Sellers
+                                        </span>
+                                        <span wire:target="sendCustomProductOrderToAnOtherSeller({{ $order->id }})"
+                                            wire:loading>
+                                            <span class="spinner-border spinner-border-sm text-light" role="status"
+                                                aria-hidden="true"></span>
+                                        </span>
+                                    </button>
+                                @endif
                             @endif
                         @endif
 
