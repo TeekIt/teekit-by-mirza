@@ -59,7 +59,7 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
     });
 });
 
-Route::prefix('password')->group(function() {
+Route::prefix('password')->group(function () {
     Route::post('email', [ForgotPasswordController::class, 'getResetToken']);
     Route::post('reset', [ResetPasswordController::class, 'reset']);
 });

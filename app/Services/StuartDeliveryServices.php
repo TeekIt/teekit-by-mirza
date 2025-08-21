@@ -11,29 +11,52 @@ use Exception;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 use Illuminate\Support\Carbon;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 final class StuartDeliveryServices
 {
-    public static function mapPkgWeightWithStuartPkgType(PackageWeightEnum $packageWeight): string
-    {
-        switch ($packageWeight) {
-            case PackageWeightEnum::SMALL:
-                return StuartPackageTypeEnum::SMALL->value;
-            case PackageWeightEnum::MEDIUM:
-                return StuartPackageTypeEnum::MEDIUM->value;
-            case PackageWeightEnum::LARGE:
-                return StuartPackageTypeEnum::LARGE->value;
-            case PackageWeightEnum::EXTRA_LARGE:
-                return StuartPackageTypeEnum::EXTRA_LARGE->value;
-            default:
-                throw new Exception('Invalid package weight provided');
-        }
-    }
-
-    public static function getStandardPickUpTime(): string
-    {
-        return now()->addMinutes(15)->toDateTimeString();
+    public static function prepareJobArray(
+        string $pickupAt,
+        string $assignmentCode,
+        string $pickupAddress,
+        string $senderName,
+        string $senderPhone,
+        string $senderEmail,
+        string $packageType,
+        string $dropoffAddress,
+        string $unitAddress,
+        string $receiverName,
+        string $receiverPhone,
+        string $receiverEmail
+    ): array {
+        return [
+            'job' => [
+                'pickup_at' => $pickupAt,
+                'assignment_code' => $assignmentCode,
+                'pickups' => [
+                    [
+                        'address' => $pickupAddress,
+                        'contact' => [
+                            'firstname' => $senderName,
+                            'phone' => $senderPhone,
+                            'email' => $senderEmail,
+                        ]
+                    ]
+                ],
+                'dropoffs' => [
+                    [
+                        'package_type' => $packageType,
+                        'client_reference' => $assignmentCode,
+                        'address' => $dropoffAddress,
+                        'comment' => $unitAddress,
+                        'contact' => [
+                            'firstname' => $receiverName,
+                            'phone' => $receiverPhone,
+                            'email' => $receiverEmail,
+                        ]
+                    ]
+                ]
+            ]
+        ];
     }
 
     public static function getJobsUrl(): string
@@ -96,6 +119,22 @@ final class StuartDeliveryServices
         }
 
         return $response;
+    }
+
+    public static function mapPkgWeightWithStuartPkgType(PackageWeightEnum $packageWeight): string
+    {
+        switch ($packageWeight) {
+            case PackageWeightEnum::SMALL:
+                return StuartPackageTypeEnum::SMALL->value;
+            case PackageWeightEnum::MEDIUM:
+                return StuartPackageTypeEnum::MEDIUM->value;
+            case PackageWeightEnum::LARGE:
+                return StuartPackageTypeEnum::LARGE->value;
+            case PackageWeightEnum::EXTRA_LARGE:
+                return StuartPackageTypeEnum::EXTRA_LARGE->value;
+            default:
+                throw new Exception('Invalid package weight provided');
+        }
     }
     /**
      * @author Muhammad Abdullah Mirza

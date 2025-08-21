@@ -8,6 +8,7 @@ use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use App\Http\Requests\Stuart\AddStuartJobRequest;
 use App\Models\RequestedDelivery;
+use App\Services\CompanyStandardsServices;
 use App\Services\JsonResponseServices;
 use App\Services\StuartDeliveryServices;
 use App\Services\UUIDServices;
@@ -18,38 +19,24 @@ class StuartDeliveryController extends Controller
     {
         $validatedData = (object) $request->validated();
 
-        $assignmentCode = UUIDServices::generateUUID();
-        $response = StuartDeliveryServices::createJob([
-            'job' => [
-                'pickup_at' => StuartDeliveryServices::getStandardPickUpTime(),
-                'assignment_code' => $assignmentCode,
-                'pickups' => [
-                    [
-                        'address' => $validatedData->pickupAddress,
-                        'contact' => [
-                            'firstname' => $validatedData->senderName,
-                            'phone' => $validatedData->senderPhone,
-                            'email' => $validatedData->senderEmail,
-                        ]
-                    ]
-                ],
-                'dropoffs' => [
-                    [
-                        'package_type' => StuartDeliveryServices::mapPkgWeightWithStuartPkgType(
-                            PackageWeightEnum::from($validatedData->packageWeight)
-                        ),
-                        'client_reference' => $assignmentCode,
-                        'address' => $validatedData->dropoffAddress,
-                        'comment' => $validatedData->unitAddress,
-                        'contact' => [
-                            'firstname' => auth()->user()->name,
-                            'phone' => auth()->user()->country_code . auth()->user()->phone,
-                            'email' => auth()->user()->email,
-                        ]
-                    ]
-                ]
-            ]
-        ]);
+        $response = StuartDeliveryServices::createJob(
+            StuartDeliveryServices::prepareJobArray(
+                pickupAt: CompanyStandardsServices::getStandardPickUpTime(),
+                assignmentCode: UUIDServices::generateUUID(),
+                pickupAddress: $validatedData->pickupAddress,
+                senderName: $validatedData->senderName,
+                senderPhone: $validatedData->senderPhone,
+                senderEmail: $validatedData->senderEmail,
+                packageType: StuartDeliveryServices::mapPkgWeightWithStuartPkgType(
+                    PackageWeightEnum::from($validatedData->packageWeight)
+                ),
+                dropoffAddress: $validatedData->dropoffAddress,
+                unitAddress: $validatedData->unitAddress,
+                receiverName: auth()->user()->name,
+                receiverPhone: auth()->user()->country_code . auth()->user()->phone,
+                receiverEmail: auth()->user()->email
+            )
+        );
 
         RequestedDelivery::add(
             creatorId: auth()->id(),
@@ -77,38 +64,24 @@ class StuartDeliveryController extends Controller
     {
         $validatedData = (object) $request->validated();
 
-        $assignmentCode = UUIDServices::generateUUID();
-        $response = StuartDeliveryServices::getJobPricing([
-            'job' => [
-                'pickup_at' => StuartDeliveryServices::getStandardPickUpTime(),
-                'assignment_code' => $assignmentCode,
-                'pickups' => [
-                    [
-                        'address' => $validatedData->pickupAddress,
-                        'contact' => [
-                            'firstname' => $validatedData->senderName,
-                            'phone' => $validatedData->senderPhone,
-                            'email' => $validatedData->senderEmail,
-                        ]
-                    ]
-                ],
-                'dropoffs' => [
-                    [
-                        'package_type' => StuartDeliveryServices::mapPkgWeightWithStuartPkgType(
-                            PackageWeightEnum::from($validatedData->packageWeight)
-                        ),
-                        'client_reference' => $assignmentCode,
-                        'address' => $validatedData->dropoffAddress,
-                        'comment' => $validatedData->unitAddress,
-                        'contact' => [
-                            'firstname' => auth()->user()->name,
-                            'phone' => auth()->user()->country_code . auth()->user()->phone,
-                            'email' => auth()->user()->email,
-                        ]
-                    ]
-                ]
-            ]
-        ]);
+        $response = StuartDeliveryServices::getJobPricing(
+            StuartDeliveryServices::prepareJobArray(
+                pickupAt: CompanyStandardsServices::getStandardPickUpTime(),
+                assignmentCode: UUIDServices::generateUUID(),
+                pickupAddress: $validatedData->pickupAddress,
+                senderName: $validatedData->senderName,
+                senderPhone: $validatedData->senderPhone,
+                senderEmail: $validatedData->senderEmail,
+                packageType: StuartDeliveryServices::mapPkgWeightWithStuartPkgType(
+                    PackageWeightEnum::from($validatedData->packageWeight)
+                ),
+                dropoffAddress: $validatedData->dropoffAddress,
+                unitAddress: $validatedData->unitAddress,
+                receiverName: auth()->user()->name,
+                receiverPhone: auth()->user()->country_code . auth()->user()->phone,
+                receiverEmail: auth()->user()->email
+            )
+        );
 
         return JsonResponseServices::getApiResponse(
             $response,

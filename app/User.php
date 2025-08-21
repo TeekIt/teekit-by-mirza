@@ -189,6 +189,21 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
+    public static function isSuperAdmin(): bool
+    {
+        return auth()->user()->role_id === UserRoleEnum::SUPERADMIN->value;
+    }
+
+    public static function isParentSeller(): bool
+    {
+        return auth()->user()->role_id === UserRoleEnum::SELLER->value;
+    }
+
+    public static function isChildSeller(): bool
+    {
+        return auth()->user()->role_id === UserRoleEnum::CHILD_SELLER->value;
+    }
+
     public static function adminUsersDel(Request $request)
     {
         for ($i = 0; $i < count($request->users); $i++) self::findOrfail($request->users[$i])->delete();
@@ -216,6 +231,7 @@ class User extends Authenticatable implements JWTSubject
         ?string $stripeAccountId = null
     ): bool {
         $user = self::findOrFail($id);
+
         if (!is_null($name)) $user->name = $name;
         if (!is_null($lName)) $user->l_name = $lName;
         if (!is_null($email)) $user->email = $email;
@@ -258,6 +274,7 @@ class User extends Authenticatable implements JWTSubject
         $user->postcode = $postcode;
         $user->lat = $lat;
         $user->lon = $lon;
+
         return $user->save();
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Livewire\Sellers;
+namespace App\Http\Livewire\Common;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
@@ -14,6 +14,7 @@ use App\Services\GoogleMapServices;
 use App\Services\GophrDeliveryServices;
 use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
+use App\Services\UUIDServices;
 use App\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -54,7 +55,10 @@ class OrdersLivewire extends Component
     */
     public function mount(Request $request)
     {
-        $this->sellerId = auth()->id();
+        if (!User::isSuperAdmin()) {
+            $this->sellerId = auth()->id();
+        }
+
         $this->requestOrderId = $request->requestOrderId;
 
         $this->resetAllPaginators();
@@ -154,7 +158,35 @@ class OrdersLivewire extends Component
 
             $parcelDescription = $this->additionalParcelDescription ?? "Please pickup your order ASAP";
 
-            $response = GophrDeliveryServices::createJob($order, $parcelDescription);
+            // $response = GophrDeliveryServices::createJob($order, $parcelDescription);
+            $response = GophrDeliveryServices::createJob(
+                GophrDeliveryServices::prepareJobArray(
+                    externalId: UUIDServices::generateUUID(),
+                    pickupAddress: $order->seller->full_address,
+                    pickupCity: $order->seller->city,
+                    pickupPostcode: $order->seller->postcode,
+                    pickupLat: $order->seller->lat,
+                    pickupLon: $order->seller->lon,
+                    pickupPersonName: $order->seller->name,
+                    pickupMobileNumber: $order->seller->phone,
+                    parcelExternalId: UUIDServices::generateUUID(),
+                    parcelReferenceNumber: 'ORD#' . $order->id,
+                    parcelDescription: $parcelDescription,
+                    width: 0,
+                    length: 0,
+                    height: 0,
+                    weight: 0,
+                    dropoffAddress: $order->address,
+                    dropoffCity: $order->city,
+                    dropoffPostcode: $order->postcode,
+                    dropoffLat: $order->customer_lat,
+                    dropoffLon: $order->customer_lon,
+                    dropoffPersonName: $order->customer_name,
+                    dropoffEmail: $order->buyer->email,
+                    dropoffMobileNumber: $order->country_code . $order->phone_number,
+                    instructions: $order->description ?? 'Standard delivery'
+                )
+            );
 
             if (isset($response->errors)) {
                 Log::error($response->errors);
@@ -404,20 +436,27 @@ class OrdersLivewire extends Component
     public function render()
     {
         try {
-            $data = Orders::getOrdersForView(
-                orderId: $this->isSearchByIdSet(),
-                sellerId: $this->sellerId,
-                orderBy: 'desc',
-            );
+            if (!User::isSuperAdmin()) {
+                $data = Orders::getOrdersForView(
+                    orderId: $this->isSearchByIdSet(),
+                    sellerId: $this->sellerId,
+                    orderBy: 'desc',
+                );
+            } else {
+                $data = Orders::getOrdersForSuperAdminView(
+                    orderId: $this->isSearchByIdSet(),
+                    orderBy: 'desc',
+                );
+            }
 
-            return view('livewire.sellers.orders-livewire', compact('data'));
+            return view('livewire.common.orders-livewire', compact('data'));
         } catch (Exception $error) {
             report($error);
             session()->flash('error', config('constants.SEARCH_FAILED'));
 
             $data = [];
 
-            return view('livewire.sellers.orders-livewire', compact('data'));
+            return view('livewire.common.orders-livewire', compact('data'));
         }
     }
 }
