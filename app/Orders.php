@@ -283,13 +283,13 @@ class Orders extends Model
         * Means if the product has been created by a 'seller' not a 'buyer' 
         * Because only seller products have 'category'
         */
-        // $orders->each(function ($order) {
-        //     $order->order_items->each(function ($orderItem) {
-        //         if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
-        //             $orderItem->product->load('category');
-        //         }
-        //     });
-        // });
+        $orders->each(function ($order) {
+            $order->order_items->each(function ($orderItem) {
+                if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
+                    $orderItem->product->load('category');
+                }
+            });
+        });
 
         return $orders;
     }
