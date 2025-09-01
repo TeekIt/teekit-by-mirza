@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Controllers\Controller;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicleEnum;
@@ -23,7 +24,6 @@ use App\Services\VerificationCodeServices;
 use App\VerificationCodes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -841,18 +841,6 @@ class OrdersController extends Controller
             "",
             config('constants.HTTP_OK')
         );
-    }
-    /**
-     * It will store the estimated time
-     * Of an order provided via id
-     */
-    public function storeEstimatedTime($id)
-    {
-        $order = Orders::findOrFail($id);
-        $order->estimated_time = request()->estimated_time;
-        $order->save();
-
-        return $order->toArray();
     }
     /**
      * It will calculate the total distance between client & store location & then

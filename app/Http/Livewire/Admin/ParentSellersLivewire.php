@@ -53,9 +53,10 @@ class ParentSellersLivewire extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    public function resetModal()
+    public function resetComponent()
     {
         $this->resetAllErrors();
+        
         $this->reset([
             'name',
             'email',

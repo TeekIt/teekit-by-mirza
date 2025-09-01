@@ -30,7 +30,7 @@ class OrderIsCanceledMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Your Order #' . $this->order->id . ' Has Been Cancelled - ' . env('APP_NAME'),
+            subject: 'Your Order #' . $this->order->id . ' Has Been Cancelled - ' . config('app.name'),
         );
     }
 

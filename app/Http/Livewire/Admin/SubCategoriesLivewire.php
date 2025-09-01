@@ -5,7 +5,6 @@ namespace App\Http\Livewire\Admin;
 use App\Categories;
 use App\Models\SubCategory;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Livewire\Component;
 
 class SubCategoriesLivewire extends Component
@@ -27,7 +26,7 @@ class SubCategoriesLivewire extends Component
     /* 
      * Custom Helpers
      */
-    public function resetModal()
+    public function resetComponent()
     {
         $this->resetValidation();
 
@@ -62,7 +61,7 @@ class SubCategoriesLivewire extends Component
             /* Operation finished */
             sleep(1);
             $this->emitSelf('refreshThisComponent');
-            $this->resetModal();
+            $this->resetComponent();
             $this->dispatchBrowserEvent('close-modal', ['id' => 'addSubCategoryModal' . $this->category->id]);
 
             if ($inserted) {

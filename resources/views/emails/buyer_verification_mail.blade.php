@@ -2,7 +2,7 @@
 <b>Dear {{ $buyer->name }},</b>
 
 Congratulations! 🥳<br>
-You have successfully registered on <b>{{ env('APP_NAME') }}</b>. To complete your registration, please verify your account by clicking the button below:
+You have successfully registered on <b>{{ config('app.name') }}</b>. To complete your registration, please verify your account by clicking the button below:
 
 <x-mail::button :url="$accountVerificationLink">
 Verify Now

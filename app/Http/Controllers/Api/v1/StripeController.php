@@ -1,25 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\v1;
 
 use App\Rules\Buyer\BuyerEmail;
 use App\Services\JsonResponseServices;
 use App\Services\StripeServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\Controller;
 
-class StripeContorller extends Controller
+class StripeController extends Controller
 {
-    public function getCheckoutFormForRequestedDelivery(Request $request)
-    {
-        return StripeServices::getSingleChargeCheckoutForm(
-            totalCharge: $request->route('totalCharge'),
-            productName: $request->route('productName'),
-            successUrl: route('seller.requested.deliveries'),
-            cancelUrl: route('seller.request.delivery.form')
-        );
-    }
-
     public function createPaymentIntent(Request $request)
     {
         $validatedData = Validator::make($request->all(), [

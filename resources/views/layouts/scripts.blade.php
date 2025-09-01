@@ -449,48 +449,6 @@
                 });
             }
         }
-
-        const updateStoreInfo = () => {
-            const form = document.forms.namedItem("user_form");
-            const formdata = new FormData(form);
-            $.ajax({
-                url: "{{ route('admin.image.update') }}",
-                type: "post",
-                contentType: false,
-                data: formdata,
-                processData: false,
-                success: function(response) {
-                    if (response == "Data Saved") {
-                        Swal.fire({
-                                title: 'Success!',
-                                text: 'Data has been updated successfully',
-                                icon: 'success',
-                                confirmButtonText: 'Ok'
-                            })
-                            .then(function() {
-                                location.reload();
-                            });
-                    } else {
-                        $('.error').html('');
-                        if (response.errors.name) {
-                            $('.name').html(response.errors.name[0]);
-                        }
-                        if (response.errors.business_name) {
-                            $('.business_name').html(response.errors.business_name[0]);
-                        }
-                        if (response.errors.phone) {
-                            $('.phone').html(response.errors.phone[0]);
-                        }
-                        if (response.errors.business_phone) {
-                            $('.business_phone').html(response.errors.business_phone[0]);
-                        }
-                        if (response.errors.store_image) {
-                            $('.store_image').html(response.errors.store_image[0]);
-                        }
-                    }
-                }
-            });
-        }
     </script>
 
     <script>

@@ -29,7 +29,7 @@ class BuyerVerificationMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Welcome To ' . env('APP_NAME') . '🥳 Please Verify Your Buyer Account',
+            subject: 'Welcome To ' . config('app.name') . '🥳 Please Verify Your Buyer Account',
         );
     }
 

@@ -36,7 +36,7 @@ class GeneralSettingsLivewire extends Component
      /* 
      * Helpers
      */
-    public function resetModal()
+    public function resetComponent()
     {
         $this->resetValidation();
 
@@ -65,7 +65,7 @@ class GeneralSettingsLivewire extends Component
             $filename = ImageServices::uploadLivewireImg($this->image_to_upload, $this->user_id);
             if ($filename) User::updateInfo($this->user_id, userImg: $filename);
             /* Operation finished */
-            $this->resetModal();
+            $this->resetComponent();
             sleep(1);
             if ($filename) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -99,7 +99,7 @@ class GeneralSettingsLivewire extends Component
             if (Hash::check($this->old_password, $user->password)) {
                 $updated = User::updateInfo($user->id, password: $this->new_password);
                 /* Operation finished */
-                $this->resetModal();
+                $this->resetComponent();
                 sleep(1);
                 if ($updated) {
                     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -126,7 +126,7 @@ class GeneralSettingsLivewire extends Component
                 name: $this->name
             );
             /* Operation finished */
-            $this->resetModal();
+            $this->resetComponent();
             sleep(1);
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -150,7 +150,7 @@ class GeneralSettingsLivewire extends Component
                 businessName: $this->business_name
             );
             /* Operation finished */
-            $this->resetModal();
+            $this->resetComponent();
             sleep(1);
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -174,7 +174,7 @@ class GeneralSettingsLivewire extends Component
                 email: $this->email
             );
             /* Operation finished */
-            $this->resetModal();
+            $this->resetComponent();
             sleep(1);
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -198,7 +198,7 @@ class GeneralSettingsLivewire extends Component
                 businessPhone: $this->business_phone
             );
             /* Operation finished */
-            $this->resetModal();
+            $this->resetComponent();
             sleep(1);
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -222,7 +222,7 @@ class GeneralSettingsLivewire extends Component
                 phone: $this->phone
             );
             /* Operation finished */
-            $this->resetModal();
+            $this->resetComponent();
             sleep(1);
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));

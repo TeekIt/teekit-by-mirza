@@ -131,7 +131,6 @@ return [
     */
     'LIVE_WEBSITE_URL' => 'https://teekit.co.uk',
     'LIVE_DASHBOARD_URL' => 'https://app.teekit.co.uk',
-    // 'APIS_DOMAIN_URL' => 'https://teekitstaging.online',
     /*
     |--------------------------------------------------------------------------
     | HTTP Status Codes

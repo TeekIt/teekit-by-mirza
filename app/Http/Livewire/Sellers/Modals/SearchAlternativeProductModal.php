@@ -138,7 +138,7 @@ class SearchAlternativeProductModal extends Component
             /* Operation finished */
             sleep(1);
             $this->emit('alternativeProductIncluded');
-            $this->emit('callParentResetModal');
+            $this->emit('callParentResetComponent');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'searchAlternativeProductModal']);
             
             if ($replacedPrice && $replacedProduct) {

@@ -37,7 +37,7 @@ class CustomResetPasswordNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        return (new MailMessage)->subject('Reset Password Request - ' . env('APP_NAME'))
+        return (new MailMessage)->subject('Reset Password Request - ' . config('app.name'))
             ->markdown('emails.reset_password_mail', [
                 'url' => url('/password/reset/' . $this->token)
             ]);

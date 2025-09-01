@@ -1,175 +1,31 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\v1;
 
-use App\Categories;
+use App\Http\Controllers\Controller;
 use App\Enums\SortByEnum;
-use App\Enums\TransportVehicleEnum;
 use App\Enums\UserRoleEnum;
 use App\Imports\ProductsImport;
-use App\Models\ProductImage;
 use App\Products;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\AddOrUpdateProductRequest;
 use App\User;
 use App\Qty;
 use App\Services\GoogleMapServices;
-use App\Services\ImageServices;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\JsonResponseServices;
-use App\Services\ProductServices;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Excel as ExcelConstants;
 
-class ProductsController extends Controller
+class ProductController extends Controller
 {
-    /**
-     * This will help us to update the qty with the given details
-     * @version 1.0.0
-     */
-    // public function updateQty($product_id, $user_id, $product_quantity)
-    // {
-    //     Qty::updateQty($product_id, $user_id, $product_quantity);
-    // }
-    /**
-     * It will redirect us to add
-     * inventory page
-     * @version 1.0.0
-     */
-    public function addSingleInventoryForm(Request $request)
-    {
-        $categories = Categories::all();
-
-        return view('shopkeeper.inventory.add', compact('categories'));
-    }
-    /**
-     * @author Muhammad Abdullah Mirza
-     */
-    public function addSingleInventory(AddOrUpdateProductRequest $request)
-    {
-        $data = $request->validated();
-
-        if ($request->has('colors')) {
-            $data['colors'] = ProductServices::jsonEncodeColors($data['colors']);
-        }
-
-        $data['bike'] = ($data['vehicle'] == TransportVehicleEnum::BIKE->value) ? 1 : 0;
-        $data['car'] = ($data['vehicle'] == TransportVehicleEnum::CAR->value) ? 1 : 0;
-        $data['van'] = ($data['vehicle'] == TransportVehicleEnum::VAN->value) ? 1 : 0;
-        $data['discount_percentage'] = (!isset($data['discount_percentage'])) ? 0.00 : $data['discount_percentage'];
-        $data['contact'] = '+44' . $data['contact'];
-        $data['seller_id'] = auth()->id();
-        $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
-
-        unset($data['_token']);
-        unset($data['color']);
-        unset($data['gallery']);
-        unset($data['qty']);
-        unset($data['vehicle']);
-
-        $product = Products::add($data);
-
-        Qty::add($data['seller_id'], $product->id, $data['category_id'], $request->safe()->only(['qty'])['qty']);
-
-        if ($request->hasFile('gallery')) {
-            foreach ($request->file('gallery') as $singleImage) {
-                $uniqueId = $data['seller_id'] . $product->id;
-                $fileName = ImageServices::uploadImg(id: $uniqueId, imageFile: $singleImage);
-
-                ProductImage::add($product->id, $fileName);
-            }
-        }
-
-        return redirect()->route('seller.inventory');
-    }
-    /**
-     * @author Muhammad Abdullah Mirza
-     */
-    public function editInventoryView($productId)
-    {
-        $categories = Categories::all();
-
-        $inventory = Products::getProductInfoEvenDisabled(auth()->id(), $productId, ['*']);
-
-        return view('shopkeeper.inventory.edit', compact('inventory', 'categories'));
-    }
-    /**
-     * @author Muhammad Abdullah Mirza
-     */
-    public function updateInventory(AddOrUpdateProductRequest $request, $productId)
-    {
-        $data = $request->validated();
-
-        $data['colors'] = ($request->has('colors')) ? ProductServices::jsonEncodeColors($data['colors']) : null;
-
-        if ($request->hasFile('feature_img')) {
-            $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
-        }
-
-        $data['bike'] = ($data['vehicle'] == TransportVehicleEnum::BIKE->value) ? 1 : 0;
-        $data['car'] = ($data['vehicle'] == TransportVehicleEnum::CAR->value) ? 1 : 0;
-        $data['van'] = ($data['vehicle'] == TransportVehicleEnum::VAN->value) ? 1 : 0;
-        $data['discount_percentage'] = $data['discount_percentage'] ?? 0.00;
-        $data['contact'] = '+44' . $data['contact'];
-        $data['seller_id'] = auth()->id();
-
-        unset($data['_token']);
-        unset($data['color']);
-        unset($data['gallery']);
-        unset($data['qty']);
-        unset($data['vehicle']);
-
-        Qty::updateQty($productId, $data['seller_id'], $request->safe()->only(['qty'])['qty']);
-
-        $product = Products::findOrFail($productId);
-        if (!empty($product)) {
-
-            if ($request->hasFile('gallery')) {
-                foreach ($request->file('gallery') as $image) {
-                    $fileName = ImageServices::uploadImg(id: $productId, imageFile: $image);
-                    ProductImage::add($productId, $fileName);
-                }
-            }
-
-            foreach ($data as $key => $value) {
-                $product->$key = ($key == 'contact') ? '+44' . $value : $value;
-            }
-
-            $updated = $product->save();
-
-            if ($updated) {
-                flash('Inventory updated successfully')->success();
-            }
-        }
-
-        return redirect()->back();
-    }
-
-    public function inventoryAddBulk()
-    {
-        return view('shopkeeper.inventory.add_bulk');
-    }
-    /**
-     * It will delete the product image
-     * @version 1.0.0
-     */
-    public function deleteImg($imageId)
-    {
-        if (ProductImage::deleteById($imageId)) {
-            flash('Image deleted successfully')->success();
-        }
-
-        return redirect()->back();
-    }
     /**
      * Upload's bulk products
      * @author Muhammad Abdullah Mirza
      */
-    public function importProductsAPI(Request $request)
+    public function importProducts(Request $request)
     {
         $validatedData = Validator::make(
             $request->all(),
