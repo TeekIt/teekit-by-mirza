@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Categories;
 use App\Products;
 use App\Qty;
 use App\Services\GoogleMapServices;
 use App\Services\ImageServices;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Services\JsonResponseServices;
 use Illuminate\Support\Facades\Cache;
@@ -43,15 +44,6 @@ class CategoriesController extends Controller
             config('constants.HTTP_OK')
         );
     }
-    
-    public function destroy(Request $request)
-    {
-        for ($i = 0; $i < count($request->categories); $i++) {
-            Categories::where('id', '=', $request->categories[$i])->delete();
-        }
-
-        return response("Categories Deleted Successfully");
-    }
     /**
      * List all categories w.r.t store ID or without store ID
      * @version 1.2.0
@@ -86,7 +78,7 @@ class CategoriesController extends Controller
         * Which will obviouly decrease the API response speed
         */
         $dataIsEmpty = $data->isEmpty();
-        
+
         return JsonResponseServices::getApiResponse(
             ($dataIsEmpty) ? [] : $data,
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
@@ -113,7 +105,7 @@ class CategoriesController extends Controller
         }
 
         $validatedData = (object) $validatedData->validated();
-        
+
         $pagination = Cache::remember(
             'productsByCategory' . $validatedData->categoryId . $validatedData->sellerId . $validatedData->page,
             now()->addDay(),
@@ -134,7 +126,7 @@ class CategoriesController extends Controller
         * Which will obviouly decrease the API response speed
         */
         $dataIsEmpty = empty($data);
-        
+
         return JsonResponseServices::getApiResponseExtention(
             ($dataIsEmpty) ? [] : $data,
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),

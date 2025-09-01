@@ -30,9 +30,10 @@ class DriversLivewire extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    public function resetModal()
+    public function resetComponent()
     {
         $this->resetAllErrors();
+        
         $this->reset([
             'name',
             'l_name',

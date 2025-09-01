@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Enums\UserRoleEnum;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\UsersController;
 use App\Http\Resources\BuyerResource;
-use App\Keys;
 use Illuminate\Support\Facades\Crypt;
 use Jenssegers\Agent\Agent;
 use App\Models\JwtToken;
@@ -18,7 +16,6 @@ use App\User;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -103,32 +100,33 @@ class AuthController extends Controller
 
     public function verify(Request $request)
     {
-        $validate = Validator::make($request->all(), [
-            'token' => 'required'
+        $validatedData = Validator::make($request->all(), [
+            'token' => 'required|string'
         ]);
-        if ($validate->fails()) {
-            echo "Validation error";
-                return;
+        if ($validatedData->fails()) {
+            return response($validatedData->errors()->first(), config('constants.HTTP_INVALID_ARGUMETS'));
         }
-        $verification_token = Crypt::decrypt($request->token);
 
-        $user = User::where('email', $verification_token)->first();
+        $validatedData = (object) $validatedData->validated();
 
-        if ($user) {
-            if ($user->email_verified_at != null) {
-                echo "Account Already verified";
-                return;
-            }
-            $user->email_verified_at = Carbon::now();
-            $user->is_active = 1;
-            $user->save();
+        $verificationToken = Crypt::decrypt($validatedData->token);
+        $user = User::where('email', '=', $verificationToken)->first();
 
-            echo "Account successfully verified";
-            return;
-        } else {
-            echo "Invalid verification token";
-            return;
+        if (!$user) {
+            return response('Invalid verification token', config('constants.HTTP_UNAUTHORIZED'));
         }
+
+        if ($user->email_verified_at != null) {
+            return response('Account already verified', config('constants.HTTP_OK'));
+        }
+
+        $user->email_verified_at = now();
+        $user->is_active = User::ACTIVE;
+        $user->save();
+
+        EmailServices::sendStripeConnectAccMail($user);
+
+        return response('Account successfully verified', config('constants.HTTP_OK'));
     }
     /**
      * It will update the password
@@ -203,7 +201,7 @@ class AuthController extends Controller
         );
     }
     /**
-     * It will Logout the user
+     * It will Logout the buyer
      * (Invalidate the token).
      * @version 1.0.0
      * @return \Illuminate\Http\JsonResponse

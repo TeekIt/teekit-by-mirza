@@ -43,7 +43,7 @@ class OrdersOfUniqueProductsLivewire extends Component
     /* 
      * Helpers
      */
-    public function resetModal()
+    public function resetComponent()
     {
         $this->resetValidation();
 
@@ -56,7 +56,7 @@ class OrdersOfUniqueProductsLivewire extends Component
 
     public function renderAcceptOrderModal($orderId)
     {
-        $this->resetModal();
+        $this->resetComponent();
 
         $this->selectedOrder = Orders::getById($orderId);
 

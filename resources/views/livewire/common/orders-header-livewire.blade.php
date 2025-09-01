@@ -19,7 +19,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Accept Order</h5>
-                    <button type="button" class="close" wire:click="resetModal" aria-label="Close"
+                    <button type="button" class="close" wire:click="resetComponent" aria-label="Close"
                         data-bs-dismiss="modal">
                         <span aria-hidden="true">×</span>
                     </button>
@@ -48,7 +48,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="resetModal"
+                        <button type="button" class="btn btn-secondary" wire:click="resetComponent"
                             data-bs-dismiss="modal">
                             Cancel
                         </button>
@@ -74,7 +74,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Cancel Order</h5>
-                    <button type="button" class="close" wire:click="resetModal" aria-label="Close"
+                    <button type="button" class="close" wire:click="resetComponent" aria-label="Close"
                         data-bs-dismiss="modal">
                         <span aria-hidden="true">×</span>
                     </button>
@@ -90,7 +90,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="resetModal"
+                        <button type="button" class="btn btn-secondary" wire:click="resetComponent"
                             data-bs-dismiss="modal">
                             No
                         </button>
@@ -119,7 +119,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title display-center">Add Custom Order Id</h5>
                         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
-                            wire:click="resetModal">
+                            wire:click="resetComponent">
                             <span>×</span>
                         </button>
                     </div>
@@ -137,7 +137,7 @@
                     </div>
                     <div class="modal-footer hidden">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                            wire:click="resetModal">
+                            wire:click="resetComponent">
                             Close
                         </button>
                         <button type="submit" class="btn btn-warning" wire:target="assignToStuartDriver"
@@ -165,7 +165,7 @@
                     <div class="modal-header">
                         <h5 class="modal-title display-center">Gophr Delivery</h5>
                         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
-                            wire:click="resetModal">
+                            wire:click="resetComponent">
                             <span>×</span>
                         </button>
                     </div>
@@ -183,7 +183,7 @@
                     </div>
                     <div class="modal-footer hidden">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                            wire:click="resetModal">
+                            wire:click="resetComponent">
                             Close
                         </button>
                         <button type="submit" class="btn btn-site-primary" wire:target="assignToGophrDriver"
@@ -208,7 +208,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title display-center">Live Delivery Tracking</h5>
                     <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
-                        wire:click="resetModal">
+                        wire:click="resetComponent">
                         <span>×</span>
                     </button>
                 </div>
@@ -223,7 +223,7 @@
                 </div>
                 <div class="modal-footer hidden">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                        wire:click="resetModal">
+                        wire:click="resetComponent">
                         Close
                     </button>
                 </div>

@@ -44,6 +44,22 @@ class SendCustomProductOrderDetailsToNearBySellersJob implements ShouldQueue
     ) {}
 
     /**
+     * Determine the time at which the job should timeout.
+     */
+    public function retryUntil(): DateTime
+    {
+        return now()->addMinutes(10);
+    }
+
+    /**
+     * Handle a job failure.
+     */
+    public function failed(?Throwable $exception): void
+    {
+        new Exception($exception);
+    }
+
+    /**
      * Execute the job.
      */
     public function handle(): void
@@ -61,21 +77,5 @@ class SendCustomProductOrderDetailsToNearBySellersJob implements ShouldQueue
                 $this->order
             );
         }
-    }
-
-    /**
-     * Determine the time at which the job should timeout.
-     */
-    public function retryUntil(): DateTime
-    {
-        return now()->addMinutes(10);
-    }
-
-    /**
-     * Handle a job failure.
-     */
-    public function failed(?Throwable $exception): void
-    {
-        new Exception($exception);
     }
 }

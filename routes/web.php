@@ -1,18 +1,18 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\Web\v1\CategoriesController;
 use App\Http\Livewire\Admin\ParentSellersLivewire;
 use App\Http\Livewire\Admin\ReferralCodesLivewire;
 use App\Http\Livewire\Sellers\InventoryLivewire;
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Web\v1\HomeController;
 use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\Web\v2\ProductController;
 use App\Http\Controllers\PromoCodesController;
-use App\Http\Controllers\StripeContorller;
-use App\Http\Controllers\Web\StuartDeliveryController;
+use App\Http\Controllers\Web\v2\StripeController;
+use App\Http\Controllers\Web\v1\StuartDeliveryController;
 use App\Http\Controllers\UsersController;
-use App\Http\Controllers\Web\OrdersController;
+use App\Http\Controllers\Web\v1\OrdersController;
 use App\Http\Livewire\Admin\CategoriesLivewire;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
@@ -59,11 +59,10 @@ Route::prefix('settings')->middleware(['auth', 'auth.sellers'])->controller(Home
 });
 /*
 |--------------------------------------------------------------------------
-| Imp/Exp Products Routes
+| Imp Products Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/exportProducts', [ProductsController::class, 'exportProducts'])->name('exportProducts');
-Route::post('/importProducts', [HomeController::class, 'importProducts'])->name('importProducts');
+Route::post('/importProducts', [ProductController::class, 'importProducts'])->name('importProducts');
 /*
 |--------------------------------------------------------------------------
 | Orders Routes
@@ -84,7 +83,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
     Route::prefix('inventory')->group(function () {
         Route::get('/', InventoryLivewire::class)->name('seller.inventory');
 
-        Route::controller(ProductsController::class)->group(function () {
+        Route::controller(ProductController::class)->group(function () {
             Route::get('/add', 'addSingleInventoryForm')->name('seller.add.single.inventory.form');
             Route::post('/add', 'addSingleInventory')->name('seller.add.single.inventory');
             Route::get('/edit/{productId}', 'editInventoryView')->name('seller.edit.inventory.form');
@@ -173,9 +172,12 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
     });
 });
 
-Route::prefix('stripe')->middleware(['auth'])->controller(StripeContorller::class)->group(function () {
+Route::prefix('stripe')->middleware(['auth'])->controller(StripeController::class)->group(function () {
     Route::get('requested_delivery/checkout_charge/{totalCharge}/{productName}', 'getCheckoutFormForRequestedDelivery')
         ->name('stripe.requested.delivery.checkout.form');
+    Route::get('re_generate_connect_account_link', 'regenerateConnectAccountLink')
+        ->withoutMiddleware('auth')
+        ->name('stripe.regenerate.connect.account.link');
 });
 
 Route::prefix('stuart')->controller(StuartDeliveryController::class)->group(function () {
@@ -192,7 +194,4 @@ Route::prefix('promocodes')->controller(PromoCodesController::class)->group(func
 });
 
 Route::get('/mark-complete-order/{id}', [HomeController::class, 'markCompleteOrder'])->name('mark.complete.order');
-
-Route::get('/queries', [HomeController::class, 'adminQueries'])->name('admin.queries');
 Route::get('/users/{user_id}/status/{status}', [HomeController::class, 'changeUserStatus'])->name('change_user_status');
-Route::post('/store_info/update', [HomeController::class, 'updateStoreInfo'])->name('admin.image.update');

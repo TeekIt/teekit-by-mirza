@@ -29,7 +29,7 @@ class SellerApprovedMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Welcome To ' . env('APP_NAME') . '🥳 You Are Approved As a Seller',
+            subject: 'Welcome To ' . config('app.name') . '🥳 You Are Approved As a Seller',
         );
     }
 

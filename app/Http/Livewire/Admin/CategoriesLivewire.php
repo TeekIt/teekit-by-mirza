@@ -22,7 +22,7 @@ class CategoriesLivewire extends Component
     /* 
      * Custom Helpers
      */
-    public function resetModal()
+    public function resetComponent()
     {
         $this->resetValidation();
 
@@ -59,7 +59,7 @@ class CategoriesLivewire extends Component
             );
             /* Operation finished */
             sleep(1);
-            $this->resetModal();
+            $this->resetComponent();
             $this->dispatchBrowserEvent('close-modal', ['id' => 'addCategoryModal']);
 
             if ($inserted) {

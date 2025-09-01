@@ -2,7 +2,11 @@
 
 namespace App\Services;
 
+use App\User;
+use Exception;
+use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Checkout;
+use RuntimeException;
 use stdClass;
 
 final class StripeServices
@@ -38,6 +42,89 @@ final class StripeServices
                 'success_url' => $successUrl,
                 'cancel_url' => $cancelUrl,
             ]
+        );
+    }
+
+    public static function createStandardConnectAccount(User $user): stdClass
+    {
+        $curl = curl_init();
+
+        $formData = [
+            'type' => 'standard',
+            'email' => $user->email,
+            'business_type' => 'company',
+            'company' => [
+                'name' => $user->business_name,
+                'address' => [
+                    'city' => $user->city,
+                    'line1' => $user->full_address,
+                ],
+            ],
+            'capabilities' => [
+                'card_payments' => ['requested' => true],
+                'transfers' => ['requested' => true],
+            ]
+        ];
+
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/accounts');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($formData));
+        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey() . ':');
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $response = json_decode($response);
+
+        if (isset($response->error)) {
+            Log::error(json_encode($response->error));
+            throw new Exception($response->error->message);
+        }
+
+        return $response;
+    }
+
+    public static function createConnectAccountLink(string $accountId, string $refreshUrl, string $returnUrl): stdClass
+    {
+        $curl = curl_init();
+
+        $formData = [
+            'account' => $accountId,
+            'refresh_url' => $refreshUrl,
+            'return_url' => $returnUrl,
+            'type' => 'account_onboarding'
+        ];
+
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/account_links');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
+        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey() . ':');
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+
+        $response = json_decode($response);
+
+        if (isset($response->error)) {
+            Log::error(json_encode($response->error));
+            throw new Exception($response->error->message);
+        }
+
+        return $response;
+    }
+
+    public static function getConnectAccountLink(User $user): stdClass
+    {
+        $response = StripeServices::createStandardConnectAccount($user);
+
+        return StripeServices::createConnectAccountLink(
+            $response->id,
+            config('constants.LIVE_DASHBOARD_URL'),
+            config('constants.LIVE_DASHBOARD_URL')
         );
     }
 

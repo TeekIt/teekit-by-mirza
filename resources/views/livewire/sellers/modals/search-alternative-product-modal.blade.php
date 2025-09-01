@@ -2,7 +2,7 @@
     <div class="alert alert-warning" role="alert">
         <h5>Please Read Carefully!</h5>
         <p>
-            <b>Must call the customer before searching an alternative</b> to know your customer's choice. If you don't call & the customer complains about the alternative product which you have selected by yourself then {{ env('APP_NAME') }} may cancel your whole order with full refund to the customer.
+            <b>Must call the customer before searching an alternative</b> to know your customer's choice. If you don't call & the customer complains about the alternative product which you have selected by yourself then {{ config('app.name') }} may cancel your whole order with full refund to the customer.
         </p>
         <h4>Customer Name: {{ $customerName }}</h4>
         <h4>Customer Contact: {{ $phoneNumber }}</h4>

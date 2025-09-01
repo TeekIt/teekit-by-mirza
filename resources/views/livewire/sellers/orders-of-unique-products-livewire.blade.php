@@ -8,7 +8,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Accept Order</h5>
-                    <button type="button" class="close" wire:click="resetModal" aria-label="Close" data-bs-dismiss="modal">
+                    <button type="button" class="close" wire:click="resetComponent" aria-label="Close" data-bs-dismiss="modal">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
@@ -33,7 +33,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="resetModal" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" wire:click="resetComponent" data-bs-dismiss="modal">
                             Cancel
                         </button>
                         <button type="submit" class="btn btn-site-primary" wire:target="acceptedBySeller" wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary" wire:loading.attr="disabled">
@@ -55,7 +55,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Cancel Order</h5>
-                    <button type="button" class="close" wire:click="resetModal" aria-label="Close" data-bs-dismiss="modal">
+                    <button type="button" class="close" wire:click="resetComponent" aria-label="Close" data-bs-dismiss="modal">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
@@ -70,7 +70,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="resetModal" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" wire:click="resetComponent" data-bs-dismiss="modal">
                             No
                         </button>
                         <button type="submit" class="btn btn-danger" wire:target="cancelOrder" wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger" wire:loading.attr="disabled">

@@ -1,5 +1,5 @@
 <x-mail::message>
-<b>Hello! From {{ env('APP_NAME') }}</b>
+<b>Hello! From {{ config('app.name') }}</b>
 
 You are receiving this email because we heard that you want to reset your password.
 

@@ -8,7 +8,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="infoModelLabel">Customer Information</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetModal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetComponent"></button>
                 </div>
                 <form>
                     <div class="modal-body">
@@ -77,7 +77,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetModal">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetComponent">
                             Close
                         </button>
                     </div>

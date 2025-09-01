@@ -11,7 +11,7 @@
                             <div class="modal-header">
                                 <h5 class="modal-title">Add Sub Category</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                                    wire:click="resetModal"></button>
+                                    wire:click="resetComponent"></button>
                             </div>
                             <div class="row">
                                 <div class="col-12">
@@ -28,7 +28,7 @@
                             </div>
                             <div class="modal-footer hidden">
                                 <button type="button" class="btn btn-secondary rounded-pill px-5 py-2"
-                                    data-bs-dismiss="modal" wire:click="resetModal">
+                                    data-bs-dismiss="modal" wire:click="resetComponent">
                                     Close
                                 </button>
                                 <button type="submit" class="btn site-primary-yellow-bg rounded-pill px-5 py-2"
@@ -59,7 +59,7 @@
                             <div class="modal-header">
                                 <h5 class="modal-title">Edit Category</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                                    wire:click="resetModal"></button>
+                                    wire:click="resetComponent"></button>
                             </div>
                             <div class="col-12 mb-3">
                                 <label>Name</label>
@@ -85,7 +85,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary rounded-pill px-5 py-2"
-                                    data-bs-dismiss="modal" wire:click="resetModal">
+                                    data-bs-dismiss="modal" wire:click="resetComponent">
                                     Close
                                 </button>
                             </div>

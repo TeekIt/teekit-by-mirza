@@ -19,7 +19,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title">Search Alternative Product</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        wire:click="resetModal"></button>
+                        wire:click="resetComponent"></button>
                 </div>
                 <div class="modal-body">
                     @if (empty($orderId) || empty($currentProdId) || empty($currentProdQty) || empty($customerName) || empty($phoneNumber))
@@ -33,7 +33,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
-                        wire:click="resetModal">
+                        wire:click="resetComponent">
                         Cancel
                     </button>
                 </div>
@@ -47,7 +47,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title">Remove This Item From The Order</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        wire:click="resetModal"></button>
+                        wire:click="resetComponent"></button>
                 </div>
                 <div class="modal-body">
                     <div class="text-center">
@@ -69,7 +69,7 @@
                         </span>
                     </button>
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
-                        wire:click="resetModal">
+                        wire:click="resetComponent">
                         Cancel
                     </button>
                 </div>
@@ -83,7 +83,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title">Send This Item To Other Stores</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        wire:click="resetModal"></button>
+                        wire:click="resetComponent"></button>
                 </div>
                 <div class="modal-body">
                     <div class="text-center">
@@ -125,7 +125,7 @@
                         </span>
                     </button>
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
-                        wire:click="resetModal">
+                        wire:click="resetComponent">
                         Cancel
                     </button>
                 </div>
@@ -139,7 +139,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="infoModelLabel">Customer Contact Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        wire:click="resetModal"></button>
+                        wire:click="resetComponent"></button>
                 </div>
                 <div class="modal-body">
                     @if (empty($customerName) || empty($phoneNumber))
@@ -176,7 +176,7 @@
                         </span>
                     </button>
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
-                        wire:click="resetModal">
+                        wire:click="resetComponent">
                         Cancel
                     </button>
                 </div>

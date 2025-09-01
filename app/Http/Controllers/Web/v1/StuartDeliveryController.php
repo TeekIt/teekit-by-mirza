@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Web;
+namespace App\Http\Controllers\Web\v1;
 
 use App\Models\StuartDelivery;
 use App\Orders;
