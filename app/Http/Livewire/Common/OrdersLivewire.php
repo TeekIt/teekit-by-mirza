@@ -84,6 +84,7 @@ class OrdersLivewire extends Component
             'customOrderId',
             'additionalParcelDescription',
             'selectedDeliveryDetails',
+            'requestOrderId',
         ]);
     }
 
@@ -145,172 +146,6 @@ class OrdersLivewire extends Component
     /* 
      * CRUD Methods
      */
-    // public function assignToGophrDriver()
-    // {
-    //     try {
-    //         /* Perform some operation */
-    //         $order = Orders::getById($this->orderId);
-
-    //         $parcelDescription = $this->additionalParcelDescription ?? "Please pickup your order ASAP";
-
-    //         // $response = GophrDeliveryServices::createJob($order, $parcelDescription);
-    //         $response = GophrDeliveryServices::createJob(
-    //             GophrDeliveryServices::prepareJobArray(
-    //                 externalId: UUIDServices::generateUUID(),
-    //                 pickupAddress: $order->seller->full_address,
-    //                 pickupCity: $order->seller->city,
-    //                 pickupPostcode: $order->seller->postcode,
-    //                 pickupLat: $order->seller->lat,
-    //                 pickupLon: $order->seller->lon,
-    //                 pickupPersonName: $order->seller->name,
-    //                 pickupMobileNumber: $order->seller->phone,
-    //                 parcelExternalId: UUIDServices::generateUUID(),
-    //                 parcelReferenceNumber: 'ORD#' . $order->id,
-    //                 parcelDescription: $parcelDescription,
-    //                 width: 0,
-    //                 length: 0,
-    //                 height: 0,
-    //                 weight: 0,
-    //                 dropoffAddress: $order->address,
-    //                 dropoffCity: $order->city,
-    //                 dropoffPostcode: $order->postcode,
-    //                 dropoffLat: $order->customer_lat,
-    //                 dropoffLon: $order->customer_lon,
-    //                 dropoffPersonName: $order->customer_name,
-    //                 dropoffEmail: $order->buyer->email,
-    //                 dropoffMobileNumber: $order->country_code . $order->phone_number,
-    //                 instructions: $order->description ?? 'Standard delivery'
-    //             )
-    //         );
-
-    //         if (isset($response->errors)) {
-    //             Log::error($response->errors);
-
-    //             $this->dispatchBrowserEvent('close-modal', ['id' => 'gophrModal']);
-
-    //             throw new Exception(json_encode($response->errors[0]->message));
-    //         }
-
-    //         GophrDelivery::add(
-    //             (new Orders)->getMorphClass(),
-    //             $this->orderId,
-    //             $response->data->job_id
-    //         );
-
-    //         $updated = Orders::updateOrderStatus($this->orderId, OrderStatusEnum::ON_THE_WAY);
-    //         /* Operation finished */
-    //         sleep(1);
-    //         $this->dispatchBrowserEvent('close-modal', ['id' => 'gophrModal']);
-
-    //         if ($updated && isset($response->data)) {
-    //             session()->flash('success', config('constants.DELIVERY_SUCCESS'));
-    //         } else {
-    //             session()->flash('error', config('constants.DELIVERY_FAILED'));
-    //         }
-    //     } catch (Exception $error) {
-    //         report($error);
-    //         session()->flash('error', $error->getMessage());
-    //     }
-    // }
-
-    // public function assignToStuartDriver()
-    // {
-    //     try {
-    //         /* Perform some operation */
-    //         $stuartMessage = StuartDeliveryServices::createJobForLivewire(
-    //             $this->orderId,
-    //             $this->customOrderId
-    //         );
-    //         /* Operation finished */
-    //         sleep(1);
-    //         $this->dispatchBrowserEvent('close-modal', ['id' => 'stuartModal']);
-
-    //         if ($stuartMessage === 'JobCreated') {
-    //             session()->flash('success', config('constants.STUART_DELIVERY_SUCCESS'));
-    //         } else {
-    //             session()->flash('error', $stuartMessage);
-    //         }
-    //     } catch (Exception $error) {
-    //         report($error);
-    //         session()->flash('error', $error->getMessage());
-    //     }
-    // }
-
-    // public function orderIsAccepted($id)
-    // {
-    //     try {
-    //         /* Perform some operation */
-    //         $order = Orders::isViewed($id);
-
-    //         $updated = Orders::updateOrderStatus($id, OrderStatusEnum::ACCEPTED);
-
-    //         /**
-    //          * Remove bugs related to "sendPickupYourOrderMail()"
-    //          */
-    //         if ($order->type == OrderTypeEnum::SELF_PICKUP->value) {
-    //             EmailServices::sendPickupYourOrderMail($order);
-    //         }
-    //         /* Operation finished */
-    //         sleep(1);
-
-    //         if ($updated) {
-    //             session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-    //         } else {
-    //             session()->flash('error', config('constants.UPDATION_FAILED'));
-    //         }
-    //     } catch (Exception $error) {
-    //         report($error);
-    //         session()->flash('error', $error->getMessage());
-    //     }
-    // }
-
-    // public function orderIsCompleted($id)
-    // {
-    //     try {
-    //         /* Perform some operation */
-    //         $updated = Orders::updateOrderStatus($id, OrderStatusEnum::COMPLETE);
-    //         /* Operation finished */
-    //         sleep(1);
-
-    //         if ($updated) {
-    //             session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-    //         } else {
-    //             session()->flash('error', config('constants.UPDATION_FAILED'));
-    //         }
-    //     } catch (Exception $error) {
-    //         report($error);
-    //         session()->flash('error', $error->getMessage());
-    //     }
-    // }
-
-    // public function cancelOrder($orderId)
-    // {
-    //     try {
-    //         /* Perform some operation */
-    //         $this->selectedOrder = Orders::getById($orderId);
-
-    //         $refunded = StripeServices::refundPaymentIntent($this->selectedOrder->payment_intent_id);
-    //         if (isset($refunded->error)) {
-    //             throw new Exception($refunded->error->message);
-    //         }
-
-    //         $cancelled = Orders::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
-
-    //         EmailServices::sendOrderHasBeenCancelledMail($this->selectedOrder);
-    //         /* Operation finished */
-    //         sleep(1);
-
-    //         if ($cancelled && $refunded->status === PaymentIntentStatusEnum::CANCELED->value) {
-    //             session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
-    //         } else {
-    //             session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
-    //         }
-    //     } catch (Exception $error) {
-    //         report($error);
-    //         session()->flash('error', $error->getMessage());
-    //     }
-    // }
-
     public function sendItemToAnOtherStore()
     {
         $this->validate([
@@ -408,10 +243,6 @@ class OrdersLivewire extends Component
         $this->resetComponent();
 
         $this->resetPage();
-
-        $this->reset([
-            'requestOrderId',
-        ]);
     }
 
     public function isSearchByIdSet()
