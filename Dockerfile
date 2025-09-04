@@ -1,5 +1,9 @@
 FROM php:8.3-fpm
 
+# Arguments defined in docker-compose.yml
+ARG user
+ARG uid
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
 	libfreetype-dev \
@@ -13,27 +17,35 @@ RUN apt-get update && apt-get install -y \
 	libxml2-dev \
 	libpq-dev \
 	libssl-dev \
-	&& docker-php-ext-configure gd --with-freetype --with-jpeg \
+	zip 
+
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 	&& docker-php-ext-install -j$(nproc) gd \
-	zip \
-	pdo \
-	pdo_mysql \
-	mysqli \
-	mbstring \
-	&& apt-get clean && rm -rf /var/lib/apt/lists/*
+	&& docker-php-ext-install bcmath \ 
+	&& docker-php-ext-install pdo pdo_mysql mysqli mbstring exif pcntl gd zip
+	
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
-# Copy local directories to the current local directory of our docker image
-COPY ./ ./
+# Create system user to run Composer and Artisan Commands
+RUN useradd -G www-data,root -u $uid -d /home/$user $user
+RUN mkdir -p /home/$user/.composer && \
+    chown -R $user:$user /home/$user
 
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install PHP dependencies
-RUN composer install --optimize-autoloader
+# Add PHP configuration
+RUN echo "memory_limit=1G" > /usr/local/etc/php/conf.d/memory-limit.ini
+RUN echo "max_execution_time=300" > /usr/local/etc/php/conf.d/max-execution-time.ini
 
-EXPOSE 8000
+WORKDIR /var/www
 
-# Start the app using serve command
-CMD [ "sh", "-c", "php artisan key:generate && php artisan serve --host=0.0.0.0 --port=8000" ]
+# Copy and set permissions for entrypoint script
+COPY docker-compose/entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+USER $user
+
+ENTRYPOINT ["entrypoint.sh"]

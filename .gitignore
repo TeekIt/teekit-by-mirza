@@ -6,6 +6,7 @@
 /public/upload
 /storage/*.key
 /vendor
+/docker-compose/mysql/
 .idea/
 .env
 .phpunit.result.cache
