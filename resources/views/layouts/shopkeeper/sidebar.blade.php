@@ -1,10 +1,10 @@
-<aside class="main-sidebar sidebar-dark-primary" style="overflow: initial;">
+<aside class="main-sidebar sidebar-dark-primary main-sidebar-width" style="overflow: initial;">
     <!-- Brand Logo -->
     <a class="nav-link nav-sidebar-arrow" onclick="jQuery('.navbar-nav>.nav-item>.nav-link').click();"> 
-        <img src="{{ asset('res/res/img/arrow.png') }}">
+        <img src="{{ asset('images/icons/arrow.png') }}">
     </a>
     <a class="brand-link" href="/" style="display:block;opacity: 1">
-        <img alt="AdminLTE Logo" class="brand-image" src="{{ asset('res/res/img/logo.png') }}" style="display: block; opacity: 1">
+        <img alt="{{ config('app.name') }} - Logo" class="brand-image" src="{{ asset('images/logo.png') }}" style="display: block; opacity: 1">
     </a>
 
     <!-- Sidebar -->
@@ -46,20 +46,27 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('seller.orders.of.unique.products') ? 'active' : '' }}" href="{{ route('seller.orders.of.unique.products') }}">
-                        {{-- <i class="nav-icon fas fa-luggage-cart"></i> --}}
                         <i class="nav-icon fas fa-fingerprint"></i>
                         <p class="ml-2">
                             Unique Product Orders
                         </p>
                     </a>
-                </li>
+                </li> --}}
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('seller.withdrawal') ? 'active' : '' }}" href="{{ route('seller.withdrawal') }}">
-                        <i class="nav-icon fas fa-dollar-sign"></i>
+                        <i class="nav-icon fas fa-money-bill-wave"></i>
                         <p class="ml-2">
                             Withdrawals
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('seller.request.delivery.form') ? 'active' : '' }}" href="{{ route('seller.request.delivery.form') }}">
+                        <i class="nav-icon fas fa-truck-loading"></i>
+                        <p class="ml-2">
+                            Request Delivery
                         </p>
                     </a>
                 </li>

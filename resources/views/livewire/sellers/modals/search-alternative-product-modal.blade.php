@@ -2,12 +2,12 @@
     <div class="alert alert-warning" role="alert">
         <h5>Please Read Carefully!</h5>
         <p>
-            <b>Must call the customer before searching an alternative</b> to know your customer's choice. If you don't call & the customer complains about the alternative product which you have selected by yourself then Teekit may cancel your whole order with full refund to the customer.
+            <b>Must call the customer before searching an alternative</b> to know your customer's choice. If you don't call & the customer complains about the alternative product which you have selected by yourself then {{ config('app.name') }} may cancel your whole order with full refund to the customer.
         </p>
-        <h4>Customer Name: {{ $receiver_name }}</h4>
-        <h4>Customer Contact: {{ $phone_number }}</h4>
+        <h4>Customer Name: {{ $customerName }}</h4>
+        <h4>Customer Contact: {{ $phoneNumber }}</h4>
     </div>
-    @if (empty($product_details))
+    @if (empty($productDetails))
         {{-- Search Container --}}
         <div class="row">
             <div class="form-group">
@@ -64,45 +64,45 @@
         <div class="row mt-3">
             <div class="col-md-12 col-lg-2">
                 <span class="img-container">
-                    @if (str_contains($product_details->feature_img, 'https://'))
-                        <img class="d-block m-auto" src="{{ asset($product_details->feature_img) }}">
+                    @if (str_contains($productDetails->feature_img, 'https://'))
+                        <img class="d-block m-auto" src="{{ asset($productDetails->feature_img) }}">
                     @else
-                        <img class="d-block m-auto" src="{{ config('constants.BUCKET') . $product_details->feature_img }}">
+                        <img class="d-block m-auto" src="{{ config('constants.BUCKET') . $productDetails->feature_img }}">
                     @endif
                 </span>
             </div>
             <div class="col-md-12 col-lg-10">
-                <form wire:submit.prevent="addProductIntoOrder({{ $product_details }})" method="POST">
+                <form wire:submit.prevent="addProductIntoOrder({{ $productDetails }})" method="POST">
                     <table class="table">
                         <tr>
                             <td class="text-site-primary"><b>Product Name:</b></td>
-                            <td>{{ $product_details->product_name }}</td>
+                            <td>{{ $productDetails->product_name }}</td>
                         </tr>
                         <tr>
                             <td class="text-site-primary"><b>Category:</b></td>
-                            <td>{{ $product_details->category->category_name }}</td>
+                            <td>{{ $productDetails->category->category_name }}</td>
                         </tr>
                         <tr>
                             <td class="text-site-primary"><b>SKU:</b></td>
-                            <td>{{ $product_details->sku }}</td>
+                            <td>{{ $productDetails->sku }}</td>
                         </tr>
                         <tr>
                             <td class="text-site-primary"><b>Available QTY:</b></td>
-                            <td>{{ $product_details->qty[0]->qty }}</td>
+                            <td>{{ $productDetails->qty[0]->qty }}</td>
                         </tr>
                         <tr>
                             <td class="text-site-primary"><b>Price:</b></td>
-                            <td>£{{ $product_details->price }}</td>
+                            <td>£{{ $productDetails->price }}</td>
                         </tr>
                         <tr>
                             <td class="text-site-primary"><b>QTY you want to add:</b></td>
                             <td>
-                                <input type="number" wire:model.defer="selected_qty" class="col-3 form-control">
+                                <input type="number" wire:model.defer="selectedQty" class="col-3 form-control">
                                 @if (session()->has('qty_should_not_be_greater'))
                                     <p class="text-danger">{{ session()->get('qty_should_not_be_greater') }}</p>
                                 @endif
                                 <small class="text-danger">
-                                    @error('selected_qty')
+                                    @error('selectedQty')
                                         {{ $message }}
                                     @enderror
                                 </small>

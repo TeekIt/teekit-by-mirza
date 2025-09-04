@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Enums\ProductStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,18 +10,28 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use App\Models\ProductImage;
+use Google\Service\AndroidEnterprise\Resource\Users;
+use Illuminate\Database\Eloquent\Collection;
 
 class Qty extends Model
 {
     use HasFactory, SoftDeletes;
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $guarded = [];
 
     protected $table = 'qty';
+
+    protected $fillable = [
+        'seller_id',
+        'product_id',
+        'category_id',
+        'qty',
+    ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */
@@ -41,40 +52,34 @@ class Qty extends Model
 
     public function productImage(): HasMany
     {
-        return $this->hasMany(productImages::class, 'product_id', 'product_id');
+        return $this->hasMany(ProductImage::class, 'product_id', 'product_id');
     }
     /**
      * Helpers
      */
-    // public static function updateProductQty(int $product_id, int $seller_id, int $product_quantity)
-    // {
-    //     if (!empty($seller_id)) {
-    //         self::where('product_id', $product_id)
-    //             ->where('seller_id', $seller_id)
-    //             ->update(['qty' => $product_quantity]);
-    //     } else if (empty($seller_id)) {
-    //         self::where('product_id', $product_id)
-    //             ->decrement(['qty' => $product_quantity]);
-    //     }
-    //     return true;
-    // }
-
-    public static function getTotalProductsCountBySellerId(int $seller_id): int
+    public static function updateQty(int $productId, int $sellerId, int $productQuantity): int
     {
-        return self::where('seller_id', '=', $seller_id)->count();
+        return self::where('product_id', $productId)
+            ->where('seller_id', $sellerId)
+            ->update(['qty' => $productQuantity]);
     }
 
-    public static function syncParentSellerQuantities(int $parent_seller_id, int $child_seller_id): bool
+    public static function getTotalProductsCountBySellerId(int $sellerId): int
+    {
+        return self::where('seller_id', '=', $sellerId)->count();
+    }
+
+    public static function syncParentSellerQuantities(int $parentSellerId, int $childSellerId): bool
     {
         return DB::statement("
-                INSERT INTO `qty` (`seller_id`, `product_id`, `category_id`, `qty`)
-                SELECT $child_seller_id, `product_id`, `category_id`, `qty`
-                FROM `qty`
-                WHERE `seller_id` = $parent_seller_id
-            ");
+            INSERT INTO `qty` (`seller_id`, `product_id`, `category_id`, `qty`)
+            SELECT $childSellerId, `product_id`, `category_id`, `qty`
+            FROM `qty`
+            WHERE `seller_id` = $parentSellerId
+        ");
     }
 
-    public static function getSellersByGivenParams(int $category_id, string $state): object
+    public static function getSellersByGivenParams(int $categoryId, string $state): ?Collection
     {
         return self::select([
             'users.id',
@@ -99,90 +104,17 @@ class Qty extends Model
             ->join('users', 'users.id', '=', 'qty.seller_id')
             ->join('products', 'products.id', '=', 'qty.product_id')
             ->where('qty.qty', '>', 0) // Products should be in stock
-            ->where('qty.category_id', '=', $category_id)
-            ->where('products.status', '=', '1') // Products should be live
-            ->where('users.is_active', '=', 1) // Sellers should be active
+            ->where('qty.category_id', '=', $categoryId)
+            ->where('products.status', '=', ProductStatusEnum::ENABLE) // Products should be live
+            ->where('users.is_active', '=', User::ACTIVE) // Sellers should be active
             ->where('users.state', '=', $state)
             ->distinct() // Use distinct to select only unique stores
             ->get();
     }
 
-    // public static function getProductByGivenIds(int $productId, int $sellerId): array
-    // {
-    //     $productData = self::select('id', 'seller_id', 'product_id', 'category_id', 'qty')
-    //         ->with([
-    //             'product:id,product_name,sku,price,featured,discount_percentage,weight,brand,size,bike,car,van,feature_img,height,width,length',
-    //             'store:id,business_name,business_hours,full_address,country,state,city,lat,lon,user_img',
-    //             'category:id,category_name,category_image',
-    //             'productImage:id,product_id,product_image',
-    //         ])
-    //         ->where('product_id', $productId)
-    //         ->where('seller_id', $sellerId)
-    //         ->get();
-
-    //     if (!$productData->isEmpty()) {
-    //         $productData = $productData->map(function ($singleIndex) {
-    //             return [
-    //                 'id' => $singleIndex->product_id,
-    //                 'seller_id' => $singleIndex->seller_id,
-    //                 'category_id' => $singleIndex->category_id,
-    //                 'product_name' => $singleIndex->product->product_name,
-    //                 'sku' => $singleIndex->product->sku,
-    //                 'price' => $singleIndex->product->price,
-    //                 'featured' => $singleIndex->product->featured,
-    //                 'discount_percentage' => $singleIndex->product->discount_percentage,
-    //                 'weight' => $singleIndex->product->weight,
-    //                 'brand' => $singleIndex->product->brand,
-    //                 'size' => $singleIndex->product->size,
-    //                 'bike' => $singleIndex->product->bike,
-    //                 'car' => $singleIndex->product->car,
-    //                 'van' => $singleIndex->product->van,
-    //                 'feature_img' => $singleIndex->product->feature_img,
-    //                 'height' => $singleIndex->product->height,
-    //                 'width' => $singleIndex->product->width,
-    //                 'length' => $singleIndex->product->length,
-    //                 'store' => [
-    //                     'id' => $singleIndex->seller_id,
-    //                     'business_name' => $singleIndex->store->business_name,
-    //                     'business_hours' => $singleIndex->store->business_hours,
-    //                     'full_address' => $singleIndex->store->full_address,
-    //                     'country' => $singleIndex->store->country,
-    //                     'state' => $singleIndex->store->state,
-    //                     'city' => $singleIndex->store->city,
-    //                     'lat' => $singleIndex->store->lat,
-    //                     'lon' => $singleIndex->store->lon,
-    //                     'user_img' => $singleIndex->store->user_img,
-    //                 ],
-    //                 'qty' => [
-    //                     [
-    //                         'id' => $singleIndex->id,
-    //                         'product_id' => $singleIndex->product_id,
-    //                         'qty' => $singleIndex->qty,
-    //                     ]
-    //                 ],
-    //                 'images' => $singleIndex->productImage->map(function ($singleImage) {
-    //                     return [
-    //                         'id' => $singleImage->id,
-    //                         'product_image' => $singleImage->product_image,
-    //                     ];
-    //                 })->toArray(),
-    //                 'category' => [
-    //                     'id' => $singleIndex->category_id,
-    //                     'category_name' => $singleIndex->category->category_name,
-    //                     'category_image' => $singleIndex->category->category_image,
-    //                 ]
-    //             ];
-    //         });
-
-    //         return ['data' => $productData];
-    //     } else {
-    //         return [];
-    //     }
-    // }
-
     public static function getProductsByGivenIds(int $categoryId, int $sellerId): array
     {
-        $paginated_data = self::select('id', 'seller_id', 'product_id', 'category_id', 'qty')
+        $paginatedData = self::select('id', 'seller_id', 'product_id', 'category_id', 'qty')
             ->with([
                 'product:id,product_name,sku,price,featured,discount_percentage,weight,brand,size,bike,car,van,feature_img,height,width,length',
                 'store:id,business_name,business_hours,full_address,country,state,city,lat,lon,user_img',
@@ -193,8 +125,8 @@ class Qty extends Model
             ->where('seller_id', $sellerId)
             ->paginate(10);
 
-        if (!$paginated_data->isEmpty()) {
-            $products_data = $paginated_data->map(function ($singleIndex) {
+        if (!$paginatedData->isEmpty()) {
+            $productsData = $paginatedData->map(function ($singleIndex) {
                 return [
                     'id' => $singleIndex->product_id,
                     'seller_id' => $singleIndex->seller_id,
@@ -247,28 +179,28 @@ class Qty extends Model
                 ];
             });
 
-            $paginated_data = $paginated_data->toArray();
-            unset($paginated_data['data']);
+            $paginatedData = $paginatedData->toArray();
+            unset($paginatedData['data']);
 
-            return ['data' => $products_data, 'pagination' => $paginated_data];
+            return ['data' => $productsData, 'pagination' => $paginatedData];
         } else {
             return [];
         }
     }
 
-    public static function getChildSellerProducts(int $seller_id): LengthAwarePaginator
+    public static function getChildSellerProducts(int $sellerId): LengthAwarePaginator
     {
-        return self::where('qty.seller_id', $seller_id)
+        return self::where('qty.seller_id', $sellerId)
             ->join('products as prod', 'prod.id', 'qty.product_id')
             ->select('prod.*')
             ->paginate(20);
     }
 
-    public static function subtractProductQty(int $seller_id, int $product_id, int $product_quantity): int
+    public static function subtractProductQty(int $sellerId, int $productId, int $productQuantity): int
     {
-        return self::where('seller_id', $seller_id)
-            ->where('product_id', $product_id)
-            ->decrement('qty', $product_quantity);
+        return self::where('seller_id', $sellerId)
+            ->where('product_id', $productId)
+            ->decrement('qty', $productQuantity);
     }
 
     public static function updateChildProductQty(array $quantity): Qty
@@ -289,11 +221,12 @@ class Qty extends Model
      */
     public static function add(int $sellerId, int $productId, int $categoryId, int $productQuantity): bool
     {
-        $quantity = new Qty();
+        $quantity = new self();
         $quantity->seller_id = $sellerId;
         $quantity->product_id = $productId;
         $quantity->category_id = $categoryId;
         $quantity->qty = $productQuantity;
+
         return $quantity->save();
     }
 }

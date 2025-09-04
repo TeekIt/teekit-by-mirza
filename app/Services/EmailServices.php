@@ -2,146 +2,108 @@
 
 namespace App\Services;
 
-use App\Drivers;
+use App\Enums\UserRoleEnum;
+use App\Mail\BuyerVerificationMail;
+use App\Mail\CustomProductOrderDetailsToNearBySellersMail;
+use App\Mail\NewSellerRegistrationMail;
 use App\Mail\OrderIsCanceledMail;
-use App\Mail\OrderIsReadyMail;
+use App\Mail\OrderIsReadyForPickupMail;
+use App\Mail\RegeneratedStripeConnectAccMail;
+use App\Mail\SellerApprovedMail;
 use App\Mail\StoreRegisterMail;
+use App\Mail\StripeConnectAccMail;
+use App\Mail\StripeConnectedAccMail;
+use App\Models\Driver;
 use App\Models\OrdersFromOtherSeller;
 use App\Orders;
 use App\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
+use Stripe\Stripe;
 
 final class EmailServices
 {
-    public static function getVerificationLink($verification_code)
+    public static function getVerificationLink($verificationCode)
     {
-        return url('/') . '/auth/verify?token=' . $verification_code;
+        return url('/') . '/auth/verify?token=' . $verificationCode;
+    }
+
+    public static function sendRegeneratedStripeConnectAccMail(User $user)
+    {
+        $response = StripeServices::getConnectAccountLink($user);
+
+        Mail::to($user->email)->send(new RegeneratedStripeConnectAccMail($response->url));
+    }
+
+    public static function sendStripeConnectAccMail(User $user)
+    {
+        $response = StripeServices::getConnectAccountLink($user);
+
+        Mail::to($user->email)->send(new StripeConnectAccMail($user, $response->url));
+    }
+
+    public static function sendCustomProductOrderDetailsToNearBySellersMail(array $nearBySellersEmails, Orders $order)
+    {
+        Mail::to($nearBySellersEmails)->send(new CustomProductOrderDetailsToNearBySellersMail($order));
     }
 
     public static function sendBuyerAccVerificationMail(User $user)
     {
-        $verification_code = Crypt::encrypt($user->email);
-        $account_verification_link = self::getVerificationLink($verification_code);
+        $verificationCode = Crypt::encrypt($user->email);
+        $accountVerificationLink = self::getVerificationLink($verificationCode);
 
-        $html = '<html>
-            Congratulations ' . $user->name . '!<br><br>
-            You have successfully registered on ' . env('APP_NAME') . '.
-            <br>
-            There is just one more step to go. Click on the link below to verify your account so you can start purchasing products on TeekIT today!  <br><br>
-                <a href="' . $account_verification_link . '">Verify</a> OR Copy This in your Browser
-                ' . $account_verification_link . '
-            <br><br><br>
-            For more information please visit https://teekit.co.uk/
-            If you have any further inquiries please email "' . env('ADMIN_EMAIL') . '"
-            </html>';
-
-        Mail::send('emails.general', ["html" => $html], function ($message) use ($user) {
-            $message->to($user->email, $user->name)->subject(env('APP_NAME') . ': Account Verification');
-        });
+        Mail::to($user->email)->send(new BuyerVerificationMail($user, $accountVerificationLink));
     }
 
-    public static function sendNewChildStoreMail(User $user, $parent_store)
+    public static function sendNewSellerMail(User $user, UserRoleEnum $sellerType, ?string $parentSeller = null)
     {
-        $verification_code = Crypt::encrypt($user->email);
-        $account_verification_link = self::getVerificationLink($verification_code);
+        $verificationCode = Crypt::encrypt($user->email);
+        $accountVerificationLink = self::getVerificationLink($verificationCode);
 
-        $html = '<html>
-            Hi! Team Teek IT.<br><br>
-            ' .  $parent_store  . ' child store has signed up today.
-            <br>
-           Please verify their details and take your decision to allow or disallow the store on our platform.<br><br>
-           <strong>Store Name:</strong> '  .  $user->business_name   .  '<br>
-           <strong>Owner Name:</strong> '  .  $user->name   .  '<br>
-           <strong>Email:</strong> '  .  $user->email  .  '<br>
-           <strong>Parent Store:</strong> '  .  $parent_store  .  '<br>
-           <strong>Contact:</strong> '  .  $user->business_phone  .  '<br>
-           <strong>Address:</strong> '  .  $user->address_1  .  '
-           <br><br>
-            <a href="' . $account_verification_link . '">Verify</a> OR Copy This in your Browser
-            ' . $account_verification_link . '
-            <br><br><br>
-        </html>';
-
-        $subject = env('APP_NAME') . ': Child Store Account Verification Required';
-
-        Mail::to(config('constants.ADMIN_EMAIL'))->send(new StoreRegisterMail($html, $subject));
-        Mail::to('mirzaabdullahizhar.teekit@gmail.com')->send(new StoreRegisterMail($html, $subject));
+        Mail::to([config('constants.ADMIN_EMAIL'), 'mirzaabdullahizhar.teekit@gmail.com'])->send(
+            new NewSellerRegistrationMail($user, $sellerType, $accountVerificationLink, $parentSeller)
+        );
     }
 
-    public static function sendNewParentStoreMail(User $user)
+    public static function sendDriverAccVerificationMail(Driver $driver)
     {
-        $verification_code = Crypt::encrypt($user->email);
-        $account_verification_link = self::getVerificationLink($verification_code);
+        // $verificationCode = Crypt::encrypt($driver->email);
+        // $accountVerificationLink = self::getVerificationLink($verificationCode);
 
-        $html = '<html>
-            Hi! Team Teek IT.<br><br>
-           A new store signed up today.
-            <br>
-           Please verify their details and take your decision to allow or disallow the store on our platform.<br><br>
-           <strong>Store Name:</strong> '  .  $user->business_name   .  '<br>
-           <strong>Owner Name:</strong> '  .  $user->name   .  '<br>
-           <strong>Email:</strong> '  .  $user->email  .  '<br>
-           <strong>Contact:</strong> '  .  $user->business_phone  .  '<br>
-           <strong>Address:</strong> '  .  $user->address_1  .  '
-           <br><br>
-            <a href="' . $account_verification_link . '">Verify</a> OR Copy This in your Browser
-            ' . $account_verification_link . '
-            <br><br><br>
-        </html>';
+        // $body = '<html>
+        //         Hi, ' . $driver->f_name . '<br><br>
+        //         Thank you for registering on ' . config('app.name') . '.
+        //         <br>
+        //         Here is your account verification link. Click on below link to verify your account. <br><br>
+        //         <a href="' . $accountVerificationLink . '">Verify</a> OR Copy This in your Browser
+        //         ' . $accountVerificationLink . '
+        //         <br><br><br>
+        //         </html>';
 
-        $subject = env('APP_NAME') . ': Parent Store Account Verification Required';
+        // $subject = config('app.name') . ': Account Verification';
 
-        Mail::to(config('constants.ADMIN_EMAIL'))->send(new StoreRegisterMail($html, $subject));
-        Mail::to('mirzaabdullahizhar.teekit@gmail.com')->send(new StoreRegisterMail($html, $subject));
+        // Mail::to($driver->email)->send(new StoreRegisterMail($body, $subject));
     }
 
-    public static function sendDriverAccVerificationMail(Drivers $driver)
+    public static function sendSellerApprovedMail(User $user)
     {
-        $verification_code = Crypt::encrypt($driver->email);
-        $account_verification_link = self::getVerificationLink($verification_code);
-
-        $body = '<html>
-                Hi, ' . $driver->f_name . '<br><br>
-                Thank you for registering on ' . env('APP_NAME') . '.
-                <br>
-                Here is your account verification link. Click on below link to verify your account. <br><br>
-                <a href="' . $account_verification_link . '">Verify</a> OR Copy This in your Browser
-                ' . $account_verification_link . '
-                <br><br><br>
-                </html>';
-
-        $subject = env('APP_NAME') . ': Account Verification';
-
-        Mail::to($driver->email)->send(new StoreRegisterMail($body, $subject));
-    }
-
-    public static function sendStoreApprovedMail(User $user)
-    {
-        $html = '<html>
-                    Hi, ' . $user->name . '<br><br>
-                    Thank you for registering on ' . env('APP_NAME') . '.
-                    <br>
-                    Your store has been approved. Please login to your
-                    <a href="' . url('/') . '">Store</a> to manage it.
-                    <br><br><br>
-                </html>';
-        $subject = url('/') . ': Account Approved!';
-        Mail::to($user->email)->send(new StoreRegisterMail($html, $subject));
+        Mail::to($user->email)->send(new SellerApprovedMail($user));
     }
 
     public static function sendPickupYourOrderMail(Orders $order)
     {
-        Mail::to($order->user->email)->send(new OrderIsReadyMail($order));
+        Mail::to($order->buyer->email)->send(new OrderIsReadyForPickupMail($order, $order->seller));
     }
 
-    public static function sendPickupYourOrderFromOtherSellerMail(OrdersFromOtherSeller $order)
+    public static function sendPickupYourOrderFromOtherSellerMail(OrdersFromOtherSeller $ordersFromOtherSeller)
     {
-        Mail::to($order->customer->email)->send(new OrderIsReadyMail($order));
+        Mail::to($ordersFromOtherSeller->buyer->email)->send(
+            new OrderIsReadyForPickupMail($ordersFromOtherSeller, $ordersFromOtherSeller->seller)
+        );
     }
 
-    public static function sendOrderHasBeenCancelledMail(Orders $order)
+    public static function sendOrderHasBeenCancelledMail(Orders|OrdersFromOtherSeller $order)
     {
-        Mail::to([$order->user->email])->send(new OrderIsCanceledMail($order));
+        Mail::to([$order->buyer->email])->send(new OrderIsCanceledMail($order));
     }
 }

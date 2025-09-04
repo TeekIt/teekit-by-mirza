@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\OrderTypeEnum;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,6 +17,11 @@ class OrdersFromOtherSeller extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['*'];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
     /**
      * Relations
      */
@@ -24,7 +30,7 @@ class OrdersFromOtherSeller extends Model
         return $this->belongsTo(User::class, 'seller_id');
     }
 
-    public function customer(): MorphTo
+    public function buyer(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'created_by_type', 'created_by_id');
     }
@@ -71,6 +77,7 @@ class OrdersFromOtherSeller extends Model
         string $createdByType,
         int $createdById,
         int $sellerId,
+        int $parentOrderId,
         string $productBelongsToType,
         int $productBelongsToId,
         float $productPrice,
@@ -79,14 +86,20 @@ class OrdersFromOtherSeller extends Model
         ?float $customerLat = null,
         ?float $customerLon = null,
         string $receiverName,
+        string $countryCode,
         string $phoneNumber,
         string $address,
-        string $houseNo = null,
-        string $flat = null,
+        ?string $houseNo = null,
+        ?string $flat = null,
+        string $country,
+        string $state,
+        string $city,
+        string $postcode,
+        string $paymentIntentId,
         float $driverCharges = 0.0,
         ?float $deliveryCharges = null,
         ?float $serviceCharges = null,
-        string $device = null,
+        ?string $device = null,
         string $type,
         ?string $description = null,
         string $paymentStatus = "hidden",
@@ -99,23 +112,42 @@ class OrdersFromOtherSeller extends Model
         $model->created_by_type = $createdByType;
         $model->created_by_id = $createdById;
         $model->seller_id = $sellerId;
+        $model->parent_order_id = $parentOrderId;
         $model->product_belongs_to_type = $productBelongsToType;
         $model->product_belongs_to_id = $productBelongsToId;
         $model->product_price = $productPrice;
         $model->product_qty = $productQty;
         $model->initial_total = $initialTotal;
-        if ($type == 'delivery') {
-            $model->customer_lat = $customerLat;
-            $model->customer_lon = $customerLon;
-            $model->customer_name = $receiverName;
-            $model->phone_number = $phoneNumber;
-            $model->address = $address;
-            $model->house_no = $houseNo;
-            $model->flat = $flat;
-            $model->driver_charges = $driverCharges;
-            $model->delivery_charges = $deliveryCharges;
-            $model->service_charges = $serviceCharges;
-        }
+        // if ($type == OrderTypeEnum::DELIVERY->value) {
+        //     $model->customer_lat = $customerLat;
+        //     $model->customer_lon = $customerLon;
+        //     $model->customer_name = $receiverName;
+        //     $model->phone_number = $phoneNumber;
+        //     $model->address = $address;
+        //     $model->house_no = $houseNo;
+        //     $model->flat = $flat;
+        //     $model->driver_charges = $driverCharges;
+        //     $model->delivery_charges = $deliveryCharges;
+        //     $model->service_charges = $serviceCharges;
+        // }
+        $model->customer_lat = $customerLat;
+        $model->customer_lon = $customerLon;
+        $model->customer_name = $receiverName;
+        $model->country_code = $countryCode;
+        $model->phone_number = $phoneNumber;
+        $model->address = $address;
+        $model->house_no = $houseNo;
+        $model->flat = $flat;
+        $model->country = $country;
+        $model->state = $state;
+        $model->city = $city;
+        $model->postcode = $postcode;
+        $model->payment_intent_id = $paymentIntentId;
+
+        $model->driver_charges = $driverCharges;
+        $model->delivery_charges = $deliveryCharges;
+        $model->service_charges = $serviceCharges;
+
         $model->device = $device;
         $model->type = $type;
         $model->description = $description;
@@ -133,7 +165,7 @@ class OrdersFromOtherSeller extends Model
     public static function getById(array $columns = ['*'], int $id): object
     {
         return self::select($columns)
-            ->with(['product', 'seller', 'customer'])
+            ->with(['product', 'buyer', 'seller'])
             ->where('id', '=', $id)
             ->first();
     }

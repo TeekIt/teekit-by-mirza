@@ -1,9 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+:root {
+    --primary-bg: #3a4b83;
+    --primary-yellow: #ffcf42;
+}
+
 body {
     font-family: "Poppins", sans-serif;
     color: #444444;
+    font-weight: 300;
 }
 
-.main-pages-bg-img{
+.text-site-primary {
+    color: var(--primary-bg) !important;
+}
+
+.btn-site-primary {
+    background-color: var(--primary-bg) !important;
+    border: none !important;
+    color: white !important;
+}
+
+.site-primary-bg {
+    background-color: var(--primary-bg) !important;
+}
+
+.site-primary-yellow-bg {
+    background-color: var(--primary-yellow) !important;
+}
+
+.main-pages-bg-img {
     background: url('../images/backgrounds/bg.webp')
 }
 
@@ -16,15 +42,11 @@ table tr:first-of-type td {
 }
 
 [class*=sidebar-dark-] {
-    background-color: #3a4b83;
+    background-color: var(--primary-bg) !important;
 }
 
 [class*=sidebar-dark-] * {
     color: #fff;
-}
-
-.text-primary {
-    color: #3a4b83 !important;
 }
 
 nav.main-header {
@@ -41,7 +63,7 @@ nav.main-header {
 
 .navbar-light .navbar-nav .nav-link,
 nav.main-header a {
-    color: #3a4b83;
+    color: var(--primary-bg) !important;
     font-weight: 600;
 }
 
@@ -62,6 +84,10 @@ nav.main-header a {
 
 .brand-link .brand-image {
     padding-top: 25px;
+}
+
+.main-sidebar-width {
+    width: 250px;
 }
 
 .sidebar-mini.sidebar-collapse .main-sidebar.sidebar-focused .brand-link,
@@ -95,16 +121,6 @@ nav.main-header a {
 
 .content-header h1 {
     font-size: 3.5rem;
-}
-
-.text-site-primary {
-    color: #3a4b83;
-}
-
-.btn-site-primary {
-    background-color: #3a4b83 !important;
-    border: none !important;
-    color: white !important;
 }
 
 .card-body {
@@ -345,7 +361,7 @@ a:hover {
 
 .section-products .single-product .part-2 .product-title {
     font-size: 1rem;
-    color: #3a4b83;
+    color: var(--primary-bg) !important;
 }
 
 .section-products .single-product .part-2 h4 {

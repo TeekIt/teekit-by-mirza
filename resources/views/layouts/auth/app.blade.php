@@ -5,14 +5,37 @@
     @include('layouts.header-links')
 </head>
 
+<style>
+    @media screen and (max-width: 769px) {
+        .cstm-container-sm {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0px 20px;
+        }
+
+        .mobile-login-btn {
+            border: none !important;
+            color: #3663ae !important;
+        }
+    }
+
+    @media screen and (max-width: 450px) {
+        .left-container {
+            display: none;
+        }
+    }
+</style>
+
 <body class="hold-transition main-pages-bg-img">
     <div class="wrapper">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-light bg-white">
             <div class="container">
                 <div class="cstm-container-sm">
-                    <a class="navbar-brand" target="_blank" href="https://teekit.co.uk/">
-                        <img style="max-height: 50px;" src="{{ asset('images/icons/logo.webp') }}" alt="TeekIt Logo">
+                    <a class="navbar-brand" target="_blank" href="{{ config('constants.LIVE_WEBSITE_URL') }}">
+                        <img style="max-height: 50px;" src="{{ asset('images/logo.webp') }}"
+                            alt="{{ config('app.name') }} - Logo">
                     </a>
                     <!-- Toggle Button For Mobiles - Begins -->
                     <button class="navbar-toggler mobile-login-btn" type="button" data-bs-toggle="collapse"
@@ -21,20 +44,23 @@
                         <i class="fas fa-sign-in-alt me-2"></i>
                         Login
                     </button>
+                    <!-- Toggle Button For Mobiles - Ends -->
                 </div>
-                <!-- Toggle Button For Mobiles - Ends -->
-                <div class="collapse navbar-collapse" id="navbarSupportedContent" aria-current="true" role="navigation">
+
+                <div class="collapse navbar-collapse px-3" id="navbarSupportedContent" aria-current="true"
+                    role="navigation">
                     <form class="my-2 my-lg-0 ml-auto w-lg-50" style="min-width: 45vw;" method="POST"
                         action="{{ route('login') }}">
                         <div class="row">
                             <div class="col-md-5 mt-3">
-                                {{ csrf_field() }}
+                                @csrf
                                 <div class="form-group">
                                     <input class="form-control mr-sm-2" type="email" required autocomplete="off"
                                         name="email" placeholder="Email" aria-label="email"
                                         value="{{ old('email') }}">
-                                    <label for="checkauto">
-                                        <input name="remember" id="checkauto" type="checkbox"> Keep me logged in
+                                    <label for="remember">
+                                        <input name="remember" id="remember" type="checkbox">
+                                        <span class="fw-light">keep me logged in</span>
                                     </label>
                                 </div>
                             </div>
@@ -44,7 +70,7 @@
                                         placeholder="Password" name="password" required>
                                     <p>
                                         <a class="text-dark" href="{{ route('password.request') }}">
-                                            Forgot Password?
+                                            forgot password?
                                         </a>
                                     </p>
                                 </div>
@@ -63,17 +89,16 @@
         </nav>
         <!-- /Navbar -->
         <div class="container">
-            @include('flash::message')
-            @if (session('status'))
-                <div class="alert alert-success" role="alert">
-                    {{ session('status') }}
+
+            <x-session-messages />
+
+            <div class="row">
+                <div class="col-md-6 col-lg-7 left-container" style="margin-top: 20vh">
+                    <img src="{{ asset('images/backgrounds/bike.webp') }}"
+                        style="width:100%; max-width: 500px; max-height: 540px; display: block; margin: 0px auto;"
+                        alt="{{ config('app.name') }} - Bike Image">
                 </div>
-            @endif
-            <div class="row mtd" style="margin-top: 20vh">
-                <div class="col-md-6 col-lg-8">
-                    <img src="{{ asset('images/backgrounds/bike.webp') }}" class="bg-img">
-                </div>
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-5" style="margin-top: 11vh">
                     @yield('content')
                 </div>
             </div>
@@ -83,35 +108,5 @@
     <!-- /.content-wrapper -->
     @include('layouts.scripts')
 </body>
-
-<style>
-    .border {
-        border: 1px solid red;
-    }
-
-    .bg-img {
-        max-height: 540px;
-        margin: 0 auto;
-        display: block;
-        max-width: 500px;
-        height: 100%;
-        width: 100%;
-        object-fit: contain;
-    }
-
-    @media screen and (max-width: 769px) {
-        .cstm-container-sm {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0px 20px;
-        }
-
-        .mobile-login-btn {
-            border: none !important;
-            color: #3663ae !important;
-        }
-    }
-</style>
 
 </html>

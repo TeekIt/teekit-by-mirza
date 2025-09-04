@@ -1,8 +1,8 @@
 <?php
 
-// namespace App\Database\Seeders;
+namespace Database\Seeders;
 
-use App\Drivers;
+use App\Models\Driver;
 use Illuminate\Database\Seeder;
 
 class DriverSeeder extends Seeder
@@ -14,6 +14,6 @@ class DriverSeeder extends Seeder
      */
     public function run()
     {
-        Drivers::factory()->count(5)->create();
+        Driver::factory()->count(5)->create();
     }
 }

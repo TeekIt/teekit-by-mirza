@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\ProductStatus;
-use App\Enums\TransportVehicle;
+use App\Enums\ProductStatusEnum;
+use App\Enums\TransportVehicleEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -38,15 +38,16 @@ class AddOrUpdateProductRequest extends FormRequest
             'weight' => 'required|numeric|min:0',
             'status' => [
                 'required',
-                Rule::in(array_column(ProductStatus::cases(), 'value')),
+                Rule::in(array_column(ProductStatusEnum::cases(), 'value')),
             ],
             'contact' => 'required|min:10|max:10',
             'colors' => 'nullable|array',
-            'feature_img' => 'required|image|max:2048',
+            'feature_img' => 'image|max:1024|mimes:jpeg,jpg,png',
             'gallery' => 'nullable|array',
+            'gallery.*' => 'image|max:1024|mimes:jpeg,jpg,png',
             'vehicle' => [
                 'required',
-                Rule::in(array_column(TransportVehicle::cases(), 'value')),
+                Rule::in(array_column(TransportVehicleEnum::cases(), 'value')),
             ],
         ];
     }

@@ -1,14 +1,15 @@
 <div class="p-2">
     <div class="content">
+
         <!-- Content Header (Page header) -->
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
-                    <div class="col-sm-12">
-                        <h1 class="text-dark text-center fs-1">Dashboard</h1>
-                    </div><!-- /.col -->
-                </div><!-- /.row -->
-            </div><!-- /.container-fluid -->
+                    <div class="col-12">
+                        <h4 class="py-4 my-1 text-site-primary">Dashboard</h4>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- /.content-header -->
 
@@ -91,13 +92,15 @@
                                     <div class="col-md-7">
                                         @if (json_decode($seller->settings)->notification_music == 1)
                                             <label class="switch float-right">
-                                                <input type="checkbox" checked onclick="window.location.href='{{ route('change_settings', ['setting_name' => 'notification_music', 'value' => 0]) }}'">
+                                                <input type="checkbox" checked
+                                                    onclick="window.location.href='{{ route('change_settings', ['setting_name' => 'notification_music', 'value' => 0]) }}'">
                                                 <span class="slider round"></span>
                                             </label>
                                             <h3 class="card-title float-right pr-3">Turn Off New Order Music</h3>
                                         @else
                                             <label class="switch float-right">
-                                                <input type="checkbox" onclick="window.location.href='{{ route('change_settings', ['setting_name' => 'notification_music', 'value' => 1]) }}'">
+                                                <input type="checkbox"
+                                                    onclick="window.location.href='{{ route('change_settings', ['setting_name' => 'notification_music', 'value' => 1]) }}'">
                                                 <span class="slider round"></span>
                                             </label>
                                             <h3 class="card-title float-right pr-3">Turn On New Order Music</h3>
@@ -135,7 +138,8 @@
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        <a href="{{ route('seller.orders', ['request_order_id' => $order->id]) }}" class="btn btn-primary">
+                                                        <a href="{{ route('seller.orders', ['requestOrderId' => $order->id]) }}"
+                                                            class="btn btn-primary">
                                                             View
                                                         </a>
                                                     </td>

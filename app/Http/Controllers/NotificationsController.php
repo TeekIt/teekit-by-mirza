@@ -13,16 +13,6 @@ use Throwable;
 
 class NotificationsController extends Controller
 {
-    /**
-     * Returns notification form view
-     * @author Muhammad Abdullah Mirza
-     * @version 1.0.0
-     */
-    public function notificationHome()
-    {
-        return view('admin.notification');
-    }
-
     public function getAccessToken($serviceAccountPath)
     {
         $client = new Client();
@@ -52,7 +42,46 @@ class NotificationsController extends Controller
             throw new Exception('Curl error: ' . curl_error($ch));
         }
         curl_close($ch);
+
         return json_decode($response, true);
+    }
+    /**
+     * It will save/update device token of every user
+     * @author Muhammad Abdullah Mirza
+     * @version 1.0.0
+     */
+    public function saveToken(Request $request)
+    {
+        $validatedData = Validator::make($request->all(), [
+            'user_id' => 'integer',
+            'device_id' => 'required|string',
+            'device_token' => 'required|string'
+        ]);
+        if ($validatedData->fails()) {
+            JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        DeviceToken::addOrUpdate(
+            $request->user_id,
+            $request->device_id,
+            $request->device_token,
+        );
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.TRUE_STATUS'),
+            config('constants.DATA_UPDATED_SUCCESS'),
+            config('constants.HTTP_OK'),
+        );
+    }
+    /**
+     * Returns notification form view
+     * @author Muhammad Abdullah Mirza
+     * @version 1.0.0
+     */
+    public function notificationHome()
+    {
+        return view('admin.notification');
     }
     /**
      * @author Muhammad Abdullah Mirza
@@ -63,10 +92,12 @@ class NotificationsController extends Controller
             'title' => 'required|string',
             'body' => 'required|string',
         ]);
-        if ($validatedData->fails()) return WebResponseServices::getResponseRedirectBack(
-            'error',
-            $validatedData->errors()->first(),
-        );
+        if ($validatedData->fails()) {
+            return WebResponseServices::getResponseRedirectBack(
+                'error',
+                $validatedData->errors()->first(),
+            );
+        }
 
         try {
             /* Path to your service account JSON key file */
@@ -79,7 +110,6 @@ class NotificationsController extends Controller
             $firebaseTokens = DeviceToken::whereNotNull('device_token')->pluck('device_token')->all();
             if (empty($firebaseTokens)) {
                 return back()->with('error', 'No valid device tokens available');
-                // return response()->json(['error' => 'No valid device tokens available'], 400);
             }
 
             $message = [
@@ -104,17 +134,12 @@ class NotificationsController extends Controller
                     }
 
                     return back()->with('error', 'Failed to send notification: ' . $response['error']['message']);
-                    // return response()->json(['error' => 'Failed to send notification: ' . $response['error']['message']], 400);
                 }
             }
 
-            // If successful, return the response
-            return back()->with('success', 'Notification sent successfully');
-            // return response()->json(['success' => 'Notification sent successfully', 'response' => $response]);
-
+            return back()->with('success', 'Notification sent successfully');            
         } catch (Throwable $error) {
             report($error);
-            // return response()->json(['error' => 'Failed to send the notification due to an internal error.'], 500);
             return back()->with('error', 'Failed to send the notification due to some internal error');
         }
     }
@@ -161,44 +186,4 @@ class NotificationsController extends Controller
     //         return back()->with('error', 'Failed to send the notification due to some internal error.');
     //     }
     // }
-
-    /**
-     * It will save/update device token of every user
-     * @author Muhammad Abdullah Mirza
-     * @version 1.0.0
-     */
-    public function saveToken(Request $request)
-    {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'user_id' => 'integer',
-                'device_id' => 'required|string',
-                'device_token' => 'required|string'
-            ]);
-            if ($validatedData->fails()) {
-                JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-            }
-
-            DeviceToken::addOrUpdate(
-                $request->user_id,
-                $request->device_id,
-                $request->device_token,
-            );
-
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.TRUE_STATUS'),
-                config('constants.DATA_UPDATED_SUCCESS'),
-                config('constants.HTTP_OK'),
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR'),
-            );
-        }
-    }
 }

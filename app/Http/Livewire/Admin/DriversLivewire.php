@@ -2,10 +2,10 @@
 
 namespace App\Http\Livewire\Admin;
 
-use App\Drivers;
-use Exception;
+use App\Models\Driver;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Exception;
 
 class DriversLivewire extends Component
 {
@@ -30,9 +30,10 @@ class DriversLivewire extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    public function resetModal()
+    public function resetComponent()
     {
         $this->resetAllErrors();
+        
         $this->reset([
             'name',
             'l_name',
@@ -59,7 +60,7 @@ class DriversLivewire extends Component
 
     public function renderInfoModal($id)
     {
-        $data = Drivers::getUserByID($id);
+        $data = Driver::getUserByID($id);
         $this->name = $data->name;
         $this->l_name = $data->l_name;
         $this->email = $data->email;
@@ -81,7 +82,7 @@ class DriversLivewire extends Component
         try {
             /* Perform some operation */
             $status = ($is_active === 1) ? 0 : 1;
-            $status_cahnged = Drivers::activeOrBlockCustomer($id, $status);
+            $status_cahnged = Driver::activeOrBlockCustomer($id, $status);
             /* Operation finished */
             if ($status_cahnged) {
                 $this->resetPage();
@@ -101,7 +102,7 @@ class DriversLivewire extends Component
 
     public function render()
     {
-        $data = Drivers::getDrivers($this->search);
+        $data = Driver::getDrivers($this->search);
         return view('livewire.admin.drivers-livewire', compact('data'));
     }
 }

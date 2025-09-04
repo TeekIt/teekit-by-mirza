@@ -15,10 +15,19 @@
         <div class="content-wrapper">
             <div class="row">
                 <div class="col-md-12">
-                    @include('flash::message')
+                    
+                    <div class="container pt-4">
+                        {{-- @include('flash::message') --}}
+                    </div>
+
                     @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
+                        <div class="container pt-4">
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <strong>Success!</strong>
+                                {{ session('status') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                    aria-label="Close"></button>
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -33,10 +42,6 @@
             border-top: 0;
         }
 
-        .brand-link {
-            background-color: white;
-        }
-
         [class*=sidebar-dark-] {
             background-color: #3a4b83;
         }
@@ -45,7 +50,7 @@
             color: #fff;
         }
 
-        .text-primary {
+        .text-site-primary {
             color: #3a4b83 !important;
         }
 
@@ -68,6 +73,7 @@
         }
 
         .brand-link {
+            background-color: white;
             min-height: 120px;
         }
 

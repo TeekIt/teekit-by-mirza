@@ -11,6 +11,13 @@ return [
     |
     */
 
+     /*
+    |--------------------------------------------------------------------------
+    | Globally Required 
+    |--------------------------------------------------------------------------
+    */
+    'EXTRA_CHARGE_AMOUNT' => 5.00,
+
     /*
     |--------------------------------------------------------------------------
     | Success Constants
@@ -24,7 +31,7 @@ return [
     'DRIVERS_DELETION_SUCCESS' => 'Drivers deleted successfully',
     'LOGIN_SUCCESS' => 'You have logged in successfully',
     'REGISTER_SUCCESS' => 'You have registered successfully',
-    'DRIVER_REGISTERATION_MSG' => 'You have registered successfully. We have sent you a verification email please verify.',
+    'DRIVER_REGISTERATION_MSG' => 'You have registered successfully. We have sent you a verification email please verify',
     'DATA_INSERTION_SUCCESS' => 'Data inserted successfully',
     'DATA_UPDATED_SUCCESS' => 'Data updated successfully',
     'ORDER_CANCELLATION_SUCCESS' => 'Your order has been cancelled successfully',
@@ -32,10 +39,13 @@ return [
     'SUCCESS_STATUS' => 'success',
     'TRUE_STATUS' => true,
     'STUART_DELIVERY_SUCCESS' => 'Stuart delivery has been initiated successfully, You can please check the status by clicking the "Check Status" button',
+    'DELIVERY_SUCCESS' => 'Your order delivery has been initiated successfully, You can please check the status by clicking the "Track Delivery" button',
     'COMPLETED' => 'Completed',
     'VALID_REFERRAL' => 'Valid referral code',
     'ORDER_ASSIGNED' => 'Assigned',
     'ORDER_UPDATED' => 'Updated',
+    'ORDER_DELIVERED_SUCCESSFULLY' => 'You have successfully delivered your order 🎉',
+    'ORDER_COMPLETED_SUCCESSFULLY' => 'Your order has been completed successfully',
     'VALID_PROMOCODE' => 'You have entered a valid promo code',
     'BANK_DETAILS_UPDATED' => 'Bank Account details are successfully updated',
     'VERIFICATION_SUCCESS' => 'Verification Successful',
@@ -71,6 +81,7 @@ return [
     'ACCOUNT_DEACTIVATED' => 'Your account has been deactivated, Please contact the admin',
     'NO_RECORD' => 'No Record Found',
     'NO_SELLER' => 'No seller found against this id',
+    'NO_NEAR_BY_SELLERS' => 'No nearby sellers found',
     'NO_STORES_FOUND' => 'No stores found in this area',
     'ORDER_CANCELLED' => 'Cancelled',
     'INVALID_PROMOCODE' => 'Invalid promo code',
@@ -86,6 +97,8 @@ return [
     'SENT_TO_OTHER_STORE_FAILED' => 'Due to some error your order cannot be sent to other store',
     'PARENT_QTY_SYNCED_FAILED' => 'Failed to sync quantities',
     'INTERNAL_SERVER_ERROR'=> 'Sorry! This operation has been failed due to some internal server error',
+    'DELIVERY_FAILED' => 'Sorry! Due to some internal error we are failed to initiate your delivery',
+    'SEARCH_FAILED' => 'Sorry! We could not find any results against your search',
     /*
     |--------------------------------------------------------------------------
     | General Messages Constants
@@ -97,7 +110,7 @@ return [
     | Digital Ocean Bucket
     |--------------------------------------------------------------------------
     */
-    'BUCKET' => 'https://user-imgs.sgp1.digitaloceanspaces.com/',
+    'BUCKET' => 'https://teekit-production-bucket.lon1.digitaloceanspaces.com/',
     /*
     |--------------------------------------------------------------------------
     | Admin Email
@@ -106,23 +119,32 @@ return [
     'ADMIN_EMAIL' => 'admin@teekit.co.uk',
     /*
     |--------------------------------------------------------------------------
+    | Head Office Details
+    |--------------------------------------------------------------------------
+    */
+    'HEAD_OFFICE_ADDRESS' => '1 Waldegrave Road, Ealing, W5 3HT',
+    'HEAD_OFFICE_CONTACT' => '+44 0208 998 0315',
+    /*
+    |--------------------------------------------------------------------------
     | Teek it URL's
     |--------------------------------------------------------------------------
     */
+    'LIVE_WEBSITE_URL' => 'https://teekit.co.uk',
     'LIVE_DASHBOARD_URL' => 'https://app.teekit.co.uk',
-    // 'APIS_DOMAIN_URL' => 'https://teekitstaging.online',
     /*
     |--------------------------------------------------------------------------
     | HTTP Status Codes
     |--------------------------------------------------------------------------
     */
     'HTTP_OK' => 200,
-    'HTTP_SERVER_ERROR' => 500,
     'HTTP_INVALID_ARGUMETS' => 400,
+    'HTTP_UNAUTHORIZED' => 401,
     'HTTP_FORBIDDEN' => 403,
+    'HTTP_NOT_FOUND' => 404,
+    'HTTP_PAGE_EXPIRED' => 419,
     'HTTP_UNPROCESSABLE_REQUEST' => 422,
     'HTTP_RESOURCE_EXHAUSTED' => 429,
-    'HTTP_PAGE_EXPIRED' => 419,
+    'HTTP_SERVER_ERROR' => 500,
     'HTTP_SERVICE_UNAVAILABLE' => 503,
     'HTTP_GATEWAY_TIMEOUT' => 504,
 ];

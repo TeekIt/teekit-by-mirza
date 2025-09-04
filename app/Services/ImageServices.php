@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,10 +20,14 @@ final class ImageServices
      * @author Muhammad Abdullah Mirza
      * @return fileName|false 
      */
-    public static function uploadImg(object $request, string $imgKeyName, int $id)
-    {
-        $file = $request->file($imgKeyName);
+    public static function uploadImg(
+        ?Request $request = null,
+        ?string $imgKeyName = null,
+        ?int $id = null,
+        ?object $imageFile = null
+    ): string|bool {
 
+        $file = $imgKeyName ? $request->file($imgKeyName) : $imageFile;
         /* Creating a unique file name */
         $fileName = uniqid($id . '_') . "." . $file->getClientOriginalExtension();
 
@@ -33,7 +38,7 @@ final class ImageServices
         return (Storage::disk('spaces')->exists($fileName)) ? $fileName : false;
     }
 
-    public static function uploadLivewireImg(object $img, int $id)
+    public static function uploadLivewireImg(object $img, ?int $id = null): string|bool
     {
         /* Creating a unique file name */
         $fileName = uniqid($id . '_') . "." . $img->getClientOriginalExtension();

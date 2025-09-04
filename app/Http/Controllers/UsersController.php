@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Drivers;
-use App\Products;
+use App\Enums\UserRoleEnum;
+use App\Models\Driver;
+use App\Pages;
 use App\Services\GoogleMapServices;
 use App\User;
 use Illuminate\Support\Facades\Validator;
@@ -11,12 +12,80 @@ use Throwable;
 use Illuminate\Http\Request;
 use App\Services\JsonResponseServices;
 use App\Services\WebResponseServices;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UsersController extends Controller
 {
+    public function saveStripeAccountId(Request $request)
+    {
+        $validatedData = Validator::make($request->all(), [
+            'email' => [
+                'required',
+                'email',
+                Rule::exists('users', 'email')
+                    ->where(fn(Builder $query) => $query->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
+            ],
+            'stripeAccountId' => 'required|string',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+
+        $validatedData = (object) $validatedData->validated();
+
+        $user = User::getParentOrChildSellerByEmail($validatedData->email, ['id']);
+
+        $updated = User::updateInfo(
+            id: $user->id,
+            stripeAccountId: $validatedData->stripeAccountId
+        );
+
+        if ($updated) {
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.TRUE_STATUS'),
+                config('constants.UPDATION_SUCCESS'),
+                config('constants.HTTP_OK'),
+            );
+        }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.UPDATION_FAILED'),
+            config('constants.HTTP_OK')
+        );
+    }
+
+    /**
+     * Return's admin settings view
+     * @author Muhammad Abdullah Mirza
+     */
+    public function adminSettings()
+    {
+        $pageTypes = ['terms', 'help', 'faq', 'slogan', 'favicon', 'logo'];
+        $pages = Pages::whereIn('page_type', $pageTypes)->get()->keyBy('page_type');
+
+        $terms_page = $pages->get('terms');
+        $help_page = $pages->get('help');
+        $faq_page = $pages->get('faq');
+        $slogan = $pages->get('slogan');
+        $favicon = $pages->get('favicon');
+        $logo = $pages->get('logo');
+
+        return view('admin.settings', compact(
+            'terms_page',
+            'help_page',
+            'faq_page',
+            'slogan',
+            'favicon',
+            'logo'
+        ));
+    }
     /**
      * It will update user details
      * via given id
@@ -93,7 +162,7 @@ class UsersController extends Controller
      */
     public function adminDriversDel(Request $request)
     {
-        Drivers::adminDriversDel($request);
+        Driver::adminDriversDel($request);
 
         return response(config('constants.DRIVERS_DELETION_SUCCESS'));
     }
@@ -134,9 +203,9 @@ class UsersController extends Controller
      * Fetch seller information w.r.t ID
      * @author Muhammad Abdullah Mirza
      */
-    public static function getSellerInfo(object $seller_info, array $map_api_result = null)
+    public static function getSellerInfo(object $seller_info, ?array $map_api_result = null)
     {
-        $data = array(
+        $data = [
             'id' => $seller_info->id,
             'name' => $seller_info->name,
             'email' => $seller_info->email,
@@ -157,11 +226,13 @@ class UsersController extends Controller
             'is_online' => $seller_info->is_online,
             'roles' => ($seller_info->role_id == 2) ? ['sellers'] : ['child_sellers'],
             'stripe_account_id' => $seller_info->stripe_account_id,
-        );
+        ];
+
         if (!empty($map_api_result)) {
             $data['distance'] = $map_api_result['distance'];
             $data['duration'] = $map_api_result['duration'];
         }
+
         return $data;
     }
 
@@ -217,103 +288,37 @@ class UsersController extends Controller
      */
     public function sellers(Request $request)
     {
-        try {
-            $validated_data = Validator::make($request->query(), [
-                'lat' => 'required|numeric|between:-90,90',
-                'lon' => 'required|numeric|between:-180,180',
-                'state' => 'required|string',
-                // 'page' => 'required|numeric',
-            ]);
-            if ($validated_data->fails()) {
-                return JsonResponseServices::getApiValidationFailedResponse($validated_data->errors());
-            }
+        $validatedData = Validator::make($request->query(), [
+            'lat' => 'required|numeric|between:-90,90',
+            'lon' => 'required|numeric|between:-180,180',
+            'city' => 'required|string',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
 
-            $data = Cache::remember('sellers' . $request->state . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
-                $sellers = User::getParentAndChildSellersByState($request->state);
-                // $pagination = $sellers->toArray();
-                // unset($pagination['data']);
-                if (!$sellers->isEmpty()) {
-                    return GoogleMapServices::findDistanceByMakingChunks($request->lat, $request->lon, $sellers, 25);
-                }
-            });
-
-            if (empty($data)) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    config('constants.NO_STORES_FOUND'),
-                    config('constants.HTTP_OK')
+        $data = Cache::remember('sellers' . $request->city . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
+            $sellers = User::getParentAndChildSellersByCity(city: $request->city, numberOfRows: 100);
+            if (!$sellers->isEmpty()) {
+                return GoogleMapServices::findNearByUsersByMakingChunks(
+                    lat: $request->lat,
+                    lon: $request->lon,
+                    users: $sellers
                 );
             }
+        });
 
-            return JsonResponseServices::getApiResponse(
-                $data,
-                config('constants.TRUE_STATUS'),
-                '',
-                config('constants.HTTP_OK'),
-            );
+        /*
+        * Just creating this variable so we don't have to call the "empty()" function again & again
+        * Which will obviouly decrease the API response speed
+        */
+        $dataIsEmpty = empty($data);
 
-            // return JsonResponseServices::getApiResponseExtention(
-            //     $data,
-            //     config('constants.TRUE_STATUS'),
-            //     '',
-            //     'pagination',
-            //     $pagination,
-            //     config('constants.HTTP_OK')
-            // );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
-        }
-    }
-    /**
-     * Search products w.r.t Seller/Store 'id' & Product Name
-     * @author Muhammad Abdullah Mirza
-     * @version 1.4.0
-     */
-    public function searchSellerProducts($seller_id, $product_name)
-    {
-        try {
-            $data = [];
-            $article = Products::search($product_name)
-                ->where('user_id', $seller_id)
-                ->where('status', 1);
-            $products = $article->paginate(20);
-            $pagination = $products->toArray();
-            if (!$products->isEmpty()) {
-                foreach ($products as $product) {
-                    $data[] = Products::getProductInfo($seller_id, $product->id, ['*']);
-                }
-                unset($pagination['data']);
-                return JsonResponseServices::getApiResponseExtention(
-                    $data,
-                    config('constants.TRUE_STATUS'),
-                    '',
-                    'pagination',
-                    $pagination,
-                    config('constants.HTTP_OK')
-                );
-            }
-
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_OK')
-            );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
-        }
+        return JsonResponseServices::getApiResponse(
+            ($dataIsEmpty) ? [] : $data,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_STORES_FOUND') : '',
+            config('constants.HTTP_OK'),
+        );
     }
 }

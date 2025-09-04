@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use App\Services\JsonResponseServices;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
@@ -41,21 +42,14 @@ class Handler extends ExceptionHandler
 
     /**
      * Register the exception handling callbacks for the application.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->reportable(function (Throwable $error) {});
 
-        $this->renderable(function (Throwable $error, $request) {
+        $this->renderable(function (ValidationException $validationException, $request) {
             if ($request->is('api/*')) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    $error,
-                    config('constants.HTTP_SERVER_ERROR')
-                );
+                return JsonResponseServices::getApiValidationFailedResponse($validationException->errors());
             }
         });
 
@@ -66,6 +60,17 @@ class Handler extends ExceptionHandler
                 session()->invalidate();
                 
                 return redirect()->route('home');
+            }
+        });
+
+        $this->renderable(function (Throwable $error, $request) {
+            if ($request->is('api/*')) {
+                return JsonResponseServices::getApiResponse(
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    $error,
+                    config('constants.HTTP_SERVER_ERROR')
+                );
             }
         });
     }

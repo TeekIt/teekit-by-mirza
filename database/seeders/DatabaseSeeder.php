@@ -3,9 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use QtySeeder;
-use DriverDocumentsSeeder;
-use DriverSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,7 +19,8 @@ class DatabaseSeeder extends Seeder
             DriverSeeder::class,
             DriverDocumentsSeeder::class,
             OrdersFromOtherSellerSeeder::class,
-            OrderItemsSeeder::class
+            OrderItemsSeeder::class,
+            GophrDeliverySeeder::class,
         ]);
     }
 }

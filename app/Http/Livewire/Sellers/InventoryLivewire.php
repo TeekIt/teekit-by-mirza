@@ -14,7 +14,7 @@ use Livewire\WithPagination;
 class InventoryLivewire extends Component
 {
     use WithPagination;
-    
+
     public
         $category_id,
         $category,
@@ -26,7 +26,24 @@ class InventoryLivewire extends Component
         $search = '';
 
     protected $paginationTheme = 'bootstrap';
+    /*
+    * Helpers
+    */
+    public function getFeaturedProducts(object $products)
+    {
+        $data = [];
+        foreach ($products as $product) if ($product->featured === 1) array_push($data, $product);
+        
+        return $data;
+    }
 
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+    /*
+    * CRUD Methods
+    */
     public function toggleProduct($id, $status)
     {
         try {
@@ -118,26 +135,15 @@ class InventoryLivewire extends Component
         });
     }
 
-    public function getFeaturedProducts(object $products)
-    {
-        $data = [];
-        foreach ($products as $product) if ($product->featured === 1) array_push($data, $product);
-        return $data;
-    }
-
-    public function updatingSearch()
-    {
-        $this->resetPage();
-    }
-
     public function render()
     {
         $categories = Categories::allCategories(['id', 'category_name']);
-        $featured = [];
+        $featuredProducts = [];
         $this->category_id = ($this->category_id == 0) ? null : $this->category_id;
+
         if (Gate::allows('seller')) {
-            $data = Products::getParentSellerProductsForView(auth()->id(), $this->search, $this->category_id, order_by: 'desc');
-            $featured = $this->getFeaturedProducts($data);
+            $data = Products::getParentSellerProductsForView(auth()->id(), $this->search, $this->category_id, orderBy: 'desc');
+            $featuredProducts = $this->getFeaturedProducts($data);
         } elseif (Gate::allows('child_seller')) {
             /*
             1st scenario when a child store will come he will have parent products with "0" Qty
@@ -146,6 +152,11 @@ class InventoryLivewire extends Component
             $data = Products::getChildSellerProductsForView(auth()->id(), $this->search, $this->category_id);
             $this->quantity = $this->populateQuantityArray($data);
         }
-        return view('livewire.sellers.inventory-livewire', ['data' => $data, 'categories' => $categories, 'featured_products' => $featured]);
+
+        return view('livewire.sellers.inventory-livewire', [
+            'data' => $data,
+            'categories' => $categories,
+            'featuredProducts' => $featuredProducts
+        ]);
     }
 }

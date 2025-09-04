@@ -2,83 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Auth\AuthController;
 use App\Rattings;
+use App\Services\JsonResponseServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Throwable;
 
 class RattingsController extends Controller
 {
-    /**
-     *It will add rating to a specific product    
-     * @version 1.0.0
-     */
+    /** @deprecated This method is deprecated, In case of new requirement we have to re-write this */
     public function add(Request $request)
     {
-        $validate = Rattings::validator($request);
-        if ($validate->fails()) {
-            $response = array('status' => false, 'message' => 'Validation error', 'data' => $validate->messages());
-            return response()->json($response, 400);
+        $validatedData = Rattings::validator($request);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
-        $user_id = Auth::id();
-        $response = [];
+
         $ratting = new Rattings();
-        $ratting->user_id = $user_id;
+        $ratting->user_id = Auth::id();
         $ratting->product_id = $request->get('product_id');
         $ratting->ratting = $request->get('ratting');
         $ratting->save();
+
         return (new ProductsController)->view($request->get('product_id'));
     }
-    /**
-     *It will update rating of a specific product    
-     * @version 1.0.0
-     */
-    public function update(Request $request)
+    
+    public function delete($rattingId)
     {
-        $validate = Rattings::updateValidator($request);
-        if ($validate->fails()) {
-            $response = array('status' => false, 'message' => 'Validation error', 'data' => $validate->messages());
-            return response()->json($response, 400);
+        $ratting = Rattings::find($rattingId);
+
+        if ($ratting) {
+            $ratting->delete();
+
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.TRUE_STATUS'),
+                config('constants.ITEM_DELETED'),
+                config('constants.HTTP_OK')
+            );
         }
-        $user_id = Auth::id();
-        $response = [];
-        $ratting = Rattings::find($request->get('id'));
-        //  $ratting->user_id=$user_id;
-        //  $ratting->product_id=$request->get('product_id');
-        $ratting->ratting = $request->get('ratting');
-        $ratting->save();
-        return (new ProductsController)->view($request->get('product_id'));
-    }
-    /**
-     *It will delete rating of a specific product    
-     * @version 1.0.0
-     */
-    public function delete($ratting_id)
-    {
-        try {
-            $delete_rating =  Rattings::find($ratting_id);
-            if ($delete_rating) {
-                $delete_rating->delete();
-                return response()->json([
-                    'data' => [],
-                    'status' => true,
-                    'message' => config('constants.ITEM_DELETED'),
-                ], 200);
-            } else {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => config('constants.NO_RECORD')
-                ], 200);
-            }
-        } catch (Throwable $error) {
-            report($error);
-            return response()->json([
-                'data' => [],
-                'status' => false,
-                'message' => $error
-            ], 500);
-        }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.TRUE_STATUS'),
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
 }

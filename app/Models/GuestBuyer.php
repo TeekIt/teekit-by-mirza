@@ -30,6 +30,10 @@ class GuestBuyer extends Model
         'lat',
         'lon',
     ];
+
+    protected $hidden = [
+        'deleted_at',
+    ];
     /**
      * Relations
      */

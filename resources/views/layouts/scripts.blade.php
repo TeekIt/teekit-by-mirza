@@ -1,6 +1,6 @@
     <!-- jQuery -->
-    <script src="{{ asset('res/plugins/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('res/dist/js/jquery.timepicker.min.js') }}"></script>
+    <script src="{{ asset('js/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('js/jquery.timepicker.min.js') }}"></script>
     <!-- Bootstrap 5 -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
         integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
@@ -9,7 +9,7 @@
         integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
     </script>
     <!-- AdminLTE App -->
-    <script src="{{ asset('res/dist/js/adminlte.min.js') }}"></script>
+    <script src="{{ asset('js/adminlte.min.js') }}"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <!-- JQuery Multi Selector -->
@@ -17,12 +17,57 @@
     <!-- Sweet Alerts -->
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <!-- Google Maps -->
+    <script
+        src="https://maps.googleapis.com/maps/api/js?libraries=geometry,places&key={{ config('google.GOOGLE_PLACES_API_KEY') }}">
+    </script>
+    <script src="{{ asset('js/custom/CustomGoogleMapsClass.js') }}"></script>
 
     @php
-        $google_map_routes = ['login', 'seller/settings/general'];
+        $googleMapRoutes = [route('seller.settings.general'), route('login')];
     @endphp
-    @if (in_array(Route::current()->uri, $google_map_routes))
-        @include('javascript.google-map-js')
+    @if (in_array(URL::current(), $googleMapRoutes))
+        <script>
+            new CustomGoogleMapsClass({
+                mapCanvasId: 'map-canvas',
+                mapAutoCompleteAddressId: 'modal_address',
+                mapLatId: 'modal_lat',
+                mapLongId: 'modal_long',
+                mapCountryId: 'modal_country',
+                mapStateId: 'modal_state',
+                mapCityId: 'modal_city',
+                mapPostcodeId: 'modal_postcode',
+            }).initialize();
+
+            const submitLocation = () => {
+                document.getElementById("display_location").innerHTML = document.getElementById("modal_address").value;
+                document.getElementById("address").value = document.getElementById("modal_address").value;
+                document.getElementById("unit_address").value = document.getElementById("modal_unit_address").value;
+                document.getElementById("postcode").value = document.getElementById("modal_postcode").value;
+                document.getElementById("country").value = document.getElementById("modal_country").value;
+                document.getElementById("state").value = document.getElementById("modal_state").value;
+                document.getElementById("city").value = document.getElementById("modal_city").value;
+                document.getElementById("address[lat]").value = document.getElementById("modal_lat").value;
+                document.getElementById("address[lon]").value = document.getElementById("modal_long").value;
+
+                $("#closeLocationModel").click();
+            }
+        </script>
+    @endif
+
+    @php
+        $requestDeliveryRoutes = [route('seller.request.delivery.form')];
+    @endphp
+    @if (in_array(URL::current(), $requestDeliveryRoutes))
+        <script>
+            new CustomGoogleMapsClass({
+                mapAutoCompleteAddressId: 'pickupAddress'
+            }).handleAutoComplete();
+
+            new CustomGoogleMapsClass({
+                mapAutoCompleteAddressId: 'dropoffAddress'
+            }).handleAutoComplete();
+        </script>
     @endif
 
     <script !src="">
@@ -66,7 +111,7 @@
                     return permission === "granted";
                 }
 
-                console.log("Please allow notifications for TeeIt :(");
+                console.log("Please allow notifications for TeeIt 🥺");
                 return false;
             }
 
@@ -94,7 +139,7 @@
                     url: "{{ route('seller.orders.count') }}",
                     method: "GET",
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                     },
                     success: (data) => {
                         this.currentOrdersData = data;
@@ -111,7 +156,7 @@
                     url: "{{ route('seller.orders.count') }}",
                     method: "GET",
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                     },
                     success: (newOrdersData) => {
 
@@ -218,28 +263,18 @@
             }
         }
 
-        const checkbox = () => {
-            $("#chkSelect").change(function() {
-                if ($(this).is(":checked")) {
-                    $("#content").show();
-                } else {
-                    $("#content").hide();
-                }
-            });
-        }
-
         const selectAll = () => {
-            var checkboxes = document.querySelectorAll('.select-checkbox');
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = true;
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            for (let i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = !checkboxes[i].checked;
             }
         }
 
         const delUsers = () => {
-            var checkboxes = document.querySelectorAll('.select-checkbox');
-            var users = [];
-            var x = 0;
-            for (var i = 0; i < checkboxes.length; i++) {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const users = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].checked) {
                     users[x] = checkboxes[i].id;
                     x++;
@@ -272,10 +307,10 @@
         }
 
         const delDrivers = () => {
-            var checkboxes = document.querySelectorAll('.select-checkbox');
-            var drivers = [];
-            var x = 0;
-            for (var i = 0; i < checkboxes.length; i++) {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const drivers = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].checked) {
                     drivers[x] = checkboxes[i].id;
                     x++;
@@ -308,10 +343,10 @@
         }
 
         const delOrders = () => {
-            var checkboxes = document.querySelectorAll('.select-checkbox');
-            var orders = [];
-            var x = 0;
-            for (var i = 0; i < checkboxes.length; i++) {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const orders = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].checked) {
                     orders[x] = checkboxes[i].id;
                     x++;
@@ -344,10 +379,10 @@
         }
 
         const delPromoCodes = () => {
-            var checkboxes = document.querySelectorAll('.select-checkbox');
-            var promocodes = [];
-            var x = 0;
-            for (var i = 0; i < checkboxes.length; i++) {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const promocodes = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].checked) {
                     promocodes[x] = checkboxes[i].id;
                     x++;
@@ -379,46 +414,40 @@
             }
         }
 
-        const updateStoreInfo = () => {
-            var form = document.forms.namedItem("user_form");
-            var formdata = new FormData(form);
-            $.ajax({
-                url: "{{ route('admin.image.update') }}",
-                type: "post",
-                contentType: false,
-                data: formdata,
-                processData: false,
-                success: function(response) {
-                    if (response == "Data Saved") {
-                        Swal.fire({
-                                title: 'Success!',
-                                text: 'Data has been updated successfully',
-                                icon: 'success',
-                                confirmButtonText: 'Ok'
-                            })
-                            .then(function() {
-                                location.reload();
-                            });
-                    } else {
-                        $('.error').html('');
-                        if (response.errors.name) {
-                            $('.name').html(response.errors.name[0]);
-                        }
-                        if (response.errors.business_name) {
-                            $('.business_name').html(response.errors.business_name[0]);
-                        }
-                        if (response.errors.phone) {
-                            $('.phone').html(response.errors.phone[0]);
-                        }
-                        if (response.errors.business_phone) {
-                            $('.business_phone').html(response.errors.business_phone[0]);
-                        }
-                        if (response.errors.store_image) {
-                            $('.store_image').html(response.errors.store_image[0]);
-                        }
-                    }
+        const delCategories = () => {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const categories = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    categories[x] = checkboxes[i].id;
+                    x++;
                 }
-            });
+            }
+            if (categories.length != 0) {
+                Swal.fire({
+                    title: 'Warning!',
+                    text: 'Are you sure you want to delete the selected categories?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('admin.categories.del') }}",
+                            type: "get",
+                            data: {
+                                "categories": categories
+                            },
+                            success: function(response) {
+                                if (response == "Categories Deleted Successfully") {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
         }
     </script>
 

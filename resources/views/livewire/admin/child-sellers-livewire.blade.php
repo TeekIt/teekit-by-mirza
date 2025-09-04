@@ -10,7 +10,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="infoModelLabel">Seller Information</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        wire:click="resetModal"></button>
+                        wire:click="resetComponent"></button>
                 </div>
                 <form>
                     <div class="modal-body">
@@ -85,7 +85,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
-                            wire:click="resetModal">
+                            wire:click="resetComponent">
                             Close
                         </button>
                     </div>
@@ -95,7 +95,7 @@
     </div>
     <div class="row">
         <div class="col-12 col-sm-6 col-md-5 col-xl-6">
-            <h4 class="py-4 my-1">Child Sellers</h4>
+            <h4 class="py-4 my-1 text-site-primary">Child Sellers</h4>
         </div>
         <div class="col-12 col-sm-6 col-md-5 col-xl-5">
             <div class="input-group py-4 my-2">
@@ -179,7 +179,7 @@
                     </div>
                 </div>
             @empty
-                <h1 class="text-dark">No Sellers Found :(</h1>
+                <h1 class="text-dark">No Sellers Found 🥺</h1>
             @endforelse
         </div>
         <div class="row">

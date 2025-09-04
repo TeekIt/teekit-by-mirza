@@ -76,12 +76,12 @@
                             <div class="card-body">
                                 <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal{{ $user->id }}"
                                     class="d-block text-right float-right" title="Edit">
-                                    <img class="img-size-16" src="/res/res/img/edit.png">
+                                    <img class="img-size-16" src="/images/edit.png">
                                 </a>
 
                                 <a href="{{ route('delete_cat', ['id' => $user->id]) }}"
                                     class="d-block text-right float-right del-icon" title="Delete">
-                                    <img class="img-size-16" src="/res/res/img/delete.png">
+                                    <img class="img-size-16" src="/images/delete.png">
                                 </a>
 
                                 <div class="card-text">

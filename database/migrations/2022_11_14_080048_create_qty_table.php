@@ -15,9 +15,9 @@ class CreateQtyTable extends Migration
     {
         Schema::create('qty', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained(table:'products')->cascadeOnDelete();
-            $table->foreignId('category_id')->constrained(table:'categories')->cascadeOnDelete();
+            $table->foreignId('seller_id')->constrained(table: 'users')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained(table: 'products')->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained(table: 'categories')->cascadeOnDelete();
             $table->integer('qty');
             $table->timestamps();
             $table->softDeletes();

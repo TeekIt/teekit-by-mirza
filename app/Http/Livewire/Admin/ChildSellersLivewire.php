@@ -33,9 +33,10 @@ class ChildSellersLivewire extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    public function resetModal()
+    public function resetComponent()
     {
         $this->resetAllErrors();
+        
         $this->reset([
             'name',
             'email',
@@ -109,7 +110,7 @@ class ChildSellersLivewire extends Component
         try {
             /* Perform some operation */
             $status = ($is_active === 1) ? 0 : 1;
-            $status_cahnged = User::activeOrBlockStore($id, $status);
+            $status_cahnged = User::activeOrBlockSeller($id, $status);
             /* Operation finished */
             if ($status_cahnged) {
                 $this->resetPage();

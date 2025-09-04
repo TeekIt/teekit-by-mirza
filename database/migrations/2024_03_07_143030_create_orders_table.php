@@ -15,7 +15,6 @@ class CreateOrdersTable extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->bigIncrements('id');
-            // $table->foreignId('customer_id')->constrained(table:'users')->cascadeOnDelete();
             $table->morphs('created_by'); /* This column can either belong to "users" or "guest_buyers" */
             $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
             $table->float('initial_total');
@@ -25,16 +24,21 @@ class CreateOrdersTable extends Migration
             $table->decimal('customer_lon', 11, 8)->nullable();
             $table->string('device', 7)->nullable()->comment('iPhone, Android');
             $table->enum('type', ['delivery', 'self-pickup'])->default('delivery');
-            $table->string('customer_name', 191)->nullable();
-            $table->string('phone_number', 191)->nullable();
-            $table->string('address', 191)->nullable();
-            $table->string('house_no', 191)->nullable();
-            $table->string('flat', 191)->nullable();
+            $table->string('customer_name')->nullable();
+            $table->string('country_code', 4)->nullable();
+            $table->string('phone_number')->nullable();
+            $table->string('address')->nullable();
+            $table->string('house_no')->nullable();
+            $table->string('flat')->nullable();
+            $table->string('country', 70)->nullable();
+            $table->string('state', 70)->nullable();
+            $table->string('city', 70)->nullable();
+            $table->string('postcode', 11)->nullable();
             $table->text('description')->nullable();
             $table->enum('payment_status', ['paid, hidden']);
             $table->enum('order_status', ['pending', 'accepted', 'ready', 'stuartDelivery', 'onTheWay', 'delivered', 'complete', 'cancelled'])->default('pending');
             $table->enum('delivery_status', ['assigned', 'pending_approval', 'complete', 'cancelled'])->nullable();
-            $table->string('payment_intent_id')->nullable();
+            $table->string('payment_intent_id');
             $table->foreignId('driver_id')->nullable()->constrained(table: 'drivers')->cascadeOnDelete();
             $table->double('driver_traveled_km', 8, 2)->default(0.00);
             $table->double('driver_charges', 8, 2)->default(0.00);
@@ -50,7 +54,6 @@ class CreateOrdersTable extends Migration
             /**
              * Indexes
              */
-            $table->index('customer_id');
             $table->index('seller_id');
             $table->index('order_status');
             $table->index('delivery_status');

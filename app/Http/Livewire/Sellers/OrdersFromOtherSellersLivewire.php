@@ -5,7 +5,6 @@ namespace App\Http\Livewire\Sellers;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Models\OrdersFromOtherSeller;
-use App\Orders;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
 use App\Services\StripeServices;
@@ -21,8 +20,7 @@ class OrdersFromOtherSellersLivewire extends Component
         $sellerId,
         $orderId;
 
-    public $orderHoldingMinutes = 2;
-
+    public int $orderHoldingMinutes = 2;
     /* 
     * Lifecycle Hooks
     */
@@ -57,9 +55,9 @@ class OrdersFromOtherSellersLivewire extends Component
                 * Add this function when moving to production/staging
                 * Bcz this function will not work with "faker" generated 
                 * customer lat, lon
-                * $nearby_sellers = GoogleMapServices::findDistanceByMakingChunks($customer_lat, $customer_lon, $sellers_of_same_city, 10);
+                * $nearby_sellers = GoogleMapServices::findNearByUsersByMakingChunks($customer_lat, $customer_lon, $sellers_of_same_city, 10);
                 */
-                return GoogleMapServices::findDistanceByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellers_of_same_city, 10);
+                return GoogleMapServices::findNearByUsersByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellers_of_same_city, 10);
             }
         );
     }
@@ -144,6 +142,7 @@ class OrdersFromOtherSellersLivewire extends Component
         try {
             /* Perform some operation */
             OrdersFromOtherSeller::isViewed($order_from_other_seller['id']);
+
             $updated = OrdersFromOtherSeller::updateOrderStatus(
                 $order_from_other_seller['id'],
                 OrderStatusEnum::ACCEPTED,
@@ -160,22 +159,25 @@ class OrdersFromOtherSellersLivewire extends Component
         }
     }
 
-    public function readyBySeller($order_from_other_seller)
+    public function readyBySeller($orderFromOtherSeller)
     {
         try {
             /* Perform some operation */
             $updated = OrdersFromOtherSeller::updateOrderStatus(
-                $order_from_other_seller['id'],
+                $orderFromOtherSeller['id'],
                 OrderStatusEnum::READY,
             );
-            if ($order_from_other_seller['type'] == OrderTypeEnum::SELF_PICKUP->value) {
-                $order_details = OrdersFromOtherSeller::getById([
+
+            if ($orderFromOtherSeller['type'] == OrderTypeEnum::SELF_PICKUP->value) {
+                $ordersFromOtherSeller = OrdersFromOtherSeller::getById([
                     'id',
-                    'customer_id',
+                    'created_by_type',
+                    'created_by_id',
                     'seller_id',
-                    'product_id'
-                ], $order_from_other_seller['id']);
-                EmailServices::sendPickupYourOrderFromOtherSellerMail($order_details);
+                    'product_belongs_to_type',
+                    'product_belongs_to_id',
+                ], $orderFromOtherSeller['id']);
+                EmailServices::sendPickupYourOrderFromOtherSellerMail($ordersFromOtherSeller);
             }
             /* Operation finished */
             if ($updated) {
@@ -213,32 +215,21 @@ class OrdersFromOtherSellersLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $orderDetails = Orders::getById($orderId);
-            dd('Order cancelled');
-            // dd($orderDetails);
-            // Orders::updateOrderStatus($order['id'], 'cancelled');
-            StripeServices::refundCustomer($orderDetails);
+            $order = OrdersFromOtherSeller::getById(id: $orderId);
 
+            StripeServices::refundCustomer($order);
 
-            $message = "Hello " . $orderDetails->user->name . " .
-            Your order from " . $orderDetails->store->name . " was unsuccessful.
-            Unfortunately " . $orderDetails->store->name . " is unable to complete your order. But don't worry 
-            you have not been charged.
-            If you need any kinda of assistance, please contact us via email at:
-            admin@teekit.co.uk";
+            $cancelled = OrdersFromOtherSeller::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
 
-            // TwilioSmsService::sendSms($orderDetails->user->phone, $message);
-            // EmailServices::sendOrderHasBeenCancelledMail($orderDetails);
-
+            EmailServices::sendOrderHasBeenCancelledMail($order);
             /* Operation finished */
             sleep(1);
-            session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
 
-            // if ($cancelled) {
-            //     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-            // } else {
-            //     session()->flash('error', config('constants.UPDATION_FAILED'));
-            // }
+            if ($cancelled) {
+                session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
+            }
         } catch (Exception $error) {
             report($error);
             session()->flash('error', $error->getMessage());
@@ -278,6 +269,6 @@ class OrdersFromOtherSellersLivewire extends Component
             'desc'
         );
 
-        return view('livewire.sellers.orders-from-other-sellers-livewire', ['data' => $data]);
+        return view('livewire.sellers.orders-from-other-sellers-livewire', compact('data'));
     }
 }

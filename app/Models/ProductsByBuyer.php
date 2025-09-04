@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\TransportVehicle;
+use App\Enums\TransportVehicleEnum;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,6 +35,11 @@ class ProductsByBuyer extends Model
         'height',
         'width',
         'length',
+    ];
+
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
     ];
     /**
      * Relations

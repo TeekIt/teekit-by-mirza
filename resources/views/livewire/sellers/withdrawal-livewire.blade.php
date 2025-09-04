@@ -1,9 +1,10 @@
 <div>
-     
+
     <x-session-messages />
 
     {{-- ************************************ Request Withdrawal Model ************************************ --}}
-    <div class="modal fade" id="requestWithdrawModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="requestWithdrawModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form wire:submit.prevent="withdrawRequest" method="post">
@@ -14,7 +15,8 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <input type="number" class="form-control" placeholder="Enter amount" wire:model.defer="amount" max="{{ auth()->user()->pending_withdraw }}">
+                        <input type="number" class="form-control" placeholder="Enter amount" wire:model.defer="amount"
+                            max="{{ auth()->user()->pending_withdraw }}">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -35,7 +37,8 @@
                                 <div class="col-lg-8 col-sm-12 col-md-8">
                                     <div class="row">
                                         <div class="col-12 col-sm-4">
-                                            <input type="number" wire:model.defer="amount" class="form-control mb-2" placeholder="Search by Amount">
+                                            <input type="number" wire:model.defer="amount" class="form-control mb-2"
+                                                placeholder="Search by Amount">
                                         </div>
                                         <div class="col-12 col-sm-4">
                                             <select wire:model.defer="search" class="form-control mb-2">
@@ -46,24 +49,36 @@
                                             </select>
                                         </div>
                                         <div class="col-12 col-sm-4">
-                                            <input type="date" wire:model.defer="created_at" class="form-control mb-2">
+                                            <input type="date" wire:model.defer="created_at"
+                                                class="form-control mb-2">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-lg-4 col-sm-12 col-md-4 d-flex flex-sm-row">
-                                    <button type="submit" class="btn btn-site-primary p-1 w-100 mx-1" wire:target="search" wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary" wire:loading.attr="disabled" title="Search">
+                                    <button type="submit" class="btn btn-site-primary p-1 w-100 mx-1"
+                                        wire:target="search" wire:loading.class="btn-dark"
+                                        wire:loading.class.remove="btn-site-primary" wire:loading.attr="disabled"
+                                        title="Search">
                                         <span class="fas fa-search" wire:target="search" wire:loading.remove=""></span>
                                         <span wire:target="search" wire:loading="">
-                                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                            <span class="spinner-border spinner-border-sm text-light" role="status"
+                                                aria-hidden="true"></span>
                                         </span>
                                     </button>
-                                    <button type="button" class="btn btn-primary p-1 w-100 mx-1" wire:click="resetThisPage" wire:target="resetThisPage" wire:loading.class="btn-dark" wire:loading.class.remove="btn-primary" wire:loading.attr="disabled" title="Reset Withdrawal Requests">
-                                        <span class="fas fa-sync" wire:target="resetThisPage" wire:loading.remove=""></span>
+                                    <button type="button" class="btn btn-primary p-1 w-100 mx-1"
+                                        wire:click="resetThisPage" wire:target="resetThisPage"
+                                        wire:loading.class="btn-dark" wire:loading.class.remove="btn-primary"
+                                        wire:loading.attr="disabled" title="Reset Withdrawal Requests">
+                                        <span class="fas fa-sync" wire:target="resetThisPage"
+                                            wire:loading.remove=""></span>
                                         <span wire:target="resetThisPage" wire:loading="">
-                                            <span class="spinner-border spinner-border-sm text-light" role="status" aria-hidden="true"></span>
+                                            <span class="spinner-border spinner-border-sm text-light" role="status"
+                                                aria-hidden="true"></span>
                                         </span>
                                     </button>
-                                    <button type="button" class="btn btn-info p-1 w-100 mx-1 text-white" data-bs-toggle="modal" data-bs-target="#requestWithdrawModal" title="Withdrawal">
+                                    <button type="button" class="btn btn-info p-1 w-100 mx-1 text-white"
+                                        data-bs-toggle="modal" data-bs-target="#requestWithdrawModal"
+                                        title="Withdrawal">
                                         <i class="fas fa-hand-holding-usd"></i>
                                     </button>
                                 </div>
@@ -77,7 +92,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-lg-12 col-sm-12 col-md-12">
-                        <h4 class="py-4 my-1">Withdrawal Requests</h4>
+                        <h4 class="py-4 my-1 text-site-primary">Withdrawal Requests</h4>
                     </div>
                 </div><!-- /.row -->
             </div><!-- /.container-fluid -->
@@ -138,18 +153,26 @@
                                         <td>{{ $single_index->id }}</td>
                                         <td>{{ $single_index->amount }}</td>
                                         @if ($single_index->status == 'Completed')
-                                            <td><span class="bg-success py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
+                                            <td><span
+                                                    class="bg-success py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span>
+                                            </td>
                                         @elseif($single_index->status == 'Pending')
-                                            <td><span class="bg-warning py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
+                                            <td><span
+                                                    class="bg-warning py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span>
+                                            </td>
                                         @elseif($single_index->status == 'Cancelled')
-                                            <td><span class="bg-danger py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span></td>
+                                            <td><span
+                                                    class="bg-danger py-1 px-3 rounded-3 text-white text-bold">{{ $single_index->status }}</span>
+                                            </td>
                                         @endif
                                         <td>{{ $single_index->transaction_id }}</td>
                                         <td>{{ $single_index->created_at }}</td>
                                     </tr>
                                 @empty
                                     <td colspan="5">
-                                        No Records Found
+                                        <p class="text-dark text-center p-2 fs-3">
+                                            {{ config('constants.NO_RECORD') }} 🥺
+                                        </p>
                                     </td>
                                 @endforelse
                             </tbody>

@@ -29,57 +29,19 @@ class RunRawQueries extends Command
      */
     public function handle()
     {
-        $executeQueries = true;
+        $executeQueries = false;
 
         try {
             if ($executeQueries) {
                 $this->warn('You are executing raw queries directly into the database');
 
                 DB::transaction(function () {
-                    /* Modification in "orders" table: */
                     
-                    /* * Drop customer_id relation from "orders" table: */
-                    // DB::statement('ALTER TABLE orders DROP FOREIGN KEY orders_customer_id_foreign'); 
+                    /* Above queries are already executed on all ENVs */
                     
-                    /* * Change "customer_id" to "created_by_id" and modify its data type: */
-                    // DB::statement('ALTER TABLE `orders` CHANGE `customer_id` `created_by_id` BIGINT UNSIGNED NOT NULL'); 
-                    
-                    // /* * Add "created_by_type" column: */
-                    // DB::statement('ALTER TABLE `orders` ADD `created_by_type` VARCHAR(191) NOT NULL AFTER `id`'); 
-                    
-                    // /* * Update "created_by_type" column to "User": */
-                    // DB::statement('UPDATE orders SET created_by_type = \'User\'');
+                    /* Above queries are already executed on local ENV */
 
-                    // DB::statement('ALTER TABLE `orders` CHANGE `order_total` `initial_total` DOUBLE(8,2) NOT NULL');
-                    // DB::statement('ALTER TABLE `orders` ADD `current_total` DOUBLE(8,2) NOT NULL AFTER `initial_total`');
-                    // DB::statement('UPDATE `orders` SET `current_total` = `initial_total`');
-                    // DB::statement('ALTER TABLE `orders` ADD `moved_at` TIMESTAMP NULL DEFAULT NULL AFTER `is_viewed`');
-
-                    // DB::statement('ALTER TABLE order_items DROP FOREIGN KEY order_items_product_id_foreign');
-                    // DB::statement('ALTER TABLE `order_items` ADD `product_belongs_to_type` VARCHAR(191) NOT NULL AFTER `order_id`');
-                    // DB::statement('ALTER TABLE `order_items` CHANGE `product_id` `product_belongs_to_id` DOUBLE(8,2) NOT NULL');
-                    // DB::statement('UPDATE order_items SET product_belongs_to_type = \'Product\'');
-
-                    // DB::statement('ALTER TABLE `orders_from_other_sellers` DROP `total_items`');
-                    // DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `driver_id` `driver_id` BIGINT UNSIGNED NULL DEFAULT NULL');
-                    // DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `moved_at` TIMESTAMP NOT NULL AFTER times_rejected');
-
-                    /* Above queries are already executed on Staging ENV */
-                    
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `product_belongs_to_type` VARCHAR(191) NOT NULL AFTER `parent_order_id`');
-                    DB::statement('UPDATE `orders_from_other_sellers` SET `product_belongs_to_type` = \'Product\'');
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` DROP FOREIGN KEY orders_from_other_sellers_product_id_foreign');
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `product_id` `product_belongs_to_id` BIGINT UNSIGNED NOT NULL');
-
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` DROP FOREIGN KEY orders_from_other_sellers_customer_id_foreign'); 
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `customer_id` `created_by_id` BIGINT UNSIGNED NOT NULL'); 
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` ADD `created_by_type` VARCHAR(191) NOT NULL AFTER `id`'); 
-                    DB::statement('UPDATE `orders_from_other_sellers` SET created_by_type = \'User\'');
-
-                    DB::statement('ALTER TABLE `orders_from_other_sellers` CHANGE `order_total` `initial_total` DOUBLE(8,2) NOT NULL');
                 });
-
-                $this->info('All raw queries are executed successfully');
             }
         } catch (Exception $error) {
             report($error);

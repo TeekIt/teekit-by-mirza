@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
+use App\Services\JsonResponseServices;
 use App\WithdrawalRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,23 +15,17 @@ class WithdrawalRequestsController extends Controller
      */
     public function sendRequest(Request $request)
     {
-        $user_id = Auth::id();
+        $user = auth()->user();
 
-        $user = User::query()->find($user_id);
-        $status = "Pending";
-        $bank_detail = $request->bank_detail;
-        $amount = $user->wallet;
+        WithdrawalRequests::create([
+            'user_id' => $user->id,
+            'amount' => $user->wallet,
+            'bank_detail' => $request->bank_detail,
+            'status' => 'Pending'
+        ]);
 
+        $user->update(['wallet' => 0.0]);
 
-        $withdrawal = new WithdrawalRequests();
-        $withdrawal->user_id = $user_id;
-        $withdrawal->amount = $amount;
-        $withdrawal->bank_detail = $bank_detail;
-        $withdrawal->status = $status;
-        $withdrawal->save();
-
-        $user->wallet = 0.0;
-        $user->save();
         return $this->getRequests();
     }
     /**
@@ -40,14 +34,11 @@ class WithdrawalRequestsController extends Controller
      */
     public function getRequests()
     {
-        $user_id = Auth::id();
-        $return_data = WithdrawalRequests::query()->where('user_id', '=', $user_id)->get();
-        $user_arr = [
-            'data' => $return_data,
-            'status' => true,
-            'message' => ''
-
-        ];
-        return response()->json($user_arr);
+        return JsonResponseServices::getApiResponse(
+            WithdrawalRequests::getWithdrawalResquests(Auth::id()),
+            config('constants.TRUE_STATUS'),
+            '',
+            config('constants.HTTP_OK')
+        );
     }
 }

@@ -1,18 +1,33 @@
 @extends('layouts.admin.app')
 @section('content')
-
     <div class="content">
+
         <!-- Content Header (Page header) -->
         <div class="content-header">
             <div class="container-fluid">
                 <div class="row mb-2">
-                    <div class="col-sm-12">
-                        <h1 class="text-dark text-center fs-1">Promo Codes</h1>
-                    </div><!-- /.col -->
-                </div><!-- /.row -->
-            </div><!-- /.container-fluid -->
+                    <div class="col-12 col-sm-6 col-md-7 col-xl-9">
+                        <h4 class="py-4 my-1 text-site-primary">Promo Codes</h4>
+                    </div>
+                    <div class="col-12 col-md-5 col-xl-3 d-flex gap-2">
+                        <button type="button" class="btn btn-success my-3 py-3 w-100" onclick="selectAll()"
+                            title="Select All">
+                            <span class="text-white">All</span>
+                        </button>
+                        <button type="button" class="btn btn-danger my-3 py-3 w-100" onclick="delPromoCodes()"
+                            title="Delete Selected">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <button data-bs-toggle="modal" data-bs-target="#add_promocodeModal"
+                            class="btn btn-site-primary my-3 py-3 w-100" title="Add New">
+                            <span class="fas fa-plus"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- /.content-header -->
+
         <!-- Main content -->
         <div class="content">
             <div class="container-fluid">
@@ -28,8 +43,9 @@
                                         enctype="multipart/form-data">
                                         {{ csrf_field() }}
                                         <div class="modal-header">
-                                            <h5 class="modal-title display-center" id="exampleModalLabel">Promo code</h5>
-                                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                            <h5 class="modal-title display-center" id="exampleModalLabel">Edit</h5>
+                                            <button type="button" class="close" data-bs-dismiss="modal"
+                                                aria-label="Close">
                                                 <span aria-hidden="true">×</span>
                                             </button>
                                         </div>
@@ -119,10 +135,15 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="modal-footer hidden ">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                        <div class="modal-footer hidden">
+                                            <button type="button" class="btn btn-secondary rounded-pill px-5 py-2"
+                                                data-bs-dismiss="modal">
+                                                Close
+                                            </button>
+                                            <button type="submit"
+                                                class="btn site-primary-yellow-bg rounded-pill px-5 py-2">
+                                                Update
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -130,6 +151,7 @@
                         </div>
                     @endforeach
                     <!-- modal end -->
+
                     <!-- Add form modal starts -->
                     <div class="modal fade" id="add_promocodeModal" tabindex="-1" role="dialog"
                         aria-labelledby="add_promocodeModalLabel" style="display: none;" aria-hidden="true">
@@ -219,11 +241,14 @@
                                                 </div>
                                                 <div class="modal-footer hidden ">
                                                     <button type="button"
-                                                        class="pl-5 pr-5 pt-2 pb-2 border-0 btn btn-secondary rounded-pill"
-                                                        data-bs-dismiss="modal">Close</button>
-                                                    <button style="background: #ffcf42;color:black;font-weight: 600"
-                                                        class="pl-5 pr-5 pt-2 pb-2 border-0 btn btn-secondary rounded-pill"
-                                                        type="submit">Add</button>
+                                                        class="btn btn-secondary rounded-pill px-5 py-2"
+                                                        data-bs-dismiss="modal">
+                                                        Close
+                                                    </button>
+                                                    <button class="btn site-primary-yellow-bg rounded-pill px-5 py-2"
+                                                        type="submit">
+                                                        Add
+                                                    </button>
                                                 </div>
                                             </div>
                                         </form>
@@ -233,19 +258,7 @@
                         </div>
                     </div>
                     <!-- Add form modal ends -->
-                    <div class="container">
-                        <button type="button" class="mx-1 d-block text-right float-right btn btn-success"
-                            onclick="selectAll()">
-                            <a class="text-white">Select All</a>
-                        </button>
-                        <button type="button" class="mx-1 d-block text-right float-right btn btn-danger"
-                            onclick="delPromoCodes()">
-                            <a class="text-white">Delete</a>
-                        </button>
-                        <a href="" data-bs-toggle="modal" data-bs-target="#add_promocodeModal"
-                            class="mx-1 d-block text-right float-right btn btn-primary">Add Promo
-                            Code</a>
-                    </div>
+
                     <div class="col-md-12">
                         <div class="row">
                             <div class="col-md-12">
@@ -262,7 +275,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($promo_codes as $promo_code)
+                                        @forelse ($promo_codes as $promo_code)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>
@@ -278,13 +291,20 @@
                                                 <td>{{ $promo_code->order_number }}</td>
                                                 <td>{{ $promo_code->expiry_dt }}</td>
                                                 <td>
-                                                    <a href="" data-bs-toggle="modal" data-bs-target="#promo_codeModal{{ $promo_code->id }}"
-                            class="mx-1 d-block text-right float-right btn btn-primary">Edit Promo
-                            Code</a>
-                                                   
+                                                    <button data-bs-toggle="modal"
+                                                        data-bs-target="#promo_codeModal{{ $promo_code->id }}"
+                                                        class="btn text-site-primary">
+                                                        <i class="far fa-edit"></i>
+                                                    </button>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="text-center">
+                                                    {{ config('constants.NO_RECORD') }}
+                                                </td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                                 <div class="d-flex justify-content-center" style="padding-top: 10px;">
