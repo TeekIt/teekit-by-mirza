@@ -1,8 +1,7 @@
 #!/bin/bash
-set -e
 
 # Wait for the container to fully start
-sleep 10
+sleep 1
 
 #################################################################
 # Begin - Commands to run only once when the container is build
