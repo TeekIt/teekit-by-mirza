@@ -146,7 +146,7 @@ class CategoriesController extends Controller
             'categoryId' => 'required|integer',
             'lat' => 'required|numeric|between:-90,90',
             'lon' => 'required|numeric|between:-180,180',
-            'state' => 'required|string',
+            'city' => 'required|string',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -154,20 +154,26 @@ class CategoriesController extends Controller
 
         $validatedData = (object) $validatedData->validated();
 
-        $sellers = Cache::remember(
+        $data = Cache::remember(
             'get-sellers-by-category' . $validatedData->categoryId . $validatedData->lat . $validatedData->lon,
             now()->addDay(),
             function () use ($validatedData) {
-                return Qty::getSellersByGivenParams($validatedData->categoryId, $validatedData->state);
+                $sellers = Qty::getSellersByGivenParams($validatedData->categoryId, $validatedData->city);
+
+                return GoogleMapServices::findNearByUsersByMakingChunks(
+                    $validatedData->lat,
+                    $validatedData->lon,
+                    $sellers,
+                    25
+                );
             }
         );
-
-        $data = GoogleMapServices::findNearByUsersByMakingChunks($validatedData->lat, $validatedData->lon, $sellers, 25);
         /*
         * Just creating this variable so we don't have to call the "empty()" function again & again
         * Because it will increase the API response time
         */
         $dataIsEmpty = empty($data);
+
         return JsonResponseServices::getApiResponse(
             ($dataIsEmpty) ? [] : $data,
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
