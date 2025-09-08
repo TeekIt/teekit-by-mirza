@@ -1,0 +1,65 @@
+services:
+  app:
+    image: teekit-by-mirza:latest
+    container_name: teekit-by-mirza
+    build:
+      args:
+        user: mirza
+        uid: 1000
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - nginx
+      - dockerhost_db
+      - meilisearch
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/entrypoint.sh:/usr/local/bin/entrypoint.sh
+    networks:
+      - teekit-network
+
+  dockerhost_db:
+    image: mysql:8.0
+    container_name: teekit-db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./docker-compose/mysql:/docker-entrypoint-initdb.d
+    networks:
+      -  teekit-network
+
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: teekit-meilisearch
+    restart: unless-stopped
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_NO_ANALYTICS: 'true'
+    networks:
+      - teekit-network
+
+  nginx:
+    image: nginx:1.17-alpine
+    container_name: teekit-nginx
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d
+    networks:
+      - teekit-network
+
+networks:
+  teekit-network:
+    driver: bridge
