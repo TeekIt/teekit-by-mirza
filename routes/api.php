@@ -70,8 +70,8 @@ Route::prefix('password')->group(function () {
 */
 Route::prefix('qty')->controller(QtyController::class)->group(function () {
     Route::get('product/{store_id}/{prod_id}', 'getById');
-    // Route::post('insert_parent_qty_to_child', 'insertParentQtyToChild')->middleware('jwt.verify');
-    // Route::get('multi-curl', 'QtyController@multiCURL');
+    /* Route::post('insert_parent_qty_to_child', 'insertParentQtyToChild')->middleware('jwt.verify');
+    Route::get('multi-curl', 'multiCURL'); */
 });
 /*
 |--------------------------------------------------------------------------
@@ -79,8 +79,6 @@ Route::prefix('qty')->controller(QtyController::class)->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('category')->controller(CategoriesController::class)->group(function () {
-    Route::post('add', 'add');
-    Route::post('update/{product_id}', 'update');
     Route::get('{categoryId}/products', 'productsByCategory');
     Route::get('get-stores-by-category', 'sellers');
     Route::get('all', 'all');
@@ -204,9 +202,9 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('update/referral_usable/status', 'updateReferralStatus');
     });
 
-    Route::prefix('wallet')->group(function () {
-        // Route::post('/update', [WalletController::class, 'update']);
-    });
+    /* Route::prefix('wallet')->group(function () {
+        Route::post('/update', [WalletController::class, 'update']);
+    }); */
 
     Route::prefix('buyer')->controller(UsersController::class)->group(function () {
         Route::patch('update', 'updateBuyer');

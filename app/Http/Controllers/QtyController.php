@@ -124,56 +124,56 @@ class QtyController extends Controller
      * qty with their child store
      * @version 1.0.0
      */
-    public function insertParentQtyToChild(Request $request)
-    {
-        $validatedData = Validator::make($request->all(), [
-            'parent_store' => 'required|int',
-            'child_store' => 'required|int'
-        ]);
-        if ($validatedData->fails()) {
-            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-        }
+    // public function insertParentQtyToChild(Request $request)
+    // {
+    //     $validatedData = Validator::make($request->all(), [
+    //         'parent_store' => 'required|int',
+    //         'child_store' => 'required|int'
+    //     ]);
+    //     if ($validatedData->fails()) {
+    //         return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+    //     }
 
-        $parent_store_data = Qty::where('seller_id', $request->parent_store)->get();
-        $child_store_data = Qty::where('seller_id', $request->child_store)->first();
-        if (!is_null($child_store_data)) {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.TRUE_STATUS'),
-                config('constants.DATA_ALREADY_EXISTS') . $request->child_store,
-                config('constants.HTTP_OK')
-            );
-        } elseif ($parent_store_data->isEmpty()) {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.TRUE_STATUS'),
-                config('constants.NO_SELLER'),
-                config('constants.HTTP_OK')
-            );
-        }
-        /**
-         * Split data into chunks of 1000 rows each
-         */
-        $chunked_data = array_chunk($parent_store_data->toArray(), 1000);
-        foreach ($chunked_data as $chunk) {
-            $data = [];
-            foreach ($chunk as $item) {
-                $data[] = [
-                    'seller_id' => $request->child_store,
-                    'product_id' => $item['product_id'],
-                    'category_id' => $item['category_id'],
-                    'qty' => $item['qty'],
-                    'created_at' => Carbon::now()
-                ];
-            }
-            Qty::insert($data);
-        }
+    //     $parent_store_data = Qty::where('seller_id', $request->parent_store)->get();
+    //     $child_store_data = Qty::where('seller_id', $request->child_store)->first();
+    //     if (!is_null($child_store_data)) {
+    //         return JsonResponseServices::getApiResponse(
+    //             [],
+    //             config('constants.TRUE_STATUS'),
+    //             config('constants.DATA_ALREADY_EXISTS') . $request->child_store,
+    //             config('constants.HTTP_OK')
+    //         );
+    //     } elseif ($parent_store_data->isEmpty()) {
+    //         return JsonResponseServices::getApiResponse(
+    //             [],
+    //             config('constants.TRUE_STATUS'),
+    //             config('constants.NO_SELLER'),
+    //             config('constants.HTTP_OK')
+    //         );
+    //     }
+    //     /**
+    //      * Split data into chunks of 1000 rows each
+    //      */
+    //     $chunked_data = array_chunk($parent_store_data->toArray(), 1000);
+    //     foreach ($chunked_data as $chunk) {
+    //         $data = [];
+    //         foreach ($chunk as $item) {
+    //             $data[] = [
+    //                 'seller_id' => $request->child_store,
+    //                 'product_id' => $item['product_id'],
+    //                 'category_id' => $item['category_id'],
+    //                 'qty' => $item['qty'],
+    //                 'created_at' => Carbon::now()
+    //             ];
+    //         }
+    //         Qty::insert($data);
+    //     }
 
-        return JsonResponseServices::getApiResponse(
-            [],
-            config('constants.TRUE_STATUS'),
-            config('constants.DATA_INSERTION_SUCCESS'),
-            config('constants.HTTP_OK')
-        );
-    }
+    //     return JsonResponseServices::getApiResponse(
+    //         [],
+    //         config('constants.TRUE_STATUS'),
+    //         config('constants.DATA_INSERTION_SUCCESS'),
+    //         config('constants.HTTP_OK')
+    //     );
+    // }
 }

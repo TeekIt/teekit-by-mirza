@@ -16,35 +16,6 @@ use Illuminate\Support\Facades\Cache;
 class CategoriesController extends Controller
 {
     /**
-     * Insert's new categories
-     * @author Muhammad Abdullah Mirza
-     * @version 1.1.0
-     */
-    public function add(Request $request)
-    {
-        $validatedData = Validator::make($request->all(), [
-            'categoryName' => 'required|string|max:255',
-            'categoryImage' => 'required|image|mimes:jpeg,png,jpg|max:100',
-        ]);
-        if ($validatedData->fails()) {
-            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-        }
-
-        $validatedData = (object) $validatedData->validated();
-
-        $category = Categories::add(
-            $validatedData->categoryName,
-            ImageServices::uploadImg($request, "categoryImage")
-        );
-
-        return JsonResponseServices::getApiResponse(
-            $category,
-            config('constants.TRUE_STATUS'),
-            config('constants.DATA_INSERTION_SUCCESS'),
-            config('constants.HTTP_OK')
-        );
-    }
-    /**
      * List all categories w.r.t store ID or without store ID
      * @version 1.2.0
      */
