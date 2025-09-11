@@ -60,7 +60,7 @@
                                                             <input type="text" class="form-control"
                                                                 wire:model.defer="pickupAddress"
                                                                 wire:change="inputFieldChanged" id="pickupAddress"
-                                                                placeholder="Pickup Address*" value="" required>
+                                                                placeholder="Pickup Address*" required>
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('pickupAddress')
@@ -73,7 +73,7 @@
                                                             <input type="text" class="form-control"
                                                                 wire:model.defer="dropoffAddress"
                                                                 wire:change="inputFieldChanged" id="dropoffAddress"
-                                                                placeholder="Dropoff Address*" value="" required>
+                                                                placeholder="Dropoff Address*" required>
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('dropoffAddress')
@@ -85,13 +85,27 @@
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
                                                                 wire:model.defer="unitAddress"
-                                                                placeholder="Unit Address (e.g Flat#)" value="" required>
+                                                                placeholder="Unit Address (e.g Flat#)" required>
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('unitAddress')
                                                                 {{ $message }}
                                                             @enderror
                                                         </small>
+                                                    </div>
+
+                                                    {{-- Dropoff Lat, Lons fields --}}
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <input type="number" class="form-control"
+                                                                wire:model.defer="dropoffLat" id="dropoffLat" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <input type="number" class="form-control"
+                                                                wire:model.defer="dropoffLon" id="dropoffLon" required>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -102,7 +116,7 @@
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
                                                                 wire:model.defer="receiverName"
-                                                                placeholder="Buyer Name*" value="" required>
+                                                                placeholder="Buyer Name*" required>
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('receiverName')
@@ -114,7 +128,7 @@
                                                         <div class="form-group">
                                                             <input type="number" class="form-control"
                                                                 wire:model.defer="receiverPhone"
-                                                                placeholder="Buyer Contact*" value="" required>
+                                                                placeholder="Buyer Contact*" required>
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('receiverPhone')
@@ -126,7 +140,7 @@
                                                         <div class="form-group">
                                                             <input type="email" class="form-control"
                                                                 wire:model.defer="receiverEmail"
-                                                                placeholder="Buyer Email*" value="" required>
+                                                                placeholder="Buyer Email*" required>
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('receiverEmail')
@@ -209,22 +223,6 @@
                                             </div>
 
                                             <div class="col-md-6 offset-md-3 text-center my-3">
-                                                {{-- <button type="button"
-                                                    class="btn site-primary-yellow-bg rounded-pill px-5 py-2 font-weight-bold dropdown-toggle"
-                                                    data-bs-toggle="dropdown" aria-expanded="false"
-                                                    wire:click="calculateDeliveryCost"
-                                                    wire:target="calculateDeliveryCost" wire:loading.class="btn-dark"
-                                                    wire:loading.class.remove="site-primary-yellow-bg"
-                                                    wire:loading.attr="disabled">
-                                                    <span wire:target="calculateDeliveryCost" wire:loading.remove>
-                                                        Calculate Delivery Charges
-                                                    </span>
-                                                    <span wire:target="calculateDeliveryCost" wire:loading>
-                                                        <span class="spinner-border spinner-border-sm text-light"
-                                                            role="status" aria-hidden="true"></span>
-                                                    </span>
-                                                </button> --}}
-
                                                 <div class="btn-group">
                                                     <button type="button"
                                                         class="btn site-primary-yellow-bg rounded-pill px-5 py-2 font-weight-bold dropdown-toggle"

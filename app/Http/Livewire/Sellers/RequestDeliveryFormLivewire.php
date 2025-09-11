@@ -100,7 +100,7 @@ class RequestDeliveryFormLivewire extends Component
             senderName: auth()->user()->name,
             senderPhone: auth()->user()->business_phone,
             senderEmail: auth()->user()->email,
-            packageType: StuartDeliveryServices::mapPkgWeightWithStuartPkgType($this->packageWeight),
+            packageType: StuartDeliveryServices::mapPkgWeightWithStuartPkgType(PackageWeightEnum::from($this->packageWeight)),
             dropoffAddress: $this->dropoffAddress,
             unitAddress: $this->unitAddress,
             receiverName: $this->receiverName,

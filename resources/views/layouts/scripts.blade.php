@@ -61,12 +61,26 @@
     @if (in_array(URL::current(), $requestDeliveryRoutes))
         <script>
             new CustomGoogleMapsClass({
-                mapAutoCompleteAddressId: 'pickupAddress'
+                mapAutoCompleteAddressId: 'pickupAddress',
             }).handleAutoComplete();
 
-            new CustomGoogleMapsClass({
-                mapAutoCompleteAddressId: 'dropoffAddress'
-            }).handleAutoComplete();
+            const customGoogleMapsClass = new CustomGoogleMapsClass({
+                mapAutoCompleteAddressId: 'dropoffAddress',
+                mapLatId: 'dropoffLat',
+                mapLongId: 'dropoffLon',
+            });
+
+            const dropoffAutoComplete = customGoogleMapsClass.handleAutoComplete();
+
+            google.maps.event.addListener(dropoffAutoComplete, 'place_changed', () => {
+                const place = dropoffAutoComplete.getPlace();
+                if (place.geometry) {
+                    customGoogleMapsClass.setLatLong(
+                        place.geometry.location.lat(),
+                        place.geometry.location.lng()
+                    );
+                }
+            });
         </script>
     @endif
 
