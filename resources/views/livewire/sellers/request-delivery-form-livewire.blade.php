@@ -84,8 +84,7 @@
                                                     <div class="col-md-12 mb-3">
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
-                                                                wire:model.defer="unitAddress"
-                                                                id="unitAddress"
+                                                                wire:model.defer="unitAddress" id="unitAddress"
                                                                 placeholder="Unit Address (e.g Flat#)" required>
                                                         </div>
                                                         <small class="text-danger">
@@ -97,18 +96,12 @@
 
                                                     {{-- Dropoff Lat, Lons fields --}}
                                                     <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <input type="number" class="form-control"
-                                                                wire:model.defer="dropoffLat" id="dropoffLat" 
-                                                                placeholder="Latitude" required>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <input type="number" class="form-control"
-                                                                wire:model.defer="dropoffLon" id="dropoffLon" 
-                                                                placeholder="Longitude" required>
-                                                        </div>
+                                                        <input type="hidden" class="form-control"
+                                                            wire:model.defer="dropoffLat" id="dropoffLat"
+                                                            placeholder="Latitude" required>
+                                                        <input type="hidden" class="form-control"
+                                                            wire:model.defer="dropoffLon" id="dropoffLon"
+                                                            placeholder="Longitude" required>
                                                     </div>
                                                 </div>
                                             </div>
