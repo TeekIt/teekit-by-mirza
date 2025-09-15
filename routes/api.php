@@ -4,20 +4,20 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\QtyController;
-use App\Http\Controllers\CategoriesController;
-use App\Http\Controllers\PagesController;
+use App\Http\Controllers\Api\v1\CategoriesController;
+use App\Http\Controllers\Api\v1\PagesController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\Api\v1\DriverController;
 use App\Http\Controllers\Api\v2\GophrDeliveryController;
 use App\Http\Controllers\Api\v2\StuartDeliveryController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\OrdersController;
-use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\Api\v1\OrdersController;
+use App\Http\Controllers\Api\v1\ProductController;
 use App\Http\Controllers\PromoCodesController;
 use App\Http\Controllers\RattingsController;
 use App\Http\Controllers\ReferralCodeRelationController;
-use App\Http\Controllers\StripeContorller;
+use App\Http\Controllers\Api\v1\StripeController;
 use App\Http\Controllers\WithdrawalRequestsController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
@@ -70,8 +70,8 @@ Route::prefix('password')->group(function () {
 */
 Route::prefix('qty')->controller(QtyController::class)->group(function () {
     Route::get('product/{store_id}/{prod_id}', 'getById');
-    // Route::post('insert_parent_qty_to_child', 'insertParentQtyToChild')->middleware('jwt.verify');
-    // Route::get('multi-curl', 'QtyController@multiCURL');
+    /* Route::post('insert_parent_qty_to_child', 'insertParentQtyToChild')->middleware('jwt.verify');
+    Route::get('multi-curl', 'multiCURL'); */
 });
 /*
 |--------------------------------------------------------------------------
@@ -79,8 +79,6 @@ Route::prefix('qty')->controller(QtyController::class)->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('category')->controller(CategoriesController::class)->group(function () {
-    Route::post('add', 'add');
-    Route::post('update/{product_id}', 'update');
     Route::get('{categoryId}/products', 'productsByCategory');
     Route::get('get-stores-by-category', 'sellers');
     Route::get('all', 'all');
@@ -107,7 +105,7 @@ Route::prefix('notifications')->controller(NotificationsController::class)->grou
 | Stripe API Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('stripe')->controller(StripeContorller::class)->group(function () {
+Route::prefix('stripe')->controller(StripeController::class)->group(function () {
     Route::prefix('payment_intent')->group(function () {
         Route::get('create', 'createPaymentIntent');
         Route::get('capture', 'capturePaymentIntent');
@@ -131,11 +129,9 @@ Route::get('page', [PagesController::class, 'getPage']);
 */
 Route::middleware(['jwt.verify'])->group(function () {
     Route::prefix('product')->group(function () {
-        Route::controller(ProductsController::class)->group(function () {
-            Route::post('add/bulk', 'importProductsAPI');
+        Route::controller(ProductController::class)->group(function () {
+            Route::post('add/bulk', 'importProducts');
             Route::post('update_price_qty/bulk', 'updatePriceAndQtyBulk');
-            Route::get('delete/{product_id}', 'delete');
-            Route::get('delete_image/{image_id}/{product_id}', 'deleteImage');
 
             Route::withoutMiddleware(['jwt.verify'])->group(function () {
                 Route::get('all', 'all');
@@ -174,7 +170,6 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::get('update_assign', 'updateAssign');
         Route::post('customer_cancel_order', 'customerCancelOrder');
         Route::post('update', 'updateOrder');
-        Route::post('estimated-time/{id}', 'storeEstimatedTime');
         Route::get('products-of-recent-order', 'productsOfRecentOrder');
     });
 
@@ -207,9 +202,9 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('update/referral_usable/status', 'updateReferralStatus');
     });
 
-    Route::prefix('wallet')->group(function () {
-        // Route::post('/update', [WalletController::class, 'update']);
-    });
+    /* Route::prefix('wallet')->group(function () {
+        Route::post('/update', [WalletController::class, 'update']);
+    }); */
 
     Route::prefix('buyer')->controller(UsersController::class)->group(function () {
         Route::patch('update', 'updateBuyer');

@@ -60,13 +60,57 @@
     @endphp
     @if (in_array(URL::current(), $requestDeliveryRoutes))
         <script>
-            new CustomGoogleMapsClass({
-                mapAutoCompleteAddressId: 'pickupAddress'
-            }).handleAutoComplete();
+            /* Initialize CustomGoogleMapsClass for pickup address autocomplete */
+            const pickupGoogleMapsClass = new CustomGoogleMapsClass({
+                mapAutoCompleteAddressId: 'pickupAddress',
+            });
 
-            new CustomGoogleMapsClass({
-                mapAutoCompleteAddressId: 'dropoffAddress'
-            }).handleAutoComplete();
+            const pickupAutoComplete = pickupGoogleMapsClass.handleAutoComplete();
+
+            google.maps.event.addListener(pickupAutoComplete, 'place_changed', () => {
+                const place = pickupAutoComplete.getPlace();
+                if (place.geometry) {
+                    /* Get the full formatted address from Google Places */
+                    const fullAddress = `${place.name}, ${place.formatted_address}`;
+
+                    pickupGoogleMapsClass.setAddress(fullAddress);
+                    /* Update Livewire component properties */
+                    if (window.Livewire) {
+                        Livewire.find(document.querySelector('[wire\\:id]')
+                                .getAttribute('wire:id'))
+                            .call('updateLivewireProperties', null, null, null, null, fullAddress);
+                    }
+                }
+            });
+
+            /* Initialize CustomGoogleMapsClass for dropoff address autocomplete */
+            const dropoffGoogleMapsClass = new CustomGoogleMapsClass({
+                mapAutoCompleteAddressId: 'dropoffAddress',
+                mapUnitAddressId: 'unitAddress',
+                mapLatId: 'dropoffLat',
+                mapLongId: 'dropoffLon',
+            });
+
+            const dropoffAutoComplete = dropoffGoogleMapsClass.handleAutoComplete();
+
+            google.maps.event.addListener(dropoffAutoComplete, 'place_changed', () => {
+                const place = dropoffAutoComplete.getPlace();
+                if (place.geometry) {
+                    const lat = place.geometry.location.lat();
+                    const lng = place.geometry.location.lng();
+                    /* Get the full formatted address from Google Places */
+                    const fullAddress = `${place.name}, ${place.formatted_address}`;
+
+                    dropoffGoogleMapsClass.setAddress(fullAddress);
+                    dropoffGoogleMapsClass.setLatLong(lat, lng);
+                    /* Update Livewire component properties */
+                    if (window.Livewire) {
+                        Livewire.find(document.querySelector('[wire\\:id]')
+                                .getAttribute('wire:id'))
+                            .call('updateLivewireProperties', lat, lng, fullAddress);
+                    }
+                }
+            });
         </script>
     @endif
 
@@ -448,48 +492,6 @@
                     }
                 });
             }
-        }
-
-        const updateStoreInfo = () => {
-            const form = document.forms.namedItem("user_form");
-            const formdata = new FormData(form);
-            $.ajax({
-                url: "{{ route('admin.image.update') }}",
-                type: "post",
-                contentType: false,
-                data: formdata,
-                processData: false,
-                success: function(response) {
-                    if (response == "Data Saved") {
-                        Swal.fire({
-                                title: 'Success!',
-                                text: 'Data has been updated successfully',
-                                icon: 'success',
-                                confirmButtonText: 'Ok'
-                            })
-                            .then(function() {
-                                location.reload();
-                            });
-                    } else {
-                        $('.error').html('');
-                        if (response.errors.name) {
-                            $('.name').html(response.errors.name[0]);
-                        }
-                        if (response.errors.business_name) {
-                            $('.business_name').html(response.errors.business_name[0]);
-                        }
-                        if (response.errors.phone) {
-                            $('.phone').html(response.errors.phone[0]);
-                        }
-                        if (response.errors.business_phone) {
-                            $('.business_phone').html(response.errors.business_phone[0]);
-                        }
-                        if (response.errors.store_image) {
-                            $('.store_image').html(response.errors.store_image[0]);
-                        }
-                    }
-                }
-            });
         }
     </script>
 

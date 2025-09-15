@@ -108,14 +108,14 @@ class ForgotPasswordController extends Controller
         $html = '<html>
                 Hi, ' . $user->name . '<br><br>
 
-                You have requested to reset password on ' . env('APP_NAME') . '.
+                You have requested to reset password on ' . config('app.name') . '.
 
                 Here is your Password reset Code. <br><br> <code style="background:lightgray">' . $token . '</code>
             </html>';
 
         Mail::send('emails.general', ["html" => $html], function ($message) use ($request, $user) {
             $message->to($request->email, $user->name)
-                ->subject(env('APP_NAME') . ': Password Reset');
+                ->subject(config('app.name') . ': Password Reset');
         });
 
         return response()->json(['status' => true, 'message' => 'Password reset link sent on your email.'], 200);

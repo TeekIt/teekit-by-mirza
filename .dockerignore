@@ -1,0 +1,16 @@
+vendor
+node_modules
+*.log
+*.tmp
+.DS_Store
+.env
+.idea
+.vscode
+*.swp
+*.bak
+*.old
+*.cache
+*.dist
+*.exe
+*.dll
+*.so

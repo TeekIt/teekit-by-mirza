@@ -126,7 +126,7 @@
                         <h5 class="modal-title">
                             Update Your Info
                         </h5>
-                        <button type="button" class="close" wire:click="resetModal" aria-label="Close"
+                        <button type="button" class="close" wire:click="resetComponent" aria-label="Close"
                             data-bs-dismiss="modal">
                             <span aria-hidden="true">×</span>
                         </button>
@@ -245,7 +245,7 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="resetModal"
+                        <button type="button" class="btn btn-secondary" wire:click="resetComponent"
                             data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>

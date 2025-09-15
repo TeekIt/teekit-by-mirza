@@ -6,6 +6,8 @@
 /public/upload
 /storage/*.key
 /vendor
+/docker-compose/mysql/
+!/docker-compose/nginx/teekit.example.conf
 .idea/
 .env
 .phpunit.result.cache

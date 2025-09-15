@@ -59,7 +59,7 @@ class OrdersHeaderLivewire extends Component
     /* 
      * Custom Helpers
      */
-    public function resetModal()
+    public function resetComponent()
     {
         $this->resetValidation();
 
@@ -91,7 +91,7 @@ class OrdersHeaderLivewire extends Component
 
     public function renderCustomProductOrderModal($orderId)
     {
-        $this->resetModal();
+        $this->resetComponent();
 
         $this->selectedOrder = Orders::getById($orderId);
 

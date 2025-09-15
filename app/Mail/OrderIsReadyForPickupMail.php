@@ -31,7 +31,7 @@ class OrderIsReadyForPickupMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Your Order #' . $this->order->id . ' Is Ready To Be Picked Up - ' . env('APP_NAME'),
+            subject: 'Your Order #' . $this->order->id . ' Is Ready To Be Picked Up - ' . config('app.name'),
         );
     }
 

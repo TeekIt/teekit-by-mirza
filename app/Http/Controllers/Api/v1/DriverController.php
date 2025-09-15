@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Controllers\Controller;
 use App\Models\Driver;
 use App\Models\DriverDocument;
-use App\Http\Controllers\Controller;
 use App\Orders;
 use App\Services\EmailServices;
 use App\Services\JsonResponseServices;
@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Throwable;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class DriverController extends Controller
@@ -224,29 +223,29 @@ class DriverController extends Controller
      */
     public function driverFailedToEnterCode(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validatedData = Validator::make($request->all(), [
             'order_id' => 'required|int'
         ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'data' => $validator->errors(),
-                'status' => false,
-                'message' => config('constants.MISSING_OR_INVALID_DATA')
-            ], 422);
-        } else {
-            // Update table
-            DB::table('verification_codes')
-                ->where('order_id', $request->order_id)
-                ->update(['code->driver_failed_to_enter_code' => "Yes"]);
-            /* Because the driver was not able to enter the code due to some reasons but still he has delivered the product. Therefore we will mark the 'delivery_status' as 'complete' & 'order_status' as 'delivered' */
-            Orders::where('id', '=', $request->order_id)->update(['order_status' => 'delivered', 'delivery_status' => 'complete']);
-
-            return response()->json([
-                'data' => [],
-                'status' => true,
-                'message' => config('constants.ORDER_UPDATED')
-            ], 200);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+        $validatedData = (object) $validatedData->validated();
+
+        DB::table('verification_codes')
+            ->where('order_id', $validatedData->order_id)
+            ->update(['code->driver_failed_to_enter_code' => "Yes"]);
+        /* Because the driver was not able to enter the code due to some reasons but still he has delivered the product. Therefore we will mark the 'delivery_status' as 'complete' & 'order_status' as 'delivered' */
+        Orders::where('id', '=', $validatedData->order_id)
+            ->update([
+                'order_status' => 'delivered',
+                'delivery_status' => 'complete'
+            ]);
+
+        return response()->json([
+            'data' => [],
+            'status' => true,
+            'message' => config('constants.ORDER_UPDATED')
+        ], 200);
     }
     /**
      * Driver signUp
@@ -255,61 +254,50 @@ class DriverController extends Controller
      */
     public function registerDriver(Request $request)
     {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'f_name' => 'required|string|max:80',
-                'l_name' => 'required|string|max:80',
-                'email' => 'required|string|email|max:80|unique:drivers',
-                'phone' => 'required|string|min:10|max:10',
-                'password' => 'required|string|min:8|max:50',
-                'profile_img' => 'image|max:1000',
-                'vehicle_type' => 'required|int',
-                'area' => 'required|string',
-                'account_holders_name' => 'required|string',
-                'bank_name' => 'required|string',
-                'sort_code' => 'required|min:6|max:6',
-                'account_number' => 'required|min:8|max:8',
-                'front_img' => 'required|image|max:1200',
-                'back_img' => 'required|image|max:1200'
-            ]);
-            if ($validatedData->fails()) {
-                return response()->json([
-                    'data' => [],
-                    'status' => false,
-                    'message' => $validatedData->errors()
-                ], 422);
-            }
-            // First add the newly signed-up driver
-            $drivers = Driver::add($request);
-            // If the driver has provided a profile img then upload it
-            if ($request->hasFile('profile_img')) Driver::addImg($drivers, $request, 'profile_img');
-            // Now upload driver documents
-            DriverDocument::add($request, $drivers->id);
-            // Send verification email
-            EmailServices::sendDriverAccVerificationMail($drivers);
-            if ($drivers) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.TRUE_STATUS'),
-                    config('constants.DRIVER_REGISTERATION_MSG'),
-                    config('constants.HTTP_OK')
-                );
-            }
+        $validatedData = Validator::make($request->all(), [
+            'f_name' => 'required|string|max:80',
+            'l_name' => 'required|string|max:80',
+            'email' => 'required|string|email|max:80|unique:drivers',
+            'phone' => 'required|string|min:10|max:10',
+            'password' => 'required|string|min:8|max:50',
+            'profile_img' => 'image|max:1000',
+            'vehicle_type' => 'required|int',
+            'area' => 'required|string',
+            'account_holders_name' => 'required|string',
+            'bank_name' => 'required|string',
+            'sort_code' => 'required|min:6|max:6',
+            'account_number' => 'required|min:8|max:8',
+            'front_img' => 'required|image|max:1200',
+            'back_img' => 'required|image|max:1200'
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+        $validatedData = (object) $validatedData->validated();
+        /* First add the newly signed-up driver */
+        $drivers = Driver::add($validatedData);
+        /* If the driver has provided a profile img then upload it */
+        if ($request->hasFile('profile_img')) Driver::addImg($drivers, $request, 'profile_img');
+        /* Now upload driver documents */
+        DriverDocument::add($request, $drivers->id);
+        /* Send verification email */
+        EmailServices::sendDriverAccVerificationMail($drivers);
+
+        if ($drivers) {
             return JsonResponseServices::getApiResponse(
                 [],
-                config('constants.FALSE_STATUS'),
-                config('constants.REGISTER_FAILED'),
+                config('constants.TRUE_STATUS'),
+                config('constants.DRIVER_REGISTERATION_MSG'),
                 config('constants.HTTP_OK')
             );
-        } catch (Throwable $error) {
-            report($error);
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                $error,
-                config('constants.HTTP_SERVER_ERROR')
-            );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.REGISTER_FAILED'),
+            config('constants.HTTP_OK')
+        );
     }
 
     protected function respondWithToken($token)
@@ -337,7 +325,7 @@ class DriverController extends Controller
                 'message' => $validatedData->errors()
             ], 422);
         }
-        
+
         $credentials = request(['email', 'password']);
         $driver_info = [];
         $driver_info = Driver::where('email', $credentials['email'])->first();

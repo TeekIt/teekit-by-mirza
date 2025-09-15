@@ -168,7 +168,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function scopeWhereUserIsActive(Builder $query): void
     {
-        $query->where('is_active', 1);
+        $query->where('is_active', self::ACTIVE);
     }
     /**
      * Helpers
@@ -461,9 +461,9 @@ class User extends Authenticatable implements JWTSubject
         return self::where('business_name', '=', $businessName)->first();
     }
 
-    public static function getUserByID(int $id, array $columns = ['*']): ?User
+    public static function getUserByID(int $id, array $columns = ['*']): User
     {
-        return self::select($columns)->find($id);
+        return self::select($columns)->findOrFail($id);
     }
 
     public function nearbyUsers($user_lat, $user_lon, $radius): User

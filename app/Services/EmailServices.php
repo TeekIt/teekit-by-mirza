@@ -8,20 +8,38 @@ use App\Mail\CustomProductOrderDetailsToNearBySellersMail;
 use App\Mail\NewSellerRegistrationMail;
 use App\Mail\OrderIsCanceledMail;
 use App\Mail\OrderIsReadyForPickupMail;
+use App\Mail\RegeneratedStripeConnectAccMail;
 use App\Mail\SellerApprovedMail;
 use App\Mail\StoreRegisterMail;
+use App\Mail\StripeConnectAccMail;
+use App\Mail\StripeConnectedAccMail;
 use App\Models\Driver;
 use App\Models\OrdersFromOtherSeller;
 use App\Orders;
 use App\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
+use Stripe\Stripe;
 
 final class EmailServices
 {
     public static function getVerificationLink($verificationCode)
     {
         return url('/') . '/auth/verify?token=' . $verificationCode;
+    }
+
+    public static function sendRegeneratedStripeConnectAccMail(User $user)
+    {
+        $response = StripeServices::getConnectAccountLink($user);
+
+        Mail::to($user->email)->send(new RegeneratedStripeConnectAccMail($response->url));
+    }
+
+    public static function sendStripeConnectAccMail(User $user)
+    {
+        $response = StripeServices::getConnectAccountLink($user);
+
+        Mail::to($user->email)->send(new StripeConnectAccMail($user, $response->url));
     }
 
     public static function sendCustomProductOrderDetailsToNearBySellersMail(array $nearBySellersEmails, Orders $order)
@@ -54,7 +72,7 @@ final class EmailServices
 
         // $body = '<html>
         //         Hi, ' . $driver->f_name . '<br><br>
-        //         Thank you for registering on ' . env('APP_NAME') . '.
+        //         Thank you for registering on ' . config('app.name') . '.
         //         <br>
         //         Here is your account verification link. Click on below link to verify your account. <br><br>
         //         <a href="' . $accountVerificationLink . '">Verify</a> OR Copy This in your Browser
@@ -62,7 +80,7 @@ final class EmailServices
         //         <br><br><br>
         //         </html>';
 
-        // $subject = env('APP_NAME') . ': Account Verification';
+        // $subject = config('app.name') . ': Account Verification';
 
         // Mail::to($driver->email)->send(new StoreRegisterMail($body, $subject));
     }
