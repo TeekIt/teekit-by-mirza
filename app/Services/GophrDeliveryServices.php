@@ -12,8 +12,8 @@ final class GophrDeliveryServices
         string $pickupAddress,
         string $pickupCity,
         string $pickupPostcode,
-        float $pickupLat,
-        float $pickupLon,
+        string $pickupLat,
+        string $pickupLon,
         string $pickupPersonName,
         string $pickupMobileNumber,
         string $parcelExternalId,
@@ -26,8 +26,8 @@ final class GophrDeliveryServices
         string $dropoffAddress,
         string $dropoffCity,
         string $dropoffPostcode,
-        float $dropoffLat,
-        float $dropoffLon,
+        string $dropoffLat,
+        string $dropoffLon,
         string $dropoffPersonName,
         string $dropoffEmail,
         string $dropoffMobileNumber,
@@ -50,30 +50,29 @@ final class GophrDeliveryServices
             'external_id' => $externalId,
             'pickups' => [
                 [
-                    'pickup_address1' => $pickupAddress,
                     'pickup_city' => $pickupCity,
+                    'pickup_address1' => $pickupAddress,
                     'pickup_postcode' => $pickupPostcode,
                     'pickup_country_code' => $countryCode,
                     'pickup_location_lat' => $pickupLat,
                     'pickup_location_lng' => $pickupLon,
-                    'pickup_person_name' => $pickupPersonName, 
-                    'pickup_mobile_number' => $pickupMobileNumber, 
+                    'pickup_person_name' => $pickupPersonName,
+                    'pickup_mobile_number' => $pickupMobileNumber,
                     'parcels' => [$parcelData]
                 ]
             ],
             'dropoffs' => [
                 [
-                    'dropoff_address1' => $dropoffAddress,
                     'dropoff_city' => $dropoffCity,
+                    'dropoff_address1' => $dropoffAddress,
                     'dropoff_postcode' => $dropoffPostcode,
                     'dropoff_country_code' => $countryCode,
                     'dropoff_location_lat' => $dropoffLat,
                     'dropoff_location_lng' => $dropoffLon,
                     'dropoff_person_name' => $dropoffPersonName,
-                    'dropoff_email' => $dropoffEmail, 
-                    'dropoff_mobile_number' => $dropoffMobileNumber, 
+                    'dropoff_email' => $dropoffEmail,
+                    'dropoff_mobile_number' => $dropoffMobileNumber,
                     'dropoff_instructions' => $instructions,
-                    'dropoff_deadline' => CompanyStandardsServices::getStandardDeliveryDeadline()->toIso8601String(),
                     'parcels' => [$parcelData]
                 ]
             ]
@@ -108,12 +107,12 @@ final class GophrDeliveryServices
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Accept: application/json',
-                'Api-Key:' . static::getApiKey(),
+                'Api-Key: ' . static::getApiKey(),
             ],
         ]);
 
         $response = curl_exec($curl);
-
+        
         curl_close($curl);
 
         $response = json_decode($response);
@@ -184,7 +183,7 @@ final class GophrDeliveryServices
         curl_close($curl);
 
         $response = json_decode($response);
-        
+
         if (isset($response->errors)) {
             throw new Exception($response->errors[0]->message);
         }

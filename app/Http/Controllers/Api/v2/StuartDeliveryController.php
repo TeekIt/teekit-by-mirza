@@ -18,10 +18,10 @@ class StuartDeliveryController extends Controller
     public function createDeliveryJob(AddStuartJobRequest $request)
     {
         $validatedData = (object) $request->validated();
-
+        
         $response = StuartDeliveryServices::createJob(
             StuartDeliveryServices::prepareJobArray(
-                pickupAt: CompanyStandardsServices::getStandardPickUpTime(),
+                pickupAt: CompanyStandardsServices::getStandardPickUpTime()->toDateTimeString(),
                 assignmentCode: UUIDServices::generateUUID(),
                 pickupAddress: $validatedData->pickupAddress,
                 senderName: $validatedData->senderName,
@@ -66,7 +66,7 @@ class StuartDeliveryController extends Controller
 
         $response = StuartDeliveryServices::getJobPricing(
             StuartDeliveryServices::prepareJobArray(
-                pickupAt: CompanyStandardsServices::getStandardPickUpTime(),
+                pickupAt: CompanyStandardsServices::getStandardPickUpTime()->toDateTimeString(),
                 assignmentCode: UUIDServices::generateUUID(),
                 pickupAddress: $validatedData->pickupAddress,
                 senderName: $validatedData->senderName,

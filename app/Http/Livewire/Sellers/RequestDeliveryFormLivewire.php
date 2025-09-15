@@ -124,7 +124,7 @@ class RequestDeliveryFormLivewire extends Component
     public function prepareStuartJobArray()
     {
         return StuartDeliveryServices::prepareJobArray(
-            pickupAt: CompanyStandardsServices::getStandardPickUpTime(),
+            pickupAt: CompanyStandardsServices::getStandardPickUpTime()->toDateTimeString(),
             assignmentCode: UUIDServices::generateUUID(),
             pickupAddress: $this->pickupAddress,
             senderName: auth()->user()->name,
