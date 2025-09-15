@@ -92,7 +92,7 @@ class GophrDeliveryController extends Controller
             'weight' => 0,
         ];
 
-        $response = GophrDeliveryServices::createJob(
+        $response = GophrDeliveryServices::getJobPricing(
             GophrDeliveryServices::prepareJobArray(
                 externalId: UUIDServices::generateUUID(),
                 pickupAddress: $validatedData->pickupAddress,
@@ -121,7 +121,7 @@ class GophrDeliveryController extends Controller
         );
 
         return JsonResponseServices::getApiResponse(
-            $response,
+            $response->data,
             config('constants.TRUE_STATUS'),
             '',
             config('constants.HTTP_OK')
@@ -131,7 +131,7 @@ class GophrDeliveryController extends Controller
     public function trackDeliveryJob(string $jobId)
     {
         return JsonResponseServices::getApiResponse(
-            GophrDeliveryServices::getJob($jobId),
+            GophrDeliveryServices::getJob($jobId)->data,
             config('constants.TRUE_STATUS'),
             '',
             config('constants.HTTP_OK')
