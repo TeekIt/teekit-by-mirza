@@ -91,6 +91,36 @@ class RequestDeliveryFormLivewire extends Component
         $this->currency = '';
     }
 
+    public function updateLivewireProperties(
+        $dropoffLat = null,
+        $dropoffLon = null,
+        $dropoffAddress = null,
+        $unitAddress = null,
+        $pickupAddress = null
+    ) {
+        if ($dropoffLat !== null) {
+            $this->dropoffLat = $dropoffLat;
+        }
+
+        if ($dropoffLon !== null) {
+            $this->dropoffLon = $dropoffLon;
+        }
+
+        if ($dropoffAddress !== null) {
+            $this->dropoffAddress = $dropoffAddress;
+        }
+
+        if ($unitAddress !== null) {
+            $this->unitAddress = $unitAddress;
+        }
+
+        if ($pickupAddress !== null) {
+            $this->pickupAddress = $pickupAddress;
+        }
+
+        $this->inputFieldChanged();
+    }
+
     public function prepareStuartJobArray()
     {
         return StuartDeliveryServices::prepareJobArray(

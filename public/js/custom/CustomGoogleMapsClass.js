@@ -7,6 +7,7 @@
         constructor(mapElementsIds = {
             mapCanvasId: 'googleMapCanvas',
             mapAutoCompleteAddressId: 'googleMapAutoCompleteAddress',
+            mapUnitAddressId: 'googleMapUnitAddress',
             mapLatId: 'googleMapLat',
             mapLongId: 'googleMapLong',
             mapCountryId: 'googleMapCountry',
@@ -128,8 +129,16 @@
 
             return new google.maps.places.Autocomplete(address, {
                 componentRestrictions: { country: ["uk", "pk"] },
-                fields: ["address_components", "geometry"]
+                fields: ["address_components", "geometry", "formatted_address", "name"]
             });
+        }
+
+        setAddress(address) {
+            document.getElementById(this.mapElementsIds.mapAutoCompleteAddressId).value = address;
+        }
+
+        setUnitAddress(unitAddress) {
+            document.getElementById(this.mapElementsIds.mapUnitAddressId).value = unitAddress;
         }
 
         setLatLong(lat, lng) {

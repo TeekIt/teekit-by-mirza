@@ -85,6 +85,7 @@
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
                                                                 wire:model.defer="unitAddress"
+                                                                id="unitAddress"
                                                                 placeholder="Unit Address (e.g Flat#)" required>
                                                         </div>
                                                         <small class="text-danger">
@@ -98,13 +99,15 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <input type="number" class="form-control"
-                                                                wire:model.defer="dropoffLat" id="dropoffLat" required>
+                                                                wire:model.defer="dropoffLat" id="dropoffLat" 
+                                                                placeholder="Latitude" required>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <input type="number" class="form-control"
-                                                                wire:model.defer="dropoffLon" id="dropoffLon" required>
+                                                                wire:model.defer="dropoffLon" id="dropoffLon" 
+                                                                placeholder="Longitude" required>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -227,6 +230,7 @@
                                                     <button type="button"
                                                         class="btn site-primary-yellow-bg rounded-pill px-5 py-2 font-weight-bold dropdown-toggle"
                                                         data-bs-toggle="dropdown" aria-expanded="false"
+                                                        wire:target="calculateDeliveryCost"
                                                         wire:loading.class="btn-dark"
                                                         wire:loading.class.remove="site-primary-yellow-bg"
                                                         wire:loading.attr="disabled">

@@ -60,25 +60,55 @@
     @endphp
     @if (in_array(URL::current(), $requestDeliveryRoutes))
         <script>
-            new CustomGoogleMapsClass({
+            /* Initialize CustomGoogleMapsClass for pickup address autocomplete */
+            const pickupGoogleMapsClass = new CustomGoogleMapsClass({
                 mapAutoCompleteAddressId: 'pickupAddress',
-            }).handleAutoComplete();
+            });
 
-            const customGoogleMapsClass = new CustomGoogleMapsClass({
+            const pickupAutoComplete = pickupGoogleMapsClass.handleAutoComplete();
+
+            google.maps.event.addListener(pickupAutoComplete, 'place_changed', () => {
+                const place = pickupAutoComplete.getPlace();
+                if (place.geometry) {
+                    /* Get the full formatted address from Google Places */
+                    const fullAddress = `${place.name}, ${place.formatted_address}`;
+
+                    pickupGoogleMapsClass.setAddress(fullAddress);
+                    /* Update Livewire component properties */
+                    if (window.Livewire) {
+                        Livewire.find(document.querySelector('[wire\\:id]')
+                                .getAttribute('wire:id'))
+                            .call('updateLivewireProperties', null, null, null, null, fullAddress);
+                    }
+                }
+            });
+
+            /* Initialize CustomGoogleMapsClass for dropoff address autocomplete */
+            const dropoffGoogleMapsClass = new CustomGoogleMapsClass({
                 mapAutoCompleteAddressId: 'dropoffAddress',
+                mapUnitAddressId: 'unitAddress',
                 mapLatId: 'dropoffLat',
                 mapLongId: 'dropoffLon',
             });
 
-            const dropoffAutoComplete = customGoogleMapsClass.handleAutoComplete();
+            const dropoffAutoComplete = dropoffGoogleMapsClass.handleAutoComplete();
 
             google.maps.event.addListener(dropoffAutoComplete, 'place_changed', () => {
                 const place = dropoffAutoComplete.getPlace();
                 if (place.geometry) {
-                    customGoogleMapsClass.setLatLong(
-                        place.geometry.location.lat(),
-                        place.geometry.location.lng()
-                    );
+                    const lat = place.geometry.location.lat();
+                    const lng = place.geometry.location.lng();
+                    /* Get the full formatted address from Google Places */
+                    const fullAddress = `${place.name}, ${place.formatted_address}`;
+
+                    dropoffGoogleMapsClass.setAddress(fullAddress);
+                    dropoffGoogleMapsClass.setLatLong(lat, lng);
+                    /* Update Livewire component properties */
+                    if (window.Livewire) {
+                        Livewire.find(document.querySelector('[wire\\:id]')
+                                .getAttribute('wire:id'))
+                            .call('updateLivewireProperties', lat, lng, fullAddress);
+                    }
                 }
             });
         </script>
