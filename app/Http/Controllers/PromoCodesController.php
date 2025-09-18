@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Helpers\PromoCodeHelpers;
 use App\Models\PromoCodesUsageLimit;
 use App\Orders;
-use App\PromoCodes;
+use App\Models\PromoCode;
+use App\Rules\Seller\IsParentOrChildSellerId;
 use App\Services\JsonResponseServices;
 use App\User;
 use Illuminate\Http\Request;
@@ -22,13 +23,31 @@ class PromoCodesController extends Controller
      */
     public function promocodesHome()
     {
-        if (Gate::allows('superadmin')) {
-            /* Get stores names for select dropdown */
-            $stores = User::getParentAndChildSellersList(['id', 'business_name']);
-            $promo_codes = PromoCodes::paginate(10);
-            return view('admin.promo_codes', compact('promo_codes', 'stores'));
-        } else {
-            abort(403);
+        /* Get stores names for select dropdown */
+        $stores = User::getParentAndChildSellersList(['id', 'business_name']);
+        $promoCodes = PromoCode::getAll('desc');
+
+        return view('admin.promo_codes', compact('promoCodes', 'stores'));
+    }
+    /**
+     * Deletes the specific promo code via ajax call
+     * @version 1.0.0
+     */
+    public function promoCodesDel(Request $request)
+    {
+        try {
+            if (Gate::allows('superadmin')) {
+                for ($i = 0; $i < count($request->promocodes); $i++) {
+                    PromoCode::where('id', '=', $request->promocodes[$i])->delete();
+                }
+
+                return response("Promocodes Deleted Successfully");
+            }
+        } catch (Throwable $error) {
+            report($error);
+            session()->flash('error', $error->getMessage());
+
+            return back();
         }
     }
     /**
@@ -42,55 +61,30 @@ class PromoCodesController extends Controller
                 'promo_code' => 'required|string|unique:promo_codes|max:20',
                 'discount_type' => 'required',
                 'discount' => 'required|int',
+                'order_number' => 'nullable|int',
+                'usage_limit' => 'nullable|int',
                 'min_amnt_for_discount' => 'required|int',
                 'max_amnt_for_discount' => 'required|int',
+                'store_id' => ['nullable', new IsParentOrChildSellerId],
+                'free_delivery' => 'nullable|string',
                 'expiry_dt' => 'required',
             ]);
             if ($validatedData->fails()) {
-                flash('Error in saving the promo code because a required field is missing or invalid data.')->error();
+                session()->flash('error', $validatedData->errors());
+
                 return Redirect::back()->withInput($request->input());
             }
 
-            PromoCodes::create([
-                "promo_code" => $request->promo_code,
-                "discount_type" => $request->discount_type,
-                "discount" => $request->discount,
-                "order_number" => $request->order_number,
-                "usage_limit" => $request->usage_limit,
-                "min_amnt_for_discount" => $request->min_amnt_for_discount,
-                "max_amnt_for_discount" => $request->max_amnt_for_discount,
-                "store_id" => $request->store_id,
-                "expiry_dt" => $request->expiry_dt,
-            ]);
+            $validatedData = $validatedData->validated();
 
-            flash('Promo code saved successfully.')->success();
+            PromoCode::addOrUpdate($validatedData);
+
+            session()->flash('success', 'Promo code saved successfully.');
 
             return back();
         } catch (Throwable $error) {
             report($error);
-            flash('Failed to save promo code due to some internal error.')->error();
-
-            return back();
-        }
-    }
-
-    /**
-     * Deletes the specific promo code via ajax call
-     * @version 1.0.0
-     */
-    public function promoCodesDel(Request $request)
-    {
-        try {
-            if (Gate::allows('superadmin')) {
-                for ($i = 0; $i < count($request->promocodes); $i++) {
-                    PromoCodes::where('id', '=', $request->promocodes[$i])->delete();
-                }
-
-                return response("Promocodes Deleted Successfully");
-            }
-        } catch (Throwable $error) {
-            report($error);
-            flash('Failed to delete promo code due to some internal error')->error();
+            session()->flash('error', $error->getMessage());
 
             return back();
         }
@@ -106,34 +100,30 @@ class PromoCodesController extends Controller
                 'promo_code' => 'required|string|max:20',
                 'discount_type' => 'required',
                 'discount' => 'required|int',
+                'order_number' => 'nullable|int',
+                'usage_limit' => 'nullable|int',
                 'min_amnt_for_discount' => 'required|int',
                 'max_amnt_for_discount' => 'required|int',
-                'expiry_dt' => 'required',
+                'store_id' => ['nullable', new IsParentOrChildSellerId],
+                'free_delivery' => 'nullable|string',
+                'expiry_dt' => 'required|date',
             ]);
             if ($validatedData->fails()) {
-                flash('Error in saving the promo code because a required field is missing or invalid data.')->error();
+                session()->flash('error', $validatedData->errors());
 
                 return Redirect::back()->withInput($request->input());
             }
 
-            $promo_code = PromoCodes::find($id);
-            $promo_code->promo_code = $request->promo_code;
-            $promo_code->discount_type = $request->discount_type;
-            $promo_code->discount = $request->discount;
-            $promo_code->order_number = $request->order_number;
-            $promo_code->usage_limit = $request->usage_limit;
-            $promo_code->min_amnt_for_discount = $request->min_amnt_for_discount;
-            $promo_code->max_amnt_for_discount = $request->max_amnt_for_discount;
-            $promo_code->expiry_dt = $request->expiry_dt;
-            $promo_code->store_id = $request->store_id;
-            $promo_code->save();
+            $validatedData = $validatedData->validated();
 
-            flash('Promo code updated successfully.')->success();
+            PromoCode::addOrUpdate($validatedData, $id);
+
+            session()->flash('success', 'Promo code updated successfully.');
 
             return back();
         } catch (Throwable $error) {
             report($error);
-            flash('Failed to update promo code due to some internal error.')->error();
+            session()->flash('error', $error->getMessage());
 
             return back();
         }
@@ -143,14 +133,14 @@ class PromoCodesController extends Controller
      */
     public function allPromocodes()
     {
-        $promocodes = PromoCodes::all();
+        $promocodes = PromoCode::all();
 
         $dataIsEmpty = $promocodes->isEmpty();
 
         return JsonResponseServices::getApiResponse(
-             ($dataIsEmpty) ? [] : $promocodes,
-             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-             ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
+            ($dataIsEmpty) ? [] : $promocodes,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
             config('constants.HTTP_OK')
         );
     }
@@ -175,9 +165,9 @@ class PromoCodesController extends Controller
                     'message' => $validatedData->errors()
                 ], 422);
             }
-            $promocodes_count = PromoCodes::where('promo_code', '=', $request->promo_code)->count();
+            $promocodes_count = PromoCode::where('promo_code', '=', $request->promo_code)->count();
             if ($promocodes_count == 1) {
-                $expiry_dt = PromoCodes::where('promo_code', '=', $request->promo_code)->pluck('expiry_dt')->first();
+                $expiry_dt = PromoCode::where('promo_code', '=', $request->promo_code)->pluck('expiry_dt')->first();
                 $current_date = date('Y-m-d');
                 if ($expiry_dt < $current_date) {
                     return response()->json([
@@ -186,10 +176,10 @@ class PromoCodesController extends Controller
                         'message' =>  config('constants.EXPIRED_PROMOCODE')
                     ], 200);
                 } else {
-                    $promo_codes = PromoCodes::where('promo_code', '=', $request->promo_code)->get();
+                    $promo_codes = PromoCode::where('promo_code', '=', $request->promo_code)->get();
                     if (empty($promo_codes[0]->store_id)) $promo_codes[0]->store_id = NULL;
                     //below query will pass required data to our helper functions down below to validate
-                    $promo_code_data = PromoCodes::where('promo_code', $request->promo_code)->first(['id', 'usage_limit', 'store_id', 'discount']);
+                    $promo_code_data = PromoCode::where('promo_code', $request->promo_code)->first(['id', 'usage_limit', 'store_id', 'discount']);
                     /**
                      * This condition will only work if the  
                      * Promo code is only valid for a specific order#
@@ -257,9 +247,9 @@ class PromoCodesController extends Controller
                     'message' => $validatedData->errors()
                 ], 422);
             }
-            $promocodes_count = PromoCodes::where('promo_code', '=', $request->promo_code)->count();
+            $promocodes_count = PromoCode::where('promo_code', '=', $request->promo_code)->count();
             if ($promocodes_count == 1) {
-                $expiry_dt = PromoCodes::where('promo_code', '=', $request->promo_code)->pluck('expiry_dt')->first();
+                $expiry_dt = PromoCode::where('promo_code', '=', $request->promo_code)->pluck('expiry_dt')->first();
                 $current_date = date('Y-m-d');
                 if ($expiry_dt < $current_date) {
                     return response()->json([
@@ -268,10 +258,10 @@ class PromoCodesController extends Controller
                         'message' =>  config('constants.EXPIRED_PROMOCODE')
                     ], 200);
                 } else {
-                    $promo_codes = PromoCodes::where('promo_code', '=', $request->promo_code)->get();
+                    $promo_codes = PromoCode::where('promo_code', '=', $request->promo_code)->get();
                     if (empty($promo_codes[0]->store_id)) $promo_codes[0]->store_id = NULL;
                     //below query will pass required data to our helper functions down below to validate
-                    $promo_code_data = PromoCodes::where('promo_code', $request->promo_code)->first(['id', 'usage_limit', 'store_id', 'discount']);
+                    $promo_code_data = PromoCode::where('promo_code', $request->promo_code)->first(['id', 'usage_limit', 'store_id', 'discount']);
                     /**
                      * This condition will only work if the  
                      * Promo code is only valid for a specific order#

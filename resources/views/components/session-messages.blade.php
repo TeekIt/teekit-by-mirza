@@ -1,11 +1,5 @@
 <div class="container pt-4">
     @if (session('status'))
-        {{-- <div class="container pt-4">
-            <div class="alert alert-success" role="alert">
-                {{ session('status') }}
-            </div>
-        </div> --}}
-
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <strong>Success!</strong>
             {{ session('status') }}
