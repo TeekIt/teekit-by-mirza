@@ -1,3 +1,7 @@
+@php
+    use App\Enums\UserRoleEnum;
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -10,11 +14,9 @@
     <div class="wrapper">
         @include('layouts.common.navbar')
 
-        {{-- 1 == Super Admin --}}
-        @if (Auth::user()->role_id === 1)
+        @if (Auth::user()->role_id == UserRoleEnum::SUPERADMIN->value)
             @include('layouts.admin.sidebar')
-            {{-- 2 == Parent Seller, 5 == Child Seller --}}
-        @elseif(Auth::user()->role_id == 2 || Auth::user()->role_id == 5)
+        @elseif(Auth::user()->role_id == UserRoleEnum::SELLER->value || Auth::user()->role_id == UserRoleEnum::CHILD_SELLER->value)
             @include('layouts.shopkeeper.sidebar')
             <x-seller-business-hours-modal />
         @endif

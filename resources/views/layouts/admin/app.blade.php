@@ -16,11 +16,13 @@
                 <div class="col-md-12">
                     <div class="container pt-4">
                         {{-- @include('flash::message') --}}
-                        @if (session('status'))
+
+                        <x-session-messages />
+                        {{-- @if (session('status'))
                             <div class="alert alert-success" role="alert">
                                 {{ session('status') }}
                             </div>
-                        @endif
+                        @endif --}}
                     </div>
                 </div>
             </div>

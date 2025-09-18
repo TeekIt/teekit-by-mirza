@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection as SupportCollection;
 use Laravel\Cashier\Billable;
 
 class User extends Authenticatable implements JWTSubject
@@ -491,14 +492,14 @@ class User extends Authenticatable implements JWTSubject
         return $updated;
     }
 
-    public static function activeOrBlockCustomer(int $user_id, int $status): int
+    public static function activeOrBlockCustomer(int $userId, int $status): int
     {
-        return self::where('id', '=', $user_id)->update(['is_active' => $status]);
+        return self::where('id', '=', $userId)->update(['is_active' => $status]);
     }
 
-    public static function getUserRole(int $user_id): object
+    public static function getUserRole(int $userId): SupportCollection
     {
-        return self::where('id', $user_id)->pluck('role_id');
+        return self::where('id', '=', $userId)->pluck('role_id');
     }
 
     public static function getUserInfo(int $userId): ?array
