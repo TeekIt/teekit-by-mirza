@@ -35,7 +35,7 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('promocodes/home') ? 'active' : '' }}"
+                      <a class="nav-link {{ request()->is('admin/promocodes/home') ? 'active' : '' }}"
                           href="{{ route('admin.promocodes.home') }}">
                           <i class="nav-icon fas fa-qrcode"></i>
                           <p class="ml-2">
@@ -44,7 +44,7 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('/admin/referralcodes') ? 'active' : '' }}"
+                      <a class="nav-link {{ request()->is('admin/referralcodes') ? 'active' : '' }}"
                           href="{{ route('admin.referralcodes') }}">
                           <i class="nav-icon fas fa-share-alt-square"></i>
                           <p class="ml-2">
