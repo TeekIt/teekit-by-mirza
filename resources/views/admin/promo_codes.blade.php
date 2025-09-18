@@ -33,13 +33,13 @@
             <div class="container-fluid">
                 <div class="row">
                     <!-- modal start -->
-                    @foreach ($promo_codes as $promo_code)
-                        <div class="modal fade" id="promo_codeModal{{ $promo_code->id }}" tabindex="-1" role="dialog"
+                    @foreach ($promoCodes as $singleIndex)
+                        <div class="modal fade" id="promo_codeModal{{ $singleIndex->id }}" tabindex="-1" role="dialog"
                             aria-labelledby="exampleModalLabel" style="display: none;" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <form method="post"
-                                        action="{{ route('admin.promocodes.update', ['id' => $promo_code->id]) }}"
+                                        action="{{ route('admin.promocodes.update', ['id' => $singleIndex->id]) }}"
                                         enctype="multipart/form-data">
                                         {{ csrf_field() }}
                                         <div class="modal-header">
@@ -55,7 +55,7 @@
                                                     <div class="form-group">
                                                         <label for="">Promo code</label>
                                                         <input type="text" name="promo_code" class="form-control"
-                                                            value="{{ $promo_code->promo_code }}" required>
+                                                            value="{{ $singleIndex->promo_code }}" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -63,10 +63,10 @@
                                                         <label for="">Discount type</label>
                                                         <select name="discount_type" class="form-control" required>
                                                             <option value="0"
-                                                                @if ($promo_code->discount_type == 0) selected @endif>Percentage
+                                                                @if ($singleIndex->discount_type == 0) selected @endif>Percentage
                                                             </option>
                                                             <option value="1"
-                                                                @if ($promo_code->discount_type == 1) selected @endif>Fixed
+                                                                @if ($singleIndex->discount_type == 1) selected @endif>Fixed
                                                                 amount
                                                             </option>
                                                         </select>
@@ -77,28 +77,28 @@
                                                     <div class="form-group">
                                                         <label for="">Discount</label>
                                                         <input type="number" name="discount" class="form-control"
-                                                            value="{{ $promo_code->discount }}" required>
+                                                            value="{{ $singleIndex->discount }}" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="">Order</label>
                                                         <input type="number" name="order_number" class="form-control"
-                                                            value="{{ $promo_code->order_number }}">
+                                                            value="{{ $singleIndex->order_number }}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="">Usage limit</label>
                                                         <input type="number" name="usage_limit" class="form-control"
-                                                            value="{{ $promo_code->usage_limit }}">
+                                                            value="{{ $singleIndex->usage_limit }}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="">Expiry date</label>
                                                         <input type="date" name="expiry_dt" class="form-control"
-                                                            value="{{ $promo_code->expiry_dt }}" required>
+                                                            value="{{ $singleIndex->expiry_dt }}" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -106,7 +106,7 @@
                                                         <label for="">Min discount</label>
                                                         <input type="number" name="min_amnt_for_discount"
                                                             class="form-control"
-                                                            value="{{ $promo_code->min_amnt_for_discount }}" required>
+                                                            value="{{ $singleIndex->min_amnt_for_discount }}" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -114,7 +114,7 @@
                                                         <label for="">Max discount</label>
                                                         <input type="number" name="max_amnt_for_discount"
                                                             class="form-control"
-                                                            value="{{ $promo_code->max_amnt_for_discount }}" required>
+                                                            value="{{ $singleIndex->max_amnt_for_discount }}" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-12">
@@ -125,12 +125,21 @@
                                                             </option>
                                                             @foreach ($stores as $store)
                                                                 <option
-                                                                    {{ $promo_code->store_id == $store->id ? 'selected' : '' }}
+                                                                    {{ $singleIndex->store_id == $store->id ? 'selected' : '' }}
                                                                     value="{{ $store->id }}">
                                                                     {{ $store->business_name }}
                                                                 </option>
                                                             @endforeach
                                                         </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <input type="checkbox" name="free_delivery" id="free_delivery"
+                                                            {{ $singleIndex->free_delivery ? 'checked' : '' }}>
+                                                        <label for="free_delivery" class="form-check-label">
+                                                            Free delivery
+                                                        </label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -178,11 +187,14 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <select name="discount_type" class="form-control" required>
-                                                            <option disabled selected>Select type
+                                                            <option disabled selected>
+                                                                Select type
                                                             </option>
-                                                            <option value="0">Percentage
+                                                            <option value="0">
+                                                                Percentage
                                                             </option>
-                                                            <option value="1">Fixed amount
+                                                            <option value="1">
+                                                                Fixed amount
                                                             </option>
                                                         </select>
                                                     </div>
@@ -239,7 +251,15 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer hidden ">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <input type="checkbox" name="free_delivery" id="free_delivery">
+                                                        <label for="free_delivery" class="form-check-label">
+                                                            Free delivery
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
                                                     <button type="button"
                                                         class="btn btn-secondary rounded-pill px-5 py-2"
                                                         data-bs-dismiss="modal">
@@ -275,24 +295,24 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse ($promo_codes as $promo_code)
+                                        @forelse ($promoCodes as $singleIndex)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>
                                                     <input type="checkbox" class="select-checkbox" title="Select"
-                                                        id="{{ $promo_code->id }}">
+                                                        id="{{ $singleIndex->id }}">
                                                 </td>
-                                                <td>{{ $promo_code->promo_code }}</td>
-                                                @if ($promo_code->discount_type == '0')
-                                                    <td>{{ $promo_code->discount }}%</td>
+                                                <td>{{ $singleIndex->promo_code }}</td>
+                                                @if ($singleIndex->discount_type == '0')
+                                                    <td>{{ $singleIndex->discount }}%</td>
                                                 @else
-                                                    <td>£{{ $promo_code->discount }}</td>
+                                                    <td>£{{ $singleIndex->discount }}</td>
                                                 @endif
-                                                <td>{{ $promo_code->order_number }}</td>
-                                                <td>{{ $promo_code->expiry_dt }}</td>
+                                                <td>{{ $singleIndex->order_number }}</td>
+                                                <td>{{ $singleIndex->expiry_dt }}</td>
                                                 <td>
                                                     <button data-bs-toggle="modal"
-                                                        data-bs-target="#promo_codeModal{{ $promo_code->id }}"
+                                                        data-bs-target="#promo_codeModal{{ $singleIndex->id }}"
                                                         class="btn text-site-primary">
                                                         <i class="far fa-edit"></i>
                                                     </button>
@@ -308,7 +328,7 @@
                                     </tbody>
                                 </table>
                                 <div class="d-flex justify-content-center" style="padding-top: 10px;">
-                                    {{ $promo_codes->links() }}
+                                    {{ $promoCodes->links() }}
                                 </div>
                             </div>
                         </div>

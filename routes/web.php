@@ -160,6 +160,13 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
         });
     });
 
+    Route::prefix('promocodes')->controller(PromoCodesController::class)->group(function () {
+        Route::get('/home', 'promocodesHome')->name('admin.promocodes.home');
+        Route::post('/add', 'promocodesAdd')->name('admin.promocodes.add');
+        Route::get('/delete', 'promoCodesDel')->name('admin.promocodes.del');
+        Route::post('/{id}/update', 'promoCodesUpdate')->name('admin.promocodes.update');
+    });
+
     Route::controller(HomeController::class)->group(function () {
         Route::post('/update/pages', 'updatePages')->name('admin.update.pages');
 
@@ -184,13 +191,6 @@ Route::prefix('stuart')->controller(StuartDeliveryController::class)->group(func
     Route::prefix('job')->group(function () {
         Route::post('/creation', 'stuartJobCreationForWeb')->name('stuart.job.creation');
     });
-});
-
-Route::prefix('promocodes')->controller(PromoCodesController::class)->group(function () {
-    Route::get('/home', 'promocodesHome')->name('admin.promocodes.home');
-    Route::post('/add', 'promocodesAdd')->name('admin.promocodes.add');
-    Route::get('/delete', 'promoCodesDel')->name('admin.promocodes.del');
-    Route::post('/{id}/update', 'promoCodesUpdate')->name('admin.promocodes.update');
 });
 
 Route::get('/mark-complete-order/{id}', [HomeController::class, 'markCompleteOrder'])->name('mark.complete.order');

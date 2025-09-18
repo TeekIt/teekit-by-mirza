@@ -29,18 +29,20 @@ class RunRawQueries extends Command
      */
     public function handle()
     {
-        $executeQueries = false;
+        $executeQueries = true;
 
         try {
             if ($executeQueries) {
                 $this->warn('You are executing raw queries directly into the database');
 
                 DB::transaction(function () {
-                    
-                    /* Above queries are already executed on all ENVs */
-                    
-                    /* Above queries are already executed on local ENV */
 
+                    /* Below queries are already executed on all ENVs */
+                    // 
+
+                    /* Below queries are already executed on local ENV */
+                    DB::statement("ALTER TABLE `promo_codes` CHANGE `store_id` `store_id` BIGINT UNSIGNED NULL DEFAULT NULL");
+                    DB::statement("ALTER TABLE `promo_codes` ADD `free_delivery` BOOLEAN NOT NULL DEFAULT FALSE AFTER `store_id`");
                 });
             }
         } catch (Exception $error) {
