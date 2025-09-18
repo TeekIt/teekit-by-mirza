@@ -8,6 +8,7 @@
 /vendor
 /docker-compose/mysql/
 /docker-compose/nginx/*
+!/docker-compose/nginx/teekit.example.conf
 .idea/
 .env
 .phpunit.result.cache
