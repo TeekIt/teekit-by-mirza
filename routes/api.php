@@ -1,12 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\v1\BuyerController;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\QtyController;
+use App\Http\Controllers\Api\v1\QtyController;
 use App\Http\Controllers\Api\v1\CategoriesController;
 use App\Http\Controllers\Api\v1\PagesController;
-use App\Http\Controllers\UsersController;
 use App\Http\Controllers\Api\v1\DriverController;
 use App\Http\Controllers\Api\v2\GophrDeliveryController;
 use App\Http\Controllers\Api\v2\StuartDeliveryController;
@@ -14,11 +14,12 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Api\v1\OrdersController;
 use App\Http\Controllers\Api\v1\ProductController;
+use App\Http\Controllers\Api\v1\RattingController;
+use App\Http\Controllers\Api\v1\SellerController;
 use App\Http\Controllers\PromoCodesController;
-use App\Http\Controllers\RattingsController;
-use App\Http\Controllers\ReferralCodeRelationController;
+use App\Http\Controllers\Api\v1\ReferralCodeRelationController;
 use App\Http\Controllers\Api\v1\StripeController;
-use App\Http\Controllers\WithdrawalRequestsController;
+use App\Http\Controllers\Api\v1\WithdrawalRequestController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
@@ -88,7 +89,7 @@ Route::prefix('category')->controller(CategoriesController::class)->group(functi
 | Seller API Routes Without JWT Authentication
 |--------------------------------------------------------------------------
 */
-Route::prefix('sellers')->controller(UsersController::class)->group(function () {
+Route::prefix('sellers')->controller(SellerController::class)->group(function () {
     Route::get('/', 'sellers');
     Route::post('save/stripe_account_id', 'saveStripeAccountId');
 });
@@ -144,13 +145,13 @@ Route::middleware(['jwt.verify'])->group(function () {
             });
         });
 
-        Route::prefix('ratings')->controller(RattingsController::class)->group(function () {
+        Route::prefix('ratings')->controller(RattingController::class)->group(function () {
             Route::post('add', 'add');
             Route::get('delete/{ratting_id}', 'delete');
         });
     });
 
-    Route::prefix('withdrawal')->controller(WithdrawalRequestsController::class)->group(function () {
+    Route::prefix('withdrawal')->controller(WithdrawalRequestController::class)->group(function () {
         Route::get('getRequests', 'getRequests');
         Route::post('sendRequest', 'sendRequest');
     });
@@ -206,7 +207,7 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('/update', [WalletController::class, 'update']);
     }); */
 
-    Route::prefix('buyer')->controller(UsersController::class)->group(function () {
+    Route::prefix('buyer')->controller(BuyerController::class)->group(function () {
         Route::patch('update', 'updateBuyer');
     });
 

@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Controllers\UsersController;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -99,7 +98,7 @@ final class GoogleMapServices
                             'distance' => $distanceInMiles,
                             'duration' => $durationInMinutes
                         ];
-                        $userData[] = UsersController::getSellerInfo($destinations['users'][$key], $distanceData);
+                        $userData[] = SellerServices::getStandardSellerInfo($destinations['users'][$key], $distanceData);
                     }
                 }
             }

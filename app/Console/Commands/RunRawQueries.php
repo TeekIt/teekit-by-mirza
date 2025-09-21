@@ -22,6 +22,8 @@ class RunRawQueries extends Command
      */
     protected $description = 'Executes all raw queries provided in the handle method';
 
+    protected bool $executeQueries = false;
+
     /**
      * Execute the console command.
      *
@@ -29,20 +31,16 @@ class RunRawQueries extends Command
      */
     public function handle()
     {
-        $executeQueries = true;
-
         try {
-            if ($executeQueries) {
+            if ($this->executeQueries) {
                 $this->warn('You are executing raw queries directly into the database');
 
                 DB::transaction(function () {
-
                     /* Below queries are already executed on all ENVs */
-                    // 
+                    // DB::statement("ALTER TABLE `promo_codes` CHANGE `store_id` `store_id` BIGINT UNSIGNED NULL DEFAULT NULL");
+                    // DB::statement("ALTER TABLE `promo_codes` ADD `free_delivery` BOOLEAN NOT NULL DEFAULT FALSE AFTER `store_id`");
 
                     /* Below queries are already executed on local ENV */
-                    DB::statement("ALTER TABLE `promo_codes` CHANGE `store_id` `store_id` BIGINT UNSIGNED NULL DEFAULT NULL");
-                    DB::statement("ALTER TABLE `promo_codes` ADD `free_delivery` BOOLEAN NOT NULL DEFAULT FALSE AFTER `store_id`");
                 });
             }
         } catch (Exception $error) {

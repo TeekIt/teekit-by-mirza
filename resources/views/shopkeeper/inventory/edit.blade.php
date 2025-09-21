@@ -14,9 +14,6 @@
 
 @section('content')
     <div class="content">
-
-        <x-session-messages />
-
         <!-- Main content -->
         <div class="content">
             <div class="container-fluid">
@@ -284,6 +281,7 @@
         }
     </style>
 @endsection
+
 @section('scripts')
     <script>
         $(document).ready(function() {
