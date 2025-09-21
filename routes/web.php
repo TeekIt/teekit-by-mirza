@@ -12,7 +12,9 @@ use App\Http\Controllers\PromoCodesController;
 use App\Http\Controllers\Web\v2\StripeController;
 use App\Http\Controllers\Web\v1\StuartDeliveryController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\Web\v1\AdminController;
 use App\Http\Controllers\Web\v1\OrdersController;
+use App\Http\Controllers\Web\v1\SellerController;
 use App\Http\Livewire\Admin\CategoriesLivewire;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
@@ -112,7 +114,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
     Route::prefix('settings')->group(function () {
         Route::get('/general', GeneralSettingsLivewire::class)->name('seller.settings.general');
 
-        Route::controller(UsersController::class)->group(function () {
+        Route::controller(SellerController::class)->group(function () {
             Route::post('/update-location', 'updateStoreLocation')->name('seller.settings.update.location');
             Route::post('/update-required-info', 'updateSellerRequiredInfo')->name('seller.update.required.info');
         });
@@ -151,12 +153,12 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
         Route::post('/send', 'notificationSend')->name('admin.notification.send');
     });
 
-    Route::controller(UsersController::class)->group(function () {
-        Route::get('/settings', 'adminSettings')->name('admin.settings');
+    Route::controller(AdminController::class)->group(function () {
+        Route::get('/settings', 'settings')->name('admin.settings');
 
         Route::prefix('delete')->group(function () {
-            Route::get('/users', 'adminUsersDel')->name('admin.del.users');
-            Route::get('/drivers', 'adminDriversDel')->name('admin.del.drivers');
+            Route::get('/users', 'deleteUsers')->name('admin.del.users');
+            Route::get('/drivers', 'deleteDrivers')->name('admin.del.drivers');
         });
     });
 

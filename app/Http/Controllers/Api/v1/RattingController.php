@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Controllers\Controller;
 use App\Rattings;
 use App\Services\JsonResponseServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class RattingsController extends Controller
+class RattingController extends Controller
 {
     /** @deprecated This method is deprecated, In case of new requirement we have to re-write this */
     public function add(Request $request)

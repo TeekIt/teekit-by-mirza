@@ -15,23 +15,12 @@
         <div class="content-wrapper">
             <div class="row">
                 <div class="col-md-12">
-                    
                     <div class="container pt-4">
-                        {{-- @include('flash::message') --}}
+                        <x-session-messages />
                     </div>
-
-                    @if (session('status'))
-                        <div class="container pt-4">
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <strong>Success!</strong>
-                                {{ session('status') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                    aria-label="Close"></button>
-                            </div>
-                        </div>
-                    @endif
                 </div>
             </div>
+
             @yield('content')
         </div>
     </div>
