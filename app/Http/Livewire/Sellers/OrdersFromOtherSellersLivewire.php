@@ -169,14 +169,17 @@ class OrdersFromOtherSellersLivewire extends Component
             );
 
             if ($orderFromOtherSeller['type'] == OrderTypeEnum::SELF_PICKUP->value) {
-                $ordersFromOtherSeller = OrdersFromOtherSeller::getById([
-                    'id',
-                    'created_by_type',
-                    'created_by_id',
-                    'seller_id',
-                    'product_belongs_to_type',
-                    'product_belongs_to_id',
-                ], $orderFromOtherSeller['id']);
+                $ordersFromOtherSeller = OrdersFromOtherSeller::getById(
+                    id: $orderFromOtherSeller['id'],
+                    columns: [
+                        'id',
+                        'created_by_type',
+                        'created_by_id',
+                        'seller_id',
+                        'product_belongs_to_type',
+                        'product_belongs_to_id',
+                    ]
+                );
                 EmailServices::sendPickupYourOrderFromOtherSellerMail($ordersFromOtherSeller);
             }
             /* Operation finished */
@@ -213,27 +216,27 @@ class OrdersFromOtherSellersLivewire extends Component
 
     public function cancelOrder($orderId)
     {
-        try {
-            /* Perform some operation */
-            $order = OrdersFromOtherSeller::getById(id: $orderId);
+        // try {
+        //     /* Perform some operation */
+        //     $order = OrdersFromOtherSeller::getById(id: $orderId);
 
-            StripeServices::refundCustomer($order);
+        //     StripeServices::refundCustomer($order);
 
-            $cancelled = OrdersFromOtherSeller::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
+        //     $cancelled = OrdersFromOtherSeller::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
 
-            EmailServices::sendOrderHasBeenCancelledMail($order);
-            /* Operation finished */
-            sleep(1);
+        //     EmailServices::sendOrderHasBeenCancelledMail($order);
+        //     /* Operation finished */
+        //     sleep(1);
 
-            if ($cancelled) {
-                session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
-            } else {
-                session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
-            }
-        } catch (Exception $error) {
-            report($error);
-            session()->flash('error', $error->getMessage());
-        }
+        //     if ($cancelled) {
+        //         session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
+        //     } else {
+        //         session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
+        //     }
+        // } catch (Exception $error) {
+        //     report($error);
+        //     session()->flash('error', $error->getMessage());
+        // }
     }
 
     /* 
@@ -252,6 +255,7 @@ class OrdersFromOtherSellersLivewire extends Component
                 'created_by_type',
                 'created_by_id',
                 'seller_id',
+                'parent_order_id',
                 'product_belongs_to_type',
                 'product_belongs_to_id',
                 'product_price',
@@ -262,6 +266,7 @@ class OrdersFromOtherSellersLivewire extends Component
                 'type',
                 'payment_status',
                 'order_status',
+                'disabled',
                 'moved_at',
                 'created_at',
             ],

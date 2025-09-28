@@ -6,6 +6,7 @@
         use App\Enums\OrderTypeEnum;
         use App\Models\ProductsByBuyer;
         use App\Products;
+        use App\Orders;
         use App\User;
         use App\Services\DateTimeServices;
     @endphp
@@ -31,7 +32,7 @@
                             <div class="form-group">
                                 <input type="number" class="form-control" placeholder="Enter your price"
                                     wire:model.defer="priceBySeller"
-                                    max="{{ $this->selectedOrder?->order_items[0]->product_price }}">
+                                    max="{{ $this->getProductPrice($selectedOrder) }}">
                             </div>
                             <small class="text-danger">
                                 @error('priceBySeller')
@@ -43,7 +44,7 @@
                             <label>Max Price By Buyer</label>
                             <div class="form-group">
                                 <input type="text" class="form-control"
-                                    value="${{ $selectedOrder?->order_items[0]->product_price }}" disabled>
+                                    value="${{ $this->getProductPrice($selectedOrder) }}" disabled>
                             </div>
                         </div>
                     </div>
@@ -234,10 +235,21 @@
     <table class="table table-striped table-responsive-sm">
         <thead>
             <tr>
+                        @php
+                            echo $order->parent_order_id . PHP_EOL;
+                            echo $order->disabled;
+                        @endphp
                 <div class="d-flex flex-column-reverse flex-md-row justify-content-between pb-4 gap-1">
+                    @if ($order->disabled)
+                        <div class="col-12">
+                            <div class="alert alert-secondary" role="alert">
+                                <b>SORRY YOU HAVE MISSED THE CHANCE!</b> this order has been accepted by another seller
+                            </div>
+                        </div>
+                    @else
                     <div>
                         @if ($order->order_status === OrderStatusEnum::PENDING->value)
-                            @if ($order?->order_items[0]?->product_belongs_to_type === (new Products())->getMorphClass())
+                            @if ($this->getProductBelongsToType($order) === (new Products())->getMorphClass())
                                 <button class="btn btn-success" wire:click="orderIsAccepted({{ $order->id }})"
                                     wire:target="orderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark"
                                     wire:loading.class.remove="btn-success" wire:loading.attr="disabled"
@@ -264,7 +276,7 @@
                                 </button>
                             @endif
 
-                            @if ($order->order_items[0]->product_belongs_to_type === (new ProductsByBuyer())->getMorphClass())
+                            @if ($this->getProductBelongsToType($order) === (new ProductsByBuyer())->getMorphClass())
                                 <button class="btn btn-success"
                                     wire:click="renderCustomProductOrderModal({{ $order->id }})"
                                     wire:loading.class="btn-dark" wire:loading.class.remove="btn-success"
@@ -281,7 +293,7 @@
                                             aria-hidden="true"></span>
                                     </span>
                                 </button>
-                                @if (!User::isSuperAdmin())
+                                @if (!User::isSuperAdmin() && $order instanceof Orders)
                                     <button class="btn btn-danger"
                                         wire:click="sendCustomProductOrderToAnOtherSeller({{ $order->id }})"
                                         wire:target="sendCustomProductOrderToAnOtherSeller({{ $order->id }})"
@@ -396,7 +408,7 @@
                     </div>
 
                     <div>
-                        @if ($order->order_items[0]->product_belongs_to_type == (new ProductsByBuyer())->getMorphClass())
+                        @if ($this->getProductBelongsToType($order) == (new ProductsByBuyer())->getMorphClass())
                             <button type="button" class="btn btn-primary"
                                 title="This is a custom product order created by the buyer. You may not uploaded it into our system but if you have it in your physical warehouse then you can accept this order happily & make money 😉">
                                 <i class="fas fa-fingerprint"></i>
@@ -404,6 +416,7 @@
                             </button>
                         @endif
                     </div>
+                    @endif
                 </div>
             </tr>
         </thead>

@@ -22,12 +22,17 @@ final class GoogleMapServices
     /**
      * @param Collection<User> $sellersOfSameCity
      */
-    public static function getNearBySellers(float $buyerLat, float $buyerLon, Collection $sellersOfSameCity, int $currentSellerId): array
-    {
+    public static function getNearBySellers(
+        float $buyerLat,
+        float $buyerLon,
+        Collection $sellersOfSameCity,
+        int $currentSellerId,
+        int $nearByMiles = CompanyStandardsServices::STANDARD_NEAR_BY_MILES,
+    ): array {
         return Cache::remember(
             'getNearBySellers' . $currentSellerId . $buyerLat . $buyerLon,
             Carbon::now()->addDay(),
-            function () use ($buyerLat, $buyerLon, $sellersOfSameCity) {
+            function () use ($buyerLat, $buyerLon, $sellersOfSameCity, $nearByMiles) {
                 /* 
                  * This function will not work with "faker" generated 
                  * customer lat, lon
@@ -36,7 +41,8 @@ final class GoogleMapServices
                     $buyerLat,
                     $buyerLon,
                     $sellersOfSameCity,
-                    25
+                    25,
+                    $nearByMiles,
                 );
             }
         );
@@ -115,7 +121,7 @@ final class GoogleMapServices
         float $lon,
         Collection $users,
         int $chunkSize = 25,
-        int $nearByMiles = 5
+        int $nearByMiles = CompanyStandardsServices::STANDARD_NEAR_BY_MILES
     ): array {
         if ($chunkSize > 25) return [];
 

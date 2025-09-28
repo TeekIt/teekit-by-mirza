@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Categories;
 use App\Enums\TransportVehicleEnum;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -23,6 +24,7 @@ class ProductsByBuyer extends Model
         'created_by_type',
         'created_by_id',
         'seller_id',
+        'category_id',
         'product_name',
         'qty',
         'max_price',
@@ -53,6 +55,11 @@ class ProductsByBuyer extends Model
     {
         return $this->morphTo();
     }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Categories::class, 'category_id');
+    }
     /**
      * Helpers
      */
@@ -60,6 +67,7 @@ class ProductsByBuyer extends Model
         string $createdByType,
         int $createdById,
         int $sellerId,
+        int $categoryId,
         string $productName,
         int $qty,
         float $maxPrice,
@@ -77,6 +85,7 @@ class ProductsByBuyer extends Model
             'created_by_type' => $createdByType,
             'created_by_id' => $createdById,
             'seller_id' => $sellerId,
+            'category_id' => $categoryId,
             'product_name' => $productName,
             'qty' => $qty,
             'max_price' => $maxPrice,

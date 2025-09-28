@@ -128,6 +128,7 @@ class Orders extends Model
         $order->state = $request->state;
         $order->city = $request->city;
         $order->postcode = $request->postcode;
+        
         $order->driver_charges = $driverCharges;
         $order->delivery_charges = $request->deliveryCharges;
         $order->service_charges = $request->serviceCharges;

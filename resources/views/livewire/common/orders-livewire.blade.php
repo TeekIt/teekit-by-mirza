@@ -308,7 +308,7 @@
                                                                     data-bs-target="#sendToOtherStoresModal"
                                                                     wire:click="renderSTOSModal({{ $order->id }})">
                                                                     <i class="fas fa-paper-plane"></i>
-                                                                    Send To Other Stores
+                                                                    Send To Other Sellers
                                                                 </button>
                                                             @elseif ($orderItem->user_choice === UserChoicesEnum::CALL_ME->value)
                                                                 <button type="button" class="btn btn-site-primary"
@@ -334,10 +334,15 @@
 
                                             @if ($orderItem->product_belongs_to_type === (new ProductsByBuyer())->getMorphClass())
                                                 <tr>
+                                                    <td class="col-4 text-site-primary"><b>Category</b></td>
+                                                    <td class="col-8">
+                                                        {{ $orderItem->product->category?->category_name }}
+                                                    </td>
+                                                </tr>
+                                                <tr>
                                                     <td class="col-4 text-site-primary"><b>Price</b></td>
                                                     <td class="col-8"> £{{ $orderItem->product->max_price }} </td>
                                                 </tr>
-
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Weight</b></td>
                                                     <td class="col-8"> {{ $orderItem->product->weight }}kg </td>

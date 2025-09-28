@@ -20,6 +20,10 @@ final class OrderServices
         if (is_array($order)) {
             return array_sum(array_column($order, 'weight'));
         }
+
+        if ($order instanceof OrdersFromOtherSeller) {
+            return $order->product->weight;
+        }
         
         return $order->order_items->pluck('product')->sum('weight');
     }

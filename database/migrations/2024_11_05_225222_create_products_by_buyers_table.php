@@ -17,6 +17,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->morphs('created_by'); /* This column can either belong to "users" or "guest_buyers" */
             $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('category_id')->nullable()->constrained(table:'categories')->cascadeOnDelete();
             $table->string('product_name');
             $table->integer('qty');
             $table->float('max_price');

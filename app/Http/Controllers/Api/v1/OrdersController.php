@@ -205,10 +205,11 @@ class OrdersController extends Controller
                     ->where(fn(Builder $query) => $query
                         ->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
             ],
+            'categoryId' => 'required|integer|exists:categories,id',
             'productName' => 'required|string|max:255',
             'qty' => 'required|integer',
-            'maxPrice' => 'required|numeric|min:0',
-            'weight' => 'nullable|numeric|min:0',
+            'maxPrice' => 'required|numeric|min:1',
+            'weight' => 'required|numeric|min:1',
             'brand' => 'nullable|string|max:255',
             'partNumber' => 'nullable|string|max:255',
             'colors' => 'nullable|array',
@@ -278,6 +279,7 @@ class OrdersController extends Controller
             $createdByType,
             $createdById,
             $request->sellerId,
+            $request->categoryId,
             $request->productName,
             $request->qty,
             $request->maxPrice,
@@ -351,12 +353,12 @@ class OrdersController extends Controller
         }
 
         /* Email order details to nearby sellers */
-        SendCustomProductOrderDetailsToNearBySellersJob::dispatch(
-            $request->lat,
-            $request->lon,
-            $seller,
-            $order
-        )->onQueue('high');
+        // SendCustomProductOrderDetailsToNearBySellersJob::dispatch(
+        //     $request->lat,
+        //     $request->lon,
+        //     $seller,
+        //     $order
+        // )->onQueue('high');
 
         $idsArray[] = $order->id;
 

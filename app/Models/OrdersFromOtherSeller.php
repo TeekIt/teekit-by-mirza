@@ -2,19 +2,22 @@
 
 namespace App\Models;
 
+use App\Enums\ModelDisabledStatusEnum;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrdersFromOtherSeller extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Prunable;
 
     protected $fillable = ['*'];
 
@@ -22,6 +25,13 @@ class OrdersFromOtherSeller extends Model
         'updated_at',
         'deleted_at',
     ];
+    /**
+     * Laravel Built-In Helpers
+     */
+    public function prunable()
+    {
+        return static::where('disabled', ModelDisabledStatusEnum::YES->value)->where('created_at', '<=', now()->addDay());
+    }
     /**
      * Relations
      */
@@ -47,22 +57,41 @@ class OrdersFromOtherSeller extends Model
         return self::where('id', '=', $id)->update(['order_status' => $status]);
     }
 
-    public static function isViewed(int $id): object
+    public static function isViewed(int $id): OrdersFromOtherSeller
     {
         $order = self::findOrFail($id);
         $order->is_viewed = 1;
         $order->save();
+
         return $order;
     }
 
-    public static function orderAccepted(int $id): int
-    {
-        return self::where('id', '=', $id)->update(['accepted' => 1]);
+    public static function updateInfo(
+        int $id,
+        ?float $initialTotal = null,
+        ?float $currentTotal = null,
+        ?OrderStatusEnum $orderStatus = null
+    ): bool {
+        $order = self::findOrFail($id);
+        if (!is_null($initialTotal)) $order->initial_total = $initialTotal;
+        if (!is_null($currentTotal)) $order->current_total = $currentTotal;
+        if (!is_null($orderStatus)) $order->order_status = $orderStatus;
+
+        return $order->save();
     }
 
     public static function incrementTimesRejected(int $id): int
     {
         return self::where('id', '=', $id)->increment('times_rejected');
+    }
+
+    public static function disableThisOrderForOthers(int $parentOrderId, int $exceptSellerId): int
+    {
+        return self::where('parent_order_id', '=', $parentOrderId)
+            ->where('seller_id', '!=', $exceptSellerId)
+            ->update([
+                'disabled' => ModelDisabledStatusEnum::YES->value
+            ]);
     }
 
     public static function moveToAnotherSeller(int $id, int $sellerId): int
@@ -95,7 +124,7 @@ class OrdersFromOtherSeller extends Model
         string $state,
         string $city,
         string $postcode,
-        string $paymentIntentId,
+        ?string $paymentIntentId = null,
         float $driverCharges = 0.0,
         ?float $deliveryCharges = null,
         ?float $serviceCharges = null,
@@ -118,18 +147,20 @@ class OrdersFromOtherSeller extends Model
         $model->product_price = $productPrice;
         $model->product_qty = $productQty;
         $model->initial_total = $initialTotal;
-        // if ($type == OrderTypeEnum::DELIVERY->value) {
-        //     $model->customer_lat = $customerLat;
-        //     $model->customer_lon = $customerLon;
-        //     $model->customer_name = $receiverName;
-        //     $model->phone_number = $phoneNumber;
-        //     $model->address = $address;
-        //     $model->house_no = $houseNo;
-        //     $model->flat = $flat;
-        //     $model->driver_charges = $driverCharges;
-        //     $model->delivery_charges = $deliveryCharges;
-        //     $model->service_charges = $serviceCharges;
-        // }
+        /* When we create a new order current_total == initial_total */
+        $model->current_total = $initialTotal;
+        /* if ($type == OrderTypeEnum::DELIVERY->value) {
+            $model->customer_lat = $customerLat;
+            $model->customer_lon = $customerLon;
+            $model->customer_name = $receiverName;
+            $model->phone_number = $phoneNumber;
+            $model->address = $address;
+            $model->house_no = $houseNo;
+            $model->flat = $flat;
+            $model->driver_charges = $driverCharges;
+            $model->delivery_charges = $deliveryCharges;
+            $model->service_charges = $serviceCharges;
+        } */
         $model->customer_lat = $customerLat;
         $model->customer_lon = $customerLon;
         $model->customer_name = $receiverName;
@@ -162,7 +193,7 @@ class OrdersFromOtherSeller extends Model
         return $model;
     }
 
-    public static function getById(array $columns = ['*'], int $id): object
+    public static function getById(int $id, array $columns = ['*']): OrdersFromOtherSeller
     {
         return self::select($columns)
             ->with(['product', 'buyer', 'seller'])

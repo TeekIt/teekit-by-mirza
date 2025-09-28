@@ -16,8 +16,10 @@ use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
 use App\Services\UUIDServices;
 use App\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -108,6 +110,18 @@ class OrdersLivewire extends Component
         $this->phoneNumber = $phoneNumber;
     }
 
+    public function getSellersOfSameCityAndCategory()
+    {
+        return Cache::remember(
+            'getSellersOfSameCityAndCategory' . $this->sellerId,
+            Carbon::now()->addDay(),
+            fn() => User::getParentAndChildSellersByCityAndCategory(
+                auth()->user()->city,
+                $this->orderItem->product->category_id
+            )
+        );
+    }
+
     public function renderSTOSModal($orderId)
     {
         $this->resetComponent();
@@ -115,11 +129,12 @@ class OrdersLivewire extends Component
         $this->order = Orders::getById($orderId);
         $this->orderItem = $this->order->order_items[0];
 
-        $sellersOfTheSameCity = User::getParentAndChildSellersByCity(auth()->user()->city);
+        // $sellersOfTheSameCity = User::getParentAndChildSellersByCity(auth()->user()->city);
+        $sellersOfTheSameCityAndCategory = $this->getSellersOfSameCityAndCategory();
         $this->nearbySellers = GoogleMapServices::getNearBySellers(
             $this->order->customer_lat,
             $this->order->customer_lon,
-            $sellersOfTheSameCity,
+            $sellersOfTheSameCityAndCategory,
             $this->sellerId,
         );
     }
@@ -154,7 +169,7 @@ class OrdersLivewire extends Component
         try {
             /* Perform some operation */
             $selectedSeller = User::getSellerByBusinessName($this->selectedNearbySeller);
-
+            $name = 'a';
             $productTotalPrice = $this->orderItem->product_price * $this->orderItem->product_qty;
             /* Send this product to another seller */
             OrdersFromOtherSeller::add(
