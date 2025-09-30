@@ -436,7 +436,7 @@ class OrdersHeaderLivewire extends Component
 
                 $newOrderTotal = $this->priceBySeller * $this->getProductQty($this->selectedOrder);
 
-                // $response = $this->capturePayment($newOrderTotal);
+                $response = $this->capturePayment($newOrderTotal);
 
                 $updated = Orders::updateInfo(
                     id: $this->selectedOrder->id,

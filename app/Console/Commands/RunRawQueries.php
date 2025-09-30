@@ -41,16 +41,6 @@ class RunRawQueries extends Command
                     // DB::statement("ALTER TABLE `promo_codes` ADD `free_delivery` BOOLEAN NOT NULL DEFAULT FALSE AFTER `store_id`");
 
                     /* Below queries are already executed on staging ENVs */
-                    DB::statement("ALTER TABLE `products_by_buyers`
-                                   ADD COLUMN `category_id` BIGINT UNSIGNED NULL DEFAULT NULL AFTER `seller_id`,
-                                   ADD CONSTRAINT `products_by_buyers_category_id_foreign`
-                                   FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE CASCADE");
-
-                    DB::statement("ALTER TABLE `orders_from_other_sellers` CHANGE `accepted` `disabled` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Only ModelStatusEnum values are allowed'");
-                    
-                    DB::statement("ALTER TABLE `orders_from_other_sellers` ADD COLUMN `current_total` FLOAT NOT NULL DEFAULT 0.00 AFTER `initial_total`");
-
-                    /* Below queries are already executed on local ENVs */
                     // DB::statement("ALTER TABLE `products_by_buyers`
                     //                ADD COLUMN `category_id` BIGINT UNSIGNED NULL DEFAULT NULL AFTER `seller_id`,
                     //                ADD CONSTRAINT `products_by_buyers_category_id_foreign`
@@ -59,6 +49,9 @@ class RunRawQueries extends Command
                     // DB::statement("ALTER TABLE `orders_from_other_sellers` CHANGE `accepted` `disabled` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Only ModelStatusEnum values are allowed'");
                     
                     // DB::statement("ALTER TABLE `orders_from_other_sellers` ADD COLUMN `current_total` FLOAT NOT NULL DEFAULT 0.00 AFTER `initial_total`");
+
+                    /* Below queries are already executed on local ENVs */
+                    
                 });
             }
         } catch (Exception $error) {
