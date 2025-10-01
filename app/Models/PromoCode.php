@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PromoCode extends Model
 {
     use HasFactory, SoftDeletes;
-    
+
     protected $fillable = [
         'promo_code',
         'discount_type',
@@ -29,10 +31,27 @@ class PromoCode extends Model
         'updated_at',
         'deleted_at'
     ];
-
+    /**
+     * Relations
+     */
+    public function seller(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'store_id');
+    }
+    /**
+     * Helpers
+     */
     public static function getAll(string $orderBy, array $columns = ['*']): LengthAwarePaginator
     {
         return self::select($columns)->orderBy('created_at', $orderBy)->paginate(10);
+    }
+
+    public static function getByPromoCode(string $promoCode, array $columns = ['*']): PromoCode
+    {
+        return self::select($columns)
+            ->with(['seller:id,business_name'])
+            ->where('promo_code', '=', $promoCode)
+            ->firstOrFail();
     }
 
     public static function addOrUpdate(array $data, ?int $id = null): PromoCode|bool

@@ -191,9 +191,9 @@ Route::middleware(['jwt.verify'])->group(function () {
     });
 
     Route::prefix('promocodes')->controller(PromoCodesController::class)->group(function () {
-        Route::get('all', 'allPromocodes');
-        Route::post('validate', 'promocodesValidate');
-        Route::post('fetch_promocode_info', 'fetchPromocodeInfo');
+        Route::get('all', 'allPromoCodes');
+        Route::post('validate', 'validatePromoCodes');
+        Route::post('fetch_promocode_info', 'fetchPromoCodeInfo');
     });
 
     Route::prefix('referral')->controller(ReferralCodeRelationController::class)->group(function () {

@@ -2,46 +2,45 @@
 
 namespace App\Helpers;
 
+use App\Models\PromoCode;
 use App\Models\PromoCodesUsageLimit;
 use App\Services\JsonResponseServices;
 use App\User;
+use Illuminate\Http\JsonResponse;
 
 class PromoCodeHelpers
 {
-    public static function ifPromoCodeBelongsToStore($promo_code_data)
+    public static function getTheSellerBelongsToThisPromoCode(PromoCode $promoCode): array
     {
-        $store = User::where('id', $promo_code_data->store_id)->first();
-        if (empty($store)) {
-            return false;
-        } else {
-            $data = [
-                'id' => $store->id,
-                'name' => $store->business_name,
-                'discount' => $promo_code_data->discount,
-            ];
-            return $data;
-        }
+        $seller = User::getUserByID($promoCode->store_id, ['id', 'business_name']);
+
+        return [
+            'id' => $seller->id,
+            'name' => $seller->business_name,
+            'discount' => $promoCode->discount,
+        ];
     }
 
-    public static function checkUsageLimit(object $promo_codes, object $promo_code_data, object $request)
+    public static function checkUsageLimitAndReturnResponse(PromoCode $promoCode, object $request): JsonResponse
     {
-        if (PromoCodesUsageLimit::promoCodeUsageLimit($promo_code_data, $request->user_id) == 1) {
-            $data[0]['promo_code'] = $promo_codes[0];
-            $store_data = static::ifPromoCodeBelongsToStore($promo_code_data);
-            $data[1]['store'] = ($store_data) ? ($store_data) : (NULL);
+        if (!PromoCodesUsageLimit::usageLimitReached($promoCode, $request->customerId)) {
+            
+            // $data['promo_code'] = $promoCode;
+            // $data['store'] = ($promoCode->store_id) ? (static::getTheSellerBelongsToThisPromoCode($promoCode)) : (null);
+
             return JsonResponseServices::getApiResponse(
-                $data,
-                true,
+                $promoCode,
+                config('constants.TRUE_STATUS'),
                 config('constants.VALID_PROMOCODE'),
                 config('constants.HTTP_OK')
             );
-        } else {
-            return JsonResponseServices::getApiResponse(
-                [],
-                false,
-                config('constants.MAX_LIMIT'),
-                config('constants.HTTP_OK')
-            );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.TRUE_STATUS'),
+            config('constants.PROMOCODE_REACHED_MAX_LIMIT'),
+            config('constants.HTTP_OK')
+        );
     }
 }
