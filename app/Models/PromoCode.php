@@ -9,6 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PromoCode extends Model
 {
@@ -38,6 +39,11 @@ class PromoCode extends Model
     {
         return $this->belongsTo(User::class, 'store_id');
     }
+
+    public function promoCodesUsageLimit(): HasMany
+    {
+        return $this->hasMany(PromoCodesUsageLimit::class, 'promo_code_id');
+    }
     /**
      * Helpers
      */
@@ -46,12 +52,32 @@ class PromoCode extends Model
         return self::select($columns)->orderBy('created_at', $orderBy)->paginate(10);
     }
 
-    public static function getByPromoCode(string $promoCode, array $columns = ['*']): PromoCode
+    public static function getByPromoCode(string $promoCode, ?int $customerId = null, array $columns = ['*']): PromoCode
     {
-        return self::select($columns)
-            ->with(['seller:id,business_name'])
-            ->where('promo_code', '=', $promoCode)
+
+        return PromoCode::with(['seller:id,business_name'])
+            ->when(!is_null($customerId), function ($q) use ($customerId) {
+                $q->with(['promoCodesUsageLimit' => function ($r) use ($customerId) {
+                    $r->where('customer_id', '=', $customerId);
+                }]);
+            })
+            ->where('promo_code', $promoCode)
             ->firstOrFail();
+
+        $query = self::select($columns)
+            ->with([
+                'seller:id,business_name',
+            ]);
+
+        if (!is_null($customerId)) {
+            $query->with(['promoCodesUsageLimit' => function ($q) use ($customerId) {
+                $q->where('customer_id', '=', $customerId);
+            }]);
+        } else {
+            $query->with(['promoCodesUsageLimit']);
+        }
+
+        return $query->where('promo_code', '=', $promoCode)->firstOrFail();
     }
 
     public static function addOrUpdate(array $data, ?int $id = null): PromoCode|bool

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Throwable;
 
 class PromoCodesController extends Controller
@@ -155,7 +156,8 @@ class PromoCodesController extends Controller
     {
         $validatedData = Validator::make($request->all(), [
             'customerId' => 'required|integer|exists:users,id',
-            'promoCode' => 'required|string|max:20|exists:promo_codes,promo_code'
+            'promoCode' => 'required|string|max:20|exists:promo_codes,promo_code',
+            'incrementTotalUsed' => ['required', Rule::in(['yes', 'no'])],
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -163,10 +165,9 @@ class PromoCodesController extends Controller
 
         $validatedData = (object) $validatedData->validated();
 
-        $promoCode = PromoCode::getByPromoCode($validatedData->promoCode);
-        
-        $currentDate = date('Y-m-d');
-        if ($promoCode->expiry_dt < $currentDate) {
+        $promoCode = PromoCode::getByPromoCode($validatedData->promoCode, $validatedData->customerId);
+
+        if (PromoCodeHelpers::isExpired($promoCode)) {
             return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
@@ -191,9 +192,12 @@ class PromoCodesController extends Controller
                 );
             }
         }
-       
-        if (!empty($promoCode->usage_limit)) {
-            return PromoCodeHelpers::checkUsageLimitAndReturnResponse($promoCode, $validatedData);
+
+        if (!empty($promoCode->usage_limit) && $validatedData->incrementTotalUsed === 'yes') {
+            return PromoCodeHelpers::incrementTotalUsedAndReturnResponse(
+                $promoCode,
+                $request
+            );
         }
 
         // $data['promo_code'] = $promoCode;
@@ -207,7 +211,7 @@ class PromoCodesController extends Controller
         );
     }
     /**
-     * function will fetch a promocode and check all
+     * It will fetch a promocode and check all
      * the validation but will not increment the total times
      * a promocode has been used
      */
@@ -245,7 +249,7 @@ class PromoCodesController extends Controller
                     if ($promoCodes[0]->order_number == $userOrdersCount + 1) {
                         $data[0]['promo_code'] = $promoCodes[0];
                         $data[1]['promo_codes_usage_limit'] = ($promoCodes[0]->usage_limit) ? PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customer_id, $promoCodes[0]->id) : null;
-                        $storeData = PromoCodeHelpers::ifPromoCodeBelongsToStore($promoCodeData);
+                        $storeData = PromoCodeHelpers::getTheSellerBelongsToThisPromoCode($promoCodeData);
                         $data[2]['store'] = ($storeData) ? ($storeData) : (NULL);
                         return JsonResponseServices::getApiResponse(
                             $data,
@@ -264,7 +268,7 @@ class PromoCodesController extends Controller
                 }
                 $data[0]['promo_code'] = $promoCodes[0];
                 $data[1]['promo_codes_usage_limit'] = ($promoCodes[0]->usage_limit) ? PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customer_id, $promoCodes[0]->id) : null;
-                $storeData = PromoCodeHelpers::ifPromoCodeBelongsToStore($promoCodeData);
+                $storeData = PromoCodeHelpers::getTheSellerBelongsToThisPromoCode($promoCodeData);
                 $data[2]['store'] = ($storeData) ? ($storeData) : (NULL);
                 return JsonResponseServices::getApiResponse(
                     $data,
