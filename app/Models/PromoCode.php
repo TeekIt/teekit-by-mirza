@@ -54,30 +54,14 @@ class PromoCode extends Model
 
     public static function getByPromoCode(string $promoCode, ?int $customerId = null, array $columns = ['*']): PromoCode
     {
-
-        return PromoCode::with(['seller:id,business_name'])
-            ->when(!is_null($customerId), function ($q) use ($customerId) {
-                $q->with(['promoCodesUsageLimit' => function ($r) use ($customerId) {
-                    $r->where('customer_id', '=', $customerId);
+        return self::with(['seller:id,business_name'])
+            ->when(!is_null($customerId), function ($query) use ($customerId) {
+                $query->with(['promoCodesUsageLimit' => function ($promoCodesUsageLimitRelation) use ($customerId) {
+                    $promoCodesUsageLimitRelation->where('customer_id', '=', $customerId);
                 }]);
             })
-            ->where('promo_code', $promoCode)
+            ->where('promo_code', '=', $promoCode)
             ->firstOrFail();
-
-        $query = self::select($columns)
-            ->with([
-                'seller:id,business_name',
-            ]);
-
-        if (!is_null($customerId)) {
-            $query->with(['promoCodesUsageLimit' => function ($q) use ($customerId) {
-                $q->where('customer_id', '=', $customerId);
-            }]);
-        } else {
-            $query->with(['promoCodesUsageLimit']);
-        }
-
-        return $query->where('promo_code', '=', $promoCode)->firstOrFail();
     }
 
     public static function addOrUpdate(array $data, ?int $id = null): PromoCode|bool

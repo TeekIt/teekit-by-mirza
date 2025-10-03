@@ -239,18 +239,24 @@ class PromoCodesController extends Controller
                 $promoCodes = PromoCode::where('promo_code', '=', $request->promo_code)->get();
                 if (empty($promoCodes[0]->store_id)) $promoCodes[0]->store_id = NULL;
                 //below query will pass required data to our helper functions down below to validate
-                $promoCodeData = PromoCode::where('promo_code', $request->promo_code)->first(['id', 'usage_limit', 'store_id', 'discount']);
+                $promoCodeData = PromoCode::where('promo_code', $request->promo_code)
+                    ->first(['id', 'usage_limit', 'store_id', 'discount']);
                 /**
                  * This condition will only work if the  
                  * Promo code is only valid for a specific order#
                  */
                 if (!empty($promoCodes[0]->order_number)) {
-                    $userOrdersCount = Orders::where('customer_id', '=', $request->customer_id)->count();
+                    $userOrdersCount = Orders::where('created_by_id', '=', $request->customer_id)->count();
                     if ($promoCodes[0]->order_number == $userOrdersCount + 1) {
                         $data[0]['promo_code'] = $promoCodes[0];
-                        $data[1]['promo_codes_usage_limit'] = ($promoCodes[0]->usage_limit) ? PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customer_id, $promoCodes[0]->id) : null;
-                        $storeData = PromoCodeHelpers::getTheSellerBelongsToThisPromoCode($promoCodeData);
-                        $data[2]['store'] = ($storeData) ? ($storeData) : (NULL);
+                        $data[1]['promo_codes_usage_limit'] = ($promoCodes[0]->usage_limit) ?
+                            PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customer_id, $promoCodes[0]->id) :
+                            null;
+                        // $storeData = PromoCodeHelpers::getTheSellerBelongsToThisPromoCode($promoCodeData);
+                        $data[2]['store'] = ($promoCodeData->store_id) ?
+                            PromoCodeHelpers::getTheSellerBelongsToThisPromoCode($promoCodeData) :
+                            null;
+
                         return JsonResponseServices::getApiResponse(
                             $data,
                             config('constants.TRUE_STATUS'),
@@ -267,9 +273,15 @@ class PromoCodesController extends Controller
                     }
                 }
                 $data[0]['promo_code'] = $promoCodes[0];
-                $data[1]['promo_codes_usage_limit'] = ($promoCodes[0]->usage_limit) ? PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customer_id, $promoCodes[0]->id) : null;
-                $storeData = PromoCodeHelpers::getTheSellerBelongsToThisPromoCode($promoCodeData);
-                $data[2]['store'] = ($storeData) ? ($storeData) : (NULL);
+
+                $data[1]['promo_codes_usage_limit'] = ($promoCodes[0]->usage_limit) ?
+                    PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customer_id, $promoCodes[0]->id) :
+                    null;
+
+                $data[2]['store'] = ($promoCodeData->store_id) ?
+                    PromoCodeHelpers::getTheSellerBelongsToThisPromoCode($promoCodeData) :
+                    null;
+
                 return JsonResponseServices::getApiResponse(
                     $data,
                     config('constants.TRUE_STATUS'),

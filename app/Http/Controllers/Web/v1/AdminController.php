@@ -3,13 +3,9 @@
 namespace App\Http\Controllers\Web\v1;
 
 use App\Http\Controllers\Controller;
-use App\Enums\UserRoleEnum;
 use App\Models\Driver;
 use App\Pages;
-use App\Services\GoogleMapServices;
 use App\User;
-use Illuminate\Support\Facades\Validator;
-use Throwable;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
