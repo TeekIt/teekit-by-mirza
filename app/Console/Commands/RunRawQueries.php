@@ -36,28 +36,24 @@ class RunRawQueries extends Command
                 $this->warn('You are executing raw queries directly into the database');
 
                 DB::transaction(function () {
-                    /* Below queries are already executed on production & all other ENVs */
+                    /* Below queries are already executed on production & all other ENV */
                     // DB::statement("ALTER TABLE `promo_codes` CHANGE `store_id` `store_id` BIGINT UNSIGNED NULL DEFAULT NULL");
                     // DB::statement("ALTER TABLE `promo_codes` ADD `free_delivery` BOOLEAN NOT NULL DEFAULT FALSE AFTER `store_id`");
 
-                    /* Below queries are already executed on staging ENVs */
-                    // DB::statement("ALTER TABLE `products_by_buyers`
-                    //                ADD COLUMN `category_id` BIGINT UNSIGNED NULL DEFAULT NULL AFTER `seller_id`,
-                    //                ADD CONSTRAINT `products_by_buyers_category_id_foreign`
-                    //                FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE CASCADE");
+                    DB::statement("ALTER TABLE `products_by_buyers`
+                                   ADD COLUMN `category_id` BIGINT UNSIGNED NULL DEFAULT NULL AFTER `seller_id`,
+                                   ADD CONSTRAINT `products_by_buyers_category_id_foreign`
+                                   FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON DELETE CASCADE");
 
-                    // DB::statement("ALTER TABLE `orders_from_other_sellers` CHANGE `accepted` `disabled` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Only ModelStatusEnum values are allowed'");
+                    DB::statement("ALTER TABLE `orders_from_other_sellers` CHANGE `accepted` `disabled` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Only ModelStatusEnum values are allowed'");
                     
-                    // DB::statement("ALTER TABLE `orders_from_other_sellers` ADD COLUMN `current_total` FLOAT NOT NULL DEFAULT 0.00 AFTER `initial_total`");
+                    DB::statement("ALTER TABLE `orders_from_other_sellers` ADD COLUMN `current_total` FLOAT NOT NULL DEFAULT 0.00 AFTER `initial_total`");
 
-                    /* Below queries are already executed on local ENVs */
-                    DB::statement("ALTER TABLE `orders` MODIFY COLUMN `type` VARCHAR(30) NOT NULL DEFAULT 'sameDayDelivery' COMMENT 'Only OrderTypeEnum values are allowed'");
+                    /* Below queries are already executed on staging ENV */
+                    
 
-                    DB::statement("ALTER TABLE `orders_from_other_sellers` MODIFY COLUMN `type` VARCHAR(30) NOT NULL DEFAULT 'sameDayDelivery' COMMENT 'Only OrderTypeEnum values are allowed'");
+                    /* Below queries are already executed on local ENV */
 
-                    DB::statement("UPDATE `orders` SET `type` = 'sameDayDelivery'");
-
-                    DB::statement("UPDATE `orders_from_other_sellers` SET `type` = 'sameDayDelivery'");
 
                 });
             }
