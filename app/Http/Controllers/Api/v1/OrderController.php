@@ -27,7 +27,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class OrdersController extends Controller
+class OrderController extends Controller
 {
     /**
      * Inserts a newly arrived order
@@ -45,10 +45,9 @@ class OrdersController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        if ($request->type == OrderTypeEnum::DELIVERY->value) {
+        if ($request->type != OrderTypeEnum::SELF_PICKUP->value) {
             $rules = [
                 /* Order details */
-                'type' => 'required|string',
                 'items' => 'required|array',
                 'houseNo' => 'required|string',
                 'deliveryCharges' => 'required|numeric',
@@ -72,7 +71,6 @@ class OrdersController extends Controller
             ];
         } elseif ($request->type == OrderTypeEnum::SELF_PICKUP->value) {
             $rules = [
-                'type' => 'required|string',
                 'paymentIntentId' => 'required|string',
             ];
         }
@@ -81,6 +79,8 @@ class OrdersController extends Controller
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+
+        $validatedData = (object) $validatedData;
 
         $buyer = User::getBuyerByEmail($request->email);
         if (! $buyer) {
@@ -128,7 +128,7 @@ class OrdersController extends Controller
             /* Adding amount into seller's wallet */
             User::addIntoWallet($sellerId, $initialTotal);
 
-            if ($request->type == OrderTypeEnum::DELIVERY->value) {
+            if ($request->type != OrderTypeEnum::SELF_PICKUP->value) {
                 $seller = User::getUserByID($sellerId, [
                     'business_phone',
                     'lat',
@@ -165,8 +165,9 @@ class OrdersController extends Controller
                 );
             }
 
-            if ($request->type == OrderTypeEnum::DELIVERY->value) {
+            if ($request->type != OrderTypeEnum::SELF_PICKUP->value) {
                 $verificationCode = VerificationCodeServices::generateCode();
+
                 VerificationCodes::add($orderId, $verificationCode);
 
                 if (app()->environment('production')) {
@@ -298,16 +299,16 @@ class OrdersController extends Controller
         $sellerId = $request->sellerId;
         $initialTotal = $request->maxPrice * $request->qty;
         $totalItems = $request->qty;
-        /* Fetch seller details against whom the order is being placed */
-        $seller = User::getUserByID($sellerId, [
-            'id',
-            'business_phone',
-            'city',
-            'lat',
-            'lon'
-        ]);
 
-        if ($request->type == OrderTypeEnum::DELIVERY->value) {
+        if ($request->type != OrderTypeEnum::SELF_PICKUP->value) {
+            /* Fetch seller details against whom the order is being placed */
+            $seller = User::getUserByID($sellerId, [
+                'id',
+                'business_phone',
+                'city',
+                'lat',
+                'lon'
+            ]);
             $driverCharges = OrderServices::getDriverCharges(
                 $seller->lat,
                 $seller->lon,
@@ -337,8 +338,9 @@ class OrdersController extends Controller
             UserChoicesEnum::SEND_TO_OTHER_STORES
         );
 
-        if ($request->type == OrderTypeEnum::DELIVERY->value) {
+        if ($request->type != OrderTypeEnum::SELF_PICKUP->value) {
             $verificationCode = VerificationCodeServices::generateCode();
+
             VerificationCodes::add($order->id, $verificationCode);
 
             if (app()->environment('production')) {

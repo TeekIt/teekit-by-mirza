@@ -12,11 +12,11 @@ use App\Http\Controllers\Api\v2\GophrDeliveryController;
 use App\Http\Controllers\Api\v2\StuartDeliveryController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\Api\v1\OrdersController;
+use App\Http\Controllers\Api\v1\OrderController;
 use App\Http\Controllers\Api\v1\ProductController;
 use App\Http\Controllers\Api\v1\RattingController;
 use App\Http\Controllers\Api\v1\SellerController;
-use App\Http\Controllers\PromoCodesController;
+use App\Http\Controllers\Api\v1\PromoCodeController;
 use App\Http\Controllers\Api\v1\ReferralCodeRelationController;
 use App\Http\Controllers\Api\v1\StripeController;
 use App\Http\Controllers\Api\v1\WithdrawalRequestController;
@@ -156,7 +156,7 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('sendRequest', 'sendRequest');
     });
 
-    Route::prefix('orders')->controller(OrdersController::class)->group(function () {
+    Route::prefix('orders')->controller(OrderController::class)->group(function () {
         Route::withoutMiddleware(['jwt.verify'])->group(function () {
             Route::post('new', 'new');
             Route::post('product_by_buyer', 'orderProductByBuyer');
@@ -190,7 +190,7 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::post('driver_failed_to_enter_code/{order_id}', 'driverFailedToEnterCode');
     });
 
-    Route::prefix('promocodes')->controller(PromoCodesController::class)->group(function () {
+    Route::prefix('promocodes')->controller(PromoCodeController::class)->group(function () {
         Route::get('all', 'allPromoCodes');
         Route::post('validate', 'validatePromoCodes');
         Route::post('fetch_promocode_info', 'fetchPromoCodeInfo');

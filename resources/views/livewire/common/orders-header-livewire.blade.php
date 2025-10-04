@@ -235,10 +235,10 @@
     <table class="table table-striped table-responsive-sm">
         <thead>
             <tr>
-                        @php
+                        {{-- @php
                             echo $order->parent_order_id . PHP_EOL;
                             echo $order->disabled;
-                        @endphp
+                        @endphp --}}
                 <div class="d-flex flex-column-reverse flex-md-row justify-content-between pb-4 gap-1">
                     @if ($order->disabled)
                         <div class="col-12">
@@ -313,7 +313,7 @@
                             @endif
                         @endif
 
-                        @if ($order->type === OrderTypeEnum::DELIVERY->value)
+                        @if ($order->type === OrderTypeEnum::SAME_DAY_DELIVERY->value)
                             @if ($order->order_status === OrderStatusEnum::ACCEPTED->value)
                                 <!-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#stuartModal" wire:click="renderStuartModal({{ $order->id }})" wire:target="renderStuartModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to Stuart delivery boy">
                                                         <span wire:target="renderStuartModal({{ $order->id }})" wire:loading.remove>

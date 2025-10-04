@@ -26,7 +26,7 @@ return new class extends Migration
             $table->decimal('customer_lat', 11, 8)->nullable();
             $table->decimal('customer_lon', 11, 8)->nullable();
             $table->string('device', 7)->nullable()->comment('iPhone, Android');
-            $table->enum('type', ['delivery', 'self-pickup'])->default('delivery');
+            $table->string('type')->comment('Only OrderTypeEnum values are allowed');
             $table->string('customer_name')->nullable();
             $table->string('country_code', 4)->nullable();
             $table->string('phone_number')->nullable();

@@ -103,7 +103,7 @@ class Orders extends Model
         /* When we create a new order current_total == initial_total */
         $order->current_total = $initialTotal;
         $order->total_items = $totalItems;
-        // if ($request->type == OrderTypeEnum::DELIVERY->value) {
+        // if ($request->type == OrderTypeEnum::SAME_DAY_DELIVERY->value) {
         //     $order->customer_lat = $request->lat;
         //     $order->customer_lon = $request->lon;
         //     $order->customer_name = $request->fName . " " .  $request->lName;

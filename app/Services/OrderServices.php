@@ -122,7 +122,7 @@ final class OrderServices
             /* Seller Number */
             TwilioSmsServices::sendSms($seller->business_phone, $messageForSeller);
         }
-        /* Customer Number */
+        /* Buyer Number */
         TwilioSmsServices::sendSms($buyerNumber, $messageForBuyer);
         /* Rameesha Number */
         TwilioSmsServices::sendSms('+923362451199', $messageForBuyer);

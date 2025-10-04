@@ -537,20 +537,21 @@ class User extends Authenticatable implements JWTSubject
         return null;
     }
 
-    public static function verifyReferralCode(int $user_id, string $referral_code)
+    public static function verifyReferralCode(int $userId, string $referral_code)
     {
-        $data = User::where('id', '!=', $user_id)->where('referral_code', $referral_code)->first();
+        $data = User::where('id', '!=', $userId)->where('referral_code', $referral_code)->first();
+        
         return (is_null($data)) ? false : $data;
     }
 
-    public static function addIntoWallet(int $user_id, float $amount)
+    public static function addIntoWallet(int $userId, float $amount)
     {
-        return self::where('id', $user_id)->increment('pending_withdraw', $amount);
+        return self::where('id', '=', $userId)->increment('pending_withdraw', $amount);
     }
 
-    public static function deductFromWallet(int $user_id, float $amount)
+    public static function deductFromWallet(int $userId, float $amount)
     {
-        return self::where('id', $user_id)->decrement('pending_withdraw', $amount);
+        return self::where('id', '=', $userId)->decrement('pending_withdraw', $amount);
     }
 
     public static function getSellerID(): int

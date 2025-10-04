@@ -8,12 +8,11 @@ use App\Http\Livewire\Sellers\InventoryLivewire;
 use App\Http\Controllers\Web\v1\HomeController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Web\v2\ProductController;
-use App\Http\Controllers\PromoCodesController;
 use App\Http\Controllers\Web\v2\StripeController;
 use App\Http\Controllers\Web\v1\StuartDeliveryController;
-use App\Http\Controllers\UsersController;
 use App\Http\Controllers\Web\v1\AdminController;
 use App\Http\Controllers\Web\v1\OrdersController;
+use App\Http\Controllers\Web\v1\PromoCodeController;
 use App\Http\Controllers\Web\v1\SellerController;
 use App\Http\Livewire\Admin\CategoriesLivewire;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
@@ -162,7 +161,7 @@ Route::prefix('admin')->middleware(['auth', 'auth.super.admin'])->group(function
         });
     });
 
-    Route::prefix('promocodes')->controller(PromoCodesController::class)->group(function () {
+    Route::prefix('promocodes')->controller(PromoCodeController::class)->group(function () {
         Route::get('/home', 'promocodesHome')->name('admin.promocodes.home');
         Route::post('/add', 'promocodesAdd')->name('admin.promocodes.add');
         Route::get('/delete', 'promoCodesDel')->name('admin.promocodes.del');

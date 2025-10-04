@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\v1;
 
-use App\Helpers\PromoCodeHelpers;
+use App\Http\Controllers\Controller;
+use App\Services\PromoCodeServices;
 use App\Models\PromoCodesUsageLimit;
 use App\Orders;
 use App\Models\PromoCode;
@@ -14,121 +15,9 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Throwable;
 
-class PromoCodesController extends Controller
+class PromoCodeController extends Controller
 {
-    /**
-     * Returns promo codes form & list view
-     * @version 1.0.0
-     */
-    public function promocodesHome()
-    {
-        /* Get stores names for select dropdown */
-        $stores = User::getParentAndChildSellersList(['id', 'business_name']);
-        $promoCodes = PromoCode::getAll('desc');
-
-        return view('admin.promo_codes', compact('promoCodes', 'stores'));
-    }
-    /**
-     * Deletes the specific promo code via ajax call
-     * @version 1.0.0
-     */
-    public function promoCodesDel(Request $request)
-    {
-        try {
-            if (Gate::allows('superadmin')) {
-                for ($i = 0; $i < count($request->promocodes); $i++) {
-                    PromoCode::where('id', '=', $request->promocodes[$i])->forceDelete();
-                }
-
-                return response("Promocodes Deleted Successfully");
-            }
-        } catch (Throwable $error) {
-            report($error);
-            session()->flash('error', $error->getMessage());
-
-            return back();
-        }
-    }
-    /**
-     * Adds promo code into the database
-     * @version 1.0.0
-     */
-    public function promocodesAdd(Request $request)
-    {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'promo_code' => 'required|string|unique:promo_codes|max:20',
-                'discount_type' => 'required',
-                'discount' => 'required|int',
-                'order_number' => 'nullable|int',
-                'usage_limit' => 'nullable|int',
-                'min_amnt_for_discount' => 'required|int',
-                'max_amnt_for_discount' => 'required|int',
-                'store_id' => ['nullable', new IsParentOrChildSellerId],
-                'free_delivery' => 'nullable|string',
-                'expiry_dt' => 'required',
-            ]);
-            if ($validatedData->fails()) {
-                session()->flash('error', $validatedData->errors());
-
-                return Redirect::back()->withInput($request->input());
-            }
-
-            $validatedData = $validatedData->validated();
-
-            PromoCode::addOrUpdate($validatedData);
-
-            session()->flash('success', 'Promo code saved successfully.');
-
-            return back();
-        } catch (Throwable $error) {
-            report($error);
-            session()->flash('error', $error->getMessage());
-
-            return back();
-        }
-    }
-    /**
-     * Updates the specific promo code via popup modal
-     * @version 1.0.0
-     */
-    public function promoCodesUpdate(Request $request, $id)
-    {
-        try {
-            $validatedData = Validator::make($request->all(), [
-                'promo_code' => 'required|string|max:20',
-                'discount_type' => 'required',
-                'discount' => 'required|int',
-                'order_number' => 'nullable|int',
-                'usage_limit' => 'nullable|int',
-                'min_amnt_for_discount' => 'required|int',
-                'max_amnt_for_discount' => 'required|int',
-                'store_id' => ['nullable', new IsParentOrChildSellerId],
-                'free_delivery' => 'nullable|string',
-                'expiry_dt' => 'required|date',
-            ]);
-            if ($validatedData->fails()) {
-                session()->flash('error', $validatedData->errors());
-
-                return Redirect::back()->withInput($request->input());
-            }
-
-            $validatedData = $validatedData->validated();
-
-            PromoCode::addOrUpdate($validatedData, $id);
-
-            session()->flash('success', 'Promo code updated successfully.');
-
-            return back();
-        } catch (Throwable $error) {
-            report($error);
-            session()->flash('error', $error->getMessage());
-
-            return back();
-        }
-    }
     /**
      * function will return all promocodes from table
      */
@@ -167,7 +56,7 @@ class PromoCodesController extends Controller
 
         $promoCode = PromoCode::getByPromoCode($validatedData->promoCode, $validatedData->customerId);
 
-        if (PromoCodeHelpers::isExpired($promoCode)) {
+        if (PromoCodeServices::isExpired($promoCode)) {
             return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
@@ -194,14 +83,11 @@ class PromoCodesController extends Controller
         }
 
         if (!empty($promoCode->usage_limit) && $validatedData->incrementTotalUsed === 'yes') {
-            return PromoCodeHelpers::incrementTotalUsedAndReturnResponse(
+            return PromoCodeServices::incrementTotalUsedAndReturnResponse(
                 $promoCode,
                 $request
             );
         }
-
-        // $data['promo_code'] = $promoCode;
-        // $data['store'] = ($promoCode->store_id) ? (PromoCodeHelpers::getTheSellerBelongsToThisPromoCode($promoCode)) : (object) [];
 
         return JsonResponseServices::getApiResponse(
             $promoCode,
@@ -252,9 +138,9 @@ class PromoCodesController extends Controller
                         $data[1]['promo_codes_usage_limit'] = ($promoCodes[0]->usage_limit) ?
                             PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customer_id, $promoCodes[0]->id) :
                             null;
-                        // $storeData = PromoCodeHelpers::getTheSellerBelongsToThisPromoCode($promoCodeData);
+                        // $storeData = PromoCodeServices::getTheSellerBelongsToThisPromoCode($promoCodeData);
                         $data[2]['store'] = ($promoCodeData->store_id) ?
-                            PromoCodeHelpers::getTheSellerBelongsToThisPromoCode($promoCodeData) :
+                            PromoCodeServices::getTheSellerBelongsToThisPromoCode($promoCodeData) :
                             null;
 
                         return JsonResponseServices::getApiResponse(
@@ -279,7 +165,7 @@ class PromoCodesController extends Controller
                     null;
 
                 $data[2]['store'] = ($promoCodeData->store_id) ?
-                    PromoCodeHelpers::getTheSellerBelongsToThisPromoCode($promoCodeData) :
+                    PromoCodeServices::getTheSellerBelongsToThisPromoCode($promoCodeData) :
                     null;
 
                 return JsonResponseServices::getApiResponse(

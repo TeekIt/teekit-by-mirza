@@ -149,7 +149,7 @@ class OrdersFromOtherSeller extends Model
         $model->initial_total = $initialTotal;
         /* When we create a new order current_total == initial_total */
         $model->current_total = $initialTotal;
-        /* if ($type == OrderTypeEnum::DELIVERY->value) {
+        /* if ($type == OrderTypeEnum::SAME_DAY_DELIVERY->value) {
             $model->customer_lat = $customerLat;
             $model->customer_lon = $customerLon;
             $model->customer_name = $receiverName;
