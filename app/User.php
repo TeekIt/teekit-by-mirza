@@ -171,6 +171,11 @@ class User extends Authenticatable implements JWTSubject
     {
         $query->where('is_active', self::ACTIVE);
     }
+
+    public function scopeWhereRoleIsParentOrChildSeller(Builder $query): void
+    {
+        $query->where('is_active', self::ACTIVE);
+    }
     /**
      * Helpers
      */
@@ -353,25 +358,30 @@ class User extends Authenticatable implements JWTSubject
     {
         return self::select($columns)
             ->WhereUserIsActive()
+            ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
             ->get();
     }
 
-    public static function getParentAndChildSellersByCityAndCategory(string $city, int $categoryId, int $numberOfRows = 25): Collection
-    {
+    public static function getParentAndChildSellersByCityAndCategory(
+        string $city,
+        int $categoryId,
+        int $exceptSellerId,
+        int $numberOfRows = 25
+    ): Collection {
         $city = explode(' ', $city);
 
         return self::WhereUserIsActive()
             ->whereHas('qty', function ($qtyRelation) use ($categoryId) {
                 $qtyRelation->where('category_id', '=', $categoryId);
             })
+            ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
             ->whereIn('city', $city)
-            ->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])
+            ->where('id', '!=', $exceptSellerId)
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
             ->get();
@@ -382,10 +392,10 @@ class User extends Authenticatable implements JWTSubject
         $city = explode(' ', $city);
 
         return self::WhereUserIsActive()
+            ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
             ->whereIn('city', $city)
-            ->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
             ->get();
@@ -394,10 +404,10 @@ class User extends Authenticatable implements JWTSubject
     public static function getParentAndChildSellersByState(string $state, int $numberOfRows = 25): Collection
     {
         return self::WhereUserIsActive()
+            ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
             ->where('state', '=', $state)
-            ->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
             ->get();
@@ -447,8 +457,8 @@ class User extends Authenticatable implements JWTSubject
     public static function getParentOrChildSellerByEmail(string $email, array $columns = ['*']): ?User
     {
         return self::select($columns)
+            ->WhereRoleIsParentOrChildSeller()
             ->where('email', '=', $email)
-            ->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])
             ->first();
     }
 
@@ -527,20 +537,21 @@ class User extends Authenticatable implements JWTSubject
         return null;
     }
 
-    public static function verifyReferralCode(int $user_id, string $referral_code)
+    public static function verifyReferralCode(int $userId, string $referral_code)
     {
-        $data = User::where('id', '!=', $user_id)->where('referral_code', $referral_code)->first();
+        $data = User::where('id', '!=', $userId)->where('referral_code', $referral_code)->first();
+        
         return (is_null($data)) ? false : $data;
     }
 
-    public static function addIntoWallet(int $user_id, float $amount)
+    public static function addIntoWallet(int $userId, float $amount)
     {
-        return self::where('id', $user_id)->increment('pending_withdraw', $amount);
+        return self::where('id', '=', $userId)->increment('pending_withdraw', $amount);
     }
 
-    public static function deductFromWallet(int $user_id, float $amount)
+    public static function deductFromWallet(int $userId, float $amount)
     {
-        return self::where('id', $user_id)->decrement('pending_withdraw', $amount);
+        return self::where('id', '=', $userId)->decrement('pending_withdraw', $amount);
     }
 
     public static function getSellerID(): int

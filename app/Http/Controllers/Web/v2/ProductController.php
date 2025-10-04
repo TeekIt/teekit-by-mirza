@@ -8,7 +8,7 @@ use App\Enums\TransportVehicleEnum;
 use App\Models\ProductImage;
 use App\Products;
 use Illuminate\Http\Request;
-use App\Http\Requests\AddOrUpdateProductRequest;
+use App\Http\Requests\Product\AddOrUpdateProductRequest;
 use App\Qty;
 use App\Services\ImageServices;
 use App\Services\ProductServices;
@@ -34,7 +34,7 @@ class ProductController extends Controller
     {
         $data = $request->validated();
 
-        if ($request->has('colors')) {
+        if (request()->has('colors')) {
             $data['colors'] = ProductServices::jsonEncodeColors($data['colors']);
         }
 
@@ -56,8 +56,8 @@ class ProductController extends Controller
 
         Qty::add($data['seller_id'], $product->id, $data['category_id'], $request->safe()->only(['qty'])['qty']);
 
-        if ($request->hasFile('gallery')) {
-            foreach ($request->file('gallery') as $singleImage) {
+        if (request()->hasFile('gallery')) {
+            foreach (request()->file('gallery') as $singleImage) {
                 $uniqueId = $data['seller_id'] . $product->id;
                 $fileName = ImageServices::uploadImg(id: $uniqueId, imageFile: $singleImage);
 
@@ -85,9 +85,9 @@ class ProductController extends Controller
     {
         $data = $request->validated();
 
-        $data['colors'] = ($request->has('colors')) ? ProductServices::jsonEncodeColors($data['colors']) : null;
+        $data['colors'] = (request()->has('colors')) ? ProductServices::jsonEncodeColors($data['colors']) : null;
 
-        if ($request->hasFile('feature_img')) {
+        if (request()->hasFile('feature_img')) {
             $data['feature_img'] = ImageServices::uploadImg($request, 'feature_img', $data['seller_id']);
         }
 
@@ -109,8 +109,8 @@ class ProductController extends Controller
         $product = Products::findOrFail($productId);
         if (!empty($product)) {
 
-            if ($request->hasFile('gallery')) {
-                foreach ($request->file('gallery') as $image) {
+            if (request()->hasFile('gallery')) {
+                foreach (request()->file('gallery') as $image) {
                     $fileName = ImageServices::uploadImg(id: $productId, imageFile: $image);
                     ProductImage::add($productId, $fileName);
                 }
@@ -123,7 +123,7 @@ class ProductController extends Controller
             $updated = $product->save();
 
             if ($updated) {
-                flash('Inventory updated successfully')->success();
+                session()->flash('success', 'Inventory updated successfully');
             }
         }
 
@@ -221,7 +221,8 @@ class ProductController extends Controller
                 $j++;
             }
         }
-        flash('Your Bulk Products Have Been Imported Successfully!');
+
+        session()->flash('success', 'Your Bulk Products Have Been Imported Successfully!');
 
         return redirect()->back();
     }

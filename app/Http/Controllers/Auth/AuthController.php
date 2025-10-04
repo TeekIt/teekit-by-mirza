@@ -282,11 +282,11 @@ class AuthController extends Controller
         $mobileHeader = $request->header('x_platform');
 
         if (isset($mobileHeader) && $mobileHeader == 'mobile') {
-            JwtToken::where('user_id', $user->id)->where('phone', 1)->delete();
+            JwtToken::where('user_id', '=', $user->id)->where('phone', 1)->delete();
             $jwtToken->phone = 1;
             $jwtToken->save();
         } else {
-            JwtToken::where('user_id', $user->id)->where('desktop', 1)->delete();
+            JwtToken::where('user_id', '=', $user->id)->where('desktop', 1)->delete();
             $jwtToken->desktop = 1;
             $jwtToken->save();
         }

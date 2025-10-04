@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\v1;
 
-use App\Services\JsonResponseServices;
+use App\Http\Controllers\Controller;
 use App\WithdrawalRequests;
 use Illuminate\Http\Request;
+use App\Services\JsonResponseServices;
 use Illuminate\Support\Facades\Auth;
 
-class WithdrawalRequestsController extends Controller
+class WithdrawalRequestController extends Controller
 {
     /**
      *It will send withdrawl request    
@@ -26,7 +27,12 @@ class WithdrawalRequestsController extends Controller
 
         $user->update(['wallet' => 0.0]);
 
-        return $this->getRequests();
+        return JsonResponseServices::getApiResponse(
+            WithdrawalRequests::getWithdrawalResquests(Auth::id()),
+            config('constants.TRUE_STATUS'),
+            '',
+            config('constants.HTTP_OK')
+        );
     }
     /**
      *Fetch withdrawl requests of logged in user   

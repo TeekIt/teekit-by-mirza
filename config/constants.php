@@ -89,7 +89,7 @@ return [
     'MISSING_OR_INVALID_DATA' => 'Required fields missing or invalid data',
     'VERIFICATION_FAILED' => 'You have entered a invalid verification code',
     'ITEM_DELETED' => 'Data deleted successfully',
-    'MAX_LIMIT' => 'Promo code usage has reached its maximum limit',
+    'PROMOCODE_REACHED_MAX_LIMIT' => 'Promo code usage has reached its maximum limit',
     'DATA_ALREADY_EXISTS' => 'Data already exists against id:- ',
     'CACHE_REMOVED_FAILED' => 'Sorry due to some issue your cahce can not be removed',
     'QTY_SHOULD_NOT_BE_GREATER' => 'You cannot enter quantity more then your stock',
@@ -116,7 +116,7 @@ return [
     | Admin Email
     |--------------------------------------------------------------------------
     */
-    'ADMIN_EMAIL' => 'admin@teekit.co.uk',
+    'ADMIN_EMAIL' => env('ADMIN_EMAIL'),
     /*
     |--------------------------------------------------------------------------
     | Head Office Details

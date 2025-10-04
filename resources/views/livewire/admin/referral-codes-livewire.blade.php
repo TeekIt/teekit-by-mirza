@@ -1,5 +1,4 @@
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Content Header (Page header) -->
 
     <x-session-messages />
 
@@ -10,10 +9,11 @@
                 <div class="col-lg-12 col-sm-12 col-md-12">
                     <h4 class="py-4 my-1 text-site-primary">Referrals</h4>
                 </div>
-            </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
+            </div>
+        </div>
     </div>
     <!-- /.content-header -->
+
     <!-- Main content -->
     <div class="content">
         <div class="container-fluid">
@@ -54,5 +54,5 @@
             </div>
         </div><!-- /.container-fluid -->
     </div>
-    <!-- /.content -->
+    
 </div>

@@ -12,23 +12,10 @@
 
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="container pt-4">
-                        {{-- @include('flash::message') --}}
-
-                        <x-session-messages />
-                        {{-- @if (session('status'))
-                            <div class="alert alert-success" role="alert">
-                                {{ session('status') }}
-                            </div>
-                        @endif --}}
-                    </div>
-                </div>
-            </div>
+            
+            <x-session-messages />
 
             @yield('content')
-
         </div>
         <!-- /.content -->
     </div>

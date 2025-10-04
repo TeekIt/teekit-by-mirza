@@ -103,7 +103,7 @@ class Orders extends Model
         /* When we create a new order current_total == initial_total */
         $order->current_total = $initialTotal;
         $order->total_items = $totalItems;
-        // if ($request->type == OrderTypeEnum::DELIVERY->value) {
+        // if ($request->type == OrderTypeEnum::SAME_DAY_DELIVERY->value) {
         //     $order->customer_lat = $request->lat;
         //     $order->customer_lon = $request->lon;
         //     $order->customer_name = $request->fName . " " .  $request->lName;
@@ -128,6 +128,7 @@ class Orders extends Model
         $order->state = $request->state;
         $order->city = $request->city;
         $order->postcode = $request->postcode;
+
         $order->driver_charges = $driverCharges;
         $order->delivery_charges = $request->deliveryCharges;
         $order->service_charges = $request->serviceCharges;
@@ -336,6 +337,14 @@ class Orders extends Model
             ->where('created_by_id', '=', $buyerId)
             ->latest()
             ->first();
+    }
+
+    public static function getByCreatorId(int $creatorId, array $columns = ['*']): Collection
+    {
+        return self::select($columns)
+            ->with(['order_items.product', 'buyer', 'seller'])
+            ->where('created_by_id', '=', $creatorId)
+            ->get();
     }
 
     public static function getByIds(array $ids, array $columns = ['*']): Collection

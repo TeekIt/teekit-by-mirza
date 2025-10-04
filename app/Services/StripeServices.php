@@ -6,7 +6,6 @@ use App\User;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Checkout;
-use RuntimeException;
 use stdClass;
 
 final class StripeServices

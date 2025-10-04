@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Http\Controllers\UsersController;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -23,17 +22,27 @@ final class GoogleMapServices
     /**
      * @param Collection<User> $sellersOfSameCity
      */
-    public static function getNearBySellers(float $buyerLat, float $buyerLon, Collection $sellersOfSameCity, int $currentSellerId): array
-    {
+    public static function getNearBySellers(
+        float $buyerLat,
+        float $buyerLon,
+        Collection $sellersOfSameCity,
+        int $currentSellerId,
+        int $nearByMiles = CompanyStandardsServices::STANDARD_NEAR_BY_MILES,
+    ): array {
         return Cache::remember(
             'getNearBySellers' . $currentSellerId . $buyerLat . $buyerLon,
             Carbon::now()->addDay(),
-            function () use ($buyerLat, $buyerLon, $sellersOfSameCity) {
+            function () use ($buyerLat, $buyerLon, $sellersOfSameCity, $nearByMiles) {
+                /* 
+                 * This function will not work with "faker" generated 
+                 * customer lat, lon
+                 */
                 return static::findNearByUsersByMakingChunks(
                     $buyerLat,
                     $buyerLon,
                     $sellersOfSameCity,
-                    25
+                    25,
+                    $nearByMiles,
                 );
             }
         );
@@ -95,7 +104,7 @@ final class GoogleMapServices
                             'distance' => $distanceInMiles,
                             'duration' => $durationInMinutes
                         ];
-                        $userData[] = UsersController::getSellerInfo($destinations['users'][$key], $distanceData);
+                        $userData[] = SellerServices::getStandardSellerInfo($destinations['users'][$key], $distanceData);
                     }
                 }
             }
@@ -114,7 +123,7 @@ final class GoogleMapServices
         float $lon,
         Collection $users,
         int $chunkSize = 25,
-        int $nearByMiles = 3
+        int $nearByMiles = CompanyStandardsServices::STANDARD_NEAR_BY_MILES
     ): array {
         if ($chunkSize > 25) return [];
 

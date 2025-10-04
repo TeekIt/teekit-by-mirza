@@ -198,7 +198,7 @@ class RequestDeliveryFormLivewire extends Component
 
                 $this->currency = $response['currency'];
                 $this->deliveryCharges = $response['amount'];
-                $this->serviceCharges = CompanyStandardsServices::$standardServiceCharges;
+                $this->serviceCharges = CompanyStandardsServices::STANDARD_SERVICE_CHARGES;
                 $this->tax = $response['amount_with_tax'] - $response['amount'];
                 $this->totalCost = $this->calculateTotalCost();
             }
@@ -213,7 +213,7 @@ class RequestDeliveryFormLivewire extends Component
 
                 $this->currency = $response['price_net']['currency'];
                 $this->deliveryCharges = $response['price_net']['amount'];
-                $this->serviceCharges = CompanyStandardsServices::$standardServiceCharges;
+                $this->serviceCharges = CompanyStandardsServices::STANDARD_SERVICE_CHARGES;
                 $this->tax = $response['price_gross']['amount'] - $response['price_net']['amount'];
                 $this->totalCost = $this->calculateTotalCost();
             }

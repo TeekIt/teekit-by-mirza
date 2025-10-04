@@ -22,10 +22,11 @@ return new class extends Migration
             $table->float('product_price');
             $table->integer('product_qty');
             $table->float('initial_total');
+            $table->float('current_total');
             $table->decimal('customer_lat', 11, 8)->nullable();
             $table->decimal('customer_lon', 11, 8)->nullable();
             $table->string('device', 7)->nullable()->comment('iPhone, Android');
-            $table->enum('type', ['delivery', 'self-pickup'])->default('delivery');
+            $table->string('type')->comment('Only OrderTypeEnum values are allowed');
             $table->string('customer_name')->nullable();
             $table->string('country_code', 4)->nullable();
             $table->string('phone_number')->nullable();
@@ -51,7 +52,7 @@ return new class extends Migration
             $table->double('offloading_charges', 10, 2)->nullable();
             $table->time('estimated_time')->nullable();
             $table->tinyInteger('is_viewed')->default(0)->comment('0: No, 1: Yes');
-            $table->tinyInteger('accepted')->default(0)->comment('0: No, 1: Yes');
+            $table->tinyInteger('disabled')->default(0)->comment('Only ModelDisabledStatusEnum values are allowed');
             $table->tinyInteger('times_rejected')->default(0);
             $table->timestamp('moved_at');
             $table->timestamps();

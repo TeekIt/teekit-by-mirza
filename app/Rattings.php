@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Http\Controllers\UsersController;
+use App\Services\SellerServices;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,7 +27,7 @@ class Rattings extends Model
         $all = [];
 
         foreach ($all_raw as $aw) {
-            $aw->user = UsersController::getSellerInfo(User::find($aw->user_id));
+            $aw->user = SellerServices::getStandardSellerInfo(User::find($aw->user_id));
             $all[] = $aw;
         }
 

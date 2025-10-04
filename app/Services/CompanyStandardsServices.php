@@ -11,7 +11,9 @@ use Carbon\Carbon;
  */
 final class CompanyStandardsServices
 {
-    public static float $standardServiceCharges = 1.99;
+    public CONST float STANDARD_SERVICE_CHARGES = 1.99;
+
+    public CONST int STANDARD_NEAR_BY_MILES = 5;
 
     public static function getStandardPickUpTime(): Carbon
     {
