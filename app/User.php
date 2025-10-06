@@ -174,7 +174,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function scopeWhereRoleIsParentOrChildSeller(Builder $query): void
     {
-        $query->where('is_active', self::ACTIVE);
+        $query->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER]);
     }
     /**
      * Helpers
@@ -540,7 +540,7 @@ class User extends Authenticatable implements JWTSubject
     public static function verifyReferralCode(int $userId, string $referral_code)
     {
         $data = User::where('id', '!=', $userId)->where('referral_code', $referral_code)->first();
-        
+
         return (is_null($data)) ? false : $data;
     }
 

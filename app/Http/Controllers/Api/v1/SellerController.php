@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Validator;
 use Throwable;
 use App\Services\JsonResponseServices;
 use App\Services\WebResponseServices;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
@@ -80,17 +82,23 @@ class SellerController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        $data = Cache::remember('sellers' . $request->city . $request->lat . $request->lon, now()->addDay(), function () use ($request) {
-            $sellers = User::getParentAndChildSellersByCity(city: $request->city, numberOfRows: 100);
-            if (!$sellers->isEmpty()) {
-                return GoogleMapServices::findNearByUsersByMakingChunks(
-                    lat: $request->lat,
-                    lon: $request->lon,
-                    users: $sellers
-                );
+        $validatedData = (object) $validatedData->validated();
+    
+        $data = Cache::remember(
+            'sellers' . $validatedData->city . $validatedData->lat . $validatedData->lon,
+            now()->addDay(),
+            function () use ($validatedData) {
+                $sellers = User::getParentAndChildSellersByCity(city: $validatedData->city, numberOfRows: 100);
+                
+                if (!$sellers->isEmpty()) {
+                    return GoogleMapServices::findNearByUsersByMakingChunks(
+                        lat: $validatedData->lat,
+                        lon: $validatedData->lon,
+                        users: $sellers
+                    );
+                }
             }
-        });
-
+        );
         /*
         * Just creating this variable so we don't have to call the "empty()" function again & again
         * Which will obviouly decrease the API response speed
