@@ -32,7 +32,7 @@ final class SellerServices
             'total_withdraw' => $seller->total_withdraw,
             'parent_store_id' => $seller->parent_store_id,
             'is_online' => $seller->is_online,
-            'roles' => ($seller->role_id == UserRoleEnum::SELLER) ? ['sellers'] : ['child_sellers'],
+            'roles' => ($seller->role_id == UserRoleEnum::SELLER->value) ? ['sellers'] : ['child_sellers'],
             'stripe_account_id' => $seller->stripe_account_id,
         ];
 
