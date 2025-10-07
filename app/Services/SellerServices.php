@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\UserRoleEnum;
-use App\User;
 
 final class SellerServices
 {
@@ -11,7 +10,7 @@ final class SellerServices
      * Fetch seller information w.r.t ID
      * @author Muhammad Abdullah Mirza
      */
-    public static function getStandardSellerInfo(User $seller, ?array $mapApiResult = null)
+    public static function getStandardSellerInfo(object $seller, ?array $mapApiResult = null)
     {
         $data = [
             'id' => $seller->id,
