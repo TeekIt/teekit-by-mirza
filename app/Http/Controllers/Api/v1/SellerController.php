@@ -88,7 +88,7 @@ class SellerController extends Controller
             'sellers' . $validatedData->city . $validatedData->lat . $validatedData->lon,
             now()->addDay(),
             function () use ($validatedData) {
-                $sellers = User::getParentAndChildSellersByCity(city: $validatedData->city, numberOfRows: 100);
+                $sellers = User::getParentAndChildSellersByCity(city: $validatedData->city, numberOfRows: 200);
                 
                 if (!$sellers->isEmpty()) {
                     return GoogleMapServices::findNearByUsersByMakingChunks(
