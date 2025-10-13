@@ -2,8 +2,8 @@
 
 namespace App\Http\Livewire\Admin;
 
-use App\Qty;
-use App\User;
+use App\Models\Qty;
+use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
@@ -13,30 +13,47 @@ class ChildSellersLivewire extends Component
 {
     use WithPagination;
 
-    public
-        $child_seller_id,
-        $name,
-        $email,
-        $phone,
-        $full_address,
-        $business_name,
-        $lat,
-        $lon,
-        $user_img,
-        $last_login,
-        $email_verified_at,
-        $pending_withdraw,
-        $total_withdraw,
-        $is_online,
-        $application_fee,
-        $search = '';
+    public $child_seller_id;
 
+    public $name;
+
+    public $email;
+
+    public $phone;
+
+    public $full_address;
+
+    public $business_name;
+
+    public $lat;
+
+    public $lon;
+
+    public $user_img;
+
+    public $last_login;
+
+    public $email_verified_at;
+
+    public $pending_withdraw;
+
+    public $total_withdraw;
+
+    public $is_online;
+
+    public $application_fee;
+
+    public $search = '';
+
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
 
     public function resetComponent()
     {
         $this->resetAllErrors();
-        
+
         $this->reset([
             'name',
             'email',
@@ -131,6 +148,7 @@ class ChildSellersLivewire extends Component
     public function render()
     {
         $data = User::getChildSellers($this->search);
+
         return view('livewire.admin.child-sellers-livewire', compact('data'));
     }
 }

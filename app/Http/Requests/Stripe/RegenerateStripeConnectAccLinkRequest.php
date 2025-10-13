@@ -22,7 +22,7 @@ class RegenerateStripeConnectAccLinkRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:users,id'
+            'id' => 'required|integer|exists:users,id',
         ];
     }
 }

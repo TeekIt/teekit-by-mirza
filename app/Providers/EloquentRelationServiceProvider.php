@@ -22,11 +22,11 @@ class EloquentRelationServiceProvider extends ServiceProvider
     public function boot()
     {
         Relation::enforceMorphMap([
-            'User' => \App\User::class,
+            'User' => \App\Models\User::class,
             'GuestBuyer' => \App\Models\GuestBuyer::class,
-            'Product' => \App\Products::class,
+            'Product' => \App\Models\Products::class,
             'ProductsByBuyer' => \App\Models\ProductsByBuyer::class,
-            'Order' => \App\Orders::class,
+            'Order' => \App\Models\Orders::class,
             'OrdersFromOtherSeller' => \App\Models\OrdersFromOtherSeller::class,
         ]);
     }

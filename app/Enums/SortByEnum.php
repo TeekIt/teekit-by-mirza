@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum SortByEnum: string 
+enum SortByEnum: string
 {
     case PriceLowToHigh = 'PriceLowToHigh';
     case PriceHighToLow = 'PriceHighToLow';

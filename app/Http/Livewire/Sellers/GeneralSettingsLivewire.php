@@ -2,40 +2,49 @@
 
 namespace App\Http\Livewire\Sellers;
 
-use Livewire\Component;
-
 use App\Services\ImageServices;
-use App\User;
+use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class GeneralSettingsLivewire extends Component
 {
     use WithFileUploads;
 
-    public
-        $user_id,
-        $name,
-        // $l_name,
-        $email,
-        $business_name,
-        $business_phone,
-        $phone,
-        $old_password,
-        $new_password,
-        $user_img,
-        $image_to_upload;
-    /* 
+    public $user_id;
+
+    public $name;
+
+    // $l_name,
+    public $email;
+
+    public $business_name;
+
+    public $business_phone;
+
+    public $phone;
+
+    public $old_password;
+
+    public $new_password;
+
+    public $user_img;
+
+    public $image_to_upload;
+
+    /*
      * Lifecycle Hooks
      */
     public function mount()
     {
         $this->user_id = auth()->id();
     }
-     /* 
-     * Helpers
-     */
+
+    /*
+    * Helpers
+    */
     public function resetComponent()
     {
         $this->resetValidation();
@@ -52,6 +61,7 @@ class GeneralSettingsLivewire extends Component
             'image_to_upload',
         ]);
     }
+
     /*
     * CRUD Methods
     */
@@ -63,7 +73,9 @@ class GeneralSettingsLivewire extends Component
         try {
             /* Perform some operation */
             $filename = ImageServices::uploadLivewireImg($this->image_to_upload, $this->user_id);
-            if ($filename) User::updateInfo($this->user_id, userImg: $filename);
+            if ($filename) {
+                User::updateInfo($this->user_id, userImg: $filename);
+            }
             /* Operation finished */
             $this->resetComponent();
             sleep(1);
@@ -244,7 +256,7 @@ class GeneralSettingsLivewire extends Component
         $this->business_phone = $user->business_phone;
         $this->phone = $user->phone;
         $this->user_img = $user->user_img;
-        
+
         return $user;
     }
 

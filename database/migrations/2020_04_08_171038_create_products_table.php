@@ -15,8 +15,8 @@ class CreateProductsTable extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
-            $table->foreignId('category_id')->constrained(table:'categories')->cascadeOnDelete();
+            $table->foreignId('seller_id')->constrained(table: 'users')->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained(table: 'categories')->cascadeOnDelete();
             $table->string('product_name');
             $table->string('sku');
             $table->float('price');

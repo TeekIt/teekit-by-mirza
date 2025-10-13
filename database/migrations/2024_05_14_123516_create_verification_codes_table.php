@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('verification_codes', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('order_id')->constrained(table:'orders')->cascadeOnDelete();
+            $table->foreignId('order_id')->constrained(table: 'orders')->cascadeOnDelete();
             $table->longText('code');
             $table->timestamps();
             /**

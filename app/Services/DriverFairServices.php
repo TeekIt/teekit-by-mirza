@@ -6,6 +6,7 @@ final class DriverFairServices
 {
     /**
      * The formulas used inside the function are pre-defined by Eesa & Team
+     *
      * @author Muhammad Abdullah Mirza
      */
     public static function calculateDriverFair2($totalWeight, $totalVolumn, $distance): float

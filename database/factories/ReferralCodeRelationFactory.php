@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ReferralCodeRelationFactory extends Factory
@@ -16,7 +16,7 @@ class ReferralCodeRelationFactory extends Factory
     {
         return [
             'referred_by' => User::inRandomOrder()->first()->id,
-            'user_id' => User::inRandomOrder()->first()->id
+            'user_id' => User::inRandomOrder()->first()->id,
         ];
     }
 }

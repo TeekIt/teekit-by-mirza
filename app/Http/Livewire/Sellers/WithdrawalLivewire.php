@@ -2,8 +2,8 @@
 
 namespace App\Http\Livewire\Sellers;
 
-use App\User;
-use App\WithdrawalRequests;
+use App\Models\User;
+use App\Models\WithdrawalRequests;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -11,20 +11,28 @@ class WithdrawalLivewire extends Component
 {
     use WithPagination;
 
-    public
-        $search,
-        $amount,
-        $created_at,
-        $status,
-        $seller_id,
-        $page = 1;
+    public $search;
 
+    public $amount;
+
+    public $created_at;
+
+    public $status;
+
+    public $seller_id;
+
+    public $page = 1;
+
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
 
     protected $rules = [
-        'amount' => 'numeric|between:0,999999.99'
+        'amount' => 'numeric|between:0,999999.99',
     ];
-    /* 
+
+    /*
      * Lifecycle Hooks
      */
     public function mount()
@@ -32,7 +40,8 @@ class WithdrawalLivewire extends Component
         $this->seller_id = User::getSellerID();
         $this->resetAllPaginators();
     }
-    /* 
+
+    /*
      * Helpers
      */
     public function updatedAmount($value)
@@ -53,16 +62,24 @@ class WithdrawalLivewire extends Component
 
     public function resetThisPage()
     {
-        $this->reset(['search', 'amount', 'created_at']);
+        $this->reset([
+            'search',
+            'amount',
+            'created_at'
+        ]);
     }
 
     public function isAmountByIdSet()
     {
-        $amount = (int)$this->amount;
-        if ($amount != 0) $this->resetPage();
+        $amount = (int) $this->amount;
+        if ($amount != 0) {
+            $this->resetPage();
+        }
+
         return $amount;
     }
-    /* 
+
+    /*
      * CRUD Methods
      */
     public function withdrawRequest()
@@ -72,12 +89,14 @@ class WithdrawalLivewire extends Component
         if ($this->amount <= 0) {
             session()->flash('error', 'Withdrawal amount is not valid');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'requestWithdrawModal']);
+
             return;
         }
 
         if ($this->amount > $user->pending_withdraw) {
             $this->addError('amount', 'Withdrawal amount exceeds pending balance');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'requestWithdrawModal']);
+
             return;
         }
         // Proceed with withdrawal

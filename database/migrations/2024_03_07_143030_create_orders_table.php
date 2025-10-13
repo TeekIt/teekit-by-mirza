@@ -16,7 +16,7 @@ class CreateOrdersTable extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->morphs('created_by'); /* This column can either belong to "users" or "guest_buyers" */
-            $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('seller_id')->constrained(table: 'users')->cascadeOnDelete();
             $table->float('initial_total');
             $table->float('current_total');
             $table->tinyInteger('total_items');

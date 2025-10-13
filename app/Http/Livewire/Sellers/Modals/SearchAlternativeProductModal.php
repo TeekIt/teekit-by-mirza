@@ -2,9 +2,9 @@
 
 namespace App\Http\Livewire\Sellers\Modals;
 
-use App\OrderItems;
-use App\Orders;
-use App\Products;
+use App\Models\OrderItems;
+use App\Models\Orders;
+use App\Models\Products;
 use Exception;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -15,27 +15,38 @@ class SearchAlternativeProductModal extends Component
 {
     use WithPagination;
 
-    public
-        $productDetails,
-        $orderId,
-        $currentProdId,
-        $currentProdQty,
-        $customerName,
-        $phoneNumber,
-        $selectedQty,
-        $sellerId,
-        $search = '';
+    public $productDetails;
 
+    public $orderId;
+
+    public $currentProdId;
+
+    public $currentProdQty;
+
+    public $customerName;
+
+    public $phoneNumber;
+
+    public $selectedQty;
+
+    public $sellerId;
+
+    public $search = '';
+
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
 
     protected $rules = [
-        'selectedQty' => 'required|integer'
+        'selectedQty' => 'required|integer',
     ];
 
     protected $messages = [
         'selectedQty.required' => 'Please enter the qty',
-        'selectedQty.integer' => 'The qty must be a integer value'
+        'selectedQty.integer' => 'The qty must be a integer value',
     ];
+
     /*
      * Lifecycle Hooks
      */
@@ -50,6 +61,7 @@ class SearchAlternativeProductModal extends Component
         $this->phoneNumber = $phoneNumber;
         $this->sellerId = auth()->id();
     }
+
     /*
      * Helpers
      */
@@ -89,6 +101,7 @@ class SearchAlternativeProductModal extends Component
     {
         $this->productDetails = null;
     }
+
     /*
      * CRUD Methods
      */
@@ -127,7 +140,7 @@ class SearchAlternativeProductModal extends Component
                     $currentProdTotalPrice,
                     $alternativeProdTotalPrice
                 );
-                
+
                 $replacedProduct = OrderItems::replaceWithAlternativeProduct(
                     $this->orderId,
                     $this->currentProdId,
@@ -140,7 +153,7 @@ class SearchAlternativeProductModal extends Component
             $this->emit('alternativeProductIncluded');
             $this->emit('callParentResetComponent');
             $this->dispatchBrowserEvent('close-modal', ['id' => 'searchAlternativeProductModal']);
-            
+
             if ($replacedPrice && $replacedProduct) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {

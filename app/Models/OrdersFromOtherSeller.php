@@ -5,10 +5,9 @@ namespace App\Models;
 use App\Enums\ModelDisabledStatusEnum;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OrdersFromOtherSeller extends Model
 {
-    use HasFactory, SoftDeletes, Prunable;
+    use HasFactory, Prunable, SoftDeletes;
 
     protected $fillable = ['*'];
 
@@ -25,6 +24,7 @@ class OrdersFromOtherSeller extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Laravel Built-In Helpers
      */
@@ -32,6 +32,7 @@ class OrdersFromOtherSeller extends Model
     {
         return static::where('disabled', ModelDisabledStatusEnum::YES->value)->where('created_at', '<=', now()->addDay());
     }
+
     /**
      * Relations
      */
@@ -49,6 +50,7 @@ class OrdersFromOtherSeller extends Model
     {
         return $this->morphTo(__FUNCTION__, 'product_belongs_to_type', 'product_belongs_to_id');
     }
+
     /**
      * Helpers
      */
@@ -73,9 +75,15 @@ class OrdersFromOtherSeller extends Model
         ?OrderStatusEnum $orderStatus = null
     ): bool {
         $order = self::findOrFail($id);
-        if (!is_null($initialTotal)) $order->initial_total = $initialTotal;
-        if (!is_null($currentTotal)) $order->current_total = $currentTotal;
-        if (!is_null($orderStatus)) $order->order_status = $orderStatus;
+        if (! is_null($initialTotal)) {
+            $order->initial_total = $initialTotal;
+        }
+        if (! is_null($currentTotal)) {
+            $order->current_total = $currentTotal;
+        }
+        if (! is_null($orderStatus)) {
+            $order->order_status = $orderStatus;
+        }
 
         return $order->save();
     }
@@ -90,7 +98,7 @@ class OrdersFromOtherSeller extends Model
         return self::where('parent_order_id', '=', $parentOrderId)
             ->where('seller_id', '!=', $exceptSellerId)
             ->update([
-                'disabled' => ModelDisabledStatusEnum::YES->value
+                'disabled' => ModelDisabledStatusEnum::YES->value,
             ]);
     }
 
@@ -112,32 +120,32 @@ class OrdersFromOtherSeller extends Model
         float $productPrice,
         int $productQty,
         float $initialTotal,
-        ?float $customerLat = null,
-        ?float $customerLon = null,
+        ?float $customerLat,
+        ?float $customerLon,
         string $receiverName,
         string $countryCode,
         string $phoneNumber,
         string $address,
-        ?string $houseNo = null,
-        ?string $flat = null,
+        ?string $houseNo,
+        ?string $flat,
         string $country,
         string $state,
         string $city,
         string $postcode,
-        ?string $paymentIntentId = null,
-        float $driverCharges = 0.0,
-        ?float $deliveryCharges = null,
-        ?float $serviceCharges = null,
-        ?string $device = null,
+        ?string $paymentIntentId,
+        float $driverCharges,
+        ?float $deliveryCharges,
+        ?float $serviceCharges,
+        ?string $device,
         string $type,
-        ?string $description = null,
-        string $paymentStatus = "hidden",
-        ?int $offloading = null,
-        ?float $offloadingCharges = null,
+        ?string $description,
+        string $paymentStatus,
+        ?int $offloading,
+        ?float $offloadingCharges,
         string $movedAt,
         string $createdAt,
     ): OrdersFromOtherSeller {
-        $model = new self();
+        $model = new self;
         $model->created_by_type = $createdByType;
         $model->created_by_id = $createdById;
         $model->seller_id = $sellerId;
@@ -201,7 +209,7 @@ class OrdersFromOtherSeller extends Model
             ->first();
     }
 
-    public static function getForView(array $columns = ['*'], int $sellerId, string $orderBy): Collection
+    public static function getForView(array $columns, int $sellerId, string $orderBy): Collection
     {
         return self::select($columns)->with('product')
             ->where('seller_id', '=', $sellerId)

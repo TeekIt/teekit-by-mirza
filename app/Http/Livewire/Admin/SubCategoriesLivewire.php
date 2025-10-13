@@ -2,19 +2,22 @@
 
 namespace App\Http\Livewire\Admin;
 
-use App\Categories;
+use App\Models\Categories;
 use App\Models\SubCategory;
 use Exception;
 use Livewire\Component;
 
 class SubCategoriesLivewire extends Component
 {
-    public
-        $subCategoryId,
-        $name;
+    public $subCategoryId;
+
+    public $name;
 
     public $category;
 
+    /*
+    * Livewire Built-in Properties
+    */
     protected $listeners = [
         'refreshThisComponent' => '$refresh',
     ];
@@ -23,7 +26,8 @@ class SubCategoriesLivewire extends Component
     {
         $this->category = $category;
     }
-    /* 
+
+    /*
      * Custom Helpers
      */
     public function resetComponent()
@@ -42,7 +46,8 @@ class SubCategoriesLivewire extends Component
         $this->subCategoryId = $subCategory->id;
         $this->name = $subCategory->name;
     }
-    /* 
+
+    /*
      * CRUD Methods
      */
     public function addSubCategory()
@@ -62,7 +67,7 @@ class SubCategoriesLivewire extends Component
             sleep(1);
             $this->emitSelf('refreshThisComponent');
             $this->resetComponent();
-            $this->dispatchBrowserEvent('close-modal', ['id' => 'addSubCategoryModal' . $this->category->id]);
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'addSubCategoryModal'.$this->category->id]);
 
             if ($inserted) {
                 session()->flash('success', config('constants.DATA_INSERTION_SUCCESS'));
@@ -89,7 +94,7 @@ class SubCategoriesLivewire extends Component
             /* Operation finished */
             sleep(1);
             $this->emitSelf('refreshThisComponent');
-            $this->dispatchBrowserEvent('close-modal', ['id' => 'editSubCategoryModal' . $this->category->id]);
+            $this->dispatchBrowserEvent('close-modal', ['id' => 'editSubCategoryModal'.$this->category->id]);
 
             if ($updated) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));

@@ -2,9 +2,8 @@
 
 namespace App\Mail;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -25,7 +24,7 @@ class StripeConnectAccMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Complete Your Stripe Connect Account Setup - ' . config('app.name'),
+            subject: 'Complete Your Stripe Connect Account Setup - '.config('app.name'),
         );
     }
 

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('commission_and_service_fees', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('seller_id')->constrained(table: 'users')->cascadeOnDelete();
             $table->json('commission')->nullable();
             $table->json('service_fee')->nullable();
             $table->timestamps();

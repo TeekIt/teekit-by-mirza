@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Web\v2;
 
-use App\Jobs\SendRegeneratedStripeConnectAccMailJob;
-use App\Services\StripeServices;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stripe\RegenerateStripeConnectAccLinkRequest;
-use App\User;
+use App\Jobs\SendRegeneratedStripeConnectAccMailJob;
+use App\Services\StripeServices;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 class StripeController extends Controller
 {

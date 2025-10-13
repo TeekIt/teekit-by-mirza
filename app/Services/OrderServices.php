@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\OrdersFromOtherSeller;
-use App\Orders;
-use App\User;
+use App\Models\Orders;
+use App\Models\User;
 
 final class OrderServices
 {
@@ -12,7 +12,7 @@ final class OrderServices
 
     public static function getTotalWithExtraCharge(float $orderTotalAmount, float $totalWeight): float
     {
-        return $orderTotalAmount + ((2.5 + 1.25) * (static::$maxDistanceInMiles + static::getDeliveryFee($totalWeight)));
+        return $orderTotalAmount + ((2.5 + 1.25) * (self::$maxDistanceInMiles + self::getDeliveryFee($totalWeight)));
     }
 
     public static function getTotalWeight(array|Orders|OrdersFromOtherSeller $order): float
@@ -24,7 +24,7 @@ final class OrderServices
         if ($order instanceof OrdersFromOtherSeller) {
             return $order->product->weight;
         }
-        
+
         return $order->order_items->pluck('product')->sum('weight');
     }
 
@@ -84,7 +84,7 @@ final class OrderServices
     ): float {
         $distanceInMiles = GoogleMapServices::getDistanceInMiles($sellerLat, $sellerLon, $buyerLat, $buyerLon);
 
-        return (2.5 + 1.25) * ($distanceInMiles + static::getDeliveryFee($totalWeight));
+        return (2.5 + 1.25) * ($distanceInMiles + self::getDeliveryFee($totalWeight));
     }
 
     public static function getDriverCharges(
@@ -107,11 +107,11 @@ final class OrderServices
         int $orderId,
         string $verificationCode
     ): void {
-        $buyerNumber = $buyerCountryCode . $buyerNumber;
+        $buyerNumber = $buyerCountryCode.$buyerNumber;
         /* Msg for sending SMS notification of this "New Order" */
-        $messageForSeller = "A new order #" . $orderId . " has been received. Please visit Teek It's seller dashboard:https://app.teekit.co.uk/login";
+        $messageForSeller = 'A new order #'.$orderId." has been received. Please visit Teek It's seller dashboard:https://app.teekit.co.uk/login";
 
-        $messageForBuyer = "Thanks for your order! Your order has been delivered to the store. Please quote verification code: " . $verificationCode . " on delivery. (TeekIt)";
+        $messageForBuyer = 'Thanks for your order! Your order has been delivered to the store. Please quote verification code: '.$verificationCode.' on delivery. (TeekIt)';
 
         /* To restrict "New Order" SMS notifications only for UK numbers */
         if (str_contains($seller->business_phone, '+44')) {

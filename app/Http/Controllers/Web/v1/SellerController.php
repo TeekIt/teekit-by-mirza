@@ -3,21 +3,12 @@
 namespace App\Http\Controllers\Web\v1;
 
 use App\Http\Controllers\Controller;
-use App\Enums\UserRoleEnum;
-use App\Models\Driver;
-use App\Pages;
-use App\Services\GoogleMapServices;
-use App\User;
+use App\Services\WebResponseServices;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
-use Illuminate\Http\Request;
-use App\Services\JsonResponseServices;
-use App\Services\WebResponseServices;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Validation\Rule;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class SellerController extends Controller
 {
@@ -32,11 +23,13 @@ class SellerController extends Controller
 
         $time = $request->time;
         foreach ($time as $key => $value) {
-            if (!in_array("on", $time[$key])) $time[$key] += ["closed" => null];
+            if (! in_array('on', $time[$key])) {
+                $time[$key] += ['closed' => null];
+            }
         }
 
         $businessHours['time'] = $time;
-        $businessHours['submitted'] = "yes";
+        $businessHours['submitted'] = 'yes';
 
         $updated = User::updateInfo(
             auth()->id(),
@@ -67,7 +60,7 @@ class SellerController extends Controller
                 'state' => 'required|string',
                 'city' => 'required|string',
                 'lat' => 'required|numeric|between:-90,90',
-                'lon' => 'required|numeric|between:-180,180'
+                'lon' => 'required|numeric|between:-180,180',
             ]);
             if ($validatedData->fails()) {
                 return WebResponseServices::getValidationResponseRedirectBack(

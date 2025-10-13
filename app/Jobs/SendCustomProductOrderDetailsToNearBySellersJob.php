@@ -2,10 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Orders;
+use App\Models\Orders;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
-use App\User;
+use App\Models\User;
 use DateTime;
 use Exception;
 use Illuminate\Bus\Queueable;

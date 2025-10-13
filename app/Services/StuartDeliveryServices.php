@@ -6,11 +6,11 @@ use App\Enums\OrderStatusEnum;
 use App\Enums\PackageWeightEnum;
 use App\Enums\StuartPackageTypeEnum;
 use App\Models\StuartDelivery;
-use App\Orders;
+use App\Models\Orders;
 use Exception;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Throwable;
-use Illuminate\Support\Carbon;
 
 final class StuartDeliveryServices
 {
@@ -39,8 +39,8 @@ final class StuartDeliveryServices
                             'firstname' => $senderName,
                             'phone' => $senderPhone,
                             'email' => $senderEmail,
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 'dropoffs' => [
                     [
@@ -52,10 +52,10 @@ final class StuartDeliveryServices
                             'firstname' => $receiverName,
                             'phone' => $receiverPhone,
                             'email' => $receiverEmail,
-                        ]
-                    ]
-                ]
-            ]
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -75,17 +75,19 @@ final class StuartDeliveryServices
     {
         return (app()->environment('production')) ? 'https://api.stuart.com/oauth/token' : 'https://api.sandbox.stuart.com/oauth/token';
     }
+
     /**
      * It will get a fresh token for hitting Stuart delivery APIs
+     *
      * @author Muhammad Abdullah Mirza
      */
     public static function getAccessToken(): string
     {
-        $response = Http::asForm()->post(static::getTokenUrl(), [
+        $response = Http::asForm()->post(self::getTokenUrl(), [
             'client_id' => config('stuart.STUART_CLIENT_ID'),
             'client_secret' => config('stuart.STUART_CLIENT_SECRET'),
             'grant_type' => 'client_credentials',
-            'scope' => 'api'
+            'scope' => 'api',
         ])->json();
 
         if (isset($response['error'])) {
@@ -94,12 +96,13 @@ final class StuartDeliveryServices
 
         return $response['access_token'];
     }
+
     /**
      * @author Muhammad Abdullah Mirza
      */
     public static function getJobPricing(array $job): array
     {
-        $response = Http::withToken(static::getAccessToken())->post(static::getJobPricingUrl(), $job)->json();
+        $response = Http::withToken(self::getAccessToken())->post(self::getJobPricingUrl(), $job)->json();
 
         if (isset($response['error'])) {
             throw new Exception($response['message']);
@@ -107,12 +110,13 @@ final class StuartDeliveryServices
 
         return $response;
     }
+
     /**
      * @author Muhammad Abdullah Mirza
      */
     public static function getJob(string $jobId): array
     {
-        $response = Http::withToken(static::getAccessToken())->get(static::getJobsUrl() . '/' . $jobId)->json();
+        $response = Http::withToken(self::getAccessToken())->get(self::getJobsUrl().'/'.$jobId)->json();
 
         if (isset($response['error'])) {
             throw new Exception($response['message']);
@@ -136,12 +140,13 @@ final class StuartDeliveryServices
                 throw new Exception('Invalid package weight provided');
         }
     }
+
     /**
      * @author Muhammad Abdullah Mirza
      */
     public static function createJob(array $job): array
     {
-        $response = Http::withToken(static::getAccessToken())->post(static::getJobsUrl(), $job)->json();
+        $response = Http::withToken(self::getAccessToken())->post(self::getJobsUrl(), $job)->json();
 
         if (isset($response['error'])) {
             throw new Exception($response['message']);
@@ -149,8 +154,10 @@ final class StuartDeliveryServices
 
         return $response;
     }
+
     /**
      * Creates a stuart delivery job for a livewire component
+     *
      * @author Muhammad Abdullah Mirza
      */
     public static function createJobForLivewire($orderId, $customOrderId = null)
@@ -172,9 +179,9 @@ final class StuartDeliveryServices
                                 // 'lastname' => 'null',
                                 'phone' => $orderDetails->store->business_phone,
                                 'email' => $orderDetails->store->email,
-                                'company' => $orderDetails->store->business_name
-                            ]
-                        ]
+                                'company' => $orderDetails->store->business_name,
+                            ],
+                        ],
                     ],
                     'dropoffs' => [
                         [
@@ -182,7 +189,7 @@ final class StuartDeliveryServices
                             'package_description' => 'Package purchased from Teek it.',
                             'transport_type' => $transportType,
                             'client_reference' => ($customOrderId) ? $customOrderId : $orderId,
-                            'address' => $orderDetails->address . ' House#' . $orderDetails->house_no,
+                            'address' => $orderDetails->address.' House#'.$orderDetails->house_no,
                             'comment' => 'Please try to call the customer before reaching the destination.',
                             // 'end_customer_time_window_start' => '2021-12-12T11:00:00.000+02:00',
                             // 'end_customer_time_window_end' => '2021-12-12T13:00:00.000+02:00',
@@ -192,29 +199,31 @@ final class StuartDeliveryServices
                                 'phone' => $orderDetails->phone_number,
                                 // 'email' => 'client3@email.com',
                                 // 'company' => 'Sample Company Inc.'
-                            ]
-                        ]
-                    ]
-                ]
+                            ],
+                        ],
+                    ],
+                ],
             ];
 
-            $data = static::createJob($job);
-            if ($data && !isset($data['error'])) {
+            $data = self::createJob($job);
+            if ($data && ! isset($data['error'])) {
                 StuartDelivery::insertInfo($orderId, $data['id']);
 
                 Orders::updateOrderStatus($orderId, OrderStatusEnum::STUART_DELIVERY);
 
                 return 'JobCreated';
             } else {
-                $message = $data['error'] . ': ' . $data['message'];
-                if ($data['error'] == 'JOB_DISTANCE_NOT_ALLOWED') $message = $message . " " . $transportType;
+                $message = $data['error'].': '.$data['message'];
+                if ($data['error'] == 'JOB_DISTANCE_NOT_ALLOWED') {
+                    $message = $message.' '.$transportType;
+                }
 
-                return 'StuartErrorA: ' . $message;
+                return 'StuartErrorA: '.$message;
             }
         } catch (Throwable $error) {
             report($error);
 
-            return 'StuartErrorB: ' . $data['error'] . ': ' . $data['message'];
+            return 'StuartErrorB: '.$data['error'].': '.$data['message'];
         }
     }
 }

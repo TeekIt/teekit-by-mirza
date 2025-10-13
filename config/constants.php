@@ -11,9 +11,9 @@ return [
     |
     */
 
-     /*
+    /*
     |--------------------------------------------------------------------------
-    | Globally Required 
+    | Globally Required
     |--------------------------------------------------------------------------
     */
     'EXTRA_CHARGE_AMOUNT' => 5.00,
@@ -96,7 +96,7 @@ return [
     'PRODUCT_REMOVED_FAILED' => 'There is an error while removing the product',
     'SENT_TO_OTHER_STORE_FAILED' => 'Due to some error your order cannot be sent to other store',
     'PARENT_QTY_SYNCED_FAILED' => 'Failed to sync quantities',
-    'INTERNAL_SERVER_ERROR'=> 'Sorry! This operation has been failed due to some internal server error',
+    'INTERNAL_SERVER_ERROR' => 'Sorry! This operation has been failed due to some internal server error',
     'DELIVERY_FAILED' => 'Sorry! Due to some internal error we are failed to initiate your delivery',
     'SEARCH_FAILED' => 'Sorry! We could not find any results against your search',
     /*

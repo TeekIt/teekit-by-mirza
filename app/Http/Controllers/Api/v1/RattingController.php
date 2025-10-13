@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
-use App\Rattings;
+use App\Models\Rattings;
 use App\Services\JsonResponseServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +18,7 @@ class RattingController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        $ratting = new Rattings();
+        $ratting = new Rattings;
         $ratting->user_id = Auth::id();
         $ratting->product_id = $request->get('product_id');
         $ratting->ratting = $request->get('ratting');
@@ -26,7 +26,7 @@ class RattingController extends Controller
 
         return (new ProductsController)->view($request->get('product_id'));
     }
-    
+
     public function delete($rattingId)
     {
         $ratting = Rattings::find($rattingId);

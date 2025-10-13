@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\User;
+use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Laravel\Cashier\Checkout;
@@ -34,7 +34,7 @@ final class StripeServices
         int $qty = 1
     ): Checkout {
         return request()->user()->checkoutCharge(
-            static::calculateCharge($totalCharge),
+            self::calculateCharge($totalCharge),
             $productName,
             $qty,
             [
@@ -62,14 +62,14 @@ final class StripeServices
             'capabilities' => [
                 'card_payments' => ['requested' => true],
                 'transfers' => ['requested' => true],
-            ]
+            ],
         ];
 
         curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/accounts');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey() . ':');
+        curl_setopt($curl, CURLOPT_USERPWD, self::getSecretKey().':');
 
         $response = curl_exec($curl);
 
@@ -93,14 +93,14 @@ final class StripeServices
             'account' => $accountId,
             'refresh_url' => $refreshUrl,
             'return_url' => $returnUrl,
-            'type' => 'account_onboarding'
+            'type' => 'account_onboarding',
         ];
 
         curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/account_links');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey() . ':');
+        curl_setopt($curl, CURLOPT_USERPWD, self::getSecretKey().':');
 
         $response = curl_exec($curl);
 
@@ -140,12 +140,13 @@ final class StripeServices
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
+        curl_setopt($curl, CURLOPT_USERPWD, self::getSecretKey());
 
         $data = curl_exec($curl);
 
-        if (curl_errno($curl))
-            echo 'Error:' . curl_error($curl);
+        if (curl_errno($curl)) {
+            echo 'Error:'.curl_error($curl);
+        }
 
         curl_close($curl);
 
@@ -156,7 +157,7 @@ final class StripeServices
     {
         $curl = curl_init();
 
-        $customer = static::createCustomer($_REQUEST['name'], $_REQUEST['email']);
+        $customer = self::createCustomer($_REQUEST['name'], $_REQUEST['email']);
 
         $formData = [
             'customer' => $customer->id,
@@ -165,7 +166,7 @@ final class StripeServices
             'setup_future_usage' => 'off_session',
             'off_session' => 'true',
             'confirm' => 'true',
-            'automatic_payment_methods[enabled]' => "true",
+            'automatic_payment_methods[enabled]' => 'true',
             'payment_method' => $_REQUEST['paymentMethodId'],
         ];
 
@@ -173,12 +174,13 @@ final class StripeServices
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
+        curl_setopt($curl, CURLOPT_USERPWD, self::getSecretKey());
 
         $data = curl_exec($curl);
 
-        if (curl_errno($curl))
-            echo 'Error:' . curl_error($curl);
+        if (curl_errno($curl)) {
+            echo 'Error:'.curl_error($curl);
+        }
 
         curl_close($curl);
 
@@ -198,12 +200,13 @@ final class StripeServices
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
+        curl_setopt($curl, CURLOPT_USERPWD, self::getSecretKey());
 
         $data = curl_exec($curl);
 
-        if (curl_errno($curl))
-            echo 'Error:' . curl_error($curl);
+        if (curl_errno($curl)) {
+            echo 'Error:'.curl_error($curl);
+        }
 
         curl_close($curl);
 
@@ -225,12 +228,13 @@ final class StripeServices
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
+        curl_setopt($curl, CURLOPT_USERPWD, self::getSecretKey());
 
         $data = curl_exec($curl);
 
-        if (curl_errno($curl))
-            echo 'Error:' . curl_error($curl);
+        if (curl_errno($curl)) {
+            echo 'Error:'.curl_error($curl);
+        }
 
         curl_close($curl);
 
@@ -255,12 +259,13 @@ final class StripeServices
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
+        curl_setopt($curl, CURLOPT_USERPWD, self::getSecretKey());
 
         $data = curl_exec($curl);
 
-        if (curl_errno($curl))
-            echo 'Error:' . curl_error($curl);
+        if (curl_errno($curl)) {
+            echo 'Error:'.curl_error($curl);
+        }
 
         curl_close($curl);
 
@@ -275,16 +280,17 @@ final class StripeServices
         ];
 
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $paymentIntentId . '/increment_authorization');
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/'.$paymentIntentId.'/increment_authorization');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
+        curl_setopt($curl, CURLOPT_USERPWD, self::getSecretKey());
 
         $data = curl_exec($curl);
 
-        if (curl_errno($curl))
-            echo 'Error:' . curl_error($curl);
+        if (curl_errno($curl)) {
+            echo 'Error:'.curl_error($curl);
+        }
 
         curl_close($curl);
 
@@ -300,16 +306,17 @@ final class StripeServices
         ];
 
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $paymentIntentId . '/capture');
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/'.$paymentIntentId.'/capture');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
-        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
+        curl_setopt($curl, CURLOPT_USERPWD, self::getSecretKey());
 
         $data = curl_exec($curl);
 
-        if (curl_errno($curl))
-            echo 'Error:' . curl_error($curl);
+        if (curl_errno($curl)) {
+            echo 'Error:'.curl_error($curl);
+        }
 
         curl_close($curl);
 
@@ -321,15 +328,16 @@ final class StripeServices
         $paymentIntentId = $_REQUEST['paymentIntentId'] ?? $paymentIntentId;
 
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/' . $paymentIntentId . '/cancel');
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/'.$paymentIntentId.'/cancel');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_USERPWD, static::getSecretKey());
+        curl_setopt($curl, CURLOPT_USERPWD, self::getSecretKey());
 
         $data = curl_exec($curl);
 
-        if (curl_errno($curl))
-            echo 'Error:' . curl_error($curl);
+        if (curl_errno($curl)) {
+            echo 'Error:'.curl_error($curl);
+        }
 
         curl_close($curl);
 

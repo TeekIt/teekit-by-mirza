@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers\Web\v1;
 
-use App\Http\Controllers\Controller;
-use App\Categories;
-use App\OrderItems;
-use App\Orders;
-use App\Pages;
+use App\Models\Categories;
 use App\Enums\DeliveryStatusEnum;
 use App\Enums\OrderStatusEnum;
-use App\Models\ProductImage;
-use App\Products;
-use App\Qty;
-use App\User;
-use App\VerificationCodes;
-use App\WithdrawalRequests;
+use App\Http\Controllers\Controller;
+use App\Models\OrderItems;
+use App\Models\Orders;
+use App\Models\Pages;
+use App\Models\Products;
+use App\Models\User;
+use App\Models\VerificationCodes;
+use App\Models\WithdrawalRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -51,23 +49,29 @@ class HomeController extends Controller
         } else {
             return $this->adminHome();
         }
-    }    
+    }
+
     /**
      * Changes user setting provided in the parameter
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function changeSettings(Request $request)
     {
         User::where('id', '=', Auth::id())->update([
-            'settings->' . $request->setting_name => $request->value
+            'settings->'.$request->setting_name => $request->value,
         ]);
 
         return redirect()->route('home');
     }
+
     /**
      * Display's payment view
+     *
      * @author Huzaifa Haleem
+     *
      * @version 1.0.0
      */
     public function paymentSettings()
@@ -76,16 +80,19 @@ class HomeController extends Controller
 
         return view('shopkeeper.settings.payment', compact('payment_settings'));
     }
+
     /**
      * Update's user password
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function adminPasswordUpdate(Request $request)
     {
         $validate = Validator::make($request->all(), [
             'old_password' => 'required|string|min:8',
-            'new_password' => 'required|string|min:8'
+            'new_password' => 'required|string|min:8',
         ]);
         if ($validate->fails()) {
             return redirect()->back()->with('flash', flash('Password must be 8 characters long.')->error());
@@ -101,9 +108,12 @@ class HomeController extends Controller
             return redirect()->back()->with('flash', flash('Your old password is incorrect.')->error());
         }
     }
+
     /**
      * Update's payment settings
+     *
      * @author Huzaifa Haleem
+     *
      * @version 1.0.0
      */
     public function paymentSettingsUpdate(Request $request)
@@ -129,24 +139,27 @@ class HomeController extends Controller
 
         return redirect()->back();
     }
+
     /**
      * Convert's CSV file to JSON
+     *
      * @author Huzaifa Haleem
+     *
      * @version 1.0.0
      */
     public function csvToJson($fname)
     {
         // open csv file
-        if (!($fp = fopen($fname, 'r'))) {
-            die("Can't open file...");
+        if (! ($fp = fopen($fname, 'r'))) {
+            exit("Can't open file...");
         }
 
-        //read csv headers
-        $key = fgetcsv($fp, "1024", ",");
+        // read csv headers
+        $key = fgetcsv($fp, '1024', ',');
 
         // parse csv rows into array
         $json = [];
-        while ($row = fgetcsv($fp, "1024", ",")) {
+        while ($row = fgetcsv($fp, '1024', ',')) {
             $json[] = array_combine($key, $row);
         }
 
@@ -156,9 +169,12 @@ class HomeController extends Controller
         // encode array to json
         return json_encode($json);
     }
+
     /**
      * Return's admin home view
+     *
      * @author Huzaifa Haleem
+     *
      * @version 1.0.0
      */
     public function adminHome()
@@ -179,9 +195,12 @@ class HomeController extends Controller
 
         abort(config('constants.HTTP_UNAUTHORIZED'));
     }
+
     /**
      * Return's admin categories view
+     *
      * @author Huzaifa Haleem
+     *
      * @version 1.0.0
      */
     public function allCat()
@@ -190,25 +209,28 @@ class HomeController extends Controller
 
         return view('admin.categories', compact('categories'));
     }
+
     /**
      * Insert's a new category
+     *
      * @author Huzaifa Haleem
+     *
      * @version 1.0.0
      */
     public function addCat(Request $request)
     {
-        $category = new Categories();
+        $category = new Categories;
         $category->category_name = $request->category_name;
         if ($request->hasFile('category_image')) {
             $image = $request->file('category_image');
             $file = $image;
             $cat_name = str_replace(' ', '_', $category->category_name);
-            $filename = uniqid("Category_" . $cat_name . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
+            $filename = uniqid('Category_'.$cat_name.'_').'.'.$file->getClientOriginalExtension(); // create unique file name...
             Storage::disk('spaces')->put($filename, File::get($file));
-            if (Storage::disk('spaces')->exists($filename)) {  //check file exists in directory or not
-                info("file is stored successfully : " . $filename);
+            if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
+                info('file is stored successfully : '.$filename);
             } else {
-                info("file is not found :- " . $filename);
+                info('file is not found :- '.$filename);
             }
             $category->category_image = $filename;
         }
@@ -220,9 +242,12 @@ class HomeController extends Controller
 
         return Redirect::back();
     }
+
     /**
      * Update's a specific category
+     *
      * @author Huzaifa Haleem
+     *
      * @version 1.0.0
      */
     public function updateCat(Request $request, $id)
@@ -233,12 +258,12 @@ class HomeController extends Controller
             $image = $request->file('category_image');
             $file = $image;
             $cat_name = str_replace(' ', '_', $category->category_name);
-            $filename = uniqid("Category_" . $cat_name . '_') . "." . $file->getClientOriginalExtension(); //create unique file name...
+            $filename = uniqid('Category_'.$cat_name.'_').'.'.$file->getClientOriginalExtension(); // create unique file name...
             Storage::disk('spaces')->put($filename, File::get($file));
             if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
-                info("file is stored successfully : " . $filename);
+                info('file is stored successfully : '.$filename);
             } else {
-                info("file is not found :- " . $filename);
+                info('file is not found :- '.$filename);
             }
             $category->category_image = $filename;
         }
@@ -259,9 +284,12 @@ class HomeController extends Controller
 
         return Redirect::back();
     }
+
     /**
      * Render verified orders listing view for admin
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function adminOrdersVerified(Request $request)
@@ -287,9 +315,12 @@ class HomeController extends Controller
 
         return view('admin.verified_orders', compact('orders', 'orders_p'));
     }
+
     /**
      * Render unverified orders listing view for admin
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function adminOrdersUnverified(Request $request)
@@ -317,9 +348,12 @@ class HomeController extends Controller
 
         return view('admin.unverified_orders', compact('orders', 'orders_p'));
     }
+
     /**
      * Delete selected orders
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function adminOrdersDel(Request $request)
@@ -330,11 +364,13 @@ class HomeController extends Controller
             DB::table('verification_codes')->where('order_id', '=', $request->orders[$i])->delete();
         }
 
-        return response("Orders Deleted Successfully");
+        return response('Orders Deleted Successfully');
     }
+
     /**
      * It will show withdrawls to seller/admin
      * based on their auth id
+     *
      * @version 1.0.0
      */
     public function withdrawals(): View
@@ -343,16 +379,20 @@ class HomeController extends Controller
 
         return view('admin.withdrawal', compact('transactions'));
     }
+
     /**
      * It will show driver withdrawls
+     *
      * @version 1.0.0
      */
     public function withdrawalDrivers()
     {
         return view('admin.withdrawal-drivers');
     }
+
     /**
      * It will show seller withdrawls requests
+     *
      * @version 1.0.0
      */
     public function withdrawalsRequest(Request $request)
@@ -368,9 +408,11 @@ class HomeController extends Controller
             return Redirect::back();
         }
     }
+
     /**
      * It will show complete orders
      * based on the given criteria
+     *
      * @version 1.0.0
      */
     public function completeOrders()
@@ -378,7 +420,7 @@ class HomeController extends Controller
         $orders = DB::table('orders')
             ->leftJoin('users', 'orders.created_by_id', '=', 'users.id')
             ->LeftJoin('drivers', 'orders.driver_id', '=', 'drivers.id')
-            ->where('created_by_type', (new User())->getMorphClass())
+            ->where('created_by_type', (new User)->getMorphClass())
             ->where('delivery_status', '=', DeliveryStatusEnum::COMPLETE)
             ->where('order_status', '=', OrderStatusEnum::COMPLETE)
             ->select(
@@ -396,9 +438,12 @@ class HomeController extends Controller
 
         return view('admin.complete-orders', compact('orders'));
     }
+
     /**
      * it will update the unverified orders to verified
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function clickToVerify($order_id)

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -39,20 +39,23 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
     /**
      * It will log the user in
+     *
      * @version 1.3.0
      */
     public function login(Request $request)
     {
         $this->validateLogin($request);
-        /* 
+        /*
         If the class is using the ThrottlesLogins trait, we can automatically throttle
         the login attempts for this application. We'll key this by the username and
-        the IP address of the client making these requests into this application. 
+        the IP address of the client making these requests into this application.
         */
         if ($this->hasTooManyLoginAttempts($request)) {
             $this->fireLockoutEvent($request);
+
             return $this->sendLockoutResponse($request);
         }
         /* This section is the only change */
@@ -70,36 +73,39 @@ class LoginController extends Controller
                         ->withErrors(['active' => 'WARNING! You cannot access private pages.']);
                 }
             } else {
-                /* 
+                /*
                 Increment the failed login attempts and redirect back to the
-                login form with an error message. 
+                login form with an error message.
                 */
                 $this->incrementLoginAttempts($request);
                 if ($user->email_verified_at == null) {
                     return redirect()
-                    ->route('login')
-                    ->withInput($request->only($this->username(), 'remember'))
-                    ->withErrors(['active' => 'Email not verified, please verify your email first']);
+                        ->route('login')
+                        ->withInput($request->only($this->username(), 'remember'))
+                        ->withErrors(['active' => 'Email not verified, please verify your email first']);
                 } else {
                     return redirect()
-                    ->route('login')
-                    ->withInput($request->only($this->username(), 'remember'))
-                    ->withErrors(['active' => 'Your account is not activated yet, kindly contact the admin']);
+                        ->route('login')
+                        ->withInput($request->only($this->username(), 'remember'))
+                        ->withErrors(['active' => 'Your account is not activated yet, kindly contact the admin']);
                 }
             }
         }
-        /* 
+        /*
         If the login attempt was unsuccessful we will increment the number of attempts
         to login and redirect the user back to the login form. Of course, when this
-        user surpasses their maximum number of attempts they will get locked out. 
+        user surpasses their maximum number of attempts they will get locked out.
         */
         $this->incrementLoginAttempts($request);
-        //return $this->sendFailedLoginResponse($request);
+
+        // return $this->sendFailedLoginResponse($request);
         return $this->invalidCreds($request);
     }
+
     /**
      * It is a helper method being called in login method
      * it will throw a flash message on incorrect/invalid credentials
+     *
      * @version 1.0.0
      */
     protected function invalidCreds()

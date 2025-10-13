@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +13,7 @@ class ReferralCodeRelation extends Model
 
     protected $fillable = [
         'referred_by',
-        'user_id'
+        'user_id',
     ];
 
     protected $hidden = [
@@ -21,6 +21,7 @@ class ReferralCodeRelation extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Relations
      */
@@ -28,6 +29,7 @@ class ReferralCodeRelation extends Model
     {
         return $this->belongsTo(User::class, 'referred_by');
     }
+
     /**
      * Helpers
      */
@@ -40,7 +42,7 @@ class ReferralCodeRelation extends Model
     {
         return self::create([
             'referred_by' => $referredBy,
-            'user_id' => $userId
+            'user_id' => $userId,
         ]);
     }
 

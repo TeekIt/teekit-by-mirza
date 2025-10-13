@@ -2,38 +2,52 @@
 
 namespace App\Http\Livewire\Sellers;
 
-use Illuminate\Support\Facades\Gate;
-use App\Products;
-use App\Qty;
+use App\Models\Categories;
+use App\Models\Products;
+use App\Models\Qty;
 use Exception;
-use Livewire\Component;
-use App\Categories;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Component;
 use Livewire\WithPagination;
 
 class InventoryLivewire extends Component
 {
     use WithPagination;
 
-    public
-        $category_id,
-        $category,
-        $product,
-        $product_id,
-        $quantity = [],
-        $inventories,
-        $owner,
-        $search = '';
+    public $category_id;
 
+    public $category;
+
+    public $product;
+
+    public $product_id;
+
+    public $quantity = [];
+
+    public $inventories;
+
+    public $owner;
+
+    public $search = '';
+
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
+
     /*
     * Helpers
     */
     public function getFeaturedProducts(object $products)
     {
         $data = [];
-        foreach ($products as $product) if ($product->featured === 1) array_push($data, $product);
-        
+        foreach ($products as $product) {
+            if ($product->featured === 1) {
+                array_push($data, $product);
+            }
+        }
+
         return $data;
     }
 
@@ -41,6 +55,7 @@ class InventoryLivewire extends Component
     {
         $this->resetPage();
     }
+
     /*
     * CRUD Methods
     */
@@ -130,7 +145,7 @@ class InventoryLivewire extends Component
                 'parent_seller_id' => $product->parent_seller_id,
                 'child_seller_id' => ($product->child_seller_id === null) ? auth()->id() : $product->child_seller_id,
                 'qty_id' => ($product->child_seller_id === null) ? 0 : $product->qty_id,
-                'qty' => ($product->child_seller_id === null) ? 0 : $product->qty
+                'qty' => ($product->child_seller_id === null) ? 0 : $product->qty,
             ];
         });
     }
@@ -156,7 +171,7 @@ class InventoryLivewire extends Component
         return view('livewire.sellers.inventory-livewire', [
             'data' => $data,
             'categories' => $categories,
-            'featuredProducts' => $featuredProducts
+            'featuredProducts' => $featuredProducts,
         ]);
     }
 }

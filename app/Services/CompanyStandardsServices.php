@@ -11,15 +11,15 @@ use Carbon\Carbon;
  */
 final class CompanyStandardsServices
 {
-    public CONST float STANDARD_SERVICE_CHARGES = 1.99;
+    public const float STANDARD_SERVICE_CHARGES = 1.99;
 
-    public CONST int STANDARD_NEAR_BY_MILES = 5;
+    public const int STANDARD_NEAR_BY_MILES = 5;
 
     public static function getStandardPickUpTime(): Carbon
     {
         return now()->addMinutes(15);
     }
-    
+
     public static function getStandardDeliveryDeadline(): Carbon
     {
         return now()->addHour();

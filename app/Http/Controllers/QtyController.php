@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Qty;
+use App\Models\Qty;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +12,7 @@ class QtyController extends Controller
 {
     /**
      * It edits the qty for a child store
+     *
      * @version 1.0.0
      */
     public function updateChildQty(Request $request)
@@ -33,12 +34,13 @@ class QtyController extends Controller
         return response()->json([
             'status' => config('constants.HTTP_OK'),
             'error' => 'false',
-            'qty' => $request->input('qty')
+            'qty' => $request->input('qty'),
         ]);
     }
     /**
      * It is used to test API's respose time
      * By sending them bulk requests in a single attempt
+     *
      * @version 1.9.0
      */
     // public function multiCURL()
@@ -87,6 +89,7 @@ class QtyController extends Controller
     /**
      * This method will share parent store
      * qty with their child store
+     *
      * @version 1.0.0
      */
     // public function insertParentQtyToChild(Request $request)

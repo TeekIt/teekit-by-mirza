@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Categories;
+use App\Models\Categories;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +22,7 @@ class SubCategory extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Relations
      */
@@ -29,6 +30,7 @@ class SubCategory extends Model
     {
         return $this->belongsTo(Categories::class, 'parent_category_id');
     }
+
     /**
      * Helpers
      */
@@ -36,7 +38,7 @@ class SubCategory extends Model
     {
         return self::create([
             'name' => $name,
-            'parent_category_id' => $parentCategoryId
+            'parent_category_id' => $parentCategoryId,
         ]);
     }
 
@@ -46,7 +48,9 @@ class SubCategory extends Model
     ): bool {
         $subCategory = self::findOrFail($id);
 
-        if (!is_null($name)) $subCategory->name = $name;
+        if (! is_null($name)) {
+            $subCategory->name = $name;
+        }
 
         return $subCategory->save();
     }

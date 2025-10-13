@@ -4,8 +4,7 @@ namespace App\Services;
 
 use App\Models\PromoCode;
 use App\Models\PromoCodesUsageLimit;
-use App\Services\JsonResponseServices;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

@@ -5,9 +5,9 @@
         use App\Enums\OrderStatusEnum;
         use App\Enums\OrderTypeEnum;
         use App\Models\ProductsByBuyer;
-        use App\Products;
-        use App\Orders;
-        use App\User;
+        use App\Models\Products;
+        use App\Models\Orders;
+        use App\Models\User;
         use App\Services\DateTimeServices;
     @endphp
 

@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Web\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
-use App\Pages;
-use App\User;
+use App\Models\Pages;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
     /**
      * Return's admin settings view
+     *
      * @author Muhammad Abdullah Mirza
      */
     public function settings()
@@ -35,8 +36,10 @@ class AdminController extends Controller
             'logo'
         ));
     }
+
     /**
      * Delete selected users
+     *
      * @author Muhammad Abdullah Mirza
      */
     public function deleteUsers(Request $request)
@@ -45,8 +48,10 @@ class AdminController extends Controller
 
         return response(config('constants.USERS_DELETION_SUCCESS'));
     }
+
     /**
      * Delete selected drivers
+     *
      * @author Muhammad Abdullah Mirza
      */
     public function deleteDrivers(Request $request)

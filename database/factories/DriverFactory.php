@@ -19,7 +19,7 @@ class DriverFactory extends Factory
             'l_name' => $this->faker->lastName(),
             'email' => $this->faker->unique()->safeEmail(),
             'phone' => $this->faker->phoneNumber(),
-            'password' => Hash::make('testdrivers'), 
+            'password' => Hash::make('testdrivers'),
             'profile_img' => null,
             'vehicle_type' => $this->faker->randomElement([1, 2, 3, 4]),
             'vehicle_number' => $this->faker->randomNumber(8),

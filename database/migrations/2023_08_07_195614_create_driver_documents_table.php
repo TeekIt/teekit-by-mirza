@@ -15,9 +15,9 @@ class CreateDriverDocumentsTable extends Migration
     {
         Schema::create('driver_documents', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('driver_id')->constrained(table:'drivers')->cascadeOnDelete();
+            $table->foreignId('driver_id')->constrained(table: 'drivers')->cascadeOnDelete();
             $table->text('front_img');
-            $table->text('back_img');       
+            $table->text('back_img');
             $table->timestamps();
             $table->softDeletes();
             /**

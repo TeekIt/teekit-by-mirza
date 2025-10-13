@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Controllers\Controller;
 use App\Rules\Buyer\BuyerEmail;
 use App\Services\JsonResponseServices;
 use App\Services\StripeServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use App\Http\Controllers\Controller;
 
 class StripeController extends Controller
 {

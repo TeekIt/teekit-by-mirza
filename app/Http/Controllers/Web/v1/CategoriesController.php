@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Web\v1;
 
+use App\Models\Categories;
 use App\Http\Controllers\Controller;
-use App\Categories;
 use Illuminate\Http\Request;
 
 class CategoriesController extends Controller
@@ -14,6 +14,6 @@ class CategoriesController extends Controller
             Categories::where('id', '=', $request->categories[$i])->delete();
         }
 
-        return response("Categories Deleted Successfully");
+        return response('Categories Deleted Successfully');
     }
 }

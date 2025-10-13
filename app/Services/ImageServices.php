@@ -11,14 +11,16 @@ final class ImageServices
     public static function createUploadLog(string $diskName, string $fileName)
     {
         if (Storage::disk($diskName)->exists($fileName)) {
-            info("File is stored in '$diskName' successfully: " . $fileName);
+            info("File is stored in '$diskName' successfully: ".$fileName);
         } else {
-            info("File not found in '$diskName': " . $fileName);
+            info("File not found in '$diskName': ".$fileName);
         }
     }
+
     /**
      * @author Muhammad Abdullah Mirza
-     * @return fileName|false 
+     *
+     * @return fileName|false
      */
     public static function uploadImg(
         ?Request $request = null,
@@ -29,7 +31,7 @@ final class ImageServices
 
         $file = $imgKeyName ? $request->file($imgKeyName) : $imageFile;
         /* Creating a unique file name */
-        $fileName = uniqid($id . '_') . "." . $file->getClientOriginalExtension();
+        $fileName = uniqid($id.'_').'.'.$file->getClientOriginalExtension();
 
         Storage::disk('spaces')->put($fileName, File::get($file));
 
@@ -41,7 +43,7 @@ final class ImageServices
     public static function uploadLivewireImg(object $img, ?int $id = null): string|bool
     {
         /* Creating a unique file name */
-        $fileName = uniqid($id . '_') . "." . $img->getClientOriginalExtension();
+        $fileName = uniqid($id.'_').'.'.$img->getClientOriginalExtension();
 
         Storage::disk('spaces')->put($fileName, $img->get());
 

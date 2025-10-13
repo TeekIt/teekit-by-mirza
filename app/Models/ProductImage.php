@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Products;
+use App\Models\Products;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +14,7 @@ class ProductImage extends Model
 
     protected $fillable = [
         'product_id',
-        'product_image'
+        'product_image',
     ];
 
     protected $hidden = [
@@ -22,6 +22,7 @@ class ProductImage extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Relations
      */
@@ -29,6 +30,7 @@ class ProductImage extends Model
     {
         return $this->belongsTo(Products::class, 'product_id');
     }
+
     /**
      * Helpers
      */
@@ -41,7 +43,7 @@ class ProductImage extends Model
     {
         return self::create([
             'product_id' => $productId,
-            'product_image' => $imageName
+            'product_image' => $imageName,
         ]);
     }
 }

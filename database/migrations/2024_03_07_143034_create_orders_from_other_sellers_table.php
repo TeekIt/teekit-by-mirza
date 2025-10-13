@@ -16,8 +16,8 @@ return new class extends Migration
         Schema::create('orders_from_other_sellers', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->morphs('created_by', 'orders_from_other_sellers_created_by'); /* This column can either belong to "users" or "guest_buyers" */
-            $table->foreignId('seller_id')->constrained(table:'users')->cascadeOnDelete();
-            $table->foreignId('parent_order_id')->constrained(table:'orders');
+            $table->foreignId('seller_id')->constrained(table: 'users')->cascadeOnDelete();
+            $table->foreignId('parent_order_id')->constrained(table: 'orders');
             $table->morphs('product_belongs_to', 'order_from_other_sellers_product_belongs_to'); /* This column can either belong to "products" or "products_by_buyers" */
             $table->float('product_price');
             $table->integer('product_qty');
@@ -42,7 +42,7 @@ return new class extends Migration
             $table->enum('order_status', ['pending', 'accepted', 'ready', 'stuartDelivery', 'onTheWay', 'delivered', 'complete', 'cancelled'])->default('pending');
             $table->enum('delivery_status', ['assigned', 'complete', 'pending_approval', 'cancelled'])->nullable();
             $table->string('payment_intent_id');
-            $table->foreignId('driver_id')->nullable()->constrained(table:'drivers')->cascadeOnDelete();
+            $table->foreignId('driver_id')->nullable()->constrained(table: 'drivers')->cascadeOnDelete();
             $table->double('driver_traveled_km', 8, 2)->default(0.00);
             $table->double('driver_charges', 8, 2)->default(0.00);
             $table->tinyInteger('driver_charges_cleared')->default(0);

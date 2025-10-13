@@ -23,7 +23,7 @@ class GophrDelivery extends Model
     /**
      * Relations
      */
-    // 
+    //
 
     /**
      * Helpers

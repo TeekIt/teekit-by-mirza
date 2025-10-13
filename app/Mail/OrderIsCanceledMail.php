@@ -3,9 +3,8 @@
 namespace App\Mail;
 
 use App\Models\OrdersFromOtherSeller;
-use App\Orders;
+use App\Models\Orders;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -30,7 +29,7 @@ class OrderIsCanceledMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Your Order #' . $this->order->id . ' Has Been Cancelled - ' . config('app.name'),
+            subject: 'Your Order #'.$this->order->id.' Has Been Cancelled - '.config('app.name'),
         );
     }
 

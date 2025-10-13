@@ -1,32 +1,33 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Web\v1\CategoriesController;
-use App\Http\Livewire\Admin\ParentSellersLivewire;
-use App\Http\Livewire\Admin\ReferralCodesLivewire;
-use App\Http\Livewire\Sellers\InventoryLivewire;
-use App\Http\Controllers\Web\v1\HomeController;
 use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\Web\v2\ProductController;
-use App\Http\Controllers\Web\v2\StripeController;
-use App\Http\Controllers\Web\v1\StuartDeliveryController;
 use App\Http\Controllers\Web\v1\AdminController;
+use App\Http\Controllers\Web\v1\CategoriesController;
+use App\Http\Controllers\Web\v1\HomeController;
 use App\Http\Controllers\Web\v1\OrdersController;
 use App\Http\Controllers\Web\v1\PromoCodeController;
 use App\Http\Controllers\Web\v1\SellerController;
+use App\Http\Controllers\Web\v1\StuartDeliveryController;
+use App\Http\Controllers\Web\v2\ProductController;
+use App\Http\Controllers\Web\v2\StripeController;
 use App\Http\Livewire\Admin\CategoriesLivewire;
 use App\Http\Livewire\Admin\ChildSellersLivewire;
 use App\Http\Livewire\Admin\CustomersLivewire;
 use App\Http\Livewire\Admin\DriversLivewire;
-use App\Http\Livewire\Sellers\OrdersFromOtherSellersLivewire;
+use App\Http\Livewire\Admin\ParentSellersLivewire;
+use App\Http\Livewire\Admin\ReferralCodesLivewire;
 use App\Http\Livewire\Common\OrdersLivewire;
-use App\Http\Livewire\Sellers\SellerDashboardLivewire;
 use App\Http\Livewire\Sellers\GeneralSettingsLivewire;
+use App\Http\Livewire\Sellers\InventoryLivewire;
+use App\Http\Livewire\Sellers\OrdersFromOtherSellersLivewire;
 use App\Http\Livewire\Sellers\RequestDeliveryFormLivewire;
 use App\Http\Livewire\Sellers\RequestedDeliveriesLivewire;
+use App\Http\Livewire\Sellers\SellerDashboardLivewire;
 use App\Http\Livewire\Sellers\WithdrawalLivewire;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | For Adding Default Authentication Routes:-
@@ -87,7 +88,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
         Route::controller(ProductController::class)->group(function () {
             Route::get('/add', 'addSingleInventoryForm')->name('seller.add.single.inventory.form');
             Route::post('/add', 'addSingleInventory')->name('seller.add.single.inventory');
-            Route::get('/edit/{productId}', 'editInventoryView')->name('seller.edit.inventory.form');
+            Route::get('/edit/{productId}', 'editSingleInventoryForm')->name('seller.edit.inventory.form');
             Route::post('/update/{productId}', 'updateInventory')->name('seller.edit.inventory');
             Route::get('/add_bulk', 'inventoryAddBulk')->name('seller.add.bulk.inventory');
             Route::get('/delete/image/{imageId}', 'deleteImg')->name('seller.delete.img');

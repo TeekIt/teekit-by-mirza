@@ -29,7 +29,7 @@ return [
      */
     'hide_matching' => [
         '#^_debugbar#',
-        '#^routes$#'
+        '#^routes$#',
     ],
 
 ];

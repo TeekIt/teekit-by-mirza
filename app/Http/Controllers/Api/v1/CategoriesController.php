@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Models\Categories;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Categories;
-use App\Products;
-use App\Qty;
+use App\Models\Products;
+use App\Models\Qty;
 use App\Services\GoogleMapServices;
-use App\Services\ImageServices;
-use Illuminate\Support\Facades\Validator;
 use App\Services\JsonResponseServices;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 
 class CategoriesController extends Controller
 {
     /**
      * List all categories w.r.t store ID or without store ID
+     *
      * @version 1.2.0
      */
     public function all(Request $request)
@@ -30,20 +30,21 @@ class CategoriesController extends Controller
 
         $validatedData = (object) $validatedData->validated();
 
-        if (isset($validatedData->sellerId))
-            $data =  Categories::getAllCategoriesBySellerId(
+        if (isset($validatedData->sellerId)) {
+            $data = Categories::getAllCategoriesBySellerId(
                 $validatedData->sellerId,
                 ['id', 'category_name', 'category_image']
             );
-        else
+        } else {
             $data = Cache::rememberForever(
                 'allCategories',
-                fn() => Categories::allCategories([
+                fn () => Categories::allCategories([
                     'id',
                     'category_name',
-                    'category_image'
+                    'category_image',
                 ])
             );
+        }
         /*
         * Just creating this variable so we don't have to call the "isEmpty()" function again & again
         * Which will obviouly decrease the API response speed
@@ -57,8 +58,10 @@ class CategoriesController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      * It will get the products of a specific category
+     *
      * @version 1.9.0
      */
     public function productsByCategory(Request $request)
@@ -78,7 +81,7 @@ class CategoriesController extends Controller
         $validatedData = (object) $validatedData->validated();
 
         $pagination = Cache::remember(
-            'productsByCategory' . $validatedData->categoryId . $validatedData->sellerId . $validatedData->page,
+            'productsByCategory'.$validatedData->categoryId.$validatedData->sellerId.$validatedData->page,
             now()->addDay(),
             function () use ($validatedData) {
                 return Products::getProductsInfoByCategoryId(
@@ -107,8 +110,10 @@ class CategoriesController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      * It will get the sellers w.r.t category id
+     *
      * @version 1.0.0
      */
     public function sellers(Request $request)
@@ -126,7 +131,7 @@ class CategoriesController extends Controller
         $validatedData = (object) $validatedData->validated();
 
         $data = Cache::remember(
-            'get-sellers-by-category' . $validatedData->categoryId . $validatedData->lat . $validatedData->lon,
+            'get-sellers-by-category'.$validatedData->categoryId.$validatedData->lat.$validatedData->lon,
             now()->addDay(),
             function () use ($validatedData) {
                 $sellers = Qty::getSellersByGivenParams($validatedData->categoryId, $validatedData->city);

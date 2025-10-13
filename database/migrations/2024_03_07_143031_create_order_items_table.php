@@ -15,7 +15,7 @@ class CreateOrderItemsTable extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('order_id')->constrained(table:'orders')->cascadeOnDelete();
+            $table->foreignId('order_id')->constrained(table: 'orders')->cascadeOnDelete();
             $table->morphs('product_belongs_to'); /* This column can either belong to "products" or "products_by_buyers" */
             $table->integer('product_price');
             $table->integer('product_qty');

@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class PromoCode extends Model
 {
@@ -30,8 +30,9 @@ class PromoCode extends Model
 
     protected $hidden = [
         'updated_at',
-        'deleted_at'
+        'deleted_at',
     ];
+
     /**
      * Relations
      */
@@ -44,6 +45,7 @@ class PromoCode extends Model
     {
         return $this->hasMany(PromoCodesUsageLimit::class, 'promo_code_id');
     }
+
     /**
      * Helpers
      */
@@ -55,7 +57,7 @@ class PromoCode extends Model
     public static function getByPromoCode(string $promoCode, ?int $customerId = null, array $columns = ['*']): PromoCode
     {
         return self::with(['seller:id,business_name'])
-            ->when(!is_null($customerId), function ($query) use ($customerId) {
+            ->when(! is_null($customerId), function ($query) use ($customerId) {
                 $query->with(['promoCodesUsageLimit' => function ($promoCodesUsageLimitRelation) use ($customerId) {
                     $promoCodesUsageLimitRelation->where('customer_id', '=', $customerId);
                 }]);

@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +17,7 @@ class DeviceToken extends Model
     /**
      * Relations
      */
-    // 
+    //
 
     /**
      * Helpers
@@ -33,7 +33,7 @@ class DeviceToken extends Model
             ['device_id' => $deviceId],
             [
                 'user_id' => $userId,
-                'device_token' => $deviceToken
+                'device_token' => $deviceToken,
             ]
         );
     }

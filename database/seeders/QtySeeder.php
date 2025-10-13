@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Qty;
+use App\Models\Qty;
 use Illuminate\Database\Seeder;
 
 class QtySeeder extends Seeder

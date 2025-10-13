@@ -33,6 +33,7 @@ jobs:
             php artisan migrate --force
 
             # Other commands
+            composer dump-autoload
             php artisan run:raw-queries
             php artisan queue:restart
             php artisan scout:sync-index-settings

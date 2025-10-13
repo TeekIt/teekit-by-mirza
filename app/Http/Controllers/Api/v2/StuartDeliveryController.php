@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api\v2;
 
-use App\Http\Controllers\Controller;
 use App\Enums\DeliveryProviderEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Stuart\AddStuartJobRequest;
 use App\Models\RequestedDelivery;
 use App\Services\CompanyStandardsServices;
@@ -18,7 +18,7 @@ class StuartDeliveryController extends Controller
     public function createDeliveryJob(AddStuartJobRequest $request)
     {
         $validatedData = (object) $request->validated();
-        
+
         $response = StuartDeliveryServices::createJob(
             StuartDeliveryServices::prepareJobArray(
                 pickupAt: CompanyStandardsServices::getStandardPickUpTime()->toDateTimeString(),
@@ -33,7 +33,7 @@ class StuartDeliveryController extends Controller
                 dropoffAddress: $validatedData->dropoffAddress,
                 unitAddress: $validatedData->unitAddress,
                 receiverName: auth()->user()->name,
-                receiverPhone: auth()->user()->country_code . auth()->user()->phone,
+                receiverPhone: auth()->user()->country_code.auth()->user()->phone,
                 receiverEmail: auth()->user()->email
             )
         );
@@ -46,7 +46,7 @@ class StuartDeliveryController extends Controller
             dropoffAddress: $validatedData->dropoffAddress,
             unitAddress: $validatedData->unitAddress,
             receiverName: auth()->user()->name,
-            receiverPhone: auth()->user()->country_code . auth()->user()->phone,
+            receiverPhone: auth()->user()->country_code.auth()->user()->phone,
             receiverEmail: auth()->user()->email,
             packageTransportType: PackageTransportTypeEnum::from($validatedData->packageTransportType),
             packageWeight: PackageWeightEnum::from($validatedData->packageWeight)
@@ -78,7 +78,7 @@ class StuartDeliveryController extends Controller
                 dropoffAddress: $validatedData->dropoffAddress,
                 unitAddress: $validatedData->unitAddress,
                 receiverName: auth()->user()->name,
-                receiverPhone: auth()->user()->country_code . auth()->user()->phone,
+                receiverPhone: auth()->user()->country_code.auth()->user()->phone,
                 receiverEmail: auth()->user()->email
             )
         );

@@ -2,14 +2,13 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
-use App\User;
 use App\Services\StripeServices;
-use App\Services\EmailServices;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Http\Request;
 use Mockery;
+use PHPUnit\Framework\TestCase;
 
 class AuthControllerTest extends TestCase
 {
@@ -25,7 +24,7 @@ class AuthControllerTest extends TestCase
         $user = User::factory()->make([
             'email' => 'user@example.com',
             'email_verified_at' => null,
-            'is_active' => 0
+            'is_active' => 0,
         ]);
 
         // Mock User model
@@ -42,12 +41,12 @@ class AuthControllerTest extends TestCase
         $mockStripe->shouldReceive('createStandardConnectAccount')
             ->once()
             ->with($user)
-            ->andReturn((object)['id' => 'acct_123456789']);
+            ->andReturn((object) ['id' => 'acct_123456789']);
 
         $mockStripe->shouldReceive('createConnectAccountLink')
             ->once()
             ->with('acct_123456789', 'https://teekit.com', 'https://teekit.com')
-            ->andReturn((object)['url' => 'https://stripe.com/onboarding']);
+            ->andReturn((object) ['url' => 'https://stripe.com/onboarding']);
 
         // Mock Mail facade
         Mail::fake();
@@ -102,7 +101,7 @@ class AuthControllerTest extends TestCase
         $user = User::factory()->make([
             'email' => 'user@example.com',
             'email_verified_at' => now(),
-            'is_active' => 1
+            'is_active' => 1,
         ]);
 
         User::shouldReceive('where')
@@ -128,13 +127,13 @@ class AuthControllerTest extends TestCase
 
         $user = User::factory()->create([
             'email_verified_at' => null,
-            'is_active' => 0
+            'is_active' => 0,
         ]);
 
         $encryptedToken = Crypt::encrypt($user->email);
 
         $response = $this->post('/verify', [
-            'token' => $encryptedToken
+            'token' => $encryptedToken,
         ]);
 
         $response->assertStatus(200)

@@ -26,7 +26,7 @@ class PromoCodesUsageLimit extends Model
     /**
      * Relations
      */
-    // 
+    //
 
     /**
      * Helpers

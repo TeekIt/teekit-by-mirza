@@ -8,6 +8,7 @@ final class SellerServices
 {
     /**
      * Fetch seller information w.r.t ID
+     *
      * @author Muhammad Abdullah Mirza
      */
     public static function getStandardSellerInfo(object $seller, ?array $mapApiResult = null)
@@ -30,12 +31,13 @@ final class SellerServices
             'pending_withdraw' => $seller->pending_withdraw,
             'total_withdraw' => $seller->total_withdraw,
             'parent_store_id' => $seller->parent_store_id,
+            'is_active' => $seller->is_active,
             'is_online' => $seller->is_online,
             'roles' => ($seller->role_id == UserRoleEnum::SELLER->value) ? ['sellers'] : ['child_sellers'],
             'stripe_account_id' => $seller->stripe_account_id,
         ];
 
-        if (!is_null($mapApiResult)) {
+        if (! is_null($mapApiResult)) {
             $data['distance'] = $mapApiResult['distance'];
             $data['duration'] = $mapApiResult['duration'];
         }

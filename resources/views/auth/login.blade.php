@@ -1,7 +1,7 @@
 @extends('layouts.auth.app')
 
 @php
-    use App\User;
+    use App\Models\User;
 @endphp
 
 @section('content')

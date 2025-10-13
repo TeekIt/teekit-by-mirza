@@ -5,8 +5,8 @@
         use App\Enums\OrderStatusEnum;
         use App\Enums\OrderTypeEnum;
         use App\Models\ProductsByBuyer;
-        use App\Products;
-        use App\User;
+        use App\Models\Products;
+        use App\Models\User;
         use App\Services\ProductServices;
     @endphp
 

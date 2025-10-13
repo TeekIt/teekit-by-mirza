@@ -1,8 +1,5 @@
 <?php
 
-use App\Enums\PackagePickUpVehicleEnum;
-use App\Enums\PackageTransportTypeEnum;
-use App\Enums\PackageWeightEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('requested_deliveries', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('creator_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('creator_id')->constrained(table: 'users')->cascadeOnDelete();
             $table->string('delivery_provider')->comment('Only DeliveryProviderEnum values are allowed');
             $table->string('delivery_id');
             $table->text('pickup_address');

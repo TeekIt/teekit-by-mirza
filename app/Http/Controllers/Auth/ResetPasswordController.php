@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\User;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -40,9 +39,10 @@ class ResetPasswordController extends Controller
     {
         $this->middleware('guest');
     }
-    
+
     /**
-     * It will get the reset the password 
+     * It will get the reset the password
+     *
      * @version 1.3.0
      */
     public function reset(Request $request)

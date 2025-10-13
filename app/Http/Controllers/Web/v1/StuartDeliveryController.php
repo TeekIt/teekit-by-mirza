@@ -2,21 +2,23 @@
 
 namespace App\Http\Controllers\Web\v1;
 
+use App\Http\Controllers\Controller;
 use App\Models\StuartDelivery;
-use App\Orders;
+use App\Models\Orders;
 use App\Services\CompanyStandardsServices;
+use App\Services\StuartDeliveryServices;
+use App\Services\WebResponseServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Throwable;
-use App\Services\StuartDeliveryServices;
-use App\Services\WebResponseServices;
-use App\Http\Controllers\Controller;
 
 class StuartDeliveryController extends Controller
 {
     /**
      * Creates a stuart delivery job
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     // public function stuartJobCreationForWeb(Request $request)

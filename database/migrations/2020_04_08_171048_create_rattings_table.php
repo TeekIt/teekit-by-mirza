@@ -15,8 +15,8 @@ class CreateRattingsTable extends Migration
     {
         Schema::create('rattings', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('product_id')->constrained(table:'products')->cascadeOnDelete();
-            $table->foreignId('customer_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained(table: 'products')->cascadeOnDelete();
+            $table->foreignId('customer_id')->constrained(table: 'users')->cascadeOnDelete();
             $table->float('ratting');
             $table->timestamps();
             $table->softDeletes();

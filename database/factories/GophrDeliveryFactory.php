@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Orders;
-use Illuminate\Support\Str;
+use App\Models\Orders;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\GophrDelivery>

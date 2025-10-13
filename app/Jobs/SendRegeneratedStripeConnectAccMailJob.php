@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Services\EmailServices;
-use App\User;
+use App\Models\User;
 use DateTime;
 use Exception;
 use Illuminate\Bus\Queueable;

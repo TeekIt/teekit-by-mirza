@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Products;
-use App\User;
+use App\Models\Products;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -51,7 +51,7 @@ class OrdersFromOtherSellerFactory extends Factory
             'estimated_time' => null, // Set estimated time as null
             'is_viewed' => 0, // Default is_viewed flag
             'accepted' => 0, // Default accepted flag
-            'times_rejected' => 0
+            'times_rejected' => 0,
         ];
     }
 }

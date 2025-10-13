@@ -2,24 +2,16 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Enums\UserRoleEnum;
-use App\Models\Driver;
-use App\Pages;
+use App\Http\Controllers\Controller;
 use App\Services\GoogleMapServices;
-use App\User;
-use Illuminate\Support\Facades\Validator;
-use Throwable;
 use App\Services\JsonResponseServices;
-use App\Services\WebResponseServices;
-use Illuminate\Database\Eloquent\Collection;
+use App\Models\User;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Collection as SupportCollection;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class SellerController extends Controller
 {
@@ -30,7 +22,7 @@ class SellerController extends Controller
                 'required',
                 'email',
                 Rule::exists('users', 'email')
-                    ->where(fn(Builder $query) => $query->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
+                    ->where(fn (Builder $query) => $query->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
             ],
             'stripeAccountId' => 'required|string',
         ]);
@@ -69,6 +61,7 @@ class SellerController extends Controller
 
     /**
      * Listing of all Sellers/Stores within 5 miles
+     *
      * @author Muhammad Abdullah Mirza
      */
     public function sellers(Request $request)
@@ -77,20 +70,31 @@ class SellerController extends Controller
             'lat' => 'required|numeric|between:-90,90',
             'lon' => 'required|numeric|between:-180,180',
             'city' => 'required|string',
+            'blocked' => 'required|boolean',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
         $validatedData = (object) $validatedData->validated();
-    
+
         $data = Cache::remember(
-            'sellers' . $validatedData->city . $validatedData->lat . $validatedData->lon,
+            'sellers'.$validatedData->city.$validatedData->lat.$validatedData->lon.$validatedData->blocked,
             now()->addDay(),
             function () use ($validatedData) {
-                $sellers = User::getParentAndChildSellersByCity(city: $validatedData->city, numberOfRows: 200);
-                
-                if (!$sellers->isEmpty()) {
+                if ($validatedData->blocked == 1) {
+                    $sellers = User::getBlokedParentAndChildSellersByCity(
+                        city: $validatedData->city,
+                        numberOfRows: 200
+                    );
+                } else {
+                    $sellers = User::getParentAndChildSellersByCity(
+                        city: $validatedData->city,
+                        numberOfRows: 200
+                    );
+                }
+
+                if (! $sellers->isEmpty()) {
                     return GoogleMapServices::findNearByUsersByMakingChunks(
                         lat: $validatedData->lat,
                         lon: $validatedData->lon,
