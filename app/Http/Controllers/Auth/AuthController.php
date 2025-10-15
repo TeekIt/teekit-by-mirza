@@ -343,30 +343,34 @@ class AuthController extends Controller
      * It will insert the deleted user data into 'Deleted_users' table
      * @version 1.0.0
      */
-    public function deleteUser(Request $request)
+    public function deleteUser()
     {
-        $user = User::find(Auth::id());
-        if (!empty($user)) {
+        if (isset(auth()->user()->id)) {
+            $user = User::find(auth()->user()->id);
+
             DB::table('deleted_users')->insert([
                 'user_id' =>  $user->id,
                 'postcode' =>  $user->postcode,
-                'created_at' =>   Carbon::now(),
-                'updated_at' =>   Carbon::now()
+                'created_at' =>   now(),
+                'updated_at' =>   now(),
             ]);
-            $user->delete();
 
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.TRUE_STATUS'),
-                'message' => config('constants.ITEM_DELETED'),
-            ], config('constants.HTTP_OK'));
+            $user->forceDelete();
+
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.TRUE_STATUS'),
+                config('constants.ITEM_DELETED'),
+                config('constants.HTTP_OK')
+            );
         }
 
-        return response()->json([
-            'data' => [],
-            'status' => config('constants.FALSE_STATUS'),
-            'message' => config('constants.NO_RECORD')
-        ], config('constants.HTTP_OK'));
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.NO_RECORD'),
+            config('constants.HTTP_OK')
+        );
     }
     /**
      * Google register
