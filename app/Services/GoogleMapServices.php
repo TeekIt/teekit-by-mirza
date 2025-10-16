@@ -75,7 +75,7 @@ final class GoogleMapServices
         $url = self::generateUrl($originAddress, $destinationAddress);
         $results = json_decode(file_get_contents($url), true);
         $meters = $results['rows'][0]['elements'][0]['distance']['value'];
-        $distanceInMiles = $meters * 0.000621;
+        $distanceInMiles = $meters * 0.000621371;
 
         return (float) $distanceInMiles;
     }
