@@ -17,6 +17,7 @@ final class OrderServices
 
     public static function getTotalWeight(array|Orders|OrdersFromOtherSeller $order): float
     {
+        /* in total weigt you have to multiply each product with the Qty in which it was ordered & then take the sum of product weights */
         if (is_array($order)) {
             return array_sum(array_column($order, 'weight'));
         }
