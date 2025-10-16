@@ -5,7 +5,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Web\v1\AdminController;
 use App\Http\Controllers\Web\v1\CategoriesController;
 use App\Http\Controllers\Web\v1\HomeController;
-use App\Http\Controllers\Web\v1\OrdersController;
+use App\Http\Controllers\Web\v1\OrderController;
 use App\Http\Controllers\Web\v1\PromoCodeController;
 use App\Http\Controllers\Web\v1\SellerController;
 use App\Http\Controllers\Web\v1\StuartDeliveryController;
@@ -70,7 +70,7 @@ Route::post('/importProducts', [ProductController::class, 'importProducts'])->na
 | Orders Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('orders')->controller(OrdersController::class)->group(function () {
+Route::prefix('orders')->controller(OrderController::class)->group(function () {
     Route::get('/mark_as_delivered/{order_id}', 'markAsDelivered')->name('mark_as_delivered');
     Route::get('/mark_as_completed/{order_id}', 'markAsCompleted')->name('mark_as_completed');
     Route::get('/{order_id}/remove/{item_id}/product/{product_price}/{product_qty}', 'removeProductFromOrder')
@@ -98,7 +98,7 @@ Route::prefix('seller')->middleware(['auth', 'auth.sellers'])->group(function ()
     });
 
     Route::prefix('orders')->group(function () {
-        Route::get('count', [OrdersController::class, 'countSellerOrders'])->name('seller.orders.count');
+        Route::get('count', [OrderController::class, 'countSellerOrders'])->name('seller.orders.count');
         Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
         // Route::get('/of-unique-products', OrdersOfUniqueProductsLivewire::class)->name('seller.orders.of.unique.products');
         Route::get('/{requestOrderId?}', OrdersLivewire::class)->name('seller.orders');

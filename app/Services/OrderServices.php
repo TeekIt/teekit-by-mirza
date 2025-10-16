@@ -85,7 +85,8 @@ final class OrderServices
     ): float {
         $distanceInMiles = GoogleMapServices::getDistanceInMiles($sellerLat, $sellerLon, $buyerLat, $buyerLon);
 
-        return (2.5 + 1.25) * ($distanceInMiles + self::getDeliveryFee($totalWeight));
+        // return (2.5 + 1.25) * ($distanceInMiles + static::getDeliveryFee($totalWeight));
+        return 2.5 + 1.25 * $distanceInMiles + static::getDeliveryFee($totalWeight);
     }
 
     public static function getDriverCharges(

@@ -12,7 +12,7 @@ use App\Models\VerificationCodes;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
-class OrdersController extends Controller
+class OrderController extends Controller
 {
     /**
      * Change's order status to "delivered"

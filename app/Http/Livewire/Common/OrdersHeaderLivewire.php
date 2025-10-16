@@ -218,8 +218,8 @@ class OrdersHeaderLivewire extends Component
         $currentDeliveryCharges = OrderServices::getTotalDeliveryCharges(
             $this->selectedOrder->seller->lat,
             $this->selectedOrder->seller->lon,
-            $this->selectedOrder->buyer->lat,
-            $this->selectedOrder->buyer->lon,
+            $this->selectedOrder->customer_lat,
+            $this->selectedOrder->customer_lon,
             $totalWeight,
         );
 
