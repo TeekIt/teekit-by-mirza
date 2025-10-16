@@ -17,16 +17,24 @@ final class OrderServices
 
     public static function getTotalWeight(array|Orders|OrdersFromOtherSeller $order): float
     {
-        /* in total weigt you have to multiply each product with the Qty in which it was ordered & then take the sum of product weights */
         if (is_array($order)) {
-            return array_sum(array_column($order, 'weight'));
+            $totalWeight = 0.0;
+
+            foreach ($order as $orderItem) {
+                $totalWeight += (float) ($orderItem['weight'] * $orderItem['product_qty']);
+            }
+
+            return $totalWeight;
         }
 
         if ($order instanceof OrdersFromOtherSeller) {
             return $order->product->weight;
         }
-
-        return $order->order_items->pluck('product')->sum('weight');
+      
+        /* The sum() function will loop over all $orderItems */
+        return $order->order_items->sum(static function ($orderItem) {
+            return (float) ($orderItem->product->weight * $orderItem->product_qty);
+        });
     }
 
     public static function getTotalHeight(Orders|OrdersFromOtherSeller $order): float
@@ -109,11 +117,11 @@ final class OrderServices
         int $orderId,
         string $verificationCode
     ): void {
-        $buyerNumber = $buyerCountryCode.$buyerNumber;
+        $buyerNumber = $buyerCountryCode . $buyerNumber;
         /* Msg for sending SMS notification of this "New Order" */
-        $messageForSeller = 'A new order #'.$orderId." has been received. Please visit Teek It's seller dashboard:https://app.teekit.co.uk/login";
+        $messageForSeller = 'A new order #' . $orderId . " has been received. Please visit Teek It's seller dashboard:https://app.teekit.co.uk/login";
 
-        $messageForBuyer = 'Thanks for your order! Your order has been delivered to the store. Please quote verification code: '.$verificationCode.' on delivery. (TeekIt)';
+        $messageForBuyer = 'Thanks for your order! Your order has been delivered to the store. Please quote verification code: ' . $verificationCode . ' on delivery. (TeekIt)';
 
         /* To restrict "New Order" SMS notifications only for UK numbers */
         if (str_contains($seller->business_phone, '+44')) {
