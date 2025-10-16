@@ -27,14 +27,14 @@ final class OrderServices
             return $totalWeight;
         }
 
-        if ($order instanceof OrdersFromOtherSeller) {
-            return $order->product->weight;
+        if ($order instanceof Orders) {
+            /* The sum() function will loop over all $orderItems */
+            return $order->order_items->sum(static function ($orderItem) {
+                return (float) ($orderItem->product->weight * $orderItem->product_qty);
+            });
         }
-      
-        /* The sum() function will loop over all $orderItems */
-        return $order->order_items->sum(static function ($orderItem) {
-            return (float) ($orderItem->product->weight * $orderItem->product_qty);
-        });
+
+        return $order->product->weight;
     }
 
     public static function getTotalHeight(Orders|OrdersFromOtherSeller $order): float
