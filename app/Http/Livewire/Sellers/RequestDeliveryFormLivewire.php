@@ -10,32 +10,49 @@ use App\Services\GophrDeliveryServices;
 use App\Services\JsonParsingServices;
 use App\Services\StuartDeliveryServices;
 use App\Services\UUIDServices;
+use Exception;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
-use Exception;
 
 class RequestDeliveryFormLivewire extends Component
 {
-    public
-        $sellerId,
-        $pickupAddress,
-        $dropoffAddress,
-        $unitAddress,
-        $dropoffLat,
-        $dropoffLon,
-        $receiverName,
-        $receiverPhone,
-        $receiverEmail,
-        $packageTransportType,
-        $packageWeight,
-        $deliveryCharges = 0,
-        $serviceCharges = 0,
-        $tax = 0,
-        $totalCost = 0,
-        $currency,
-        $disableRequestDeliveryButton = true,
-        $requestDeliveryButtonTxt = 'Request',
-        $deliveryServiceName;
+    public $sellerId;
+
+    public $pickupAddress;
+
+    public $dropoffAddress;
+
+    public $unitAddress;
+
+    public $dropoffLat;
+
+    public $dropoffLon;
+
+    public $receiverName;
+
+    public $receiverPhone;
+
+    public $receiverEmail;
+
+    public $packageTransportType;
+
+    public $packageWeight;
+
+    public $deliveryCharges = 0;
+
+    public $serviceCharges = 0;
+
+    public $tax = 0;
+
+    public $totalCost = 0;
+
+    public $currency;
+
+    public $disableRequestDeliveryButton = true;
+
+    public $requestDeliveryButtonTxt = 'Request';
+
+    public $deliveryServiceName;
 
     protected function rules()
     {
@@ -50,7 +67,8 @@ class RequestDeliveryFormLivewire extends Component
             'packageWeight' => ['required', Rule::enum(PackageWeightEnum::class)],
         ];
     }
-    /* 
+
+    /*
      * Lifecycle Hooks
      */
     public function mount()
@@ -58,7 +76,8 @@ class RequestDeliveryFormLivewire extends Component
         $this->sellerId = auth()->id();
         $this->pickupAddress = auth()->user()->full_address;
     }
-    /* 
+
+    /*
      * Helpers
      */
     public function changePackageWeight()
@@ -175,7 +194,7 @@ class RequestDeliveryFormLivewire extends Component
 
     public function setDeliveryServiceName($deliveryServiceName)
     {
-        if (!in_array($deliveryServiceName, array_column(DeliveryProviderEnum::cases(), 'value'))) {
+        if (! in_array($deliveryServiceName, array_column(DeliveryProviderEnum::cases(), 'value'))) {
             throw new Exception('Invalid delivery provider');
         }
 
@@ -224,6 +243,7 @@ class RequestDeliveryFormLivewire extends Component
             session()->flash('error', $error->getMessage());
         }
     }
+
     /*
     * CRUD Methods
     */
@@ -251,7 +271,7 @@ class RequestDeliveryFormLivewire extends Component
 
             redirect()->route('stripe.requested.delivery.checkout.form', [
                 'totalCharge' => $this->totalCost,
-                'productName' => uniqid('requested-delivery-')
+                'productName' => uniqid('requested-delivery-'),
             ]);
         } catch (Exception $error) {
             report($error);

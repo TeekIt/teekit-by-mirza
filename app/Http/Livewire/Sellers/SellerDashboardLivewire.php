@@ -2,21 +2,24 @@
 
 namespace App\Http\Livewire\Sellers;
 
-use App\Orders;
-use App\Qty;
-use App\User;
+use App\Models\Orders;
+use App\Models\Qty;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\DB;
 
 class SellerDashboardLivewire extends Component
 {
     use WithPagination;
-    
-    public
-        $seller_id;
 
+    public $seller_id;
+
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
+
     /*
     * Lifecycle Hooks
     */
@@ -52,7 +55,7 @@ class SellerDashboardLivewire extends Component
             'total_products' => $total_products,
             'total_orders' => $total_orders,
             'total_sales' => $total_sales,
-            'all_orders' => $all_orders
+            'all_orders' => $all_orders,
         ]);
     }
 }

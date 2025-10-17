@@ -2,26 +2,26 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Http\Controllers\Controller;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicleEnum;
 use App\Enums\UserChoicesEnum;
 use App\Enums\UserRoleEnum;
+use App\Http\Controllers\Controller;
 use App\Jobs\SendCustomProductOrderDetailsToNearBySellersJob;
 use App\Models\GuestBuyer;
 use App\Models\ProductsByBuyer;
-use App\OrderItems;
-use App\Orders;
-use App\Products;
-use App\Qty;
+use App\Models\OrderItems;
+use App\Models\Orders;
+use App\Models\Products;
+use App\Models\Qty;
 use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
 use App\Services\OrderServices;
 use App\Services\ProductServices;
-use App\User;
 use App\Services\VerificationCodeServices;
-use App\VerificationCodes;
+use App\Models\User;
+use App\Models\VerificationCodes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -31,6 +31,7 @@ class OrderController extends Controller
 {
     /**
      * Inserts a newly arrived order
+     *
      * @author Muhammad Abdullah Mirza
      */
     public function new(Request $request)
@@ -132,7 +133,7 @@ class OrderController extends Controller
                 $seller = User::getUserByID($sellerId, [
                     'business_phone',
                     'lat',
-                    'lon'
+                    'lon',
                 ]);
                 $driverCharges = OrderServices::getDriverCharges(
                     $seller->lat,
@@ -157,7 +158,7 @@ class OrderController extends Controller
             foreach ($order as $orderItem) {
                 OrderItems::add(
                     $orderId,
-                    (new Products())->getMorphClass(),
+                    (new Products)->getMorphClass(),
                     $orderItem['product_id'],
                     $orderItem['product_price'],
                     $orderItem['product_qty'],
@@ -184,7 +185,9 @@ class OrderController extends Controller
             $idsArray[] = $orderId;
         }
 
-        if ($request->walletFlag == 1) User::deductFromWallet($createdById, $request->walletDeductionAmount);
+        if ($request->walletFlag == 1) {
+            User::deductFromWallet($createdById, $request->walletDeductionAmount);
+        }
 
         return JsonResponseServices::getApiResponse(
             Orders::getByIds($idsArray),
@@ -193,6 +196,7 @@ class OrderController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      * @author Muhammad Abdullah Mirza
      */
@@ -203,7 +207,7 @@ class OrderController extends Controller
                 'required',
                 'integer',
                 Rule::exists('users', 'id')
-                    ->where(fn(Builder $query) => $query
+                    ->where(fn (Builder $query) => $query
                         ->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
             ],
             'categoryId' => 'required|integer|exists:categories,id',
@@ -307,7 +311,7 @@ class OrderController extends Controller
                 'business_phone',
                 'city',
                 'lat',
-                'lon'
+                'lon',
             ]);
             $driverCharges = OrderServices::getDriverCharges(
                 $seller->lat,
@@ -371,6 +375,7 @@ class OrderController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      * @author Muhammad Abdullah Mirza
      */
@@ -411,6 +416,7 @@ class OrderController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      * @author Muhammad Abdullah Mirza
      */
@@ -418,20 +424,22 @@ class OrderController extends Controller
     {
         $validatedData = Validator::make($request->all(), [
             'productsLimit' => 'required|integer',
-            'sellerId' => 'required|integer'
+            'sellerId' => 'required|integer',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
         }
 
         $order = Orders::getRecentOrderByBuyerId(auth()->id(), $request->productsLimit, $request->sellerId);
-        if (!empty($order)) {
+        if (! empty($order)) {
             $recentOrderProdsData = [];
-            foreach ($order->products as $product) $recentOrderProdsData[] = Products::getProductInfo(
-                $request->sellerId,
-                $product->id,
-                Products::getCommonColumns(),
-            );
+            foreach ($order->products as $product) {
+                $recentOrderProdsData[] = Products::getProductInfo(
+                    $request->sellerId,
+                    $product->id,
+                    Products::getCommonColumns(),
+                );
+            }
             /*
             * Just creating this variable so we don't have to call the "empty()" function again & again
             * Which will obviouly decrease the API response speed
@@ -453,9 +461,11 @@ class OrderController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      * List all ready or delivered orders
      * for a specific delivery boy
+     *
      * @author Huzaifa Haleem
      */
     // public function sellerOrders(Request $request)
@@ -586,6 +596,7 @@ class OrderController extends Controller
     /**
      * List all (assigned,complete,pending_approval,cancelled) orders
      * for a specific delivery boy
+     *
      * @author Huzaifa Haleem
      */
     public function driverOrders(Request $request, $driver_id)
@@ -596,7 +607,7 @@ class OrderController extends Controller
             ->where('type', '=', 'delivery')
             ->paginate(10);
         $pagination = $orders->toArray();
-        if (!$orders->isEmpty()) {
+        if (! $orders->isEmpty()) {
             $order_data = [];
             foreach ($orders as $order) {
                 $order_data[] = $this->getOrderDetails($order->id);
@@ -607,18 +618,20 @@ class OrderController extends Controller
                 'data' => $order_data,
                 'status' => true,
                 'message' => '',
-                'pagination' => $pagination
+                'pagination' => $pagination,
             ], 200);
         }
 
         return response()->json([
             'data' => [],
             'status' => false,
-            'message' => config('constants.NO_RECORD')
+            'message' => config('constants.NO_RECORD'),
         ], 200);
     }
+
     /**
      * Assigns an order to a specific delivery boy
+     *
      * @author Huzaifa Haleem
      */
     public function assignOrder(Request $request)
@@ -629,24 +642,28 @@ class OrderController extends Controller
             $order->driver_id = $request->driver_id;
             $order->order_status = $request->order_status;
             $order->save();
+
             return response()->json([
                 'data' => [],
                 'status' => true,
-                'message' => config('constants.ORDER_ASSIGNED')
+                'message' => config('constants.ORDER_ASSIGNED'),
             ], 200);
         } else {
             return response()->json([
                 'data' => [],
                 'status' => false,
-                'message' => config('constants.NO_RECORD')
+                'message' => config('constants.NO_RECORD'),
             ], 200);
         }
     }
+
     /**
      * This API is consumed on two occasions
      * 1) When the driver is "ACCEPTING" the order
      * 2) When the driver is "COMPLETING" the order
+     *
      * @author Huzaifa Haleem
+     *
      * @version 1.1.1
      */
     public function updateAssign(Request $request)
@@ -658,46 +675,52 @@ class OrderController extends Controller
             $order->order_status = $request->order_status;
             $order->driver_traveled_km = $request->driver_traveled_km;
             $order->save();
+
             return response()->json([
                 'data' => [],
                 'status' => true,
-                'message' => config('constants.ORDER_UPDATED')
+                'message' => config('constants.ORDER_UPDATED'),
             ], 200);
         } else {
             return response()->json([
                 'data' => [],
                 'status' => false,
-                'message' => config('constants.NO_RECORD')
+                'message' => config('constants.NO_RECORD'),
             ], 200);
         }
     }
+
     /**
      * A delivery boy can cancel a specific order through this function
+     *
      * @author Muhammad Abdullah Mirza
      */
     public function cancelOrder(Request $request)
     {
         $order = Orders::find($request->order_id);
         if ($order) {
-            $order->driver_id = NULL;
-            $order->order_status = "ready";
-            $order->delivery_status = "cancelled";
+            $order->driver_id = null;
+            $order->order_status = 'ready';
+            $order->delivery_status = 'cancelled';
             $order->save();
+
             return response()->json([
                 'data' => [],
                 'status' => true,
-                'message' => config('constants.ORDER_CANCELLED')
+                'message' => config('constants.ORDER_CANCELLED'),
             ], 200);
         } else {
             return response()->json([
                 'data' => [],
                 'status' => false,
-                'message' => config('constants.NO_RECORD')
+                'message' => config('constants.NO_RECORD'),
             ], 200);
         }
     }
+
     /**
      * Cancel's a customer order
+     *
      * @author Muhammad Abdullah Mirza
      */
     public function customerCancelOrder(Request $request)
@@ -707,7 +730,7 @@ class OrderController extends Controller
         $count = 0;
         print_r($product_ids);
         exit;
-        if (!is_null($order)) {
+        if (! is_null($order)) {
             /**
              * Order cenceled by user & not accepted by store then full refund
              */
@@ -718,45 +741,47 @@ class OrderController extends Controller
                 return response()->json([
                     'data' => $order,
                     'status' => true,
-                    'message' => config('constants.ORDER_CANCELLED')
+                    'message' => config('constants.ORDER_CANCELLED'),
                 ], 200);
             }
             /**
              * Order cenceled by user & accepted by store but not picked by the driver then deduct handling charges
              */
-            else if ($order->order_status == OrderStatusEnum::ACCEPTED->value || $order->order_status == OrderStatusEnum::READY->value) {
+            elseif ($order->order_status == OrderStatusEnum::ACCEPTED->value || $order->order_status == OrderStatusEnum::READY->value) {
                 $order->order_status = OrderStatusEnum::CANCELLED->value;
                 $order->save();
 
                 return response()->json([
                     'data' => $order,
                     'status' => true,
-                    'message' => config('constants.ORDER_CANCELLED')
+                    'message' => config('constants.ORDER_CANCELLED'),
                 ], 200);
             }
             /**
              * Order cenceled by user, accepted by store & picked by the driver then multiply driver's fee by 2 plus add handling charge & service fee
              */
-            else if ($order->order_status == OrderStatusEnum::ON_THE_WAY->value) {
+            elseif ($order->order_status == OrderStatusEnum::ON_THE_WAY->value) {
                 $order->order_status = OrderStatusEnum::CANCELLED->value;
                 $order->save();
 
                 return response()->json([
                     'data' => $order,
                     'status' => true,
-                    'message' => config('constants.ORDER_CANCELLED')
+                    'message' => config('constants.ORDER_CANCELLED'),
                 ], 200);
             }
         } else {
             return response()->json([
                 'data' => [],
                 'status' => false,
-                'message' => config('constants.NO_RECORD')
+                'message' => config('constants.NO_RECORD'),
             ], 200);
         }
     }
+
     /**
      * Update's the order
+     *
      * @author Muhammad Abdullah Mirza
      */
     public function updateOrder(Request $request)
@@ -766,12 +791,12 @@ class OrderController extends Controller
         $count = 0;
         foreach ($order_arr as $order_id) {
             $order = Orders::find($order_id);
-            if ($request->payment_status == "paid" && $order->payment_status != "paid" && $request->order_status == 'complete' && $order->order_status != 'complete' && $request->delivery_status == 'delivered' && $order->delivery_status != 'delivered') {
+            if ($request->payment_status == 'paid' && $order->payment_status != 'paid' && $request->order_status == 'complete' && $order->order_status != 'complete' && $request->delivery_status == 'delivered' && $order->delivery_status != 'delivered') {
                 $user = User::find($order->seller_id);
                 $user_money = $user->pending_withdraw;
                 $user->pending_withdraw = $order->initial_total + $user_money;
                 $user->save();
-                //$this->calculateDriverFair($order, $user);
+                // $this->calculateDriverFair($order, $user);
             }
             $order->lat = $request->lat;
             $order->lon = $request->lon;
@@ -798,11 +823,13 @@ class OrderController extends Controller
         return response()->json([
             'data' => Orders::getByIds($order_arr),
             'status' => true,
-            'message' => 'Order Added Successfully'
+            'message' => 'Order Added Successfully',
         ], 200);
     }
+
     /**
      * It is used to fetch the information of a single order w.r.t it's ID
+     *
      * @author Huzaifa Haleem
      */
     public function getOrderDetails(int $orderId)
@@ -814,13 +841,14 @@ class OrderController extends Controller
 
         return $temp;
     }
+
     /**
      * It will get order details via given id
      */
     public function getOrderDetailsForApi(Request $request)
     {
         $validatedData = Validator::make($request->route()->parameters(), [
-            'id' => 'required|integer'
+            'id' => 'required|integer',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -828,7 +856,7 @@ class OrderController extends Controller
 
         $validatedData = (object) $validatedData->validated();
 
-        if (!Orders::checkIfOrderExists($validatedData->id)) {
+        if (! Orders::checkIfOrderExists($validatedData->id)) {
             return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
@@ -842,13 +870,14 @@ class OrderController extends Controller
         return JsonResponseServices::getApiResponse(
             $order,
             config('constants.TRUE_STATUS'),
-            "",
+            '',
             config('constants.HTTP_OK')
         );
     }
     /**
      * It will calculate the total distance between client & store location & then
      * It will return the total distance in Miles
+     *
      * @author Muhammad Abdullah Mirza
      */
     // public function calculateDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo)

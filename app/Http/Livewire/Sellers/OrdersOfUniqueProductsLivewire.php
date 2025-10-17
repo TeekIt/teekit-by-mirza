@@ -6,41 +6,45 @@ use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\PaymentIntentStatusEnum;
 use App\Models\OrdersFromOtherSeller;
-use App\OrderItems;
-use App\Orders;
+use App\Models\OrderItems;
+use App\Models\Orders;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
 use App\Services\OrderServices;
 use App\Services\StripeServices;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Exception;
 
 /** @deprecated */
 class OrdersOfUniqueProductsLivewire extends Component
 {
     use WithPagination;
 
-    public
-        $sellerId,
-        $priceBySeller,
-        $selectedOrder,
-        $orderId;
+    public $sellerId;
+
+    public $priceBySeller;
+
+    public $selectedOrder;
+
+    public $orderId;
 
     public int $orderHoldingMinutes = 2;
 
     protected $paginationTheme = 'bootstrap';
-    /* 
+
+    /*
      * Lifecycle Hooks
      */
     public function mount()
     {
         $this->sellerId = auth()->id();
     }
-    /* 
+
+    /*
      * Helpers
      */
     public function resetComponent()
@@ -71,21 +75,21 @@ class OrdersOfUniqueProductsLivewire extends Component
     public function getSellersOfSameCity()
     {
         return Cache::remember(
-            'getSellersOfSameCity' . $this->sellerId,
+            'getSellersOfSameCity'.$this->sellerId,
             Carbon::now()->addDay(),
-            fn() => User::getParentAndChildSellersByCity(auth()->user()->city)
+            fn () => User::getParentAndChildSellersByCity(auth()->user()->city)
         );
     }
 
     public function getNearBySellers($customerLat, $customerLon, $sellersOfSameCity)
     {
         return Cache::remember(
-            'getNearBySellers' . $this->sellerId . $customerLat . $customerLon,
+            'getNearBySellers'.$this->sellerId.$customerLat.$customerLon,
             Carbon::now()->addDay(),
             function () use ($customerLat, $customerLon, $sellersOfSameCity) {
-                /* 
+                /*
                  * Add this function when moving to production/staging
-                 * Bcz this function will not work with "faker" generated 
+                 * Bcz this function will not work with "faker" generated
                  * customer lat, lon
                  */
                 return GoogleMapServices::findNearByUsersByMakingChunks(
@@ -106,7 +110,7 @@ class OrdersOfUniqueProductsLivewire extends Component
         $this->dispatchBrowserEvent('show-modal', ['id' => 'noOtherSellersModal']);
     }
 
-    /* 
+    /*
      * CRUD Methods
      */
     public function sendItemToAnOtherSeller($orderId)
@@ -125,8 +129,9 @@ class OrdersOfUniqueProductsLivewire extends Component
                 $sellersOfTheSameCity
             );
 
-            if (empty($nearbySellers))
+            if (empty($nearbySellers)) {
                 return $this->noNearBySellers($orderId);
+            }
 
             $randomIndex = array_rand($nearbySellers, 1);
 
@@ -170,7 +175,7 @@ class OrdersOfUniqueProductsLivewire extends Component
             /* Subtract the total price of this product/order_item from the current order's total */
             $subtracted = Orders::subFromOrderTotal($this->selectedOrder->id, $orderTotalPrice);
 
-            info('The current order has been sent to seller: ' . $nearbySellers[$randomIndex]['id']);
+            info('The current order has been sent to seller: '.$nearbySellers[$randomIndex]['id']);
             /* Operation finished */
             sleep(1);
 
@@ -191,7 +196,7 @@ class OrdersOfUniqueProductsLivewire extends Component
             'priceBySeller' => [
                 'required',
                 'numeric',
-                'max:' . $this->selectedOrder->order_items[0]->product_price,
+                'max:'.$this->selectedOrder->order_items[0]->product_price,
                 'min:1',
             ],
         ]);
@@ -229,7 +234,7 @@ class OrdersOfUniqueProductsLivewire extends Component
 
             // Note:
             // Please remove the bugs related to the sendPickupYourOrderMail() email method
-           
+
             if ($type == OrderTypeEnum::SELF_PICKUP->value) {
                 $orderDetails = Orders::getById($orderId, ['id', 'created_by_id', 'seller_id']);
                 EmailServices::sendPickupYourOrderMail($orderDetails);
@@ -264,7 +269,7 @@ class OrdersOfUniqueProductsLivewire extends Component
             );
 
             $currentTotalAmount = round($this->selectedOrder->current_total + $this->selectedOrder->service_charges + $currentDeliveryCharges);
-          
+
             $initialTotalAmount = round($this->selectedOrder->initial_total + $this->selectedOrder->service_charges + $this->selectedOrder->delivery_charges);
 
             if ($currentTotalAmount <= $initialTotalAmount) {

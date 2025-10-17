@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Services\SellerServices;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,6 +16,7 @@ class Rattings extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Helpers
      */

@@ -1,30 +1,29 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Enums\ProductStatusEnum;
 use App\Enums\SortByEnum;
 use App\Models\ProductImage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\Paginator;
-use Laravel\Scout\Searchable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Attributes\SearchUsingFullText;
+use Laravel\Scout\Searchable;
 
 class Products extends Model
 {
-    use Searchable, HasFactory, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes;
 
     protected $fillable = [
         'seller_id',
@@ -60,8 +59,9 @@ class Products extends Model
      * @var array
      */
     protected $casts = [
-        'status' => ProductStatusEnum::class
+        'status' => ProductStatusEnum::class,
     ];
+
     /**
      * Laravel Built-In Helpers
      */
@@ -71,13 +71,12 @@ class Products extends Model
             set: fn($value) => (string) $value
         );
     }
+
     /**
      * Scout Built-In Helpers
      */
     /**
      * Get the indexable data array for the model.
-     *
-     * @return array
      */
     #[SearchUsingFullText(['product_name'])]
     public function toSearchableArray(): array
@@ -90,9 +89,10 @@ class Products extends Model
             'price' => $this->price,
             'status' => $this->status,
             'wieght' => $this->weight,
-            'brand' => $this->brand
+            'brand' => $this->brand,
         ];
     }
+
     /**
      * Determine if the model should be searchable.
      */
@@ -100,6 +100,7 @@ class Products extends Model
     {
         return $this->status === ProductStatusEnum::ENABLE;
     }
+
     /**
      * Modify the query used to retrieve models when making all of the models searchable.
      */
@@ -112,8 +113,9 @@ class Products extends Model
             'category:id,category_name,category_image',
         ]);
     }
+
     /**
-     *  Define filterable attributes for meilisearch 
+     *  Define filterable attributes for meilisearch
      */
     public function scoutFilterable(): array
     {
@@ -125,9 +127,10 @@ class Products extends Model
             'price',
             'status',
             'weight',
-            'brand'
+            'brand',
         ];
     }
+
     /**
      * Relations
      */
@@ -135,6 +138,7 @@ class Products extends Model
     {
         return $this->belongsTo(User::class, 'seller_id');
     }
+
     /**
      * Fetch all sellers related to a product.
      * "Sellers" could be parent or child sellers.
@@ -173,6 +177,7 @@ class Products extends Model
     {
         return $this->quantities();
     }
+
     /**
      * Scopes
      */
@@ -209,6 +214,7 @@ class Products extends Model
     {
         $query->where('status', ProductStatusEnum::ENABLE);
     }
+
     /**
      * Helpers
      */
@@ -313,7 +319,7 @@ class Products extends Model
                 $qtyRelation->select('id', 'product_id', 'qty')->whereIn('seller_id', $sellerIds);
             },
             'images:id,product_id,product_image',
-            'category:id,category_name,category_image'
+            'category:id,category_name,category_image',
         ])->when($categoryId, function ($query) use ($categoryId) {
             return $query->where('category_id', '=', $categoryId);
         })->when($brand, function ($query) use ($brand) {
@@ -413,7 +419,7 @@ class Products extends Model
         return self::with([
             'qty:id,product_id,qty',
             'images:id,product_id,product_image',
-            'category:id,category_name,category_image'
+            'category:id,category_name,category_image',
         ])
             ->whereHas('store', function ($query) {
                 $query->where('is_active', 1);
@@ -434,7 +440,7 @@ class Products extends Model
                     $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', $sellerId);
                 },
                 'images:id,product_id,product_image',
-                'category:id,category_name,category_image'
+                'category:id,category_name,category_image',
             ])
             ->whereHas('qty', function ($qtyRelation) use ($sellerId, $categoryId) {
                 $qtyRelation->where('seller_id', '=', $sellerId)
@@ -457,7 +463,7 @@ class Products extends Model
                     $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', $sellerId);
                 },
                 'images:id,product_id,product_image',
-                'category:id,category_name,category_image'
+                'category:id,category_name,category_image',
             ])
             ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
                 $qtyRelation->where('seller_id', $sellerId);
@@ -466,26 +472,26 @@ class Products extends Model
             ->paginate(20);
     }
 
-    public static function getProductInfoEvenDisabled(int $sellerId, int $productId, array $columns): Products
+    public static function getProductInfoEvenDisabled(int $sellerId, int $productId, array $columns = ['*']): Products
     {
         return self::select($columns)
-        ->with([
-            'sellers' => function ($sellersRelation) use ($sellerId) {
-                $sellersRelation->select(
-                    User::getSellerCommonColumns()
-                )->where('seller_id', '=', $sellerId);
-            },
-            'qty' => function ($qtyRelation) use ($sellerId) {
-                $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', '=', $sellerId);
-            },
-            'images:id,product_id,product_image',
-            'category:id,category_name,category_image'
-        ])
-        ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
-            $qtyRelation->where('seller_id', '=', $sellerId);
-        })
-        ->where('id', '=', $productId)
-        ->firstOrFail();
+            ->with([
+                'sellers' => function ($sellersRelation) use ($sellerId) {
+                    $sellersRelation->select(
+                        User::getSellerCommonColumns()
+                    )->where('seller_id', '=', $sellerId);
+                },
+                'qty' => function ($qtyRelation) use ($sellerId) {
+                    $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', '=', $sellerId);
+                },
+                'images:id,product_id,product_image',
+                'category:id,category_name,category_image',
+            ])
+            ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
+                $qtyRelation->where('seller_id', '=', $sellerId);
+            })
+            ->where('id', '=', $productId)
+            ->firstOrFail();
     }
 
     public static function getProductInfo(int $sellerId, int $productId, array $columns): Products
@@ -495,13 +501,13 @@ class Products extends Model
                 'sellers' => function ($sellersRelation) use ($sellerId) {
                     $sellersRelation->select(
                         User::getSellerCommonColumns()
-                    )->where('seller_id', $sellerId);
+                    )->where('seller_id', '=', $sellerId);
                 },
                 'qty' => function ($qtyRelation) use ($sellerId) {
-                    $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', $sellerId);
+                    $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', '=', $sellerId);
                 },
                 'images:id,product_id,product_image',
-                'category:id,category_name,category_image'
+                'category:id,category_name,category_image',
             ])
             ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
                 $qtyRelation->where('seller_id', '=', $sellerId);
@@ -526,8 +532,12 @@ class Products extends Model
         return self::WhereProductIsEnable()->where('seller_id', '=', $seller_id)->orderBy('id', 'asc')->get();
     }
 
-    public static function getParentSellerProductsForView(int $sellerId, string $search = '', ?int $categoryId = null, string $orderBy = 'desc'): LengthAwarePaginator
-    {
+    public static function getParentSellerProductsForView(
+        int $sellerId,
+        string $search = '',
+        ?int $categoryId = null,
+        string $orderBy = 'desc'
+    ): LengthAwarePaginator {
         return self::with('category')
             ->withAvg('rattings:ratting', 'average_ratting')
             ->where('product_name', 'LIKE', "%{$search}%")
@@ -535,6 +545,9 @@ class Products extends Model
             ->when($categoryId, function ($query, $categoryId) {
                 return $query->where('category_id', '=', $categoryId);
             })
+            // ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
+            //     $qtyRelation->where('seller_id', '=', $sellerId);
+            // })
             ->orderBy('id', $orderBy)
             ->paginate(12);
     }
@@ -548,6 +561,7 @@ class Products extends Model
         $qty = Qty::where('seller_id', $child_seller_id)->first();
 
         $query = (empty($qty)) ? self::ParentSellerProducts() : self::ChildSellerQty(child_seller_id: $child_seller_id);
+
         return $query->where('products.product_name', 'LIKE', "%{$search}%")
             ->where('products.seller_id', $parent_seller_id)
             ->when($category_id, function ($query, $category_id) {
@@ -567,6 +581,7 @@ class Products extends Model
     public static function getProductWeight(int $product_id)
     {
         $product = self::select('weight')->where('id', $product_id)->get();
+
         return $product[0]->weight;
     }
 
@@ -575,12 +590,14 @@ class Products extends Model
         $product = self::select(DB::raw('(products.height * products.width * products.length) as volumn'))
             ->where('id', $product_id)
             ->get();
+
         return $product[0]->volumn;
     }
 
     public static function getProductPrice(int $product_id): float
     {
         $product = self::find($product_id);
+
         /* Due to some unknown reason this line was previously written for getting discounted price */
         // return ($product->discount_percentage > 0) ? $product->discount_percentage * 1.2 : $product->price * 1.2;
         return $product->price * 1.2;
@@ -609,6 +626,7 @@ class Products extends Model
     {
         $latitude = $request->get('lat');
         $longitude = $request->get('lon');
+
         return self::selectRaw('*, ( 6367 * acos( cos( radians(?) ) * cos( radians( lat ) ) * cos( radians( lon ) - radians(?) ) + sin( radians(?) ) * sin( radians( lat ) ) ) ) AS distance', [$latitude, $longitude, $latitude])
             ->orderBy('distance')
             ->paginate(10);
@@ -617,15 +635,19 @@ class Products extends Model
     public static function getBulkProducts(object $request): LengthAwarePaginator
     {
         $ids = explode(',', $request->ids);
+
         return self::whereIn('id', $ids)->paginate(10);
     }
+
     /**
      * SAP == Search Alternative Product
      */
     public static function getProductsForSAPModal(int $sellerId, string $search = ''): Paginator
     {
-        if (!empty($search))
+        if (! empty($search)) {
             $search = str_replace(' ', '%', $search);
+        }
+
         return self::join('qty', 'products.id', '=', 'qty.product_id')
             ->select('products.id as prod_id', 'products.product_name', 'qty.qty', 'products.price')
             ->where('qty.seller_id', $sellerId)
@@ -641,7 +663,7 @@ class Products extends Model
         return self::where('id', $id)
             ->where('seller_id', Auth::id())
             ->update([
-                'featured' => $status
+                'featured' => $status,
             ]);
     }
 
@@ -650,7 +672,7 @@ class Products extends Model
         return self::where('id', $id)
             ->where('seller_id', Auth::id())
             ->update([
-                'status' => $status
+                'status' => $status,
             ]);
     }
 
@@ -658,7 +680,7 @@ class Products extends Model
     {
         return self::where('seller_id', Auth::id())
             ->update([
-                'status' => $status
+                'status' => $status,
             ]);
     }
 }

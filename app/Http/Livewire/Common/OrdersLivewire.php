@@ -2,25 +2,17 @@
 
 namespace App\Http\Livewire\Common;
 
-use App\Enums\OrderStatusEnum;
-use App\Enums\OrderTypeEnum;
 use App\Models\GophrDelivery;
-use App\Enums\PaymentIntentStatusEnum;
 use App\Models\OrdersFromOtherSeller;
-use App\OrderItems;
-use App\Orders;
-use App\Services\EmailServices;
+use App\Models\OrderItems;
+use App\Models\Orders;
 use App\Services\GoogleMapServices;
 use App\Services\GophrDeliveryServices;
-use App\Services\StripeServices;
-use App\Services\StuartDeliveryServices;
-use App\Services\UUIDServices;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -28,36 +20,54 @@ class OrdersLivewire extends Component
 {
     use WithPagination;
 
-    public
-        $sellerId,
-        $orderId,
-        $currentProdId,
-        $currentProdQty,
-        $customerName,
-        $phoneNumber,
-        $order,
-        $orderItem,
-        $nearbySellers,
-        $selectedNearbySeller,
-        $selectedOrder,
-        $search,
-        $customOrderId,
-        $requestOrderId,
-        $additionalParcelDescription,
-        $selectedDeliveryDetails;
+    public $sellerId;
 
+    public $orderId;
+
+    public $currentProdId;
+
+    public $currentProdQty;
+
+    public $customerName;
+
+    public $phoneNumber;
+
+    public $order;
+
+    public $orderItem;
+
+    public $nearbySellers;
+
+    public $selectedNearbySeller;
+
+    public $selectedOrder;
+
+    public $search;
+
+    public $customOrderId;
+
+    public $requestOrderId;
+
+    public $additionalParcelDescription;
+
+    public $selectedDeliveryDetails;
+
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
 
     protected $listeners = [
         'alternativeProductIncluded' => 'render',
         'callParentResetComponent' => 'resetComponent',
     ];
+
     /*
     * Lifecycle Hooks
     */
     public function mount(Request $request)
     {
-        if (!User::isSuperAdmin()) {
+        if (! User::isSuperAdmin()) {
             $this->sellerId = auth()->id();
         }
 
@@ -65,7 +75,8 @@ class OrdersLivewire extends Component
 
         $this->resetAllPaginators();
     }
-    /* 
+
+    /*
      * Custom Helpers
      */
     public function resetComponent()
@@ -117,7 +128,8 @@ class OrdersLivewire extends Component
             Carbon::now()->addDay(),
             fn() => User::getParentAndChildSellersByCityAndCategory(
                 auth()->user()->city,
-                $this->orderItem->product->category_id
+                $this->orderItem->product->category_id,
+                $this->sellerId,
             )
         );
     }
@@ -158,18 +170,19 @@ class OrdersLivewire extends Component
             true
         );
     }
-    /* 
+
+    /*
      * CRUD Methods
      */
     public function sendItemToAnOtherStore()
     {
         $this->validate([
-            'selectedNearbySeller' => 'required|string'
+            'selectedNearbySeller' => 'required|string',
         ]);
         try {
             /* Perform some operation */
             $selectedSeller = User::getSellerByBusinessName($this->selectedNearbySeller);
-            $name = 'a';
+
             $productTotalPrice = $this->orderItem->product_price * $this->orderItem->product_qty;
             /* Send this product to another seller */
             OrdersFromOtherSeller::add(
@@ -210,14 +223,13 @@ class OrdersLivewire extends Component
             /* Subtract the total price of this product/order_item from the current order's total */
             $subtracted = Orders::subFromOrderTotal($this->orderItem->order_id, $productTotalPrice);
             /**
-             * If there's only 1 item in the order, remove the whole order, 
-             * else only remove the selected item from current order items 
+             * If there's only 1 item in the order, remove the whole order,
+             * else only remove the selected item from current order items
              */
             $removed = ($this->order->order_items->count() == 1) ? Orders::remove($this->order->id) : OrderItems::remove($this->orderItem->id);
             /* Operation finished */
             sleep(1);
             $this->dispatchBrowserEvent('close-modal', ['id' => 'sendToOtherStoresModal']);
-
 
             if ($removed && $subtracted) {
                 session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
@@ -269,7 +281,9 @@ class OrdersLivewire extends Component
             $searchedOrderId = $this->requestOrderId;
         }
 
-        if ($searchedOrderId != 0) $this->resetPage();
+        if ($searchedOrderId != 0) {
+            $this->resetPage();
+        }
 
         return $searchedOrderId;
     }
@@ -277,7 +291,7 @@ class OrdersLivewire extends Component
     public function render()
     {
         try {
-            if (!User::isSuperAdmin()) {
+            if (! User::isSuperAdmin()) {
                 $data = Orders::getOrdersForView(
                     orderId: $this->isSearchByIdSet(),
                     sellerId: $this->sellerId,

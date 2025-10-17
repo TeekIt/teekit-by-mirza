@@ -58,8 +58,8 @@ final class GophrDeliveryServices
                     'pickup_location_lng' => $pickupLon,
                     'pickup_person_name' => $pickupPersonName,
                     'pickup_mobile_number' => $pickupMobileNumber,
-                    'parcels' => [$parcelData]
-                ]
+                    'parcels' => [$parcelData],
+                ],
             ],
             'dropoffs' => [
                 [
@@ -73,9 +73,9 @@ final class GophrDeliveryServices
                     'dropoff_email' => $dropoffEmail,
                     'dropoff_mobile_number' => $dropoffMobileNumber,
                     'dropoff_instructions' => $instructions,
-                    'parcels' => [$parcelData]
-                ]
-            ]
+                    'parcels' => [$parcelData],
+                ],
+            ],
         ];
     }
 
@@ -95,7 +95,7 @@ final class GophrDeliveryServices
     {
         $curl = curl_init();
         curl_setopt_array($curl, [
-            CURLOPT_URL => static::getApiUrl() . '/jobs?XDEBUG_SESSION=1',
+            CURLOPT_URL => self::getApiUrl().'/jobs?XDEBUG_SESSION=1',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -107,12 +107,12 @@ final class GophrDeliveryServices
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Accept: application/json',
-                'Api-Key: ' . static::getApiKey(),
+                'Api-Key: '.self::getApiKey(),
             ],
         ]);
 
         $response = curl_exec($curl);
-        
+
         curl_close($curl);
 
         $response = json_decode($response);
@@ -131,7 +131,7 @@ final class GophrDeliveryServices
     {
         $curl = curl_init();
         curl_setopt_array($curl, [
-            CURLOPT_URL => static::getApiUrl() . '/quotes',
+            CURLOPT_URL => self::getApiUrl().'/quotes',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -143,7 +143,7 @@ final class GophrDeliveryServices
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Accept: application/json',
-                'Api-Key:' . static::getApiKey(),
+                'Api-Key:'.self::getApiKey(),
             ],
         ]);
 
@@ -164,7 +164,7 @@ final class GophrDeliveryServices
     {
         $curl = curl_init();
         curl_setopt_array($curl, [
-            CURLOPT_URL => static::getApiUrl() . '/jobs/' . $jobId,
+            CURLOPT_URL => self::getApiUrl().'/jobs/'.$jobId,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -174,7 +174,7 @@ final class GophrDeliveryServices
             CURLOPT_CUSTOMREQUEST => 'GET',
             CURLOPT_HTTPHEADER => [
                 'Accept: application/json',
-                'Api-Key:' . static::getApiKey(),
+                'Api-Key:'.self::getApiKey(),
             ],
         ]);
 
@@ -194,12 +194,12 @@ final class GophrDeliveryServices
     public static function cancelJob(string $jobId): stdClass
     {
         $formData = [
-            "cancelled_reason" => "TEST_ORDER"
+            'cancelled_reason' => 'TEST_ORDER',
         ];
 
         $curl = curl_init();
         curl_setopt_array($curl, [
-            CURLOPT_URL => static::getApiUrl() . '/jobs/' . $jobId . '/cancel',
+            CURLOPT_URL => self::getApiUrl().'/jobs/'.$jobId.'/cancel',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -211,7 +211,7 @@ final class GophrDeliveryServices
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Accept: application/json',
-                'Api-Key:' . static::getApiKey(),
+                'Api-Key:'.self::getApiKey(),
             ],
         ]);
 

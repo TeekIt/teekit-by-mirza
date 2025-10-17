@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class DriverDocument extends Model
 {
     use HasFactory, SoftDeletes;
-     /**
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
@@ -18,7 +19,7 @@ class DriverDocument extends Model
     protected $fillable = [
         'driver_id',
         'front_img',
-        'back_img'
+        'back_img',
     ];
 
     protected $hidden = [
@@ -29,7 +30,7 @@ class DriverDocument extends Model
     /**
      * Relations
      */
-    // 
+    //
 
     /**
      * Helpers

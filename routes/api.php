@@ -1,29 +1,29 @@
 <?php
 
 use App\Http\Controllers\Api\v1\BuyerController;
-use Illuminate\Support\Facades\Hash;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\Api\v1\QtyController;
 use App\Http\Controllers\Api\v1\CategoriesController;
-use App\Http\Controllers\Api\v1\PagesController;
 use App\Http\Controllers\Api\v1\DriverController;
+use App\Http\Controllers\Api\v1\OrderController;
+use App\Http\Controllers\Api\v1\PagesController;
+use App\Http\Controllers\Api\v1\ProductController;
+use App\Http\Controllers\Api\v1\PromoCodeController;
+use App\Http\Controllers\Api\v1\QtyController;
+use App\Http\Controllers\Api\v1\RattingController;
+use App\Http\Controllers\Api\v1\ReferralCodeRelationController;
+use App\Http\Controllers\Api\v1\SellerController;
+use App\Http\Controllers\Api\v1\StripeController;
+use App\Http\Controllers\Api\v1\WithdrawalRequestController;
 use App\Http\Controllers\Api\v2\GophrDeliveryController;
 use App\Http\Controllers\Api\v2\StuartDeliveryController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\Api\v1\OrderController;
-use App\Http\Controllers\Api\v1\ProductController;
-use App\Http\Controllers\Api\v1\RattingController;
-use App\Http\Controllers\Api\v1\SellerController;
-use App\Http\Controllers\Api\v1\PromoCodeController;
-use App\Http\Controllers\Api\v1\ReferralCodeRelationController;
-use App\Http\Controllers\Api\v1\StripeController;
-use App\Http\Controllers\Api\v1\WithdrawalRequestController;
+use App\Services\JsonResponseServices;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
-use App\Services\JsonResponseServices;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,7 +36,7 @@ use App\Services\JsonResponseServices;
 |
 */
 
-Route::get('/', fn() =>  'Teek it API Routes Are Working Fine 😃');
+Route::get('/', fn () => 'Teek it API Routes Are Working Fine 😃');
 /*
 |--------------------------------------------------------------------------
 | Authentication API Routes

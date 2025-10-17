@@ -12,20 +12,18 @@ use App\Mail\RegeneratedStripeConnectAccMail;
 use App\Mail\SellerApprovedMail;
 use App\Mail\StoreRegisterMail;
 use App\Mail\StripeConnectAccMail;
-use App\Mail\StripeConnectedAccMail;
 use App\Models\Driver;
 use App\Models\OrdersFromOtherSeller;
-use App\Orders;
-use App\User;
+use App\Models\Orders;
+use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
-use Stripe\Stripe;
 
 final class EmailServices
 {
     public static function getVerificationLink($verificationCode)
     {
-        return url('/') . '/auth/verify?token=' . $verificationCode;
+        return url('/').'/auth/verify?token='.$verificationCode;
     }
 
     public static function sendRegeneratedStripeConnectAccMail(User $user)

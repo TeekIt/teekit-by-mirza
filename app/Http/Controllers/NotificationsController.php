@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\DeviceToken;
+use App\Models\DeviceToken;
 use App\Services\JsonResponseServices;
 use App\Services\WebResponseServices;
-use Illuminate\Http\Request;
 use Exception;
-use Illuminate\Support\Facades\Validator;
 use Google\Client;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 class NotificationsController extends Controller
 {
     public function getAccessToken($serviceAccountPath)
     {
-        $client = new Client();
+        $client = new Client;
         $client->setAuthConfig($serviceAccountPath);
         $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
         $client->useApplicationDefaultCredentials();
@@ -26,9 +26,9 @@ class NotificationsController extends Controller
 
     public function sendMessage($accessToken, $projectId, $message)
     {
-        $url = 'https://fcm.googleapis.com/v1/projects/' . $projectId . '/messages:send';
+        $url = 'https://fcm.googleapis.com/v1/projects/'.$projectId.'/messages:send';
         $headers = [
-            'Authorization: Bearer ' . $accessToken,
+            'Authorization: Bearer '.$accessToken,
             'Content-Type: application/json',
         ];
         $ch = curl_init();
@@ -39,15 +39,18 @@ class NotificationsController extends Controller
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['message' => $message]));
         $response = curl_exec($ch);
         if ($response === false) {
-            throw new Exception('Curl error: ' . curl_error($ch));
+            throw new Exception('Curl error: '.curl_error($ch));
         }
         curl_close($ch);
 
         return json_decode($response, true);
     }
+
     /**
      * It will save/update device token of every user
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function saveToken(Request $request)
@@ -55,7 +58,7 @@ class NotificationsController extends Controller
         $validatedData = Validator::make($request->all(), [
             'user_id' => 'integer',
             'device_id' => 'required|string',
-            'device_token' => 'required|string'
+            'device_token' => 'required|string',
         ]);
         if ($validatedData->fails()) {
             JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -74,15 +77,19 @@ class NotificationsController extends Controller
             config('constants.HTTP_OK'),
         );
     }
+
     /**
      * Returns notification form view
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function notificationHome()
     {
         return view('admin.notification');
     }
+
     /**
      * @author Muhammad Abdullah Mirza
      */
@@ -113,7 +120,7 @@ class NotificationsController extends Controller
             }
 
             $message = [
-                // 'token' => $firebaseTokens[0],  
+                // 'token' => $firebaseTokens[0],
                 'notification' => [
                     'title' => $request->title,
                     'body' => $request->body,
@@ -133,20 +140,23 @@ class NotificationsController extends Controller
                         DeviceToken::deleteByDeviceToken($singleFirebaseToken);
                     }
 
-                    return back()->with('error', 'Failed to send notification: ' . $response['error']['message']);
+                    return back()->with('error', 'Failed to send notification: '.$response['error']['message']);
                 }
             }
 
-            return back()->with('success', 'Notification sent successfully');            
+            return back()->with('success', 'Notification sent successfully');
         } catch (Throwable $error) {
             report($error);
+
             return back()->with('error', 'Failed to send the notification due to some internal error');
         }
     }
 
     /**
      * It will send notifications
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.1.0
      */
     // public function notificationSend(Request $request)

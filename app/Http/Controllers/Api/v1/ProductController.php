@@ -2,27 +2,28 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Http\Controllers\Controller;
 use App\Enums\SortByEnum;
 use App\Enums\UserRoleEnum;
+use App\Http\Controllers\Controller;
 use App\Imports\ProductsImport;
-use App\Products;
-use Illuminate\Http\Request;
-use App\User;
-use App\Qty;
+use App\Models\Products;
+use App\Models\Qty;
 use App\Services\GoogleMapServices;
-use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Services\JsonResponseServices;
+use App\Models\User;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Excel as ExcelConstants;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
     /**
      * Upload's bulk products
+     *
      * @author Muhammad Abdullah Mirza
      */
     public function importProducts(Request $request)
@@ -34,7 +35,7 @@ class ProductController extends Controller
                 'sellerId' => [
                     'required',
                     'integer',
-                    Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRoleEnum::SELLER)),
+                    Rule::exists('users', 'id')->where(fn (Builder $query) => $query->where('role_id', UserRoleEnum::SELLER)),
                 ],
             ],
             messages: [
@@ -56,15 +57,18 @@ class ProductController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      * All products listing
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function all(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
-            'page' => 'required|integer'
+            'page' => 'required|integer',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -74,7 +78,7 @@ class ProductController extends Controller
         $data = $pagination['data'];
         unset($pagination['data']);
 
-        if (!empty($data)) {
+        if (! empty($data)) {
             return JsonResponseServices::getApiResponseExtention(
                 $data,
                 config('constants.TRUE_STATUS'),
@@ -92,8 +96,10 @@ class ProductController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      *It will sort the products by location
+     *
      * @version 1.0.0
      */
     // public function sortByLocation(Request $request)
@@ -135,7 +141,9 @@ class ProductController extends Controller
      * This function will return back store open/close & product qty status
      * Along with this information it will also send store_id & product_id
      * If the store is active & product is live
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.1.0
      */
     public function recheckProducts(Request $request)
@@ -143,7 +151,7 @@ class ProductController extends Controller
         $validatedData = Validator::make($request->all(), [
             'items' => 'required|array',
             'day' => 'required|string',
-            'time' => 'required|string'
+            'time' => 'required|string',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
@@ -151,12 +159,12 @@ class ProductController extends Controller
 
         $i = 0;
         foreach ($request->items as $item) {
-            $open_time = User::select('business_hours->time->' . $request->day . '->open as open')
+            $open_time = User::select('business_hours->time->'.$request->day.'->open as open')
                 ->where('id', '=', $item['store_id'])
                 ->where('is_active', '=', 1)
                 ->get();
 
-            $close_time = User::select('business_hours->time->' . $request->day . '->close as close')
+            $close_time = User::select('business_hours->time->'.$request->day.'->close as close')
                 ->where('id', '=', $item['store_id'])
                 ->where('is_active', '=', 1)
                 ->get();
@@ -169,8 +177,8 @@ class ProductController extends Controller
 
             $order_data[$i]['store_id'] = $item['store_id'];
             $order_data[$i]['product_id'] = $item['product_id'];
-            $order_data[$i]['closed'] = (strtotime($request->time) >= strtotime($open_time[0]->open) && strtotime($request->time) <= strtotime($close_time[0]->close)) ? "No" : "Yes";
-            $order_data[$i]['qty'] = (isset($qty[0]->qty)) ? $qty[0]->qty : NULL;
+            $order_data[$i]['closed'] = (strtotime($request->time) >= strtotime($open_time[0]->open) && strtotime($request->time) <= strtotime($close_time[0]->close)) ? 'No' : 'Yes';
+            $order_data[$i]['qty'] = (isset($qty[0]->qty)) ? $qty[0]->qty : null;
             $i++;
         }
 
@@ -181,15 +189,17 @@ class ProductController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      * View product w.r.t ID
+     *
      * @author Muhammad Abdullah Mirza
      */
     public function view(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'sellerId' => 'required|integer',
-            'productId' => 'required|integer'
+            'productId' => 'required|integer',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -214,22 +224,24 @@ class ProductController extends Controller
             config('constants.HTTP_OK'),
         );
     }
+
     /**
      *helper function for exporting products
+     *
      * @version 1.0.0
      */
     public function jsonToCsv($json, $csvFilePath = false, $boolOutputFile = false)
     {
         // See if the string contains something
         if (empty($json)) {
-            die("The JSON string is empty!");
+            exit('The JSON string is empty!');
         }
         // If passed a string, turn it into an array
         if (is_array($json) === false) {
             $json = json_decode($json, true);
         }
-        $strTempFile = public_path() . "/upload/csv/" . 'csvOutput' . date("U") . ".csv";
-        $f = fopen($strTempFile, "w+");
+        $strTempFile = public_path().'/upload/csv/'.'csvOutput'.date('U').'.csv';
+        $f = fopen($strTempFile, 'w+');
         $csvFilePath = $strTempFile;
         $firstLineKeys = false;
         foreach ($json as $line) {
@@ -242,14 +254,18 @@ class ProductController extends Controller
             fputcsv($f, array_merge($firstLineKeys, $line));
         }
         fclose($f);
+
         // Take the file and put it to a string/file for output (if no save path was included in function arguments)
         // Delete the temp file
         // unlink($strTempFile);
         return response()->download($csvFilePath, null, ['Content-Type' => 'text/csv'])->deleteFileAfterSend();
     }
+
     /**
      * It searches all products with w.r.t all given filters
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.7.0
      */
     public function search(Request $request)
@@ -318,7 +334,7 @@ class ProductController extends Controller
         * Which will obviouly decrease the API response speed
         */
         $dataIsEmpty = $products['data']->isEmpty();
-        
+
         return JsonResponseServices::getApiResponseExtention(
             ($dataIsEmpty) ? [] : $products['data'],
             ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
@@ -330,8 +346,8 @@ class ProductController extends Controller
     }
     /**
      * Update product price from csv file w.r.t their SKU and store_id
-     * @author Muhammad Abdullah Mirza
      *
+     * @author Muhammad Abdullah Mirza
      */
     // public function updatePriceBulk(Request $request, $delimiter = ',', $filename = '')
     // {
@@ -400,13 +416,14 @@ class ProductController extends Controller
         $filename = $file->getClientOriginalName();
         $location = public_path('upload/csv');
         $file->move($location, $filename);
-        $filepath = $location . "/" . $filename;        
+        $filepath = $location.'/'.$filename;
         /* Reading file */
-        $file = fopen($filepath, "r");
+        $file = fopen($filepath, 'r');
         $i = 0;
-        while (($filedata = fgetcsv($file, 1000, $delimiter)) !== FALSE) {
+        while (($filedata = fgetcsv($file, 1000, $delimiter)) !== false) {
             if ($i == 0) {
                 $i++;
+
                 continue;
             }
             $catgory_id = $filedata[0];
@@ -418,8 +435,8 @@ class ProductController extends Controller
             if ($product) {
                 $product->price = $price;
                 $product->save();
-                $productQty = (new Qty())->getQtybyStoreAndProductId($request->store_id, $product->id);
-                if (!empty($productQty)) {
+                $productQty = (new Qty)->getQtybyStoreAndProductId($request->store_id, $product->id);
+                if (! empty($productQty)) {
                     $productQty->qty = $qty;
                     $productQty->save();
                 }
@@ -440,22 +457,24 @@ class ProductController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      * Listing of all products w.r.t Seller 'id'
+     *
      * @author Muhammad Abdullah Mirza
      */
     public function sellerProducts(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'sellerId' => 'required|integer',
-            'page' => 'required|integer'
+            'page' => 'required|integer',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
         $pagination = Cache::remember(
-            'sellerProducts' . $request->sellerId . $request->page,
+            'sellerProducts'.$request->sellerId.$request->page,
             now()->addHour(),
             function () use ($request) {
                 return Products::getProductsInfoBySellerId(
@@ -468,7 +487,7 @@ class ProductController extends Controller
         $data = $pagination['data'];
         unset($pagination['data']);
 
-        if (!empty($data)) {
+        if (! empty($data)) {
             return JsonResponseServices::getApiResponseExtention(
                 $data,
                 config('constants.TRUE_STATUS'),

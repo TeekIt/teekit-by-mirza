@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire\Admin;
 
-use App\User;
+use App\Models\User;
 use Exception;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -10,30 +10,46 @@ use Livewire\WithPagination;
 class CustomersLivewire extends Component
 {
     use WithPagination;
-    
-    public
-        $name,
-        $l_name,
-        $email,
-        $phone,
-        $address_1,
-        $lat,
-        $lon,
-        $user_img,
-        $last_login,
-        $email_verified_at,
-        $pending_withdraw,
-        $total_withdraw,
-        $is_online,
-        $application_fee,
-        $search = '';
 
+    public $name;
+
+    public $l_name;
+
+    public $email;
+
+    public $phone;
+
+    public $address_1;
+
+    public $lat;
+
+    public $lon;
+
+    public $user_img;
+
+    public $last_login;
+
+    public $email_verified_at;
+
+    public $pending_withdraw;
+
+    public $total_withdraw;
+
+    public $is_online;
+
+    public $application_fee;
+
+    public $search = '';
+
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
 
     public function resetComponent()
     {
         $this->resetAllErrors();
-        
+
         $this->reset([
             'name',
             'l_name',
@@ -103,6 +119,7 @@ class CustomersLivewire extends Component
     public function render()
     {
         $data = User::getCustomers($this->search);
+
         return view('livewire.admin.customers-livewire', compact('data'));
     }
 }

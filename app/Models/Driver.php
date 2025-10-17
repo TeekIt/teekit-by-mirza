@@ -5,15 +5,16 @@ namespace App\Models;
 use App\Services\ImageServices;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Tymon\JWTAuth\Contracts\JWTSubject;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class Driver extends Authenticatable implements JWTSubject
 {
-    use Notifiable, HasFactory, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -36,8 +37,9 @@ class Driver extends Authenticatable implements JWTSubject
         'account_number',
         'driving_licence_name',
         'dob',
-        'driving_licence_number'
+        'driving_licence_number',
     ];
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -54,6 +56,7 @@ class Driver extends Authenticatable implements JWTSubject
     {
         return $this->getKey();
     }
+
     /**
      * Return a key value array, containing any custom claims to be added to the JWT.
      *
@@ -63,13 +66,15 @@ class Driver extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
     /**
      * Relations
      */
     public function role()
     {
-        return $this->belongsTo(\App\Role::class);
+        return $this->belongsTo(\App\Models\Role::class);
     }
+
     /**
      * Helpers
      */
@@ -79,7 +84,7 @@ class Driver extends Authenticatable implements JWTSubject
             'f_name' => $request->f_name,
             'l_name' => $request->l_name,
             'email' => $request->email,
-            'phone' => '+44' . $request->phone,
+            'phone' => '+44'.$request->phone,
             'password' => Hash::make($request->password),
             'vehicle_type' => $request->vehicle_type,
             'vehicle_number' => $request->vehicle_number,
@@ -92,7 +97,7 @@ class Driver extends Authenticatable implements JWTSubject
             'account_number' => $request->account_number,
             'driving_licence_name' => $request->driving_licence_name,
             'dob' => $request->dob,
-            'driving_licence_number' => $request->driving_licence_number
+            'driving_licence_number' => $request->driving_licence_number,
         ]);
     }
 
@@ -100,19 +105,21 @@ class Driver extends Authenticatable implements JWTSubject
     {
         $driver->profile_img = ImageServices::uploadImg($request, $img_key_name, $driver->id);
         $driver->save();
-        
+
         return $driver;
     }
 
     public static function getDrivers(string $search = '')
     {
-        return self::where('f_name', 'like', '%' . $search . '%')
+        return self::where('f_name', 'like', '%'.$search.'%')
             ->orderBy('f_name', 'asc')
             ->paginate(9);
     }
 
     public static function adminDriversDel(Request $request)
     {
-        for ($i = 0; $i < count($request->drivers); $i++) self::findOrfail($request->drivers[$i])->delete();
+        for ($i = 0; $i < count($request->drivers); $i++) {
+            self::findOrfail($request->drivers[$i])->delete();
+        }
     }
 }

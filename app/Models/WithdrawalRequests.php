@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Enums\UserRoleEnum;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,6 +25,7 @@ class WithdrawalRequests extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Relations
      */
@@ -32,12 +33,13 @@ class WithdrawalRequests extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
     /**
      * Helpers
      */
     public static function getParentAndChildSellersWithdrawalRequests(): Collection
     {
-        return  self::whereHas('user', function ($query) {
+        return self::whereHas('user', function ($query) {
             $query->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER]);
         })->get();
     }
@@ -51,15 +53,15 @@ class WithdrawalRequests extends Model
         return self::query()
             ->select('id', 'amount', 'status', 'transaction_id', 'created_at')
             ->where('user_id', $userId)
-            ->when($search, fn($query) => $query->where('status', $search))
-            ->when($amount, fn($query) => $query->where('amount', $amount))
-            ->when($createdAt, fn($query) => $query->whereDate('created_at', $createdAt));
+            ->when($search, fn ($query) => $query->where('status', $search))
+            ->when($amount, fn ($query) => $query->where('amount', $amount))
+            ->when($createdAt, fn ($query) => $query->whereDate('created_at', $createdAt));
     }
 
     public static function add(
-        int $userId, 
-        int $amount, 
-        string $status, 
+        int $userId,
+        int $amount,
+        string $status,
         string $bankDetails
     ): WithdrawalRequests {
         return self::create([

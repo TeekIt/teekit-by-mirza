@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class StuartDelivery extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'order_id',
-        'job_id'
+        'job_id',
     ];
 
     protected $hidden = [
@@ -21,7 +21,7 @@ class StuartDelivery extends Model
     /**
      * Relations
      */
-    // 
+    //
 
     /**
      * Helpers

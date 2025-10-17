@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
-use App\User;
+use Illuminate\Http\Request;
 // use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class ForgotPasswordController extends Controller
@@ -62,7 +62,7 @@ class ForgotPasswordController extends Controller
                             'created_at' => now(),
                         ]
                     );
-                       
+
                     $user->sendPasswordResetNotification($token);
                 } else {
                     return back()->withErrors(['email' => trans('passwords.user')]);
@@ -76,7 +76,8 @@ class ForgotPasswordController extends Controller
     }
 
     /**
-     * It will get the reset email token 
+     * It will get the reset email token
+     *
      * @version 1.3.0
      */
     public function getResetToken(Request $request)
@@ -88,15 +89,15 @@ class ForgotPasswordController extends Controller
             return response()->json([
                 'data' => $validate->messages(),
                 'status' => false,
-                'message' => config('constants.VALIDATION_ERROR')
+                'message' => config('constants.VALIDATION_ERROR'),
             ], 400);
         }
         $user = User::where('email', $request->get('email'))->first();
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'data' => [],
                 'status' => false,
-                'message' => trans('passwords.user')
+                'message' => trans('passwords.user'),
             ], 404);
         }
         $digits = 6;
@@ -106,16 +107,16 @@ class ForgotPasswordController extends Controller
         $user->save();
 
         $html = '<html>
-                Hi, ' . $user->name . '<br><br>
+                Hi, '.$user->name.'<br><br>
 
-                You have requested to reset password on ' . config('app.name') . '.
+                You have requested to reset password on '.config('app.name').'.
 
-                Here is your Password reset Code. <br><br> <code style="background:lightgray">' . $token . '</code>
+                Here is your Password reset Code. <br><br> <code style="background:lightgray">'.$token.'</code>
             </html>';
 
-        Mail::send('emails.general', ["html" => $html], function ($message) use ($request, $user) {
+        Mail::send('emails.general', ['html' => $html], function ($message) use ($request, $user) {
             $message->to($request->email, $user->name)
-                ->subject(config('app.name') . ': Password Reset');
+                ->subject(config('app.name').': Password Reset');
         });
 
         return response()->json(['status' => true, 'message' => 'Password reset link sent on your email.'], 200);

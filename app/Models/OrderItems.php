@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Enums\UserChoicesEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,7 +19,7 @@ class OrderItems extends Model
         'product_belongs_to_id',
         'product_price',
         'product_qty',
-        'user_choice'
+        'user_choice',
     ];
 
     protected $hidden = [
@@ -27,6 +27,7 @@ class OrderItems extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Relations
      */
@@ -39,6 +40,7 @@ class OrderItems extends Model
     {
         return $this->morphTo(__FUNCTION__, 'product_belongs_to_type', 'product_belongs_to_id');
     }
+
     /**
      * Helpers
      */
@@ -56,7 +58,7 @@ class OrderItems extends Model
             'product_belongs_to_id' => $productBelongsToId,
             'product_price' => $productPrice,
             'product_qty' => $qty,
-            'user_choice' => $userChoice
+            'user_choice' => $userChoice,
         ]);
     }
 
@@ -72,11 +74,11 @@ class OrderItems extends Model
         int $selectedQty
     ): int {
         return self::where('order_id', $orderId)
-            ->where('product_belongs_to_type', (new Products())->getMorphClass())
+            ->where('product_belongs_to_type', (new Products)->getMorphClass())
             ->where('product_belongs_to_id', $currentProdId)
             ->update([
                 'product_belongs_to_id' => $alternativeProdId,
-                'product_qty' => $selectedQty
+                'product_qty' => $selectedQty,
             ]);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Http\Livewire\Admin;
 
-use App\Categories;
+use App\Models\Categories;
 use App\Models\CommissionAndServiceFee;
-use App\User;
+use App\Models\User;
 use Exception;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -13,50 +13,83 @@ class ParentSellersLivewire extends Component
 {
     use WithPagination;
 
-    public
-        $seller_id,
-        $name,
-        $email,
-        $phone,
-        $full_address,
-        $business_name,
-        $lat,
-        $lon,
-        $user_img,
-        $last_login,
-        $email_verified_at,
-        $pending_withdraw,
-        $total_withdraw,
-        $is_online,
-        $application_fee,
-        $enable_fixed_commission,
-        $enable_different_commissions,
-        $fixed_commission,
-        $different_commissions = [],
-        $enable_apply_commission_btn,
-        $enable_fixed_service_fees,
-        $enable_different_service_fees,
-        $fixed_service_fees,
-        $different_service_fees = [],
-        $enable_apply_service_fees_btn,
-        $categories,
-        $category_id_map,
-        $modal_success = false,
-        $modal_success_msg,
-        $modal_error = false,
-        $modal_error_msg,
-        $search = '';
+    public $seller_id;
 
-    private const
-        ACTIVE = 1,
-        BLOCK = 0;
+    public $name;
 
+    public $email;
+
+    public $phone;
+
+    public $full_address;
+
+    public $business_name;
+
+    public $lat;
+
+    public $lon;
+
+    public $user_img;
+
+    public $last_login;
+
+    public $email_verified_at;
+
+    public $pending_withdraw;
+
+    public $total_withdraw;
+
+    public $is_online;
+
+    public $application_fee;
+
+    public $enable_fixed_commission;
+
+    public $enable_different_commissions;
+
+    public $fixed_commission;
+
+    public $different_commissions = [];
+
+    public $enable_apply_commission_btn;
+
+    public $enable_fixed_service_fees;
+
+    public $enable_different_service_fees;
+
+    public $fixed_service_fees;
+
+    public $different_service_fees = [];
+
+    public $enable_apply_service_fees_btn;
+
+    public $categories;
+
+    public $category_id_map;
+
+    public $modal_success = false;
+
+    public $modal_success_msg;
+
+    public $modal_error = false;
+
+    public $modal_error_msg;
+
+    public $search = '';
+
+    private const ACTIVE = 1;
+
+    private const BLOCK = 0;
+
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
 
     public function resetComponent()
     {
         $this->resetAllErrors();
-        
+
         $this->reset([
             'name',
             'email',
@@ -108,22 +141,26 @@ class ParentSellersLivewire extends Component
         if (in_array($input_to_enable, $commission_array)) {
             $this->enable_apply_commission_btn = true;
 
-            if ($input_to_enable === $commission_array[0])
+            if ($input_to_enable === $commission_array[0]) {
                 $this->enable_different_commissions = false;
+            }
 
-            if ($input_to_enable === $commission_array[1])
+            if ($input_to_enable === $commission_array[1]) {
                 $this->enable_fixed_commission = false;
+            }
         }
 
         $service_fees_array = ['enable_fixed_service_fees', 'enable_different_service_fees'];
         if (in_array($input_to_enable, $service_fees_array)) {
             $this->enable_apply_service_fees_btn = true;
 
-            if ($input_to_enable === $service_fees_array[0])
+            if ($input_to_enable === $service_fees_array[0]) {
                 $this->enable_different_service_fees = false;
+            }
 
-            if ($input_to_enable === $service_fees_array[1])
+            if ($input_to_enable === $service_fees_array[1]) {
                 $this->enable_fixed_service_fees = false;
+            }
         }
     }
 
@@ -135,11 +172,11 @@ class ParentSellersLivewire extends Component
 
             $this->enableThis('enable_fixed_commission');
             $this->fixed_commission = $commission->fixed_commission;
-        } else if (isset($commission->different_commissions)) {
+        } elseif (isset($commission->different_commissions)) {
 
             $this->enableThis('enable_different_commissions');
             /* Convert different_commissions to an array of associative arrays */
-            $different_commissions = collect($commission->different_commissions)->map(fn($item) => (array) $item);
+            $different_commissions = collect($commission->different_commissions)->map(fn ($item) => (array) $item);
 
             /* Align commissions according to categories */
             $this->different_commissions = collect($this->categories)
@@ -160,11 +197,11 @@ class ParentSellersLivewire extends Component
 
             $this->enableThis('enable_fixed_service_fees');
             $this->fixed_service_fees = $service_fee->fixed_service_fees;
-        } else if (isset($service_fee->different_service_fees)) {
+        } elseif (isset($service_fee->different_service_fees)) {
 
             $this->enableThis('enable_different_service_fees');
             /* Convert different_service_fees to an array of associative arrays */
-            $different_service_fees = collect($service_fee->different_service_fees)->map(fn($item) => (array) $item);
+            $different_service_fees = collect($service_fee->different_service_fees)->map(fn ($item) => (array) $item);
 
             /* Align service fees according to categories */
             $this->different_service_fees = collect($this->categories)
@@ -239,6 +276,7 @@ class ParentSellersLivewire extends Component
      * Now this function will be called only when a button is clicked
      * And after that it will remove the focus from the forms input fields & calls
      * The given form action manually
+     *
      * @author Muhammad Abdullah Mirza
      */
     // public function submitForm($form_name)
@@ -248,22 +286,25 @@ class ParentSellersLivewire extends Component
 
     public function applyCommission()
     {
-        if ($this->enable_fixed_commission)
+        if ($this->enable_fixed_commission) {
             $this->validate([
                 'fixed_commission' => 'required|int',
             ]);
+        }
 
-        if ($this->enable_different_commissions)
+        if ($this->enable_different_commissions) {
             $this->validate([
                 'different_commissions' => 'required|array',
             ]);
+        }
         try {
             /* Perform some operation */
-            if ($this->enable_fixed_commission)
+            if ($this->enable_fixed_commission) {
                 $inserted = CommissionAndServiceFee::addOrUpdate(
                     $this->seller_id,
                     commission: ['fixed_commission' => (int) $this->fixed_commission]
                 );
+            }
 
             if ($this->enable_different_commissions) {
                 foreach ($this->different_commissions as $index => $commission) {
@@ -297,22 +338,25 @@ class ParentSellersLivewire extends Component
 
     public function applyServiceFees()
     {
-        if ($this->enable_fixed_service_fees)
+        if ($this->enable_fixed_service_fees) {
             $this->validate([
                 'fixed_service_fees' => 'required|int',
             ]);
+        }
 
-        if ($this->enable_different_service_fees)
+        if ($this->enable_different_service_fees) {
             $this->validate([
                 'different_service_fees' => 'required|array',
             ]);
+        }
         try {
             /* Perform some operation */
-            if ($this->enable_fixed_service_fees)
+            if ($this->enable_fixed_service_fees) {
                 $inserted = CommissionAndServiceFee::addOrUpdate(
                     $this->seller_id,
                     service_fee: ['fixed_service_fees' => (int) $this->fixed_service_fees]
                 );
+            }
 
             if ($this->enable_different_service_fees) {
                 foreach ($this->different_service_fees as $index => $service_fees) {
@@ -370,6 +414,7 @@ class ParentSellersLivewire extends Component
     public function render()
     {
         $data = User::getParentSellers($this->search);
+
         return view('livewire.admin.parent-sellers-livewire', compact('data'));
     }
 }

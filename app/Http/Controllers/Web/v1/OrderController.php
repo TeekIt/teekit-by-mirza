@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Web\v1;
 
-use App\Http\Controllers\Controller;
-use App\OrderItems;
-use App\Orders;
 use App\Enums\DeliveryStatusEnum;
 use App\Enums\OrderStatusEnum;
-use App\User;
-use App\VerificationCodes;
+use App\Http\Controllers\Controller;
+use App\Models\OrderItems;
+use App\Models\Orders;
+use App\Models\User;
+use App\Models\VerificationCodes;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 
@@ -16,7 +16,9 @@ class OrderController extends Controller
 {
     /**
      * Change's order status to "delivered"
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function markAsDelivered($order_id)
@@ -27,10 +29,13 @@ class OrderController extends Controller
 
         return redirect()->back();
     }
+
     /**
      * It change's the order_status & delivery_status to "complete"
      * Only if the driver is failed to enter the correct verification code
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.1.0
      */
     public function markAsCompleted($order_id)
@@ -41,8 +46,8 @@ class OrderController extends Controller
             ->get();
 
         if (
-            json_decode($verificationCodes)[0]->driver_failed_to_enter_code == "Yes" ||
-            json_decode($verificationCodes)[0]->driver_failed_to_enter_code == "NULL"
+            json_decode($verificationCodes)[0]->driver_failed_to_enter_code == 'Yes' ||
+            json_decode($verificationCodes)[0]->driver_failed_to_enter_code == 'NULL'
         ) {
             Orders::where('id', '=', $order_id)->update([
                 'order_status' => OrderStatusEnum::COMPLETE,
@@ -50,14 +55,16 @@ class OrderController extends Controller
             ]);
 
             flash('This Order Has Been Marked As Completed')->success();
-        } elseif (json_decode($verificationCodes)[0]->driver_failed_to_enter_code == "No") {
+        } elseif (json_decode($verificationCodes)[0]->driver_failed_to_enter_code == 'No') {
             flash('This Order Is Already Marked As Completed')->success();
         }
 
         return redirect()->back();
     }
+
     /**
      * It will remove a single product from the given order
+     *
      * @version 1.0.0
      */
     public function removeProductFromOrder($order_id, $item_id, $product_price, $product_qty)
@@ -85,6 +92,7 @@ class OrderController extends Controller
 
     /**
      * It will show the order count
+     *
      * @version 1.0.0
      */
     public function countSellerOrders()
@@ -94,7 +102,7 @@ class OrderController extends Controller
 
         return response()->json([
             'total_orders' => $totalOrders,
-            'user_settings' => $userSettings
+            'user_settings' => $userSettings,
         ]);
     }
 }

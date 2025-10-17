@@ -58,7 +58,7 @@ class Handler extends ExceptionHandler
                 Auth::logout();
 
                 session()->invalidate();
-                
+
                 return redirect()->route('home');
             }
         });

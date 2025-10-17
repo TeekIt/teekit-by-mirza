@@ -8,7 +8,7 @@ final class WebResponseServices
     {
         ($status) ? flash($message)->success() : flash($message)->error();
     }
-    
+
     public static function getValidationResponseRedirectBack($errors)
     {
         return redirect()->back()->withErrors($errors)->withInput();

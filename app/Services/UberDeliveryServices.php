@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Models\OrdersFromOtherSeller;
-use App\Orders;
-use stdClass;
+use App\Models\Orders;
 use Illuminate\Support\Str;
+use stdClass;
 
 final class UberDeliveryServices
 {
@@ -21,31 +21,31 @@ final class UberDeliveryServices
 
     public static function createJob(Orders|OrdersFromOtherSeller $order): stdClass
     {
-        $customerId = static::generateUuid(); // Replace with your customer ID
+        $customerId = self::generateUuid(); // Replace with your customer ID
         $token = '{token}'; // Replace with your Bearer token
 
-        $url = self::getApiUrl() . "/v1/customers/{$customerId}/deliveries";
+        $url = self::getApiUrl()."/v1/customers/{$customerId}/deliveries";
 
         $data = [
-            "pickup_name" => $order->seller->name,
-            "pickup_address" => json_encode([
-                "street_address" => $order->seller->full_address,
-                "city" => $order->seller->city,
-                "state" => $order->seller->state,
-                "zip_code" => $order->seller->postcode,
-                "country" => "GB"
+            'pickup_name' => $order->seller->name,
+            'pickup_address' => json_encode([
+                'street_address' => $order->seller->full_address,
+                'city' => $order->seller->city,
+                'state' => $order->seller->state,
+                'zip_code' => $order->seller->postcode,
+                'country' => 'GB',
             ]),
-            "pickup_phone_number" => $order->seller->business_phone,
-            "dropoff_name" => $order->customer_name,
-            "dropoff_address" => json_encode([
-                "street_address" => $order->address,
-                "city" => $order->city,
-                "state" => $order->state,
-                "zip_code" => $order->postcode,
-                "country" => "GB"
+            'pickup_phone_number' => $order->seller->business_phone,
+            'dropoff_name' => $order->customer_name,
+            'dropoff_address' => json_encode([
+                'street_address' => $order->address,
+                'city' => $order->city,
+                'state' => $order->state,
+                'zip_code' => $order->postcode,
+                'country' => 'GB',
             ]),
-            "dropoff_phone_number" => $order->phone_number,
-            "manifest_items" => [
+            'dropoff_phone_number' => $order->phone_number,
+            'manifest_items' => [
                 [
                     // "name" => "Bow tie",
                     // "quantity" => 1,
@@ -64,8 +64,8 @@ final class UberDeliveryServices
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Content-Type: application/json",
-            "Authorization: Bearer {$token}"
+            'Content-Type: application/json',
+            "Authorization: Bearer {$token}",
         ]);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -83,7 +83,7 @@ final class UberDeliveryServices
         // $deliveryId = 'your_delivery_id';
         $token = 'your_token';
 
-        $url = self::getApiUrl() . "/v1/customers/{$customerId}/deliveries/{$deliveryId}";
+        $url = self::getApiUrl()."/v1/customers/{$customerId}/deliveries/{$deliveryId}";
 
         $curl = curl_init();
 
@@ -92,7 +92,7 @@ final class UberDeliveryServices
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
-                'Authorization: Bearer ' . $token,
+                'Authorization: Bearer '.$token,
             ],
         ]);
 
@@ -109,7 +109,7 @@ final class UberDeliveryServices
         // $deliveryId = 'your_delivery_id';
         $token = 'your_token';
 
-        $url = self::getApiUrl() . "/v1/customers/{$customerId}/deliveries/{$deliveryId}/cancel";
+        $url = self::getApiUrl()."/v1/customers/{$customerId}/deliveries/{$deliveryId}/cancel";
 
         $curl = curl_init();
 
@@ -119,7 +119,7 @@ final class UberDeliveryServices
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
-                'Authorization: Bearer ' . $token,
+                'Authorization: Bearer '.$token,
             ],
         ]);
 

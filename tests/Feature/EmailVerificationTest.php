@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
+use Tests\TestCase;
 
 class EmailVerificationTest extends TestCase
 {
@@ -15,13 +15,13 @@ class EmailVerificationTest extends TestCase
 
         $user = User::factory()->create([
             'email_verified_at' => null,
-            'is_active' => 0
+            'is_active' => 0,
         ]);
 
         $encryptedToken = Crypt::encrypt($user->email);
 
         $response = $this->post('/verify', [
-            'token' => $encryptedToken
+            'token' => $encryptedToken,
         ]);
 
         $response->assertStatus(200)

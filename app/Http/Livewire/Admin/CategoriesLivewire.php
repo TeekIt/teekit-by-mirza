@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire\Admin;
 
-use App\Categories;
+use App\Models\Categories;
 use App\Services\ImageServices;
 use Exception;
 use Livewire\Component;
@@ -11,15 +11,20 @@ use Livewire\WithPagination;
 
 class CategoriesLivewire extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithFileUploads, WithPagination;
 
-    public
-        $categoryId,
-        $image,
-        $name;
+    public $categoryId;
 
+    public $image;
+
+    public $name;
+
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
-    /* 
+
+    /*
      * Custom Helpers
      */
     public function resetComponent()
@@ -32,7 +37,8 @@ class CategoriesLivewire extends Component
             'name',
         ]);
     }
-    /* 
+
+    /*
      * CRUD Methods
      */
     public function renderEditCategoryModal($id)
@@ -42,7 +48,7 @@ class CategoriesLivewire extends Component
         $this->name = $category->category_name;
         $this->image = $category->category_image;
     }
-    
+
     public function addCategory()
     {
         $validatedData = $this->validate([

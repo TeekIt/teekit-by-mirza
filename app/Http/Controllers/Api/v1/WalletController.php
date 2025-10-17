@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Services\JsonResponseServices;
-use App\User;
-use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 class WalletController extends Controller
@@ -15,7 +15,7 @@ class WalletController extends Controller
      * @version 1.0.0
      */
     // public function update(Request $request)
-    // { 
+    // {
     //     try {
     //         $validate = Validator::make($request->all(), [
     //             'user_id' => 'required|integer',

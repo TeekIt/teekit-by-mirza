@@ -2,9 +2,8 @@
 
 namespace App\Mail;
 
-use App\Orders;
+use App\Models\Orders;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -17,7 +16,7 @@ class CustomProductOrderDetailsToNearBySellersMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(public Orders $order){}
+    public function __construct(public Orders $order) {}
 
     /**
      * Get the message envelope.
@@ -25,7 +24,7 @@ class CustomProductOrderDetailsToNearBySellersMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Custom Product Order #' . $this->order->id . ' Details - ' . config('app.name'),
+            subject: 'Custom Product Order #'.$this->order->id.' Details - '.config('app.name'),
         );
     }
 

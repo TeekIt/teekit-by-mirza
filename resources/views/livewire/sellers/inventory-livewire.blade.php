@@ -142,9 +142,13 @@
                                                 <h5>{{ $inventory->category->category_name }}</h5>
                                                 <h4>SKU: {{ $inventory->sku }}</h4>
                                                 <div>
-                                                    <?php $rattings = app\Rattings::getRatting($inventory->id); ?>
+                                                    @php
+                                                        $rattings = app\Models\Rattings::getRatting($inventory->id);
+                                                    @endphp
                                                     @if (!empty($rattings['average']))
-                                                        <?php $star = round($rattings['average']); ?>
+                                                        @php
+                                                            $star = round($rattings['average']);
+                                                        @endphp
                                                         @for ($i = 1; $i <= 5; $i++)
                                                             <span
                                                                 class="fa fa-star @if ($i <= $star) checked @endif">

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Products;
+use App\Models\Products;
 
 final class CsvFileServices
 {
@@ -19,31 +19,34 @@ final class CsvFileServices
             unset($pt->updated_at);
             $temp_img = [];
             if (isset($pt->images)) {
-                foreach ($pt->images as $img) $temp_img[] = $img->product_image;
+                foreach ($pt->images as $img) {
+                    $temp_img[] = $img->product_image;
+                }
             }
             $pt->images = implode(',', $temp_img);
             $all_products[] = $pt;
         }
-        $destinationPath = public_path() . "/upload/csv/";
-        if (!is_dir($destinationPath)) {
+        $destinationPath = public_path().'/upload/csv/';
+        if (! is_dir($destinationPath)) {
             mkdir($destinationPath, 0777, true);
         }
-        $file = time() . '_export.csv';
-        return  self::jsonToCsv(json_encode($all_products), $destinationPath . $file, true);
+        $file = time().'_export.csv';
+
+        return self::jsonToCsv(json_encode($all_products), $destinationPath.$file, true);
     }
 
     public static function jsonToCsv($json, $csvFilePath = false, $boolOutputFile = false)
     {
         if (empty($json)) {
-            die("The JSON string is empty!");
+            exit('The JSON string is empty!');
         }
 
         if (is_array($json) === false) {
             $json = json_decode($json, true);
         }
 
-        $strTempFile = public_path() . "/upload/csv/" . 'csvOutput' . date("U") . ".csv";
-        $f = fopen($strTempFile, "w+");
+        $strTempFile = public_path().'/upload/csv/'.'csvOutput'.date('U').'.csv';
+        $f = fopen($strTempFile, 'w+');
         $csvFilePath = $strTempFile;
         $firstLineKeys = false;
 

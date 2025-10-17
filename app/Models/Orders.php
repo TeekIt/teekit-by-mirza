@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
@@ -27,6 +27,7 @@ class Orders extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Relations
      */
@@ -56,6 +57,7 @@ class Orders extends Model
             'product_belongs_to_id'
         );
     }
+
     /**
      * Helpers
      */
@@ -71,9 +73,15 @@ class Orders extends Model
         ?OrderStatusEnum $orderStatus = null
     ): bool {
         $order = self::findOrFail($id);
-        if (!is_null($initialTotal)) $order->initial_total = $initialTotal;
-        if (!is_null($currentTotal)) $order->current_total = $currentTotal;
-        if (!is_null($orderStatus)) $order->order_status = $orderStatus;
+        if (! is_null($initialTotal)) {
+            $order->initial_total = $initialTotal;
+        }
+        if (! is_null($currentTotal)) {
+            $order->current_total = $currentTotal;
+        }
+        if (! is_null($orderStatus)) {
+            $order->order_status = $orderStatus;
+        }
 
         return $order->save();
     }
@@ -95,7 +103,7 @@ class Orders extends Model
         float $driverCharges,
         Request $request
     ): Orders {
-        $order = new self();
+        $order = new self;
         $order->created_by_type = $createdByType;
         $order->created_by_id = $createdById;
         $order->seller_id = $sellerId;
@@ -119,7 +127,7 @@ class Orders extends Model
         /* If order type == self-pickup even then we need this information */
         $order->customer_lat = $request->lat;
         $order->customer_lon = $request->lon;
-        $order->customer_name = $request->fName . " " .  $request->lName;
+        $order->customer_name = $request->fName.' '.$request->lName;
         $order->country_code = $request->countryCode;
         $order->phone_number = $request->phone;
         $order->address = $request->fullAddress;
@@ -135,11 +143,11 @@ class Orders extends Model
 
         $order->type = $request->type;
         $order->description = $request->description;
-        $order->payment_status = $request->paymentStatus ?? "hidden";
+        $order->payment_status = $request->paymentStatus ?? 'hidden';
         $order->payment_intent_id = $request->paymentIntentId;
-        $order->device = $request->device ?? NULL;
-        $order->offloading = $request->offloading ?? NULL;
-        $order->offloading_charges = $request->offloadingCharges ?? NULL;
+        $order->device = $request->device ?? null;
+        $order->offloading = $request->offloading ?? null;
+        $order->offloading_charges = $request->offloadingCharges ?? null;
         $order->save();
 
         return $order;
@@ -161,7 +169,6 @@ class Orders extends Model
         return $order->save();
     }
 
-
     public static function fetchTransportType(?int $order_id = null): string
     {
         $transposrt_type = [];
@@ -171,24 +178,26 @@ class Orders extends Model
          * First populate the array $transposrt_type
          */
         foreach ($products as $single_product) {
-            if ($single_product->van)
+            if ($single_product->van) {
                 array_push($transposrt_type, TransportVehicleEnum::VAN->value);
-            elseif ($single_product->car)
+            } elseif ($single_product->car) {
                 array_push($transposrt_type, TransportVehicleEnum::CAR->value);
-            elseif ($single_product->bike)
+            } elseif ($single_product->bike) {
                 array_push($transposrt_type, TransportVehicleEnum::BIKE->value);
+            }
         }
         /**
          * Now if any product contains "van" then the function should return "van"
          * If any product contains "car" then return "car"
          * Otherwise "bike"
          */
-        if (in_array(TransportVehicleEnum::VAN->value, $transposrt_type))
+        if (in_array(TransportVehicleEnum::VAN->value, $transposrt_type)) {
             return TransportVehicleEnum::VAN->value;
-        elseif (in_array(TransportVehicleEnum::CAR->value, $transposrt_type))
+        } elseif (in_array(TransportVehicleEnum::CAR->value, $transposrt_type)) {
             return TransportVehicleEnum::CAR->value;
-        else
+        } else {
             return TransportVehicleEnum::BIKE->value;
+        }
     }
 
     public static function checkIfOrderExists(int $id): bool
@@ -204,7 +213,7 @@ class Orders extends Model
     public static function updateOrderStatus(int $id, OrderStatusEnum $status): int
     {
         return self::where('id', '=', $id)->update([
-            'order_status' => $status
+            'order_status' => $status,
         ]);
     }
 
@@ -253,7 +262,10 @@ class Orders extends Model
         array $columns = ['*'],
     ): LengthAwarePaginator {
         /* First we will update the "is_viewed" column if the order is searched by ID */
-        if ($orderId) static::isViewed($orderId);
+        if ($orderId) {
+            static::isViewed($orderId);
+        }
+
         /* Now we will fetch the required data */
         return self::select($columns)
             ->with(['order_items.product'])
@@ -261,17 +273,19 @@ class Orders extends Model
                 return $query->where('id', '=', $orderId);
             })
             ->whereHas('order_items', function ($orderItemsQuery) {
-                $orderItemsQuery->where('product_belongs_to_type', (new ProductsByBuyer())->getMorphClass());
+                $orderItemsQuery->where('product_belongs_to_type', (new ProductsByBuyer)->getMorphClass());
             })
             ->where('seller_id', '=', $sellerId)
             ->orderBy('created_at', $orderBy)
             ->paginate(10);
     }
 
-    public static function getOrdersForSuperAdminView(string $orderBy, int|null $orderId = null): LengthAwarePaginator
+    public static function getOrdersForSuperAdminView(string $orderBy, ?int $orderId = null): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
-        if ($orderId) static::isViewed($orderId);
+        if ($orderId) {
+            static::isViewed($orderId);
+        }
         /* Now we will fetch the required data */
         $orders = self::with(['order_items.product'])
             ->when($orderId, function ($query) use ($orderId) {
@@ -279,14 +293,14 @@ class Orders extends Model
             })
             ->orderBy('created_at', $orderBy)
             ->paginate(10);
-        /* 
+        /*
         * Load 'category' for products where 'product_belongs_to_type' is 'Product'
-        * Means if the product has been created by a 'seller' not a 'buyer' 
+        * Means if the product has been created by a 'seller' not a 'buyer'
         * Because only seller products have 'category'
         */
         $orders->each(function ($order) {
             $order->order_items->each(function ($orderItem) {
-                if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
+                if ($orderItem->product_belongs_to_type == (new Products)->getMorphClass()) {
                     $orderItem->product->load('category');
                 }
             });
@@ -295,10 +309,12 @@ class Orders extends Model
         return $orders;
     }
 
-    public static function getOrdersForView(string $orderBy, int $sellerId, int|null $orderId = null): LengthAwarePaginator
+    public static function getOrdersForView(string $orderBy, int $sellerId, ?int $orderId = null): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
-        if ($orderId) static::isViewed($orderId);
+        if ($orderId) {
+            static::isViewed($orderId);
+        }
         /* Now we will fetch the required data */
         $orders = self::with(['order_items.product'])
             ->when($orderId, function ($query) use ($orderId) {
@@ -307,14 +323,14 @@ class Orders extends Model
             ->where('seller_id', '=', $sellerId)
             ->orderBy('created_at', $orderBy)
             ->paginate(10);
-        /* 
+        /*
         * Load 'category' for products where 'product_belongs_to_type' is 'Product'
-        * Means if the product has been created by a 'seller' not a 'buyer' 
+        * Means if the product has been created by a 'seller' not a 'buyer'
         * Because only seller products have 'category'
         */
         $orders->each(function ($order) {
             $order->order_items->each(function ($orderItem) {
-                if ($orderItem->product_belongs_to_type == (new Products())->getMorphClass()) {
+                if ($orderItem->product_belongs_to_type == (new Products)->getMorphClass()) {
                     $orderItem->product->load('category');
                 }
             });
@@ -330,10 +346,12 @@ class Orders extends Model
     ): ?Orders {
         return self::with([
             'products' => function ($query) use ($productsLimit) {
-                if ($productsLimit !== null) $query->take($productsLimit);
-            }
+                if ($productsLimit !== null) {
+                    $query->take($productsLimit);
+                }
+            },
         ])
-            ->when($sellerId, fn($query) => $query->where('seller_id', '=', $sellerId))
+            ->when($sellerId, fn ($query) => $query->where('seller_id', '=', $sellerId))
             ->where('created_by_id', '=', $buyerId)
             ->latest()
             ->first();

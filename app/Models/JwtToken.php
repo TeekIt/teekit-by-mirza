@@ -15,7 +15,7 @@ class JwtToken extends Model
         'platform',
         'device',
         'desktop',
-        'phone'
+        'phone',
     ];
 
     protected $hidden = [

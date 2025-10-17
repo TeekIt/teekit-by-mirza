@@ -6,5 +6,5 @@ use App\Http\Controllers\Controller;
 
 class UserCardsController extends Controller
 {
-    // 
+    //
 }

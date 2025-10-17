@@ -8,7 +8,7 @@ use App\Models\OrdersFromOtherSeller;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
 use App\Services\StripeServices;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Cache;
@@ -16,19 +16,21 @@ use Livewire\Component;
 
 class OrdersFromOtherSellersLivewire extends Component
 {
-    public
-        $sellerId,
-        $orderId;
+    public $sellerId;
+
+    public $orderId;
 
     public int $orderHoldingMinutes = 2;
-    /* 
+
+    /*
     * Lifecycle Hooks
     */
     public function mount()
     {
         $this->sellerId = auth()->id();
     }
-    /* 
+
+    /*
     * Helpers
     */
     public function isTheOrderOlderThen(int $theseMinutes, string $orderMovedAt)
@@ -39,21 +41,21 @@ class OrdersFromOtherSellersLivewire extends Component
     public function getSellersOfSameCity()
     {
         return Cache::remember(
-            'getSellersOfSameCity' . $this->sellerId,
+            'getSellersOfSameCity'.$this->sellerId,
             Carbon::now()->addDay(),
-            fn() => User::getParentAndChildSellersByCity(auth()->user()->city)
+            fn () => User::getParentAndChildSellersByCity(auth()->user()->city)
         );
     }
 
     public function getNearBySellers($customer_lat, $customer_lon, $sellers_of_same_city)
     {
         return Cache::remember(
-            'getNearBySellers' . $this->sellerId . $customer_lat . $customer_lon,
+            'getNearBySellers'.$this->sellerId.$customer_lat.$customer_lon,
             Carbon::now()->addDay(),
-            function () use ($customer_lat, $customer_lon, $sellers_of_same_city) {
-                /* 
+            function () use ($sellers_of_same_city) {
+                /*
                 * Add this function when moving to production/staging
-                * Bcz this function will not work with "faker" generated 
+                * Bcz this function will not work with "faker" generated
                 * customer lat, lon
                 * $nearby_sellers = GoogleMapServices::findNearByUsersByMakingChunks($customer_lat, $customer_lon, $sellers_of_same_city, 10);
                 */
@@ -67,7 +69,8 @@ class OrdersFromOtherSellersLivewire extends Component
         $this->orderId = $orderId;
         $this->dispatchBrowserEvent('show-modal', ['id' => 'noOtherSellersModal']);
     }
-    /* 
+
+    /*
     * CRUD Methods
     */
     public function moveToAnotherSeller($orderId, $orderStatus, $customerLat, $customerLon, $movedAt)
@@ -80,7 +83,9 @@ class OrdersFromOtherSellersLivewire extends Component
             /* Get sellers who are nearby to the order-placing buyer */
             $nearbySellers = $this->getNearBySellers($customerLat, $customerLon, $sellersOfSameCity);
 
-            if (empty($nearbySellers)) return $this->noNearBySellers($orderId);
+            if (empty($nearbySellers)) {
+                return $this->noNearBySellers($orderId);
+            }
 
             $randomIndex = array_rand($nearbySellers, 1);
             /* Update sellerId if the current order is older than 2 minutes */
@@ -93,9 +98,9 @@ class OrdersFromOtherSellersLivewire extends Component
             /* Operation finished */
             if ($orderStatus === 'pending') {
                 if ($moved) {
-                    session()->flash('success', 'Order#' . $orderId . ' has been moved to another seller');
+                    session()->flash('success', 'Order#'.$orderId.' has been moved to another seller');
                 } else {
-                    session()->flash('warning', 'Soon Order#' . $orderId . ' will be moved to another seller');
+                    session()->flash('warning', 'Soon Order#'.$orderId.' will be moved to another seller');
                 }
             }
         } catch (Exception $error) {
@@ -114,28 +119,29 @@ class OrdersFromOtherSellersLivewire extends Component
             /* Get sellers who are nearby to the order placing buyer */
             $nearbySellers = $this->getNearBySellers($customerLat, $customerLon, $sellersOfSameCity);
 
-            if (empty($nearbySellers)) return $this->noNearBySellers($orderId);
+            if (empty($nearbySellers)) {
+                return $this->noNearBySellers($orderId);
+            }
 
             $randomIndex = array_rand($nearbySellers, 1);
 
             OrdersFromOtherSeller::incrementTimesRejected($orderId);
             $moved = OrdersFromOtherSeller::moveToAnotherSeller($orderId, $nearbySellers[$randomIndex]['id']);
 
-            info('The current order has been sent to seller: ' . $nearbySellers[$randomIndex]['id']);
+            info('The current order has been sent to seller: '.$nearbySellers[$randomIndex]['id']);
             /* Operation finished */
             sleep(1);
 
             if ($moved) {
-                session()->flash('success', 'Order#' . $orderId . ' has been moved to another seller.');
+                session()->flash('success', 'Order#'.$orderId.' has been moved to another seller.');
             } else {
-                session()->flash('warning', 'Sorry! Order#' . $orderId . ' has not been moved to another seller due to some technical error.');
+                session()->flash('warning', 'Sorry! Order#'.$orderId.' has not been moved to another seller due to some technical error.');
             }
         } catch (Exception $error) {
             report($error);
             session()->flash('error', $error->getMessage());
         }
     }
-
 
     public function acceptedBySeller($order_from_other_seller)
     {
@@ -239,12 +245,12 @@ class OrdersFromOtherSellersLivewire extends Component
         // }
     }
 
-    /* 
+    /*
     * IMPORTANT NOTE!!!
     * completeBySeller function is not created yet bcz the order will
-    * Only be marked as completed if the delivery boy marks it as complete 
-    * As soon as the delivery boy marks it as complete the called API 
-    * Will add the order amount into the seller's wallet 
+    * Only be marked as completed if the delivery boy marks it as complete
+    * As soon as the delivery boy marks it as complete the called API
+    * Will add the order amount into the seller's wallet
     */
 
     public function render()

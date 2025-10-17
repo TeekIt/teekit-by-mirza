@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Enums\UserRoleEnum;
-use App\User;
 use App\Http\Controllers\Controller;
 use App\Services\EmailServices;
 use App\Services\JsonResponseServices;
+use App\Models\User;
+use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Foundation\Auth\RegistersUsers;
 
 class RegisterController extends Controller
 {
@@ -46,7 +46,6 @@ class RegisterController extends Controller
     /**
      * Get a validator for an incoming registration request.
      *
-     * @param array $data
      * @return \Illuminate\Contracts\Validation\Validator
      */
     protected function validator(array $data)
@@ -63,10 +62,12 @@ class RegisterController extends Controller
             'postcode' => 'required|string',
             'country' => 'required|string',
             'state' => 'required|string',
-            'city' => 'required|string'
+            'city' => 'required|string',
         ];
 
-        if ($data['is_child_seller'] != 0) $rules['parent_store'] = 'required|exists:users,business_name';
+        if ($data['is_child_seller'] != 0) {
+            $rules['parent_store'] = 'required|exists:users,business_name';
+        }
 
         return Validator::make($data, $rules);
     }
@@ -74,7 +75,8 @@ class RegisterController extends Controller
     /**
      * register_web function (It is only used for the registration of web users)
      * Create a new user instance after a valid registration.
-     * @param array $data
+     *
+     * @param  array  $data
      * @return User|\Illuminate\Http\RedirectResponse
      */
     protected function register(Request $request)
@@ -131,7 +133,7 @@ class RegisterController extends Controller
             },
             "submitted" : null
         }';
-        
+
         $parentStoreId = ($request->input('parent_store')) ? User::getSellerByBusinessName($request->input('parent_store'))->id : null;
 
         $user = User::createStore(
@@ -156,7 +158,7 @@ class RegisterController extends Controller
         );
 
         if ($user) {
-            echo "User Created";
+            echo 'User Created';
 
             EmailServices::sendNewSellerMail(
                 $user,

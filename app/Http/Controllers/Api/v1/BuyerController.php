@@ -3,20 +3,10 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
-use App\Enums\UserRoleEnum;
-use App\Models\Driver;
-use App\Pages;
-use App\Services\GoogleMapServices;
-use App\User;
-use Illuminate\Support\Facades\Validator;
-use Throwable;
-use Illuminate\Http\Request;
 use App\Services\JsonResponseServices;
-use App\Services\WebResponseServices;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Validation\Rule;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class BuyerController extends Controller
@@ -24,7 +14,9 @@ class BuyerController extends Controller
     /**
      * It will update user details
      * via given id
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.1.0
      */
     public function updateBuyer(Request $request)

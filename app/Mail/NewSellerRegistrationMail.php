@@ -3,7 +3,7 @@
 namespace App\Mail;
 
 use App\Enums\UserRoleEnum;
-use App\User;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -15,6 +15,7 @@ class NewSellerRegistrationMail extends Mailable
     use Queueable, SerializesModels;
 
     protected readonly string $sellerRoleName;
+
     /**
      * Create a new message instance.
      *
@@ -42,7 +43,7 @@ class NewSellerRegistrationMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'A New ' . $this->sellerRoleName . ' Seller Has Been Registered 🥳 - Verification Required',
+            subject: 'A New '.$this->sellerRoleName.' Seller Has Been Registered 🥳 - Verification Required',
         );
     }
 

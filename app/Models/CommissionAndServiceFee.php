@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,6 +23,7 @@ class CommissionAndServiceFee extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Relations
      */
@@ -30,6 +31,7 @@ class CommissionAndServiceFee extends Model
     {
         return $this->belongsTo(User::class, 'seller_id');
     }
+
     /**
      * Helpers
      */
@@ -37,14 +39,14 @@ class CommissionAndServiceFee extends Model
     {
         $data = [];
 
-        if (!empty($commission)) {
+        if (! empty($commission)) {
             $data['commission'] = json_encode($commission);
         }
-    
-        if (!empty($service_fee)) {
+
+        if (! empty($service_fee)) {
             $data['service_fee'] = json_encode($service_fee);
         }
-    
+
         return self::updateOrCreate(
             ['seller_id' => $seller_id],
             $data

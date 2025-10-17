@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Orders;
-use App\Products;
-use App\Qty;
+use App\Models\Orders;
+use App\Models\Products;
+use App\Models\Qty;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,7 +24,7 @@ class OrderItemsFactory extends Factory
             'product_id' => Products::inRandomOrder()->first()->id,
             'product_price' => Products::inRandomOrder()->first()->price,
             'product_qty' => Qty::inRandomOrder()->first()->qty,
-            'user_choice' => $this->faker->numberBetween(1, 5)
+            'user_choice' => $this->faker->numberBetween(1, 5),
         ];
     }
 }

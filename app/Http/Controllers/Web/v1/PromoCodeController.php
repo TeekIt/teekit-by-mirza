@@ -3,24 +3,20 @@
 namespace App\Http\Controllers\Web\v1;
 
 use App\Http\Controllers\Controller;
-use App\Helpers\PromoCodeHelpers;
-use App\Models\PromoCodesUsageLimit;
-use App\Orders;
 use App\Models\PromoCode;
 use App\Rules\Seller\IsParentOrChildSellerId;
-use App\Services\JsonResponseServices;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Throwable;
 
 class PromoCodeController extends Controller
 {
     /**
      * Returns promo codes form & list view
+     *
      * @version 1.0.0
      */
     public function promocodesHome()
@@ -31,8 +27,10 @@ class PromoCodeController extends Controller
 
         return view('admin.promo_codes', compact('promoCodes', 'stores'));
     }
+
     /**
      * Deletes the specific promo code via ajax call
+     *
      * @version 1.0.0
      */
     public function promoCodesDel(Request $request)
@@ -43,7 +41,7 @@ class PromoCodeController extends Controller
                     PromoCode::where('id', '=', $request->promocodes[$i])->forceDelete();
                 }
 
-                return response("Promocodes Deleted Successfully");
+                return response('Promocodes Deleted Successfully');
             }
         } catch (Throwable $error) {
             report($error);
@@ -52,8 +50,10 @@ class PromoCodeController extends Controller
             return back();
         }
     }
+
     /**
      * Adds promo code into the database
+     *
      * @version 1.0.0
      */
     public function promocodesAdd(Request $request)
@@ -91,8 +91,10 @@ class PromoCodeController extends Controller
             return back();
         }
     }
+
     /**
      * Updates the specific promo code via popup modal
+     *
      * @version 1.0.0
      */
     public function promoCodesUpdate(Request $request, $id)

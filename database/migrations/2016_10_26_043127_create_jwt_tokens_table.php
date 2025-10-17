@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 class CreateJwtTokensTable extends Migration
@@ -15,7 +15,7 @@ class CreateJwtTokensTable extends Migration
     {
         Schema::create('jwt_tokens', function (Blueprint $table) {
             $table->increments('id');
-            $table->foreignId('user_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained(table: 'users')->cascadeOnDelete();
             $table->text('token');
             $table->string('browser');
             $table->string('platform');

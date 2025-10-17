@@ -1,5 +1,5 @@
 @php
-    use App\Products;
+    use App\Models\Products;
 @endphp
 
 @extends('layouts.shopkeeper.app')

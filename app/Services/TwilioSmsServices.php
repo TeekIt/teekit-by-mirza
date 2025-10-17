@@ -15,11 +15,11 @@ final class TwilioSmsServices
         $sid = config('twilio.TWILIO_SID');
         $token = config('twilio.TWILIO_TOKEN');
         $fromNumber = config('twilio.TWILIO_FROM');
-        
+
         $client = new Client($sid, $token);
         $client->messages->create($receiverNumber, [
             'from' => $fromNumber,
-            'body' => $message
+            'body' => $message,
         ]);
     }
 }

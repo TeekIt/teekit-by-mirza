@@ -1,8 +1,10 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Enums\ProductStatusEnum;
+use App\Models\ProductImage;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,9 +12,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use App\Models\ProductImage;
-use Google\Service\AndroidEnterprise\Resource\Users;
-use Illuminate\Database\Eloquent\Collection;
 
 class Qty extends Model
 {
@@ -32,6 +31,7 @@ class Qty extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Relations
      */
@@ -54,6 +54,7 @@ class Qty extends Model
     {
         return $this->hasMany(ProductImage::class, 'product_id', 'product_id');
     }
+
     /**
      * Helpers
      */
@@ -99,7 +100,7 @@ class Qty extends Model
             'users.total_withdraw',
             'users.parent_store_id',
             'users.is_online',
-            'users.role_id'
+            'users.role_id',
         ])
             ->join('users', 'users.id', '=', 'qty.seller_id')
             ->join('products', 'products.id', '=', 'qty.product_id')
@@ -125,7 +126,7 @@ class Qty extends Model
             ->where('seller_id', $sellerId)
             ->paginate(10);
 
-        if (!$paginatedData->isEmpty()) {
+        if (! $paginatedData->isEmpty()) {
             $productsData = $paginatedData->map(function ($singleIndex) {
                 return [
                     'id' => $singleIndex->product_id,
@@ -163,7 +164,7 @@ class Qty extends Model
                             'id' => $singleIndex->id,
                             'product_id' => $singleIndex->product_id,
                             'qty' => $singleIndex->qty,
-                        ]
+                        ],
                     ],
                     'images' => $singleIndex->productImage->map(function ($singleImage) {
                         return [
@@ -175,7 +176,7 @@ class Qty extends Model
                         'id' => $singleIndex->category_id,
                         'category_name' => $singleIndex->category->category_name,
                         'category_image' => $singleIndex->category->category_image,
-                    ]
+                    ],
                 ];
             });
 
@@ -214,14 +215,16 @@ class Qty extends Model
             ['qty' => $quantity['qty']]
         );
     }
+
     /**
      * Since our qty has now it's separate migration,
      * this will help us add qty with given details to qty table
+     *
      * @author Muhammad Abdullah Mirza
      */
     public static function add(int $sellerId, int $productId, int $categoryId, int $productQuantity): bool
     {
-        $quantity = new self();
+        $quantity = new self;
         $quantity->seller_id = $sellerId;
         $quantity->product_id = $productId;
         $quantity->category_id = $categoryId;

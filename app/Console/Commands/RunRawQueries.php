@@ -37,13 +37,10 @@ class RunRawQueries extends Command
 
                 DB::transaction(function () {
                     /* Below queries are already executed on production & all other ENV */
-                    
 
                     /* Below queries are already executed on staging ENV */
-                    
 
                     /* Below queries are already executed on local ENV */
-
 
                 });
             }

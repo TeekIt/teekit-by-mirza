@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\OrdersFromOtherSeller;
-use App\Orders;
-use App\User;
+use App\Models\Orders;
+use App\Models\User;
 
 final class OrderServices
 {
@@ -12,20 +12,29 @@ final class OrderServices
 
     public static function getTotalWithExtraCharge(float $orderTotalAmount, float $totalWeight): float
     {
-        return $orderTotalAmount + ((2.5 + 1.25) * (static::$maxDistanceInMiles + static::getDeliveryFee($totalWeight)));
+        return $orderTotalAmount + ((2.5 + 1.25) * (self::$maxDistanceInMiles + self::getDeliveryFee($totalWeight)));
     }
 
     public static function getTotalWeight(array|Orders|OrdersFromOtherSeller $order): float
     {
         if (is_array($order)) {
-            return array_sum(array_column($order, 'weight'));
+            $totalWeight = 0.0;
+
+            foreach ($order as $orderItem) {
+                $totalWeight += (float) ($orderItem['weight'] * $orderItem['product_qty']);
+            }
+
+            return $totalWeight;
         }
 
-        if ($order instanceof OrdersFromOtherSeller) {
-            return $order->product->weight;
+        if ($order instanceof Orders) {
+            /* The sum() function will loop over all $orderItems */
+            return $order->order_items->sum(static function ($orderItem) {
+                return (float) ($orderItem->product->weight * $orderItem->product_qty);
+            });
         }
-        
-        return $order->order_items->pluck('product')->sum('weight');
+
+        return $order->product->weight;
     }
 
     public static function getTotalHeight(Orders|OrdersFromOtherSeller $order): float
@@ -110,9 +119,9 @@ final class OrderServices
     ): void {
         $buyerNumber = $buyerCountryCode . $buyerNumber;
         /* Msg for sending SMS notification of this "New Order" */
-        $messageForSeller = "A new order #" . $orderId . " has been received. Please visit Teek It's seller dashboard:https://app.teekit.co.uk/login";
+        $messageForSeller = 'A new order #' . $orderId . " has been received. Please visit Teek It's seller dashboard:https://app.teekit.co.uk/login";
 
-        $messageForBuyer = "Thanks for your order! Your order has been delivered to the store. Please quote verification code: " . $verificationCode . " on delivery. (TeekIt)";
+        $messageForBuyer = 'Thanks for your order! Your order has been delivered to the store. Please quote verification code: ' . $verificationCode . ' on delivery. (TeekIt)';
 
         /* To restrict "New Order" SMS notifications only for UK numbers */
         if (str_contains($seller->business_phone, '+44')) {

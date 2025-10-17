@@ -4,10 +4,10 @@ namespace App\Http\Livewire\Common;
 
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
-use App\Models\GophrDelivery;
 use App\Enums\PaymentIntentStatusEnum;
+use App\Models\GophrDelivery;
 use App\Models\OrdersFromOtherSeller;
-use App\Orders;
+use App\Models\Orders;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
 use App\Services\GophrDeliveryServices;
@@ -15,7 +15,7 @@ use App\Services\OrderServices;
 use App\Services\StripeServices;
 use App\Services\StuartDeliveryServices;
 use App\Services\UUIDServices;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Cache;
@@ -27,25 +27,39 @@ class OrdersHeaderLivewire extends Component
 {
     use WithPagination;
 
-    public
-        $orderId,
-        $currentProdQty,
-        $customerName,
-        $phoneNumber,
-        $orderItem,
-        $nearbySellers,
-        $selectedNearbySeller,
-        $selectedOrder,
-        $customOrderId,
-        $additionalParcelDescription,
-        $selectedDeliveryDetails,
-        $priceBySeller,
-        $isOrderFromOtherSeller;
+    public $orderId;
+
+    public $currentProdQty;
+
+    public $customerName;
+
+    public $phoneNumber;
+
+    public $orderItem;
+
+    public $nearbySellers;
+
+    public $selectedNearbySeller;
+
+    public $selectedOrder;
+
+    public $customOrderId;
+
+    public $additionalParcelDescription;
+
+    public $selectedDeliveryDetails;
+
+    public $priceBySeller;
+
+    public $isOrderFromOtherSeller;
 
     public $order;
 
     public $sellerId;
 
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
 
     protected $listeners = [
@@ -58,7 +72,8 @@ class OrdersHeaderLivewire extends Component
         $this->isOrderFromOtherSeller = $this->isOrderFromOtherSeller($order);
         $this->order = $order;
     }
-    /* 
+
+    /*
      * Custom Helpers
      */
     public function resetComponent()
@@ -93,7 +108,7 @@ class OrdersHeaderLivewire extends Component
 
     public function isOrderFromOtherSeller($order): bool
     {
-        return ($order instanceof OrdersFromOtherSeller);
+        return $order instanceof OrdersFromOtherSeller;
     }
 
     public function getProductBelongsToType(Orders|OrdersFromOtherSeller $order): ?string
@@ -102,6 +117,7 @@ class OrdersHeaderLivewire extends Component
         if ($order instanceof Orders) {
             return $order->order_items[0]->product_belongs_to_type;
         }
+
         /* OrdersFromOtherSeller keeps product info on the order record */
         return $order->product_belongs_to_type;
     }
@@ -129,6 +145,7 @@ class OrdersHeaderLivewire extends Component
         if ($order instanceof Orders) {
             return $order->order_items[0]->product->category_id;
         }
+
         /* OrdersFromOtherSeller has morph relation "product" */
         return $order->product->category_id;
     }
@@ -255,7 +272,7 @@ class OrdersHeaderLivewire extends Component
         );
     }
 
-    /* 
+    /*
      * CRUD Methods
      */
     public function assignToGophrDriver()
@@ -264,7 +281,7 @@ class OrdersHeaderLivewire extends Component
             /* Perform some operation */
             $order = Orders::getById($this->orderId);
 
-            $parcelDescription = $this->additionalParcelDescription ?? "Please pickup your order ASAP";
+            $parcelDescription = $this->additionalParcelDescription ?? 'Please pickup your order ASAP';
 
             $response = GophrDeliveryServices::createJob(
                 $this->prepareGophrJobArray($order, $parcelDescription)
@@ -341,7 +358,9 @@ class OrdersHeaderLivewire extends Component
                 nearByMiles: 3,
             );
 
-            if (empty($nearbySellers)) return $this->noNearBySellers($orderId);
+            if (empty($nearbySellers)) {
+                return $this->noNearBySellers($orderId);
+            }
 
             /* Send this product to all nearby sellers */
             foreach ($nearbySellers as $singleIndex) {
@@ -416,7 +435,7 @@ class OrdersHeaderLivewire extends Component
             /* Perform some operation */
             if ($this->isOrderFromOtherSeller) {
                 OrdersFromOtherSeller::isViewed($this->selectedOrder->id);
-                
+
                 $newOrderTotal = $this->priceBySeller * $this->getProductQty($this->selectedOrder);
 
                 $response = $this->capturePayment($newOrderTotal);

@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Api\v1;
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
 use App\Models\DriverDocument;
-use App\Orders;
+use App\Models\Orders;
 use App\Services\EmailServices;
 use App\Services\JsonResponseServices;
-use App\User;
-use App\VerificationCodes;
-use App\WithdrawalRequests;
+use App\Models\User;
+use App\Models\VerificationCodes;
+use App\Models\WithdrawalRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -22,6 +22,7 @@ class DriverController extends Controller
     /**
      * It will fetch & show the driver's
      * info
+     *
      * @version 1.0.0
      */
     public function info($id)
@@ -33,15 +34,16 @@ class DriverController extends Controller
             ->map(function ($user) {
                 return [
                     'id' => $user->id,
-                    'name' => $user->name . ' ' . $user->l_name,
+                    'name' => $user->name.' '.$user->l_name,
                     'lat_lon' => $user->business_location,
-                    'phone' => $user->phone
+                    'phone' => $user->phone,
                 ];
             });
     }
 
     /**
      * It will add driver location
+     *
      * @version 1.0.0
      */
     public function addLatLon(Request $request)
@@ -49,18 +51,23 @@ class DriverController extends Controller
         $data = [
             'business_location' => $request->latlon,
             'lat' => json_decode($request->latlon)->lat,
-            'lon' => json_decode($request->latlon)->long
+            'lon' => json_decode($request->latlon)->long,
         ];
+
         return User::where('id', auth()->id())
             ->update($data);
     }
+
     /**
      * It will submit driver's withdrawl
+     *
      * @version 1.0.0
      */
     public function submitWithdrawal(Request $request)
     {
-        if (!\auth()->guard('rider')->user()) abort(404);
+        if (! \auth()->guard('rider')->user()) {
+            abort(404);
+        }
         $user = User::find(\auth()->id());
         if (empty($user->bank_details)) {
             return response()->json(['message' => 'Please update your bank account info.'], 403);
@@ -73,36 +80,43 @@ class DriverController extends Controller
         $withdrawal = $request->has('amount') ? $request->amount : $user->pending_withdraw;
         $user->pending_withdraw = $user->pending_withdraw - $withdrawal;
         $user->total_withdraw = $user->total_withdraw + $withdrawal;
-        $with = new WithdrawalRequests();
+        $with = new WithdrawalRequests;
         $with->user_id = \auth()->id();
         $with->amount = $withdrawal;
         $with->status = 'Pending';
         $with->bank_detail = $user->bank_details;
         $with->save();
         $user->save();
+
         return response()->json([
             'data' => [],
             'status' => true,
-            'message' => config("constants.WITHDRAWAL_REQUEST_SUBMITTED")
+            'message' => config('constants.WITHDRAWAL_REQUEST_SUBMITTED'),
         ], 200);
     }
+
     /**
      * It will fetch & show the driver's
      * Withdrawal balance
+     *
      * @author Huzaifa Haleem
+     *
      * @version 1.0.0
      */
     public function getWithdrawalBalance()
     {
-        $amount = number_format((float)\auth()->guard('rider')->user()->pending_withdraw, 2, '.', '');
+        $amount = number_format((float) \auth()->guard('rider')->user()->pending_withdraw, 2, '.', '');
+
         return response()->json([
             'data' => $amount,
             'status' => true,
-            'message' => ""
+            'message' => '',
         ], 200);
     }
+
     /**
      * It will submit driver's bank account details
+     *
      * @version 1.0.0
      */
     public function submitBankAccountDetails(Request $request)
@@ -111,32 +125,35 @@ class DriverController extends Controller
             'branch_code' => 'required',
             'bank_name' => 'required',
             'account_number' => 'required',
-            'phone' => 'required'
+            'phone' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json([
                 'data' => $validator->errors(),
                 'status' => false,
-                'message' => ""
+                'message' => '',
             ], 422);
         }
         $data = ['branch' => $request->branch_code, 'bank_name' => $request->bank_name, 'account_number' => $request->account_number, 'phone' => $request->phone];
         $bankDetails = [1 => $data];
         auth()->user()->update(['bank_details' => json_encode($bankDetails)]);
+
         return response()->json([
             'data' => [],
             'status' => true,
-            'message' => config("constants.BANK_DETAILS_UPDATED")
+            'message' => config('constants.BANK_DETAILS_UPDATED'),
         ], 200);
     }
+
     /**
      * It will show drivers withdrawl requests
+     *
      * @version 1.0.0
      */
     public function driverAllWithdrawalRequests()
     {
 
-        if (!auth()->guard('rider')->user()) {
+        if (! auth()->guard('rider')->user()) {
             abort(404);
         }
         // $user_id = Auth::id();
@@ -154,18 +171,22 @@ class DriverController extends Controller
             $data[$key]['updated_at'] = $withdrawal->updated_at;
             $data[$key]['transaction_id'] = $withdrawal->transaction_id;
         }
+
         return response()->json([
             'data' => $data,
             'status' => true,
-            'message' => ""
+            'message' => '',
         ], 200);
     }
+
     /**
      * It will confirm that either the entered verification code
      * By the driver is correct or not
      * If it is correct then the 'order_status' & 'delivery_status'
      * Will be marked as 'complete'
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.1.0
      */
     public function checkVerificationCode(Request $request)
@@ -173,13 +194,13 @@ class DriverController extends Controller
         $validator = Validator::make($request->all(), [
             'order_id' => 'required|integer',
             'verification_code' => 'required|min:6|max:6',
-            'driver_id' => 'required|integer'
+            'driver_id' => 'required|integer',
         ]);
         if ($validator->fails()) {
             return response()->json([
                 'data' => $validator->errors(),
                 'status' => false,
-                'message' => config('constants.MISSING_OR_INVALID_DATA')
+                'message' => config('constants.MISSING_OR_INVALID_DATA'),
             ], 422);
         } else {
             $verification_codes = VerificationCodes::select('code->code as verification_code')
@@ -191,10 +212,11 @@ class DriverController extends Controller
             if ($saved_code != $given_code) {
                 VerificationCodes::where('order_id', '=', $request->order_id)
                     ->update(['code->driver_failed_to_enter_code' => 'Yes']);
+
                 return response()->json([
                     'data' => [],
                     'status' => false,
-                    'message' => config('constants.VERIFICATION_FAILED')
+                    'message' => config('constants.VERIFICATION_FAILED'),
                 ], 200);
             } else {
                 VerificationCodes::where('order_id', '=', $request->order_id)
@@ -205,26 +227,30 @@ class DriverController extends Controller
                 $order = Orders::find($request->order_id);
                 $driver->pending_withdraw = $order->driver_charges + $driver->pending_withdraw;
                 $driver->save();
+
                 return response()->json([
                     'data' => [],
                     'status' => true,
-                    'message' => config('constants.VERIFICATION_SUCCESS')
+                    'message' => config('constants.VERIFICATION_SUCCESS'),
                 ], 200);
             }
         }
     }
+
     /**
      * If the driver does not have the verfication code
      * Then this function will be used to
      * Update 'code->driver_failed_to_enter_code' column &
      * It will mark the 'delivery_status' as 'complete'
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function driverFailedToEnterCode(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
-            'order_id' => 'required|int'
+            'order_id' => 'required|int',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -233,23 +259,26 @@ class DriverController extends Controller
 
         DB::table('verification_codes')
             ->where('order_id', $validatedData->order_id)
-            ->update(['code->driver_failed_to_enter_code' => "Yes"]);
+            ->update(['code->driver_failed_to_enter_code' => 'Yes']);
         /* Because the driver was not able to enter the code due to some reasons but still he has delivered the product. Therefore we will mark the 'delivery_status' as 'complete' & 'order_status' as 'delivered' */
         Orders::where('id', '=', $validatedData->order_id)
             ->update([
                 'order_status' => 'delivered',
-                'delivery_status' => 'complete'
+                'delivery_status' => 'complete',
             ]);
 
         return response()->json([
             'data' => [],
             'status' => true,
-            'message' => config('constants.ORDER_UPDATED')
+            'message' => config('constants.ORDER_UPDATED'),
         ], 200);
     }
+
     /**
      * Driver signUp
+     *
      * @author Muhammad Abdullah Mirza
+     *
      * @version 1.0.0
      */
     public function registerDriver(Request $request)
@@ -268,7 +297,7 @@ class DriverController extends Controller
             'sort_code' => 'required|min:6|max:6',
             'account_number' => 'required|min:8|max:8',
             'front_img' => 'required|image|max:1200',
-            'back_img' => 'required|image|max:1200'
+            'back_img' => 'required|image|max:1200',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -277,7 +306,9 @@ class DriverController extends Controller
         /* First add the newly signed-up driver */
         $drivers = Driver::add($validatedData);
         /* If the driver has provided a profile img then upload it */
-        if ($request->hasFile('profile_img')) Driver::addImg($drivers, $request, 'profile_img');
+        if ($request->hasFile('profile_img')) {
+            Driver::addImg($drivers, $request, 'profile_img');
+        }
         /* Now upload driver documents */
         DriverDocument::add($request, $drivers->id);
         /* Send verification email */
@@ -305,24 +336,26 @@ class DriverController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('rider')->factory()->getTTL() * 60
+            'expires_in' => auth('rider')->factory()->getTTL() * 60,
         ]);
     }
+
     /**
      * Driver logIn
+     *
      * @version 1.1.0
      */
     protected function loginDriver(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'email' => 'required|string|email|max:80',
-            'password' => 'required|string|min:8|max:50'
+            'password' => 'required|string|min:8|max:50',
         ]);
         if ($validatedData->fails()) {
             return response()->json([
                 'data' => [],
                 'status' => false,
-                'message' => $validatedData->errors()
+                'message' => $validatedData->errors(),
             ], 422);
         }
 
@@ -354,16 +387,17 @@ class DriverController extends Controller
                 'token_type' => 'bearer',
                 'expires_in' => JWTAuth::factory()->getTTL() * 60,
             ];
+
             return response()->json([
                 'data' => $data_info,
                 'status' => true,
-                'message' =>  config('constants.LOGIN_SUCCESS')
+                'message' => config('constants.LOGIN_SUCCESS'),
             ], 200);
         } else {
             return response()->json([
                 'data' => [],
                 'status' => false,
-                'message' =>  config('constants.INVALID_CREDENTIALS')
+                'message' => config('constants.INVALID_CREDENTIALS'),
             ], 401);
         }
     }

@@ -15,11 +15,11 @@ class CreateReferralCodeRelationsTable extends Migration
     {
         Schema::create('referral_code_relations', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('referred_by')->constrained(table:'users')->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('referred_by')->constrained(table: 'users')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained(table: 'users')->cascadeOnDelete();
             $table->enum('referral_useable', [0, 1])
-            ->default(1)
-            ->comment('0: Referral cannot be used by the user, 1: Can be used by the user');
+                ->default(1)
+                ->comment('0: Referral cannot be used by the user, 1: Can be used by the user');
             $table->timestamps();
             $table->softDeletes();
             /**

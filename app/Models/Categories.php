@@ -1,14 +1,13 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Models\SubCategory;
-use Illuminate\Database\Eloquent\Model;
-use App\Products;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class Categories extends Model
@@ -25,12 +24,14 @@ class Categories extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * The relations to eager load on every query.
      *
      * @var array
      */
     protected $with = ['subCategories'];
+
     /**
      * Relations
      */
@@ -53,6 +54,7 @@ class Categories extends Model
     {
         return $this->hasMany(Qty::class, 'category_id', 'id');
     }
+
     /**
      * Helpers
      */
@@ -71,8 +73,12 @@ class Categories extends Model
     ): bool {
         $category = self::findOrFail($id);
 
-        if (!is_null($categoryName)) $category->category_name = $categoryName;
-        if (!is_null($categoryImage)) $category->category_image = $categoryImage;
+        if (! is_null($categoryName)) {
+            $category->category_name = $categoryName;
+        }
+        if (! is_null($categoryImage)) {
+            $category->category_image = $categoryImage;
+        }
 
         return $category->save();
     }

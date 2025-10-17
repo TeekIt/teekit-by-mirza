@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\ReferralCodeRelation;
-use App\Orders;
+use App\Models\Orders;
 use App\Services\JsonResponseServices;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -17,6 +17,7 @@ class ReferralCodeRelationController extends Controller
      * The amount which will be rewarded after applying a valid referral code
      */
     private $rewardAmount = 10.00;
+
     /**
      * @author Muhammad Abdullah Mirza
      */
@@ -24,14 +25,14 @@ class ReferralCodeRelationController extends Controller
     {
         $validatedData = Validator::make($request->all(), [
             'user_id' => 'required|int',
-            'referral_code' => 'required|uuid'
+            'referral_code' => 'required|uuid',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
         $is_verified = User::verifyReferralCode($request->user_id, $request->referral_code);
-        if (!$is_verified) {
+        if (! $is_verified) {
             return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
@@ -41,7 +42,7 @@ class ReferralCodeRelationController extends Controller
         }
 
         $using_referral_first_time = ReferralCodeRelation::usingReferalFirstTime($request->user_id);
-        if (!$using_referral_first_time) {
+        if (! $using_referral_first_time) {
             return JsonResponseServices::getApiResponse(
                 [],
                 config('constants.FALSE_STATUS'),
@@ -69,6 +70,7 @@ class ReferralCodeRelationController extends Controller
             );
         }
     }
+
     /**
      * @author Muhammad Abdullah Mirza
      */
@@ -87,6 +89,7 @@ class ReferralCodeRelationController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      * @author Muhammad Abdullah Mirza
      */
@@ -113,6 +116,7 @@ class ReferralCodeRelationController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     /**
      * @version 1.0.0
      */
@@ -120,7 +124,7 @@ class ReferralCodeRelationController extends Controller
     {
         $validatedData = Validator::make($request->all(), [
             'referral_relation_id' => 'required|integer',
-            'referral_useable' => 'required|integer'
+            'referral_useable' => 'required|integer',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());

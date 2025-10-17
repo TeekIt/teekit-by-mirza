@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\CommissionAndServiceFee;
-use App\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
@@ -37,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
                 if ($user->role->name == $ability) {
                     return true;
                 }
+
                 return false;
             });
         });

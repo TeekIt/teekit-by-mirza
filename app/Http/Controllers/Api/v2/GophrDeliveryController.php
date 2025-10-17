@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api\v2;
 
-use App\Http\Controllers\Controller;
 use App\Enums\DeliveryProviderEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Gophr\AddGophrJobRequest;
 use App\Models\RequestedDelivery;
 use App\Services\GophrDeliveryServices;
@@ -52,10 +52,10 @@ class GophrDeliveryController extends Controller
                 dropoffLon: $validatedData->dropoffLon,
                 dropoffPersonName: auth()->user()->name,
                 dropoffEmail: auth()->user()->email,
-                dropoffMobileNumber: auth()->user()->country_code . auth()->user()->phone
+                dropoffMobileNumber: auth()->user()->country_code.auth()->user()->phone
             )
         );
-        
+
         RequestedDelivery::add(
             creatorId: auth()->id(),
             deliveryProvider: DeliveryProviderEnum::GOPHR,
@@ -64,7 +64,7 @@ class GophrDeliveryController extends Controller
             dropoffAddress: $validatedData->dropoffAddress,
             unitAddress: $validatedData->unitAddress,
             receiverName: auth()->user()->name,
-            receiverPhone: auth()->user()->country_code . auth()->user()->phone,
+            receiverPhone: auth()->user()->country_code.auth()->user()->phone,
             receiverEmail: auth()->user()->email,
             packageTransportType: PackageTransportTypeEnum::from($validatedData->packageTransportType),
             packageWeight: PackageWeightEnum::from($validatedData->packageWeight)
@@ -116,7 +116,7 @@ class GophrDeliveryController extends Controller
                 dropoffLon: $validatedData->dropoffLon,
                 dropoffPersonName: auth()->user()->name,
                 dropoffEmail: auth()->user()->email,
-                dropoffMobileNumber: auth()->user()->country_code . auth()->user()->phone
+                dropoffMobileNumber: auth()->user()->country_code.auth()->user()->phone
             )
         );
 

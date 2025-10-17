@@ -15,7 +15,6 @@ class JwtMiddleware
      * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @return mixed
      */
     public function handle($request, Closure $next)
@@ -30,7 +29,7 @@ class JwtMiddleware
                     'Token is Invalid',
                     config('constants.HTTP_UNAUTHORIZED')
                 );
-            } else if ($error instanceof TokenExpiredException) {
+            } elseif ($error instanceof TokenExpiredException) {
                 return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),

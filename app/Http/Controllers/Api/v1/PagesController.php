@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Pages;
+use App\Http\Controllers\Controller;
+use App\Models\Pages;
 use App\Services\JsonResponseServices;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 
 class PagesController extends Controller
 {
     /**
      * Fetches the page via given page type
+     *
      * @version 1.0.0
      */
     public function getPage(Request $request)

@@ -10,7 +10,6 @@ use App\Services\GophrDeliveryServices;
 use App\Services\JsonParsingServices;
 use App\Services\StuartDeliveryServices;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -18,21 +17,33 @@ class RequestedDeliveriesLivewire extends Component
 {
     use WithPagination;
 
-    public
-        $sellerId,
-        $createdAt,
-        $requestedDeliveryId,
-        $pickupAddress,
-        $dropoffAddress,
-        $unitAddress,
-        $receiverName,
-        $receiverPhone,
-        $receiverEmail,
-        $selectedDeliveryDetails,
-        $deliveryServiceName,
-        $stuartJobArray = [],
-        $gophrJobArray = [],
-        $search = '';
+    public $sellerId;
+
+    public $createdAt;
+
+    public $requestedDeliveryId;
+
+    public $pickupAddress;
+
+    public $dropoffAddress;
+
+    public $unitAddress;
+
+    public $receiverName;
+
+    public $receiverPhone;
+
+    public $receiverEmail;
+
+    public $selectedDeliveryDetails;
+
+    public $deliveryServiceName;
+
+    public $stuartJobArray = [];
+
+    public $gophrJobArray = [];
+
+    public $search = '';
 
     public PackageTransportTypeEnum $packageTransportType = PackageTransportTypeEnum::SMALL_VAN;
 
@@ -40,8 +51,12 @@ class RequestedDeliveriesLivewire extends Component
 
     public DeliveryProviderEnum $deliveryProvider = DeliveryProviderEnum::STUART;
 
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
-    /* 
+
+    /*
      * Lifecycle Hooks
      */
     public function mount()
@@ -86,6 +101,7 @@ class RequestedDeliveriesLivewire extends Component
             $this->createGophrDelivery();
         }
     }
+
     /*
     * Helpers
     */
@@ -142,7 +158,8 @@ class RequestedDeliveriesLivewire extends Component
             $this->showModal('trackGophrDeliveryModal');
         }
     }
-    /* 
+
+    /*
      * CRUD Methods
      */
     public function createStuartDelivery()

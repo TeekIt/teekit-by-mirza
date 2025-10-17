@@ -28,6 +28,7 @@ class UberDelivery extends Model
         'job_id' => 'string',
         'delivery_fee' => 'float',
     ];
+
     /**
      * Relations
      */

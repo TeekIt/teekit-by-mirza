@@ -3,7 +3,7 @@
 namespace App\Rules\Seller;
 
 use App\Enums\UserRoleEnum;
-use App\User;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -16,7 +16,7 @@ class IsParentOrChildSellerId implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        in_array(User::getUserRole($value)->first(), [UserRoleEnum::SELLER->value, UserRoleEnum::CHILD_SELLER->value]) ?: 
+        in_array(User::getUserRole($value)->first(), [UserRoleEnum::SELLER->value, UserRoleEnum::CHILD_SELLER->value]) ?:
         $fail('Invalid seller id, this id does not belongs to any seller');
     }
 }

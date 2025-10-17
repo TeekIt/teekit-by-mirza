@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use App\Categories;
-use App\Enums\TransportVehicleEnum;
-use App\User;
+use App\Models\Categories;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProductsByBuyer extends Model
 {
     use HasFactory, SoftDeletes;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -43,6 +43,7 @@ class ProductsByBuyer extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Relations
      */
@@ -60,6 +61,7 @@ class ProductsByBuyer extends Model
     {
         return $this->belongsTo(Categories::class, 'category_id');
     }
+
     /**
      * Helpers
      */
@@ -71,10 +73,10 @@ class ProductsByBuyer extends Model
         string $productName,
         int $qty,
         float $maxPrice,
-        ?float $weight = null,
-        ?string $brand = null,
-        ?string $partNumber = null,
-        ?string $colors = null,
+        ?float $weight,
+        ?string $brand,
+        ?string $partNumber,
+        ?string $colors,
         string $transportVehicle,
         ?string $featureImg = null,
         ?float $height = null,

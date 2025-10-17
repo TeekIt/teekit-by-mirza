@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class GuestBuyer extends Model
 {
     use HasFactory, SoftDeletes;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -34,13 +35,15 @@ class GuestBuyer extends Model
     protected $hidden = [
         'deleted_at',
     ];
+
     /**
      * Relations
      */
     public function productsByBuyer(): MorphMany
     {
         return $this->morphMany(ProductsByBuyer::class, 'created_by');
-    } 
+    }
+
     /**
      * Helpers
      */
@@ -76,5 +79,5 @@ class GuestBuyer extends Model
                 'lon' => $lon,
             ]
         );
-    }    
+    }
 }

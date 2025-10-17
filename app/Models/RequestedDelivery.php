@@ -13,6 +13,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class RequestedDelivery extends Model
 {
     use HasFactory, SoftDeletes;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -36,6 +37,7 @@ class RequestedDelivery extends Model
         'updated_at',
         'deleted_at',
     ];
+
     /**
      * Helpers
      */
@@ -80,7 +82,7 @@ class RequestedDelivery extends Model
             'receiver_phone' => $receiverPhone,
             'receiver_email' => $receiverEmail,
             'package_transport_type' => $packageTransportType,
-            'package_weight' => $packageWeight
+            'package_weight' => $packageWeight,
         ]);
     }
 

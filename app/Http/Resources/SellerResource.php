@@ -2,12 +2,11 @@
 
 namespace App\Http\Resources;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class SellerResource extends JsonResource
 {
-
     public function __construct(private User $user, private array $distanceData = [])
     {
         $this->user = $user;

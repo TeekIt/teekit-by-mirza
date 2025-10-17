@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('promo_codes_usage_limit', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('promo_code_id')->constrained(table:'promo_codes')->cascadeOnDelete();
-            $table->foreignId('customer_id')->constrained(table:'users')->cascadeOnDelete();
+            $table->foreignId('promo_code_id')->constrained(table: 'promo_codes')->cascadeOnDelete();
+            $table->foreignId('customer_id')->constrained(table: 'users')->cascadeOnDelete();
             $table->integer('total_used')->nullable();
             $table->timestamps();
             $table->softDeletes();
