@@ -31,22 +31,22 @@ class AuthController extends Controller
      */
     public function registerBuyer(Request $request)
     {
-        $faker = Factory::create();
-        // $faker = new Generator();
-        // dd($faker->firstName());
-// Create test user
-$user = User::createBuyer(
-    $faker->firstName(),           // name
-    $faker->lastName(),            // l_name
-    $faker->unique()->safeEmail(), // email
-    'password123',                 // password
-    '+44',                         // countryCode (UK)
-    $faker->numerify('##########'),// phone (10 digits)
-    User::ACTIVE,                  // status
-    Str::uuid()                   // uuid
-);
-        // dd($user);
-        dd(EmailServices::sendBuyerAccVerificationMail($user));
+        // $faker = Factory::create();
+        // // $faker = new Generator();
+        // // dd($faker->firstName());
+        // // Create test user
+        // $user = User::createBuyer(
+        //     $faker->firstName(),           // name
+        //     $faker->lastName(),            // l_name
+        //     $faker->unique()->safeEmail(), // email
+        //     'password123',                 // password
+        //     '+44',                         // countryCode (UK)
+        //     $faker->numerify('##########'),// phone (10 digits)
+        //     User::ACTIVE,                  // status
+        //     Str::uuid()                   // uuid
+        // );
+        // // dd($user);
+        // dd(EmailServices::sendBuyerAccVerificationMail($user));
 
         $validatedData = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -352,9 +352,9 @@ $user = User::createBuyer(
     {
         $data = User::getUserInfo($userId);
         /*
-        * Just creating this variable so we don't have to call the "empty()" function again & again
-        * Which will obviouly decrease the API response speed
-        */
+         * Just creating this variable so we don't have to call the "empty()" function again & again
+         * Which will obviouly decrease the API response speed
+         */
         $dataIsEmpty = empty($data);
 
         return JsonResponseServices::getApiResponse(
@@ -390,10 +390,10 @@ $user = User::createBuyer(
             $user = User::find(auth()->user()->id);
 
             DB::table('deleted_users')->insert([
-                'user_id' =>  $user->id,
-                'postcode' =>  $user->postcode,
-                'created_at' =>   now(),
-                'updated_at' =>   now(),
+                'user_id' => $user->id,
+                'postcode' => $user->postcode,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             $user->forceDelete();
