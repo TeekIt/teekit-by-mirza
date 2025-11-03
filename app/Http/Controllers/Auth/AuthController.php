@@ -10,6 +10,8 @@ use App\Services\EmailServices;
 use App\Services\JsonResponseServices;
 use App\Models\User;
 use Carbon\Carbon;
+use Faker\Factory;
+use Faker\Generator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -29,6 +31,23 @@ class AuthController extends Controller
      */
     public function registerBuyer(Request $request)
     {
+        $faker = Factory::create();
+        // $faker = new Generator();
+        // dd($faker->firstName());
+// Create test user
+$user = User::createBuyer(
+    $faker->firstName(),           // name
+    $faker->lastName(),            // l_name
+    $faker->unique()->safeEmail(), // email
+    'password123',                 // password
+    '+44',                         // countryCode (UK)
+    $faker->numerify('##########'),// phone (10 digits)
+    User::ACTIVE,                  // status
+    Str::uuid()                   // uuid
+);
+        // dd($user);
+        dd(EmailServices::sendBuyerAccVerificationMail($user));
+
         $validatedData = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'l_name' => 'required|string|max:255',

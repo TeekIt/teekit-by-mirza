@@ -565,7 +565,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $updated = self::where('id', '=', $id)->update(['is_active' => $status]);
 
-        if ($status == 1) {
+        if ($status == self::ACTIVE) {
             $user = self::findOrFail($id);
             EmailServices::sendSellerApprovedMail($user);
         }

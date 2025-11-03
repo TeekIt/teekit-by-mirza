@@ -41,6 +41,23 @@ class RequestedDelivery extends Model
     /**
      * Helpers
      */
+    public static function getForApi(
+        string $orderBy,
+        ?string $createdAt = null,
+        ?int $creatorId = null,
+        array $columns = ['*']
+    ): LengthAwarePaginator {
+        return self::select($columns)
+            ->when($creatorId, function ($query, $creatorId) {
+                return $query->where('creator_id', '=', $creatorId);
+            })
+            ->when($createdAt, function ($query, $createdAt) {
+                return $query->whereDate('created_at', $createdAt);
+            })
+            ->orderBy('created_at', $orderBy)
+            ->paginate(10);
+    }
+
     public static function getForView(
         string $orderBy,
         ?string $createdAt = null,

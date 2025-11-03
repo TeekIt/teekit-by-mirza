@@ -599,10 +599,10 @@ class OrderController extends Controller
      *
      * @author Huzaifa Haleem
      */
-    public function driverOrders(Request $request, $driver_id)
+    public function driverOrders(Request $request, $driverId)
     {
         /* delivery_status:assigned,complete,pending_approval,cancelled */
-        $orders = Orders::select('id')->where('driver_id', '=', $driver_id)
+        $orders = Orders::select('id')->where('driver_id', '=', $driverId)
             ->where('delivery_status', '=', $request->delivery_status)
             ->where('type', '=', 'delivery')
             ->paginate(10);
