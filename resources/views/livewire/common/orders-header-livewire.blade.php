@@ -250,14 +250,14 @@
                     <div>
                         @if ($order->order_status === OrderStatusEnum::PENDING->value)
                             @if ($this->getProductBelongsToType($order) === (new Products())->getMorphClass())
-                                <button class="btn btn-success" wire:click="orderIsAccepted({{ $order->id }})"
-                                    wire:target="orderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark"
+                                <button class="btn btn-success" wire:click="generalOrderIsAccepted({{ $order->id }})"
+                                    wire:target="generalOrderIsAccepted({{ $order->id }})" wire:loading.class="btn-dark"
                                     wire:loading.class.remove="btn-success" wire:loading.attr="disabled"
                                     title="Click here when preparing order">
-                                    <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading.remove>
+                                    <span wire:target="generalOrderIsAccepted({{ $order->id }})" wire:loading.remove>
                                         Accept
                                     </span>
-                                    <span wire:target="orderIsAccepted({{ $order->id }})" wire:loading>
+                                    <span wire:target="generalOrderIsAccepted({{ $order->id }})" wire:loading>
                                         <span class="spinner-border spinner-border-sm text-light"
                                             role="status"></span>
                                     </span>

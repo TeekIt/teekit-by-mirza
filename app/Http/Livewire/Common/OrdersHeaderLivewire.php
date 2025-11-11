@@ -481,13 +481,13 @@ class OrdersHeaderLivewire extends Component
         }
     }
 
-    public function orderIsAccepted($orderId)
+    public function generalOrderIsAccepted($orderId)
     {
         try {
             /* Perform some operation */
             $this->selectedOrder = Orders::isViewed($orderId);
 
-            $response = $this->capturePayment();
+            // $response = $this->capturePayment();
 
             if ($this->selectedOrder->type == OrderTypeEnum::SELF_PICKUP->value) {
                 /**
@@ -501,7 +501,13 @@ class OrdersHeaderLivewire extends Component
             sleep(1);
             $this->emitSelf('refreshThisComponent');
 
-            if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
+            // if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
+            //     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            // } else {
+            //     session()->flash('error', config('constants.UPDATION_FAILED'));
+            // }
+
+            if ($updated == 1) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.UPDATION_FAILED'));
