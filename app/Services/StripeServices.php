@@ -332,7 +332,7 @@ final class StripeServices
         ];
 
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/refunds/');
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/refunds');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
