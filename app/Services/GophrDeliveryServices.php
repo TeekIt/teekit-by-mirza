@@ -118,7 +118,7 @@ final class GophrDeliveryServices
         $response = json_decode($response);
 
         if (isset($response->errors)) {
-            report($response->errors);
+            report($response);
             throw new Exception($response->errors[0]->message);
         }
 
@@ -155,7 +155,7 @@ final class GophrDeliveryServices
         $response = json_decode($response);
 
         if (isset($response->errors)) {
-            report($response->errors);
+            report($response);
             throw new Exception($response->errors[0]->message);
         }
 
@@ -187,7 +187,7 @@ final class GophrDeliveryServices
         $response = json_decode($response);
 
         if (isset($response->errors)) {
-            report($response->errors);
+            report($response);
             throw new Exception($response->errors[0]->message);
         }
 
@@ -225,7 +225,7 @@ final class GophrDeliveryServices
         $response = json_decode($response);
 
         if (isset($response->errors)) {
-            report($response->errors);
+            report($response);
             throw new Exception($response->errors[0]->message);
         }
 
