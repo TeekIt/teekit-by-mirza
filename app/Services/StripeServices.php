@@ -327,10 +327,15 @@ final class StripeServices
     {
         $paymentIntentId = $_REQUEST['paymentIntentId'] ?? $paymentIntentId;
 
+        $formData = [
+            'payment_intent' => $paymentIntentId,
+        ];
+
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/payment_intents/'.$paymentIntentId.'/cancel');
+        curl_setopt($curl, CURLOPT_URL, 'https://api.stripe.com/v1/refunds/');
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($formData));
         curl_setopt($curl, CURLOPT_USERPWD, self::getSecretKey());
 
         $data = curl_exec($curl);
