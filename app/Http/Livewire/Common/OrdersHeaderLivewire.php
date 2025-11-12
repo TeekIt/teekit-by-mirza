@@ -267,7 +267,7 @@ class OrdersHeaderLivewire extends Component
             dropoffLat: (float) $order->customer_lat,
             dropoffLon: (float) $order->customer_lon,
             dropoffPersonName: $order->customer_name,
-            dropoffEmail: '',
+            dropoffEmail: $order->buyer->email,
             dropoffMobileNumber: $order->phone_number,
         );
     }
