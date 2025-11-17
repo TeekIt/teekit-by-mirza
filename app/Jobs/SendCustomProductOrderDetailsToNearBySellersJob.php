@@ -3,9 +3,9 @@
 namespace App\Jobs;
 
 use App\Models\Orders;
+use App\Models\User;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
-use App\Models\User;
 use DateTime;
 use Exception;
 use Illuminate\Bus\Queueable;

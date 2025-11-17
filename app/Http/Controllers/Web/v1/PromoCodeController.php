@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Web\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\PromoCode;
-use App\Rules\Seller\IsParentOrChildSellerId;
 use App\Models\User;
+use App\Rules\Seller\IsParentOrChildSellerId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;

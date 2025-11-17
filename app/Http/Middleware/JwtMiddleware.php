@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use App\Services\JsonResponseServices;
 use Closure;
 use Exception;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -14,10 +16,9 @@ class JwtMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         try {
             JWTAuth::parseToken()->authenticate();

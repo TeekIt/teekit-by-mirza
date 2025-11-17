@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReferralCodeRelation extends Model
 {
@@ -25,7 +25,7 @@ class ReferralCodeRelation extends Model
     /**
      * Relations
      */
-    public function referredByUser()
+    public function referredByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'referred_by');
     }

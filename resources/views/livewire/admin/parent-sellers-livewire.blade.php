@@ -117,7 +117,7 @@
                                             </div>
                                             <div>
                                                 <input type="number" class="form-control px-3"
-                                                    wire:model.defer="fixed_commission"
+                                                    wire:model="fixed_commission"
                                                     placeholder="Enter fixed commission"
                                                     @if (!$enable_fixed_commission) disabled @endif>
                                                 <small class="text-danger">
@@ -144,7 +144,7 @@
                                                     <div class="p-2 w-50" wire:ignore>{{ $value->category_name }}</div>
                                                     <div class="p-2 w-50">
                                                         <input type="number" class="form-control px-3"
-                                                            wire:model.defer="different_commissions.{{ $single_index }}"
+                                                            wire:model="different_commissions.{{ $single_index }}"
                                                             placeholder="Enter commission for this category"
                                                             @if (!$enable_different_commissions) disabled @endif>
                                                     </div>
@@ -196,7 +196,7 @@
                                             </div>
                                             <div>
                                                 <input type="number" class="form-control px-3"
-                                                    wire:model.defer="fixed_service_fees"
+                                                    wire:model="fixed_service_fees"
                                                     placeholder="Enter fixed service fees"
                                                     @if (!$enable_fixed_service_fees) disabled @endif>
                                                 <small class="text-danger">
@@ -225,7 +225,7 @@
                                                     </div>
                                                     <div class="p-2 w-50">
                                                         <input type="number" class="form-control px-3"
-                                                            wire:model.defer="different_service_fees.{{ $single_index }}"
+                                                            wire:model="different_service_fees.{{ $single_index }}"
                                                             placeholder="Enter service fees for this category"
                                                             @if (!$enable_different_service_fees) disabled @endif>
                                                     </div>
@@ -284,7 +284,7 @@
         </div>
         <div class="col-12 col-sm-6 col-md-5 col-xl-5">
             <div class="input-group py-4 my-2">
-                <input type="text" wire:model.debounce.500ms="search" class="form-control py-3"
+                <input type="text" wire:model.live.debounce.500ms="search" class="form-control py-3"
                     placeholder="Search here...">
                 {{-- <button class="btn btn-primary" type="button"><i class='bx bx-search-alt'></i></button> --}}
             </div>

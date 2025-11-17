@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class UberDelivery extends Model
 {
@@ -24,16 +25,19 @@ class UberDelivery extends Model
         'deleted_at',
     ];
 
-    protected $casts = [
-        'job_id' => 'string',
-        'delivery_fee' => 'float',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'job_id' => 'string',
+            'delivery_fee' => 'float',
+        ];
+    }
 
     /**
      * Relations
      */
     /* Polymorphic relationship to either 'orders' table or 'orders_from_other_sellers' table */
-    public function orderBelongsTo()
+    public function orderBelongsTo(): MorphTo
     {
         return $this->morphTo();
     }

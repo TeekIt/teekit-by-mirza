@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use App\Enums\UserRoleEnum;
-use App\Models\CommissionAndServiceFee;
-use App\Models\ReferralCodeRelation;
 use App\Notifications\CustomResetPasswordNotification;
 use App\Services\EmailServices;
 use Illuminate\Database\Eloquent\Builder;
@@ -83,14 +81,17 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
-     * The attributes that should be cast to native types.
+     * Get the attributes that should be cast.
      *
-     * @var array
+     * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.

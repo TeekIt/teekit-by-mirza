@@ -7,7 +7,7 @@
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form wire:submit.prevent="withdrawRequest" method="post">
+                <form wire:submit="withdrawRequest" method="post">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">Request Withdrawal</h5>
                         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
@@ -15,7 +15,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <input type="number" class="form-control" placeholder="Enter amount" wire:model.defer="amount"
+                        <input type="number" class="form-control" placeholder="Enter amount" wire:model="amount"
                             max="{{ auth()->user()->pending_withdraw }}">
                     </div>
                     <div class="modal-footer">
@@ -30,18 +30,18 @@
     <div class="content">
         <div class="content-header">
             <div class="container pt-4">
-                <form wire:submit.prevent="render">
+                <form wire:submit="render">
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="row">
                                 <div class="col-lg-8 col-sm-12 col-md-8">
                                     <div class="row">
                                         <div class="col-12 col-sm-4">
-                                            <input type="number" wire:model.defer="amount" class="form-control mb-2"
+                                            <input type="number" wire:model="amount" class="form-control mb-2"
                                                 placeholder="Search by Amount">
                                         </div>
                                         <div class="col-12 col-sm-4">
-                                            <select wire:model.defer="search" class="form-control mb-2">
+                                            <select wire:model="search" class="form-control mb-2">
                                                 <option>Select Status</option>
                                                 <option value="Completed">Completed</option>
                                                 <option value="Cancelled">Cancelled</option>
@@ -49,7 +49,7 @@
                                             </select>
                                         </div>
                                         <div class="col-12 col-sm-4">
-                                            <input type="date" wire:model.defer="created_at"
+                                            <input type="date" wire:model="created_at"
                                                 class="form-control mb-2">
                                         </div>
                                     </div>

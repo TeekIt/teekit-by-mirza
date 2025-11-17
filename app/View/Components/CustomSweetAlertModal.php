@@ -15,10 +15,10 @@ class CustomSweetAlertModal extends Component
         public string $alertIconHTML,
         public string $alertHeading,
         public string $msg,
-        public string $confirmButtonText,
-        public string $cancelButtonText,
         public string $confirmButtonFunction,
         public string $cancelButtonFunction,
+        public string $confirmButtonText = "Yes",
+        public string $cancelButtonText = "No",
     ) {}
 
     /**

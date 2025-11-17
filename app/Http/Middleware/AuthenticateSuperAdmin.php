@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Enums\UserRoleEnum;
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthenticateSuperAdmin
 {
@@ -14,7 +15,7 @@ class AuthenticateSuperAdmin
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         if (auth()->user()->role_id === UserRoleEnum::SUPERADMIN->value) {
             return $next($request);

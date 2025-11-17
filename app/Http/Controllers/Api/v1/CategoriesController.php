@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Models\Categories;
 use App\Http\Controllers\Controller;
+use App\Models\Categories;
 use App\Models\Products;
 use App\Models\Qty;
 use App\Services\GoogleMapServices;

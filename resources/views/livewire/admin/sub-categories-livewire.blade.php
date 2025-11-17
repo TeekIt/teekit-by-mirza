@@ -6,7 +6,7 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="row">
-                        <form wire:submit.prevent="addSubCategory">
+                        <form wire:submit="addSubCategory">
                             {{ csrf_field() }}
                             <div class="modal-header">
                                 <h5 class="modal-title">Add Sub Category</h5>
@@ -17,7 +17,7 @@
                                 <div class="col-12">
                                     <div class="form-group">
                                         <input type="text" class="form-control"
-                                            placeholder="Enter sub category name..." wire:model.defer="name">
+                                            placeholder="Enter sub category name..." wire:model="name">
                                     </div>
                                     <small class="text-danger">
                                         @error('name')
@@ -55,7 +55,7 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="row">
-                        <form wire:submit.prevent>
+                        <form wire:submit>
                             <div class="modal-header">
                                 <h5 class="modal-title">Edit Category</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
@@ -64,7 +64,7 @@
                             <div class="col-12 mb-3">
                                 <label>Name</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" wire:model.defer="name"
+                                    <input type="text" class="form-control" wire:model="name"
                                         placeholder="Enter sub category name...">
                                     <button type="button" class="btn btn-site-primary"
                                         wire:click="updateSubCategoryName" wire:loading.class="btn-dark"

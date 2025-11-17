@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
-use App\Models\OrdersFromOtherSeller;
 use App\Models\Orders;
+use App\Models\OrdersFromOtherSeller;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;

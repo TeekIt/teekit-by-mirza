@@ -137,7 +137,7 @@
                                 <div class="col-12 mb-3">
                                     <label>Your Name</label>
                                     <div class="input-group">
-                                        <input type="text" wire:model.defer="name" class="form-control"
+                                        <input type="text" wire:model="name" class="form-control"
                                             placeholder="Enter your name">
                                         <button type="button" class="btn btn-site-primary" wire:click="updateName"
                                             wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
@@ -158,7 +158,7 @@
                                 <div class="col-12 mb-3">
                                     <label>Business Name</label>
                                     <div class="input-group">
-                                        <input type="text" wire:model.defer="business_name" class="form-control"
+                                        <input type="text" wire:model="business_name" class="form-control"
                                             placeholder="Enter your business name">
                                         <button type="button" class="btn btn-site-primary"
                                             wire:click="updateBusinessName" wire:loading.class="btn-dark"
@@ -180,7 +180,7 @@
                                 <div class="col-12 mb-3">
                                     <label>Email</label>
                                     <div class="input-group">
-                                        <input type="email" class="form-control" wire:model.defer="email"
+                                        <input type="email" class="form-control" wire:model="email"
                                             placeholder="Enter your email address">
                                         <button type="button" class="btn btn-site-primary" wire:click="updateEmail"
                                             wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
@@ -201,7 +201,7 @@
                                 <div class="col-12 mb-3">
                                     <label>Business Phone</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" wire:model.defer="business_phone"
+                                        <input type="text" class="form-control" wire:model="business_phone"
                                             placeholder="Enter your business number">
                                         <button type="button" class="btn btn-site-primary"
                                             wire:click="updateBusinessPhone" wire:loading.class="btn-dark"
@@ -223,7 +223,7 @@
                                 <div class="col-12 mb-3">
                                     <label>Personal Phone</label>
                                     <div class="input-group">
-                                        <input type="tel" class="form-control" wire:model.defer="phone"
+                                        <input type="tel" class="form-control" wire:model="phone"
                                             placeholder="Enter your phone number">
                                         <button type="button" class="btn btn-site-primary" wire:click="updatePhone"
                                             wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
@@ -280,20 +280,27 @@
                                                         <img class="img img-fluid img-thumbnail"
                                                             src="{{ config('constants.BUCKET') . $user->user_img }}"
                                                             alt="Store image not uploaded 🥺">
-                                                        <form wire:submit.prevent="updateImage">
+                                                        <div>
                                                             <input type="file" class="my-3"
-                                                                wire:model.defer="image_to_upload" accept="image/*">
+                                                                wire:model="image_to_upload" accept="image/*">
+                                                            @error('image_to_upload')
+                                                                <div class="text-danger small">{{ $message }}</div>
+                                                            @enderror
+                                                            <div wire:loading wire:target="image_to_upload" class="small text-muted">
+                                                                Uploading...
+                                                            </div>
                                                             <div class="col-12 my-1">
                                                                 <div class="text-center">
-                                                                    <button type="submit"
+                                                                    <button type="button"
                                                                         class="w-100 pb-2 border-0 btn rounded-pill cstm-edit-btn"
+                                                                        wire:click="updateImage"
                                                                         wire:loading.class="btn-dark"
                                                                         wire:loading.class.remove="cstm-edit-btn"
                                                                         wire:loading.attr="disabled"
-                                                                        wire:target="updateImage">
+                                                                        wire:target="updateImage,image_to_upload">
                                                                         <span wire:loading.remove
-                                                                            wire:target="updateImage">Upload</span>
-                                                                        <span wire:loading wire:target="updateImage">
+                                                                            wire:target="updateImage,image_to_upload">Upload</span>
+                                                                        <span wire:loading wire:target="updateImage,image_to_upload">
                                                                             <span
                                                                                 class="spinner-border spinner-border-sm text-light"
                                                                                 role="status" aria-hidden="true">
@@ -302,7 +309,7 @@
                                                                     </button>
                                                                 </div>
                                                             </div>
-                                                        </form>
+                                                        </div>
                                                     </div>
                                                     <div class="col-12 col-lg-8">
                                                         <div class="form-group">
@@ -445,16 +452,16 @@
                                                                     <div class="form-group">
                                                                         <input type="password"
                                                                             class="form-control w-100"
-                                                                            wire:model.defer="old_password"
+                                                                            wire:model="old_password"
                                                                             placeholder="Old Password" required
-                                                                            wire:model.defer="old_password"
+                                                                            wire:model="old_password"
                                                                             minlength="8">
 
                                                                         <input type="password"
                                                                             class="form-control w-100"
-                                                                            wire:model.defer="new_password"
+                                                                            wire:model="new_password"
                                                                             placeholder="New Password" required
-                                                                            wire:model.defer="new_password"
+                                                                            wire:model="new_password"
                                                                             minlength="8">
                                                                     </div>
                                                                 </div>

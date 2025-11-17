@@ -16,7 +16,7 @@ class OrdersFromOtherSellerFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
         return [
             'customer_id' => User::inRandomOrder()->where('role_id', 3)->first()->id, // Generate random customer ID

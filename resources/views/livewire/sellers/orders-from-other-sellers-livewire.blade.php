@@ -13,7 +13,7 @@
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form wire:submit.prevent="cancelOrder({{ $orderId }})" method="post">
+                <form wire:submit="cancelOrder({{ $orderId }})" method="post">
                     <div class="modal-body">
                         <div class="text-center">
                             <h2>Attention!!</h2>

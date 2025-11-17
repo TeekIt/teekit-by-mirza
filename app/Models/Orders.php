@@ -6,7 +6,6 @@ use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicleEnum;
 use App\Enums\UserMorphTypeEnum;
-use App\Models\ProductsByBuyer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

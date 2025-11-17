@@ -4,18 +4,19 @@ namespace App\Http\Middleware;
 
 use Closure;
 use DB;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Symfony\Component\HttpFoundation\Response;
 
 class DatabaseSwitcher
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  string|null  $guard
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null)
+    public function handle(Request $request, Closure $next, $guard = null): Response
     {
         $database = $request->getHost();
 

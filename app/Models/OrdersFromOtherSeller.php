@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\ModelDisabledStatusEnum;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

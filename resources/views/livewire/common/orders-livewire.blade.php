@@ -95,7 +95,7 @@
                                 </div>
                             @else
                                 <div class="col-6">
-                                    <select class="form-select form-select-lg" wire:model="selectedNearbySeller">
+                                    <select class="form-select form-select-lg" wire:model.live="selectedNearbySeller">
                                         <option value="" selected>Nearby stores</option>
                                         @foreach ($nearbySellers as $singleIndex)
                                             <option value="{{ $singleIndex['business_name'] }}">
@@ -185,10 +185,10 @@
     </div>
 
     <!-- Content Header -->
-    <form wire:submit.prevent="render">
+    <form wire:submit="performSearch">
         <div class="row">
             <div class="col-12 col-sm-12 col-md-8 py-4 my-2">
-                <input type="number" wire:model.defer="search" class="form-control" placeholder="Search by order#">
+                <input type="number" wire:model="search" class="form-control" placeholder="Search by order#">
             </div>
             <div class="col-12 col-sm-12 col-md-4 d-flex">
                 <button type="submit" class="btn btn-site-primary my-4 p-1 w-100 mx-1" wire:target="search"
@@ -221,7 +221,7 @@
         </div>
         @forelse ($data as $order)
             <!-- Single Order Content -->
-            <div class="col-12 p-2">
+            <div class="col-12 p-2" wire:key="order-{{ $order->id }}">
                 <div class="card">
                     <div class="card-body py-1 px-2">
                         <!-- Order Header -->

@@ -8,7 +8,7 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="row">
-                        <form wire:submit.prevent="addCategory">
+                        <form wire:submit="addCategory">
                             {{ csrf_field() }}
                             <div class="modal-header">
                                 <h5 class="modal-title">Add Category</h5>
@@ -19,7 +19,7 @@
                                 <div class="col-12">
                                     <div class="form-group">
                                         <input type="file" class="form-control" accept="image/*"
-                                            wire:model.defer="image">
+                                            wire:model="image">
                                     </div>
                                     <small class="text-danger">
                                         @error('image')
@@ -32,7 +32,7 @@
                                 <div class="col-12">
                                     <div class="form-group">
                                         <input type="text" class="form-control" placeholder="Enter category name..."
-                                            wire:model.defer="name">
+                                            wire:model="name">
                                     </div>
                                     <small class="text-danger">
                                         @error('name')
@@ -85,7 +85,7 @@
                                 <label>Image</label>
                                 <div class="input-group">
                                     <input type="file" class="form-control" accept="image/*"
-                                        wire:model.defer="image">
+                                        wire:model="image">
                                     <button type="button" class="btn btn-site-primary" wire:click="updateCategoryImage"
                                         wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
                                         wire:loading.attr="disabled" wire:target="updateCategoryImage">
@@ -105,7 +105,7 @@
                             <div class="col-12 mb-3">
                                 <label>Name</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" wire:model.defer="name"
+                                    <input type="text" class="form-control" wire:model="name"
                                         placeholder="Enter category name...">
                                     <button type="button" class="btn btn-site-primary" wire:click="updateCategoryName"
                                         wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"

@@ -17,7 +17,7 @@ class OrderItemsFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
         return [
             'order_id' => Orders::inRandomOrder()->first()->id,

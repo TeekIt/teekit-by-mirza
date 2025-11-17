@@ -16,7 +16,7 @@ class GophrDeliveryFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
         return [
             'order_belongs_to_type' => (new Orders)->getMorphClass(),

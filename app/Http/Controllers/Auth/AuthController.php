@@ -6,10 +6,9 @@ use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BuyerResource;
 use App\Models\JwtToken;
+use App\Models\User;
 use App\Services\EmailServices;
 use App\Services\JsonResponseServices;
-use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -371,10 +370,10 @@ class AuthController extends Controller
             $user = User::find(auth()->user()->id);
 
             DB::table('deleted_users')->insert([
-                'user_id' =>  $user->id,
-                'postcode' =>  $user->postcode,
-                'created_at' =>   now(),
-                'updated_at' =>   now(),
+                'user_id' => $user->id,
+                'postcode' => $user->postcode,
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
 
             $user->forceDelete();

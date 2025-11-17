@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Services\ImageServices;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\Request;
@@ -70,7 +71,7 @@ class Driver extends Authenticatable implements JWTSubject
     /**
      * Relations
      */
-    public function role()
+    public function role(): BelongsTo
     {
         return $this->belongsTo(\App\Models\Role::class);
     }

@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Services\EmailServices;
 use App\Models\User;
+use App\Services\EmailServices;
 use DateTime;
 use Exception;
 use Illuminate\Bus\Queueable;
