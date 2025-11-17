@@ -18,15 +18,15 @@ class QtyController extends Controller
     public function getById(Request $request)
     {
         $validatedData = Validator::make($request->route()->parameters(), [
-            'store_id' => 'required|integer',
-            'prod_id' => 'required|integer',
+            'storeId' => 'required|integer',
+            'prodId' => 'required|integer',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        $qty = Qty::where('seller_id', '=', $request->store_id)
-            ->where('product_id', '=', $request->prod_id)
+        $qty = Qty::where('seller_id', '=', $request->storeId)
+            ->where('product_id', '=', $request->prodId)
             ->get();
 
         if (! is_null($qty)) {

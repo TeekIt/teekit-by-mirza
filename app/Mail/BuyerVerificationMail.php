@@ -41,6 +41,7 @@ class BuyerVerificationMail extends Mailable
     {
         return new Content(
             markdown: 'emails.buyer_verification_mail',
+            // htmlString: '<p>Test Mobile Registraion Email</p>',
             with: [
                 'buyer' => $this->user,
                 'accountVerificationLink' => $this->accountVerificationLink,

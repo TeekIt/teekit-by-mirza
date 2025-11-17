@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\v1\SellerController;
 use App\Http\Controllers\Api\v1\StripeController;
 use App\Http\Controllers\Api\v1\WithdrawalRequestController;
 use App\Http\Controllers\Api\v2\GophrDeliveryController;
+use App\Http\Controllers\Api\v2\RequestedDeliveryController;
 use App\Http\Controllers\Api\v2\StuartDeliveryController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -70,7 +71,7 @@ Route::prefix('password')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('qty')->controller(QtyController::class)->group(function () {
-    Route::get('product/{store_id}/{prod_id}', 'getById');
+    Route::get('product/{storeId}/{prodId}', 'getById');
     /* Route::post('insert_parent_qty_to_child', 'insertParentQtyToChild')->middleware('jwt.verify');
     Route::get('multi-curl', 'multiCURL'); */
 });
@@ -141,13 +142,13 @@ Route::middleware(['jwt.verify'])->group(function () {
                 Route::get('seller', 'sellerProducts');
                 Route::get('sortByLocation', 'sortByLocation');
                 Route::post('recheck_products', 'recheckProducts');
-                Route::get('featured/{store_id}', 'featuredProducts');
+                Route::get('featured/{storeId}', 'featuredProducts');
             });
         });
 
         Route::prefix('ratings')->controller(RattingController::class)->group(function () {
             Route::post('add', 'add');
-            Route::get('delete/{ratting_id}', 'delete');
+            Route::get('delete/{ratingId}', 'delete');
         });
     });
 
@@ -165,7 +166,7 @@ Route::middleware(['jwt.verify'])->group(function () {
 
         Route::get('logged_in/buyer', 'showLoggedinBuyerOrders');
         Route::get('seller', 'sellerOrders');
-        Route::get('driver_orders/{driver_id}', 'driverOrders');
+        Route::get('driver_orders/{driverId}', 'driverOrders');
         Route::get('assign_order', 'assignOrder');
         Route::get('cancel_order', 'cancelOrder');
         Route::get('update_assign', 'updateAssign');
@@ -180,14 +181,14 @@ Route::middleware(['jwt.verify'])->group(function () {
             Route::post('login', 'loginDriver');
         });
 
-        Route::get('info/{id}', 'info');
+        Route::get('info/{driverId}', 'info');
         Route::post('add-lat-lon', 'addLatLon');
         Route::get('withdrawable-balance', 'getWithdrawalBalance');
         Route::get('request-withdrawal-balance', 'submitWithdrawal');
         Route::post('bank-details', 'submitBankAccountDetails');
         Route::get('all-withdrawals', 'driverAllWithdrawalRequests');
-        Route::post('check_verification_code/{order_id}', 'checkVerificationCode');
-        Route::post('driver_failed_to_enter_code/{order_id}', 'driverFailedToEnterCode');
+        Route::post('check_verification_code/{orderId}', 'checkVerificationCode');
+        Route::post('driver_failed_to_enter_code/{orderId}', 'driverFailedToEnterCode');
     });
 
     Route::prefix('promocodes')->controller(PromoCodeController::class)->group(function () {
@@ -199,7 +200,7 @@ Route::middleware(['jwt.verify'])->group(function () {
     Route::prefix('referral')->controller(ReferralCodeRelationController::class)->group(function () {
         Route::post('validate', 'validateReferral');
         Route::post('insert', 'insertReferrals');
-        Route::get('details_by_id/{referral_relation_id}', 'fetchReferralRelationDetails');
+        Route::get('details_by_id/{referralRelationId}', 'fetchReferralRelationDetails');
         Route::post('update/referral_usable/status', 'updateReferralStatus');
     });
 
@@ -215,7 +216,7 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::prefix('delivery/job')->group(function () {
             Route::post('create', 'createDeliveryJob');
             Route::get('pricing', 'getDeliveryJobPricing');
-            Route::get('track/{job_id}', 'trackDeliveryJob');
+            Route::get('track/{jobId}', 'trackDeliveryJob');
         });
     });
 
@@ -223,8 +224,12 @@ Route::middleware(['jwt.verify'])->group(function () {
         Route::prefix('delivery/job')->group(function () {
             Route::post('create', 'createDeliveryJob');
             Route::get('pricing', 'getDeliveryJobPricing');
-            Route::get('track/{job_id}', 'trackDeliveryJob');
+            Route::get('track/{jobId}', 'trackDeliveryJob');
         });
+    });
+
+    Route::prefix('delivery')->controller(RequestedDeliveryController::class)->group(function () {
+        Route::get('list/{buyerId}', 'list');
     });
 
     // Route::get('keys', [AuthController::class, 'keys']);
