@@ -15,13 +15,13 @@ use App\Models\Orders;
 use App\Models\Products;
 use App\Models\ProductsByBuyer;
 use App\Models\Qty;
-use App\Models\User;
-use App\Models\VerificationCodes;
 use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
 use App\Services\OrderServices;
 use App\Services\ProductServices;
 use App\Services\VerificationCodeServices;
+use App\Models\User;
+use App\Models\VerificationCodes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -55,6 +55,7 @@ class OrderController extends Controller
                 'serviceCharges' => 'required|numeric',
                 'device' => 'sometimes',
                 'paymentIntentId' => 'required|string',
+                'dateTime' => 'required_if:type,scheduled|date',
                 /* Customer details */
                 'fName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
                 'lName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
@@ -207,7 +208,7 @@ class OrderController extends Controller
                 'required',
                 'integer',
                 Rule::exists('users', 'id')
-                    ->where(fn (Builder $query) => $query
+                    ->where(fn(Builder $query) => $query
                         ->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
             ],
             'categoryId' => 'required|integer|exists:categories,id',

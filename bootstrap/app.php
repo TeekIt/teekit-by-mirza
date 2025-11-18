@@ -4,6 +4,7 @@ use App\Http\Middleware\AuthenticateParentChildSeller;
 use App\Http\Middleware\AuthenticateSuperAdmin;
 use App\Http\Middleware\CheckForMaintenanceMode;
 use App\Http\Middleware\JwtMiddleware;
+use App\Http\Middleware\TransactionWrapper;
 use App\Providers\AppServiceProvider;
 use App\Services\JsonResponseServices;
 use Illuminate\Auth\Middleware\Authorize;
@@ -46,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.super.admin' => AuthenticateSuperAdmin::class,
             'bindings' => SubstituteBindings::class,
             'jwt.verify' => JwtMiddleware::class,
+            'transaction.wrapper' => TransactionWrapper::class,
         ]);
 
         $middleware->priority([

@@ -26,5 +26,5 @@ Schedule::command('model:prune')
     // ->dailyAt('00:00')
     ->everySecond()
     ->withoutOverlapping()
-    ->runInBackground()
-    ->emailOutputOnFailure(config('constants.ADMIN_EMAIL'));
+    ->runInBackground();
+    // ->emailOutputOnFailure(config('constants.ADMIN_EMAIL'));

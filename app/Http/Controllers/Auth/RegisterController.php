@@ -59,10 +59,13 @@ class RegisterController extends Controller
             'business_name' => 'required|string|max:80|unique:users,business_name',
             'business_phone' => 'required|string|min:8',
             'address' => 'required|string',
+            'unit_address' => 'nullable|string',
             'postcode' => 'required|string',
             'country' => 'required|string',
             'state' => 'required|string',
             'city' => 'required|string',
+            'lat' => 'required|numeric|between:-90,90',
+            'lon' => 'required|numeric|between:-180,180',
         ];
 
         if ($data['is_child_seller'] != 0) {
@@ -73,11 +76,8 @@ class RegisterController extends Controller
     }
 
     /**
-     * register_web function (It is only used for the registration of web users)
+     * register() function (It is only used for the registration of web users)
      * Create a new user instance after a valid registration.
-     *
-     * @param  array  $data
-     * @return User|\Illuminate\Http\RedirectResponse
      */
     protected function register(Request $request)
     {
@@ -91,7 +91,7 @@ class RegisterController extends Controller
             );
         }
 
-        $data = $request->toArray();
+        $validatedData = $validatedData->validated();
 
         $businessHours = '{
             "time": {
@@ -134,36 +134,38 @@ class RegisterController extends Controller
             "submitted" : null
         }';
 
-        $parentStoreId = ($request->input('parent_store')) ? User::getSellerByBusinessName($request->input('parent_store'))->id : null;
+        $parentStoreId = (isset($validatedData['parent_store'])) ?
+            User::getSellerByBusinessName($validatedData('parent_store'))->id :
+            null;
 
         $user = User::createStore(
-            $data['name'],
-            strtolower($data['email']),
-            $data['password'],
-            $data['country_code'],
-            $data['phone'],
-            $data['address'],
-            $data['unit_address'],
-            $data['postcode'],
-            $data['country'],
-            $data['state'],
-            $data['city'],
-            $data['business_name'],
-            $data['business_phone'],
-            $data['lat'],
-            $data['lon'],
+            $validatedData['name'],
+            strtolower($validatedData['email']),
+            $validatedData['password'],
+            $validatedData['country_code'],
+            $validatedData['phone'],
+            $validatedData['address'],
+            $validatedData['unit_address'],
+            $validatedData['postcode'],
+            $validatedData['country'],
+            $validatedData['state'],
+            $validatedData['city'],
+            $validatedData['business_name'],
+            $validatedData['business_phone'],
+            $validatedData['lat'],
+            $validatedData['lon'],
             $businessHours,
-            $request->input('parent_store') ? UserRoleEnum::CHILD_SELLER : UserRoleEnum::SELLER,
+            isset($validatedData['parent_store']) ? UserRoleEnum::CHILD_SELLER : UserRoleEnum::SELLER,
             $parentStoreId
         );
 
-        if ($user) {
+        if ($user instanceof User) {
             echo 'User Created';
 
             EmailServices::sendNewSellerMail(
                 $user,
                 $user->role_id,
-                ($user->role_id === UserRoleEnum::CHILD_SELLER) ? $request->input('parent_store') : null,
+                ($user->role_id === UserRoleEnum::CHILD_SELLER) ? $validatedData['parent_store'] : null,
             );
         }
     }

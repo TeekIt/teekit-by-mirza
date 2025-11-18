@@ -73,7 +73,7 @@ class OrdersHeaderLivewire extends Component
         $this->order = $order;
     }
 
-    /* Handle prop updates in Livewire v3 */
+    /* Handle Order prop updates */
     public function updatedOrder(Orders|OrdersFromOtherSeller $order)
     {
         $this->isOrderFromOtherSeller = $this->isOrderFromOtherSeller($order);
@@ -274,7 +274,7 @@ class OrdersHeaderLivewire extends Component
             dropoffLat: (float) $order->customer_lat,
             dropoffLon: (float) $order->customer_lon,
             dropoffPersonName: $order->customer_name,
-            dropoffEmail: '',
+            dropoffEmail: $order->buyer->email,
             dropoffMobileNumber: $order->phone_number,
         );
     }
@@ -488,13 +488,13 @@ class OrdersHeaderLivewire extends Component
         }
     }
 
-    public function orderIsAccepted($orderId)
+    public function generalOrderIsAccepted($orderId)
     {
         try {
             /* Perform some operation */
             $this->selectedOrder = Orders::isViewed($orderId);
 
-            $response = $this->capturePayment();
+            // $response = $this->capturePayment();
 
             if ($this->selectedOrder->type == OrderTypeEnum::SELF_PICKUP->value) {
                 /**
@@ -508,7 +508,13 @@ class OrdersHeaderLivewire extends Component
             sleep(1);
             $this->dispatch(event: 'refreshThisComponent')->self();
 
-            if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
+            // if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
+            //     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            // } else {
+            //     session()->flash('error', config('constants.UPDATION_FAILED'));
+            // }
+
+            if ($updated == 1) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.UPDATION_FAILED'));

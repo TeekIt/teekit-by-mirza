@@ -31,6 +31,7 @@ final class GophrDeliveryServices
         string $dropoffPersonName,
         string $dropoffEmail,
         string $dropoffMobileNumber,
+        ?string $earliestPickupTime = null,
         string $instructions = 'Make the delivery possible ASAP',
         string $countryCode = 'GB',
         bool $isConfirmed = true
@@ -50,6 +51,7 @@ final class GophrDeliveryServices
             'external_id' => $externalId,
             'pickups' => [
                 [
+                    'earliest_pickup_time' => $earliestPickupTime ?? CompanyStandardsServices::getStandardPickUpTime()->toIso8601String(),
                     'pickup_city' => $pickupCity,
                     'pickup_address1' => $pickupAddress,
                     'pickup_postcode' => $pickupPostcode,
@@ -118,6 +120,7 @@ final class GophrDeliveryServices
         $response = json_decode($response);
 
         if (isset($response->errors)) {
+            report(json_encode($response->errors));
             throw new Exception($response->errors[0]->message);
         }
 
@@ -154,6 +157,7 @@ final class GophrDeliveryServices
         $response = json_decode($response);
 
         if (isset($response->errors)) {
+            report(json_encode($response->errors));
             throw new Exception($response->errors[0]->message);
         }
 
@@ -185,6 +189,7 @@ final class GophrDeliveryServices
         $response = json_decode($response);
 
         if (isset($response->errors)) {
+            report(json_encode($response->errors));
             throw new Exception($response->errors[0]->message);
         }
 
@@ -222,6 +227,7 @@ final class GophrDeliveryServices
         $response = json_decode($response);
 
         if (isset($response->errors)) {
+            report(json_encode($response->errors));
             throw new Exception($response->errors[0]->message);
         }
 

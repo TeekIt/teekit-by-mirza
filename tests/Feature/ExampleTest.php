@@ -6,6 +6,8 @@ use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
+    public function createApplication() {}
+
     /**
      * A basic test example.
      */

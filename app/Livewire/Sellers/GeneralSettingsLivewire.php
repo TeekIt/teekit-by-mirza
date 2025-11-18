@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Sellers;
 
-use App\Models\User;
 use App\Services\ImageServices;
+use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
@@ -79,12 +79,14 @@ class GeneralSettingsLivewire extends Component
             }
 
             $filename = ImageServices::uploadLivewireImg($this->image_to_upload, $this->user_id);
+            if ($filename) {
+                User::updateInfo($this->user_id, userImg: $filename);
+            }
             /* Operation finished */
             $this->resetComponent();
             sleep(1);
 
             if ($filename) {
-                User::updateInfo($this->user_id, userImg: $filename);
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.UPDATION_FAILED'));

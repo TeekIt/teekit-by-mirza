@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Web\v2;
 
+use App\Models\Categories;
 use App\Enums\TransportVehicleEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\AddOrUpdateProductRequest;
-use App\Models\Categories;
 use App\Models\ProductImage;
 use App\Models\Products;
 use App\Models\Qty;
@@ -44,7 +44,7 @@ class ProductController extends Controller
         $validatedData['car'] = ($validatedData['vehicle'] == TransportVehicleEnum::CAR->value) ? 1 : 0;
         $validatedData['van'] = ($validatedData['vehicle'] == TransportVehicleEnum::VAN->value) ? 1 : 0;
         $validatedData['discount_percentage'] = (! isset($validatedData['discount_percentage'])) ? 0.00 : $validatedData['discount_percentage'];
-        $validatedData['contact'] = '+44'.$validatedData['contact'];
+        $validatedData['contact'] = '+44' . $validatedData['contact'];
         $validatedData['seller_id'] = auth()->id();
         $validatedData['feature_img'] = ImageServices::uploadImg(request: $request, imgKeyName: 'feature_img', id: $validatedData['seller_id']);
 
@@ -59,7 +59,7 @@ class ProductController extends Controller
 
         if (request()->hasFile('gallery')) {
             foreach (request()->file('gallery') as $singleImage) {
-                $uniqueId = $validatedData['seller_id'].$product->id;
+                $uniqueId = $validatedData['seller_id'] . $product->id;
                 $fileName = ImageServices::uploadImg(id: $uniqueId, imageFile: $singleImage);
                 ProductImage::add($product->id, $fileName);
             }
@@ -97,7 +97,7 @@ class ProductController extends Controller
         $validatedData['car'] = ($validatedData['vehicle'] == TransportVehicleEnum::CAR->value) ? 1 : 0;
         $validatedData['van'] = ($validatedData['vehicle'] == TransportVehicleEnum::VAN->value) ? 1 : 0;
         $validatedData['discount_percentage'] = $validatedData['discount_percentage'] ?? 0.00;
-        $validatedData['contact'] = '+44'.$validatedData['contact'];
+        $validatedData['contact'] = '+44' . $validatedData['contact'];
         $validatedData['seller_id'] = auth()->id();
 
         unset($validatedData['_token']);
@@ -119,7 +119,7 @@ class ProductController extends Controller
             }
 
             foreach ($validatedData as $key => $value) {
-                $product->$key = ($key == 'contact') ? '+44'.$value : $value;
+                $product->$key = ($key == 'contact') ? '+44' . $value : $value;
             }
 
             $updated = $product->save();
@@ -176,7 +176,7 @@ class ProductController extends Controller
             // Upload file
             $file->move($location, $filename);
             // In case the uploaded file path is to be stored in the database
-            $filepath = $location.'/'.$filename;
+            $filepath = $location . '/' . $filename;
             // Reading file
             $file = fopen($filepath, 'r');
             // Read through the file and store the contents as an array

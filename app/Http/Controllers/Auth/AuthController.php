@@ -9,19 +9,18 @@ use App\Models\JwtToken;
 use App\Models\User;
 use App\Services\EmailServices;
 use App\Services\JsonResponseServices;
-use App\Models\User;
-use Carbon\Carbon;
-use Faker\Factory;
-use Faker\Generator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Carbon\Carbon;
+use Faker\Factory;
+use Faker\Generator;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {

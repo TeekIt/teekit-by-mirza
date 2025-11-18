@@ -95,6 +95,7 @@ class WithdrawalLivewire extends Component
 
         if ($this->amount > $user->pending_withdraw) {
             $this->addError('amount', 'Withdrawal amount exceeds pending balance');
+            
             $this->dispatch('close-modal', ['id' => 'requestWithdrawModal']);
 
             return;

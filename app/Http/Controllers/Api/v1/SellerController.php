@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Services\GoogleMapServices;
 use App\Services\JsonResponseServices;
+use App\Models\User;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;

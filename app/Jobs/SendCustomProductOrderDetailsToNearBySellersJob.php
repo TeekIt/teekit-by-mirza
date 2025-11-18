@@ -71,7 +71,7 @@ class SendCustomProductOrderDetailsToNearBySellersJob implements ShouldQueue
             $this->seller->id
         );
 
-        if ($nearbySellers) {
+        if (!empty($nearbySellers)) {
             EmailServices::sendCustomProductOrderDetailsToNearBySellersMail(
                 array_merge(array_column($nearbySellers, 'email')),
                 $this->order

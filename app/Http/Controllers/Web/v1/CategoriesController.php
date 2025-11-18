@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Web\v1;
 
-use App\Http\Controllers\Controller;
 use App\Models\Categories;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class CategoriesController extends Controller

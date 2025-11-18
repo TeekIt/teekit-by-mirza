@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Web\v1;
 
+use App\Models\Categories;
 use App\Enums\DeliveryStatusEnum;
 use App\Enums\OrderStatusEnum;
 use App\Http\Controllers\Controller;
-use App\Models\Categories;
 use App\Models\OrderItems;
 use App\Models\Orders;
 use App\Models\Pages;
@@ -194,84 +194,6 @@ class HomeController extends Controller
         }
 
         abort(config('constants.HTTP_UNAUTHORIZED'));
-    }
-
-    /**
-     * Return's admin categories view
-     *
-     * @author Huzaifa Haleem
-     *
-     * @version 1.0.0
-     */
-    public function allCat()
-    {
-        $categories = Categories::paginate();
-
-        return view('admin.categories', compact('categories'));
-    }
-
-    /**
-     * Insert's a new category
-     *
-     * @author Huzaifa Haleem
-     *
-     * @version 1.0.0
-     */
-    public function addCat(Request $request)
-    {
-        $category = new Categories;
-        $category->category_name = $request->category_name;
-        if ($request->hasFile('category_image')) {
-            $image = $request->file('category_image');
-            $file = $image;
-            $cat_name = str_replace(' ', '_', $category->category_name);
-            $filename = uniqid('Category_'.$cat_name.'_').'.'.$file->getClientOriginalExtension(); // create unique file name...
-            Storage::disk('spaces')->put($filename, File::get($file));
-            if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
-                info('file is stored successfully : '.$filename);
-            } else {
-                info('file is not found :- '.$filename);
-            }
-            $category->category_image = $filename;
-        }
-        $category->save();
-
-        Cache::forget('allCategories');
-
-        flash('Added')->success();
-
-        return Redirect::back();
-    }
-
-    /**
-     * Update's a specific category
-     *
-     * @author Huzaifa Haleem
-     *
-     * @version 1.0.0
-     */
-    public function updateCat(Request $request, $id)
-    {
-        $category = Categories::find($id);
-        $category->category_name = $request->category_name;
-        if ($request->hasFile('category_image')) {
-            $image = $request->file('category_image');
-            $file = $image;
-            $cat_name = str_replace(' ', '_', $category->category_name);
-            $filename = uniqid('Category_'.$cat_name.'_').'.'.$file->getClientOriginalExtension(); // create unique file name...
-            Storage::disk('spaces')->put($filename, File::get($file));
-            if (Storage::disk('spaces')->exists($filename)) {  // check file exists in directory or not
-                info('file is stored successfully : '.$filename);
-            } else {
-                info('file is not found :- '.$filename);
-            }
-            $category->category_image = $filename;
-        }
-        $category->save();
-
-        flash('Updated')->success();
-
-        return Redirect::back();
     }
 
     public function updatePages(Request $request)

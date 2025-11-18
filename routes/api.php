@@ -45,10 +45,10 @@ Route::get('/', fn () => 'Teek it API Routes Are Working Fine 😃');
 */
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::post('login', 'loginBuyer');
-    Route::post('register', 'registerBuyer');
-    Route::get('verify', 'verify');
     Route::post('login_google', 'loginBuyerFromGoogle');
+    Route::post('register', 'registerBuyer');
     Route::post('register_google', 'registerBuyerFromGoogle');
+    Route::get('verify', 'verify');
 
     Route::middleware(['jwt.verify'])->group(function () {
         Route::post('change-password', 'changePassword');

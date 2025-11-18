@@ -33,7 +33,7 @@ class StuartDeliveryController extends Controller
                 dropoffAddress: $validatedData->dropoffAddress,
                 unitAddress: $validatedData->unitAddress,
                 receiverName: auth()->user()->name,
-                receiverPhone: auth()->user()->country_code.auth()->user()->phone,
+                receiverPhone: auth()->user()->country_code . auth()->user()->phone,
                 receiverEmail: auth()->user()->email
             )
         );
@@ -46,7 +46,7 @@ class StuartDeliveryController extends Controller
             dropoffAddress: $validatedData->dropoffAddress,
             unitAddress: $validatedData->unitAddress,
             receiverName: auth()->user()->name,
-            receiverPhone: auth()->user()->country_code.auth()->user()->phone,
+            receiverPhone: auth()->user()->country_code . auth()->user()->phone,
             receiverEmail: auth()->user()->email,
             packageTransportType: PackageTransportTypeEnum::from($validatedData->packageTransportType),
             packageWeight: PackageWeightEnum::from($validatedData->packageWeight)
@@ -78,7 +78,7 @@ class StuartDeliveryController extends Controller
                 dropoffAddress: $validatedData->dropoffAddress,
                 unitAddress: $validatedData->unitAddress,
                 receiverName: auth()->user()->name,
-                receiverPhone: auth()->user()->country_code.auth()->user()->phone,
+                receiverPhone: auth()->user()->country_code . auth()->user()->phone,
                 receiverEmail: auth()->user()->email
             )
         );

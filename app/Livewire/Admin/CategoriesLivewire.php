@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Categories;
 use App\Services\ImageServices;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -65,6 +66,7 @@ class CategoriesLivewire extends Component
             );
             /* Operation finished */
             sleep(1);
+            Cache::forget('allCategories');
             $this->resetComponent();
             $this->dispatch('close-modal', ['id' => 'addCategoryModal']);
 
