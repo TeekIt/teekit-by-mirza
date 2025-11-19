@@ -27,6 +27,8 @@ class NewSellerRegistrationMail extends Mailable
         public string $accountVerificationLink,
         public ?string $parentSeller = null,
     ) {
+        $this->afterCommit();
+        
         $this->sellerRoleName = $this->getSellerRoleName($this->sellerType);
     }
 
