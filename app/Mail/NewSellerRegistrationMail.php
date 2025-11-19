@@ -43,7 +43,7 @@ class NewSellerRegistrationMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'A New '.$this->sellerRoleName.' Seller Has Been Registered 🥳 - Verification Required',
+            subject: 'A New ' . $this->sellerRoleName . ' Seller Has Been Registered 🥳 - Verification Required',
         );
     }
 
@@ -54,6 +54,7 @@ class NewSellerRegistrationMail extends Mailable
      */
     public function content()
     {
+        dd($this->user);
         return new Content(
             markdown: 'emails.new_seller_registration',
             with: [
