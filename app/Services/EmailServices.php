@@ -59,14 +59,14 @@ final class EmailServices
         $verificationCode = Crypt::encrypt($user->email);
         $accountVerificationLink = self::getVerificationLink($verificationCode);
         
-        Mail::raw('This is a plain text notification for the new seller.', function ($message) {
-            $message->to([config('constants.ADMIN_EMAIL'), 'mirzaabdullahizhar.teekit@gmail.com'])
-                    ->subject('New Seller Registration');
-        });
-        // Mail::to([config('constants.ADMIN_EMAIL'), 'mirzaabdullahizhar.teekit@gmail.com'])->send(
-        //     new NewSellerRegistrationMail($user, $sellerType, $accountVerificationLink, $parentSeller)
-        // );
-        // Mail::to([config('constants.ADMIN_EMAIL'), 'mirzaabdullahizhar.teekit@gmail.com'])->plain;
+        // Mail::raw('This is a plain text notification for the new seller.', function ($message) {
+        //     $message->to([config('constants.ADMIN_EMAIL'), 'mirzaabdullahizhar.teekit@gmail.com'])
+        //             ->subject('New Seller Registration');
+        // });
+
+        Mail::to([config('constants.ADMIN_EMAIL'), 'mirzaabdullahizhar.teekit@gmail.com'])->send(
+            new NewSellerRegistrationMail($user, $sellerType, $accountVerificationLink, $parentSeller)
+        );
     }
 
     public static function sendDriverAccVerificationMail(Driver $driver)

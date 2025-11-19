@@ -28,7 +28,7 @@ class NewSellerRegistrationMail extends Mailable
         public ?string $parentSeller = null,
     ) {
         $this->afterCommit();
-        
+
         $this->sellerRoleName = $this->getSellerRoleName($this->sellerType);
     }
 
@@ -56,7 +56,6 @@ class NewSellerRegistrationMail extends Mailable
      */
     public function content()
     {
-        dd($this->user);
         return new Content(
             markdown: 'emails.new_seller_registration',
             with: [
