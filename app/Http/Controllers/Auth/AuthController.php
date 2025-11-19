@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BuyerResource;
+use App\Jobs\SendStripeConnectAccMailJob;
 use App\Models\JwtToken;
 use App\Models\User;
 use App\Services\EmailServices;
@@ -130,8 +131,8 @@ class AuthController extends Controller
 
         $validatedData = (object) $validatedData->validated();
 
-        $verificationToken = Crypt::decrypt($validatedData->token);
-        $user = User::where('email', '=', $verificationToken)->first();
+        $email = Crypt::decrypt($validatedData->token);
+        $user = User::where('email', '=', $email)->first();
 
         if (! $user) {
             return response('Invalid verification token', config('constants.HTTP_UNAUTHORIZED'));
@@ -145,7 +146,9 @@ class AuthController extends Controller
         $user->is_active = User::ACTIVE;
         $user->save();
 
-        EmailServices::sendStripeConnectAccMail($user);
+        if (in_array($user->role_id, [UserRoleEnum::SELLER->value, UserRoleEnum::CHILD_SELLER->value])) {
+            SendStripeConnectAccMailJob::dispatch($user)->onQueue('high');
+        }
 
         return response('Account successfully verified', config('constants.HTTP_OK'));
     }
