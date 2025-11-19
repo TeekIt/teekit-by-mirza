@@ -92,6 +92,10 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->renderable(function (Throwable $error, $request) {
+            if ($request->is('web/*')) {
+                return redirect()->back(config('constants.HTTP_SERVER_ERROR'))->withErrors($error->getMessage());
+            }
+
             if ($request->is('api/*')) {
                 return JsonResponseServices::getApiResponse(
                     [],
