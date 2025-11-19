@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\OrdersFromOtherSeller;
 use App\Models\Orders;
+use App\Models\OrdersFromOtherSeller;
 use App\Models\User;
 
 final class OrderServices
@@ -94,7 +94,7 @@ final class OrderServices
         $distanceInMiles = GoogleMapServices::getDistanceInMiles($sellerLat, $sellerLon, $buyerLat, $buyerLon);
 
         // return (2.5 + 1.25) * ($distanceInMiles + static::getDeliveryFee($totalWeight));
-        return 2.5 + 1.25 * $distanceInMiles + static::getDeliveryFee($totalWeight);
+        return 2.5 + 1.25 * $distanceInMiles + self::getDeliveryFee($totalWeight);
     }
 
     public static function getDriverCharges(
@@ -117,11 +117,11 @@ final class OrderServices
         int $orderId,
         string $verificationCode
     ): void {
-        $buyerNumber = $buyerCountryCode . $buyerNumber;
+        $buyerNumber = $buyerCountryCode.$buyerNumber;
         /* Msg for sending SMS notification of this "New Order" */
-        $messageForSeller = 'A new order #' . $orderId . " has been received. Please visit Teek It's seller dashboard:https://app.teekit.co.uk/login";
+        $messageForSeller = 'A new order #'.$orderId." has been received. Please visit Teek It's seller dashboard:https://app.teekit.co.uk/login";
 
-        $messageForBuyer = 'Thanks for your order! Your order has been delivered to the store. Please quote verification code: ' . $verificationCode . ' on delivery. (TeekIt)';
+        $messageForBuyer = 'Thanks for your order! Your order has been delivered to the store. Please quote verification code: '.$verificationCode.' on delivery. (TeekIt)';
 
         /* To restrict "New Order" SMS notifications only for UK numbers */
         if (str_contains($seller->business_phone, '+44')) {

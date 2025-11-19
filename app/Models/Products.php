@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\ProductStatusEnum;
 use App\Enums\SortByEnum;
-use App\Models\ProductImage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -54,13 +53,16 @@ class Products extends Model
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array
+     * @return array<string, string>
      */
-    protected $casts = [
-        'status' => ProductStatusEnum::class,
-    ];
+    protected function casts(): array
+    {
+        return [
+            'status' => ProductStatusEnum::class,
+        ];
+    }
 
     /**
      * Laravel Built-In Helpers
@@ -68,13 +70,14 @@ class Products extends Model
     protected function status(): Attribute
     {
         return Attribute::make(
-            set: fn($value) => (string) $value
+            set: fn ($value) => (string) $value
         );
     }
 
     /**
      * Scout Built-In Helpers
      */
+
     /**
      * Get the indexable data array for the model.
      */
@@ -661,7 +664,7 @@ class Products extends Model
     public static function markAsFeatured(int $id, int $status): int
     {
         return self::where('id', $id)
-            ->where('seller_id', Auth::id())
+            ->where('seller_id', auth()->id())
             ->update([
                 'featured' => $status,
             ]);
@@ -670,7 +673,7 @@ class Products extends Model
     public static function toggleProduct(int $id, string $status): int
     {
         return self::where('id', $id)
-            ->where('seller_id', Auth::id())
+            ->where('seller_id', auth()->id())
             ->update([
                 'status' => $status,
             ]);
@@ -678,7 +681,7 @@ class Products extends Model
 
     public static function toggleAllProducts(string $status): int
     {
-        return self::where('seller_id', Auth::id())
+        return self::where('seller_id', auth()->id())
             ->update([
                 'status' => $status,
             ]);

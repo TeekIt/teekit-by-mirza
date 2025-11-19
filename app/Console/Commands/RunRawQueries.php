@@ -26,10 +26,8 @@ class RunRawQueries extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle()
+    public function handle(): void
     {
         try {
             if ($this->executeQueries) {

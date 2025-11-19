@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Web\v1;
 
 use App\Http\Controllers\Controller;
-use App\Services\WebResponseServices;
 use App\Models\User;
+use App\Services\WebResponseServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;

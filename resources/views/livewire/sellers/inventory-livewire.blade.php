@@ -8,10 +8,10 @@
 
     <div class="row">
         <div class="col-12 col-sm-12 col-md-4 py-4 my-2">
-            <input type="text" wire:model.debounce.500ms="search" class="form-control" placeholder="Search here...">
+            <input type="text" wire:model.live.debounce.500ms="search" class="form-control" placeholder="Search here...">
         </div>
         <div class="col-12 col-sm-12 col-md-3 py-4 my-2">
-            <select class="form-control" wire:model.debounce.500ms="category_id">
+            <select class="form-control" wire:model.live.debounce.500ms="category_id">
                 <option value="0">Select category</option>
                 @foreach ($categories as $cat)
                     <option value="{{ $cat->id }}">{{ $cat->category_name }}</option>
@@ -306,7 +306,7 @@
                                 </td>
                                 <td class="align-middle fit-content">
                                     <input type="number" class="form-control" style="width:80px;" min="0"
-                                        wire:model.defer="quantity.{{ $key }}.qty">
+                                        wire:model="quantity.{{ $key }}.qty">
                                 </td>
                                 <td class="align-middle fit-content">
                                     <button type="button" class="btn btn-success"

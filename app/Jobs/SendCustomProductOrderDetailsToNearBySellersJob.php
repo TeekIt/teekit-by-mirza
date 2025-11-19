@@ -3,9 +3,9 @@
 namespace App\Jobs;
 
 use App\Models\Orders;
+use App\Models\User;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
-use App\Models\User;
 use DateTime;
 use Exception;
 use Illuminate\Bus\Queueable;
@@ -71,7 +71,7 @@ class SendCustomProductOrderDetailsToNearBySellersJob implements ShouldQueue
             $this->seller->id
         );
 
-        if ($nearbySellers) {
+        if (!empty($nearbySellers)) {
             EmailServices::sendCustomProductOrderDetailsToNearBySellersMail(
                 array_merge(array_column($nearbySellers, 'email')),
                 $this->order

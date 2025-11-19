@@ -19,7 +19,7 @@ final class GoogleMapServices
 
     public static function generateUrl($originAddress, $destinationAddress): string
     {
-        return self::GOOGLE_DISTANCEMATRIX_API_URL . '?units=imperial&origins=' . urlencode($originAddress) . '&destinations=' . urlencode($destinationAddress) . '&mode=driving&key=' . self::getApiKey();
+        return self::GOOGLE_DISTANCEMATRIX_API_URL.'?units=imperial&origins='.urlencode($originAddress).'&destinations='.urlencode($destinationAddress).'&mode=driving&key='.self::getApiKey();
     }
 
     /**
@@ -33,7 +33,7 @@ final class GoogleMapServices
         int $nearByMiles = CompanyStandardsServices::STANDARD_NEAR_BY_MILES,
     ): array {
         return Cache::remember(
-            'getNearBySellers' . $currentSellerId . $buyerLat . $buyerLon,
+            'getNearBySellers'.$currentSellerId.$buyerLat.$buyerLon,
             Carbon::now()->addDay(),
             function () use ($buyerLat, $buyerLon, $sellersOfSameCity, $nearByMiles) {
                 /*
@@ -59,8 +59,8 @@ final class GoogleMapServices
      */
     public static function getDistanceInArray(float $originLat, float $originLon, float $destinationLat, float $destinationLon): array
     {
-        $originAddress = $originLat . ',' . $originLon;
-        $destinationAddress = $destinationLat . ',' . $destinationLon;
+        $originAddress = $originLat.','.$originLon;
+        $destinationAddress = $destinationLat.','.$destinationLon;
 
         $url = self::generateUrl($originAddress, $destinationAddress);
         $results = json_decode(file_get_contents($url), true);
@@ -75,8 +75,8 @@ final class GoogleMapServices
 
     public static function getDistanceInMiles(float $originLat, float $originLon, float $destinationLat, float $destinationLon): float
     {
-        $originAddress = $originLat . ',' . $originLon;
-        $destinationAddress = $destinationLat . ',' . $destinationLon;
+        $originAddress = $originLat.','.$originLon;
+        $destinationAddress = $destinationLat.','.$destinationLon;
 
         $url = self::generateUrl($originAddress, $destinationAddress);
         $results = json_decode(file_get_contents($url), true);
@@ -125,7 +125,7 @@ final class GoogleMapServices
     }
 
     /*
-     * $chunkSize > 25 is not allowed because Google distance matrix API 
+     * $chunkSize > 25 is not allowed because Google distance matrix API
      * does not support destinations more then 25 when sending in bulk
      *
      * -----NOTE-----
@@ -148,7 +148,7 @@ final class GoogleMapServices
         foreach ($chunks as $chunk) {
             $destinationData = [
                 'users' => $chunk->values(),
-                'users_coordinates' => $chunk->map(fn($user) => "{$user->lat},{$user->lon}")->values()->toArray(),
+                'users_coordinates' => $chunk->map(fn ($user) => "{$user->lat},{$user->lon}")->values()->toArray(),
             ];
 
             $temp = self::getNearByUsersFromMultipleDestinations($lat, $lon, $destinationData, $nearByMiles);

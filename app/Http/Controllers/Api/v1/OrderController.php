@@ -10,10 +10,10 @@ use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendCustomProductOrderDetailsToNearBySellersJob;
 use App\Models\GuestBuyer;
-use App\Models\ProductsByBuyer;
 use App\Models\OrderItems;
 use App\Models\Orders;
 use App\Models\Products;
+use App\Models\ProductsByBuyer;
 use App\Models\Qty;
 use App\Services\ImageServices;
 use App\Services\JsonResponseServices;
@@ -55,6 +55,7 @@ class OrderController extends Controller
                 'serviceCharges' => 'required|numeric',
                 'device' => 'sometimes',
                 'paymentIntentId' => 'required|string',
+                'dateTime' => 'required_if:type,scheduled|date',
                 /* Customer details */
                 'fName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
                 'lName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
@@ -207,7 +208,7 @@ class OrderController extends Controller
                 'required',
                 'integer',
                 Rule::exists('users', 'id')
-                    ->where(fn (Builder $query) => $query
+                    ->where(fn(Builder $query) => $query
                         ->whereIn('role_id', [UserRoleEnum::SELLER, UserRoleEnum::CHILD_SELLER])),
             ],
             'categoryId' => 'required|integer|exists:categories,id',
@@ -599,10 +600,10 @@ class OrderController extends Controller
      *
      * @author Huzaifa Haleem
      */
-    public function driverOrders(Request $request, $driver_id)
+    public function driverOrders(Request $request, $driverId)
     {
         /* delivery_status:assigned,complete,pending_approval,cancelled */
-        $orders = Orders::select('id')->where('driver_id', '=', $driver_id)
+        $orders = Orders::select('id')->where('driver_id', '=', $driverId)
             ->where('delivery_status', '=', $request->delivery_status)
             ->where('type', '=', 'delivery')
             ->paginate(10);

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Schedule;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,14 @@ use Illuminate\Foundation\Inspiring;
 // Artisan::command('inspire', function () {
 //     $this->comment(Inspiring::quote());
 // })->describe('Display an inspiring quote');
+
+/*
+    Run the following cron job inside Docker app container
+*/
+Schedule::command('model:prune')
+    /* 00:00 == 12AM */
+    // ->dailyAt('00:00')
+    ->everySecond()
+    ->withoutOverlapping()
+    ->runInBackground();
+    // ->emailOutputOnFailure(config('constants.ADMIN_EMAIL'));

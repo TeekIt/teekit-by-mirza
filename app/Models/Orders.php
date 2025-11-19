@@ -6,7 +6,6 @@ use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicleEnum;
 use App\Enums\UserMorphTypeEnum;
-use App\Models\ProductsByBuyer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -111,7 +110,7 @@ class Orders extends Model
         /* When we create a new order current_total == initial_total */
         $order->current_total = $initialTotal;
         $order->total_items = $totalItems;
-        // if ($request->type == OrderTypeEnum::SAME_DAY_DELIVERY->value) {
+        // if ($request->type == OrderTypeEnum::SUPER_FAST_DELIVERY->value) {
         //     $order->customer_lat = $request->lat;
         //     $order->customer_lon = $request->lon;
         //     $order->customer_name = $request->fName . " " .  $request->lName;

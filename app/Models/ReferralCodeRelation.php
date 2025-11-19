@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReferralCodeRelation extends Model
 {
@@ -25,7 +26,7 @@ class ReferralCodeRelation extends Model
     /**
      * Relations
      */
-    public function referredByUser()
+    public function referredByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'referred_by');
     }
@@ -46,14 +47,13 @@ class ReferralCodeRelation extends Model
         ]);
     }
 
-    public static function getReferralRelationDetails(int $referralRelationId): Collection
+    public static function getReferralRelationDetails(int $id): ReferralCodeRelation
     {
-        return self::with('referredByUser')->where('id', '=', $referralRelationId)->get();
+        return self::with('referredByUser')->where('id', '=', $id)->first();
     }
 
-    public static function updateReferralRelationStatus(int $referralRelationId, int $referralUseable): int
+    public static function updateReferralRelationStatus(int $id, int $referralUseable): int
     {
-        return self::where('id', $referralRelationId)
-            ->update(['referral_useable' => $referralUseable]);
+        return self::where('id', '=', $id)->update(['referral_useable' => $referralUseable]);
     }
 }

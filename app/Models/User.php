@@ -83,9 +83,9 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
-     * The attributes that should be cast to native types.
+     * Get the attributes that should be cast.
      *
-     * @var array
+     * @return array<string, string>
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -565,7 +565,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $updated = self::where('id', '=', $id)->update(['is_active' => $status]);
 
-        if ($status == 1) {
+        if ($status == self::ACTIVE) {
             $user = self::findOrFail($id);
             EmailServices::sendSellerApprovedMail($user);
         }

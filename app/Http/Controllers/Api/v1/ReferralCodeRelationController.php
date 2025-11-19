@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
-use App\Models\ReferralCodeRelation;
 use App\Models\Orders;
+use App\Models\ReferralCodeRelation;
 use App\Services\JsonResponseServices;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -61,14 +61,14 @@ class ReferralCodeRelationController extends Controller
                 config('constants.VALID_REFERRAL'),
                 config('constants.HTTP_OK')
             );
-        } else {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.REFERRALS_ARE_ONLY_FOR_FIRST_ORDER'),
-                config('constants.HTTP_OK')
-            );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            config('constants.REFERRALS_ARE_ONLY_FOR_FIRST_ORDER'),
+            config('constants.HTTP_OK')
+        );
     }
 
     /**
@@ -93,9 +93,9 @@ class ReferralCodeRelationController extends Controller
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public function fetchReferralRelationDetails(int $referral_relation_id)
+    public function fetchReferralRelationDetails(int $referralRelationId)
     {
-        $referral_reltaion_details = ReferralCodeRelation::getReferralRelationDetails($referral_relation_id);
+        $referral_reltaion_details = ReferralCodeRelation::getReferralRelationDetails($referralRelationId);
         if ($referral_reltaion_details->isEmpty()) {
             return JsonResponseServices::getApiResponse(
                 [],

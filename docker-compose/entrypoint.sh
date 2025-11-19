@@ -9,11 +9,11 @@ sleep 1
 # Remove vendor and composer.lock
 # rm -rf /var/www/vendor /var/www/composer.lock
 # # Install dependencies
-# composer install --optimize-autoloader
+# composer install --no-interaction --prefer-dist --optimize-autoloader
 # # Other commands
 # php artisan key:generate
 # php artisan scout:sync-index-settings
-# php artisan scout:import "App\Products"
+# php artisan scout:import "App\Models\Products"
 #################################################################
 # End - Commands to run only once when the container is build
 #################################################################

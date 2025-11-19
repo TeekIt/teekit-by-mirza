@@ -12,7 +12,7 @@
         <div class="row">
             <div class="form-group">
                 <div class="input-group">
-                    <input type="search" wire:model.debounce.500ms="search" class="form-control" placeholder="Search alternative product">
+                    <input type="search" wire:model.live.debounce.500ms="search" class="form-control" placeholder="Search alternative product">
                     <div class="input-group-append">
                         <button class="btn btn-site-primary"><i class='fas fa-search'></i></button>
                     </div>
@@ -72,7 +72,7 @@
                 </span>
             </div>
             <div class="col-md-12 col-lg-10">
-                <form wire:submit.prevent="addProductIntoOrder({{ $productDetails }})" method="POST">
+                <form wire:submit="addProductIntoOrder({{ $productDetails }})" method="POST">
                     <table class="table">
                         <tr>
                             <td class="text-site-primary"><b>Product Name:</b></td>
@@ -97,7 +97,7 @@
                         <tr>
                             <td class="text-site-primary"><b>QTY you want to add:</b></td>
                             <td>
-                                <input type="number" wire:model.defer="selectedQty" class="col-3 form-control">
+                                <input type="number" wire:model="selectedQty" class="col-3 form-control">
                                 @if (session()->has('qty_should_not_be_greater'))
                                     <p class="text-danger">{{ session()->get('qty_should_not_be_greater') }}</p>
                                 @endif

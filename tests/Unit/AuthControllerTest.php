@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use App\Services\StripeServices;
 use App\Models\User;
+use App\Services\StripeServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 class AuthControllerTest extends TestCase
 {
-    public function test_email_verification_with_valid_token()
+    public function test_email_verification_with_valid_token(): void
     {
         // Mock Crypt facade
         Crypt::shouldReceive('decrypt')
@@ -68,7 +68,7 @@ class AuthControllerTest extends TestCase
         });
     }
 
-    public function test_email_verification_with_invalid_token()
+    public function test_email_verification_with_invalid_token(): void
     {
         Crypt::shouldReceive('decrypt')
             ->once()
@@ -91,7 +91,7 @@ class AuthControllerTest extends TestCase
         $this->assertEquals(401, $response->getStatusCode());
     }
 
-    public function test_already_verified_account()
+    public function test_already_verified_account(): void
     {
         Crypt::shouldReceive('decrypt')
             ->once()
@@ -121,7 +121,7 @@ class AuthControllerTest extends TestCase
         $this->assertEquals('Account already verified', $response->getContent());
     }
 
-    public function test_email_verification_endpoint()
+    public function test_email_verification_endpoint(): void
     {
         Mail::fake();
 

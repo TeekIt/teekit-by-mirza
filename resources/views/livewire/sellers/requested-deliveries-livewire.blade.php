@@ -77,14 +77,14 @@
     <div class="content">
         <div class="content-header">
             <div class="container pt-4">
-                <form wire:submit.prevent="render">
+                <form wire:submit="render">
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="row">
                                 <div class="col-lg-8 col-sm-12 col-md-8">
                                     <div class="row">
                                         <div class="col-12 col-sm-12">
-                                            <input type="date" wire:model.defer="search" class="form-control mb-2">
+                                            <input type="date" wire:model="search" class="form-control mb-2">
                                         </div>
                                     </div>
                                 </div>

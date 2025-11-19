@@ -22,7 +22,7 @@
     <div class="content">
         <div class="content-header">
             <div class="container pt-4">
-                <form wire:submit.prevent="render">
+                <form wire:submit="render">
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="row">
@@ -50,7 +50,7 @@
                                         <h4 class="text-center text-site-primary">Request Delivery For Buyer</h4>
                                     </div>
                                     <div class="col-md-12">
-                                        <form wire:submit.prevent="requestDelivery" method="POST"
+                                        <form wire:submit="requestDelivery" method="POST"
                                             enctype="multipart/form-data">
                                             {{ csrf_field() }}
                                             <div class="my-3">
@@ -58,7 +58,7 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
-                                                                wire:model.defer="pickupAddress"
+                                                                wire:model="pickupAddress"
                                                                 wire:change="inputFieldChanged" id="pickupAddress"
                                                                 placeholder="Pickup Address*" required>
                                                         </div>
@@ -71,7 +71,7 @@
                                                     <div class="col-md-12 mt-3">
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
-                                                                wire:model.defer="dropoffAddress"
+                                                                wire:model="dropoffAddress"
                                                                 wire:change="inputFieldChanged" id="dropoffAddress"
                                                                 placeholder="Dropoff Address*" required>
                                                         </div>
@@ -84,7 +84,7 @@
                                                     <div class="col-md-12 mb-3">
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
-                                                                wire:model.defer="unitAddress" id="unitAddress"
+                                                                wire:model="unitAddress" id="unitAddress"
                                                                 placeholder="Unit Address (e.g Flat#)" required>
                                                         </div>
                                                         <small class="text-danger">
@@ -97,10 +97,10 @@
                                                     {{-- Dropoff Lat, Lons fields --}}
                                                     <div class="col-md-6">
                                                         <input type="hidden" class="form-control"
-                                                            wire:model.defer="dropoffLat" id="dropoffLat"
+                                                            wire:model="dropoffLat" id="dropoffLat"
                                                             placeholder="Latitude" required>
                                                         <input type="hidden" class="form-control"
-                                                            wire:model.defer="dropoffLon" id="dropoffLon"
+                                                            wire:model="dropoffLon" id="dropoffLon"
                                                             placeholder="Longitude" required>
                                                     </div>
                                                 </div>
@@ -111,7 +111,7 @@
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
-                                                                wire:model.defer="receiverName"
+                                                                wire:model="receiverName"
                                                                 placeholder="Buyer Name*" required>
                                                         </div>
                                                         <small class="text-danger">
@@ -123,7 +123,7 @@
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <input type="number" class="form-control"
-                                                                wire:model.defer="receiverPhone"
+                                                                wire:model="receiverPhone"
                                                                 placeholder="Buyer Contact*" required>
                                                         </div>
                                                         <small class="text-danger">
@@ -135,7 +135,7 @@
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <input type="email" class="form-control"
-                                                                wire:model.defer="receiverEmail"
+                                                                wire:model="receiverEmail"
                                                                 placeholder="Buyer Email*" required>
                                                         </div>
                                                         <small class="text-danger">
@@ -152,7 +152,7 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <select class="form-control"
-                                                                wire:model.defer="packageTransportType"
+                                                                wire:model="packageTransportType"
                                                                 wire:change="changePackageWeight" required>
                                                                 <option value="">
                                                                     Package Transport Type*
@@ -183,7 +183,7 @@
                                                     <div class="col-md-6">
                                                         <div class="form-group">
                                                             <select class="form-control"
-                                                                wire:model.defer="packageWeight"
+                                                                wire:model="packageWeight"
                                                                 wire:change="inputFieldChanged" required>
                                                                 <option value="">Package Weight (Kg)*</option>
                                                                 <optgroup label="Small">

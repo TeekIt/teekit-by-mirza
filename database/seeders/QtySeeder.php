@@ -9,10 +9,8 @@ class QtySeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         Qty::factory()->count(5)->create();
     }

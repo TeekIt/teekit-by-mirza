@@ -25,13 +25,13 @@
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form wire:submit.prevent="customProductOrderIsAccepted" method="post">
+                <form wire:submit="customProductOrderIsAccepted" method="post">
                     <div class="modal-body">
                         <div class="col-12 mb-3">
                             <label>Price By Seller</label>
                             <div class="form-group">
                                 <input type="number" class="form-control" placeholder="Enter your price"
-                                    wire:model.defer="priceBySeller"
+                                    wire:model="priceBySeller"
                                     max="{{ $this->getProductPrice($selectedOrder) }}">
                             </div>
                             <small class="text-danger">
@@ -80,7 +80,7 @@
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form wire:submit.prevent="cancelOrder({{ $orderId }})" method="post">
+                <form wire:submit="cancelOrder({{ $orderId }})" method="post">
                     <div class="modal-body">
                         <div class="text-center">
                             <h2>Attention!!</h2>
@@ -115,7 +115,7 @@
     <div wire:ignore.self class="modal fade" id="stuartModal" tabindex="-1">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form wire:submit.prevent="assignToStuartDriver">
+                <form wire:submit="assignToStuartDriver">
                     {{ csrf_field() }}
                     <div class="modal-header">
                         <h5 class="modal-title display-center">Add Custom Order Id</h5>
@@ -129,7 +129,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label>Order #</label>
-                                    <input type="text" wire:model.defer="customOrderId"
+                                    <input type="text" wire:model="customOrderId"
                                         placeholder="Enter custom order id or leave blank..." class="form-control"
                                         autofocus>
                                 </div>
@@ -161,7 +161,7 @@
     <div wire:ignore.self class="modal fade" id="gophrModal" tabindex="-1">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form wire:submit.prevent="assignToGophrDriver">
+                <form wire:submit="assignToGophrDriver">
                     {{ csrf_field() }}
                     <div class="modal-header">
                         <h5 class="modal-title display-center">Gophr Delivery</h5>
@@ -175,7 +175,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label>Add Aditional Notes (Optional)</label>
-                                    <input type="text" wire:model.defer="additionalParcelDescription"
+                                    <input type="text" wire:model="additionalParcelDescription"
                                         placeholder="Enter additional notes here if any..." class="form-control"
                                         autofocus>
                                 </div>
@@ -313,7 +313,10 @@
                             @endif
                         @endif
 
-                        @if ($order->type === OrderTypeEnum::SAME_DAY_DELIVERY->value)
+                        @if (
+                            $order->type === OrderTypeEnum::SUPER_FAST_DELIVERY->value || 
+                            $order->type === OrderTypeEnum::SAME_DAY_DELIVERY->value
+                        )
                             @if ($order->order_status === OrderStatusEnum::ACCEPTED->value)
                                 <!-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#stuartModal" wire:click="renderStuartModal({{ $order->id }})" wire:target="renderStuartModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to Stuart delivery boy">
                                                         <span wire:target="renderStuartModal({{ $order->id }})" wire:loading.remove>

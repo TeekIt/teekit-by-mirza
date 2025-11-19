@@ -1,3 +1,4 @@
+{{-- Plain layout for displaying important msg pages --}}
 <!DOCTYPE html>
 <html lang="en">
 

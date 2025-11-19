@@ -9,10 +9,8 @@ class GophrDeliverySeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         GophrDelivery::factory()->count(10)->create();
     }

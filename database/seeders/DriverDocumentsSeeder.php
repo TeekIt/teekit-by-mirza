@@ -9,10 +9,8 @@ class DriverDocumentsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         DriverDocument::factory()->count(5)->create();
     }

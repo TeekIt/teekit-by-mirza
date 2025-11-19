@@ -9,11 +9,10 @@ class DriverSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
+        /* You can contribute to Laravel in this line */
         Driver::factory()->count(5)->create();
     }
 }

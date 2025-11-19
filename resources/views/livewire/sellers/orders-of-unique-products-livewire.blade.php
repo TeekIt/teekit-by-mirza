@@ -12,12 +12,12 @@
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form wire:submit.prevent="acceptedBySeller" method="post">
+                <form wire:submit="acceptedBySeller" method="post">
                     <div class="modal-body">
                         <div class="col-12 mb-3">
                             <label>Price By Seller</label>
                             <div class="form-group">
-                                <input type="number" class="form-control" placeholder="Enter your price" wire:model.defer="priceBySeller" max="{{ $this->selectedOrder?->order_items[0]->product_price }}">
+                                <input type="number" class="form-control" placeholder="Enter your price" wire:model="priceBySeller" max="{{ $this->selectedOrder?->order_items[0]->product_price }}">
                             </div>
                             <small class="text-danger">
                                 @error('priceBySeller')
@@ -59,7 +59,7 @@
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form wire:submit.prevent="cancelOrder({{ $orderId }})" method="post">
+                <form wire:submit="cancelOrder({{ $orderId }})" method="post">
                     <div class="modal-body">
                         <div class="text-center">
                             <h2>Attention!!</h2>
