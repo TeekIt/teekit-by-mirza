@@ -161,7 +161,7 @@ class RegisterController extends Controller
 
         if ($user instanceof User) {
             echo 'User Created';
-
+            dd($user);
             EmailServices::sendNewSellerMail(
                 $user,
                 $user->role_id,
