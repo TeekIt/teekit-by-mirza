@@ -7,6 +7,7 @@ use App\Http\Middleware\JwtMiddleware;
 use App\Http\Middleware\TransactionWrapper;
 use App\Providers\AppServiceProvider;
 use App\Services\JsonResponseServices;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,6 +20,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jenssegers\Agent\AgentServiceProvider;
 use PrettyRoutes\ServiceProvider;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tymon\JWTAuth\Providers\LaravelServiceProvider;
 
@@ -29,15 +31,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ServiceProvider::class,
     ])
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
-        channels: __DIR__.'/../routes/channels.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
+        channels: __DIR__ . '/../routes/channels.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->redirectGuestsTo(fn () => route('login'));
-        
+        $middleware->redirectGuestsTo(fn() => route('login'));
+
         $middleware->redirectUsersTo(AppServiceProvider::HOME);
 
         $middleware->append(CheckForMaintenanceMode::class);
@@ -75,6 +77,17 @@ return Application::configure(basePath: dirname(__DIR__))
                 session()->invalidate();
 
                 return redirect()->route('home');
+            }
+        });
+
+        $exceptions->renderable(function (AccessDeniedHttpException $error, $request) {
+            if ($request->is('api/*')) {
+                return JsonResponseServices::getApiResponse(
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    config('constants.UNAUTHORIZED_ACTION'),
+                    config('constants.HTTP_FORBIDDEN')
+                );
             }
         });
 

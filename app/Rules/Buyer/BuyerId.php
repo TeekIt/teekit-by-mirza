@@ -17,6 +17,6 @@ class BuyerId implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         (User::getUserRole((int) $value)->first() == UserRoleEnum::BUYER->value) ?:
-        $fail('Invalid buyer id, this id does not belongs to any buyer');
+            $fail('Invalid buyer id, this id does not belongs to any buyer');
     }
 }

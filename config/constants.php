@@ -99,6 +99,7 @@ return [
     'INTERNAL_SERVER_ERROR' => 'Sorry! This operation has been failed due to some internal server error',
     'DELIVERY_FAILED' => 'Sorry! Due to some internal error we are failed to initiate your delivery',
     'SEARCH_FAILED' => 'Sorry! We could not find any results against your search',
+    'UNAUTHORIZED_ACTION' => 'This action is unauthorized for you because this resource belongs to someone else',
     /*
     |--------------------------------------------------------------------------
     | General Messages Constants

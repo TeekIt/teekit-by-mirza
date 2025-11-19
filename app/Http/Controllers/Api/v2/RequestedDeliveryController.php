@@ -13,7 +13,7 @@ class RequestedDeliveryController extends Controller
     {
         $validatedData = (object) $request->validated();
 
-        $pagination = RequestedDelivery::getForApi(
+        $pagination = RequestedDelivery::getForView(
             orderBy: 'desc',
             creatorId: $validatedData->buyerId,
             columns: [

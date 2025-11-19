@@ -8,16 +8,16 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ListRequestedDeliveryRequest extends FormRequest
 {
-    function __construct(protected RequestedDeliveryPolicy $requestedDeliveryPolicy)
-    {
-    }
+    function __construct(protected RequestedDeliveryPolicy $requestedDeliveryPolicy) {}
 
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->requestedDeliveryPolicy->viewAny($this->route('buyerId'));
+        return $this->requestedDeliveryPolicy->viewAny((int) $this['buyerId']);
+
+        // return $this->requestedDeliveryPolicy->viewAny($this->route('buyerId'));
     }
 
     /**
@@ -26,7 +26,7 @@ class ListRequestedDeliveryRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'buyerId' => $this->route('buyerId'),
+            'buyerId' => $this['buyerId'],
         ]);
     }
 
