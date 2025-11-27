@@ -422,7 +422,26 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function getParentAndChildSellersByCityAndCategory(
+    public static function getActiveAndBlockedParentAndChildSellersByCityAndCategory(
+        string $city,
+        int $categoryId,
+        int $exceptSellerId,
+        int $numberOfRows = 25
+    ): Collection {
+        return self::whereHas('qty', function ($qtyRelation) use ($categoryId) {
+                $qtyRelation->where('category_id', '=', $categoryId);
+            })
+            ->WhereRoleIsParentOrChildSeller()
+            ->whereNotNull('lat')
+            ->whereNotNull('lon')
+            ->where('city', '=', $city)
+            ->where('id', '!=', $exceptSellerId)
+            ->orderBy('business_name', 'asc')
+            ->take($numberOfRows)
+            ->get();
+    }
+
+    public static function getActiveParentAndChildSellersByCityAndCategory(
         string $city,
         int $categoryId,
         int $exceptSellerId,

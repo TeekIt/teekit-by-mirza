@@ -126,7 +126,7 @@ class OrdersLivewire extends Component
         return Cache::remember(
             'getSellersOfSameCityAndCategory' . $this->sellerId,
             Carbon::now()->addDay(),
-            fn() => User::getParentAndChildSellersByCityAndCategory(
+            fn() => User::getActiveParentAndChildSellersByCityAndCategory(
                 auth()->user()->city,
                 $this->orderItem->product->category_id,
                 $this->sellerId,
