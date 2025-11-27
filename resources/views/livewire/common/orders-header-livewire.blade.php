@@ -424,21 +424,58 @@
             </tr>
         </thead>
         <tbody>
+            @if (User::isSuperAdmin())
+                <tr>
+                    <td colspan="8">
+                        <div class="accordion" id="sellerAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="sellerAccordionHeading">
+                                    <button class="accordion-button collapsed text-site-primary" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#collapseSellerAccordion{{ $order->id }}"
+                                        aria-expanded="false" aria-controls="collapseSellerAccordion{{ $order->id }}">
+                                        <h5>Seller Details</h5>
+                                    </button>
+                                </h2>
+                                <div id="collapseSellerAccordion{{ $order->id }}" class="accordion-collapse collapse"
+                                    aria-labelledby="sellerAccordionHeading" data-bs-parent="#sellerAccordion">
+                                    <div class="accordion-body">
+                                        <div>
+                                            <table class="table table-striped table-responsive-sm">
+                                                <tr>
+                                                    <td><b>Name</b></td>
+                                                    <td>{{ $order->seller->business_name }}</td>
+                                                    <td><b>Contact</b></td>
+                                                    <td>{{ $order->seller->country_code }} {{ $order->seller->business_phone }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Address</b></td>
+                                                    <td colspan="3">{{ $order->seller->full_address }}</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            @endif
+
             <tr>
                 <td colspan="8">
-                    <div class="accordion" id="accordionExample">
+                    <div class="accordion" id="customerAccordion">
                         <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingTwo">
+                            <h2 class="accordion-header" id="cutomerAccordionHeading">
                                 <button class="accordion-button collapsed text-site-primary" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#collapse{{ $order->id }}"
-                                    aria-expanded="false" aria-controls="collapse{{ $order->id }}">
+                                    data-bs-toggle="collapse" data-bs-target="#collapseCustomerAccordion{{ $order->id }}"
+                                    aria-expanded="false" aria-controls="collapseCustomerAccordion{{ $order->id }}">
                                     <h5>Customer Details</h5>
                                 </button>
                             </h2>
-                            <div id="collapse{{ $order->id }}" class="accordion-collapse collapse"
-                                aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                            <div id="collapseCustomerAccordion{{ $order->id }}" class="accordion-collapse collapse"
+                                aria-labelledby="cutomerAccordionHeading" data-bs-parent="#customerAccordion">
                                 <div class="accordion-body">
-                                    <div class="">
+                                    <div>
                                         <table class="table table-striped table-responsive-sm">
                                             <tr>
                                                 <td><b>Name</b></td>
@@ -474,13 +511,9 @@
                 <td>{{ DateTimeServices::getDateOnly($order->created_at) }}</td>
                 <td><b>Time</b></td>
                 <td>{{ DateTimeServices::getTimeOnlyWithOutSeconds($order->created_at) }}</td>
-                {{-- <td><b>Order Status</b></td>
-                <td><span class="badge badge-warning">{{ $order->order_status }}</span></td> --}}
             </tr>
 
             <tr>
-                {{-- <td><b>Placed At</b></td>
-                <td>{{ $order->created_at }}</td> --}}
                 <td><b>Order Type</b></td>
                 <td><span class="badge badge-info">{{ $order->type }}</span></td>
                 <td><b>Order Status</b></td>
@@ -488,30 +521,6 @@
                 <td colspan="2"><b>Payment Status</b></td>
                 <td colspan="2"><span class="badge badge-primary">{{ $order->payment_status }}</span></td>
             </tr>
-
-            <tr>
-                {{-- <td><b>Order Total</b></td>
-                <td>£{{ $order->current_total }}</td> --}}
-                {{-- <td><b>Payment Status</b></td>
-                <td><span class="badge badge-primary">{{ $order->payment_status }}</span></td> --}}
-            </tr>
-
-            {{-- <tr>
-                <th colspan="4">
-                    <h5>Customer Details</h5>
-                </th>
-            </tr>
-
-            <tr>
-                <td><b>Name</b></td>
-                <td>{{ $order->customer_name }}</td>
-                <td><b>Contact</b></td>
-                <td>{{ $order->phone_number }}</td>
-            </tr>
-            <tr>
-                <td><b>Address</b></td>
-                <td colspan="3">{{ $order->address }}</td>
-            </tr> --}}
 
             <tr>
                 <th colspan="8">

@@ -286,7 +286,7 @@ class Orders extends Model
             static::isViewed($orderId);
         }
         /* Now we will fetch the required data */
-        $orders = self::with(['order_items.product'])
+        $orders = self::with(['order_items.product', 'seller'])
             ->when($orderId, function ($query) use ($orderId) {
                 return $query->where('id', '=', $orderId);
             })
@@ -308,7 +308,7 @@ class Orders extends Model
         return $orders;
     }
 
-    public static function getOrdersForView(string $orderBy, int $sellerId, ?int $orderId = null): LengthAwarePaginator
+    public static function getOrdersForSellerView(string $orderBy, int $sellerId, ?int $orderId = null): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) {

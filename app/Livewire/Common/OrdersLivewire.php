@@ -302,7 +302,7 @@ class OrdersLivewire extends Component
     {
         try {
             if (! User::isSuperAdmin()) {
-                $data = Orders::getOrdersForView(
+                $data = Orders::getOrdersForSellerView(
                     orderId: $this->isSearchByIdSet(),
                     sellerId: $this->sellerId,
                     orderBy: 'desc',
