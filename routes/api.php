@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\v1\WithdrawalRequestController;
 use App\Http\Controllers\Api\v2\GophrDeliveryController;
 use App\Http\Controllers\Api\v2\RequestedDeliveryController;
 use App\Http\Controllers\Api\v2\StuartDeliveryController;
+use App\Http\Controllers\Api\v2\SuperWallPackageController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -46,7 +47,7 @@ Route::middleware('transaction.wrapper')->group(function () {
 |--------------------------------------------------------------------------
 */
     Route::prefix('auth')->controller(AuthController::class)->group(function () {
-        Route::post('login', 'loginBuyer');
+        Route::post('login', 'login');
         Route::post('login_google', 'loginBuyerFromGoogle');
         Route::post('register', 'registerBuyer');
         Route::post('register_google', 'registerBuyerFromGoogle');
@@ -236,6 +237,13 @@ Route::middleware('transaction.wrapper')->group(function () {
             Route::get('list/{buyerId}', 'list');
         });
 
+        Route::prefix('super_wall_package')->controller(SuperWallPackageController::class)->group(function () {
+            Route::post('create', 'store');
+            Route::get('list', 'list');
+            Route::get('list/{superWallPackageId}', 'listById');
+            Route::put('update/{superWallPackageId}', 'update');
+            Route::delete('delete/{superWallPackageId}', 'destroy');
+        });
         // Route::get('keys', [AuthController::class, 'keys']);
     });
     /*

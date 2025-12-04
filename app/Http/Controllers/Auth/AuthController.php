@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\ModelDisabledStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\BuyerResource;
@@ -70,32 +71,35 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function loginBuyer(Request $request)
+    public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
         if (! $token = JWTAuth::attempt($credentials)) {
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.FALSE_STATUS'),
-                'message' => config('constants.INVALID_CREDENTIALS'),
-            ], 401);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                config('constants.INVALID_CREDENTIALS'),
+                config('constants.HTTP_UNAUTHORIZED')
+            );
         }
 
         $user = JWTAuth::user();
         if ($user->email_verified_at == null) {
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.FALSE_STATUS'),
-                'message' => config('constants.EMAIL_NOT_VERIFIED'),
-            ], 401);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                config('constants.EMAIL_NOT_VERIFIED'),
+                config('constants.HTTP_UNAUTHORIZED')
+            );
         }
 
-        if ($user->is_active == 0) {
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.FALSE_STATUS'),
-                'message' => config('constants.ACCOUNT_DEACTIVATED'),
-            ], 401);
+        if ($user->is_active == User::BLOCK) {
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                config('constants.ACCOUNT_DEACTIVATED'),
+                config('constants.HTTP_UNAUTHORIZED')
+            );
         }
 
         $this->authenticated($request, $user, $token);
@@ -143,35 +147,33 @@ class AuthController extends Controller
      */
     public function changePassword(Request $request)
     {
-        $validate = Validator::make($request->all(), [
-            'password' => 'required',
+        $validatedData = Validator::make($request->all(), [
+            'password' => 'required|string',
         ]);
 
-        if ($validate->fails()) {
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.FALSE_STATUS'),
-                'message' => $validate->errors(),
-            ], 422);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        $User = JWTAuth::user();
-        if ($User) {
-            $User->password = Hash::make($request->password);
-            $User->save();
+        $user = JWTAuth::user();
+        if ($user) {
+            $user->password = Hash::make($request->password);
+            $user->save();
 
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.TRUE_STATUS'),
-                'message' => 'Password changed successfully.',
-            ], config('constants.HTTP_OK'));
-        } else {
-            return response()->json([
-                'data' => [],
-                'status' => config('constants.FALSE_STATUS'),
-                'message' => 'User not found.',
-            ], 404);
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.TRUE_STATUS'),
+                'Password changed successfully.',
+                config('constants.HTTP_OK')
+            );
         }
+
+        return JsonResponseServices::getApiResponse(
+            [],
+            config('constants.FALSE_STATUS'),
+            'User not found.',
+            config('constants.HTTP_UNPROCESSABLE_REQUEST')
+        );
     }
 
     /**
@@ -276,11 +278,12 @@ class AuthController extends Controller
             'expires_in' => JWTAuth::factory()->getTTL() * 60,
         ];
 
-        return response()->json([
-            'data' => $data,
-            'status' => config('constants.TRUE_STATUS'),
-            'message' => config('constants.LOGIN_SUCCESS'),
-        ], config('constants.HTTP_OK'));
+        return JsonResponseServices::getApiResponse(
+            $data,
+            config('constants.TRUE_STATUS'),
+            config('constants.LOGIN_SUCCESS'),
+            config('constants.HTTP_OK')
+        );
     }
 
     protected function authenticated($request, $user, $token)
