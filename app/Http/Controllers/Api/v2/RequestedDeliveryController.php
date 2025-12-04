@@ -38,7 +38,7 @@ class RequestedDeliveryController extends Controller
 
         /*
          * Just creating this variable so we don't have to call the "empty()" function again & again
-         * Which will obviouly decrease the API response speed
+         * Because it will increase the API response time
          */
         $dataIsEmpty = empty($data);
 

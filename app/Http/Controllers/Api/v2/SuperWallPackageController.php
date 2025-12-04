@@ -48,10 +48,16 @@ class SuperWallPackageController extends Controller
             orderBy: OrderByEnum::from($validatedData->orderBy)
         );
 
+        /*
+        * Just creating this variable so we don't have to call the "empty()" function again & again
+        * Because it will increase the API response time
+        */
+        $dataIsEmpty = $data->isEmpty();
+
         return JsonResponseServices::getApiResponse(
-            $data,
-            config('constants.TRUE_STATUS'),
-            '',
+            ($dataIsEmpty) ? [] : $data,
+            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
             config('constants.HTTP_OK')
         );
     }
