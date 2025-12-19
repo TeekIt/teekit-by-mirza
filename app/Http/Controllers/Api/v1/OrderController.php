@@ -8,7 +8,7 @@ use App\Enums\TransportVehicleEnum;
 use App\Enums\UserChoicesEnum;
 use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
-use App\Jobs\SendCustomProductOrderDetailsToNearBySellersJob;
+use App\Jobs\MoveOrderToOtherNearBySellersJob;
 use App\Models\GuestBuyer;
 use App\Models\OrderItems;
 use App\Models\Orders;
@@ -358,14 +358,12 @@ class OrderController extends Controller
                 );
             }
         }
-
-        /* Email order details to nearby sellers */
-        // SendCustomProductOrderDetailsToNearBySellersJob::dispatch(
-        //     $request->lat,
-        //     $request->lon,
-        //     $seller,
-        //     $order
-        // )->onQueue('high');
+        
+        MoveOrderToOtherNearBySellersJob::dispatch(
+            $order,
+            $seller
+        )->onQueue('high')
+        ->delay(now()->addMinutes(5));
 
         $idsArray[] = $order->id;
 

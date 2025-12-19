@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class CustomProductOrderDetailsToNearBySellersMail extends Mailable
+class ProductByBuyerOrderDetailsToNearBySellersMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -34,7 +34,7 @@ class CustomProductOrderDetailsToNearBySellersMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.custom_product_order_details_to_near_by_sellers_mail',
+            markdown: 'emails.product_by_buyer_order_details_to_near_by_sellers_mail',
             with: [
                 'order' => $this->order,
             ]

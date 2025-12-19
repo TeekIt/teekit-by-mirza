@@ -41,16 +41,16 @@ class OrdersFromOtherSellersLivewire extends Component
     public function getSellersOfSameCity()
     {
         return Cache::remember(
-            'getSellersOfSameCity'.$this->sellerId,
+            'getSellersOfSameCity' . $this->sellerId,
             Carbon::now()->addDay(),
-            fn () => User::getParentAndChildSellersByCity(auth()->user()->city)
+            fn() => User::getParentAndChildSellersByCity(auth()->user()->city)
         );
     }
 
     public function getNearBySellers($customer_lat, $customer_lon, $sellers_of_same_city)
     {
         return Cache::remember(
-            'getNearBySellers'.$this->sellerId.$customer_lat.$customer_lon,
+            'getNearBySellers' . $this->sellerId . $customer_lat . $customer_lon,
             Carbon::now()->addDay(),
             function () use ($sellers_of_same_city) {
                 /*
@@ -59,7 +59,12 @@ class OrdersFromOtherSellersLivewire extends Component
                 * customer lat, lon
                 * $nearby_sellers = GoogleMapServices::findNearByUsersByMakingChunks($customer_lat, $customer_lon, $sellers_of_same_city, 10);
                 */
-                return GoogleMapServices::findNearByUsersByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellers_of_same_city, 10);
+                return GoogleMapServices::findNearByUsersByMakingChunks(
+                    auth()->user()->lat,
+                    auth()->user()->lon,
+                    $sellers_of_same_city,
+                    10
+                );
             }
         );
     }
@@ -77,31 +82,31 @@ class OrdersFromOtherSellersLivewire extends Component
     {
         try {
             /* Perform some operation */
-
-            /* Get sellers who belongs to the city of this store owner */
-            $sellersOfSameCity = $this->getSellersOfSameCity();
-            /* Get sellers who are nearby to the order-placing buyer */
-            $nearbySellers = $this->getNearBySellers($customerLat, $customerLon, $sellersOfSameCity);
-
-            if (empty($nearbySellers)) {
-                return $this->noNearBySellers($orderId);
-            }
-
-            $randomIndex = array_rand($nearbySellers, 1);
             /* Update sellerId if the current order is older than 2 minutes */
             $moved = false;
-            if ($this->isTheOrderOlderThen($this->orderHoldingMinutes, $movedAt) && $orderStatus === 'pending') {
-                $moved = OrdersFromOtherSeller::moveToAnotherSeller($orderId, $nearbySellers[$randomIndex]['id']);
-                OrdersFromOtherSeller::incrementTimesRejected($orderId);
-            }
+            if ($this->isTheOrderOlderThen($this->orderHoldingMinutes, $movedAt) && $orderStatus === OrderStatusEnum::PENDING->value) {
+                // /* Get sellers who belongs to the city of this store owner */
+                // $sellersOfSameCity = $this->getSellersOfSameCity();
+                // /* Get sellers who are nearby to the order-placing buyer */
+                // $nearbySellers = $this->getNearBySellers($customerLat, $customerLon, $sellersOfSameCity);
 
+                // if (empty($nearbySellers)) {
+                //     return $this->noNearBySellers($orderId);
+                // }
+
+                // $randomIndex = array_rand($nearbySellers, 1);
+
+                // $moved = OrdersFromOtherSeller::moveToAnotherSeller($orderId, $nearbySellers[$randomIndex]['id']);
+
+                // OrdersFromOtherSeller::incrementTimesRejected($orderId);
+            }
             /* Operation finished */
-            if ($orderStatus === 'pending') {
-                if ($moved) {
-                    session()->flash('success', 'Order#'.$orderId.' has been moved to another seller');
-                } else {
-                    session()->flash('warning', 'Soon Order#'.$orderId.' will be moved to another seller');
-                }
+            sleep(1);
+
+            if ($moved) {
+                session()->flash('success', 'Order#' . $orderId . ' has been moved to another seller');
+            } else {
+                session()->flash('warning', 'Soon Order#' . $orderId . ' will be moved to another seller');
             }
         } catch (Exception $error) {
             report($error);
@@ -128,14 +133,14 @@ class OrdersFromOtherSellersLivewire extends Component
             OrdersFromOtherSeller::incrementTimesRejected($orderId);
             $moved = OrdersFromOtherSeller::moveToAnotherSeller($orderId, $nearbySellers[$randomIndex]['id']);
 
-            info('The current order has been sent to seller: '.$nearbySellers[$randomIndex]['id']);
+            info('The current order has been sent to seller: ' . $nearbySellers[$randomIndex]['id']);
             /* Operation finished */
             sleep(1);
 
             if ($moved) {
-                session()->flash('success', 'Order#'.$orderId.' has been moved to another seller.');
+                session()->flash('success', 'Order#' . $orderId . ' has been moved to another seller.');
             } else {
-                session()->flash('warning', 'Sorry! Order#'.$orderId.' has not been moved to another seller due to some technical error.');
+                session()->flash('warning', 'Sorry! Order#' . $orderId . ' has not been moved to another seller due to some technical error.');
             }
         } catch (Exception $error) {
             report($error);

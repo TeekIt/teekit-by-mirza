@@ -23,7 +23,7 @@ final class StripeServices
     public static function calculateCharge(int $amount, string $currency = 'GBP'): int
     {
         /* Convert to Cents or lowest unit of given Currency according to Stripe standards */
-        return bcmul($amount, 100, 0);
+        return (int) bcmul($amount, 100, 0);
     }
 
     public static function getSingleChargeCheckoutForm(

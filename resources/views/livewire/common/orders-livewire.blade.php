@@ -3,7 +3,6 @@
     @php
         use App\Enums\UserChoicesEnum;
         use App\Enums\OrderStatusEnum;
-        use App\Enums\OrderTypeEnum;
         use App\Models\ProductsByBuyer;
         use App\Models\Products;
         use App\Models\User;

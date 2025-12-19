@@ -4,10 +4,10 @@ namespace App\Services;
 
 use App\Enums\UserRoleEnum;
 use App\Mail\BuyerVerificationMail;
-use App\Mail\CustomProductOrderDetailsToNearBySellersMail;
 use App\Mail\NewSellerRegistrationMail;
 use App\Mail\OrderIsCanceledMail;
 use App\Mail\OrderIsReadyForPickupMail;
+use App\Mail\ProductByBuyerOrderDetailsToNearBySellersMail;
 use App\Mail\RegeneratedStripeConnectAccMail;
 use App\Mail\SellerApprovedMail;
 use App\Mail\StoreRegisterMail;
@@ -41,9 +41,9 @@ final class EmailServices
         Mail::to($user->email)->send(new StripeConnectAccMail($user, $response->url));
     }
 
-    public static function sendCustomProductOrderDetailsToNearBySellersMail(array $nearBySellersEmails, Orders $order)
+    public static function sendProductByBuyerOrderDetailsToNearBySellersMail(array $nearBySellersEmails, Orders $order)
     {
-        Mail::to('azim@teekit.co.uk')->bcc($nearBySellersEmails)->send(new CustomProductOrderDetailsToNearBySellersMail($order));
+        Mail::to('azim@teekit.co.uk')->bcc($nearBySellersEmails)->send(new ProductByBuyerOrderDetailsToNearBySellersMail($order));
     }
 
     public static function sendBuyerAccVerificationMail(User $user)

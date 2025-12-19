@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrderByEnum;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\TransportVehicleEnum;
@@ -155,7 +156,7 @@ class Orders extends Model
     public static function subFromOrderTotal(int $orderId, float $prodTotalPrice): bool
     {
         $order = self::find($orderId);
-        $order->initial_total -= $prodTotalPrice;
+        $order->current_total -= $prodTotalPrice;
 
         return $order->save();
     }
@@ -254,7 +255,23 @@ class Orders extends Model
             ->paginate(20);
     }
 
-    public static function getOrdersOfUniqueProductsForView(
+    public static function getOrdersOfUniqueProductsForCommand(
+        OrderByEnum $orderBy,
+        array $columns = ['*'],
+    ): Collection {
+        /* Now we will fetch the required data */
+        return self::select($columns)
+            ->with(['order_items.product'])
+            ->whereHas('order_items', function ($orderItemsQuery) {
+                $orderItemsQuery->where('product_belongs_to_type', (new ProductsByBuyer)->getMorphClass());
+            })
+            ->where('order_status', '=', OrderStatusEnum::PENDING->value)
+            ->where('created_at', '<=', now()->subMinutes(5))
+            ->orderBy('created_at', $orderBy->value)
+            ->get();
+    }
+
+     public static function getOrdersOfUniqueProductsForView(
         int $sellerId,
         string $orderBy,
         ?int $orderId = null,
