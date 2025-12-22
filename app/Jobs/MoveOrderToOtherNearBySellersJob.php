@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Actions\MoveOrderToOtherNearBySellersAction;
+use App\Actions\Orders\MoveOrderToOtherNearBySellersAction;
 use App\Models\Orders;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;

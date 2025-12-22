@@ -11,7 +11,7 @@ final class SellerServices
      *
      * @author Muhammad Abdullah Mirza
      */
-    public static function getStandardSellerInfo(object $seller, ?array $mapApiResult = null)
+    public static function getStandardSellerInfo(object $seller, ?array $mapApiResult = null): array
     {
         $data = [
             'id' => $seller->id,

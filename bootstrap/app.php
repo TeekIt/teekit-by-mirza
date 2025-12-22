@@ -7,7 +7,6 @@ use App\Http\Middleware\JwtMiddleware;
 use App\Http\Middleware\TransactionWrapper;
 use App\Providers\AppServiceProvider;
 use App\Services\JsonResponseServices;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;

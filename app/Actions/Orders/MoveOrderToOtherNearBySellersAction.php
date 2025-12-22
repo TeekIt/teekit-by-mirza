@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions;
+namespace App\Actions\Orders;
 
 use App\Enums\OrderStatusEnum;
 use App\Jobs\SendProductByBuyerOrderDetailsToNearBySellersJob;
@@ -46,18 +46,19 @@ final class MoveOrderToOtherNearBySellersAction
             $this->setProductType($this->order);
 
             if ($this->productType == (new ProductsByBuyer)->getMorphClass()) {
-                $this->setNearbySellers($this->seller, $this->order);
+                $this->updateInitialTotal();
+                $this->setNearbySellers($this->seller);
                 $this->moveOrderToNearbySellers($this->nearbySellers);
             }
 
-            if ($this->productType == (new Products)->getMorphClass() && isset($orderItem)) {
-                $this->moveOrderItemToGivenNearBySeller($orderItem, $this->order, $seller->id);
+            if ($this->productType == (new Products)->getMorphClass() && isset($this->orderItem)) {
+                $this->moveOrderItemToGivenNearBySeller($this->seller->id);
             }
         }
 
         if ($this->order instanceof OrdersFromOtherSeller && $this->getOrderStatus() == OrderStatusEnum::PENDING->value) {
-            $this->setNearbySellers($seller, $this->order);
-            $this->moveOrderToRandomNearBySeller($this->order, $this->nearbySellers);
+            $this->setNearbySellers($this->seller);
+            $this->moveOrderFromOtherSellerToRandomNearBySeller($this->nearbySellers);
         }
 
         return true;
@@ -70,14 +71,14 @@ final class MoveOrderToOtherNearBySellersAction
             $order->product_belongs_to_type;
     }
 
-    private function setNearbySellers(User $seller, Orders|OrdersFromOtherSeller $order): void
+    private function setNearbySellers(User $seller): void
     {
         /* Get sellers who belongs to the city of this store owner */
         $sellersOfTheSameCityAndCategory = $this->getSellersOfSameCityAndCategory();
         /* Get sellers who are nearby to the order placing buyer */
         $this->nearbySellers = GoogleMapServices::getNearBySellers(
-            $order->customer_lat,
-            $order->customer_lon,
+            $this->order->customer_lat,
+            $this->order->customer_lon,
             $sellersOfTheSameCityAndCategory,
             $seller->id,
             nearByMiles: $this->nearByMiles,
@@ -86,6 +87,21 @@ final class MoveOrderToOtherNearBySellersAction
         if (empty($this->nearbySellers)) {
             throw new Exception('No nearby sellers found');
         }
+
+        $this->logNearBySellers();
+    }
+
+    private function getSellersOfSameCityAndCategory(): Collection
+    {
+        return Cache::remember(
+            'getSellersOfSameCityAndCategory' . $this->seller->id,
+            Carbon::now()->addDay(),
+            fn() => User::getActiveAndBlockedParentAndChildSellersByCityAndCategory(
+                $this->seller->city,
+                $this->getProductCategoryId(),
+                $this->seller->id,
+            )
+        );
     }
 
     private function getProductCategoryId(): int
@@ -105,17 +121,18 @@ final class MoveOrderToOtherNearBySellersAction
             OrdersFromOtherSeller::getById($this->order->id, ['order_status'])->order_status;
     }
 
-    private function getSellersOfSameCityAndCategory(): Collection
+    private function logNearBySellers(): void
     {
-        return Cache::remember(
-            'getSellersOfSameCityAndCategory' . $this->seller->id,
-            Carbon::now()->addDay(),
-            fn() => User::getActiveAndBlockedParentAndChildSellersByCityAndCategory(
-                $this->seller->city,
-                $this->getProductCategoryId(),
-                $this->seller->id,
-            )
-        );
+        logger()->channel('nearBySellers')->info('Nearby Sellers Information:', [
+            'id' => $this->nearbySellers['id'],
+            'email' => $this->nearbySellers['email'],
+            'business_name' => $this->nearbySellers['business_name'],
+        ]);
+    }
+
+    private function updateInitialTotal(): void
+    {
+        $this->order->initial_total = $this->order->order_items[0]->product_price * $this->order->order_items[0]->product_qty;
     }
 
     private function moveOrderToNearbySellers(array $nearbySellers): void
@@ -137,34 +154,34 @@ final class MoveOrderToOtherNearBySellersAction
         )->onQueue('high');
     }
 
-    private function moveOrderToRandomNearBySeller(OrdersFromOtherSeller $order, array $nearbySellers): void
+    private function moveOrderFromOtherSellerToRandomNearBySeller(array $nearbySellers): void
     {
         $randomIndex = array_rand($nearbySellers, 1);
 
-        OrdersFromOtherSeller::moveToAnotherSeller($order->id, $nearbySellers[$randomIndex]['id']);
+        OrdersFromOtherSeller::moveToAnotherSeller($this->order->id, $nearbySellers[$randomIndex]['id']);
 
-        OrdersFromOtherSeller::incrementTimesRejected($order->id);
+        OrdersFromOtherSeller::incrementTimesRejected($this->order->id);
     }
 
-    private function moveOrderItemToGivenNearBySeller(OrderItems $orderItem, Orders $order, int $nearBySellerId): void
+    private function moveOrderItemToGivenNearBySeller(int $nearBySellerId): void
     {
         /* Send this product to another seller */
         $this->addIntoOrdersFromOtherSeller(
-            order: $order,
-            orderItem: $orderItem,
+            order: $this->order,
+            orderItem: $this->orderItem,
             nearBySellerId: $nearBySellerId
         );
         /* Subtract the total price of this order_item/product from the current order's total */
-        $productTotalPrice = $orderItem->product_price * $orderItem->product_qty;
+        $productTotalPrice = $this->orderItem->product_price * $this->orderItem->product_qty;
         Orders::subFromOrderTotal(
-            $orderItem->order_id,
+            $this->orderItem->order_id,
             $productTotalPrice
         );
         /**
          * If there's only 1 item in the order, remove the whole order,
          * else only remove the selected item from current order items
          */
-        ($order->order_items->count() == 1) ? Orders::remove($order->id) : OrderItems::remove($orderItem->id);
+        ($this->order->order_items->count() == 1) ? Orders::remove($this->order->id) : OrderItems::remove($this->orderItem->id);
     }
 
     public function addIntoOrdersFromOtherSeller(Orders $order, OrderItems $orderItem, int $nearBySellerId): OrdersFromOtherSeller

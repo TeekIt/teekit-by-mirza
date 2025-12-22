@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Common;
 
+use App\Actions\Orders\MoveOrderToOtherNearBySellersAction;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\PaymentIntentStatusEnum;
@@ -18,6 +19,7 @@ use App\Services\StuartDeliveryServices;
 use App\Services\UUIDServices;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
@@ -57,6 +59,8 @@ class OrdersHeaderLivewire extends Component
 
     public $sellerId;
 
+    public $moveOrderToOtherNearBySellersAction;
+
     /*
     * Livewire Built-in Properties
     */
@@ -68,9 +72,10 @@ class OrdersHeaderLivewire extends Component
 
     public function mount(Orders|OrdersFromOtherSeller $order)
     {
-        $this->sellerId = auth()->user()->id;
+        $this->sellerId = Auth::user()->id;
         $this->isOrderFromOtherSeller = $this->isOrderFromOtherSeller($order);
         $this->order = $order;
+        $this->moveOrderToOtherNearBySellersAction = new MoveOrderToOtherNearBySellersAction();
     }
 
     /* Handle Order prop updates */
@@ -193,18 +198,18 @@ class OrdersHeaderLivewire extends Component
     public function getSellersOfSameCity()
     {
         return Cache::remember(
-            'getSellersOfSameCity'.$this->sellerId,
+            'getSellersOfSameCity' . $this->sellerId,
             Carbon::now()->addDay(),
-            fn () => User::getParentAndChildSellersByCity(auth()->user()->city)
+            fn() => User::getParentAndChildSellersByCity(auth()->user()->city)
         );
     }
 
     public function getSellersOfSameCityAndCategory()
     {
         return Cache::remember(
-            'getSellersOfSameCityAndCategory'.$this->sellerId,
+            'getSellersOfSameCityAndCategory' . $this->sellerId,
             Carbon::now()->addDay(),
-            fn () => User::getActiveAndBlockedParentAndChildSellersByCityAndCategory(
+            fn() => User::getActiveAndBlockedParentAndChildSellersByCityAndCategory(
                 auth()->user()->city,
                 $this->getProductCategoryId($this->selectedOrder),
                 $this->sellerId,
@@ -353,65 +358,67 @@ class OrdersHeaderLivewire extends Component
             /* Perform some operation */
             $this->selectedOrder = Orders::getById($orderId);
 
-            $orderTotalPrice = $this->selectedOrder->order_items[0]->product_price * $this->selectedOrder->order_items[0]->product_qty;
-            /* Get sellers who belongs to the city of this store owner */
-            $sellersOfTheSameCityAndCategory = $this->getSellersOfSameCityAndCategory();
-            /* Get sellers who are nearby to the order placing buyer */
-            $nearbySellers = GoogleMapServices::getNearBySellers(
-                $this->selectedOrder->customer_lat,
-                $this->selectedOrder->customer_lon,
-                $sellersOfTheSameCityAndCategory,
-                $this->sellerId,
-                nearByMiles: 3,
-            );
+            // $orderTotalPrice = $this->selectedOrder->order_items[0]->product_price * $this->selectedOrder->order_items[0]->product_qty;
+            // /* Get sellers who belongs to the city of this store owner */
+            // $sellersOfTheSameCityAndCategory = $this->getSellersOfSameCityAndCategory();
+            // /* Get sellers who are nearby to the order placing buyer */
+            // $nearbySellers = GoogleMapServices::getNearBySellers(
+            //     $this->selectedOrder->customer_lat,
+            //     $this->selectedOrder->customer_lon,
+            //     $sellersOfTheSameCityAndCategory,
+            //     $this->sellerId,
+            //     nearByMiles: 3,
+            // );
 
-            if (empty($nearbySellers)) {
-                return $this->noNearBySellers($orderId);
-            }
+            // if (empty($nearbySellers)) {
+            //     return $this->noNearBySellers($orderId);
+            // }
 
-            /* Send this product to all nearby sellers */
-            foreach ($nearbySellers as $singleIndex) {
-                OrdersFromOtherSeller::add(
-                    $this->selectedOrder->created_by_type,
-                    $this->selectedOrder->created_by_id,
-                    $singleIndex['id'],
-                    $this->selectedOrder->id,
-                    $this->selectedOrder->order_items[0]->product_belongs_to_type,
-                    $this->selectedOrder->order_items[0]->product_belongs_to_id,
-                    $this->selectedOrder->order_items[0]->product_price,
-                    $this->selectedOrder->order_items[0]->product_qty,
-                    $orderTotalPrice,
-                    (float) $this->selectedOrder->customer_lat ?? null,
-                    (float) $this->selectedOrder->customer_lon ?? null,
-                    $this->selectedOrder->customer_name,
-                    $this->order->country_code,
-                    $this->selectedOrder->phone_number,
-                    $this->selectedOrder->address,
-                    $this->selectedOrder->house_no,
-                    $this->selectedOrder->flat,
-                    $this->selectedOrder->country,
-                    $this->selectedOrder->state,
-                    $this->selectedOrder->city,
-                    $this->selectedOrder->postcode,
-                    $this->selectedOrder->payment_intent_id,
-                    $this->selectedOrder->driver_charges,
-                    $this->selectedOrder->delivery_charges,
-                    $this->selectedOrder->service_charges,
-                    $this->selectedOrder->device,
-                    $this->selectedOrder->type,
-                    $this->selectedOrder->description,
-                    $this->selectedOrder->payment_status,
-                    $this->selectedOrder->offloading,
-                    $this->selectedOrder->offloading_charges,
-                    now(),
-                    $this->selectedOrder->created_at,
-                );
-            }
+            // /* Send this product to all nearby sellers */
+            // foreach ($nearbySellers as $singleIndex) {
+            //     OrdersFromOtherSeller::add(
+            //         $this->selectedOrder->created_by_type,
+            //         $this->selectedOrder->created_by_id,
+            //         $singleIndex['id'],
+            //         $this->selectedOrder->id,
+            //         $this->selectedOrder->order_items[0]->product_belongs_to_type,
+            //         $this->selectedOrder->order_items[0]->product_belongs_to_id,
+            //         $this->selectedOrder->order_items[0]->product_price,
+            //         $this->selectedOrder->order_items[0]->product_qty,
+            //         $orderTotalPrice,
+            //         (float) $this->selectedOrder->customer_lat ?? null,
+            //         (float) $this->selectedOrder->customer_lon ?? null,
+            //         $this->selectedOrder->customer_name,
+            //         $this->order->country_code,
+            //         $this->selectedOrder->phone_number,
+            //         $this->selectedOrder->address,
+            //         $this->selectedOrder->house_no,
+            //         $this->selectedOrder->flat,
+            //         $this->selectedOrder->country,
+            //         $this->selectedOrder->state,
+            //         $this->selectedOrder->city,
+            //         $this->selectedOrder->postcode,
+            //         $this->selectedOrder->payment_intent_id,
+            //         $this->selectedOrder->driver_charges,
+            //         $this->selectedOrder->delivery_charges,
+            //         $this->selectedOrder->service_charges,
+            //         $this->selectedOrder->device,
+            //         $this->selectedOrder->type,
+            //         $this->selectedOrder->description,
+            //         $this->selectedOrder->payment_status,
+            //         $this->selectedOrder->offloading,
+            //         $this->selectedOrder->offloading_charges,
+            //         now(),
+            //         $this->selectedOrder->created_at,
+            //     );
+            // }
 
-            /* Remove the whole order in case of custom product order's */
-            $removed = Orders::remove($this->selectedOrder->id);
+            // /* Remove the whole order in case of custom product order's */
+            // $removed = Orders::remove($this->selectedOrder->id);
 
-            info('The current order has been sent to these nearby sellers', $nearbySellers);
+            // info('The current order has been sent to these nearby sellers', $nearbySellers);
+
+            $removed = $this->moveOrderToOtherNearBySellersAction->execute($this->selectedOrder, Auth::user());
             /* Operation finished */
             sleep(1);
             $this->dispatch(event: 'refreshThisComponent')->self();
@@ -433,7 +440,7 @@ class OrdersHeaderLivewire extends Component
             'priceBySeller' => [
                 'required',
                 'numeric',
-                'max:'.$this->getProductPrice($this->selectedOrder),
+                'max:' . $this->getProductPrice($this->selectedOrder),
                 'min:1',
             ],
         ]);
