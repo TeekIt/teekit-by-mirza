@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('receiver_email');
             $table->string('package_transport_type')->comment('Only PackageTransportTypeEnum values are allowed');
             $table->string('package_weight')->comment('Only PackageWeightEnum values are allowed');
+            $table->float('total_cost')->default(0.0);
             $table->timestamps();
             $table->softDeletes();
         });

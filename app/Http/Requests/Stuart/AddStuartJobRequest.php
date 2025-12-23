@@ -31,6 +31,7 @@ class AddStuartJobRequest extends FormRequest
             'pickupAddress' => 'required|string',
             'dropoffAddress' => 'required|string',
             'unitAddress' => 'required|string',
+            'productDetails' => 'nullable|string',
             'packageTransportType' => ['required', Rule::enum(PackageTransportTypeEnum::class)],
             'packageWeight' => ['required', Rule::enum(PackageWeightEnum::class)],
         ];

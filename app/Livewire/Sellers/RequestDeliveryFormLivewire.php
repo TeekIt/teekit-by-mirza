@@ -22,7 +22,7 @@ class RequestDeliveryFormLivewire extends Component
 
     public $dropoffAddress;
 
-    public $unitAddress;
+    public $dropoffUnitAddress;
 
     public $dropoffLat;
 
@@ -37,6 +37,8 @@ class RequestDeliveryFormLivewire extends Component
     public $packageTransportType;
 
     public $packageWeight;
+
+    public $productDetails;
 
     public $deliveryCharges = 0;
 
@@ -59,12 +61,15 @@ class RequestDeliveryFormLivewire extends Component
         return [
             'pickupAddress' => 'required|string',
             'dropoffAddress' => 'required|string',
-            'unitAddress' => 'required|string',
+            'dropoffUnitAddress' => 'required|string',
+            'dropoffLat' => 'required|numeric',
+            'dropoffLon' => 'required|numeric',
             'receiverName' => 'required|string',
             'receiverPhone' => 'required|numeric',
             'receiverEmail' => 'required|email',
             'packageTransportType' => ['required', Rule::enum(PackageTransportTypeEnum::class)],
             'packageWeight' => ['required', Rule::enum(PackageWeightEnum::class)],
+            'productDetails' => 'nullable|string',
         ];
     }
 
@@ -114,7 +119,7 @@ class RequestDeliveryFormLivewire extends Component
         $dropoffLat = null,
         $dropoffLon = null,
         $dropoffAddress = null,
-        $unitAddress = null,
+        $dropoffUnitAddress = null,
         $pickupAddress = null
     ) {
         if ($dropoffLat !== null) {
@@ -129,8 +134,8 @@ class RequestDeliveryFormLivewire extends Component
             $this->dropoffAddress = $dropoffAddress;
         }
 
-        if ($unitAddress !== null) {
-            $this->unitAddress = $unitAddress;
+        if ($dropoffUnitAddress !== null) {
+            $this->dropoffUnitAddress = $dropoffUnitAddress;
         }
 
         if ($pickupAddress !== null) {
@@ -151,7 +156,8 @@ class RequestDeliveryFormLivewire extends Component
             senderEmail: auth()->user()->email,
             packageType: StuartDeliveryServices::mapPkgWeightWithStuartPkgType(PackageWeightEnum::from($this->packageWeight)),
             dropoffAddress: $this->dropoffAddress,
-            unitAddress: $this->unitAddress,
+            dropoffUnitAddress: $this->dropoffUnitAddress,
+            comment: $this->productDetails ?? 'Please pickup your order ASAP',
             receiverName: $this->receiverName,
             receiverPhone: $this->receiverPhone,
             receiverEmail: $this->receiverEmail
@@ -171,14 +177,14 @@ class RequestDeliveryFormLivewire extends Component
             pickupMobileNumber: auth()->user()->business_phone,
             parcelExternalId: UUIDServices::generateUUID(),
             parcelReferenceNumber: UUIDServices::generateUUID(),
-            parcelDescription: 'Please pickup your order ASAP',
-            width: 0,
-            length: 0,
-            height: 0,
-            weight: 0,
+            parcelDescription: $this->productDetails ?? 'Please pickup your order ASAP',
+            width: 1,
+            length: 1,
+            height: 1,
+            weight: 1,
             dropoffAddress: $this->dropoffAddress,
             dropoffCity: auth()->user()->city,
-            dropoffPostcode: $this->unitAddress,
+            dropoffPostcode: $this->dropoffUnitAddress,
             dropoffLat: $this->dropoffLat,
             dropoffLon: $this->dropoffLon,
             dropoffPersonName: $this->receiverName,
@@ -255,9 +261,12 @@ class RequestDeliveryFormLivewire extends Component
         try {
             if ($this->deliveryServiceName === DeliveryProviderEnum::STUART->value) {
                 request()->session()->put('stuartDeliveryDetails', [
-                    'jobArray' => $this->prepareStuartJobArray(),
+                    'jobArray' => array_merge($this->prepareStuartJobArray(), [
+                        'dropoffUnitAddress' => $this->dropoffUnitAddress,
+                    ]),
                     'packageTransportType' => $this->packageTransportType,
                     'packageWeight' => $this->packageWeight,
+                    'totalCost' => $this->totalCost,
                 ]);
             }
 
@@ -266,6 +275,7 @@ class RequestDeliveryFormLivewire extends Component
                     'jobArray' => $this->prepareGophrJobArray(),
                     'packageTransportType' => $this->packageTransportType,
                     'packageWeight' => $this->packageWeight,
+                    'totalCost' => $this->totalCost,
                 ]);
             }
 

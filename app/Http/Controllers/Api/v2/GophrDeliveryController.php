@@ -21,11 +21,11 @@ class GophrDeliveryController extends Controller
         $parcelData = [
             'parcel_external_id' => UUIDServices::generateUUID(),
             'parcel_reference_number' => UUIDServices::generateUUID(),
-            'parcel_description' => 'Please pickup your order ASAP',
-            'width' => 0,
-            'length' => 0,
-            'height' => 0,
-            'weight' => 0,
+            'parcel_description' => $validatedData->productDetails ?? 'Please pickup your order ASAP',
+            'width' => 1,
+            'length' => 1,
+            'height' => 1,
+            'weight' => 1,
         ];
 
         $response = GophrDeliveryServices::createJob(
@@ -52,7 +52,7 @@ class GophrDeliveryController extends Controller
                 dropoffLon: $validatedData->dropoffLon,
                 dropoffPersonName: auth()->user()->name,
                 dropoffEmail: auth()->user()->email,
-                dropoffMobileNumber: auth()->user()->country_code.auth()->user()->phone
+                dropoffMobileNumber: auth()->user()->country_code . auth()->user()->phone
             )
         );
 
@@ -64,10 +64,11 @@ class GophrDeliveryController extends Controller
             dropoffAddress: $validatedData->dropoffAddress,
             unitAddress: $validatedData->unitAddress,
             receiverName: auth()->user()->name,
-            receiverPhone: auth()->user()->country_code.auth()->user()->phone,
+            receiverPhone: auth()->user()->country_code . auth()->user()->phone,
             receiverEmail: auth()->user()->email,
             packageTransportType: PackageTransportTypeEnum::from($validatedData->packageTransportType),
-            packageWeight: PackageWeightEnum::from($validatedData->packageWeight)
+            packageWeight: PackageWeightEnum::from($validatedData->packageWeight),
+            totalCost: $validatedData->totalCost
         );
 
         return JsonResponseServices::getApiResponse(
@@ -86,10 +87,10 @@ class GophrDeliveryController extends Controller
             'parcel_external_id' => UUIDServices::generateUUID(),
             'parcel_reference_number' => UUIDServices::generateUUID(),
             'parcel_description' => 'Please pickup your order ASAP',
-            'width' => 0,
-            'length' => 0,
-            'height' => 0,
-            'weight' => 0,
+            'width' => 1,
+            'length' => 1,
+            'height' => 1,
+            'weight' => 1,
         ];
 
         $response = GophrDeliveryServices::getJobPricing(
@@ -116,7 +117,7 @@ class GophrDeliveryController extends Controller
                 dropoffLon: $validatedData->dropoffLon,
                 dropoffPersonName: auth()->user()->name,
                 dropoffEmail: auth()->user()->email,
-                dropoffMobileNumber: auth()->user()->country_code.auth()->user()->phone
+                dropoffMobileNumber: auth()->user()->country_code . auth()->user()->phone
             )
         );
 

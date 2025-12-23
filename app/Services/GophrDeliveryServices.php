@@ -51,7 +51,7 @@ final class GophrDeliveryServices
             'external_id' => $externalId,
             'pickups' => [
                 [
-                    'earliest_pickup_time' => $earliestPickupTime ?? CompanyStandardsServices::getStandardPickUpTime()->toIso8601String(),
+                    // 'earliest_pickup_time' => $earliestPickupTime ?? CompanyStandardsServices::getStandardPickUpTime()->toIso8601String(),
                     'pickup_city' => $pickupCity,
                     'pickup_address1' => $pickupAddress,
                     'pickup_postcode' => $pickupPostcode,

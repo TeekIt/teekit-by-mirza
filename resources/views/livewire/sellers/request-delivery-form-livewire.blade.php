@@ -84,11 +84,11 @@
                                                     <div class="col-md-12 mb-3">
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
-                                                                wire:model="unitAddress" id="unitAddress"
+                                                                wire:model="dropoffUnitAddress" id="dropoffUnitAddress"
                                                                 placeholder="Unit Address (e.g Flat#)" required>
                                                         </div>
                                                         <small class="text-danger">
-                                                            @error('unitAddress')
+                                                            @error('dropoffUnitAddress')
                                                                 {{ $message }}
                                                             @enderror
                                                         </small>
@@ -97,11 +97,9 @@
                                                     {{-- Dropoff Lat, Lons fields --}}
                                                     <div class="col-md-6">
                                                         <input type="hidden" class="form-control"
-                                                            wire:model="dropoffLat" id="dropoffLat"
-                                                            placeholder="Latitude" required>
+                                                            wire:model="dropoffLat" id="dropoffLat" required>
                                                         <input type="hidden" class="form-control"
-                                                            wire:model="dropoffLon" id="dropoffLon"
-                                                            placeholder="Longitude" required>
+                                                            wire:model="dropoffLon" id="dropoffLon" required>
                                                     </div>
                                                 </div>
                                             </div>
@@ -211,6 +209,25 @@
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('packageWeight')
+                                                                {{ $message }}
+                                                            @enderror
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="my-3">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Product Details</label>
+                                                            <textarea class="form-control"
+                                                                wire:model="productDetails"
+                                                                wire:change="inputFieldChanged" rows="6" required>
+                                                            </textarea>
+                                                        </div>
+                                                        <small class="text-danger">
+                                                            @error('productDetails')
                                                                 {{ $message }}
                                                             @enderror
                                                         </small>

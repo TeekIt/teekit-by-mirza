@@ -196,14 +196,13 @@ nav.main-header a {
 
 input.form-control,
 select.form-control {
+    color: #8aa7d7;
     border: 0;
     border-bottom: 1px solid;
     border-radius: 0;
-    color: #8aa7d7;
     border-color: #4a7ed6;
     padding-left: 3px;
     background: transparent;
-
     background-color: transparent !important;
 }
 

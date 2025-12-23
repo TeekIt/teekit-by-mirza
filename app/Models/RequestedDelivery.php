@@ -31,6 +31,7 @@ class RequestedDelivery extends Model
         'receiver_email',
         'package_transport_type',
         'package_weight',
+        'total_cost',
     ];
 
     protected $hidden = [
@@ -69,6 +70,7 @@ class RequestedDelivery extends Model
         string $receiverEmail,
         PackageTransportTypeEnum $packageTransportType,
         PackageWeightEnum $packageWeight,
+        float $totalCost,
         ?string $unitAddress = null,
     ): RequestedDelivery {
         return self::create([
@@ -83,6 +85,7 @@ class RequestedDelivery extends Model
             'receiver_email' => $receiverEmail,
             'package_transport_type' => $packageTransportType,
             'package_weight' => $packageWeight,
+            'total_cost' => $totalCost,
         ]);
     }
 

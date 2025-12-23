@@ -29,11 +29,15 @@ class RequestedDeliveriesLivewire extends Component
 
     public $unitAddress;
 
+    public $productDetails;
+
     public $receiverName;
 
     public $receiverPhone;
 
     public $receiverEmail;
+
+    public $totalCost;
 
     public $selectedDeliveryDetails;
 
@@ -68,11 +72,13 @@ class RequestedDeliveriesLivewire extends Component
 
             $this->packageTransportType = PackageTransportTypeEnum::from(request()->session()->get('stuartDeliveryDetails')['packageTransportType']);
             $this->packageWeight = PackageWeightEnum::from(request()->session()->get('stuartDeliveryDetails')['packageWeight']);
+            $this->totalCost = request()->session()->get('stuartDeliveryDetails')['totalCost'];
             $this->stuartJobArray = request()->session()->get('stuartDeliveryDetails')['jobArray'];
 
             $this->pickupAddress = $this->stuartJobArray['job']['pickups'][0]['address'];
             $this->dropoffAddress = $this->stuartJobArray['job']['dropoffs'][0]['address'];
-            $this->unitAddress = $this->stuartJobArray['job']['dropoffs'][0]['comment'];
+            $this->unitAddress = $this->stuartJobArray['dropoffUnitAddress'];
+            $this->productDetails = $this->stuartJobArray['job']['dropoffs'][0]['comment'];
             $this->receiverName = $this->stuartJobArray['job']['dropoffs'][0]['contact']['firstname'];
             $this->receiverPhone = $this->stuartJobArray['job']['dropoffs'][0]['contact']['phone'];
             $this->receiverEmail = $this->stuartJobArray['job']['dropoffs'][0]['contact']['email'];
@@ -87,11 +93,13 @@ class RequestedDeliveriesLivewire extends Component
 
             $this->packageTransportType = PackageTransportTypeEnum::from(request()->session()->get('gophrDeliveryDetails')['packageTransportType']);
             $this->packageWeight = PackageWeightEnum::from(request()->session()->get('gophrDeliveryDetails')['packageWeight']);
+            $this->totalCost = request()->session()->get('gophrDeliveryDetails')['totalCost'];
             $this->gophrJobArray = request()->session()->get('gophrDeliveryDetails')['jobArray'];
 
             $this->pickupAddress = $this->gophrJobArray['pickups'][0]['pickup_address1'];
             $this->dropoffAddress = $this->gophrJobArray['dropoffs'][0]['dropoff_address1'];
-            $this->unitAddress = $this->gophrJobArray['dropoffs'][0]['dropoff_instructions'];
+            $this->unitAddress = $this->gophrJobArray['dropoffs'][0]['dropoff_postcode'];
+            $this->productDetails = $this->gophrJobArray['dropoffs'][0]['parcel_description'];
             $this->receiverName = $this->gophrJobArray['dropoffs'][0]['dropoff_person_name'];
             $this->receiverPhone = $this->gophrJobArray['dropoffs'][0]['dropoff_mobile_number'];
             $this->receiverEmail = $this->gophrJobArray['dropoffs'][0]['dropoff_email'];
@@ -118,6 +126,7 @@ class RequestedDeliveriesLivewire extends Component
             'receiverName',
             'receiverPhone',
             'receiverEmail',
+            'totalCost',
             'packageTransportType',
             'packageWeight',
             'deliveryProvider',
@@ -225,7 +234,8 @@ class RequestedDeliveriesLivewire extends Component
             receiverPhone: $this->receiverPhone,
             receiverEmail: $this->receiverEmail,
             packageTransportType: $this->packageTransportType,
-            packageWeight: $this->packageWeight
+            packageWeight: $this->packageWeight,
+            totalCost: $this->totalCost
         );
     }
 

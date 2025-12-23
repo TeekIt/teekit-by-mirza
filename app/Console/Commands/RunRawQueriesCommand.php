@@ -6,7 +6,7 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class RunRawQueries extends Command
+class RunRawQueriesCommand extends Command
 {
     /**
      * The name and signature of the console command.
@@ -22,7 +22,7 @@ class RunRawQueries extends Command
      */
     protected $description = 'Executes all raw queries provided in the handle method';
 
-    protected bool $executeQueries = false;
+    protected bool $executeQueries = true;
 
     /**
      * Execute the console command.
@@ -39,7 +39,7 @@ class RunRawQueries extends Command
                     /* Below queries are already executed on staging ENV */
 
                     /* Below queries are already executed on local ENV */
-
+                    DB::statement('ALTER TABLE requested_deliveries ADD COLUMN total_cost FLOAT NOT NULL DEFAULT 0.0 AFTER package_weight');
                 });
             }
         } catch (Exception $error) {

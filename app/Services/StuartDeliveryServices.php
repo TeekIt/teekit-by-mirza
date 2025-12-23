@@ -23,7 +23,8 @@ final class StuartDeliveryServices
         string $senderEmail,
         string $packageType,
         string $dropoffAddress,
-        string $unitAddress,
+        string $dropoffUnitAddress,
+        string $comment,
         string $receiverName,
         string $receiverPhone,
         string $receiverEmail
@@ -46,8 +47,8 @@ final class StuartDeliveryServices
                     [
                         'package_type' => $packageType,
                         'client_reference' => $assignmentCode,
-                        'address' => $dropoffAddress,
-                        'comment' => $unitAddress,
+                        'address' => $dropoffAddress . ', ' . $dropoffUnitAddress,
+                        'comment' => $comment,
                         'contact' => [
                             'firstname' => $receiverName,
                             'phone' => $receiverPhone,

@@ -86,7 +86,7 @@
             /* Initialize CustomGoogleMapsClass for dropoff address autocomplete */
             const dropoffGoogleMapsClass = new CustomGoogleMapsClass({
                 mapAutoCompleteAddressId: 'dropoffAddress',
-                mapUnitAddressId: 'unitAddress',
+                mapUnitAddressId: 'dropoffUnitAddress',
                 mapLatId: 'dropoffLat',
                 mapLongId: 'dropoffLon',
             });
@@ -100,7 +100,7 @@
                     const lng = place.geometry.location.lng();
                     /* Get the full formatted address from Google Places */
                     const fullAddress = `${place.name}, ${place.formatted_address}`;
-
+                    
                     dropoffGoogleMapsClass.setAddress(fullAddress);
                     dropoffGoogleMapsClass.setLatLong(lat, lng);
                     /* Update Livewire component properties */

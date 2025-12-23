@@ -132,6 +132,7 @@ final class MoveOrderToOtherNearBySellersAction
 
     private function updateInitialTotal(): void
     {
+        /* Update initial_total in case of ProductsByBuyer order */
         $this->order->initial_total = $this->order->order_items[0]->product_price * $this->order->order_items[0]->product_qty;
     }
 

@@ -31,7 +31,8 @@ class StuartDeliveryController extends Controller
                     PackageWeightEnum::from($validatedData->packageWeight)
                 ),
                 dropoffAddress: $validatedData->dropoffAddress,
-                unitAddress: $validatedData->unitAddress,
+                dropoffUnitAddress: $validatedData->unitAddress,
+                comment: $validatedData->productDetails ?? 'Please pickup your order ASAP',
                 receiverName: auth()->user()->name,
                 receiverPhone: auth()->user()->country_code . auth()->user()->phone,
                 receiverEmail: auth()->user()->email
