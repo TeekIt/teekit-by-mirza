@@ -11,10 +11,11 @@ use App\Models\RequestedDelivery;
 use App\Services\GophrDeliveryServices;
 use App\Services\JsonResponseServices;
 use App\Services\UUIDServices;
+use Illuminate\Http\JsonResponse;
 
 class GophrDeliveryController extends Controller
 {
-    public function createDeliveryJob(AddGophrJobRequest $request)
+    public function createDeliveryJob(AddGophrJobRequest $request): JsonResponse
     {
         $validatedData = (object) $request->validated();
 
@@ -79,7 +80,7 @@ class GophrDeliveryController extends Controller
         );
     }
 
-    public function getDeliveryJobPricing(AddGophrJobRequest $request)
+    public function getDeliveryJobPricing(AddGophrJobRequest $request): JsonResponse
     {
         $validatedData = (object) $request->validated();
 
@@ -129,7 +130,7 @@ class GophrDeliveryController extends Controller
         );
     }
 
-    public function trackDeliveryJob(string $jobId)
+    public function trackDeliveryJob(string $jobId): JsonResponse
     {
         return JsonResponseServices::getApiResponse(
             GophrDeliveryServices::getJob($jobId)->data,

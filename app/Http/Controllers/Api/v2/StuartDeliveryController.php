@@ -12,10 +12,11 @@ use App\Services\CompanyStandardsServices;
 use App\Services\JsonResponseServices;
 use App\Services\StuartDeliveryServices;
 use App\Services\UUIDServices;
+use Illuminate\Http\JsonResponse;
 
 class StuartDeliveryController extends Controller
 {
-    public function createDeliveryJob(AddStuartJobRequest $request)
+    public function createDeliveryJob(AddStuartJobRequest $request): JsonResponse
     {
         $validatedData = (object) $request->validated();
 
@@ -50,7 +51,8 @@ class StuartDeliveryController extends Controller
             receiverPhone: auth()->user()->country_code . auth()->user()->phone,
             receiverEmail: auth()->user()->email,
             packageTransportType: PackageTransportTypeEnum::from($validatedData->packageTransportType),
-            packageWeight: PackageWeightEnum::from($validatedData->packageWeight)
+            packageWeight: PackageWeightEnum::from($validatedData->packageWeight),
+            totalCost: $validatedData->totalCost
         );
 
         return JsonResponseServices::getApiResponse(
@@ -61,7 +63,7 @@ class StuartDeliveryController extends Controller
         );
     }
 
-    public function getDeliveryJobPricing(AddStuartJobRequest $request)
+    public function getDeliveryJobPricing(AddStuartJobRequest $request): JsonResponse
     {
         $validatedData = (object) $request->validated();
 
@@ -92,7 +94,7 @@ class StuartDeliveryController extends Controller
         );
     }
 
-    public function trackDeliveryJob(string $jobId)
+    public function trackDeliveryJob(string $jobId): JsonResponse
     {
         return JsonResponseServices::getApiResponse(
             StuartDeliveryServices::getJob($jobId),
