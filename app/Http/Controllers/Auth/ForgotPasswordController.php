@@ -54,10 +54,9 @@ class ForgotPasswordController extends Controller
                 if ($user) {
                     $token = Str::random(60);
 
-                    DB::table('password_resets')->updateOrInsert(
+                    DB::table('password_reset_tokens')->updateOrInsert(
                         ['email' => $request->email],
                         [
-                            'email' => $request->email,
                             'token' => Hash::make($token),
                             'created_at' => now(),
                         ]

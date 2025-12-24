@@ -3,13 +3,13 @@
 namespace App\Actions\Orders;
 
 use App\Enums\OrderStatusEnum;
-use App\Jobs\SendProductByBuyerOrderDetailsToNearBySellersJob;
 use App\Models\OrderItems;
 use App\Models\Orders;
 use App\Models\OrdersFromOtherSeller;
 use App\Models\Products;
 use App\Models\ProductsByBuyer;
 use App\Models\User;
+use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
 use Carbon\Carbon;
 use Exception;
@@ -130,7 +130,7 @@ final class MoveOrderToOtherNearBySellersAction
                 'business_name' => $singleIndex['business_name'],
             ]);
         }
-        /* Add a blank space at the end of a log group */
+        /* Add hyphens at the end of a log group */
         logger()->channel('nearBySellers')->info('-----------------------------------');
     }
 
@@ -150,13 +150,13 @@ final class MoveOrderToOtherNearBySellersAction
                 nearBySellerId: $singleIndex['id']
             );
         }
+        /* Email order details to nearby sellers */
+        EmailServices::sendProductByBuyerOrderDetailsToNearBySellersMail(
+            array_column($this->nearbySellers, 'email'),
+            $this->order
+        );
         /* Remove the whole parent order from the orders table in case of ProductsByBuyer order */
         Orders::remove($this->order->id);
-        /* Email order details to nearby sellers */
-        SendProductByBuyerOrderDetailsToNearBySellersJob::dispatch(
-            $this->nearbySellers,
-            $this->order
-        )->onQueue('high');
     }
 
     private function moveOrderFromOtherSellerToRandomNearBySeller(array $nearbySellers): void

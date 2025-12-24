@@ -35,11 +35,11 @@ class RunRawQueriesCommand extends Command
 
                 DB::transaction(function () {
                     /* Below queries are already executed on production & all other ENV */
-                    DB::statement('ALTER TABLE requested_deliveries ADD COLUMN total_cost FLOAT NOT NULL DEFAULT 0.0 AFTER package_weight');
 
                     /* Below queries are already executed on staging ENV */
-
+                    
                     /* Below queries are already executed on local ENV */
+                    DB::statement('ALTER TABLE orders_from_other_sellers DROP FOREIGN KEY orders_from_other_sellers_parent_order_id_foreign');
                 });
             }
         } catch (Exception $error) {
