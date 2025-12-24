@@ -123,11 +123,15 @@ final class MoveOrderToOtherNearBySellersAction
 
     private function logNearBySellers(): void
     {
-        logger()->channel('nearBySellers')->info('Nearby Sellers Information:', [
-            'id' => $this->nearbySellers['id'],
-            'email' => $this->nearbySellers['email'],
-            'business_name' => $this->nearbySellers['business_name'],
-        ]);
+        foreach ($this->nearbySellers as $singleIndex) {
+            logger()->channel('nearBySellers')->info('Nearby Sellers Information:', [
+                'id' => $singleIndex['id'],
+                'email' => $singleIndex['email'],
+                'business_name' => $singleIndex['business_name'],
+            ]);
+        }
+        /* Add a blank space at the end of a log group */
+        logger()->channel('nearBySellers')->info('-----------------------------------');
     }
 
     private function updateInitialTotal(): void

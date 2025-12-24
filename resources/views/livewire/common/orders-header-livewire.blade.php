@@ -1,7 +1,6 @@
 <div>
 
     @php
-        use App\Enums\UserChoicesEnum;
         use App\Enums\OrderStatusEnum;
         use App\Enums\OrderTypeEnum;
         use App\Models\ProductsByBuyer;
@@ -14,8 +13,7 @@
     <x-session-messages />
 
     {{-- ************************************ Accept Order Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="acceptCustomProductOrderModal" tabindex="-1" role="dialog"
-        aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="acceptCustomProductOrderModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -69,7 +67,7 @@
         </div>
     </div>
     {{-- ************************************ No Other Sellers Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="noOtherSellersModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="noOtherSellersModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -111,7 +109,7 @@
         </div>
     </div>
     {{-- ************************************ Stuart Delivery Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="stuartModal" tabindex="-1">
+    <div wire:ignore.self class="modal fade" id="stuartModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form wire:submit="assignToStuartDriver">
@@ -157,7 +155,7 @@
         </div>
     </div>
     {{-- ************************************ Gophr Delivery Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="gophrModal" tabindex="-1">
+    <div wire:ignore.self class="modal fade" id="gophrModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form wire:submit="assignToGophrDriver">
@@ -202,7 +200,7 @@
         </div>
     </div>
     {{-- ************************************ Track Gophr Delivery Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="trackGophrDeliveryModal" tabindex="-1">
+    <div wire:ignore.self class="modal fade" id="trackGophrDeliveryModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">

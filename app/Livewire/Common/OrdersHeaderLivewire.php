@@ -75,7 +75,6 @@ class OrdersHeaderLivewire extends Component
         $this->sellerId = Auth::user()->id;
         $this->isOrderFromOtherSeller = $this->isOrderFromOtherSeller($order);
         $this->order = $order;
-        $this->moveOrderToOtherNearBySellersAction = new MoveOrderToOtherNearBySellersAction();
     }
 
     /* Handle Order prop updates */
@@ -418,7 +417,7 @@ class OrdersHeaderLivewire extends Component
 
             // info('The current order has been sent to these nearby sellers', $nearbySellers);
 
-            $removed = $this->moveOrderToOtherNearBySellersAction->execute($this->selectedOrder, Auth::user());
+            $removed = (new MoveOrderToOtherNearBySellersAction())->execute($this->selectedOrder, Auth::user());
             /* Operation finished */
             sleep(1);
             $this->dispatch(event: 'refreshThisComponent')->self();
