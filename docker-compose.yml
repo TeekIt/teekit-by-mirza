@@ -16,8 +16,8 @@ services:
     volumes:
       - ./:/var/www/teekit-by-mirza
       - ./docker-compose/entrypoint.sh:/usr/local/bin/entrypoint.sh
-    environment:
-      - APP_USER=mirza
+    # environment:
+    #   - APP_USER=mirza
     security_opt:
       - seccomp:unconfined
     cap_add:
