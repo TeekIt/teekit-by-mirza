@@ -15,9 +15,9 @@ class ListRequestedDeliveryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->requestedDeliveryPolicy->viewAny((int) $this['buyerId']);
+        return $this->requestedDeliveryPolicy->viewAny((int) $this['creatorId']);
 
-        // return $this->requestedDeliveryPolicy->viewAny($this->route('buyerId'));
+        // return $this->requestedDeliveryPolicy->viewAny($this->route('creatorId'));
     }
 
     /**
@@ -26,7 +26,7 @@ class ListRequestedDeliveryRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'buyerId' => $this['buyerId'],
+            'creatorId' => $this['creatorId'],
         ]);
     }
 
@@ -38,7 +38,7 @@ class ListRequestedDeliveryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'buyerId' => ['required', 'integer', new BuyerId],
+            'creatorId' => ['required', 'integer', new BuyerId],
         ];
     }
 }

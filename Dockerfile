@@ -40,14 +40,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN echo "memory_limit=1G" > /usr/local/etc/php/conf.d/memory-limit.ini
 RUN echo "max_execution_time=300" > /usr/local/etc/php/conf.d/max-execution-time.ini
 
-# Configure PHP-FPM to listen on all interfaces (for Docker networking)
-# RUN sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.conf || \
-#     echo "listen = 0.0.0.0:9000" >> /usr/local/etc/php-fpm.d/www.conf
-
-# # Ensure PHP-FPM runs workers as www-data (for security)
-# RUN sed -i 's/user = www-data/user = www-data/' /usr/local/etc/php-fpm.d/www.conf && \
-#     sed -i 's/group = www-data/group = www-data/' /usr/local/etc/php-fpm.d/www.conf
-
 WORKDIR /var/www/teekit-by-mirza
 
 # Copy and set permissions for entrypoint script

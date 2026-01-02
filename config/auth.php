@@ -23,7 +23,7 @@ return [
 
         'riders' => [
             'driver' => 'eloquent',
-            'model' => App\Drivers::class,
+            'model' => App\Models\Driver::class,
             'table' => 'drivers',
         ],
     ],

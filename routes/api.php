@@ -289,7 +289,7 @@ Route::middleware('transaction.wrapper')->group(function () {
          ***********************************************************************
          */
         Route::prefix('delivery')->controller(RequestedDeliveryController::class)->group(function () {
-            Route::get('list/{buyerId}', 'list');
+            Route::get('list/{creatorId}', 'list');
         });
         /*
          *********************************************************************** 

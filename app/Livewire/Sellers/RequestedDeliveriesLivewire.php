@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Sellers;
 
+use App\Actions\RequestedDelivery\ListRequestedDeliveriesAction;
 use App\Enums\DeliveryProviderEnum;
+use App\Enums\OrderByEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use App\Models\RequestedDelivery;
@@ -253,8 +255,8 @@ class RequestedDeliveriesLivewire extends Component
 
     public function render()
     {
-        $data = RequestedDelivery::getForView(
-            orderBy: 'desc',
+        $data = (new ListRequestedDeliveriesAction())->execute(
+            orderByEnum: OrderByEnum::DESC,
             createdAt: $this->search,
             creatorId: $this->sellerId,
             columns: [
