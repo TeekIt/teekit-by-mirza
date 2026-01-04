@@ -2,20 +2,24 @@
 
 namespace App\Http\Controllers\Api\v2;
 
+use App\Actions\RequestedDelivery\ListRequestedDeliveriesAction;
+use App\Enums\OrderByEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RequestedDelivery\ListRequestedDeliveryRequest;
-use App\Models\RequestedDelivery;
 use App\Services\JsonResponseServices;
+use Illuminate\Http\JsonResponse;
 
 class RequestedDeliveryController extends Controller
 {
-    public function list(ListRequestedDeliveryRequest $request)
-    {
+    public function list(
+        ListRequestedDeliveryRequest $request,
+        ListRequestedDeliveriesAction $listRequestedDeliveriesAction
+    ): JsonResponse {
         $validatedData = (object) $request->validated();
-
-        $pagination = RequestedDelivery::getForView(
-            orderBy: 'desc',
-            creatorId: $validatedData->buyerId,
+        
+        $data = $listRequestedDeliveriesAction->execute(
+            orderByEnum: OrderByEnum::DESC,
+            creatorId: $validatedData->creatorId,
             columns: [
                 'id',
                 'creator_id',
@@ -29,26 +33,15 @@ class RequestedDeliveryController extends Controller
                 'receiver_email',
                 'package_transport_type',
                 'package_weight',
+                'total_cost',
                 'created_at',
             ]
-        )->toArray();
+        );
 
-        $data = $pagination['data'];
-        unset($pagination['data']);
-
-        /*
-         * Just creating this variable so we don't have to call the "empty()" function again & again
-         * Because it will increase the API response time
-         */
-        $dataIsEmpty = empty($data);
-
-        return JsonResponseServices::getApiResponseExtention(
-            ($dataIsEmpty) ? [] : $data,
-            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
-            'pagination',
-            ($dataIsEmpty) ? (object) [] : $pagination,
-            config('constants.HTTP_OK')
+        return JsonResponseServices::getPaginatedApiResponse(
+            data: $data,
+            message: '',
+            httpCode: config('constants.HTTP_OK')
         );
     }
 }

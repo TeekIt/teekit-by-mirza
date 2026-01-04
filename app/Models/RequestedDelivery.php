@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DeliveryProviderEnum;
+use App\Enums\OrderByEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -43,7 +44,7 @@ class RequestedDelivery extends Model
      * Helpers
      */
     public static function getForView(
-        string $orderBy,
+        OrderByEnum $orderBy,
         ?string $createdAt = null,
         ?int $creatorId = null,
         array $columns = ['*']
@@ -55,7 +56,7 @@ class RequestedDelivery extends Model
             ->when($createdAt, function ($query, $createdAt) {
                 return $query->whereDate('created_at', $createdAt);
             })
-            ->orderBy('created_at', $orderBy)
+            ->orderBy('created_at', $orderBy->value)
             ->paginate(10);
     }
 

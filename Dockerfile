@@ -40,7 +40,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN echo "memory_limit=1G" > /usr/local/etc/php/conf.d/memory-limit.ini
 RUN echo "max_execution_time=300" > /usr/local/etc/php/conf.d/max-execution-time.ini
 
-WORKDIR /var/www
+WORKDIR /var/www/teekit-by-mirza
 
 # Copy and set permissions for entrypoint script
 COPY docker-compose/entrypoint.sh /usr/local/bin/
