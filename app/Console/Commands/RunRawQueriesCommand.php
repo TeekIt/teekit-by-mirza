@@ -22,7 +22,7 @@ class RunRawQueriesCommand extends Command
      */
     protected $description = 'Executes all raw queries provided in the handle method';
 
-    protected bool $executeQueries = false;
+    protected bool $executeQueries = true;
 
     /**
      * Execute the console command.
@@ -35,11 +35,11 @@ class RunRawQueriesCommand extends Command
 
                 DB::transaction(function () {
                     /* Below queries are already executed on production & all other ENV */
-                    DB::statement('ALTER TABLE requested_deliveries ADD COLUMN total_cost FLOAT NOT NULL DEFAULT 0.0 AFTER package_weight');
-
+                    
                     /* Below queries are already executed on staging ENV */
 
                     /* Below queries are already executed on local ENV */
+                    DB::statement('ALTER TABLE `order_items` CHANGE `product_belongs_to_id` `product_belongs_to_id` BIGINT NOT NULL');
                 });
             }
         } catch (Exception $error) {

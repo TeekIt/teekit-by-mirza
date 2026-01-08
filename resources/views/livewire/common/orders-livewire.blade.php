@@ -305,7 +305,7 @@
                                                                 <button type="button" class="btn btn-site-primary"
                                                                     data-bs-toggle="modal"
                                                                     data-bs-target="#sendToOtherStoresModal"
-                                                                    wire:click="renderSTOSModal({{ $order->id }})">
+                                                                    wire:click="renderSTOSModal({{ $order->id }}, {{ $orderItem->id }})">
                                                                     <i class="fas fa-paper-plane"></i>
                                                                     Send To Other Sellers
                                                                 </button>

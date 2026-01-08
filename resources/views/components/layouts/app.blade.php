@@ -32,6 +32,7 @@
     <audio id="newOrderNotification2">
         <source src="{{ asset('audio/TeekItNotificationMusic (mp3cut.net).mp3') }}" type="audio/mp3">
     </audio>
+    
     @include('layouts.scripts')
     @livewireScripts
 </body>

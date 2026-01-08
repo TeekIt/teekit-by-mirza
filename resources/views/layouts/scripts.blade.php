@@ -278,9 +278,17 @@
             })
         });
 
-        window.addEventListener('close-modal', event => $('#' + event.detail.id).modal('hide'));
 
-        window.addEventListener('show-modal', event => $('#' + event.detail.id).modal('show'));
+    document.addEventListener('livewire:init', () => {
+       Livewire.on('close-modal', (event) => {
+           $('#' + event[0].id).modal('hide');
+        });
+
+        Livewire.on('show-modal', (event) => {
+           $('#' + event[0].id).modal('show');
+        });
+    });
+    
         /*
          * General JavaScript Methods
          */
