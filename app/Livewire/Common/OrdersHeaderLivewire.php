@@ -22,12 +22,20 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class OrdersHeaderLivewire extends Component
 {
     use WithPagination;
+
+    public $sellerId;
+
+    public $isOrderFromOtherSeller;
+
+    #[Reactive]
+    public $order;
 
     public $orderId;
 
@@ -52,14 +60,6 @@ class OrdersHeaderLivewire extends Component
     public $selectedDeliveryDetails;
 
     public $priceBySeller;
-
-    public $isOrderFromOtherSeller;
-
-    public $order;
-
-    public $sellerId;
-
-    public $moveOrderToOtherNearBySellersAction;
 
     /*
     * Livewire Built-in Properties
@@ -357,66 +357,6 @@ class OrdersHeaderLivewire extends Component
             /* Perform some operation */
             $this->selectedOrder = Orders::getById($orderId);
 
-            // $orderTotalPrice = $this->selectedOrder->order_items[0]->product_price * $this->selectedOrder->order_items[0]->product_qty;
-            // /* Get sellers who belongs to the city of this store owner */
-            // $sellersOfTheSameCityAndCategory = $this->getSellersOfSameCityAndCategory();
-            // /* Get sellers who are nearby to the order placing buyer */
-            // $nearbySellers = GoogleMapServices::getNearBySellers(
-            //     $this->selectedOrder->customer_lat,
-            //     $this->selectedOrder->customer_lon,
-            //     $sellersOfTheSameCityAndCategory,
-            //     $this->sellerId,
-            //     nearByMiles: 3,
-            // );
-
-            // if (empty($nearbySellers)) {
-            //     return $this->noNearBySellers($orderId);
-            // }
-
-            // /* Send this product to all nearby sellers */
-            // foreach ($nearbySellers as $singleIndex) {
-            //     OrdersFromOtherSeller::add(
-            //         $this->selectedOrder->created_by_type,
-            //         $this->selectedOrder->created_by_id,
-            //         $singleIndex['id'],
-            //         $this->selectedOrder->id,
-            //         $this->selectedOrder->order_items[0]->product_belongs_to_type,
-            //         $this->selectedOrder->order_items[0]->product_belongs_to_id,
-            //         $this->selectedOrder->order_items[0]->product_price,
-            //         $this->selectedOrder->order_items[0]->product_qty,
-            //         $orderTotalPrice,
-            //         (float) $this->selectedOrder->customer_lat ?? null,
-            //         (float) $this->selectedOrder->customer_lon ?? null,
-            //         $this->selectedOrder->customer_name,
-            //         $this->order->country_code,
-            //         $this->selectedOrder->phone_number,
-            //         $this->selectedOrder->address,
-            //         $this->selectedOrder->house_no,
-            //         $this->selectedOrder->flat,
-            //         $this->selectedOrder->country,
-            //         $this->selectedOrder->state,
-            //         $this->selectedOrder->city,
-            //         $this->selectedOrder->postcode,
-            //         $this->selectedOrder->payment_intent_id,
-            //         $this->selectedOrder->driver_charges,
-            //         $this->selectedOrder->delivery_charges,
-            //         $this->selectedOrder->service_charges,
-            //         $this->selectedOrder->device,
-            //         $this->selectedOrder->type,
-            //         $this->selectedOrder->description,
-            //         $this->selectedOrder->payment_status,
-            //         $this->selectedOrder->offloading,
-            //         $this->selectedOrder->offloading_charges,
-            //         now(),
-            //         $this->selectedOrder->created_at,
-            //     );
-            // }
-
-            // /* Remove the whole order in case of custom product order's */
-            // $removed = Orders::remove($this->selectedOrder->id);
-
-            // info('The current order has been sent to these nearby sellers', $nearbySellers);
-
             $removed = (new MoveOrderToOtherNearBySellersAction())->execute($this->selectedOrder, Auth::user());
             /* Operation finished */
             sleep(1);
@@ -512,7 +452,6 @@ class OrdersHeaderLivewire extends Component
             $updated = Orders::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
             /* Operation finished */
             sleep(1);
-            $this->dispatch(event: 'refreshThisComponent')->self();
 
             // if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
             //     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -521,7 +460,8 @@ class OrdersHeaderLivewire extends Component
             // }
 
             if ($updated == 1) {
-                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+                $this->dispatch(event: 'refreshThisComponent')->self();
+                $this->dispatch(event: 'callParentRenderMethod');
             } else {
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }

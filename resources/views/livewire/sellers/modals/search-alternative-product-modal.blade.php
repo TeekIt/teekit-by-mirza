@@ -50,7 +50,7 @@
                 <tfoot>
                     <tr>
                         <td colspan="4">
-                            {{ $products->links() }}
+                            {{ $products->links(data: ['scrollTo' => false]) }}
                         </td>
                     </tr>
                 </tfoot>
@@ -72,7 +72,7 @@
                 </span>
             </div>
             <div class="col-md-12 col-lg-10">
-                <form wire:submit="addProductIntoOrder({{ $productDetails }})" method="POST">
+                <form wire:submit="addProductIntoOrder({{ $productDetails->id }})" method="POST">
                     <table class="table">
                         <tr>
                             <td class="text-site-primary"><b>Product Name:</b></td>
@@ -97,12 +97,12 @@
                         <tr>
                             <td class="text-site-primary"><b>QTY you want to add:</b></td>
                             <td>
-                                <input type="number" wire:model="selectedQty" class="col-3 form-control">
+                                <input type="number" wire:model="alternativeProdUserGivenQty" class="col-3 form-control">
                                 @if (session()->has('qty_should_not_be_greater'))
                                     <p class="text-danger">{{ session()->get('qty_should_not_be_greater') }}</p>
                                 @endif
                                 <small class="text-danger">
-                                    @error('selectedQty')
+                                    @error('alternativeProdUserGivenQty')
                                         {{ $message }}
                                     @enderror
                                 </small>

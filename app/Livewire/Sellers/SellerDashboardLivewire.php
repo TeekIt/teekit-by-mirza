@@ -25,7 +25,7 @@ class SellerDashboardLivewire extends Component
     */
     public function mount()
     {
-        $this->seller_id = auth()->id();
+        $this->seller_id = User::getAuthUser()->id;
     }
     /*
     * Helpers

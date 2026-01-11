@@ -251,7 +251,7 @@ class Orders extends Model
                 return $query->where('order_status', '=', $orderStatus);
             })
             ->where('created_by_type', UserMorphTypeEnum::USER)
-            ->where('created_by_id', '=', auth()->id())
+            ->where('created_by_id', '=', User::getAuthUser()->id)
             ->paginate(20);
     }
 
@@ -279,7 +279,7 @@ class Orders extends Model
     ): LengthAwarePaginator {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) {
-            static::isViewed($orderId);
+            self::isViewed($orderId);
         }
 
         /* Now we will fetch the required data */

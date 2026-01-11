@@ -70,7 +70,7 @@ class Products extends Model
     protected function status(): Attribute
     {
         return Attribute::make(
-            set: fn ($value) => (string) $value
+            set: fn($value) => (string) $value
         );
     }
 
@@ -437,10 +437,10 @@ class Products extends Model
                 'sellers' => function ($sellersRelation) use ($sellerId) {
                     $sellersRelation->select(
                         User::getSellerCommonColumns()
-                    )->where('seller_id', $sellerId);
+                    )->where('seller_id', '=', $sellerId);
                 },
                 'qty' => function ($qtyRelation) use ($sellerId) {
-                    $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', $sellerId);
+                    $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', '=', $sellerId);
                 },
                 'images:id,product_id,product_image',
                 'category:id,category_name,category_image',
@@ -453,23 +453,23 @@ class Products extends Model
             ->paginate(20);
     }
 
-    public static function getProductsInfoBySellerId(int $sellerId, array $columns): LengthAwarePaginator
+    public static function getProductsInfoBySellerId(int $sellerId, array $columns = ['*']): LengthAwarePaginator
     {
         return self::select($columns)
             ->with([
                 'sellers' => function ($sellersRelation) use ($sellerId) {
                     $sellersRelation->select(
                         User::getSellerCommonColumns()
-                    )->where('seller_id', $sellerId);
+                    )->where('seller_id', '=', $sellerId);
                 },
                 'qty' => function ($qtyRelation) use ($sellerId) {
-                    $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', $sellerId);
+                    $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', '=', $sellerId);
                 },
                 'images:id,product_id,product_image',
                 'category:id,category_name,category_image',
             ])
             ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
-                $qtyRelation->where('seller_id', $sellerId);
+                $qtyRelation->where('seller_id', '=', $sellerId);
             })
             ->WhereProductIsEnable()
             ->paginate(20);
@@ -497,7 +497,7 @@ class Products extends Model
             ->firstOrFail();
     }
 
-    public static function getProductInfo(int $sellerId, int $productId, array $columns): Products
+    public static function getProductInfoWithRelations(int $sellerId, int $productId, array $columns = ['*']): Products
     {
         return self::select($columns)
             ->with([
@@ -520,9 +520,9 @@ class Products extends Model
             ->firstOrFail();
     }
 
-    public static function getOnlyProductDetailsById(int $id, array $columns = ['*']): Products
+    public static function getProductInfoWithoutRelationsById(int $id, array $columns = ['*']): Products
     {
-        return self::select($columns)->where('id', $id)->WhereProductIsEnable()->first();
+        return self::select($columns)->where('id', '=', $id)->WhereProductIsEnable()->first();
     }
 
     public static function getParentSellerProducts(int $seller_id): LengthAwarePaginator
@@ -581,29 +581,30 @@ class Products extends Model
             ->first();
     }
 
-    public static function getProductWeight(int $product_id)
+    public static function getProductWeight(int $id)
     {
-        $product = self::select('weight')->where('id', $product_id)->get();
+        $product = self::select('weight')->where('id', $id)->get();
 
         return $product[0]->weight;
     }
 
-    public static function getProductVolume(int $product_id)
+    public static function getProductVolume(int $id)
     {
         $product = self::select(DB::raw('(products.height * products.width * products.length) as volumn'))
-            ->where('id', $product_id)
+            ->where('id', '=', $id)
             ->get();
 
         return $product[0]->volumn;
     }
 
-    public static function getProductPrice(int $product_id): float
+    public static function getProductPrice(int $id): float
     {
-        $product = self::find($product_id);
-
+        $product = self::find($id);
         /* Due to some unknown reason this line was previously written for getting discounted price */
         // return ($product->discount_percentage > 0) ? $product->discount_percentage * 1.2 : $product->price * 1.2;
-        return $product->price * 1.2;
+        return ($product->discount_percentage > 0) ?
+            $product->price - ($product->price * ($product->discount_percentage / 100)) :
+            $product->price;
     }
 
     public static function getFeaturedProducts(int $seller_id): LengthAwarePaginator
@@ -653,8 +654,8 @@ class Products extends Model
 
         return self::join('qty', 'products.id', '=', 'qty.product_id')
             ->select('products.id as prod_id', 'products.product_name', 'qty.qty', 'products.price')
-            ->where('qty.seller_id', $sellerId)
-            ->where('products.seller_id', $sellerId)
+            ->where('qty.seller_id', '=', $sellerId)
+            // ->where('products.seller_id', '=', $sellerId)
             ->when($search, function ($query, $search) {
                 return $query->where('products.product_name', 'LIKE', "%{$search}%");
             })
@@ -663,8 +664,8 @@ class Products extends Model
 
     public static function markAsFeatured(int $id, int $status): int
     {
-        return self::where('id', $id)
-            ->where('seller_id', auth()->id())
+        return self::where('id', '=', $id)
+            ->where('seller_id', '=', User::getAuthUser()->id)
             ->update([
                 'featured' => $status,
             ]);
@@ -672,8 +673,7 @@ class Products extends Model
 
     public static function toggleProduct(int $id, string $status): int
     {
-        return self::where('id', $id)
-            ->where('seller_id', auth()->id())
+        return self::where('id', '=', $id)
             ->update([
                 'status' => $status,
             ]);
@@ -681,7 +681,7 @@ class Products extends Model
 
     public static function toggleAllProducts(string $status): int
     {
-        return self::where('seller_id', auth()->id())
+        return self::where('seller_id', '=', User::getAuthUser()->id)
             ->update([
                 'status' => $status,
             ]);

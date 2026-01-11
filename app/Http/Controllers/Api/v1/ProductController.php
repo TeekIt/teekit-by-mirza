@@ -116,7 +116,7 @@ class ProductController extends Controller
     //                 continue;
     //             }
     //             $i = $i + 1;
-    //             $t = Products::getProductInfo($product->id);
+    //             $t = Products::getProductInfoWithRelations($product->id);
     //             $t->distance = $product->distance;
     //             //$t->distance = round($product->distance);
     //             $products_data[] = $t;
@@ -205,7 +205,7 @@ class ProductController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        $data = Products::getProductInfo(
+        $data = Products::getProductInfoWithRelations(
             $request->sellerId,
             $request->productId,
             Products::getCommonColumns(),

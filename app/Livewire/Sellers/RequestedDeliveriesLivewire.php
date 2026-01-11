@@ -67,7 +67,7 @@ class RequestedDeliveriesLivewire extends Component
      */
     public function mount()
     {
-        $this->sellerId = auth()->id();
+        $this->sellerId = User::getAuthUser()->id;
 
         if (request()->session()->get('stuartDeliveryDetails')) {
             $this->deliveryProvider = DeliveryProviderEnum::STUART;

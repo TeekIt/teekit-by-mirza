@@ -40,6 +40,7 @@ class RunRawQueriesCommand extends Command
 
                     /* Below queries are already executed on local ENV */
                     DB::statement('ALTER TABLE `order_items` CHANGE `product_belongs_to_id` `product_belongs_to_id` BIGINT NOT NULL');
+                    DB::statement('ALTER TABLE `order_items` CHANGE `product_price` `product_price` FLOAT NOT NULL');
                 });
             }
         } catch (Exception $error) {

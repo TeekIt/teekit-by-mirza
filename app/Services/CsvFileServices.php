@@ -10,7 +10,7 @@ final class CsvFileServices
     {
         $all_products = [];
         foreach ($products as $product) {
-            $pt = json_decode(json_encode(Products::getProductInfo($user_id, $product->id, ['*'])->toArray()));
+            $pt = json_decode(json_encode(Products::getProductInfoWithRelations($user_id, $product->id, ['*'])->toArray()));
             unset($pt->category);
             unset($pt->ratting);
             unset($pt->id);

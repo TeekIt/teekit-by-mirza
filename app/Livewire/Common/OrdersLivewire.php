@@ -52,14 +52,18 @@ class OrdersLivewire extends Component
 
     public $selectedDeliveryDetails;
 
+    public $successMessage;
+
+    public $errorMessage;
+
     /*
     * Livewire Built-in Properties
     */
     protected $paginationTheme = 'bootstrap';
 
     protected $listeners = [
-        'alternativeProductIncluded' => 'render',
-        'callParentResetComponent' => 'resetComponent',
+        'callParentRenderMethod' => 'render',
+        'callParentResetComponentMethod' => 'resetComponent',
     ];
 
     /*
@@ -68,7 +72,7 @@ class OrdersLivewire extends Component
     public function mount(Request $request)
     {
         if (! User::isSuperAdmin()) {
-            $this->sellerId = auth()->id();
+            $this->sellerId = User::getAuthUser()->id;
         }
 
         $this->requestOrderId = $request->requestOrderId;
@@ -96,9 +100,11 @@ class OrdersLivewire extends Component
             'selectedOrder',
             'search',
             'customOrderId',
+            'requestOrderId',
             'additionalParcelDescription',
             'selectedDeliveryDetails',
-            'requestOrderId',
+            'successMessage',
+            'errorMessage',
         ]);
     }
 
@@ -198,13 +204,13 @@ class OrdersLivewire extends Component
             $this->dispatch('close-modal', ['id' => 'sendToOtherStoresModal']);
 
             if ($moved) {
-                session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
+                $this->successMessage = config('constants.SENT_TO_OTHER_STORE_SUCCESS');
             } else {
-                session()->flash('error', config('constants.SENT_TO_OTHER_STORE_FAILED'));
+                $this->errorMessage = config('constants.SENT_TO_OTHER_STORE_FAILED');
             }
         } catch (Exception $error) {
             report($error);
-            session()->flash('error', $error->getMessage());
+            $this->errorMessage = $error->getMessage();
         }
     }
 
@@ -222,13 +228,13 @@ class OrdersLivewire extends Component
             $this->dispatch('close-modal', ['id' => 'removeItemFromOrderModel']);
 
             if ($removed && $updated) {
-                session()->flash('success', config('constants.PRODUCT_REMOVED_SUCCESSFULLY'));
+                $this->successMessage = config('constants.PRODUCT_REMOVED_SUCCESSFULLY');
             } else {
-                session()->flash('error', config('constants.PRODUCT_REMOVED_FAILED'));
+                $this->errorMessage = config('constants.PRODUCT_REMOVED_FAILED');
             }
         } catch (Exception $error) {
             report($error);
-            session()->flash('error', $error->getMessage());
+            $this->errorMessage = $error->getMessage();
         }
     }
 
@@ -284,7 +290,7 @@ class OrdersLivewire extends Component
             return view('livewire.common.orders-livewire', compact('data'));
         } catch (Exception $error) {
             report($error);
-            session()->flash('error', config('constants.SEARCH_FAILED'));
+            $this->errorMessage = config('constants.SEARCH_FAILED');
 
             $data = [];
 

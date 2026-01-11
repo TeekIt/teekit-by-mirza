@@ -8,6 +8,7 @@ use App\Enums\PackageWeightEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stuart\AddStuartJobRequest;
 use App\Models\RequestedDelivery;
+use App\Models\User;
 use App\Services\CompanyStandardsServices;
 use App\Services\JsonResponseServices;
 use App\Services\StuartDeliveryServices;
@@ -34,22 +35,22 @@ class StuartDeliveryController extends Controller
                 dropoffAddress: $validatedData->dropoffAddress,
                 dropoffUnitAddress: $validatedData->unitAddress,
                 comment: $validatedData->productDetails ?? 'Please pickup your order ASAP',
-                receiverName: auth()->user()->name,
-                receiverPhone: auth()->user()->country_code . auth()->user()->phone,
-                receiverEmail: auth()->user()->email
+                receiverName: User::getAuthUser()->name,
+                receiverPhone: User::getAuthUser()->country_code . User::getAuthUser()->phone,
+                receiverEmail: User::getAuthUser()->email
             )
         );
 
         RequestedDelivery::add(
-            creatorId: auth()->id(),
+            creatorId: User::getAuthUser()->id,
             deliveryProvider: DeliveryProviderEnum::STUART,
             deliveryId: $response['id'],
             pickupAddress: $validatedData->pickupAddress,
             dropoffAddress: $validatedData->dropoffAddress,
             unitAddress: $validatedData->unitAddress,
-            receiverName: auth()->user()->name,
-            receiverPhone: auth()->user()->country_code . auth()->user()->phone,
-            receiverEmail: auth()->user()->email,
+            receiverName: User::getAuthUser()->name,
+            receiverPhone: User::getAuthUser()->country_code . User::getAuthUser()->phone,
+            receiverEmail: User::getAuthUser()->email,
             packageTransportType: PackageTransportTypeEnum::from($validatedData->packageTransportType),
             packageWeight: PackageWeightEnum::from($validatedData->packageWeight),
             totalCost: $validatedData->totalCost
@@ -81,9 +82,9 @@ class StuartDeliveryController extends Controller
                 dropoffAddress: $validatedData->dropoffAddress,
                 dropoffUnitAddress: $validatedData->unitAddress,
                 comment: '',
-                receiverName: auth()->user()->name,
-                receiverPhone: auth()->user()->country_code . auth()->user()->phone,
-                receiverEmail: auth()->user()->email
+                receiverName: User::getAuthUser()->name,
+                receiverPhone: User::getAuthUser()->country_code . User::getAuthUser()->phone,
+                receiverEmail: User::getAuthUser()->email
             )
         );
 

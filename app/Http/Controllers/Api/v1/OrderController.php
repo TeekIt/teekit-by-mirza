@@ -110,7 +110,7 @@ class OrderController extends Controller
         foreach ($request->items as $item) {
             Qty::subtractProductQty($item['sellerId'], $item['productId'], $item['qty']);
 
-            $product = Products::getOnlyProductDetailsById($item['productId']);
+            $product = Products::getProductInfoWithoutRelationsById($item['productId']);
             $groupedSellers[$item['sellerId']][] = [
                 'product_id' => $item['productId'],
                 'product_qty' => $item['qty'],
@@ -429,11 +429,11 @@ class OrderController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->error());
         }
 
-        $order = Orders::getRecentOrderByBuyerId(auth()->id(), $request->productsLimit, $request->sellerId);
+        $order = Orders::getRecentOrderByBuyerId(User::getAuthUser()->id, $request->productsLimit, $request->sellerId);
         if (! empty($order)) {
             $recentOrderProdsData = [];
             foreach ($order->products as $product) {
-                $recentOrderProdsData[] = Products::getProductInfo(
+                $recentOrderProdsData[] = Products::getProductInfoWithRelations(
                     $request->sellerId,
                     $product->id,
                     Products::getCommonColumns(),
@@ -478,7 +478,7 @@ class OrderController extends Controller
     //         $orders = $orders->orderByDesc('created_at')->paginate();
     //         $pagination = $orders->toArray();
     //     } elseif ($request->has('order_status') && $request->order_status == 'ready') {
-    //         $assignedOrders = Orders::where('driver_id', \auth()->id())->where('delivery_status', 'assigned')->get();
+    //         $assignedOrders = Orders::where('driver_id', User::getAuthUser()->id)->where('delivery_status', 'assigned')->get();
     //         if (count($assignedOrders) == 0) {
     //             $users = DB::table("users")
     //                 ->select(
@@ -542,7 +542,7 @@ class OrderController extends Controller
     //                 ->toArray();
     //             $orders = Orders::query();
     //             $orders = $orders->where('order_status', '=', $request->order_status)
-    //                 ->where('driver_id', \auth()->id());
+    //                 ->where('driver_id', User::getAuthUser()->id);
     //             $orders = $orders->orWhere(function ($q) use ($nearbyOrders) {
     //                 $q->whereIn('id', $nearbyOrders);
     //                 if (\auth()->user()->vehicle_type == 'bike') {

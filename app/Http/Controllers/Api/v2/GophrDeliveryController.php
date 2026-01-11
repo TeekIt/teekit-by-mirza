@@ -8,6 +8,7 @@ use App\Enums\PackageWeightEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Gophr\AddGophrJobRequest;
 use App\Models\RequestedDelivery;
+use App\Models\User;
 use App\Services\GophrDeliveryServices;
 use App\Services\JsonResponseServices;
 use App\Services\UUIDServices;
@@ -51,22 +52,22 @@ class GophrDeliveryController extends Controller
                 dropoffPostcode: $validatedData->dropOffPostCode,
                 dropoffLat: $validatedData->dropoffLat,
                 dropoffLon: $validatedData->dropoffLon,
-                dropoffPersonName: auth()->user()->name,
-                dropoffEmail: auth()->user()->email,
-                dropoffMobileNumber: auth()->user()->country_code . auth()->user()->phone
+                dropoffPersonName: User::getAuthUser()->name,
+                dropoffEmail: User::getAuthUser()->email,
+                dropoffMobileNumber: User::getAuthUser()->country_code . User::getAuthUser()->phone
             )
         );
 
         RequestedDelivery::add(
-            creatorId: auth()->id(),
+            creatorId: User::getAuthUser()->id,
             deliveryProvider: DeliveryProviderEnum::GOPHR,
             deliveryId: $response->data->job_id,
             pickupAddress: $validatedData->pickupAddress,
             dropoffAddress: $validatedData->dropoffAddress,
             unitAddress: $validatedData->unitAddress,
-            receiverName: auth()->user()->name,
-            receiverPhone: auth()->user()->country_code . auth()->user()->phone,
-            receiverEmail: auth()->user()->email,
+            receiverName: User::getAuthUser()->name,
+            receiverPhone: User::getAuthUser()->country_code . User::getAuthUser()->phone,
+            receiverEmail: User::getAuthUser()->email,
             packageTransportType: PackageTransportTypeEnum::from($validatedData->packageTransportType),
             packageWeight: PackageWeightEnum::from($validatedData->packageWeight),
             totalCost: $validatedData->totalCost
@@ -116,9 +117,9 @@ class GophrDeliveryController extends Controller
                 dropoffPostcode: $validatedData->dropOffPostCode,
                 dropoffLat: $validatedData->dropoffLat,
                 dropoffLon: $validatedData->dropoffLon,
-                dropoffPersonName: auth()->user()->name,
-                dropoffEmail: auth()->user()->email,
-                dropoffMobileNumber: auth()->user()->country_code . auth()->user()->phone
+                dropoffPersonName: User::getAuthUser()->name,
+                dropoffEmail: User::getAuthUser()->email,
+                dropoffMobileNumber: User::getAuthUser()->country_code . User::getAuthUser()->phone
             )
         );
 

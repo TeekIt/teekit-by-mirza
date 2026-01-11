@@ -375,8 +375,9 @@ class AuthController extends Controller
      */
     public function deleteUser()
     {
-        if (isset(auth()->user()->id)) {
-            $user = User::find(auth()->user()->id);
+        $authUserId = User::getAuthUser()->id;
+        if ($authUserId) {
+            $user = User::find($authUserId);
 
             DB::table('deleted_users')->insert([
                 'user_id' => $user->id,

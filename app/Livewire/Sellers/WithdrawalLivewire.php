@@ -37,7 +37,7 @@ class WithdrawalLivewire extends Component
      */
     public function mount()
     {
-        $this->seller_id = User::getSellerID();
+        $this->seller_id = User::getAuthUser()->id;
         $this->resetAllPaginators();
     }
 
@@ -84,8 +84,8 @@ class WithdrawalLivewire extends Component
      */
     public function withdrawRequest()
     {
-        $user = User::find(auth()->user()->id);
-        // Check if withdrawal amount is valid
+        $user = User::find(User::getAuthUser()->id);
+        /* Check if withdrawal amount is valid */
         if ($this->amount <= 0) {
             session()->flash('error', 'Withdrawal amount is not valid');
             $this->dispatch('close-modal', ['id' => 'requestWithdrawModal']);
@@ -100,13 +100,13 @@ class WithdrawalLivewire extends Component
 
             return;
         }
-        // Proceed with withdrawal
+        /* Proceed with withdrawal */
         $user->pending_withdraw -= $this->amount;
         $user->total_withdraw += $this->amount;
         $user->save();
 
         $status = 'Pending';
-        // Create withdrawal request
+        /* Create withdrawal request */
         $withdrawalRequest = WithdrawalRequests::add($user->id, $this->amount, $status, $user->bank_details);
         if ($withdrawalRequest) {
             session()->flash('success', 'Amount Withdrawal SuccessFull');
@@ -120,7 +120,7 @@ class WithdrawalLivewire extends Component
     public function render()
     {
         $data = WithdrawalRequests::getWithdrawalRequests(
-            User::getSellerID(),
+            User::getAuthUser()->id,
             $this->search,
             $this->isAmountByIdSet(),
             $this->created_at

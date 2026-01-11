@@ -5,6 +5,7 @@ namespace App\Livewire\Sellers;
 use App\Models\Categories;
 use App\Models\Products;
 use App\Models\Qty;
+use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
@@ -143,7 +144,7 @@ class InventoryLivewire extends Component
                 'prod_id' => $product->prod_id,
                 'category_id' => $product->category_id,
                 'parent_seller_id' => $product->parent_seller_id,
-                'child_seller_id' => ($product->child_seller_id === null) ? auth()->id() : $product->child_seller_id,
+                'child_seller_id' => ($product->child_seller_id === null) ? User::getAuthUser()->id : $product->child_seller_id,
                 'qty_id' => ($product->child_seller_id === null) ? 0 : $product->qty_id,
                 'qty' => ($product->child_seller_id === null) ? 0 : $product->qty,
             ];
@@ -157,14 +158,14 @@ class InventoryLivewire extends Component
         $this->category_id = ($this->category_id == 0) ? null : $this->category_id;
 
         if (Gate::allows('seller')) {
-            $data = Products::getParentSellerProductsForView(auth()->id(), $this->search, $this->category_id, orderBy: 'desc');
+            $data = Products::getParentSellerProductsForView(User::getAuthUser()->id, $this->search, $this->category_id, orderBy: 'desc');
             $featuredProducts = $this->getFeaturedProducts($data);
         } elseif (Gate::allows('child_seller')) {
             /*
             1st scenario when a child store will come he will have parent products with "0" Qty
             2nd after entering the Qty for each product a child store can see his own entered Qty
              */
-            $data = Products::getChildSellerProductsForView(auth()->id(), $this->search, $this->category_id);
+            $data = Products::getChildSellerProductsForView(User::getAuthUser()->id, $this->search, $this->category_id);
             $this->quantity = $this->populateQuantityArray($data);
         }
 

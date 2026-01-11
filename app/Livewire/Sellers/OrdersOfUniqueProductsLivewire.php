@@ -41,7 +41,7 @@ class OrdersOfUniqueProductsLivewire extends Component
      */
     public function mount()
     {
-        $this->sellerId = auth()->id();
+        $this->sellerId = User::getAuthUser()->id;
     }
 
     /*
