@@ -146,7 +146,7 @@ class ProductController extends Controller
     public function deleteImg($imageId)
     {
         if (ProductImage::deleteById($imageId)) {
-            flash('Image deleted successfully')->success();
+            session()->flash('success', 'Image deleted successfully');
         }
 
         return redirect()->back();

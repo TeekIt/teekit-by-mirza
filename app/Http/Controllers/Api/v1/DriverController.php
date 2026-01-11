@@ -135,7 +135,7 @@ class DriverController extends Controller
         }
         $data = ['branch' => $request->branch_code, 'bank_name' => $request->bank_name, 'account_number' => $request->account_number, 'phone' => $request->phone];
         $bankDetails = [1 => $data];
-        auth()->user()->update(['bank_details' => json_encode($bankDetails)]);
+        User::getAuthUser()->update(['bank_details' => json_encode($bankDetails)]);
 
         return response()->json([
             'data' => [],

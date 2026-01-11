@@ -7,7 +7,6 @@ use App\Models\Orders;
 use App\Models\Products;
 use App\Models\User;
 use Exception;
-use Google\Service\CloudSearch\Id;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -112,7 +111,7 @@ class SearchAlternativeProductModal extends Component
                 $id,
                 // ['id', 'category_id', 'product_name', 'price']
             )->toArray();
-            dd($alternativeProd);
+            // dd($alternativeProd);
             if ($alternativeProd['qty'][0]['qty'] < $this->alternativeProdUserGivenQty) {
                 return session()->flash('qty_should_not_be_greater', config('constants.QTY_SHOULD_NOT_BE_GREATER'));
             }

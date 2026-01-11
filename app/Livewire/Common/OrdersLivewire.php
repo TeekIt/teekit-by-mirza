@@ -134,7 +134,7 @@ class OrdersLivewire extends Component
             'getSellersOfSameCityAndCategory' . $this->sellerId,
             Carbon::now()->addDay(),
             fn() => User::getActiveParentAndChildSellersByCityAndCategory(
-                auth()->user()->city,
+                User::getAuthUser()->city,
                 $this->orderItem->product->category_id,
                 $this->sellerId,
             )
@@ -148,7 +148,7 @@ class OrdersLivewire extends Component
         $this->order = Orders::getById($orderId);
         $this->orderItem = $this->order->order_items->firstWhere('id', '=', $orderItemId);
 
-        // $sellersOfTheSameCity = User::getParentAndChildSellersByCity(auth()->user()->city);
+        // $sellersOfTheSameCity = User::getParentAndChildSellersByCity(User::getAuthUser()->city);
         $sellersOfTheSameCityAndCategory = $this->getSellersOfSameCityAndCategory();
         $this->nearbySellers = GoogleMapServices::getNearBySellers(
             $this->order->customer_lat,

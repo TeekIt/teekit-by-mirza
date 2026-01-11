@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\JsonResponseServices;
 use App\Models\WithdrawalRequests;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class WithdrawalRequestController extends Controller
      */
     public function sendRequest(Request $request)
     {
-        $user = auth()->user();
+        $user = User::getAuthUser();
 
         WithdrawalRequests::create([
             'user_id' => $user->id,

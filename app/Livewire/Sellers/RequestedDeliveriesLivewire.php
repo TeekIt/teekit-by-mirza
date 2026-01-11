@@ -8,6 +8,7 @@ use App\Enums\OrderByEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use App\Models\RequestedDelivery;
+use App\Models\User;
 use App\Services\GophrDeliveryServices;
 use App\Services\JsonParsingServices;
 use App\Services\StuartDeliveryServices;

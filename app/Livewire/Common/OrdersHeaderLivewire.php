@@ -199,7 +199,7 @@ class OrdersHeaderLivewire extends Component
         return Cache::remember(
             'getSellersOfSameCity' . $this->sellerId,
             Carbon::now()->addDay(),
-            fn() => User::getParentAndChildSellersByCity(auth()->user()->city)
+            fn() => User::getParentAndChildSellersByCity(User::getAuthUser()->city)
         );
     }
 
@@ -209,7 +209,7 @@ class OrdersHeaderLivewire extends Component
             'getSellersOfSameCityAndCategory' . $this->sellerId,
             Carbon::now()->addDay(),
             fn() => User::getActiveAndBlockedParentAndChildSellersByCityAndCategory(
-                auth()->user()->city,
+                User::getAuthUser()->city,
                 $this->getProductCategoryId($this->selectedOrder),
                 $this->sellerId,
             )

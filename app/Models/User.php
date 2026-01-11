@@ -214,17 +214,17 @@ class User extends Authenticatable implements JWTSubject
 
     public static function isSuperAdmin(): bool
     {
-        return auth()->user()->role_id === UserRoleEnum::SUPERADMIN->value;
+        return self::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value;
     }
 
     public static function isParentSeller(): bool
     {
-        return auth()->user()->role_id === UserRoleEnum::SELLER->value;
+        return self::getAuthUser()->role_id === UserRoleEnum::SELLER->value;
     }
 
     public static function isChildSeller(): bool
     {
-        return auth()->user()->role_id === UserRoleEnum::CHILD_SELLER->value;
+        return self::getAuthUser()->role_id === UserRoleEnum::CHILD_SELLER->value;
     }
 
     public static function adminUsersDel(Request $request)
@@ -405,7 +405,7 @@ class User extends Authenticatable implements JWTSubject
             'lat' => $lat,
             'lon' => $lon,
             'settings' => '{"notification_music": 1}',
-            'is_active' => User::BLOCK,
+            'is_active' => self::BLOCK,
             'role_id' => $role_id,
             'parent_store_id' => $parent_store_id,
         ]);
@@ -629,7 +629,7 @@ class User extends Authenticatable implements JWTSubject
 
     public static function verifyReferralCode(int $id, string $referral_code)
     {
-        $data = User::where('id', '!=', $id)->where('referral_code', $referral_code)->first();
+        $data = self::where('id', '!=', $id)->where('referral_code', $referral_code)->first();
 
         return (is_null($data)) ? false : $data;
     }

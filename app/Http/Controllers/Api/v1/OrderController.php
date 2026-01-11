@@ -469,8 +469,8 @@ class OrderController extends Controller
      */
     // public function sellerOrders(Request $request)
     // {
-    //     $lat = \auth()->user()->lat;
-    //     $lon = \auth()->user()->lon;
+    //     $lat = \User::getAuthUser()->lat;
+    //     $lon = \User::getAuthUser()->lon;
     //     $orders = [];
     //     if ($request->has('order_status') && $request->order_status == 'delivered') {
     //         $orders = Orders::query();
@@ -509,7 +509,7 @@ class OrderController extends Controller
     //                             $w->whereIn('id', $users);
     //                         });
     //                     });
-    //                 if (\auth()->user()->vehicle_type == 'bike') {
+    //                 if (\User::getAuthUser()->vehicle_type == 'bike') {
     //                     $orders = $orders->whereHas('order_items.product', function ($q) {
     //                         return $q->where('bike', 1);
     //                     });
@@ -545,7 +545,7 @@ class OrderController extends Controller
     //                 ->where('driver_id', User::getAuthUser()->id);
     //             $orders = $orders->orWhere(function ($q) use ($nearbyOrders) {
     //                 $q->whereIn('id', $nearbyOrders);
-    //                 if (\auth()->user()->vehicle_type == 'bike') {
+    //                 if (\User::getAuthUser()->vehicle_type == 'bike') {
     //                     $q->whereHas('order_items.product', function ($query) {
     //                         return $query->where('bike', 1);
     //                     });

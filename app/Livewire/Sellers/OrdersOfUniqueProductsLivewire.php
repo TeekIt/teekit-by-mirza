@@ -77,7 +77,7 @@ class OrdersOfUniqueProductsLivewire extends Component
         return Cache::remember(
             'getSellersOfSameCity'.$this->sellerId,
             Carbon::now()->addDay(),
-            fn () => User::getParentAndChildSellersByCity(auth()->user()->city)
+            fn () => User::getParentAndChildSellersByCity(User::getAuthUser()->city)
         );
     }
 
@@ -99,7 +99,7 @@ class OrdersOfUniqueProductsLivewire extends Component
                     10
                 );
 
-                // return GoogleMapServices::findNearByUsersByMakingChunks(auth()->user()->lat, auth()->user()->lon, $sellersOfSameCity, 10);
+                // return GoogleMapServices::findNearByUsersByMakingChunks(User::getAuthUser()->lat, User::getAuthUser()->lon, $sellersOfSameCity, 10);
             }
         );
     }
