@@ -8,6 +8,7 @@ use App\Enums\OrderByEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
 use App\Models\RequestedDelivery;
+use App\Models\User;
 use App\Services\GophrDeliveryServices;
 use App\Services\JsonParsingServices;
 use App\Services\StuartDeliveryServices;
@@ -67,7 +68,7 @@ class RequestedDeliveriesLivewire extends Component
      */
     public function mount()
     {
-        $this->sellerId = auth()->id();
+        $this->sellerId = User::getAuthUser()->id;
 
         if (request()->session()->get('stuartDeliveryDetails')) {
             $this->deliveryProvider = DeliveryProviderEnum::STUART;
@@ -271,10 +272,11 @@ class RequestedDeliveriesLivewire extends Component
                 'receiver_email',
                 'package_transport_type',
                 'package_weight',
+                'total_cost',
                 'created_at',
             ]
         );
-
+        
         return view('livewire.sellers.requested-deliveries-livewire', compact('data'));
     }
 }

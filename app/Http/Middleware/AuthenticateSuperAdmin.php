@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Enums\UserRoleEnum;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +18,7 @@ class AuthenticateSuperAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->user()->role_id === UserRoleEnum::SUPERADMIN->value) {
+        if (User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value) {
             return $next($request);
         }
 

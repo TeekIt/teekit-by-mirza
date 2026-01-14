@@ -9,7 +9,24 @@
         use App\Services\ProductServices;
     @endphp
 
-    <x-session-messages />
+    {{-- These are component specific session messages therefore we are not using global "session-messages" component here --}}
+    <div class="container pt-4">
+        @if ($successMessage)
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Success!</strong>
+                {{ $successMessage }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if ($errorMessage)
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error!</strong>
+                {{ $errorMessage }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+    </div>
 
     {{-- ************************************ Search Alternative Product Modal ************************************ --}}
     <div wire:ignore.self class="modal fade" id="searchAlternativeProductModal" tabindex="-1" aria-hidden="true">
@@ -272,7 +289,7 @@
                                             @if ($orderItem->product_belongs_to_type === (new Products())->getMorphClass())
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Price</b></td>
-                                                    <td class="col-8"> £{{ $orderItem->product->price }} </td>
+                                                    <td class="col-8"> £{{ $orderItem->product_price }} </td>
                                                 </tr>
                                                 @if ($order->order_status == OrderStatusEnum::PENDING->value && !User::isSuperAdmin())
                                                     <tr>
@@ -305,7 +322,7 @@
                                                                 <button type="button" class="btn btn-site-primary"
                                                                     data-bs-toggle="modal"
                                                                     data-bs-target="#sendToOtherStoresModal"
-                                                                    wire:click="renderSTOSModal({{ $order->id }})">
+                                                                    wire:click="renderSTOSModal({{ $order->id }}, {{ $orderItem->id }})">
                                                                     <i class="fas fa-paper-plane"></i>
                                                                     Send To Other Sellers
                                                                 </button>

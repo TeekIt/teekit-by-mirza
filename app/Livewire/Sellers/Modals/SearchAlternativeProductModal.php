@@ -5,6 +5,7 @@ namespace App\Livewire\Sellers\Modals;
 use App\Models\OrderItems;
 use App\Models\Orders;
 use App\Models\Products;
+use App\Models\User;
 use Exception;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -27,7 +28,7 @@ class SearchAlternativeProductModal extends Component
 
     public $phoneNumber;
 
-    public $selectedQty;
+    public $alternativeProdUserGivenQty;
 
     public $sellerId;
 
@@ -39,12 +40,12 @@ class SearchAlternativeProductModal extends Component
     protected $paginationTheme = 'bootstrap';
 
     protected $rules = [
-        'selectedQty' => 'required|integer',
+        'alternativeProdUserGivenQty' => 'required|integer',
     ];
 
     protected $messages = [
-        'selectedQty.required' => 'Please enter the qty',
-        'selectedQty.integer' => 'The qty must be a integer value',
+        'alternativeProdUserGivenQty.required' => 'Please enter the qty',
+        'alternativeProdUserGivenQty.integer' => 'The qty must be a integer value',
     ];
 
     /*
@@ -59,34 +60,12 @@ class SearchAlternativeProductModal extends Component
         $this->currentProdQty = $currentProdQty;
         $this->customerName = $customerName;
         $this->phoneNumber = $phoneNumber;
-        $this->sellerId = auth()->id();
+        $this->sellerId = User::getAuthUser()->id;
     }
 
     /*
      * Helpers
      */
-    public function resetChildModal()
-    {
-        $this->resetAllErrors();
-        dd('called');
-        // $this->reset([
-        //     'name',
-        //     'l_name',
-        //     'email',
-        //     'phone',
-        //     'address_1',
-        //     'lat',
-        //     'lon',
-        //     'user_img',
-        //     'last_login',
-        //     'email_verified_at',
-        //     'pending_withdraw',
-        //     'total_withdraw',
-        //     'is_online',
-        //     'application_fee',
-        // ]);
-    }
-
     public function resetAllPaginators()
     {
         $this->resetPage('sap_products_page');
@@ -109,7 +88,7 @@ class SearchAlternativeProductModal extends Component
     {
         try {
             /* Perform some operation */
-            $this->productDetails = Products::getProductInfo(
+            $this->productDetails = Products::getProductInfoWithRelations(
                 $this->sellerId,
                 $productId,
                 ['id', 'category_id', 'product_name', 'sku', 'price', 'feature_img']
@@ -121,37 +100,41 @@ class SearchAlternativeProductModal extends Component
         }
     }
 
-    public function addProductIntoOrder($alternativeProduct)
+    public function addProductIntoOrder($id)
     {
         $this->validate();
 
         try {
             /* Perform some operation */
-            if ($alternativeProduct['qty'][0]['qty'] < $this->selectedQty) {
+            $alternativeProd = Products::getProductInfoWithRelations(
+                $this->sellerId,
+                $id,
+                ['id', 'category_id']
+            )->toArray();
+            
+            if ($alternativeProd['qty'][0]['qty'] < $this->alternativeProdUserGivenQty) {
                 return session()->flash('qty_should_not_be_greater', config('constants.QTY_SHOULD_NOT_BE_GREATER'));
-            } else {
-                $currentProduct = Products::getOnlyProductDetailsById($this->currentProdId);
-
-                $currentProdTotalPrice = $currentProduct->price * $this->currentProdQty;
-                $alternativeProdTotalPrice = $alternativeProduct['price'] * $this->selectedQty;
-
-                $replacedPrice = Orders::replaceWithAlternativePrice(
-                    $this->orderId,
-                    $currentProdTotalPrice,
-                    $alternativeProdTotalPrice
-                );
-
-                $replacedProduct = OrderItems::replaceWithAlternativeProduct(
-                    $this->orderId,
-                    $this->currentProdId,
-                    $alternativeProduct['id'],
-                    $this->selectedQty
-                );
             }
+
+            $currentProdTotalPrice = Products::getProductPrice($this->currentProdId) * $this->currentProdQty;
+            $alternativeProdTotalPrice = Products::getProductPrice($alternativeProd['id']) * $this->alternativeProdUserGivenQty;
+
+            $replacedPrice = Orders::replaceWithAlternativePrice(
+                $this->orderId,
+                $currentProdTotalPrice,
+                $alternativeProdTotalPrice
+            );
+
+            $replacedProduct = OrderItems::replaceWithAlternativeProduct(
+                $this->orderId,
+                $this->currentProdId,
+                $alternativeProd['id'],
+                $alternativeProdTotalPrice,
+                $this->alternativeProdUserGivenQty
+            );
             /* Operation finished */
             sleep(1);
-            $this->dispatch(event: 'alternativeProductIncluded');
-            $this->dispatch(event: 'callParentResetComponent');
+            $this->dispatch(event: 'callParentRenderMethod');
             $this->dispatch('close-modal', ['id' => 'searchAlternativeProductModal']);
 
             if ($replacedPrice && $replacedProduct) {

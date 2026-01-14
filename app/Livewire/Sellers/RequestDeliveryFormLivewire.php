@@ -5,6 +5,7 @@ namespace App\Livewire\Sellers;
 use App\Enums\DeliveryProviderEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
+use App\Models\User;
 use App\Services\CompanyStandardsServices;
 use App\Services\GophrDeliveryServices;
 use App\Services\JsonParsingServices;
@@ -54,7 +55,7 @@ class RequestDeliveryFormLivewire extends Component
 
     public $requestDeliveryButtonTxt = 'Request';
 
-    public $deliveryServiceName;
+    public $deliveryProviderName;
 
     protected function rules()
     {
@@ -78,8 +79,8 @@ class RequestDeliveryFormLivewire extends Component
      */
     public function mount()
     {
-        $this->sellerId = auth()->id();
-        $this->pickupAddress = auth()->user()->full_address;
+        $this->sellerId = User::getAuthUser()->id;
+        $this->pickupAddress = User::getAuthUser()->full_address;
     }
 
     /*
@@ -151,9 +152,9 @@ class RequestDeliveryFormLivewire extends Component
             pickupAt: CompanyStandardsServices::getStandardPickUpTime()->toDateTimeString(),
             assignmentCode: UUIDServices::generateUUID(),
             pickupAddress: $this->pickupAddress,
-            senderName: auth()->user()->name,
-            senderPhone: auth()->user()->business_phone,
-            senderEmail: auth()->user()->email,
+            senderName: User::getAuthUser()->name,
+            senderPhone: User::getAuthUser()->business_phone,
+            senderEmail: User::getAuthUser()->email,
             packageType: StuartDeliveryServices::mapPkgWeightWithStuartPkgType(PackageWeightEnum::from($this->packageWeight)),
             dropoffAddress: $this->dropoffAddress,
             dropoffUnitAddress: $this->dropoffUnitAddress,
@@ -169,12 +170,12 @@ class RequestDeliveryFormLivewire extends Component
         return GophrDeliveryServices::prepareJobArray(
             externalId: UUIDServices::generateUUID(),
             pickupAddress: $this->pickupAddress,
-            pickupCity: auth()->user()->city,
-            pickupPostcode: auth()->user()->postcode,
-            pickupLat: auth()->user()->lat,
-            pickupLon: auth()->user()->lon,
-            pickupPersonName: auth()->user()->name,
-            pickupMobileNumber: auth()->user()->business_phone,
+            pickupCity: User::getAuthUser()->city,
+            pickupPostcode: User::getAuthUser()->postcode,
+            pickupLat: User::getAuthUser()->lat,
+            pickupLon: User::getAuthUser()->lon,
+            pickupPersonName: User::getAuthUser()->name,
+            pickupMobileNumber: User::getAuthUser()->business_phone,
             parcelExternalId: UUIDServices::generateUUID(),
             parcelReferenceNumber: UUIDServices::generateUUID(),
             parcelDescription: $this->productDetails ?? 'Please pickup your order ASAP',
@@ -183,7 +184,7 @@ class RequestDeliveryFormLivewire extends Component
             height: 1,
             weight: 1,
             dropoffAddress: $this->dropoffAddress,
-            dropoffCity: auth()->user()->city,
+            dropoffCity: User::getAuthUser()->city,
             dropoffPostcode: $this->dropoffUnitAddress,
             dropoffLat: $this->dropoffLat,
             dropoffLon: $this->dropoffLon,
@@ -198,23 +199,23 @@ class RequestDeliveryFormLivewire extends Component
         return round($this->deliveryCharges + $this->serviceCharges + $this->tax);
     }
 
-    public function setDeliveryServiceName($deliveryServiceName)
+    public function setDeliveryProviderName($deliveryProviderName)
     {
-        if (! in_array($deliveryServiceName, array_column(DeliveryProviderEnum::cases(), 'value'))) {
+        if (! in_array($deliveryProviderName, array_column(DeliveryProviderEnum::cases(), 'value'))) {
             throw new Exception('Invalid delivery provider');
         }
 
-        $this->deliveryServiceName = $deliveryServiceName;
+        $this->deliveryProviderName = $deliveryProviderName;
     }
 
-    public function calculateDeliveryCost($deliveryServiceName)
+    public function calculateDeliveryCost($deliveryProviderName)
     {
         $this->validate();
 
         try {
-            $this->setDeliveryServiceName($deliveryServiceName);
-
-            if ($this->deliveryServiceName === DeliveryProviderEnum::STUART->value) {
+            $this->setDeliveryProviderName($deliveryProviderName);
+            
+            if ($this->deliveryProviderName === DeliveryProviderEnum::STUART->value) {
                 $this->requestDeliveryButtonTxt = 'Request Staurt Delivery';
 
                 $response = StuartDeliveryServices::getJobPricing(
@@ -223,12 +224,12 @@ class RequestDeliveryFormLivewire extends Component
 
                 $this->currency = $response['currency'];
                 $this->deliveryCharges = $response['amount'];
-                $this->serviceCharges = CompanyStandardsServices::STANDARD_SERVICE_CHARGES;
+                $this->serviceCharges = 0.0;
                 $this->tax = $response['amount_with_tax'] - $response['amount'];
                 $this->totalCost = $this->calculateTotalCost();
             }
 
-            if ($this->deliveryServiceName === DeliveryProviderEnum::GOPHR->value) {
+            if ($this->deliveryProviderName === DeliveryProviderEnum::GOPHR->value) {
                 $this->requestDeliveryButtonTxt = 'Request Gophr Delivery';
 
                 $response = GophrDeliveryServices::getJobPricing(
@@ -259,7 +260,7 @@ class RequestDeliveryFormLivewire extends Component
         $this->disableRequestDeliveryButton = true;
 
         try {
-            if ($this->deliveryServiceName === DeliveryProviderEnum::STUART->value) {
+            if ($this->deliveryProviderName === DeliveryProviderEnum::STUART->value) {
                 request()->session()->put('stuartDeliveryDetails', [
                     'jobArray' => array_merge($this->prepareStuartJobArray(), [
                         'dropoffUnitAddress' => $this->dropoffUnitAddress,
@@ -270,7 +271,7 @@ class RequestDeliveryFormLivewire extends Component
                 ]);
             }
 
-            if ($this->deliveryServiceName === DeliveryProviderEnum::GOPHR->value) {
+            if ($this->deliveryProviderName === DeliveryProviderEnum::GOPHR->value) {
                 request()->session()->put('gophrDeliveryDetails', [
                     'jobArray' => $this->prepareGophrJobArray(),
                     'packageTransportType' => $this->packageTransportType,

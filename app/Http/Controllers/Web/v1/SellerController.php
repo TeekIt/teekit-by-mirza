@@ -32,7 +32,7 @@ class SellerController extends Controller
         $businessHours['submitted'] = 'yes';
 
         $updated = User::updateInfo(
-            auth()->id(),
+            User::getAuthUser()->id,
             hours: $businessHours,
         );
 

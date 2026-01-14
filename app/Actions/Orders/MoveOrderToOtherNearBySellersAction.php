@@ -18,12 +18,6 @@ use Illuminate\Support\Facades\Cache;
 
 final class MoveOrderToOtherNearBySellersAction
 {
-    /**
-     * 1st fetch all CUSTOM ORDERS of today which are still pending 
-     * Now, check if their created_at time is more than 5 minutes ago
-     * Then update their seller_id to another seller having products in the same category within 5 miles
-     * After doing this process send a request to the frontend to refresh the orders list (Using Websockets)
-     */
     private Orders|OrdersFromOtherSeller $order;
 
     private User $seller;
@@ -36,7 +30,7 @@ final class MoveOrderToOtherNearBySellersAction
 
     private int $nearByMiles = 3;
 
-    public function execute(Orders|OrdersFromOtherSeller $order, User $seller, ?OrderItems $orderItem = null): bool
+    public function execute(Orders|OrdersFromOtherSeller $order, User $seller, ?OrderItems $orderItem = null): true
     {
         $this->order = $order;
         $this->seller = $seller;
@@ -186,7 +180,9 @@ final class MoveOrderToOtherNearBySellersAction
          * If there's only 1 item in the order, remove the whole order,
          * else only remove the selected item from current order items
          */
-        ($this->order->order_items->count() == 1) ? Orders::remove($this->order->id) : OrderItems::remove($this->orderItem->id);
+        ($this->order->order_items->count() == 1) ?
+            Orders::remove($this->order->id) :
+            OrderItems::remove($this->orderItem->id);
     }
 
     public function addIntoOrdersFromOtherSeller(Orders $order, OrderItems $orderItem, int $nearBySellerId): OrdersFromOtherSeller

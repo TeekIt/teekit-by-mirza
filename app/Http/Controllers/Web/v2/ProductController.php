@@ -9,6 +9,7 @@ use App\Http\Requests\Product\AddOrUpdateProductRequest;
 use App\Models\ProductImage;
 use App\Models\Products;
 use App\Models\Qty;
+use App\Models\User;
 use App\Services\ImageServices;
 use App\Services\ProductServices;
 use Illuminate\Http\Request;
@@ -45,7 +46,7 @@ class ProductController extends Controller
         $validatedData['van'] = ($validatedData['vehicle'] == TransportVehicleEnum::VAN->value) ? 1 : 0;
         $validatedData['discount_percentage'] = (! isset($validatedData['discount_percentage'])) ? 0.00 : $validatedData['discount_percentage'];
         $validatedData['contact'] = '+44' . $validatedData['contact'];
-        $validatedData['seller_id'] = auth()->id();
+        $validatedData['seller_id'] = User::getAuthUser()->id;
         $validatedData['feature_img'] = ImageServices::uploadImg(request: $request, imgKeyName: 'feature_img', id: $validatedData['seller_id']);
 
         unset($validatedData['_token']);
@@ -75,7 +76,7 @@ class ProductController extends Controller
     {
         $categories = Categories::all();
 
-        $inventory = Products::getProductInfoEvenDisabled(auth()->id(), $productId);
+        $inventory = Products::getProductInfoEvenDisabled(User::getAuthUser()->id, $productId);
 
         return view('shopkeeper.inventory.edit', compact('inventory', 'categories'));
     }
@@ -98,7 +99,7 @@ class ProductController extends Controller
         $validatedData['van'] = ($validatedData['vehicle'] == TransportVehicleEnum::VAN->value) ? 1 : 0;
         $validatedData['discount_percentage'] = $validatedData['discount_percentage'] ?? 0.00;
         $validatedData['contact'] = '+44' . $validatedData['contact'];
-        $validatedData['seller_id'] = auth()->id();
+        $validatedData['seller_id'] = User::getAuthUser()->id;
 
         unset($validatedData['_token']);
         unset($validatedData['color']);
@@ -145,7 +146,7 @@ class ProductController extends Controller
     public function deleteImg($imageId)
     {
         if (ProductImage::deleteById($imageId)) {
-            flash('Image deleted successfully')->success();
+            session()->flash('success', 'Image deleted successfully');
         }
 
         return redirect()->back();

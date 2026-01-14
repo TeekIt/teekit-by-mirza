@@ -27,7 +27,7 @@ class OrdersFromOtherSellersLivewire extends Component
     */
     public function mount()
     {
-        $this->sellerId = auth()->id();
+        $this->sellerId = User::getAuthUser()->id;
     }
 
     /*
@@ -43,7 +43,7 @@ class OrdersFromOtherSellersLivewire extends Component
         return Cache::remember(
             'getSellersOfSameCity' . $this->sellerId,
             Carbon::now()->addDay(),
-            fn() => User::getParentAndChildSellersByCity(auth()->user()->city)
+            fn() => User::getParentAndChildSellersByCity(User::getAuthUser()->city)
         );
     }
 
@@ -60,8 +60,8 @@ class OrdersFromOtherSellersLivewire extends Component
                 * $nearby_sellers = GoogleMapServices::findNearByUsersByMakingChunks($customer_lat, $customer_lon, $sellers_of_same_city, 10);
                 */
                 return GoogleMapServices::findNearByUsersByMakingChunks(
-                    auth()->user()->lat,
-                    auth()->user()->lon,
+                    User::getAuthUser()->lat,
+                    User::getAuthUser()->lon,
                     $sellers_of_same_city,
                     10
                 );

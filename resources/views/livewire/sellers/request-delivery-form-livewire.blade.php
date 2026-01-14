@@ -85,7 +85,7 @@
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
                                                                 wire:model="dropoffUnitAddress" id="dropoffUnitAddress"
-                                                                placeholder="Unit Address (e.g Flat#)" required>
+                                                                placeholder="Unit Address* (e.g Flat#)" required>
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('dropoffUnitAddress')
@@ -109,8 +109,8 @@
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <input type="text" class="form-control"
-                                                                wire:model="receiverName"
-                                                                placeholder="Buyer Name*" required>
+                                                                wire:model="receiverName" placeholder="Buyer Name*"
+                                                                required>
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('receiverName')
@@ -121,8 +121,8 @@
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <input type="number" class="form-control"
-                                                                wire:model="receiverPhone"
-                                                                placeholder="Buyer Contact*" required>
+                                                                wire:model="receiverPhone" placeholder="Buyer Contact*"
+                                                                required>
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('receiverPhone')
@@ -133,8 +133,8 @@
                                                     <div class="col-md-4">
                                                         <div class="form-group">
                                                             <input type="email" class="form-control"
-                                                                wire:model="receiverEmail"
-                                                                placeholder="Buyer Email*" required>
+                                                                wire:model="receiverEmail" placeholder="Buyer Email*"
+                                                                required>
                                                         </div>
                                                         <small class="text-danger">
                                                             @error('receiverEmail')
@@ -180,8 +180,7 @@
                                                     </div>
                                                     <div class="col-md-6">
                                                         <div class="form-group">
-                                                            <select class="form-control"
-                                                                wire:model="packageWeight"
+                                                            <select class="form-control" wire:model="packageWeight"
                                                                 wire:change="inputFieldChanged" required>
                                                                 <option value="">Package Weight (Kg)*</option>
                                                                 <optgroup label="Small">
@@ -221,9 +220,7 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Product Details</label>
-                                                            <textarea class="form-control"
-                                                                wire:model="productDetails"
-                                                                wire:change="inputFieldChanged" rows="6" required>
+                                                            <textarea class="form-control" wire:model="productDetails" wire:change="inputFieldChanged" rows="6" required>
                                                             </textarea>
                                                         </div>
                                                         <small class="text-danger">
@@ -253,13 +250,15 @@
                                                         </span>
                                                     </button>
                                                     <ul class="dropdown-menu col-12">
-                                                        <li class="dropdown-item cursor-pointer p-3 border-bottom"
-                                                            wire:click="calculateDeliveryCost('{{ DeliveryProviderEnum::STUART }}')">
-                                                            Stuart Delivery Charges
-                                                        </li>
+                                                        @if ($packageTransportType != PackageTransportTypeEnum::BIG_VAN->value)
+                                                            <li class="dropdown-item cursor-pointer p-3 border-bottom"
+                                                                wire:click="calculateDeliveryCost('{{ DeliveryProviderEnum::STUART }}')">
+                                                                For delivery within 2 hours
+                                                            </li>
+                                                        @endif
                                                         <li class="dropdown-item cursor-pointer p-3"
                                                             wire:click="calculateDeliveryCost('{{ DeliveryProviderEnum::GOPHR }}')">
-                                                            Gophr Delivery Charges
+                                                            For delivery within 90 minutes
                                                         </li>
                                                     </ul>
                                                 </div>

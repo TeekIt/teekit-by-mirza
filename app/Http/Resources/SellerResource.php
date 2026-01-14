@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\UserRoleEnum;
 use App\Models\User;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -40,9 +41,9 @@ class SellerResource extends JsonResource
             'total_withdraw' => $this->user->total_withdraw,
             'parent_store_id' => $this->user->parent_store_id,
             'is_online' => $this->user->is_online,
-            'roles' => ($this->user->role_id == 2) ? ['sellers'] : ['child_sellers'],
-            'distance' => (empty($this->distanceData)) ? null : $this->distanceData['distance'],
-            'duration' => (empty($this->distanceData)) ? null : $this->distanceData['duration'],
+            'roles' => ($this->user->role_id == UserRoleEnum::SELLER->value) ? ['sellers'] : ['child_sellers'],
+            'distance' => $this->distanceData['distance'] ?? null,
+            'duration' => $this->distanceData['duration'] ?? null,
         ];
     }
 }

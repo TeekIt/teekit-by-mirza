@@ -49,8 +49,7 @@
                                             </select>
                                         </div>
                                         <div class="col-12 col-sm-4">
-                                            <input type="date" wire:model="created_at"
-                                                class="form-control mb-2">
+                                            <input type="date" wire:model="createdAt" class="form-control mb-2">
                                         </div>
                                     </div>
                                 </div>
@@ -66,12 +65,12 @@
                                         </span>
                                     </button>
                                     <button type="button" class="btn btn-primary p-1 w-100 mx-1"
-                                        wire:click="resetThisPage" wire:target="resetThisPage"
+                                        wire:click="resetComponent" wire:target="resetComponent"
                                         wire:loading.class="btn-dark" wire:loading.class.remove="btn-primary"
                                         wire:loading.attr="disabled" title="Reset Withdrawal Requests">
-                                        <span class="fas fa-sync" wire:target="resetThisPage"
+                                        <span class="fas fa-sync" wire:target="resetComponent"
                                             wire:loading.remove=""></span>
-                                        <span wire:target="resetThisPage" wire:loading="">
+                                        <span wire:target="resetComponent" wire:loading="">
                                             <span class="spinner-border spinner-border-sm text-light" role="status"
                                                 aria-hidden="true"></span>
                                         </span>

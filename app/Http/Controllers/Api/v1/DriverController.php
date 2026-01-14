@@ -54,8 +54,7 @@ class DriverController extends Controller
             'lon' => json_decode($request->latlon)->long,
         ];
 
-        return User::where('id', auth()->id())
-            ->update($data);
+        return User::where('id', User::getAuthUser()->id)->update($data);
     }
 
     /**
@@ -68,7 +67,7 @@ class DriverController extends Controller
         if (! \auth()->guard('rider')->user()) {
             abort(404);
         }
-        $user = User::find(\auth()->id());
+        $user = User::find(User::getAuthUser()->id);
         if (empty($user->bank_details)) {
             return response()->json(['message' => 'Please update your bank account info.'], 403);
         }
@@ -81,7 +80,7 @@ class DriverController extends Controller
         $user->pending_withdraw = $user->pending_withdraw - $withdrawal;
         $user->total_withdraw = $user->total_withdraw + $withdrawal;
         $with = new WithdrawalRequests;
-        $with->user_id = \auth()->id();
+        $with->user_id = User::getAuthUser()->id;
         $with->amount = $withdrawal;
         $with->status = 'Pending';
         $with->bank_detail = $user->bank_details;
@@ -136,7 +135,7 @@ class DriverController extends Controller
         }
         $data = ['branch' => $request->branch_code, 'bank_name' => $request->bank_name, 'account_number' => $request->account_number, 'phone' => $request->phone];
         $bankDetails = [1 => $data];
-        auth()->user()->update(['bank_details' => json_encode($bankDetails)]);
+        User::getAuthUser()->update(['bank_details' => json_encode($bankDetails)]);
 
         return response()->json([
             'data' => [],

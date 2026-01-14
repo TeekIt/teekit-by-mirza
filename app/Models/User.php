@@ -214,17 +214,17 @@ class User extends Authenticatable implements JWTSubject
 
     public static function isSuperAdmin(): bool
     {
-        return auth()->user()->role_id === UserRoleEnum::SUPERADMIN->value;
+        return self::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value;
     }
 
     public static function isParentSeller(): bool
     {
-        return auth()->user()->role_id === UserRoleEnum::SELLER->value;
+        return self::getAuthUser()->role_id === UserRoleEnum::SELLER->value;
     }
 
     public static function isChildSeller(): bool
     {
-        return auth()->user()->role_id === UserRoleEnum::CHILD_SELLER->value;
+        return self::getAuthUser()->role_id === UserRoleEnum::CHILD_SELLER->value;
     }
 
     public static function adminUsersDel(Request $request)
@@ -405,7 +405,7 @@ class User extends Authenticatable implements JWTSubject
             'lat' => $lat,
             'lon' => $lon,
             'settings' => '{"notification_music": 1}',
-            'is_active' => User::BLOCK,
+            'is_active' => self::BLOCK,
             'role_id' => $role_id,
             'parent_store_id' => $parent_store_id,
         ]);
@@ -592,19 +592,19 @@ class User extends Authenticatable implements JWTSubject
         return $updated;
     }
 
-    public static function activeOrBlockCustomer(int $userId, int $status): int
+    public static function activeOrBlockCustomer(int $id, int $status): int
     {
-        return self::where('id', '=', $userId)->update(['is_active' => $status]);
+        return self::where('id', '=', $id)->update(['is_active' => $status]);
     }
 
-    public static function getUserRole(int $userId): SupportCollection
+    public static function getUserRole(int $id): SupportCollection
     {
-        return self::where('id', '=', $userId)->pluck('role_id');
+        return self::where('id', '=', $id)->pluck('role_id');
     }
 
-    public static function getUserInfo(int $userId): ?array
+    public static function getUserInfo(int $id): ?array
     {
-        $user = self::with('referralRelations')->where('id', '=', $userId)->first();
+        $user = self::with('referralRelations')->where('id', '=', $id)->first();
 
         if ($user) {
             return [
@@ -627,25 +627,25 @@ class User extends Authenticatable implements JWTSubject
         return null;
     }
 
-    public static function verifyReferralCode(int $userId, string $referral_code)
+    public static function verifyReferralCode(int $id, string $referral_code)
     {
-        $data = User::where('id', '!=', $userId)->where('referral_code', $referral_code)->first();
+        $data = self::where('id', '!=', $id)->where('referral_code', $referral_code)->first();
 
         return (is_null($data)) ? false : $data;
     }
 
-    public static function addIntoWallet(int $userId, float $amount)
+    public static function addIntoWallet(int $id, float $amount)
     {
-        return self::where('id', '=', $userId)->increment('pending_withdraw', $amount);
+        return self::where('id', '=', $id)->increment('pending_withdraw', $amount);
     }
 
-    public static function deductFromWallet(int $userId, float $amount)
+    public static function deductFromWallet(int $id, float $amount)
     {
-        return self::where('id', '=', $userId)->decrement('pending_withdraw', $amount);
+        return self::where('id', '=', $id)->decrement('pending_withdraw', $amount);
     }
 
-    public static function getSellerID(): int
+    public static function getAuthUser(): self
     {
-        return auth()->user()->id;
+        return auth()->user();
     }
 }

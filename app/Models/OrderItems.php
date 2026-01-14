@@ -64,21 +64,23 @@ class OrderItems extends Model
 
     public static function remove(int $id): int
     {
-        return self::where('id', $id)->forceDelete();
+        return self::where('id', '=', $id)->forceDelete();
     }
 
     public static function replaceWithAlternativeProduct(
         int $orderId,
         int $currentProdId,
         int $alternativeProdId,
-        int $selectedQty
+        float $alternativeProdPrice,
+        int $alternativeProdQty
     ): int {
-        return self::where('order_id', $orderId)
+        return self::where('order_id', '=',$orderId)
             ->where('product_belongs_to_type', (new Products)->getMorphClass())
-            ->where('product_belongs_to_id', $currentProdId)
+            ->where('product_belongs_to_id', '=', $currentProdId)
             ->update([
                 'product_belongs_to_id' => $alternativeProdId,
-                'product_qty' => $selectedQty,
+                'product_price' => $alternativeProdPrice,
+                'product_qty' => $alternativeProdQty,
             ]);
     }
 }

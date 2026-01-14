@@ -225,7 +225,7 @@ class HomeController extends Controller
             $items = OrderItems::where('order_id', '=', $order->order_id)->get();
             $item_arr = [];
             foreach ($items as $item) {
-                $product = Products::getProductInfo($order_details->seller_id, $item->product_id, ['*']);
+                $product = Products::getProductInfoWithRelations($order_details->seller_id, $item->product_id, ['*']);
                 $item['product'] = $product;
                 $item_arr[] = $item;
             }
@@ -258,7 +258,7 @@ class HomeController extends Controller
             $items = OrderItems::query()->where('order_id', '=', $order->order_id)->get();
             $item_arr = [];
             foreach ($items as $item) {
-                $product = Products::getProductInfo($order_details->seller_id, $item->product_id, ['*']);
+                $product = Products::getProductInfoWithRelations($order_details->seller_id, $item->product_id, ['*']);
                 $item['product'] = $product;
                 $item_arr[] = $item;
             }

@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\RequestedDelivery;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class RequestedDeliveryPolicy
 {
@@ -13,7 +12,7 @@ class RequestedDeliveryPolicy
      */
     public function viewAny(int $userId): bool
     {
-        return $userId === auth()->user()->id;
+        return $userId === User::getAuthUser()->id;
     }
 
     /**
