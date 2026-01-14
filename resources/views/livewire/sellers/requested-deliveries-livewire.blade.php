@@ -149,6 +149,7 @@
                                     <th scope="col">Package Weight</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Delivery Provider</th>
+                                    <th scope="col">Charges</th>
                                     <th scope="col">Created At</th>
                                     <th scope="col">Options</th>
                                 </tr>
@@ -167,6 +168,7 @@
                                         <td>{{ $singleIndex->package_weight }}</td>
                                         <td><span class="badge badge-primary">inProgress</span></td>
                                         <td>{{ $singleIndex->delivery_provider }}</td>
+                                        <td>{{ $singleIndex->total_cost }}</td>
                                         <td>{{ $singleIndex->created_at }}</td>
                                         <td>
                                             <button type="button" class="btn text-site-primary"

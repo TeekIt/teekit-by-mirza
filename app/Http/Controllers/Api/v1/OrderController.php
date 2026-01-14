@@ -127,9 +127,7 @@ class OrderController extends Controller
             $totalVolume = OrderServices::getTotalOfGivenVolume($order);
             $totalItems = OrderServices::getTotalItems($order);
             $initialTotal = OrderServices::getOrderTotal($order);
-            /* Adding amount into seller's wallet */
-            User::addIntoWallet($sellerId, $initialTotal);
-
+            
             if ($request->type != OrderTypeEnum::SELF_PICKUP->value) {
                 $seller = User::getUserByID($sellerId, [
                     'business_phone',

@@ -109,9 +109,9 @@ class SearchAlternativeProductModal extends Component
             $alternativeProd = Products::getProductInfoWithRelations(
                 $this->sellerId,
                 $id,
-                // ['id', 'category_id', 'product_name', 'price']
+                ['id', 'category_id']
             )->toArray();
-            // dd($alternativeProd);
+            
             if ($alternativeProd['qty'][0]['qty'] < $this->alternativeProdUserGivenQty) {
                 return session()->flash('qty_should_not_be_greater', config('constants.QTY_SHOULD_NOT_BE_GREATER'));
             }

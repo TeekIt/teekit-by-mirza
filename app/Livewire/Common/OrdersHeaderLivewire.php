@@ -72,7 +72,7 @@ class OrdersHeaderLivewire extends Component
 
     public function mount(Orders|OrdersFromOtherSeller $order)
     {
-        $this->sellerId = Auth::user()->id;
+        $this->sellerId = User::getAuthUser()->id;
         $this->isOrderFromOtherSeller = $this->isOrderFromOtherSeller($order);
         $this->order = $order;
     }
@@ -247,6 +247,8 @@ class OrdersHeaderLivewire extends Component
             if (isset($response->error)) {
                 throw new Exception($response->error->message);
             }
+            /* Adding only total amount into seller's wallet without service charges & delivery charges */
+            User::addIntoWallet($this->sellerId, $currentTotal);
         } else {
             throw new Exception('Your current order total should be equal to or less than the initial order total amount');
         }
@@ -440,7 +442,7 @@ class OrdersHeaderLivewire extends Component
             /* Perform some operation */
             $this->selectedOrder = Orders::isViewed($orderId);
 
-            // $response = $this->capturePayment();
+            $response = $this->capturePayment();
 
             if ($this->selectedOrder->type == OrderTypeEnum::SELF_PICKUP->value) {
                 /**
@@ -453,18 +455,19 @@ class OrdersHeaderLivewire extends Component
             /* Operation finished */
             sleep(1);
 
-            // if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
-            //     session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-            // } else {
-            //     session()->flash('error', config('constants.UPDATION_FAILED'));
-            // }
-
-            if ($updated == 1) {
+            if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
                 $this->dispatch(event: 'refreshThisComponent')->self();
                 $this->dispatch(event: 'callParentRenderMethod');
             } else {
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
+
+            // if ($updated == 1) {
+            //     $this->dispatch(event: 'refreshThisComponent')->self();
+            //     $this->dispatch(event: 'callParentRenderMethod');
+            // } else {
+            //     session()->flash('error', config('constants.UPDATION_FAILED'));
+            // }
         } catch (Exception $error) {
             report($error);
             session()->flash('error', $error->getMessage());

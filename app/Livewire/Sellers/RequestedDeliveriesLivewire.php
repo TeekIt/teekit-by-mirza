@@ -272,10 +272,11 @@ class RequestedDeliveriesLivewire extends Component
                 'receiver_email',
                 'package_transport_type',
                 'package_weight',
+                'total_cost',
                 'created_at',
             ]
         );
-
+        
         return view('livewire.sellers.requested-deliveries-livewire', compact('data'));
     }
 }

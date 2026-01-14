@@ -55,7 +55,7 @@ class RequestDeliveryFormLivewire extends Component
 
     public $requestDeliveryButtonTxt = 'Request';
 
-    public $deliveryServiceName;
+    public $deliveryProviderName;
 
     protected function rules()
     {
@@ -199,23 +199,23 @@ class RequestDeliveryFormLivewire extends Component
         return round($this->deliveryCharges + $this->serviceCharges + $this->tax);
     }
 
-    public function setDeliveryServiceName($deliveryServiceName)
+    public function setDeliveryProviderName($deliveryProviderName)
     {
-        if (! in_array($deliveryServiceName, array_column(DeliveryProviderEnum::cases(), 'value'))) {
+        if (! in_array($deliveryProviderName, array_column(DeliveryProviderEnum::cases(), 'value'))) {
             throw new Exception('Invalid delivery provider');
         }
 
-        $this->deliveryServiceName = $deliveryServiceName;
+        $this->deliveryProviderName = $deliveryProviderName;
     }
 
-    public function calculateDeliveryCost($deliveryServiceName)
+    public function calculateDeliveryCost($deliveryProviderName)
     {
         $this->validate();
 
         try {
-            $this->setDeliveryServiceName($deliveryServiceName);
-
-            if ($this->deliveryServiceName === DeliveryProviderEnum::STUART->value) {
+            $this->setDeliveryProviderName($deliveryProviderName);
+            
+            if ($this->deliveryProviderName === DeliveryProviderEnum::STUART->value) {
                 $this->requestDeliveryButtonTxt = 'Request Staurt Delivery';
 
                 $response = StuartDeliveryServices::getJobPricing(
@@ -224,12 +224,12 @@ class RequestDeliveryFormLivewire extends Component
 
                 $this->currency = $response['currency'];
                 $this->deliveryCharges = $response['amount'];
-                $this->serviceCharges = CompanyStandardsServices::STANDARD_SERVICE_CHARGES;
+                $this->serviceCharges = 0.0;
                 $this->tax = $response['amount_with_tax'] - $response['amount'];
                 $this->totalCost = $this->calculateTotalCost();
             }
 
-            if ($this->deliveryServiceName === DeliveryProviderEnum::GOPHR->value) {
+            if ($this->deliveryProviderName === DeliveryProviderEnum::GOPHR->value) {
                 $this->requestDeliveryButtonTxt = 'Request Gophr Delivery';
 
                 $response = GophrDeliveryServices::getJobPricing(
@@ -260,7 +260,7 @@ class RequestDeliveryFormLivewire extends Component
         $this->disableRequestDeliveryButton = true;
 
         try {
-            if ($this->deliveryServiceName === DeliveryProviderEnum::STUART->value) {
+            if ($this->deliveryProviderName === DeliveryProviderEnum::STUART->value) {
                 request()->session()->put('stuartDeliveryDetails', [
                     'jobArray' => array_merge($this->prepareStuartJobArray(), [
                         'dropoffUnitAddress' => $this->dropoffUnitAddress,
@@ -271,7 +271,7 @@ class RequestDeliveryFormLivewire extends Component
                 ]);
             }
 
-            if ($this->deliveryServiceName === DeliveryProviderEnum::GOPHR->value) {
+            if ($this->deliveryProviderName === DeliveryProviderEnum::GOPHR->value) {
                 request()->session()->put('gophrDeliveryDetails', [
                     'jobArray' => $this->prepareGophrJobArray(),
                     'packageTransportType' => $this->packageTransportType,

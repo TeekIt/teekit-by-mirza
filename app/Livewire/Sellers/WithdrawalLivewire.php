@@ -15,11 +15,11 @@ class WithdrawalLivewire extends Component
 
     public $amount;
 
-    public $created_at;
+    public $createdAt;
 
     public $status;
 
-    public $seller_id;
+    public $sellerId;
 
     public $page = 1;
 
@@ -37,7 +37,7 @@ class WithdrawalLivewire extends Component
      */
     public function mount()
     {
-        $this->seller_id = User::getAuthUser()->id;
+        $this->sellerId = User::getAuthUser()->id;
         $this->resetAllPaginators();
     }
 
@@ -60,12 +60,12 @@ class WithdrawalLivewire extends Component
         $this->resetPage('sap_products_page');
     }
 
-    public function resetThisPage()
+    public function resetComponent()
     {
         $this->reset([
             'search',
             'amount',
-            'created_at',
+            'createdAt',
         ]);
     }
 
@@ -123,7 +123,7 @@ class WithdrawalLivewire extends Component
             User::getAuthUser()->id,
             $this->search,
             $this->isAmountByIdSet(),
-            $this->created_at
+            $this->createdAt
         )->paginate(9);
 
         return view('livewire.sellers.withdrawal-livewire', compact('data'));
