@@ -29,7 +29,7 @@ class OrdersFromOtherSeller extends Model
      */
     public function prunable()
     {
-        return static::where('disabled', ModelDisabledStatusEnum::YES->value)->where('created_at', '<=', now()->addDay());
+        return static::where('disabled', '=', ModelDisabledStatusEnum::YES->value)->where('created_at', '<=', now());
     }
 
     /**

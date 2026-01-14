@@ -13,16 +13,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Throwable;
 
-class SendProductByBuyerOrderDetailsToNearBySellersJob implements ShouldQueue
+class SendProductByBuyerOrderDetailsToNearBySellersMailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    /**
-     * Delete the job if its models no longer exist.
-     *
-     * @var bool
-     */
-    public $deleteWhenMissingModels = true;
 
     /**
      * The maximum number of unhandled exceptions to allow before failing.
@@ -52,7 +45,10 @@ class SendProductByBuyerOrderDetailsToNearBySellersJob implements ShouldQueue
      */
     public function failed(?Throwable $exception): void
     {
-        new Exception($exception);
+        logger()->channel('jobs')->error('Job Failed:', [
+            'exception' => $exception?->getMessage(),
+            'trace' => $exception?->getTraceAsString(),
+        ]);
     }
 
     /**

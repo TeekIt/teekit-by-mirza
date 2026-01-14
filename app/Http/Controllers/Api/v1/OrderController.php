@@ -361,7 +361,8 @@ class OrderController extends Controller
             $order,
             $seller
         )->onQueue('high')
-        ->delay(now()->addMinutes(1));
+        // ->withoutDelay();
+        ->delay(now()->addMinutes(5));
 
         $idsArray[] = $order->id;
 

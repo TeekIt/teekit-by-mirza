@@ -57,7 +57,6 @@ class ForgotPasswordController extends Controller
                     DB::table('password_reset_tokens')->updateOrInsert(
                         ['email' => $request->email],
                         [
-                            'email' => $request->email,
                             'token' => Hash::make($token),
                             'created_at' => now(),
                         ]

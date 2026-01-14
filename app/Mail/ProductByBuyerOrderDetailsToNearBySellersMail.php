@@ -24,7 +24,7 @@ class ProductByBuyerOrderDetailsToNearBySellersMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Custom Product Order #'.$this->order->id.' Details - '.config('app.name'),
+            subject: 'Custom Products Order #'.$this->order->id.' Details - '.config('app.name'),
         );
     }
 

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->morphs('created_by', 'orders_from_other_sellers_created_by'); /* This column can either belong to "users" or "guest_buyers" */
             $table->foreignId('seller_id')->constrained(table: 'users')->cascadeOnDelete();
-            $table->foreignId('parent_order_id')->constrained(table: 'orders');
+            $table->bigInteger('parent_order_id')->comment('This column refers to orders.id but we should not create any foreign key constraints here bcz we want to prevent the deletion of these records when their parent order is deleted');
             $table->morphs('product_belongs_to', 'order_from_other_sellers_product_belongs_to'); /* This column can either belong to "products" or "products_by_buyers" */
             $table->float('product_price');
             $table->integer('product_qty');

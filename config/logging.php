@@ -52,6 +52,12 @@ return [
 
     'channels' => [
 
+        'jobs' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/jobs.log'),
+            'ignore_exceptions' => false,
+        ],
+
         'nearBySellers' => [
             'driver' => 'single',
             'path' => storage_path('logs/nearBySellers.log'),
@@ -95,7 +101,7 @@ return [
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
-                'connectionString' => 'tls://'.env('PAPERTRAIL_URL').':'.env('PAPERTRAIL_PORT'),
+                'connectionString' => 'tls://' . env('PAPERTRAIL_URL') . ':' . env('PAPERTRAIL_PORT'),
             ],
             'processors' => [PsrLogMessageProcessor::class],
         ],

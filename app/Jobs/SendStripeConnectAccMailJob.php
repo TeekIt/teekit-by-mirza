@@ -49,7 +49,10 @@ class SendStripeConnectAccMailJob implements ShouldQueue
      */
     public function failed(?Throwable $exception): void
     {
-        new Exception($exception);
+        logger()->channel('jobs')->error('Job Failed:', [
+            'exception' => $exception?->getMessage(),
+            'trace' => $exception?->getTraceAsString(),
+        ]);
     }
 
     /**
