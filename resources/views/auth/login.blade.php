@@ -127,8 +127,7 @@
                         <p class="text-danger location error"></p>
                     </div>
                     <label for="is_child_seller">
-                        <input type="checkbox" name="is_child_seller" id="is_child_seller"
-                            onclick="checkbox()" />
+                        <input type="checkbox" name="is_child_seller" id="is_child_seller" onclick="checkbox()" />
                         I'm a child store
                     </label>
                     <div class="form-group row">
@@ -222,7 +221,9 @@
                     is_child_seller: is_child_seller
                 },
                 success: function(response) {
+
                     $('#signup-btn').text('Sign Up');
+
                     if (response == "User Created") {
                         Swal.fire({
                             title: 'Success!',
@@ -235,7 +236,7 @@
                     } else {
                         $('.error').html('');
 
-                        const errors = response.message;
+                        const errors = JSON.parse(response.message);
 
                         const errorMap = {
                             name: '.name',
@@ -252,9 +253,9 @@
                             city: '.location'
                         };
 
-                        Object.keys(errorMap).forEach(field => {
-                            if (errors[field]) {
-                                $(errorMap[field]).html(errors[field][0]);
+                        Object.keys(errorMap).forEach(key => {
+                            if (errors[key]) {
+                                $(errorMap[key]).html(errors[key][0]);
                             }
                         });
 
