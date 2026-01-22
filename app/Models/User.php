@@ -267,7 +267,7 @@ class User extends Authenticatable implements JWTSubject
             $user->email = $email;
         }
         if (! is_null($phone)) {
-            $user->phone = '+44'.$phone;
+            $user->phone = '+44' . $phone;
         }
         if (! is_null($fullAddress)) {
             $user->full_address = $fullAddress;
@@ -297,7 +297,7 @@ class User extends Authenticatable implements JWTSubject
             $user->business_name = $businessName;
         }
         if (! is_null($businessPhone)) {
-            $user->business_phone = '+44'.$businessPhone;
+            $user->business_phone = '+44' . $businessPhone;
         }
         if (! is_null($password)) {
             $user->password = Hash::make($password);
@@ -411,7 +411,7 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
 
-    public static function getParentAndChildSellersList(array $columns): Collection
+    public static function getParentAndChildSellers(array $columns): Collection
     {
         return self::select($columns)
             ->WhereUserIsActive()
@@ -422,6 +422,21 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
+    public static function getActiveAndBlockedParentAndChildSellersByCity(
+        string $city,
+        int $exceptSellerId,
+        int $numberOfRows = 25
+    ): Collection {
+        return self::WhereRoleIsParentOrChildSeller()
+            ->whereNotNull('lat')
+            ->whereNotNull('lon')
+            ->where('city', '=', $city)
+            ->where('id', '!=', $exceptSellerId)
+            ->orderBy('business_name', 'asc')
+            ->take($numberOfRows)
+            ->get();
+    }
+
     public static function getActiveAndBlockedParentAndChildSellersByCityAndCategory(
         string $city,
         int $categoryId,
@@ -429,8 +444,8 @@ class User extends Authenticatable implements JWTSubject
         int $numberOfRows = 25
     ): Collection {
         return self::whereHas('qty', function ($qtyRelation) use ($categoryId) {
-                $qtyRelation->where('category_id', '=', $categoryId);
-            })
+            $qtyRelation->where('category_id', '=', $categoryId);
+        })
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
@@ -506,30 +521,30 @@ class User extends Authenticatable implements JWTSubject
     public static function getParentSellersSpecificColumns(array $columns): Collection
     {
         return self::select($columns)
-            ->where('role_id', UserRoleEnum::SELLER)
+            ->where('role_id', '=', UserRoleEnum::SELLER)
             ->get();
     }
 
     public static function getParentSellers(string $search = ''): LengthAwarePaginator
     {
-        return self::where('business_name', 'like', '%'.$search.'%')
-            ->where('role_id', UserRoleEnum::SELLER)
+        return self::where('business_name', 'like', '%' . $search . '%')
+            ->where('role_id', '=', UserRoleEnum::SELLER)
             ->orderBy('business_name', 'asc')
             ->paginate(9);
     }
 
     public static function getChildSellers(string $search = ''): LengthAwarePaginator
     {
-        return self::where('business_name', 'like', '%'.$search.'%')
-            ->where('role_id', UserRoleEnum::CHILD_SELLER)
+        return self::where('business_name', 'like', '%' . $search . '%')
+            ->where('role_id', '=', UserRoleEnum::CHILD_SELLER)
             ->orderBy('business_name', 'asc')
             ->paginate(9);
     }
 
     public static function getCustomers(string $search = ''): LengthAwarePaginator
     {
-        return self::where('name', 'like', '%'.$search.'%')
-            ->where('role_id', '=', UserRoleEnum::BUYER)
+        return self::where('name', 'like', '%' . $search . '%')
+            ->where('role_id', '=', '=', UserRoleEnum::BUYER)
             ->orderByDesc('created_at')
             ->paginate(9);
     }
@@ -569,10 +584,10 @@ class User extends Authenticatable implements JWTSubject
 
     public function nearbyUsers($user_lat, $user_lon, $radius): User
     {
-        return self::selectRaw('*, (  3961 * acos( cos( radians('.$user_lat.') ) *
+        return self::selectRaw('*, (  3961 * acos( cos( radians(' . $user_lat . ') ) *
                                 cos( radians(users.lat) ) *
-                                cos( radians(users.lon) - radians('.$user_lon.') ) +
-                                sin( radians('.$user_lat.') ) *
+                                cos( radians(users.lon) - radians(' . $user_lon . ') ) +
+                                sin( radians(' . $user_lat . ') ) *
                                 sin( radians(users.lat) ) ) )
                                 AS distance')
             ->having('distance', '<', $radius)

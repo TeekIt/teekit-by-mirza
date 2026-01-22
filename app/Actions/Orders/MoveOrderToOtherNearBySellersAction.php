@@ -68,12 +68,12 @@ final class MoveOrderToOtherNearBySellersAction
     private function setNearbySellers(User $seller): void
     {
         /* Get sellers who belongs to the city of this store owner */
-        $sellersOfTheSameCityAndCategory = $this->getSellersOfSameCityAndCategory();
+        $sellersOfSameCity = $this->getSellersOfSameCity();
         /* Get sellers who are nearby to the order placing buyer */
         $this->nearbySellers = GoogleMapServices::getNearBySellers(
             $this->order->customer_lat,
             $this->order->customer_lon,
-            $sellersOfTheSameCityAndCategory,
+            $sellersOfSameCity,
             $seller->id,
             nearByMiles: $this->nearByMiles,
         );
@@ -83,6 +83,18 @@ final class MoveOrderToOtherNearBySellersAction
         }
 
         $this->logNearBySellers();
+    }
+
+    private function getSellersOfSameCity(): Collection
+    {
+        return Cache::remember(
+            'getSellersOfSameCity' . $this->seller->id,
+            Carbon::now()->addDay(),
+            fn() => User::getActiveAndBlockedParentAndChildSellersByCity(
+                $this->seller->city,
+                $this->seller->id,
+            )
+        );
     }
 
     private function getSellersOfSameCityAndCategory(): Collection

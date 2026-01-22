@@ -85,12 +85,12 @@
                                 <p>General</p>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a href="{{route('setting.payment')}}" class="nav-link ">
                                 <i class="fas fa-money nav-icon"></i>
                                 <p>Payment</p>
                             </a>
-                        </li>
+                        </li> --}}
                     </ul>
                 </li>
 
