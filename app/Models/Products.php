@@ -548,8 +548,10 @@ class Products extends Model
             ->when($categoryId, function ($query, $categoryId) {
                 return $query->where('category_id', '=', $categoryId);
             })
-            // ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
-            //     $qtyRelation->where('seller_id', '=', $sellerId);
+            // ->when($categoryId, function ($query, $categoryId) {
+            //     return $query->whereHas('qty', function ($qtyRelation) use ($categoryId) {
+            //         $qtyRelation->where('category_id', '=', $categoryId);
+            //     });
             // })
             ->orderBy('id', $orderBy)
             ->paginate(12);

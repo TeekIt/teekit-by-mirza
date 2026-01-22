@@ -22,6 +22,8 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -78,10 +80,12 @@ class OrdersHeaderLivewire extends Component
     }
 
     /* Handle Order prop updates */
-    public function updatedOrder(Orders|OrdersFromOtherSeller $order)
+    public function updatedOrder(Orders|OrdersFromOtherSeller|null $order)
     {
-        $this->isOrderFromOtherSeller = $this->isOrderFromOtherSeller($order);
-        $this->order = $order;
+        if ($order !== null) {
+            $this->isOrderFromOtherSeller = $this->isOrderFromOtherSeller($order);
+            $this->order = $order;
+        }
     }
 
     /*
@@ -359,14 +363,15 @@ class OrdersHeaderLivewire extends Component
             /* Perform some operation */
             $this->selectedOrder = Orders::getById($orderId);
 
-            $removed = (new MoveOrderToOtherNearBySellersAction())->execute($this->selectedOrder, Auth::user());
+            $moved = (new MoveOrderToOtherNearBySellersAction())->execute($this->selectedOrder, User::getAuthUser());
             /* Operation finished */
             sleep(1);
-            $this->dispatch(event: 'refreshThisComponent')->self();
-
-            if ($removed) {
-                session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
+            
+            if ($moved) {
+                $this->redirectRoute('seller.orders');
+                // session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
             } else {
+                // $this->dispatch(event: 'refreshThisComponent')->self();
                 session()->flash('error', config('constants.SENT_TO_OTHER_STORE_FAILED'));
             }
         } catch (Exception $error) {
