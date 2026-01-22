@@ -22,7 +22,7 @@ class PromoCodeController extends Controller
     public function promocodesHome()
     {
         /* Get stores names for select dropdown */
-        $stores = User::getParentAndChildSellersList(['id', 'business_name']);
+        $stores = User::getParentAndChildSellers(['id', 'business_name']);
         $promoCodes = PromoCode::getAll('desc');
 
         return view('admin.promo_codes', compact('promoCodes', 'stores'));
