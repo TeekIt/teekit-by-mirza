@@ -356,7 +356,7 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="col-4 text-site-primary"><b>Price</b></td>
+                                                    <td class="col-4 text-site-primary"><b>Budget</b></td>
                                                     <td class="col-8"> £{{ $orderItem->product->max_price }} </td>
                                                 </tr>
                                                 <tr>

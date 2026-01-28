@@ -207,11 +207,11 @@ class OrdersHeaderLivewire extends Component
         );
     }
 
-    public function noNearBySellers($orderId)
-    {
-        $this->orderId = $orderId;
-        $this->dispatch('show-modal', ['id' => 'noOtherSellersModal']);
-    }
+    // public function noNearBySellers($orderId)
+    // {
+    //     $this->orderId = $orderId;
+    //     $this->dispatch('show-modal', ['id' => 'noOtherSellersModal']);
+    // }
 
     public function capturePayment($currentTotal = null)
     {
