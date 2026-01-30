@@ -74,12 +74,15 @@ class OrdersFromOtherSeller extends Model
         ?OrderStatusEnum $orderStatus = null
     ): bool {
         $order = self::findOrFail($id);
+        
         if (! is_null($initialTotal)) {
             $order->initial_total = $initialTotal;
         }
+
         if (! is_null($currentTotal)) {
             $order->current_total = $currentTotal;
         }
+
         if (! is_null($orderStatus)) {
             $order->order_status = $orderStatus;
         }

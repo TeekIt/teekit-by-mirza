@@ -12,8 +12,8 @@
 
     <x-session-messages />
 
-    {{-- ************************************ Accept Order Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="acceptCustomProductOrderModal" tabindex="-1" role="dialog">
+    {{-- ************************************ Accept Custom Product Order Modal ************************************ --}}
+    <div wire:ignore.self class="modal fade" id="acceptCustomProductOrderModal{{ $order->id }}" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -24,6 +24,7 @@
                     </button>
                 </div>
                 <form wire:submit="customProductOrderIsAccepted" method="post">
+                    @csrf
                     <div class="modal-body">
                         <div class="col-12 mb-3">
                             <label>Price By Seller</label>
@@ -67,7 +68,7 @@
         </div>
     </div>
     {{-- ************************************ No Other Sellers Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="noOtherSellersModal" tabindex="-1" role="dialog">
+    <div wire:ignore.self class="modal fade" id="noOtherSellersModal{{ $order->id }}" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -78,6 +79,7 @@
                     </button>
                 </div>
                 <form wire:submit="cancelOrder({{ $orderId }})" method="post">
+                    @csrf
                     <div class="modal-body">
                         <div class="text-center">
                             <h2>Attention!!</h2>
@@ -109,11 +111,11 @@
         </div>
     </div>
     {{-- ************************************ Stuart Delivery Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="stuartModal" tabindex="-1" role="dialog">
+    <div wire:ignore.self class="modal fade" id="stuartModal{{ $order->id }}" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form wire:submit="assignToStuartDriver">
-                    {{ csrf_field() }}
+                    @csrf
                     <div class="modal-header">
                         <h5 class="modal-title display-center">Add Custom Order Id</h5>
                         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
@@ -155,11 +157,11 @@
         </div>
     </div>
     {{-- ************************************ Gophr Delivery Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="gophrModal" tabindex="-1" role="dialog">
+    <div wire:ignore.self class="modal fade" id="gophrModal{{ $order->id }}" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form wire:submit="assignToGophrDriver">
-                    {{ csrf_field() }}
+                    @csrf
                     <div class="modal-header">
                         <h5 class="modal-title display-center">Gophr Delivery</h5>
                         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
@@ -200,7 +202,7 @@
         </div>
     </div>
     {{-- ************************************ Track Gophr Delivery Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="trackGophrDeliveryModal" tabindex="-1" role="dialog">
+    <div wire:ignore.self class="modal fade" id="trackGophrDeliveryModal{{ $order->id }}" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -312,7 +314,7 @@
                                                                                                                                                         </span>
                                                                                                                                                     </button> -->
                                     <button type="button" class="btn btn-warning" data-bs-toggle="modal"
-                                        data-bs-target="#gophrModal" wire:click="renderOrderId({{ $order->id }})"
+                                        data-bs-target="#gophrModal{{ $order->id }}" wire:click="renderOrderId({{ $order->id }})"
                                         wire:target="renderOrderId({{ $order->id }})" wire:loading.class="btn-dark"
                                         wire:loading.class.remove="btn-warning" wire:loading.attr="disabled"
                                         title="Assign this order to delivery boy">
@@ -334,7 +336,7 @@
                                 @endif
 
                                 @if ($order->order_status === OrderStatusEnum::ON_THE_WAY->value)
-                                    <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#trackGophrDeliveryModal"
+                                    <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#trackGophrDeliveryModal{{ $order->id }}"
                                         wire:click="renderTrackGophrDeliveryModal({{ $order->id }})"
                                         wire:target="renderTrackGophrDeliveryModal({{ $order->id }})" wire:loading.class="btn-dark"
                                         wire:loading.class.remove="btn-dark" wire:loading.attr="disabled"
@@ -490,7 +492,7 @@
                     <h5 class="text-site-primary">Order Details</h5>
                 </th>
             </tr>
-
+            
             <tr>
                 <td><b>Order#</b></td>
                 <td>{{ $order->id }}</td>

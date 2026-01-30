@@ -242,8 +242,9 @@
                     <div class="card-body py-1 px-2">
                         <!-- Order Header -->
                         <div class="p-2 mb-2">
-                            <livewire:common.orders-header-livewire :order="$order"
-                                wire:key="orders-header-livewire-{{ $order->id }}" />
+
+                            <livewire:common.orders-header-livewire :$order :key="'orders-header-livewire-' . $order->id" />
+                                
                         </div>
                         <!-- /Order Header -->
                         <div class="card-text">
@@ -268,19 +269,6 @@
                                                 <td class="col-8"><b>{{ $orderItem->product->product_name }}</b></td>
                                             </tr>
 
-                                            @if ($orderItem->product_belongs_to_type === (new Products())->getMorphClass())
-                                                <tr>
-                                                    <td class="col-4 text-site-primary"><b>Category</b></td>
-                                                    <td class="col-8">
-                                                        {{ $orderItem->product->category->category_name }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="col-4 text-site-primary"><b>SKU</b></td>
-                                                    <td class="col-8">{{ $orderItem->product->sku }}</td>
-                                                </tr>
-                                            @endif
-
                                             <tr>
                                                 <td class="col-4 text-site-primary"><b>Qty</b></td>
                                                 <td class="col-8"> {{ $orderItem->product_qty }} </td>
@@ -288,9 +276,17 @@
 
                                             @if ($orderItem->product_belongs_to_type === (new Products())->getMorphClass())
                                                 <tr>
+                                                    <td class="col-4 text-site-primary"><b>Category</b></td>
+                                                    <td class="col-8">
+                                                        {{ $orderItem->product->category?->category_name }}
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
                                                     <td class="col-4 text-site-primary"><b>Price</b></td>
                                                     <td class="col-8"> £{{ $orderItem->product_price }} </td>
                                                 </tr>
+
                                                 @if ($order->order_status == OrderStatusEnum::PENDING->value && !User::isSuperAdmin())
                                                     <tr>
                                                         <td class="col-4 text-site-primary">
@@ -371,12 +367,14 @@
                                                     <td class="col-4 text-site-primary"><b>Part Nnumber</b></td>
                                                     <td class="col-8"> {{ $orderItem->product->part_number }} </td>
                                                 </tr>
+
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Colors</b></td>
                                                     <td class="col-8">
-                                                        {{ ProductServices::jsonDecodeColors($orderItem->product->colors) }}
+                                                        {{ ProductServices::jsonDecodeColors($orderItem?->product?->colors) }}
                                                     </td>
                                                 </tr>
+
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Transport Vehicle</b></td>
                                                     <td class="col-8"> {{ $orderItem->product->transport_vehicle }}

@@ -3,6 +3,7 @@
 namespace App\Livewire\Common;
 
 use App\Actions\Orders\MoveOrderToOtherNearBySellersAction;
+use App\Enums\GophrCancellationReasonEnum;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\PaymentIntentStatusEnum;
@@ -21,6 +22,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -62,6 +64,8 @@ class OrdersHeaderLivewire extends Component
     public $selectedDeliveryDetails;
 
     public $priceBySeller;
+
+    public $deliveryJob;
 
     /*
     * Livewire Built-in Properties
@@ -111,10 +115,12 @@ class OrdersHeaderLivewire extends Component
         ]);
     }
 
-    /* public function renderStuartModal($orderId)
+    /* 
+    public function renderStuartModal($orderId)
     {
         $this->orderId = $orderId;
-    } */
+    }
+    */
 
     public function renderOrderId($orderId)
     {
@@ -137,15 +143,6 @@ class OrdersHeaderLivewire extends Component
         return $order->product_belongs_to_type;
     }
 
-    public function getProductPrice(null|Orders|OrdersFromOtherSeller $order = null): ?float
-    {
-        if ($order instanceof Orders) {
-            return $order->order_items[0]->product_price;
-        }
-
-        return $order?->product_price;
-    }
-
     public function getProductQty(Orders|OrdersFromOtherSeller $order): int
     {
         if ($order instanceof Orders) {
@@ -165,13 +162,31 @@ class OrdersHeaderLivewire extends Component
         return $order->product->category_id;
     }
 
+    public function getUniqueModalId(string $modalBaseId): string
+    {
+        return $modalBaseId . $this->order->id;
+    }
+
+    public function getProductPrice(Orders|OrdersFromOtherSeller|null $order = null): ?float
+    {
+        if ($order instanceof Orders) {
+            /**
+             * This function only works for "Custom Product Orders a.k.a ProductsByBuyer Orders" 
+             * Hence, this kind of order always has only one order item 
+             */
+            return $order->order_items[0]->product_price;
+        }
+
+        return $order?->product_price;
+    }
+
     public function renderCustomProductOrderModal($orderId)
     {
         $this->resetComponent();
 
         $this->selectedOrder = $this->isOrderFromOtherSeller ? OrdersFromOtherSeller::getById($orderId) : Orders::getById($orderId);
 
-        $this->dispatch('show-modal', ['id' => 'acceptCustomProductOrderModal']);
+        $this->dispatch('show-modal', ['id' => $this->getUniqueModalId('acceptCustomProductOrderModal')]);
     }
 
     public function renderTrackGophrDeliveryModal($orderId)
@@ -181,9 +196,9 @@ class OrdersHeaderLivewire extends Component
 
             $response = GophrDeliveryServices::getJob($gophrDelivery->job_id);
             if (isset($response->errors)) {
-                $this->dispatch('close-modal', ['id' => 'trackGophrDeliveryModal']);
+                $this->dispatch('close-modal', ['id' => $this->getUniqueModalId('trackGophrDeliveryModal')]);
 
-                Log::error($response->errors);
+                logger()->error($response->errors);
 
                 throw new Exception(json_encode($response->errors[0]->message));
             }
@@ -210,7 +225,7 @@ class OrdersHeaderLivewire extends Component
     // public function noNearBySellers($orderId)
     // {
     //     $this->orderId = $orderId;
-    //     $this->dispatch('show-modal', ['id' => 'noOtherSellersModal']);
+    //     $this->dispatch('show-modal', ['id' => $this->getUniqueModalId('noOtherSellersModal')]);
     // }
 
     public function capturePayment($currentTotal = null)
@@ -276,6 +291,23 @@ class OrdersHeaderLivewire extends Component
         );
     }
 
+    public function cancelGophrJob(): void
+    {
+        try {
+            /* 1st check if the delivery job has been created? then cancel */
+            if (isset($this->deliveryJob->data)) {
+                GophrDeliveryServices::cancelJob(
+                    $this->deliveryJob->data->job_id,
+                    GophrCancellationReasonEnum::TECHNICAL_ISSUES
+                );
+            }
+        } catch (Exception $error) {
+            report($error);
+            logger()->error(
+                'Failed to cancel Gophr job #' . ($this->deliveryJob->data->job_id) . ' - ' . $error->getMessage()
+            );
+        }
+    }
     /*
      * CRUD Methods
      */
@@ -283,44 +315,57 @@ class OrdersHeaderLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $order = Orders::getById($this->orderId);
+            DB::beginTransaction();
+
+            if ($this->isOrderFromOtherSeller) {
+                $order = OrdersFromOtherSeller::getById($this->orderId);
+
+                $updated = OrdersFromOtherSeller::updateOrderStatus($this->orderId, OrderStatusEnum::ON_THE_WAY);
+            } else {
+                $order = Orders::getById($this->orderId);
+
+                $updated = Orders::updateOrderStatus($this->orderId, OrderStatusEnum::ON_THE_WAY);
+            }
 
             $parcelDescription = $this->additionalParcelDescription ?? 'Please pickup your order ASAP';
 
-            $response = GophrDeliveryServices::createJob(
+            $this->deliveryJob = GophrDeliveryServices::createJob(
                 $this->prepareGophrJobArray($order, $parcelDescription)
             );
-            if (isset($response->errors)) {
-                $this->dispatch('close-modal', ['id' => 'gophrModal']);
-
-                Log::error($response->errors);
-
-                throw new Exception(json_encode($response->errors[0]->message));
+            if (isset($this->deliveryJob->errors)) {
+                throw new Exception(json_encode($this->deliveryJob->errors[0]->message));
             }
 
             GophrDelivery::add(
                 (new Orders)->getMorphClass(),
                 $this->orderId,
-                $response->data->job_id
+                $this->deliveryJob->data->job_id
             );
 
-            $updated = Orders::updateOrderStatus($this->orderId, OrderStatusEnum::ON_THE_WAY);
+            DB::commit();
             /* Operation finished */
             sleep(1);
             $this->dispatch(event: 'refreshThisComponent')->self();
-            $this->dispatch('close-modal', ['id' => 'gophrModal']);
+            $this->dispatch('close-modal', ['id' => $this->getUniqueModalId('gophrModal')]);
 
-            if ($updated && isset($response->data)) {
+            if ($updated && isset($this->deliveryJob->data)) {
                 session()->flash('success', config('constants.DELIVERY_SUCCESS'));
             } else {
                 session()->flash('error', config('constants.DELIVERY_FAILED'));
             }
         } catch (Exception $error) {
+            DB::rollBack();
+
+            $this->dispatch('close-modal', ['id' => $this->getUniqueModalId('gophrModal')]);
+
+            $this->cancelGophrJob();
+
             report($error);
             session()->flash('error', $error->getMessage());
         }
     }
 
+    /** @deprecated */
     public function assignToStuartDriver()
     {
         try {
@@ -331,7 +376,7 @@ class OrdersHeaderLivewire extends Component
             );
             /* Operation finished */
             sleep(1);
-            $this->dispatch('close-modal', ['id' => 'stuartModal']);
+            $this->dispatch('close-modal', ['id' => $this->getUniqueModalId('stuartModal')]);
 
             if ($stuartMessage === 'JobCreated') {
                 session()->flash('success', config('constants.STUART_DELIVERY_SUCCESS'));
@@ -353,7 +398,7 @@ class OrdersHeaderLivewire extends Component
             $moved = (new MoveOrderToOtherNearBySellersAction())->execute($this->selectedOrder, User::getAuthUser());
             /* Operation finished */
             sleep(1);
-            
+
             if ($moved) {
                 $this->redirectRoute('seller.orders');
                 // session()->flash('success', config('constants.SENT_TO_OTHER_STORE_SUCCESS'));
@@ -380,29 +425,27 @@ class OrdersHeaderLivewire extends Component
 
         try {
             /* Perform some operation */
+            DB::beginTransaction();
+
             if ($this->isOrderFromOtherSeller) {
                 OrdersFromOtherSeller::isViewed($this->selectedOrder->id);
 
-                $newOrderTotal = $this->priceBySeller * $this->getProductQty($this->selectedOrder);
+                OrdersFromOtherSeller::disableThisOrderForOthers(
+                    parentOrderId: $this->selectedOrder->parent_order_id,
+                    exceptSellerId: $this->sellerId,
+                );
 
-                $response = $this->capturePayment($newOrderTotal);
+                $newOrderTotal = $this->priceBySeller * $this->getProductQty($this->selectedOrder);
 
                 $updated = OrdersFromOtherSeller::updateInfo(
                     id: $this->selectedOrder->id,
                     currentTotal: $newOrderTotal,
                     orderStatus: OrderStatusEnum::ACCEPTED,
                 );
-
-                OrdersFromOtherSeller::disableThisOrderForOthers(
-                    parentOrderId: $this->selectedOrder->parent_order_id,
-                    exceptSellerId: $this->sellerId,
-                );
             } else {
                 Orders::isViewed($this->selectedOrder->id);
 
                 $newOrderTotal = $this->priceBySeller * $this->getProductQty($this->selectedOrder);
-
-                $response = $this->capturePayment($newOrderTotal);
 
                 $updated = Orders::updateInfo(
                     id: $this->selectedOrder->id,
@@ -410,10 +453,14 @@ class OrdersHeaderLivewire extends Component
                     orderStatus: OrderStatusEnum::ACCEPTED,
                 );
             }
+
+            $response = $this->capturePayment($newOrderTotal);
+
+            DB::commit();
             /* Operation finished */
             sleep(1);
             $this->dispatch(event: 'refreshThisComponent')->self();
-            $this->dispatch('close-modal', ['id' => 'acceptCustomProductOrderModal']);
+            $this->dispatch('close-modal', ['id' => $this->getUniqueModalId('acceptCustomProductOrderModal')]);
 
             if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
                 session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
@@ -421,7 +468,9 @@ class OrdersHeaderLivewire extends Component
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
         } catch (Exception $error) {
-            $this->dispatch('close-modal', ['id' => 'acceptCustomProductOrderModal']);
+            DB::rollBack();
+
+            $this->dispatch('close-modal', ['id' => $this->getUniqueModalId('acceptCustomProductOrderModal')]);
 
             report($error);
             session()->flash('error', $error->getMessage());
@@ -432,9 +481,26 @@ class OrdersHeaderLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $this->selectedOrder = Orders::isViewed($orderId);
+            DB::beginTransaction();
+
+            if ($this->isOrderFromOtherSeller) {
+                $this->selectedOrder = OrdersFromOtherSeller::isViewed($orderId);
+
+                OrdersFromOtherSeller::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
+
+                OrdersFromOtherSeller::disableThisOrderForOthers(
+                    parentOrderId: $this->selectedOrder->parent_order_id,
+                    exceptSellerId: $this->sellerId,
+                );
+            } else {
+                $this->selectedOrder = Orders::isViewed($orderId);
+
+                Orders::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
+            }
 
             $response = $this->capturePayment();
+
+            DB::commit();
 
             if ($this->selectedOrder->type == OrderTypeEnum::SELF_PICKUP->value) {
                 /**
@@ -442,25 +508,18 @@ class OrdersHeaderLivewire extends Component
                  */
                 EmailServices::sendPickupYourOrderMail($this->selectedOrder);
             }
-
-            $updated = Orders::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
             /* Operation finished */
             sleep(1);
 
-            if ($updated && $response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
+            if ($response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
                 $this->dispatch(event: 'refreshThisComponent')->self();
                 $this->dispatch(event: 'callParentRenderMethod');
             } else {
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
-
-            // if ($updated == 1) {
-            //     $this->dispatch(event: 'refreshThisComponent')->self();
-            //     $this->dispatch(event: 'callParentRenderMethod');
-            // } else {
-            //     session()->flash('error', config('constants.UPDATION_FAILED'));
-            // }
         } catch (Exception $error) {
+            DB::rollBack();
+
             report($error);
             session()->flash('error', $error->getMessage());
         }
@@ -489,14 +548,24 @@ class OrdersHeaderLivewire extends Component
     {
         try {
             /* Perform some operation */
-            $this->selectedOrder = Orders::getById($orderId);
+            DB::beginTransaction();
+
+            if ($this->isOrderFromOtherSeller) {
+                $this->selectedOrder = OrdersFromOtherSeller::getById($orderId);
+
+                $cancelled = OrdersFromOtherSeller::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
+            } else {
+                $this->selectedOrder = Orders::getById($orderId);
+
+                $cancelled = Orders::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
+            }
 
             $refunded = StripeServices::refundPaymentIntent($this->selectedOrder->payment_intent_id);
             if (isset($refunded->error)) {
                 throw new Exception($refunded->error->message);
             }
 
-            $cancelled = Orders::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
+            DB::commit();
 
             EmailServices::sendOrderHasBeenCancelledMail($this->selectedOrder);
             /* Operation finished */
@@ -509,6 +578,8 @@ class OrdersHeaderLivewire extends Component
                 session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
             }
         } catch (Exception $error) {
+            DB::rollBack();
+
             report($error);
             session()->flash('error', $error->getMessage());
         }

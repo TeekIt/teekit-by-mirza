@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\GophrCancellationReasonEnum;
 use Exception;
 use stdClass;
 
@@ -196,10 +197,10 @@ final class GophrDeliveryServices
         return $response;
     }
 
-    public static function cancelJob(string $jobId): stdClass
+    public static function cancelJob(string $jobId, GophrCancellationReasonEnum $cancellationReason): stdClass
     {
         $formData = [
-            'cancelled_reason' => 'TEST_ORDER',
+            'cancelled_reason' => $cancellationReason->value,
         ];
 
         $curl = curl_init();

@@ -272,6 +272,7 @@ class OrdersFromOtherSellersLivewire extends Component
                 'product_price',
                 'product_qty',
                 'initial_total',
+                'current_total',
                 'customer_lat',
                 'customer_lon',
                 'type',
