@@ -106,7 +106,6 @@ final class UberDeliveryServices
     public static function cancelJob(string $deliveryId): stdClass
     {
         $customerId = 'your_customer_id';
-        // $deliveryId = 'your_delivery_id';
         $token = 'your_token';
 
         $url = self::getApiUrl()."/v1/customers/{$customerId}/deliveries/{$deliveryId}/cancel";

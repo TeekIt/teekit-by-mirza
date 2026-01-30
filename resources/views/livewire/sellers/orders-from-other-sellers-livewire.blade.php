@@ -1,5 +1,11 @@
 <div class="container-xxl flex-grow-1 container-p-y">
 
+    @php
+        use App\Services\ProductServices;
+        use App\Models\ProductsByBuyer;
+        use App\Models\Products;
+    @endphp
+
     <x-session-messages />
 
     {{-- ************************************ No Other Sellers Modal ************************************ --}}
@@ -64,177 +70,9 @@
                     <div class="card-body py-1 px-2">
                         <!-- Order Header -->
                         <div class="p-2 mb-2">
-                            <livewire:common.orders-header-livewire :order="$order"
-                                wire:key="orders-header-livewire-{{ $order->id }}" />
-                            {{-- <table class="table table-striped table-responsive-sm">
-                                <thead>
-                                    <tr class="col-12">
-                                        <td colspan="6">
-                                            <div class="row">
-                                                <div class="col-12 col-md-10">
-                                                    <button class="btn btn-warning col-3 col-md-2"
-                                                        title="Hold the order">
-                                                        <span
-                                                            onclick="timerManager.holdThisTimer({{ $order->id }})">
-                                                            Hold
-                                                        </span>
-                                                        <span>
-                                                            <span class="spinner-border spinner-border-sm text-light"
-                                                                role="status" aria-hidden="true"></span>
-                                                        </span>
-                                                    </button>
 
-                                                    @if ($order->order_status === 'pending')
-                                                        @if ($this->isTheOrderOlderThen($orderHoldingMinutes, $order->moved_at))
-                                                            <button class="btn btn-success col-4 col-md-2" disabled
-                                                                title="Accept the order">
-                                                                Accept
-                                                            </button>
-                                                            <button class="btn btn-danger col-3 col-md-2" disabled
-                                                                title="Reject the order">
-                                                                Reject
-                                                            </button>
-                                                        @else
-                                                            <button class="btn btn-success col-4 col-md-2"
-                                                                wire:click="acceptedBySeller({{ $order }})"
-                                                                wire:target="acceptedBySeller({{ $order }})"
-                                                                wire:loading.class="btn-dark"
-                                                                wire:loading.class.remove="btn-success"
-                                                                wire:loading.attr="disabled" title="Accept the order">
-                                                                <span
-                                                                    wire:target="acceptedBySeller({{ $order }})"
-                                                                    wire:loading.remove>
-                                                                    Accept
-                                                                </span>
-                                                                <span
-                                                                    wire:target="acceptedBySeller({{ $order }})"
-                                                                    wire:loading>
-                                                                    <span
-                                                                        class="spinner-border spinner-border-sm text-light"
-                                                                        role="status" aria-hidden="true"></span>
-                                                                </span>
-                                                            </button>
-                                                            <button class="btn btn-danger col-3 col-md-2"
-                                                                wire:click="rejectedBySeller({{ $order->id }}, {{ $order->customer_lat }}, {{ $order->customer_lon }})"
-                                                                wire:target="rejectedBySeller({{ $order->id }}, {{ $order->customer_lat }}, {{ $order->customer_lon }})"
-                                                                wire:loading.class="btn-dark"
-                                                                wire:loading.class.remove="btn-danger"
-                                                                wire:loading.attr="disabled" title="Reject the order">
-                                                                <span
-                                                                    wire:target="rejectedBySeller({{ $order->id }}, {{ $order->customer_lat }}, {{ $order->customer_lon }})"
-                                                                    wire:loading.remove>
-                                                                    Reject
-                                                                </span>
-                                                                <span
-                                                                    wire:target="rejectedBySeller({{ $order->id }}, {{ $order->customer_lat }}, {{ $order->customer_lon }})"
-                                                                    wire:loading>
-                                                                    <span
-                                                                        class="spinner-border spinner-border-sm text-light"
-                                                                        role="status" aria-hidden="true"></span>
-                                                                </span>
-                                                            </button>
-                                                        @endif
-                                                    @endif
+                            <livewire:common.orders-header-livewire :$order :key="'orders-header-livewire-' . $order->id" />
 
-                                                    @if ($order->order_status === 'accepted')
-                                                        <button class="btn btn-warning col-4 col-md-2"
-                                                            wire:click="readyBySeller({{ $order }})"
-                                                            wire:target="readyBySeller({{ $order }})"
-                                                            wire:loading.class="btn-dark"
-                                                            wire:loading.class.remove="btn-warning"
-                                                            wire:loading.attr="disabled"
-                                                            title="Mark the order as ready">
-                                                            <span wire:target="readyBySeller({{ $order }})"
-                                                                wire:loading.remove>
-                                                                Ready
-                                                            </span>
-                                                            <span wire:target="readyBySeller({{ $order }})"
-                                                                wire:loading>
-                                                                <span
-                                                                    class="spinner-border spinner-border-sm text-light"
-                                                                    role="status" aria-hidden="true"></span>
-                                                            </span>
-                                                        </button>
-                                                    @endif
-
-                                                    @if ($order->order_status === 'ready')
-                                                        <button class="btn btn-warning col-4 col-md-2"
-                                                            wire:click="deliveredBySeller({{ $order }})"
-                                                            wire:target="deliveredBySeller({{ $order }})"
-                                                            wire:loading.class="btn-dark"
-                                                            wire:loading.class.remove="btn-warning"
-                                                            wire:loading.attr="disabled"
-                                                            title="Mark the order as delivered">
-                                                            <span wire:target="deliveredBySeller({{ $order }})"
-                                                                wire:loading.remove>
-                                                                Deliver
-                                                            </span>
-                                                            <span wire:target="deliveredBySeller({{ $order }})"
-                                                                wire:loading>
-                                                                <span
-                                                                    class="spinner-border spinner-border-sm text-light"
-                                                                    role="status" aria-hidden="true"></span>
-                                                            </span>
-                                                        </button>
-                                                    @endif
-
-                                                    @if ($order->order_status === 'delivered')
-                                                        <button class="btn btn-dark col-4 col-md-2"
-                                                            title="You have delivered the order successfully">
-                                                            Delivered 🥳
-                                                        </button>
-                                                    @endif
-
-                                                    @if ($order->order_status === 'onTheWay')
-                                                        <button class="btn btn-dark col-4 col-md-2"
-                                                            title="Our delivery boy is delivering your order">
-                                                            On The Way 😊
-                                                        </button>
-                                                    @endif
-                                                </div>
-                                                <div class="col-12 col-md-2 mt-md-1 mt-4">
-                                                    @if ($order->order_status === 'pending')
-                                                        @if ($this->isTheOrderOlderThen($orderHoldingMinutes, $order->moved_at))
-                                                            <p class="fs-3 fw-bold text-danger">
-                                                                Time Over...
-                                                            </p>
-                                                        @else
-                                                            <p class="fs-3 fw-bold timer" id={{ $order->id }}>
-                                                                Timer will render here
-                                                            </p>
-                                                        @endif
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><b>Order#</b></td>
-                                        <td>{{ $order->id }}</td>
-                                        <td><b>Order Status</b></td>
-                                        <td><span class="badge badge-warning">{{ $order->order_status }}</span>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td><b>Placed At</b></td>
-                                        <td>{{ $order->created_at }}</td>
-                                        <td><b>Order Type</b></td>
-                                        <td><span class="badge badge-info">{{ $order->type }}</span></td>
-                                    </tr>
-
-                                    <tr>
-                                        <td><b>Order Total</b></td>
-                                        <td>£{{ $order->initial_total }}</td>
-                                        <td><b>Payment Status</b></td>
-                                        <td><span
-                                                class="badge badge-primary">{{ $order->payment_status }}</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table> --}}
                         </div>
                         <!-- /Order Header -->
                         <div class="card-text">
@@ -242,10 +80,8 @@
                             <div class="row mb-2">
                                 <div class="col-md-2">
                                     <span class="img-container">
-                                        {{-- @dd($order) --}}
                                         @if (str_contains($order->product->feature_img, 'https://'))
-                                            <img class="d-block m-auto"
-                                                src="{{ $order->product->feature_img }}">
+                                            <img class="d-block m-auto" src="{{ $order->product->feature_img }}">
                                         @else
                                             <img class="d-block m-auto"
                                                 src="{{ config('constants.BUCKET') . $order->product->feature_img }}">
@@ -255,26 +91,83 @@
                                 <div class="col-12 col-sm-10">
                                     <table class="table">
                                         <tr>
-                                            <td class="col-4 text-site-primary"><b>Product Name:</b></td>
+                                            <td class="col-4 text-site-primary"><b>Product Name</b></td>
                                             <td class="col-8">{{ $order->product->product_name }}</td>
                                         </tr>
+
                                         <tr>
-                                            <td class="col-4 text-site-primary"><b>Category:</b></td>
-                                            <td class="col-8">{{ $order->product->category?->category_name }}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="col-4 text-site-primary"><b>SKU:</b></td>
-                                            <td class="col-8">{{ $order->product->sku }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="col-4 text-site-primary"><b>QTY:</b></td>
+                                            <td class="col-4 text-site-primary"><b>Qty</b></td>
                                             <td class="col-8">{{ $order->product_qty }}</td>
                                         </tr>
+
                                         <tr>
-                                            <td class="col-4 text-site-primary"><b>Price:</b></td>
-                                            <td class="col-8">£{{ $order->product_price }}</td>
+                                            <td class="col-4 text-site-primary"><b>Category</b></td>
+                                            <td class="col-8">{{ $order->product->category?->category_name }}</td>
                                         </tr>
+
+                                        @if ($order->product_belongs_to_type === (new ProductsByBuyer())->getMorphClass())
+                                            <tr>
+                                                <td class="col-4 text-site-primary"><b>Budget</b></td>
+                                                <td class="col-8">£{{ $order->product_price }}</td>
+                                            </tr>
+                                        @else
+                                            <tr>
+                                                <td class="col-4 text-site-primary"><b>Price</b></td>
+                                                <td class="col-8">£{{ $order->product_price }}</td>
+                                            </tr>
+                                        @endif
+
+                                        <tr>
+                                            <td class="col-4 text-site-primary"><b>Weight</b></td>
+                                            <td class="col-8">{{ $order->product->weight }}kg</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="col-4 text-site-primary"><b>Brand</b></td>
+                                            <td class="col-8">{{ $order->product->brand }}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="col-4 text-site-primary"><b>Part Number</b></td>
+                                            <td class="col-8">{{ $order->product->part_number }}</td>
+                                        </tr>
+
+                                        @if ($order->product_belongs_to_type === (new ProductsByBuyer())->getMorphClass())
+                                            <tr>
+                                                <td class="col-4 text-site-primary"><b>Colors</b></td>
+                                                <td class="col-8">
+                                                    {{ ProductServices::jsonDecodeColors($order->product?->colors) }}
+                                                </td>
+                                            </tr>
+                                        @endif
+
+                                        <tr>
+                                            <td class="col-4 text-site-primary"><b>Transport Vehicle</b></td>
+                                            <td class="col-8">{{ $order->product->transport_vehicle }}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="col-4 text-site-primary"><b>Height</b></td>
+                                            <td class="col-8">{{ $order->product->height }}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="col-4 text-site-primary"><b>Width</b></td>
+                                            <td class="col-8">{{ $order->product->width }}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="col-4 text-site-primary"><b>Length</b></td>
+                                            <td class="col-8">{{ $order->product->length }}</td>
+                                        </tr>
+
+                                        @if ($order->product_belongs_to_type === (new Products())->getMorphClass())
+                                            <tr>
+                                                <td class="col-4 text-site-primary"><b>SKU</b></td>
+                                                <td class="col-8">{{ $order->product->sku }}</td>
+                                            </tr>
+                                        @endif
+
                                     </table>
                                 </div>
                             </div>
@@ -378,7 +271,7 @@
             }
         }
 
-        //Params: minutes, seconds, holdingMinutes, holdingSeconds
+        /* Params: minutes, seconds, holdingMinutes, holdingSeconds */
         const timerManager = new TimerManager({{ $orderHoldingMinutes }}, 00, 5, 59);
         timerManager.start();
     </script>
