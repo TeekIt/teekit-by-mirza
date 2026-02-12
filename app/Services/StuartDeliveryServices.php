@@ -14,52 +14,6 @@ use Throwable;
 
 final class StuartDeliveryServices
 {
-    public static function prepareJobArray(
-        string $pickupAt,
-        string $assignmentCode,
-        string $pickupAddress,
-        string $senderName,
-        string $senderPhone,
-        string $senderEmail,
-        string $packageType,
-        string $dropoffAddress,
-        string $dropoffUnitAddress,
-        string $comment,
-        string $receiverName,
-        string $receiverPhone,
-        string $receiverEmail
-    ): array {
-        return [
-            'job' => [
-                'pickup_at' => $pickupAt,
-                'assignment_code' => $assignmentCode,
-                'pickups' => [
-                    [
-                        'address' => $pickupAddress,
-                        'contact' => [
-                            'firstname' => $senderName,
-                            'phone' => $senderPhone,
-                            'email' => $senderEmail,
-                        ],
-                    ],
-                ],
-                'dropoffs' => [
-                    [
-                        'package_type' => $packageType,
-                        'client_reference' => $assignmentCode,
-                        'address' => $dropoffAddress . ', ' . $dropoffUnitAddress,
-                        'comment' => $comment,
-                        'contact' => [
-                            'firstname' => $receiverName,
-                            'phone' => $receiverPhone,
-                            'email' => $receiverEmail,
-                        ],
-                    ],
-                ],
-            ],
-        ];
-    }
-
     public static function getJobsUrl(): string
     {
         return (app()->environment('production')) ? 'https://api.stuart.com/v2/jobs' : 'https://api.sandbox.stuart.com/v2/jobs';
@@ -124,6 +78,52 @@ final class StuartDeliveryServices
         }
 
         return $response;
+    }
+
+    public static function prepareJobArray(
+        string $pickupAt,
+        string $assignmentCode,
+        string $pickupAddress,
+        string $senderName,
+        string $senderPhone,
+        string $senderEmail,
+        string $packageType,
+        string $dropoffAddress,
+        string $dropoffUnitAddress,
+        string $comment,
+        string $receiverName,
+        string $receiverPhone,
+        string $receiverEmail
+    ): array {
+        return [
+            'job' => [
+                'pickup_at' => $pickupAt,
+                'assignment_code' => $assignmentCode,
+                'pickups' => [
+                    [
+                        'address' => $pickupAddress,
+                        'contact' => [
+                            'firstname' => $senderName,
+                            'phone' => $senderPhone,
+                            'email' => $senderEmail,
+                        ],
+                    ],
+                ],
+                'dropoffs' => [
+                    [
+                        'package_type' => $packageType,
+                        'client_reference' => $assignmentCode,
+                        'address' => $dropoffAddress . ', ' . $dropoffUnitAddress,
+                        'comment' => $comment,
+                        'contact' => [
+                            'firstname' => $receiverName,
+                            'phone' => $receiverPhone,
+                            'email' => $receiverEmail,
+                        ],
+                    ],
+                ],
+            ],
+        ];
     }
 
     public static function mapPkgWeightWithStuartPkgType(PackageWeightEnum $packageWeight): string

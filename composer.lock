@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d6647ee481805b0adbef77edda26d7f2",
+    "content-hash": "629ee548d196083b77ec641491606ba6",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -8762,22 +8762,23 @@
         },
         {
             "name": "twilio/sdk",
-            "version": "6.44.4",
+            "version": "8.11.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/twilio/twilio-php.git",
-                "reference": "08aad5f377e2245b9cd7508e7762d95e7392fa4d"
+                "url": "https://github.com/twilio/twilio-php",
+                "reference": "e3b9248f556ed522ce841ba2b7e9228ff1c8276a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/08aad5f377e2245b9cd7508e7762d95e7392fa4d",
-                "reference": "08aad5f377e2245b9cd7508e7762d95e7392fa4d",
+                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/e3b9248f556ed522ce841ba2b7e9228ff1c8276a",
+                "reference": "e3b9248f556ed522ce841ba2b7e9228ff1c8276a",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.1.0"
             },
             "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.0",
                 "guzzlehttp/guzzle": "^6.3 || ^7.0",
                 "phpunit/phpunit": ">=7.0 < 10"
             },
@@ -8807,11 +8808,7 @@
                 "sms",
                 "twilio"
             ],
-            "support": {
-                "issues": "https://github.com/twilio/twilio-php/issues",
-                "source": "https://github.com/twilio/twilio-php/tree/6.44.4"
-            },
-            "time": "2023-02-22T19:59:53+00:00"
+            "time": "2026-02-05T12:32:52+00:00"
         },
         {
             "name": "tymon/jwt-auth",
