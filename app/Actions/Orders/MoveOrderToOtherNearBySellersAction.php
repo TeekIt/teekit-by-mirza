@@ -11,6 +11,8 @@ use App\Models\ProductsByBuyer;
 use App\Models\User;
 use App\Services\EmailServices;
 use App\Services\GoogleMapServices;
+use App\Services\ProductServices;
+use App\Services\TwilioSmsServices;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -155,6 +157,13 @@ final class MoveOrderToOtherNearBySellersAction
                 orderItem: $this->order->order_items[0],
                 nearBySellerId: $singleIndex['id']
             );
+            /* WhatsApp order details to nearby sellers */
+            TwilioSmsServices::sendWhatsAppMessageWithMedia(
+                receiverNumber: $singleIndex['country_code'] . $singleIndex['business_phone'],
+                // receiverNumber: '+923170155625',
+                message: $this->buildWhatsAppMessageBody(),
+                mediaUrl: asset(config('constants.BUCKET') . $this->order->order_items[0]->product->feature_img)
+            );
         }
         /* Email order details to nearby sellers */
         EmailServices::sendProductByBuyerOrderDetailsToNearBySellersMail(
@@ -234,5 +243,42 @@ final class MoveOrderToOtherNearBySellersAction
             now(),
             $order->created_at,
         );
+    }
+
+    private function buildWhatsAppMessageBody(): string
+    {
+        $product = $this->order->order_items[0]->product;
+        $colors = ProductServices::jsonDecodeColors($product->colors);
+
+        $message = "*Hi Dear Seller,*\n\n";
+        $message .= "Can you help with a quick stock check please?\n\n";
+        $message .= "If you can reply in the next 10–15 minutes, I can confirm and arrange a collection/delivery.\n\n";
+        $message .= "*Please reply with:*\n";
+        $message .= "• In stock? (Yes/No)\n";
+        $message .= "• Price ex VAT (and inc VAT if easier)\n";
+        $message .= "• Earliest collection time today\n\n";
+
+        $message .= "*ITEM NEEDED:*\n";
+        $message .= "─────────────────────────────\n";
+        $message .= "*Product Name:* {$product->product_name}\n";
+        $message .= "*Qty:* {$this->order->order_items[0]->product_qty}\n";
+        $message .= "*Category:* {$product->category?->category_name}\n";
+        $message .= "*Budget:* £{$product->max_price}\n";
+        $message .= "*Weight:* {$product->weight}kg\n";
+        $message .= "*Brand:* {$product->brand}\n";
+        $message .= "*Part Number:* {$product->part_number}\n";
+        $message .= "*Colors:* {$colors}\n";
+        $message .= "*Transport Vehicle:* {$product->transport_vehicle}\n";
+        $message .= "*Height:* {$product->height}\n";
+        $message .= "*Width:* {$product->width}\n";
+        $message .= "*Length:* {$product->length}\n";
+        $message .= "─────────────────────────────\n\n";
+
+        $message .= "Thanks,\n";
+        $message .= "Azim\n";
+        $message .= "Teek It\n";
+        $message .= config('constants.HEAD_OFFICE_CONTACT');
+
+        return $message;
     }
 }

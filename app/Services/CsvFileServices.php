@@ -6,36 +6,42 @@ use App\Models\Products;
 
 final class CsvFileServices
 {
-    public static function exportAsCsv(object $products, int $user_id)
+    public static function exportAsCsv(object $products, int $sellerId)
     {
-        $all_products = [];
+        $allProducts = [];
+
         foreach ($products as $product) {
-            $pt = json_decode(json_encode(Products::getProductInfoWithRelations($user_id, $product->id, ['*'])->toArray()));
-            unset($pt->category);
-            unset($pt->ratting);
-            unset($pt->id);
-            unset($pt->user_id);
-            unset($pt->created_at);
-            unset($pt->updated_at);
-            $temp_img = [];
-            if (isset($pt->images)) {
-                foreach ($pt->images as $img) {
-                    $temp_img[] = $img->product_image;
+            $product = json_decode(json_encode(Products::getProductInfoWithRelations($sellerId, $product->id, ['*'])->toArray()));
+            
+            unset($product->category);
+            unset($product->ratting);
+            unset($product->id);
+            unset($product->user_id);
+            unset($product->created_at);
+            unset($product->updated_at);
+
+            $tempImgs = [];
+            if (isset($product->images)) {
+                foreach ($product->images as $singleIndex) {
+                    $tempImgs[] = $singleIndex->product_image;
                 }
             }
-            $pt->images = implode(',', $temp_img);
-            $all_products[] = $pt;
+
+            $product->images = implode(',', $tempImgs);
+            $allProducts[] = $product;
         }
+
         $destinationPath = public_path().'/upload/csv/';
         if (! is_dir($destinationPath)) {
             mkdir($destinationPath, 0777, true);
         }
-        $file = time().'_export.csv';
 
-        return self::jsonToCsv(json_encode($all_products), $destinationPath.$file, true);
+        $fileName = time().'_export.csv';
+
+        return self::jsonToCsv(json_encode($allProducts), $destinationPath.$fileName, true);
     }
 
-    public static function jsonToCsv($json, $csvFilePath = false, $boolOutputFile = false)
+    public static function jsonToCsv($json, $csvFilePath = false)
     {
         if (empty($json)) {
             exit('The JSON string is empty!');
@@ -46,23 +52,23 @@ final class CsvFileServices
         }
 
         $strTempFile = public_path().'/upload/csv/'.'csvOutput'.date('U').'.csv';
-        $f = fopen($strTempFile, 'w+');
+        $file = fopen($strTempFile, 'w+');
         $csvFilePath = $strTempFile;
         $firstLineKeys = false;
 
         foreach ($json as $line) {
             if (empty($firstLineKeys)) {
                 $firstLineKeys = array_keys($line);
-                fputcsv($f, array_map('strval', $firstLineKeys));
+                fputcsv($file, array_map('strval', $firstLineKeys));
                 $firstLineKeys = array_flip($firstLineKeys);
             }
 
             /* Using array_merge is important to maintain the order of keys according to the first element */
             // $line = array_map('strval', $line);
-            fputcsv($f, array_merge($firstLineKeys, $line));
+            fputcsv($file, array_merge($firstLineKeys, $line));
         }
 
-        fclose($f);
+        fclose($file);
 
         return response()->download($csvFilePath, null, ['Content-Type' => 'text/csv'])->deleteFileAfterSend();
     }
