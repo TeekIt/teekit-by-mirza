@@ -34,7 +34,7 @@ return new class extends Migration
             $table->string('city', 70)->nullable();
             $table->string('postcode', 11)->nullable();
             $table->text('description')->nullable();
-            $table->enum('payment_status', ['paid, hidden']);
+            $table->enum('payment_status', ['paid', 'hidden']);
             $table->enum('order_status', ['pending', 'accepted', 'ready', 'stuartDelivery', 'onTheWay', 'delivered', 'complete', 'cancelled'])->default('pending');
             $table->enum('delivery_status', ['assigned', 'pending_approval', 'complete', 'cancelled'])->nullable();
             $table->string('payment_intent_id');
