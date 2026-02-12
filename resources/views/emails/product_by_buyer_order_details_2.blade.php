@@ -1,17 +1,9 @@
+{{-- This template is deprecated - Remove it if its not required for a long time --}}
+{{-- 
 <x-mail::message>
 
-Hi Dear Seller,
-
-Can you help with a quick stock check please?
-
-If you can reply in the next 10–15 minutes, I can confirm and arrange a collection/delivery.
-
-Please reply to this email with:<br>
-<b>In stock? (Yes/No)</b><br>
-<b>Price ex VAT (and inc VAT if easier)?</b><br>
-<b>Earliest collection time today?</b><br><br>
-
-<b>Item needed:</b>
+A new custom product order has been created by a buyer.<br>
+Following are the details of the custom product:
 <x-mail::table>
 |               |              |
 | ------------- |:-------------|
@@ -30,10 +22,5 @@ Please reply to this email with:<br>
 | <b>Length</b>      | {{ $order->order_items[0]->product->length }} |
 </x-mail::table>
 
-Thanks,<br>
-Azim<br>
-Teek It<br>
-{{ config('constants.HEAD_OFFICE_CONTACT') }}
-
 @include('layouts.email.footer')
-</x-mail::message>
+</x-mail::message> --}}
