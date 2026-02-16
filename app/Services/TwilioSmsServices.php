@@ -28,7 +28,7 @@ final class TwilioSmsServices
         self::getTwilioClient()->messages->create(
             to: $receiverNumber,
             options: [
-                'from' => config('twilio.TWILIO_FROM'),
+                'from' => config('twilio.TWILIO_FROM_NAME'),
                 'body' => $message,
             ]
         );

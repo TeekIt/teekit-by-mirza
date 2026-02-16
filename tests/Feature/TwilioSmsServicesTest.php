@@ -12,6 +12,16 @@ class TwilioSmsServicesTest extends TestCase
     // use RefreshDatabase;
     use WithFaker;
 
+    public function testSendSmsIsWorking(): void
+    {
+        TwilioSmsServices::sendSms(
+            receiverNumber: '+923170155625',
+            message: 'Your order is ready for pickup!'
+        );
+
+        $this->assertTrue(true);
+    }
+
     public function testSendPlainWhatsAppMessageIsWorking(): void
     {
         TwilioSmsServices::sendPlainWhatsAppMessage(
