@@ -28,7 +28,7 @@ final class TwilioSmsServices
         self::getTwilioClient()->messages->create(
             to: $receiverNumber,
             options: [
-                'from' => config('twilio.TWILIO_FROM'),
+                'from' => config('twilio.TWILIO_FROM_NAME'),
                 'body' => $message,
             ]
         );
@@ -45,13 +45,13 @@ final class TwilioSmsServices
         );
     }
 
-    public static function sendWhatsAppMessageWithMedia(string $receiverNumber, string $message, string $mediaUrl): void
+    public static function sendWhatsAppMessageWithMedia(string $receiverNumber, string $message, array $mediaUrl): void
     {
         self::getTwilioClient()->messages->create(
             to: 'whatsapp:' . $receiverNumber,
             options: [
                 'from' => 'whatsapp:' . self::getFromNumber(),
-                "mediaUrl" => [$mediaUrl],
+                "mediaUrl" => $mediaUrl,
                 'body' => $message,
             ]
         );
