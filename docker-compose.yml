@@ -45,6 +45,23 @@ services:
       - teekit-network
       - nginx-network
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: teekit-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8090:80"
+    depends_on:
+      - dockerhosted_db
+    environment:
+      PMA_HOST: dockerhosted_db
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+      PMA_PORT: 3306
+    networks:
+      - teekit-network
+      - nginx-network
+
   meilisearch:
     image: getmeili/meilisearch:latest
     container_name: teekit-meilisearch
@@ -53,6 +70,7 @@ services:
       - "7700:7700"
     environment:
       MEILI_NO_ANALYTICS: 'true'
+      MEILI_EXPERIMENTAL_ENABLE_VECTOR_SEARCH: 'true'
     networks:
       - teekit-network
       - nginx-network

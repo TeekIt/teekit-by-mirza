@@ -8,14 +8,14 @@ use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
-class MakeActionCommand extends Command
+class MakeServiceCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'make:action {name}';
+    protected $signature = 'make:service {name}';
 
     protected $successCode = Command::SUCCESS;
 
@@ -26,12 +26,12 @@ class MakeActionCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create a new action class';
+    protected $description = 'Create a new service class';
 
     /**
      * Command specific code
      */
-    protected $namespace = 'App\\Actions';
+    protected $namespace = 'App\\Services';
 
     protected $className;
 
@@ -44,9 +44,6 @@ class MakeActionCommand extends Command
 
                 final class {$this->className}
                 {
-                    public function __construct() {}
-
-                    public function execute() {}
                 }
                 EOT;
     }
@@ -64,10 +61,10 @@ class MakeActionCommand extends Command
                 $parts = explode('/', $name);
                 $this->className = array_pop($parts);
                 $this->namespace .= '\\' . implode('\\', $parts);
-                $path = app_path('Actions/' . implode('/', $parts));
+                $path = app_path('Services/' . implode('/', $parts));
             } else {
                 $this->className = $name;
-                $path = app_path('Actions');
+                $path = app_path('Services');
             }
 
             File::ensureDirectoryExists($path, 0755);
@@ -79,14 +76,14 @@ class MakeActionCommand extends Command
 
             /* Check if file already exists */
             if (File::exists($filePath)) {
-                $this->error("Action class [{$relativePath}] already exists!");
+                $this->error("Service class [{$relativePath}] already exists!");
 
                 return $this->failureCode;
             }
 
             File::put($filePath, $this->getClassStub());
 
-            $this->info("Action class [{$relativePath}] created successfully.");
+            $this->info("Service class [{$relativePath}] created successfully.");
 
             return $this->successCode;
         } catch (Exception $e) {

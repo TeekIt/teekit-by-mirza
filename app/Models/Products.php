@@ -286,6 +286,17 @@ class Products extends Model
             ->paginate(20, 'scoutPage')
             ->toArray();
 
+        // $scoutData = self::search($productName)
+        //     ->options([
+        //         'hybrid' => [
+        //             'semanticRatio' => 0.5, // 50% keyword, 50% AI
+        //             'embedder' => 'default'
+        //         ]
+        //     ])
+        //     ->whereIn('seller_ids', $sellerIds)
+        //     ->paginate(20, 'scoutPage')
+        //     ->toArray();
+
         $productIds = array_column($scoutData['data'], 'id');
         unset($scoutData['data']);
         $pagination = $scoutData;

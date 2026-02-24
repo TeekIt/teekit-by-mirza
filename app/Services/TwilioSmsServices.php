@@ -6,7 +6,7 @@ use Twilio\Rest\Client;
 
 final class TwilioSmsServices
 {
-    public static function getTwilioClient(): Client
+    public static function getClient(): Client
     {
         return new Client(
             config('twilio.TWILIO_SID'),
@@ -25,7 +25,7 @@ final class TwilioSmsServices
      */
     public static function sendSms(string $receiverNumber, string $message): void
     {
-        self::getTwilioClient()->messages->create(
+        self::getClient()->messages->create(
             to: $receiverNumber,
             options: [
                 'from' => config('twilio.TWILIO_FROM_NAME'),
@@ -34,9 +34,9 @@ final class TwilioSmsServices
         );
     }
 
-    public static function sendPlainWhatsAppMessage(string $receiverNumber, string $message): void
+    public static function sendWhatsAppMessage(string $receiverNumber, string $message): void
     {
-        self::getTwilioClient()->messages->create(
+        self::getClient()->messages->create(
             to: 'whatsapp:' . $receiverNumber,
             options: [
                 'from' => 'whatsapp:' . self::getFromNumber(),
@@ -47,7 +47,7 @@ final class TwilioSmsServices
 
     public static function sendWhatsAppMessageWithMedia(string $receiverNumber, string $message, array $mediaUrl): void
     {
-        self::getTwilioClient()->messages->create(
+        self::getClient()->messages->create(
             to: 'whatsapp:' . $receiverNumber,
             options: [
                 'from' => 'whatsapp:' . self::getFromNumber(),
