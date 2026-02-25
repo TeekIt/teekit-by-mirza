@@ -91,7 +91,7 @@ class Products extends Model
             'category_id' => $this->category_id,
             'price' => $this->price,
             'status' => $this->status,
-            'wieght' => $this->weight,
+            'weight' => $this->weight,
             'brand' => $this->brand,
         ];
     }
@@ -273,29 +273,31 @@ class Products extends Model
     public static function searchProducts(
         string $productName,
         array $sellerIds,
-        ?int $categoryId,
-        ?string $brand,
-        ?float $minPrice,
-        ?float $maxPrice,
-        ?float $minWeight,
-        ?float $maxWeight,
-        ?string $sortBy,
+        ?int $categoryId = null,
+        ?string $sku = null,
+        ?float $minPrice = null,
+        ?float $maxPrice = null,
+        ?float $minWeight = null,
+        ?float $maxWeight = null,
+        ?string $brand = null,
+        ?string $sortBy = null,
     ): array {
-        $scoutData = self::search($productName)
-            ->whereIn('seller_ids', $sellerIds)
-            ->paginate(20, 'scoutPage')
-            ->toArray();
-
         // $scoutData = self::search($productName)
-        //     ->options([
-        //         'hybrid' => [
-        //             'semanticRatio' => 0.5, // 50% keyword, 50% AI
-        //             'embedder' => 'default'
-        //         ]
-        //     ])
         //     ->whereIn('seller_ids', $sellerIds)
         //     ->paginate(20, 'scoutPage')
         //     ->toArray();
+
+        $scoutData = self::search($productName)
+            ->options([
+                'hybrid' => [
+                    /* 50% keyword, 50% Ai */
+                    'semanticRatio' => 0.5, 
+                    'embedder' => 'default'
+                ]
+            ])
+            ->whereIn('seller_ids', $sellerIds)
+            ->paginate(20, 'scoutPage')
+            ->toArray();
 
         $productIds = array_column($scoutData['data'], 'id');
         unset($scoutData['data']);
@@ -346,6 +348,8 @@ class Products extends Model
             return $query->where('weight', '>=', $minWeight);
         })->when($maxWeight, function ($query) use ($maxWeight) {
             return $query->where('weight', '<=', $maxWeight);
+        })->when($sku, function ($query) use ($sku) {
+            return $query->where('sku', '=', $sku);
         })->when($sortBy, function ($query) use ($sortBy) {
             return match ($sortBy) {
                 SortByEnum::PriceLowToHigh->value => $query->orderBy('price', 'asc'),

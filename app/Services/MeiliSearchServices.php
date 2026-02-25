@@ -23,7 +23,8 @@ final class MeiliSearchServices
                 'source' => 'openAi',
                 'model' => 'text-embedding-3-small',
                 'apiKey' => config('openai.OPENAI_API_KEY'),
-                'documentTemplate' => 'A product used in construction titled "{{doc.product_name}}"',
+                'documentTemplate' => 'A product named "{{doc.product_name}}". Do not hallucinate or match unrelated items.',
+                // 'documentTemplate' => 'A product named "{{doc.product_name}}"',
             ]
         ]);
     }
