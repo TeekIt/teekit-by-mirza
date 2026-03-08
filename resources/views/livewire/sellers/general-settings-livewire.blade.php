@@ -18,7 +18,7 @@
                     <!-- Modal body -->
                     <div class="modal-body">
                         <form action="{{ route('seller.settings.update.location') }}" method="POST">
-                            @csrf
+                            {{ csrf_field() }}
                             <div class="p-3">
                                 <div class="col-md-12 my-2">
                                     <label for="full_address">Address 1</label>

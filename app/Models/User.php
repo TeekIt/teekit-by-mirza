@@ -544,7 +544,7 @@ class User extends Authenticatable implements JWTSubject
     public static function getCustomers(string $search = ''): LengthAwarePaginator
     {
         return self::where('name', 'like', '%' . $search . '%')
-            ->where('role_id', '=', '=', UserRoleEnum::BUYER)
+            ->where('role_id', '=', UserRoleEnum::BUYER->value)
             ->orderByDesc('created_at')
             ->paginate(9);
     }

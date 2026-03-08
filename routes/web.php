@@ -17,6 +17,8 @@ use App\Livewire\Admin\CustomersLivewire;
 use App\Livewire\Admin\DriversLivewire;
 use App\Livewire\Admin\ParentSellersLivewire;
 use App\Livewire\Admin\ReferralCodesLivewire;
+use App\Livewire\Admin\VanInventoriesLivewire;
+use App\Livewire\Admin\VansLivewire;
 use App\Livewire\Common\OrdersLivewire;
 use App\Livewire\Sellers\GeneralSettingsLivewire;
 use App\Livewire\Sellers\InventoryLivewire;
@@ -157,9 +159,17 @@ Route::middleware('transaction.wrapper')->group(function () {
             Route::get('/delete', [CategoriesController::class, 'destroy'])->name('admin.categories.del');
         });
 
-        Route::prefix('notification')->controller(NotificationsController::class)->group(function () {
-            Route::get('/home', 'notificationHome')->name('admin.notification.home');
-            Route::post('/send', 'notificationSend')->name('admin.notification.send');
+        Route::prefix('notifications')->controller(NotificationsController::class)->group(function () {
+            Route::get('/home', 'notificationHome')->name('admin.notifications.home');
+            Route::post('/send', 'notificationSend')->name('admin.notifications.send');
+        });
+
+        Route::prefix('vans')->group(function () {
+            Route::get('/', VansLivewire::class)->name('admin.vans');
+        });
+
+        Route::prefix('van/inventories')->group(function () {
+            Route::get('/', VanInventoriesLivewire::class)->name('admin.van.inventories');
         });
 
         Route::controller(AdminController::class)->group(function () {

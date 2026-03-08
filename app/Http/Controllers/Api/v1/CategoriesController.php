@@ -38,7 +38,7 @@ class CategoriesController extends Controller
         } else {
             $data = Cache::rememberForever(
                 'allCategories',
-                fn () => Categories::allCategories([
+                fn () => Categories::getAll([
                     'id',
                     'category_name',
                     'category_image',

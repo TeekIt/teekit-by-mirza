@@ -25,7 +25,7 @@
                             <div class="card-text">
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <form action="{{ route('admin.notification.send') }}" method="POST"
+                                        <form action="{{ route('admin.notifications.send') }}" method="POST"
                                             enctype="multipart/form-data">
                                             {{ csrf_field() }}
                                             <div class="row">

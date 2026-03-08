@@ -204,7 +204,7 @@
     <form wire:submit="performSearch">
         <div class="row">
             <div class="col-12 col-sm-12 col-md-8 py-4 my-2">
-                <input type="number" wire:model="search" class="form-control" placeholder="Search by order#">
+                <input type="number" wire:model="search" class="form-control" placeholder="Search by order#...">
             </div>
             <div class="col-12 col-sm-12 col-md-4 d-flex">
                 <button type="submit" class="btn btn-site-primary my-4 p-1 w-100 mx-1" wire:target="search"
@@ -253,12 +253,12 @@
                                 <div class="row mb-2">
                                     <div class="col-md-2">
                                         <span class="img-container">
-                                            @if (str_contains($orderItem->product->feature_img, 'https://'))
+                                            @if (str_contains($orderItem?->product?->feature_img, 'https://'))
                                                 <img class="d-block m-auto"
                                                     src="{{ asset($orderItem->product->feature_img) }}">
                                             @else
                                                 <img class="d-block m-auto"
-                                                    src="{{ config('constants.BUCKET') . $orderItem->product->feature_img }}">
+                                                    src="{{ config('constants.BUCKET') . $orderItem?->product?->feature_img }}">
                                             @endif
                                         </span>
                                     </div>
@@ -266,25 +266,25 @@
                                         <table class="table">
                                             <tr>
                                                 <td class="col-4 text-site-primary"><b>Product Name</b></td>
-                                                <td class="col-8"><b>{{ $orderItem->product->product_name }}</b></td>
+                                                <td class="col-8"><b>{{ $orderItem?->product?->product_name }}</b></td>
                                             </tr>
 
                                             <tr>
                                                 <td class="col-4 text-site-primary"><b>Qty</b></td>
-                                                <td class="col-8"> {{ $orderItem->product_qty }} </td>
+                                                <td class="col-8"> {{ $orderItem?->product_qty }} </td>
                                             </tr>
 
-                                            @if ($orderItem->product_belongs_to_type === (new Products())->getMorphClass())
+                                            @if ($orderItem?->product_belongs_to_type === (new Products())->getMorphClass())
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Category</b></td>
                                                     <td class="col-8">
-                                                        {{ $orderItem->product->category?->category_name }}
+                                                        {{ $orderItem?->product?->category?->category_name }}
                                                     </td>
                                                 </tr>
 
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Price</b></td>
-                                                    <td class="col-8"> £{{ $orderItem->product_price }} </td>
+                                                    <td class="col-8"> £{{ $orderItem?->product_price }} </td>
                                                 </tr>
 
                                                 @if ($order->order_status == OrderStatusEnum::PENDING->value && !User::isSuperAdmin())
@@ -344,28 +344,28 @@
                                                 @endif
                                             @endif
 
-                                            @if ($orderItem->product_belongs_to_type === (new ProductsByBuyer())->getMorphClass())
+                                            @if ($orderItem?->product_belongs_to_type === (new ProductsByBuyer())->getMorphClass())
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Category</b></td>
                                                     <td class="col-8">
-                                                        {{ $orderItem->product->category?->category_name }}
+                                                        {{ $orderItem?->product?->category?->category_name }}
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Budget</b></td>
-                                                    <td class="col-8"> £{{ $orderItem->product->max_price }} </td>
+                                                    <td class="col-8"> £{{ $orderItem?->product?->max_price }} </td>
                                                 </tr>
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Weight</b></td>
-                                                    <td class="col-8"> {{ $orderItem->product->weight }}kg </td>
+                                                    <td class="col-8"> {{ $orderItem?->product?->weight }}kg </td>
                                                 </tr>
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Brand</b></td>
-                                                    <td class="col-8"> {{ $orderItem->product->brand }} </td>
+                                                    <td class="col-8"> {{ $orderItem?->product?->brand }} </td>
                                                 </tr>
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Part Nnumber</b></td>
-                                                    <td class="col-8"> {{ $orderItem->product->part_number }} </td>
+                                                    <td class="col-8"> {{ $orderItem?->product?->part_number }} </td>
                                                 </tr>
 
                                                 <tr>
@@ -377,20 +377,20 @@
 
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Transport Vehicle</b></td>
-                                                    <td class="col-8"> {{ $orderItem->product->transport_vehicle }}
+                                                    <td class="col-8"> {{ $orderItem?->product?->transport_vehicle }}
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Height</b></td>
-                                                    <td class="col-8"> {{ $orderItem->product->height }} </td>
+                                                    <td class="col-8"> {{ $orderItem?->product?->height }} </td>
                                                 </tr>
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Width</b></td>
-                                                    <td class="col-8"> {{ $orderItem->product->width }} </td>
+                                                    <td class="col-8"> {{ $orderItem?->product?->width }} </td>
                                                 </tr>
                                                 <tr>
                                                     <td class="col-4 text-site-primary"><b>Length</b></td>
-                                                    <td class="col-8"> {{ $orderItem->product->length }} </td>
+                                                    <td class="col-8"> {{ $orderItem?->product?->length }} </td>
                                                 </tr>
                                             @endif
                                         </table>

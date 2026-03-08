@@ -153,7 +153,7 @@ class InventoryLivewire extends Component
 
     public function render()
     {
-        $categories = Categories::allCategories(['id', 'category_name']);
+        $categories = Categories::getAll(['id', 'category_name']);
         $featuredProducts = [];
         $this->category_id = ($this->category_id == 0) ? null : $this->category_id;
 

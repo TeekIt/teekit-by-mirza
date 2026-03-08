@@ -315,9 +315,9 @@ class Orders extends Model
         * Because only seller products have 'category'
         */
         $orders->each(function ($order) {
-            $order->order_items->each(function ($orderItem) {
-                if ($orderItem->product_belongs_to_type == (new Products)->getMorphClass()) {
-                    $orderItem->product->load('category');
+            $order->order_items?->each(function ($orderItem) {
+                if ($orderItem?->product_belongs_to_type == (new Products)->getMorphClass()) {
+                    $orderItem?->product?->load('category');
                 }
             });
         });

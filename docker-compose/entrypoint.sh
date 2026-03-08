@@ -6,7 +6,7 @@
 #################################################################
 
 # Wait for the container to fully start
-sleep 50
+sleep 5
 
 #################################################################
 # Begin - Commands to run only once when the container is build

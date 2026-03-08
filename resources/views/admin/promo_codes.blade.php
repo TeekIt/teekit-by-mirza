@@ -43,7 +43,7 @@
                                         enctype="multipart/form-data">
                                         {{ csrf_field() }}
                                         <div class="modal-header">
-                                            <h5 class="modal-title display-center" id="exampleModalLabel">Edit</h5>
+                                            <h5 class="modal-title display-center">Edit Promocode</h5>
                                             <button type="button" class="close" data-bs-dismiss="modal"
                                                 aria-label="Close">
                                                 <span aria-hidden="true">×</span>

@@ -17,7 +17,7 @@
         <div class="w-100">
             <h1 class="text-site-primary fs-3">Reset Password Email</h1>
             <form method="POST" action="{{ route('password.email') }}" class="mt-3">
-                @csrf
+                {{ csrf_field() }}
                 <div class="form-group row">
                     <div class="col-md-12">
                         <input type="email" id="email" placeholder="Please enter your email"

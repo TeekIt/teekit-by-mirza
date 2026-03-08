@@ -26,11 +26,20 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('admin/notification/home') ? 'active' : '' }}"
-                          href="{{ route('admin.notification.home') }}">
+                      <a class="nav-link {{ request()->is('admin/notifications/home') ? 'active' : '' }}"
+                          href="{{ route('admin.notifications.home') }}">
                           <i class="nav-icon fas fa-bell"></i>
                           <p class="ml-2">
                               Notifications
+                          </p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link {{ request()->is('admin/vans') ? 'active' : '' }}"
+                          href="{{ route('admin.vans') }}">
+                          <i class="nav-icon fas fa-shuttle-van"></i>
+                          <p class="ml-2">
+                              Vans
                           </p>
                       </a>
                   </li>
@@ -88,7 +97,9 @@
                       <a href="{{ route('admin.customers') }}"
                           class="nav-link  @if (request()->is('admin/customers')) active @endif">
                           <i class="nav-icon fas fa-users-cog"></i>
-                          <p class="ml-2"> Customers </p>
+                          <p class="ml-2">
+                              Customers
+                          </p>
                       </a>
                   </li>
                   {{-- <li class="nav-item">
