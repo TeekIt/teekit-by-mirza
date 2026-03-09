@@ -28,7 +28,7 @@ class RequestedDeliveryPolicy
      */
     public function create(User $user): bool
     {
-        //
+        return false;
     }
 
     /**
@@ -36,7 +36,7 @@ class RequestedDeliveryPolicy
      */
     public function update(User $user, RequestedDelivery $requestedDelivery): bool
     {
-        //
+        return false;
     }
 
     /**
@@ -44,7 +44,7 @@ class RequestedDeliveryPolicy
      */
     public function delete(User $user, RequestedDelivery $requestedDelivery): bool
     {
-        //
+        return false;
     }
 
     /**
@@ -52,7 +52,7 @@ class RequestedDeliveryPolicy
      */
     public function restore(User $user, RequestedDelivery $requestedDelivery): bool
     {
-        //
+        return false;
     }
 
     /**
@@ -60,6 +60,6 @@ class RequestedDeliveryPolicy
      */
     public function forceDelete(User $user, RequestedDelivery $requestedDelivery): bool
     {
-        //
+        return false;
     }
 }

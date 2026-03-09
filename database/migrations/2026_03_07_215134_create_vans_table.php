@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('vans', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->foreignId('company_id')->constrained(table: 'users')->cascadeOnDelete();
             $table->string('username');
             $table->string('operative');
             $table->string('number_plate')->unique();

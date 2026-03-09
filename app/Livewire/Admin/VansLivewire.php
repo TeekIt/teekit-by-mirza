@@ -78,6 +78,9 @@ class VansLivewire extends Component
     public function renderEditVanModal(int $id): void
     {
         $van = Van::find($id);
+
+        $this->authorize('view', $van);
+        
         $this->vanId = $van->id;
         $this->username = $van->username;
         $this->operative = $van->operative;
@@ -91,6 +94,8 @@ class VansLivewire extends Component
 
     public function addVan(): void
     {
+        $this->authorize('create', Van::class);
+
         $this->validate();
 
         try {
@@ -123,6 +128,10 @@ class VansLivewire extends Component
 
     public function updateVan(): void
     {
+        $van = Van::find($this->vanId);
+
+        $this->authorize('update', $van);
+
         $this->validate();
 
         try {
@@ -156,6 +165,8 @@ class VansLivewire extends Component
 
     public function render(): View
     {
+        $this->authorize('viewAny', Van::class);
+
         $data = Van::getAll(OrderByEnum::DESC, $this->search);
 
         return view('livewire.admin.vans-livewire', compact('data'));

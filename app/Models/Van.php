@@ -97,7 +97,7 @@ class Van extends Model
         if (! is_null($length)) {
             $van->length = $length;
         }
-        
+
         if (! is_null($password)) {
             $van->password = bcrypt($password);
         }
@@ -109,11 +109,11 @@ class Van extends Model
     {
         return self::select($columns)
             ->when($search, function ($query) use ($search) {
-                $searchValue = trim(mb_strtolower($search));
-                $query->where(function ($query) use ($searchValue) {
-                    $query->where('username', 'like', '%' . $searchValue . '%')
-                        ->orWhere('operative', 'like', '%' . $searchValue . '%')
-                        ->orWhere('number_plate', 'like', '%' . $searchValue . '%');
+                $search = trim(mb_strtolower($search));
+                $query->where(function ($query) use ($search) {
+                    $query->where('username', 'like', '%' . $search . '%')
+                        ->orWhere('operative', 'like', '%' . $search . '%')
+                        ->orWhere('number_plate', 'like', '%' . $search . '%');
                 });
             })
             ->orderBy('created_at', $orderBy->value)
