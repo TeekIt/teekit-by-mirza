@@ -12,10 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('vans', function (Blueprint $table) {
-            $table->id();
-            // $table->string('name');
+            $table->bigIncrements('id');
+            $table->string('username');
             $table->string('operative');
             $table->string('number_plate')->unique();
+            $table->integer('payload');
+            $table->decimal('width', 2, 2);
+            $table->decimal('height', 2, 2);
+            $table->decimal('length', 2, 2);
+            $table->string('password');
             $table->timestamps();
             $table->softDeletes();
         });

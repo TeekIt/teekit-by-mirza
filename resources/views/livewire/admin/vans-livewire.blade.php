@@ -18,11 +18,11 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <input type="text" class="form-control" id="vanName"
-                                            placeholder="Enter van name..." wire:model="vanName">
+                                        <input type="text" class="form-control" id="username"
+                                            placeholder="Enter username..." wire:model="username">
                                     </div>
                                     <small class="text-danger">
-                                        @error('vanName')
+                                        @error('username')
                                             {{ $message }}
                                         @enderror
                                     </small>
@@ -40,7 +40,7 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <div class="form-group">
                                         <input type="text" class="form-control" id="numberPlate"
                                             placeholder="Enter number plate..." wire:model="numberPlate">
@@ -51,8 +51,67 @@
                                         @enderror
                                     </small>
                                 </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="number" step="0.01" class="form-control" id="payload"
+                                            placeholder="Enter payload in kg..." wire:model="payload">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('payload')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
                             </div>
-                            <div class="modal-footer hidden">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="number" step="0.01" class="form-control"
+                                            placeholder="Width (m)" wire:model="width">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('width')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="number" step="0.01" class="form-control"
+                                            placeholder="Height (m)" wire:model="height">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('height')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <input type="number" step="0.01" class="form-control"
+                                            placeholder="Length (m)" wire:model="length">
+                                    </div>
+                                     <small class="text-danger">
+                                        @error('length')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="password" class="form-control" id="password"
+                                            placeholder="Enter password..." wire:model="password">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('password')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary rounded-pill px-5 py-2"
                                     data-bs-dismiss="modal" wire:click="resetComponent">
                                     Close
@@ -81,7 +140,7 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <div class="row">
-                        <form>
+                        <form wire:submit="updateVan">
                             <div class="modal-header">
                                 <h5 class="modal-title">Edit Van</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
@@ -91,12 +150,12 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="vanName">Van Name</label>
-                                            <input type="text" class="form-control" id="vanName"
-                                                placeholder="Enter van name..." wire:model="vanName">
+                                            <label for="username">Username</label>
+                                            <input type="text" class="form-control" id="username"
+                                                placeholder="Enter username..." wire:model="username">
                                         </div>
                                         <small class="text-danger">
-                                            @error('vanName')
+                                            @error('username')
                                                 {{ $message }}
                                             @enderror
                                         </small>
@@ -128,14 +187,84 @@
                                         </small>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="payload">Payload (kg)</label>
+                                            <input type="number" step="0.01" class="form-control" id="payload"
+                                                placeholder="Enter payload in kg..." wire:model="payload">
+                                        </div>
+                                        <small class="text-danger">
+                                            @error('payload')
+                                                {{ $message }}
+                                            @enderror
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <input type="number" step="0.01" class="form-control"
+                                                placeholder="Width (m)" wire:model="dimensionWidth">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <input type="number" step="0.01" class="form-control"
+                                                placeholder="Height (m)" wire:model="dimensionHeight">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <input type="number" step="0.01" class="form-control"
+                                                placeholder="Length (m)" wire:model="dimensionLength">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <small class="text-danger">
+                                            @error('dimensionWidth')
+                                                {{ $message }}
+                                            @enderror
+                                            @error('dimensionHeight')
+                                                {{ $message }}
+                                            @enderror
+                                            @error('dimensionLength')
+                                                {{ $message }}
+                                            @enderror
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="password">Password</label>
+                                            <input type="password" class="form-control" id="password"
+                                                placeholder="Enter password..." wire:model="password">
+                                        </div>
+                                        <small class="text-danger">
+                                            @error('password')
+                                                {{ $message }}
+                                            @enderror
+                                        </small>
+                                    </div>
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary rounded-pill px-5 py-2"
                                     data-bs-dismiss="modal" wire:click="resetComponent">
                                     Close
                                 </button>
-                                <button type="button" class="btn site-primary-yellow-bg rounded-pill px-5 py-2">
-                                    Update
+                                <button type="submit" class="btn site-primary-yellow-bg rounded-pill px-5 py-2"
+                                    wire:target="updateVan" wire:loading.class="btn-dark"
+                                    wire:loading.class.remove="site-primary-yellow-bg" wire:loading.attr="disabled">
+                                    <span wire:target="updateVan" wire:loading.remove>
+                                        Update
+                                    </span>
+                                    <span wire:target="updateVan" wire:loading>
+                                        <span class="spinner-border spinner-border-sm text-light" role="status"></span>
+                                    </span>
                                 </button>
                             </div>
                         </form>
@@ -190,25 +319,25 @@
                             <tr class="bg-primary text-white">
                                 <th scope="col">#</th>
                                 <th></th>
-                                <th scope="col">Name</th>
+                                <th scope="col">Username</th>
                                 <th scope="col">Operative (Driver)</th>
                                 <th scope="col">Number Plate</th>
                                 <th scope="col">Options</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($data as $van)
+                            @forelse ($data as $singleIndex)
                                 <a href="{{ route('admin.sellers.parent') }}">
-                                    <tr wire:click="renderEditModal({{ $van['id'] }})" data-bs-toggle="modal"
+                                    <tr wire:click="renderEditVanModal({{ $singleIndex->id }})" data-bs-toggle="modal"
                                         data-bs-target="#editVanModal">
                                         <td>{{ $loop->iteration }}</td>
                                         <td>
                                             <input type="checkbox" class="select-checkbox" title="Select"
-                                                id="van-{{ $van['id'] }}" onclick="event.stopPropagation()">
+                                                id="van-{{ $singleIndex->id }}" onclick="event.stopPropagation()">
                                         </td>
-                                        <td>{{ $van['name'] }}</td>
-                                        <td>{{ $van['operative'] }}</td>
-                                        <td>{{ $van['number_plate'] }}</td>
+                                        <td>{{ $singleIndex->username }}</td>
+                                        <td>{{ $singleIndex->operative }}</td>
+                                        <td>{{ $singleIndex->number_plate }}</td>
                                         <td>
                                             <button type="button" class="btn text-site-primary"
                                                 onclick="event.stopPropagation()">
@@ -219,11 +348,16 @@
                                 </a>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">No vans found.</td>
+                                    <td colspan="6" class="text-center">{{ config('constants.NO_RECORD') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    {{ $data->links() }}
                 </div>
             </div>
         </div>

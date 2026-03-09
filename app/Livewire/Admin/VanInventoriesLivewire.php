@@ -19,6 +19,13 @@ class VanInventoriesLivewire extends Component
 
     public string $threshold = '';
 
+    protected function rules()
+    {
+        return [
+            
+        ];
+    }
+
     /**
      * Reset to the first page in future if pagination is introduced.
      */
