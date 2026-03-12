@@ -146,9 +146,9 @@ class VansLivewire extends Component
             /* Perform some operation */
             $updated = Van::updateInfo(
                 $this->vanId,
-                ($this->userName != $this->oldUserName) ? $this->userName : null,
+                $this->userName,
                 $this->operative,
-                ($this->numberPlate !== $this->oldNumberPlate) ? $this->numberPlate : null,
+                $this->numberPlate,
                 $this->payload,
                 $this->width,
                 $this->height,
