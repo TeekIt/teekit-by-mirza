@@ -1,3 +1,7 @@
+@php
+    use Livewire\Livewire;
+@endphp
+
 <div class="container pt-4">
     @if (session('status'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -31,11 +35,11 @@
         </div>
     @endif
 
-    {{-- For Laravel Generated Errors --}}
-    @if ($errors->any())
+    {{-- Laravel Generated Errors (for Non-Livewire components only) --}}
+    @if (! Livewire::isLivewireRequest() && $errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <strong>Error!</strong>
-            <ul>
+            <ul> 
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach

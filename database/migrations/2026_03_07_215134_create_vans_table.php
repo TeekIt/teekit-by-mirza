@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('vans', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->foreignId('company_id')->constrained(table: 'users')->cascadeOnDelete();
-            $table->string('username');
+            $table->string('user_name')->unique();
             $table->string('operative');
             $table->string('number_plate')->unique();
             $table->integer('payload');
-            $table->decimal('width', 2, 2);
-            $table->decimal('height', 2, 2);
-            $table->decimal('length', 2, 2);
+            $table->decimal('width', 5, 2);
+            $table->decimal('height', 5, 2);
+            $table->decimal('length', 5, 2);
             $table->string('password');
             $table->timestamps();
             $table->softDeletes();

@@ -46,11 +46,17 @@ class ProductsImport implements ToModel, WithBatchInserts, WithChunkReading, Wit
         ]);
     }
 
+    /**
+     * limit the amount of queries in one time
+     */
     public function batchSize(): int
     {
-        return 1000;
+        return 500;
     }
 
+    /**
+     * limit the chunk size loaded into the memory at a time
+     */
     public function chunkSize(): int
     {
         return 1000;

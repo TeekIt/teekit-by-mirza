@@ -13,15 +13,16 @@ class VanPolicy
      */
     public function viewAny(): bool
     {
-        return User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN || User::getAuthUser()->role_id === UserRoleEnum::COMPANY;
+        return User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value || 
+        User::getAuthUser()->role_id === UserRoleEnum::COMPANY->value;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(Van $van): bool
+    public function view(User $user, Van $van): bool
     {
-        return User::getAuthUser()->id === $van->company_id;
+        return $user->id === $van->company_id;
     }
 
     /**
@@ -29,38 +30,39 @@ class VanPolicy
      */
     public function create(): bool
     {
-        return User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN || User::getAuthUser()->role_id === UserRoleEnum::COMPANY;
+        return User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value || 
+        User::getAuthUser()->role_id === UserRoleEnum::COMPANY->value;
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(Van $van): bool
+    public function update(User $user, Van $van): bool
     {
-        return User::getAuthUser()->id === $van->company_id;
+        return $user->id === $van->company_id;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(Van $van): bool
+    public function delete(User $user, Van $van): bool
     {
-        return User::getAuthUser()->id === $van->company_id;
+        return $user->id === $van->company_id;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(Van $van): bool
+    public function restore(User $user, Van $van): bool
     {
-        return User::getAuthUser()->id === $van->company_id;
+        return $user->id === $van->company_id;
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(Van $van): bool
+    public function forceDelete(User $user, Van $van): bool
     {
-        return User::getAuthUser()->id === $van->company_id;
+        return $user->id === $van->company_id;
     }
 }

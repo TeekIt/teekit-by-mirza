@@ -144,7 +144,7 @@
                     <h4 class="py-4 my-1 text-site-primary">Categories</h4>
                 </div>
                 <div class="col-12 col-md-5 col-xl-3 d-flex gap-2">
-                    <button type="button" class="btn btn-success my-3 py-3 w-100" onclick="selectAll()"
+                    <button type="button" class="btn btn-site-primary my-3 py-3 w-100" onclick="selectAll()"
                         title="Select All">
                         <span class="text-white">All</span>
                     </button>
@@ -195,7 +195,7 @@
                                     <td>{{ $category->category_name }}</td>
                                     <td>{{ $category->created_at }}</td>
                                     <td>
-                                        <button data-bs-toggle="modal" data-bs-target="#editCategoryModal"
+                                        <button type="button" data-bs-toggle="modal" data-bs-target="#editCategoryModal"
                                             wire:click="renderEditCategoryModal({{ $category->id }})"
                                             class="btn text-site-primary">
                                             <i class="far fa-edit"></i>

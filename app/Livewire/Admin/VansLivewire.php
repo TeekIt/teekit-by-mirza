@@ -3,24 +3,33 @@
 namespace App\Livewire\Admin;
 
 use App\Enums\OrderByEnum;
+use App\Exports\VansExport;
+use App\Imports\VansImport;
 use App\Models\Van;
 use Exception;
 use Illuminate\Contracts\View\View;
+use Maatwebsite\Excel\Validators\ValidationException as ExcelValidationException;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Excel as ExcelConstants;
 
 class VansLivewire extends Component
 {
-    use WithPagination;
+    use WithFileUploads, WithPagination;
 
     public $vanId;
 
+    public $userName;
 
-    public $username;
+    public $oldUserName;
 
     public $operative;
 
     public $numberPlate;
+
+    public $oldNumberPlate;
 
     public $payload;
 
@@ -32,39 +41,32 @@ class VansLivewire extends Component
 
     public $password;
 
-    public $search = '';
+    public $excelFile;
 
+    public $search = '';
 
     protected function rules(): array
     {
+        return (new Van)->getValidationRules($this->vanId);
+    }
+
+    protected function messages(): array
+    {
         return [
-            'username' => 'required|string|max:20',
-            'operative' => 'required|string|max:20',
-            'numberPlate' => 'required|string|max:20',
-            'payload' => 'required|integer|min:1',
-            'width' => 'required|numeric|min:1.0',
-            'height' => 'required|numeric|min:1.0',
-            'length' => 'required|numeric|min:1.0',
-            'password' => 'required|string|min:6',
+            'userName.regex' => 'Blank spaces are not allowed.',
         ];
     }
 
-    /**
-     * Reset to the first page in future if pagination is introduced.
+    /*
+     * Custom Helpers
      */
-    public function updatingSearch(): void
-    {
-        // Intentionally left blank for now. Kept to mirror other admin components.
-    }
-
     public function resetComponent(): void
     {
         $this->resetValidation();
 
         $this->reset([
             'vanId',
-            'search',
-            'username',
+            'userName',
             'operative',
             'numberPlate',
             'payload',
@@ -72,24 +74,30 @@ class VansLivewire extends Component
             'height',
             'length',
             'password',
+            'excelFile',
+            'search',
         ]);
     }
 
+    /*
+     * CRUD Methods
+     */
     public function renderEditVanModal(int $id): void
     {
         $van = Van::find($id);
 
         $this->authorize('view', $van);
-        
+
         $this->vanId = $van->id;
-        $this->username = $van->username;
+        $this->userName = $van->user_name;
+        $this->oldUserName = $van->user_name;
         $this->operative = $van->operative;
         $this->numberPlate = $van->number_plate;
+        $this->oldNumberPlate = $van->number_plate;
         $this->payload = $van->payload ?? '';
         $this->width = $van->width ?? '';
         $this->height = $van->height ?? '';
         $this->length = $van->length ?? '';
-        $this->password = $van->password;
     }
 
     public function addVan(): void
@@ -101,7 +109,7 @@ class VansLivewire extends Component
         try {
             /* Perform some operation */
             $inserted = Van::add(
-                $this->username,
+                $this->userName,
                 $this->operative,
                 $this->numberPlate,
                 $this->payload,
@@ -122,7 +130,7 @@ class VansLivewire extends Component
             }
         } catch (Exception $error) {
             report($error);
-            session()->flash('error', config('constants.INVALID_DATA'));
+            session()->flash('error', $error->getMessage());
         }
     }
 
@@ -138,9 +146,9 @@ class VansLivewire extends Component
             /* Perform some operation */
             $updated = Van::updateInfo(
                 $this->vanId,
-                $this->username,
+                ($this->userName != $this->oldUserName) ? $this->userName : null,
                 $this->operative,
-                $this->numberPlate,
+                ($this->numberPlate !== $this->oldNumberPlate) ? $this->numberPlate : null,
                 $this->payload,
                 $this->width,
                 $this->height,
@@ -159,7 +167,51 @@ class VansLivewire extends Component
             }
         } catch (Exception $error) {
             report($error);
-            session()->flash('error', config('constants.INVALID_DATA'));
+            session()->flash('error', $error->getMessage());
+        }
+    }
+
+    public function importVans()
+    {
+        $this->validate([
+            'excelFile' => 'required|file|mimes:csv|max:2048',
+        ]);
+
+        try {
+            /* Perform some operation */
+            Excel::import(new VansImport, $this->excelFile, ExcelConstants::CSV);
+            /* Operation finished */
+            sleep(1);
+            $this->resetComponent();
+            $this->dispatch('close-modal', ['id' => 'importVansModal']);
+
+            session()->flash('success', config('constants.DATA_INSERTION_SUCCESS'));
+        } catch (ExcelValidationException $error) {
+            $this->dispatch('close-modal', ['id' => 'importVansModal']);
+
+            session()->flash('error', $error->getMessage());
+        } catch (Exception $error) {
+            logger()->channel('importExport')->error($error->getMessage());
+
+            $this->dispatch('close-modal', ['id' => 'importVansModal']);
+
+            session()->flash('error', config('constants.IMPORT_FAILED'));
+        }
+    }
+
+    public function exportVans()
+    {
+        try {
+            /* Perform some operation */
+            $fileName = 'vans-' . now()->format('m-d-Y:H:i:s') . '.csv';
+            /* Operation finished */
+            return Excel::download(new VansExport, $fileName, ExcelConstants::CSV);
+        } catch (Exception $error) {
+            logger()->channel('importExport')->error($error->getMessage());
+
+            $this->dispatch('close-modal', ['id' => 'importVansModal']);
+
+            session()->flash('error', config('constants.EXPORT_FAILED'));
         }
     }
 
