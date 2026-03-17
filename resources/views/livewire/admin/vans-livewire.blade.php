@@ -386,26 +386,25 @@
                         </thead>
                         <tbody>
                             @forelse ($data as $singleIndex)
-                                <a href="{{ route('admin.sellers.parent') }}">
-                                    <tr>
+                                    <tr style="cursor: pointer;" wire:click="redirectToVanInventories({{ $singleIndex->id }})">
                                         <td>{{ $loop->iteration }}</td>
                                         <td>
                                             <input type="checkbox" class="select-checkbox" title="Select"
-                                                id="van-{{ $singleIndex->id }}" onclick="event.stopPropagation()">
+                                                onclick="event.stopPropagation();"
+                                                id="{{ $singleIndex->id }}">
                                         </td>
                                         <td>{{ $singleIndex->user_name }}</td>
                                         <td>{{ $singleIndex->operative }}</td>
                                         <td>{{ $singleIndex->number_plate }}</td>
                                         <td>
                                             <button type="button" data-bs-toggle="modal"
+                                                wire:click.stop="renderEditVanModal({{ $singleIndex->id }})"
                                                 data-bs-target="#editVanModal"
-                                                wire:click="renderEditVanModal({{ $singleIndex->id }})"
                                                 class="btn text-site-primary">
                                                 <i class="far fa-edit"></i>
                                             </button>
                                         </td>
                                     </tr>
-                                </a>
                             @empty
                                 <tr>
                                     <td colspan="6" class="text-center">{{ config('constants.NO_RECORD') }}</td>

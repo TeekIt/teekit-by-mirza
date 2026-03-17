@@ -32,13 +32,13 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($data as $single_index)
+                                    @foreach ($data as $singleIndex)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $single_index->name . ' ' . $single_index->l_name }}</td>
-                                            <td>{{ $single_index->email }}</td>
-                                            <td>{{ $single_index->referral_code }}</td>
-                                            <td>{{ $single_index->created_at }}</td>
+                                            <td>{{ $singleIndex->name . ' ' . $singleIndex->l_name }}</td>
+                                            <td>{{ $singleIndex->email }}</td>
+                                            <td>{{ $singleIndex->referral_code }}</td>
+                                            <td>{{ $singleIndex->created_at }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

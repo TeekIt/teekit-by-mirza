@@ -9,14 +9,16 @@ use App\Http\Controllers\Web\v1\OrderController;
 use App\Http\Controllers\Web\v1\PromoCodeController;
 use App\Http\Controllers\Web\v1\SellerController;
 use App\Http\Controllers\Web\v1\StuartDeliveryController;
+use App\Http\Controllers\Web\v1\UserController;
+use App\Http\Controllers\Web\v1\VanController;
 use App\Http\Controllers\Web\v2\ProductController;
 use App\Http\Controllers\Web\v2\StripeController;
 use App\Livewire\Admin\CategoriesLivewire;
 use App\Livewire\Admin\ChildSellersLivewire;
 use App\Livewire\Admin\CustomersLivewire;
-use App\Livewire\Admin\DriversLivewire;
 use App\Livewire\Admin\ParentSellersLivewire;
 use App\Livewire\Admin\ReferralCodesLivewire;
+use App\Livewire\Admin\SearchVanInventoriesLivewire;
 use App\Livewire\Admin\VanInventoriesLivewire;
 use App\Livewire\Admin\VansLivewire;
 use App\Livewire\Common\OrdersLivewire;
@@ -139,7 +141,6 @@ Route::middleware('transaction.wrapper')->group(function () {
     Route::controller(HomeController::class)->group(function () {
         Route::get('/withdrawals', 'withdrawals')->name('withdrawals');
         Route::post('/withdrawals', 'withdrawalsRequest')->name('withdrawal.request');
-        Route::get('/withdrawals-drivers', 'withdrawalDrivers')->name('withdrawals.drivers');
     });
     /*
      *********************************************************************** 
@@ -151,8 +152,8 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::get('/sellers/parent', ParentSellersLivewire::class)->name('admin.sellers.parent');
         Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
         Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
-        Route::get('/drivers', DriversLivewire::class)->name('admin.test.drivers');
         Route::get('/orders', OrdersLivewire::class)->name('admin.orders');
+
 
         Route::prefix('categories')->group(function () {
             Route::get('/', CategoriesLivewire::class)->name('admin.categories');
@@ -166,25 +167,24 @@ Route::middleware('transaction.wrapper')->group(function () {
 
         Route::prefix('vans')->group(function () {
             Route::get('/', VansLivewire::class)->name('admin.vans');
-        });
-
-        Route::prefix('van/inventories')->group(function () {
-            Route::get('/', VanInventoriesLivewire::class)->name('admin.van.inventories');
+            Route::get('/inventories', VanInventoriesLivewire::class)->name('admin.vans.inventories');
+            Route::get('/inventories/search', SearchVanInventoriesLivewire::class)->name('admin.vans.inventories.search');
+            Route::get('/delete', [VanController::class, 'destroy'])->name('admin.vans.del');
+            // admin.vans.inventories.del
         });
 
         Route::controller(AdminController::class)->group(function () {
             Route::get('/settings', 'settings')->name('admin.settings');
+        });
 
-            Route::prefix('delete')->group(function () {
-                Route::get('/users', 'deleteUsers')->name('admin.del.users');
-                Route::get('/drivers', 'deleteDrivers')->name('admin.del.drivers');
-            });
+        Route::controller(UserController::class)->group(function () {
+            Route::get('delete/users', 'destroy')->name('admin.del.users');
         });
 
         Route::prefix('promocodes')->controller(PromoCodeController::class)->group(function () {
             Route::get('/home', 'promocodesHome')->name('admin.promocodes.home');
             Route::post('/add', 'promocodesAdd')->name('admin.promocodes.add');
-            Route::get('/delete', 'promoCodesDel')->name('admin.promocodes.del');
+            Route::get('/delete', 'destroy')->name('admin.promocodes.del');
             Route::post('/{id}/update', 'promoCodesUpdate')->name('admin.promocodes.update');
         });
 

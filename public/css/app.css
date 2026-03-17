@@ -2,6 +2,7 @@
 
 :root {
     --primary-bg: #3a4b83;
+    --primary-bg-hover: #29365f;
     --primary-yellow: #ffcf42;
 }
 
@@ -19,6 +20,10 @@ body {
     background-color: var(--primary-bg) !important;
     border: none !important;
     color: white !important;
+}
+
+.btn-site-primary:hover {
+    background-color: var(--primary-bg-hover) !important;
 }
 
 .site-primary-bg {

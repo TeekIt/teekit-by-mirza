@@ -181,7 +181,7 @@
                         <tbody>
                             @forelse ($data as $category)
                                 <tr>
-                                    <td>{{ $category->id }}</td>
+                                    <td>{{ $loop->iteration }}</td>
                                     <td>
                                         <input type="checkbox" class="select-checkbox" title="Select"
                                             id="{{ $category->id }}">

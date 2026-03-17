@@ -1,14 +1,16 @@
 <div class="container-xxl flex-grow-1 container-p-y">
-      
+
     <x-session-messages />
 
     {{-- ************************************ Info Model ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="infoModel" tabindex="-1" aria-labelledby="infoModelLabel" aria-hidden="true">
+    <div wire:ignore.self class="modal fade" id="infoModel" tabindex="-1" aria-labelledby="infoModelLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="infoModelLabel">Customer Information</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" wire:click="resetComponent"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        wire:click="resetComponent"></button>
                 </div>
                 <form>
                     <div class="modal-body">
@@ -45,7 +47,8 @@
                                         <td>
                                             <img src=@if ($user_img) "{{ config('constants.BUCKET') . $user_img }}"
                                             @else
-                                            "{{ asset('images/icons/customer.png') }}" @endif width="150px">
+                                            "{{ asset('images/icons/customer.png') }}" @endif
+                                                width="150px">
                                         </td>
                                     </tr>
                                     <tr>
@@ -77,7 +80,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" wire:click="resetComponent">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                            wire:click="resetComponent">
                             Close
                         </button>
                     </div>
@@ -91,12 +95,14 @@
         </div>
         <div class="col-12 col-sm-6 col-md-5 col-xl-5">
             <div class="input-group py-4 my-2">
-                <input type="text" wire:model.live.debounce.500ms="search" class="form-control py-3" placeholder="Search here...">
+                <input type="text" wire:model.live.debounce.500ms="search" class="form-control py-3"
+                    placeholder="Search here...">
                 {{-- <button class="btn btn-primary" type="button"><i class='bx bx-search-alt'></i></button> --}}
             </div>
         </div>
         <div class="col-12 col-md-2 col-xl-1">
-            <button type="button" class="btn btn-danger my-3 py-3 w-100" title="Delete selected data" onclick="delUsers()">
+            <button type="button" class="btn btn-danger my-3 py-3 w-100" title="Delete Selected"
+                onclick="delUsers()">
                 <i class="fas fa-trash-alt"></i>
             </button>
         </div>
@@ -105,24 +111,31 @@
         <div class="row">
             @forelse ($data as $single_index)
                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-4">
-                    <div class="card custom-card text-white custom-card-has-bg" @if ($single_index->user_img) style="background-image:url('{{ config('constants.BUCKET') . $single_index->user_img }}');"
+                    <div class="card custom-card text-white custom-card-has-bg"
+                        @if ($single_index->user_img) style="background-image:url('{{ config('constants.BUCKET') . $single_index->user_img }}');"
                         @else
                         style="background-image:url('{{ asset('images/icons/customer.png') }}');" @endif>
                         <div class="card-img-overlay custom-card-img-overlay d-flex flex-column">
                             <div class="card-body custom-card-body">
                                 <div class="form-check">
-                                    <input type="checkbox" class="form-check-input select-checkbox" title="Select" id="{{ $single_index->id }}">
-                                    <button type="button" class="btn btn-primary" title="Show detail information" data-bs-toggle="modal" data-bs-target="#infoModel" wire:click="renderInfoModal({{ $single_index->id }})">
+                                    <input type="checkbox" class="form-check-input select-checkbox" title="Select"
+                                        id="{{ $single_index->id }}">
+                                    <button type="button" class="btn btn-primary" title="Show detail information"
+                                        data-bs-toggle="modal" data-bs-target="#infoModel"
+                                        wire:click="renderInfoModal({{ $single_index->id }})">
                                         <i class="fas fa-info-circle"></i>
                                     </button>
-                                    <a href="{{ route('admin.orders', ['customer_id' => $single_index->id]) }}" class="btn btn-dark" title="Show orders">
+                                    <a href="{{ route('admin.orders', ['customer_id' => $single_index->id]) }}"
+                                        class="btn btn-dark" title="Show orders">
                                         <i class="fas fa-luggage-cart"></i>
                                     </a>
                                 </div>
                             </div>
                             <div class="card-footer custom-card-footer">
                                 <div class="form-check form-switch mt-3">
-                                    <input type="checkbox" class="form-check-input" value="{{ $single_index->id }}" wire:click="changeStatus({{ $single_index->id }}, {{ $single_index->is_active }})" role="switch" {{ $single_index->is_active === 1 ? 'checked' : '' }}>
+                                    <input type="checkbox" class="form-check-input" value="{{ $single_index->id }}"
+                                        wire:click="changeStatus({{ $single_index->id }}, {{ $single_index->is_active }})"
+                                        role="switch" {{ $single_index->is_active === 1 ? 'checked' : '' }}>
                                     <label class="form-check-label">
                                         @if ($single_index->is_active === 1)
                                             <b class="bg-success rounded px-2">Active</b>
@@ -135,7 +148,8 @@
                                     {{-- <img class="mr-3 rounded-circle" src="{{ asset('storage/images/dummyemp.png') }}"
                                         alt="Generic placeholder image" style="max-width:50px"> --}}
                                     <div class="media-body">
-                                        <h6 class="my-0 text-white d-block">{{ $single_index->name }} {{ $single_index->l_name }}</h6>
+                                        <h6 class="my-0 text-white d-block">{{ $single_index->name }}
+                                            {{ $single_index->l_name }}</h6>
                                         <small>{{ $single_index->email }}</small> <br>
                                         <small><i class="far fa-clock"></i> Joining:
                                             {{ $single_index->created_at }}</small>

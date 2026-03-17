@@ -80,7 +80,7 @@
                                             <div class="col-md-12">
                                                 <textarea
                                                     style="border:0;margin-top: 0px;margin-bottom: 0px;height: 227px;min-height: 279px;max-height: 227px;width: 100%;min-width: 100%;max-width: 100%;background: #f4f6f9;border-radius: 15px;"
-                                                    placeholder="Help" name="help" class="form-control" onresize="return 0;">{{ $help_page->page_content }}
+                                                    placeholder="Help" name="help" class="form-control" onresize="return 0;">{{ $helpPage->page_content }}
                                             </textarea>
                                                 <button type="submit"
                                                     class="btn site-primary-yellow-bg rounded-pill mt-3 col-12">
@@ -113,7 +113,7 @@
                                         <textarea
                                             style=" border:0;margin-top: 0px;margin-bottom: 0px;height: 127px;min-height: 279px;max-height: 127px;width: 100%;min-width: 100%;max-width: 100%;background: #f4f6f9;border-radius: 15px;"
                                             placeholder="Write your terms & conditions here..." name="tos" class="form-control" onresize="return 0;">
-                                            {{ $terms_page->page_content }}
+                                            {{ $termsPage->page_content }}
                                         </textarea>
                                         <button type="submit" class="btn site-primary-yellow-bg rounded-pill mt-3 col-12">
                                             Update
@@ -143,7 +143,7 @@
                                         <textarea
                                             style=" border:0;margin-top: 0px;margin-bottom: 0px;height: 127px;min-height: 279px;max-height: 127px;width: 100%;min-width: 100%;max-width: 100%;background: #f4f6f9;border-radius: 15px;"
                                             placeholder="Please write 'Frequently Asked Questions' here..." name="faq" class="form-control"
-                                            onresize="return 0;">{{ $faq_page->page_content }}</textarea>
+                                            onresize="return 0;">{{ $faqPage->page_content }}</textarea>
                                         <button type="submit" class="btn site-primary-yellow-bg rounded-pill mt-3 col-12">
                                             Update
                                         </button>

@@ -2,90 +2,6 @@
 
     <x-session-messages />
 
-    {{-- ************************************ Add VanInventory Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="addVanInventoryModal" tabindex="-1">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div class="row">
-                        <form wire:submit="addInventory">
-                            {{ csrf_field() }}
-                            <div class="modal-header">
-                                <h5 class="modal-title">Add Product to Inventory</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                                    wire:click="resetComponent"></button>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="productName" placeholder="Enter product name..."
-                                            wire:model="productName">
-                                    </div>
-                                    <small class="text-danger">
-                                        @error('productName')
-                                            {{ $message }}
-                                        @enderror
-                                    </small>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="price" placeholder="Enter price..."
-                                            wire:model="price">
-                                    </div>
-                                    <small class="text-danger">
-                                        @error('price')
-                                            {{ $message }}
-                                        @enderror
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="quantity" placeholder="Enter quantity..."
-                                            wire:model="quantity">
-                                    </div>
-                                    <small class="text-danger">
-                                        @error('quantity')
-                                            {{ $message }}
-                                        @enderror
-                                    </small>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <input type="text" class="form-control" id="threshold" placeholder="Enter threshold..."
-                                            wire:model="threshold">
-                                    </div>
-                                    <small class="text-danger">
-                                        @error('threshold')
-                                            {{ $message }}
-                                        @enderror
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="modal-footer hidden">
-                                <button type="button" class="btn btn-secondary rounded-pill px-5 py-2"
-                                    data-bs-dismiss="modal" wire:click="resetComponent">
-                                    Close
-                                </button>
-                                <button type="submit" class="btn site-primary-yellow-bg rounded-pill px-5 py-2"
-                                    wire:target="addInventory" wire:loading.class="btn-dark"
-                                    wire:loading.class.remove="site-primary-yellow-bg" wire:loading.attr="disabled">
-                                    <span wire:target="addInventory" wire:loading.remove>
-                                        Add
-                                    </span>
-                                    <span wire:target="addInventory" wire:loading>
-                                        <span class="spinner-border spinner-border-sm text-light" role="status"></span>
-                                    </span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- ************************************ Edit Inventory Modal ************************************ --}}
     <div wire:ignore.self class="modal fade" id="editVanInventoryModal" tabindex="-1">
         <div class="modal-dialog" role="document">
@@ -181,24 +97,23 @@
                     </div>
                 </div>
                 <div class="col-12 col-xl-6 d-flex gap-1">
-                    <button type="button" class="btn btn-success my-3 py-3 w-100" onclick="selectAll()"
+                    <button type="button" class="btn btn-site-primary my-3 py-3 w-100" onclick="selectAll()"
                         title="Select All">
                         <span class="text-white">All</span>
-                    </button>
-                    <button type="button" class="btn btn-success my-3 py-3 w-100" title="Import">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </button>
-                    <button type="button" class="btn btn-success my-3 py-3 w-100" title="Export">
-                        <i class="fas fa-cloud-download-alt"></i>
                     </button>
                     <button type="button" class="btn btn-danger my-3 py-3 w-100" onclick="delVans()"
                         title="Delete Selected">
                         <i class="fas fa-trash-alt"></i>
                     </button>
-                    <button type="button" class="btn btn-site-primary my-3 py-3 w-100" data-bs-toggle="modal"
-                        data-bs-target="#addVanInventoryModal" title="Add New">
-                        <span class="fas fa-plus"></span>
+                    <button type="button" class="btn btn-site-primary my-3 py-3 w-100" title="Import">
+                        <i class="fas fa-cloud-upload-alt"></i>
                     </button>
+                    <button type="button" class="btn btn-site-primary my-3 py-3 w-100" title="Export">
+                        <i class="fas fa-cloud-download-alt"></i>
+                    </button>
+                    <a href="{{ route('admin.vans.inventories.search') }}" class="btn btn-site-primary my-3 py-3 w-100" title="Add New">
+                        <span class="fas fa-plus"></span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -222,7 +137,9 @@
                         </thead>
                         <tbody>
                             @forelse ($data as $inventory)
-                                <tr style="cursor: pointer;" wire:click="renderEditVanInventoryModal({{ $inventory['id'] }})" data-bs-toggle="modal" data-bs-target="#editVanInventoryModal">
+                                <tr style="cursor: pointer;"
+                                    wire:click="renderEditVanInventoryModal({{ $inventory['id'] }})"
+                                    data-bs-toggle="modal" data-bs-target="#editVanInventoryModal">
                                     <td>{{ $loop->iteration }}</td>
                                     <td>
                                         <input type="checkbox" class="select-checkbox" title="Select"

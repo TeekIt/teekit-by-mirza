@@ -29,45 +29,14 @@ class User extends Authenticatable implements JWTSubject
     use Billable, HasFactory, Notifiable, SoftDeletes;
 
     /**
-     * The attributes that are mass assignable.
+     * The attributes that aren't mass assignable.
      *
-     * @var array
+     * @var array<string>|bool
      */
-    protected $fillable = [
-        'name',
-        'l_name',
-        'email',
-        'password',
-        'country_code',
-        'phone',
-        'business_name',
-        'business_phone',
-        'business_hours',
-        'full_address',
-        'unit_address',
-        'country',
-        'state',
-        'city',
-        'postcode',
-        'lat',
-        'lon',
-        'bank_details',
-        'settings',
-        'user_img',
-        'is_active',
-        'is_online',
-        'remember_token',
-        'role_id',
-        'pending_withdraw',
-        'total_withdraw',
-        'parent_store_id',
-        'vehicle_type',
-        'application_fee',
-        'temp_code',
-        'referral_code',
-        'stripe_account_id',
-        'last_login',
-        'email_verified_at',
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
     ];
 
     /**

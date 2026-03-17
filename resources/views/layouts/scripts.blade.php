@@ -358,42 +358,6 @@
             }
         }
 
-        const delDrivers = () => {
-            const checkboxes = document.querySelectorAll('.select-checkbox');
-            const drivers = [];
-            let x = 0;
-            for (let i = 0; i < checkboxes.length; i++) {
-                if (checkboxes[i].checked) {
-                    drivers[x] = checkboxes[i].id;
-                    x++;
-                }
-            }
-            if (drivers.length != 0) {
-                Swal.fire({
-                    title: 'Warning!',
-                    text: 'Are you sure you want to delete the selected drivers?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: "{{ route('admin.del.drivers') }}",
-                            type: "get",
-                            data: {
-                                "drivers": drivers
-                            },
-                            success: function(response) {
-                                if (response == "Drivers Deleted Successfully") {
-                                    window.location.reload();
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-        }
-
         const delOrders = () => {
             const checkboxes = document.querySelectorAll('.select-checkbox');
             const orders = [];
@@ -501,6 +465,78 @@
                 });
             }
         }
+
+        const delVans = () => {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const vans = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    vans[x] = checkboxes[i].id;
+                    x++;
+                }
+            }
+            if (vans.length != 0) {
+                Swal.fire({
+                    title: 'Warning!',
+                    text: 'Are you sure you want to delete the selected vans?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('admin.vans.del') }}",
+                            type: "get",
+                            data: {
+                                "vans": vans
+                            },
+                            success: function(response) {
+                                if (response == "Vans Deleted Successfully") {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        // const delVanInventories = () => {
+        //     const checkboxes = document.querySelectorAll('.select-checkbox');
+        //     const vanInventories = [];
+        //     let x = 0;
+        //     for (let i = 0; i < checkboxes.length; i++) {
+        //         if (checkboxes[i].checked) {
+        //             vanInventories[x] = checkboxes[i].id;
+        //             x++;
+        //         }
+        //     }
+        //     if (vanInventories.length != 0) {
+        //         Swal.fire({
+        //             title: 'Warning!',
+        //             text: 'Are you sure you want to delete the selected van inventories?',
+        //             icon: 'warning',
+        //             showCancelButton: true,
+        //             confirmButtonText: 'Yes'
+        //         }).then((result) => {
+        //             if (result.isConfirmed) {
+        //                 $.ajax({
+        //                     url: "",
+        //                     type: "get",
+        //                     data: {
+        //                         "vans": vans
+        //                     },
+        //                     success: function(response) {
+        //                         if (response == "Vans Deleted Successfully") {
+        //                             window.location.reload();
+        //                         }
+        //                     }
+        //                 });
+        //             }
+        //         });
+        //     }
+        // }
     </script>
 
     <script>

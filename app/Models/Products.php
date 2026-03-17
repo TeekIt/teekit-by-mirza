@@ -291,7 +291,7 @@ class Products extends Model
             ->options([
                 'hybrid' => [
                     /* 50% keyword, 50% Ai */
-                    'semanticRatio' => 0.5, 
+                    'semanticRatio' => 0.5,
                     'embedder' => 'default'
                 ]
             ])
@@ -563,11 +563,6 @@ class Products extends Model
             ->when($categoryId, function ($query, $categoryId) {
                 return $query->where('category_id', '=', $categoryId);
             })
-            // ->when($categoryId, function ($query, $categoryId) {
-            //     return $query->whereHas('qty', function ($qtyRelation) use ($categoryId) {
-            //         $qtyRelation->where('category_id', '=', $categoryId);
-            //     });
-            // })
             ->orderBy('id', $orderBy)
             ->paginate(12);
     }
@@ -590,6 +585,25 @@ class Products extends Model
             ->paginate(20);
     }
 
+    public static function getParentOrChildSellerProductsForView(
+        int $sellerId,
+        string $search = '',
+        ?int $categoryId = null,
+        string $orderBy = 'desc'
+    ): LengthAwarePaginator {
+        return self::with('category')
+            ->withAvg('rattings:ratting', 'average_ratting')
+            ->where('product_name', 'LIKE', "%{$search}%")
+            ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
+                $qtyRelation->where('seller_id', '=', $sellerId);
+            })
+            ->when($categoryId, function ($query, $categoryId) {
+                return $query->where('category_id', '=', $categoryId);
+            })
+            ->orderBy('id', $orderBy)
+            ->paginate(12);
+    }
+
     public static function getProductsByParameters(int $seller_id, string $sku, int $catgory_id): Products
     {
         return self::where('seller_id', '=', $seller_id)
@@ -600,7 +614,7 @@ class Products extends Model
 
     public static function getProductWeight(int $id)
     {
-        $product = self::select('weight')->where('id', $id)->get();
+        $product = self::select('weight')->where('id', '=', $id)->get();
 
         return $product[0]->weight;
     }

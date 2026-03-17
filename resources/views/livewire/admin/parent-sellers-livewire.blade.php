@@ -290,7 +290,7 @@
             </div>
         </div>
         <div class="col-12 col-md-2 col-xl-1">
-            <button type="button" class="btn btn-danger my-3 py-3 w-100" title="Delete selected data"
+            <button type="button" class="btn btn-danger my-3 py-3 w-100" title="Delete Selected"
                 onclick="delUsers()">
                 <i class="fas fa-trash-alt"></i>
             </button>

@@ -303,16 +303,6 @@ class HomeController extends Controller
     }
 
     /**
-     * It will show driver withdrawls
-     *
-     * @version 1.0.0
-     */
-    public function withdrawalDrivers()
-    {
-        return view('admin.withdrawal-drivers');
-    }
-
-    /**
      * It will show seller withdrawls requests
      *
      * @version 1.0.0

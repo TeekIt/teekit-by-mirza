@@ -102,23 +102,6 @@
                           </p>
                       </a>
                   </li>
-                  {{-- <li class="nav-item">
-                      <a class="nav-link {{ request()->is('drivers') ? 'active' : '' }}" href="/drivers">
-                          <i class="nav-icon fas fa-biking"></i>
-                          <p class="ml-2">
-                              Drivers
-                          </p>
-                      </a>
-                  </li> --}}
-                  <li class="nav-item">
-                      <a href="{{ route('admin.test.drivers') }}"
-                          class="nav-link {{ request()->routeIs('admin.test.drivers') ? 'active' : '' }}">
-                          <i class="nav-icon fas fa-biking"></i>
-                          <p class="ml-2">
-                              Drivers
-                          </p>
-                      </a>
-                  </li>
                   <li class="nav-item has-treeview">
                       <a href="#" class="nav-link ">
                           <i class="nav-icon fas fa-luggage-cart"></i>
@@ -172,12 +155,6 @@
                               <a href="/withdrawals" class="nav-link">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>Sellers</p>
-                              </a>
-                          </li>
-                          <li class="nav-item">
-                              <a href="/withdrawals-drivers" class="nav-link">
-                                  <i class="fas fa-money nav-icon"></i>
-                                  <p>Drivers</p>
                               </a>
                           </li>
                       </ul>
