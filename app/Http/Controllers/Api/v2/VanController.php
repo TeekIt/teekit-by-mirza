@@ -31,7 +31,7 @@ class VanController extends Controller
     {
         $validatedData = (object) $request->validated();
 
-        $data = $listVanAction->execute($validatedData->id);
+        $data = $listVanAction->execute(['id' => $validatedData->id]);
 
         return JsonResponseServices::getApiResponse(
             $data,

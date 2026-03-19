@@ -3,11 +3,16 @@
 namespace App\Actions\Van;
 
 use App\Models\Van;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 final class ListVanAction
 {
-    public function execute(int $vanId, array $columns = ['*']): Van
+    public function execute(array $filters, array $columns = ['*']): Van|LengthAwarePaginator
     {
-        return Van::getById($vanId, $columns);
+        if (isset($filters['id'])) {
+            return Van::getById($filters['id'], $columns);
+        }
+
+        return Van::getAll($filters['orderBy'], $filters['search'], $columns);
     }
 }

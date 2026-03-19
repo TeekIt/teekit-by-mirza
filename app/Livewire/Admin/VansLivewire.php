@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Actions\Van\ListVanAction;
 use App\Enums\OrderByEnum;
 use App\Exports\VansExport;
 use App\Imports\VansImport;
@@ -225,7 +226,10 @@ class VansLivewire extends Component
     {
         $this->authorize('viewAny', Van::class);
 
-        $data = Van::getAll(OrderByEnum::DESC, $this->search);
+        $data = (new ListVanAction)->execute([
+            'orderBy' => OrderByEnum::DESC,
+            'search' => $this->search
+        ]);
 
         return view('livewire.admin.vans-livewire', compact('data'));
     }
