@@ -10,13 +10,10 @@ use App\Mail\OrderIsReadyForPickupMail;
 use App\Mail\ProductByBuyerOrderDetailsToNearBySellersMail;
 use App\Mail\RegeneratedStripeConnectAccMail;
 use App\Mail\SellerApprovedMail;
-use App\Mail\StoreRegisterMail;
 use App\Mail\StripeConnectAccMail;
-use App\Models\Driver;
 use App\Models\Orders;
 use App\Models\OrdersFromOtherSeller;
 use App\Models\User;
-use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 

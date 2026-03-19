@@ -19,7 +19,7 @@ class CategoriesController extends Controller
      *
      * @version 1.2.0
      */
-    public function all(Request $request)
+    public function list(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'sellerId' => 'integer',
@@ -37,7 +37,7 @@ class CategoriesController extends Controller
             );
         } else {
             $data = Cache::rememberForever(
-                'allCategories',
+                'categoriesList',
                 fn () => Categories::getAll([
                     'id',
                     'category_name',

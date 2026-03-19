@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class RattingController extends Controller
 {
     /** @deprecated This method is deprecated, In case of new requirement we have to re-write this */
-    public function add(Request $request)
+    public function store(Request $request)
     {
         $validatedData = Rattings::validator($request);
         if ($validatedData->fails()) {

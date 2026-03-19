@@ -12,6 +12,11 @@ return [
             'driver' => 'jwt',
             'provider' => 'riders',
         ],
+
+        'van' => [
+            'driver' => 'jwt',
+            'provider' => 'vans',
+        ],
     ],
 
     'providers' => [
@@ -25,6 +30,12 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\Driver::class,
             'table' => 'drivers',
+        ],
+
+        'vans' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Van::class,
+            'table' => 'vans',
         ],
     ],
 

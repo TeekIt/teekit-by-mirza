@@ -18,10 +18,10 @@ class JwtMiddleware
      *
      * @return mixed
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, ?string $guard = null): Response
     {
         try {
-            JWTAuth::parseToken()->authenticate();
+            ($guard) ? auth($guard)->userOrFail() : JWTAuth::parseToken()->authenticate();
         } catch (Exception $error) {
             if ($error instanceof TokenInvalidException) {
                 return JsonResponseServices::getApiResponse(
@@ -41,7 +41,7 @@ class JwtMiddleware
                 return JsonResponseServices::getApiResponse(
                     [],
                     config('constants.FALSE_STATUS'),
-                    'Authorization Token not found',
+                    'Authorization Token not found or Token belongs to a different Guard',
                     config('constants.HTTP_UNAUTHORIZED')
                 );
             }

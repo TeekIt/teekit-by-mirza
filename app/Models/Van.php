@@ -5,13 +5,15 @@ namespace App\Models;
 use App\Enums\OrderByEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Van extends Model
+class Van extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\VanFactory> */
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that aren't mass assignable.
@@ -25,6 +27,7 @@ class Van extends Model
     ];
 
     protected $hidden = [
+        'password',
         'updated_at',
         'deleted_at',
     ];
@@ -35,6 +38,34 @@ class Van extends Model
             set: fn(string $value) => strtolower($value),
         );
     }
+
+    protected function numberPlate(): Attribute
+    {
+        return Attribute::make(
+            set: fn(string $value) => strtoupper($value),
+        );
+    }
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
     /**
      * Relations
      */
@@ -125,6 +156,16 @@ class Van extends Model
         }
 
         return $van->save();
+    }
+
+    public static function getByUserName(string $userName, array $columns = ['*']): Van
+    {
+        return self::select($columns)->where('user_name', '=', $userName)->firstOrFail();
+    }
+
+    public static function getById(int $id, array $columns = ['*']): Van
+    {
+        return self::select($columns)->where('id', '=', $id)->firstOrFail();
     }
 
     public static function getAll(OrderByEnum $orderBy, string $search = '', array $columns = ['*']): LengthAwarePaginator

@@ -113,7 +113,6 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::prefix('orders')->group(function () {
             Route::get('count', [OrderController::class, 'countSellerOrders'])->name('seller.orders.count');
             Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
-            // Route::get('/of-unique-products', OrdersOfUniqueProductsLivewire::class)->name('seller.orders.of.unique.products');
             Route::get('/{requestOrderId?}', OrdersLivewire::class)->name('seller.orders');
         });
 
@@ -152,8 +151,6 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::get('/sellers/parent', ParentSellersLivewire::class)->name('admin.sellers.parent');
         Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
         Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
-        Route::get('/orders', OrdersLivewire::class)->name('admin.orders');
-
 
         Route::prefix('categories')->group(function () {
             Route::get('/', CategoriesLivewire::class)->name('admin.categories');
@@ -161,8 +158,8 @@ Route::middleware('transaction.wrapper')->group(function () {
         });
 
         Route::prefix('notifications')->controller(NotificationsController::class)->group(function () {
-            Route::get('/home', 'notificationHome')->name('admin.notifications.home');
-            Route::post('/send', 'notificationSend')->name('admin.notifications.send');
+            Route::get('/', 'notificationsHome')->name('admin.notifications');
+            Route::post('/send', 'notificationsSend')->name('admin.notifications.send');
         });
 
         Route::prefix('vans')->group(function () {
@@ -182,21 +179,22 @@ Route::middleware('transaction.wrapper')->group(function () {
         });
 
         Route::prefix('promocodes')->controller(PromoCodeController::class)->group(function () {
-            Route::get('/home', 'promocodesHome')->name('admin.promocodes.home');
+            Route::get('/', 'promocodesHome')->name('admin.promocodes');
             Route::post('/add', 'promocodesAdd')->name('admin.promocodes.add');
             Route::get('/delete', 'destroy')->name('admin.promocodes.del');
             Route::post('/{id}/update', 'promoCodesUpdate')->name('admin.promocodes.update');
         });
 
+        Route::prefix('orders')->controller(OrderController::class)->group(function () {
+            Route::get('/', OrdersLivewire::class)->name('admin.orders');
+            Route::get('/verified', 'adminOrdersVerified')->name('admin.orders.verified');
+            Route::get('/unverified', 'adminOrdersUnverified')->name('admin.orders.unverified');
+            Route::get('/complete', 'completeOrders')->name('admin.orders.complete');
+            Route::get('/delete', 'adminOrdersDel')->name('admin.del.orders');
+        });
+
         Route::controller(HomeController::class)->group(function () {
             Route::post('/update/pages', 'updatePages')->name('admin.update.pages');
-
-            Route::prefix('orders')->group(function () {
-                Route::get('/verified', 'adminOrdersVerified')->name('admin.orders.verified');
-                Route::get('/unverified', 'adminOrdersUnverified')->name('admin.orders.unverified');
-                Route::get('/complete', 'completeOrders')->name('admin.orders.complete');
-                Route::get('/delete', 'adminOrdersDel')->name('admin.del.orders');
-            });
         });
     });
     /*

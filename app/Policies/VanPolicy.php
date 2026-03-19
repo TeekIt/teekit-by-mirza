@@ -13,16 +13,20 @@ class VanPolicy
      */
     public function viewAny(): bool
     {
-        return User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value || 
-        User::getAuthUser()->role_id === UserRoleEnum::COMPANY->value;
+        return User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value ||
+            User::getAuthUser()->role_id === UserRoleEnum::COMPANY->value;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Van $van): bool
+    public function view(?User $user, Van $van): bool
     {
-        return $user->id === $van->company_id;
+        if ($user) {
+            return $user->id === $van->company_id;
+        }
+
+        return auth('van')->user()->id === $van->id;
     }
 
     /**
@@ -30,8 +34,8 @@ class VanPolicy
      */
     public function create(): bool
     {
-        return User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value || 
-        User::getAuthUser()->role_id === UserRoleEnum::COMPANY->value;
+        return User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value ||
+            User::getAuthUser()->role_id === UserRoleEnum::COMPANY->value;
     }
 
     /**

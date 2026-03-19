@@ -389,11 +389,11 @@ class Orders extends Model
             ->get();
     }
 
-    public static function getById(int $id, array $columns = ['*']): ?Orders
+    public static function getById(int $id, array $columns = ['*']): Orders
     {
         return self::select($columns)
             ->with(['order_items.product', 'buyer', 'seller'])
             ->where('id', '=', $id)
-            ->first();
+            ->firstOrFail();
     }
 }

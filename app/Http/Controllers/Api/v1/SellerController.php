@@ -64,7 +64,7 @@ class SellerController extends Controller
      *
      * @author Muhammad Abdullah Mirza
      */
-    public function sellers(Request $request)
+    public function list(Request $request)
     {
         $validatedData = Validator::make($request->query(), [
             'lat' => 'required|numeric|between:-90,90',
@@ -79,7 +79,7 @@ class SellerController extends Controller
         $validatedData = (object) $validatedData->validated();
 
         $data = Cache::remember(
-            'sellers'.$validatedData->city.$validatedData->lat.$validatedData->lon.$validatedData->blocked,
+            'sellersList'.$validatedData->city.$validatedData->lat.$validatedData->lon.$validatedData->blocked,
             now()->addDay(),
             function () use ($validatedData) {
                 if ($validatedData->blocked == 1) {

@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Excel as ExcelConstants;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ProductController extends Controller
 {
@@ -65,7 +66,7 @@ class ProductController extends Controller
      *
      * @version 1.0.0
      */
-    public function all(Request $request)
+    public function list(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'page' => 'required|integer',
@@ -74,25 +75,11 @@ class ProductController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        $pagination = Products::getAllProducts()->toArray();
-        $data = $pagination['data'];
-        unset($pagination['data']);
+        $data = Products::getAllProducts();
 
-        if (! empty($data)) {
-            return JsonResponseServices::getApiResponseExtention(
-                $data,
-                config('constants.TRUE_STATUS'),
-                '',
-                'pagination',
-                $pagination,
-                config('constants.HTTP_OK')
-            );
-        }
-
-        return JsonResponseServices::getApiResponse(
-            [],
-            config('constants.FALSE_STATUS'),
-            config('constants.NO_RECORD'),
+        return JsonResponseServices::getPaginatedApiResponse(
+            $data,
+            '',
             config('constants.HTTP_OK')
         );
     }

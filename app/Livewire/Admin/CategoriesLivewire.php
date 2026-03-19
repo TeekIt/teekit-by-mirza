@@ -66,7 +66,7 @@ class CategoriesLivewire extends Component
             );
             /* Operation finished */
             sleep(1);
-            Cache::forget('allCategories');
+            Cache::forget('categoriesList');
             $this->resetComponent();
             $this->dispatch('close-modal', ['id' => 'addCategoryModal']);
 

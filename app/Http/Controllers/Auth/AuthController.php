@@ -71,7 +71,7 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
+    public function loginUser(Request $request)
     {
         $credentials = $request->only('email', 'password');
         if (! $token = JWTAuth::attempt($credentials)) {
@@ -102,7 +102,7 @@ class AuthController extends Controller
             );
         }
 
-        $this->authenticated($request, $user, $token);
+        $this->saveJWT($request, $user, $token);
 
         return $this->respondWithToken($token);
     }
@@ -286,7 +286,7 @@ class AuthController extends Controller
         );
     }
 
-    protected function authenticated($request, $user, $token)
+    protected function saveJWT($request, $user, $token)
     {
         $user->last_login = date('Y-m-d H:i:s');
         $user->save();

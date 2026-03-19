@@ -55,7 +55,8 @@ class PromoCode extends Model
 
     public static function getByPromoCode(string $promoCode, ?int $customerId = null, array $columns = ['*']): PromoCode
     {
-        return self::with(['seller:id,business_name'])
+        return self::select($columns)
+            ->with(['seller:id,business_name'])
             ->when(! is_null($customerId), function ($query) use ($customerId) {
                 $query->with(['promoCodesUsageLimit' => function ($promoCodesUsageLimitRelation) use ($customerId) {
                     $promoCodesUsageLimitRelation->where('customer_id', '=', $customerId);
