@@ -440,7 +440,7 @@ class User extends Authenticatable implements JWTSubject
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->whereIn('city', $city)
+            ->where('city', '=', $city)
             ->where('id', '!=', $exceptSellerId)
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
@@ -455,13 +455,13 @@ class User extends Authenticatable implements JWTSubject
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->whereIn('city', $city)
+            ->where('city', '=', $city)
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
             ->get();
     }
 
-    public static function getParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
+    public static function getActiveParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
     {
         $city = explode(' ', $city);
 
@@ -469,7 +469,7 @@ class User extends Authenticatable implements JWTSubject
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->whereIn('city', $city)
+            ->where('city', '=', $city)
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
             ->get();

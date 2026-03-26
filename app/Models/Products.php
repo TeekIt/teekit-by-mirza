@@ -196,10 +196,10 @@ class Products extends Model
         );
     }
 
-    public function scopeChildSellerQty(Builder $query, int $child_seller_id): void
+    public function scopeChildSellerQty(Builder $query, int $childSellerId): void
     {
-        $query->leftJoin('qty', function ($join) use ($child_seller_id) {
-            $join->on('qty.product_id', '=', 'products.id')->where('qty.seller_id', '=', $child_seller_id);
+        $query->leftJoin('qty', function ($join) use ($childSellerId) {
+            $join->on('qty.product_id', '=', 'products.id')->where('qty.seller_id', '=', $childSellerId);
         })->select(
             'products.id as prod_id',
             'products.seller_id as parent_seller_id',
@@ -568,19 +568,19 @@ class Products extends Model
     }
 
     public static function getChildSellerProductsForView(
-        int $child_seller_id,
+        int $childSellerId,
         string $search = '',
-        ?int $category_id = null
+        ?int $categoryId = null
     ): LengthAwarePaginator {
-        $parent_seller_id = User::find($child_seller_id)->parent_store_id;
-        $qty = Qty::where('seller_id', $child_seller_id)->first();
+        $parentSellerId = User::find($childSellerId)->parent_store_id;
+        $qty = Qty::where('seller_id', '=', $childSellerId)->first();
 
-        $query = (empty($qty)) ? self::ParentSellerProducts() : self::ChildSellerQty(child_seller_id: $child_seller_id);
+        $query = (empty($qty)) ? self::ParentSellerProducts() : self::ChildSellerQty(childSellerId: $childSellerId);
 
         return $query->where('products.product_name', 'LIKE', "%{$search}%")
-            ->where('products.seller_id', $parent_seller_id)
-            ->when($category_id, function ($query, $category_id) {
-                return $query->where('category_id', '=', $category_id);
+            ->where('products.seller_id', $parentSellerId)
+            ->when($categoryId, function ($query, $categoryId) {
+                return $query->where('category_id', '=', $categoryId);
             })
             ->paginate(20);
     }
@@ -589,6 +589,7 @@ class Products extends Model
         int $sellerId,
         string $search = '',
         ?int $categoryId = null,
+        ?ProductStatusEnum $status = null,
         string $orderBy = 'desc'
     ): LengthAwarePaginator {
         return self::with('category')
@@ -599,6 +600,9 @@ class Products extends Model
             })
             ->when($categoryId, function ($query, $categoryId) {
                 return $query->where('category_id', '=', $categoryId);
+            })
+            ->when($status, function ($query, $status) {
+                return $query->where('status', '=', $status);
             })
             ->orderBy('id', $orderBy)
             ->paginate(12);
@@ -612,20 +616,21 @@ class Products extends Model
             ->first();
     }
 
-    public static function getProductWeight(int $id)
+    public static function getProductWeight(int $id): float
     {
-        $product = self::select('weight')->where('id', '=', $id)->get();
+        // $product = self::select('weight')->where('id', '=', $id)->first()->weight;
 
-        return $product[0]->weight;
+        // return $product->weight;
+
+        return self::select('weight')->where('id', '=', $id)->first()->weight;
     }
 
-    public static function getProductVolume(int $id)
+    public static function getProductVolume(int $id): float
     {
-        $product = self::select(DB::raw('(products.height * products.width * products.length) as volumn'))
+        return self::select(DB::raw('(products.height * products.width * products.length) as volumn'))
             ->where('id', '=', $id)
-            ->get();
-
-        return $product[0]->volumn;
+            ->first()
+            ->volumn;
     }
 
     public static function getProductPrice(int $id): float

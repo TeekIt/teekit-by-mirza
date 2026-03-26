@@ -34,6 +34,14 @@ body {
     background-color: var(--primary-yellow) !important;
 }
 
+.custom-cart-icon {
+    transition: transform 0.2s ease-in-out;
+}
+
+.custom-cart-icon:hover {
+    transform: scale(1.15);
+}
+
 .main-pages-bg-img {
     background: url('../images/backgrounds/bg.webp')
 }

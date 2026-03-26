@@ -13,6 +13,7 @@ use App\Http\Controllers\Web\v1\UserController;
 use App\Http\Controllers\Web\v1\VanController;
 use App\Http\Controllers\Web\v2\ProductController;
 use App\Http\Controllers\Web\v2\StripeController;
+use App\Livewire\Admin\AddVanInventoryLivewire;
 use App\Livewire\Admin\CategoriesLivewire;
 use App\Livewire\Admin\ChildSellersLivewire;
 use App\Livewire\Admin\CustomersLivewire;
@@ -165,7 +166,7 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::prefix('vans')->group(function () {
             Route::get('/', VansLivewire::class)->name('admin.vans');
             Route::get('/inventories', VanInventoriesLivewire::class)->name('admin.vans.inventories');
-            Route::get('/inventories/search', SearchVanInventoriesLivewire::class)->name('admin.vans.inventories.search');
+            Route::get('/inventories/add', AddVanInventoryLivewire::class)->name('admin.vans.inventories.add');
             Route::get('/delete', [VanController::class, 'destroy'])->name('admin.vans.del');
             // admin.vans.inventories.del
         });

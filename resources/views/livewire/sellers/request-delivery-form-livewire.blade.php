@@ -95,12 +95,12 @@
                                                     </div>
 
                                                     {{-- Dropoff Lat, Lons fields --}}
-                                                    <div class="col-md-6">
+                                                    {{-- <div class="col-md-6">
                                                         <input type="hidden" class="form-control"
                                                             wire:model="dropoffLat" id="dropoffLat" required>
                                                         <input type="hidden" class="form-control"
                                                             wire:model="dropoffLon" id="dropoffLon" required>
-                                                    </div>
+                                                    </div> --}}
                                                 </div>
                                             </div>
 

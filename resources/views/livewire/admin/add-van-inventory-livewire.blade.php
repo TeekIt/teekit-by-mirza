@@ -1,4 +1,4 @@
-{{-- <div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y">
     @php
         use App\Enums\ProductStatusEnum;
         use Illuminate\Support\Str;
@@ -24,77 +24,84 @@
                     <div class="row mb-3">
                         <div class="col-7">
                             <div class="form-group">
+                                {{-- The "id" attribute is set to "pickupAddress" so we can align it with the
+                                    CustomGoogleMapsClass in the scripts.blade.php file --}}
                                 <input type="text" class="form-control" placeholder="Enter van location"
-                                    wire:model.live="vanLocation">
+                                    id="pickupAddress" required>
                             </div>
                         </div>
                         <div class="col-5">
                             <div class="form-group">
                                 <select class="form-control" wire:model.live="nearBySellerId">
                                     <option value="">Select a near by seller</option>
-                                    @foreach ($sellers as $seller)
-                                        <option value="{{ $seller->id }}">{{ $seller->business_name }}</option>
+                                    @foreach ($nearbySellers as $singleIndex)
+                                        <option value="{{ $singleIndex['id'] }}">
+                                            {{ $singleIndex['business_name'] }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Product Name (optional) --}}
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Enter product name (optional)"
-                                    wire:model.live="productSearch">
+                    <form wire:submit="performSearch">
+                        {{-- Product Name (optional) --}}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <input type="text" class="form-control"
+                                        placeholder="Enter product name (optional)" wire:model.live="search">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- Search Button --}}
-                    <div class="row">
-                        <div class="col-12">
-                            <button type="button" class="btn site-primary-yellow-bg w-100 rounded-pill py-2"
-                                wire:click="search" wire:target="search" wire:loading.class="btn-dark"
-                                wire:loading.class.remove="site-primary-yellow-bg" wire:loading.attr="disabled"
-                                @disabled(!trim($vanLocation) || !$nearBySellerId)>
-                                <span wire:target="search" wire:loading.remove>
-                                    Search
-                                </span>
-                                <span wire:target="search" wire:loading>
-                                    <span class="spinner-border spinner-border-sm text-light" role="status"></span>
-                                </span>
-                            </button>
+                        {{-- Search Button --}}
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn site-primary-yellow-bg w-100 rounded-pill py-2"
+                                    wire:target="performSearch" wire:loading.class="btn-dark"
+                                    wire:loading.class.remove="site-primary-yellow-bg" wire:loading.attr="disabled"
+                                    @disabled(!trim($vanLocation) || !$nearBySellerId)>
+                                    <span wire:target="performSearch" wire:loading.remove>
+                                        Search
+                                    </span>
+                                    <span wire:target="performSearch" wire:loading>
+                                        <span class="spinner-border spinner-border-sm text-light" role="status"></span>
+                                    </span>
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
-            @if ($showInventoryGrid && $products)
+            @if ($showInventoryGrid && $inventory)
                 <section class="section-products mt-4">
                     <div class="container px-0">
                         <div class="row">
-                            @forelse ($products as $inventory)
+                            @forelse ($inventory as $singleIndex)
                                 <div class="col-md-6 col-lg-4 col-xl-3 p-2">
                                     <div
-                                        class="single-product bg-white p-2 rounded @if ($inventory->status->value == ProductStatusEnum::DISABLE->value) disabled-product @endif">
+                                        class="single-product bg-white p-2 rounded @if ($singleIndex->status->value == ProductStatusEnum::DISABLE->value) disabled-product @endif">
                                         @php
-                                            if (str_contains($inventory->feature_img, 'https://')) {
-                                                $featureImageUrl = $inventory->feature_img;
+                                            if (str_contains($singleIndex->feature_img, 'https://')) {
+                                                $featureImageUrl = $singleIndex->feature_img;
                                             } else {
-                                                $featureImageUrl = config('constants.BUCKET') . $inventory->feature_img;
+                                                $featureImageUrl =
+                                                    config('constants.BUCKET') . $singleIndex->feature_img;
                                             }
                                         @endphp
                                         <div class="part-1"
                                             style="background:url('{{ $featureImageUrl }}') no-repeat center;">
                                             <ul>
                                                 <li>
-                                                    <a wire:click="markAsFeatured('{{ $inventory->id }}', 1)"
-                                                        wire:target="markAsFeatured('{{ $inventory->id }}', 1)"
+                                                    <a wire:click="addToCart({{ $singleIndex->id }})"
+                                                        wire:target="addToCart({{ $singleIndex->id }})"
                                                         wire:loading.attr="disabled" title="Add to Cart">
                                                         <span class="fas fa-cart-arrow-down"
-                                                            wire:target="markAsFeatured('{{ $inventory->id }}', 1)"
+                                                            wire:target="addToCart({{ $singleIndex->id }})"
                                                             wire:loading.remove></span>
-                                                        <span wire:target="markAsFeatured('{{ $inventory->id }}', 1)"
+                                                        <span wire:target="addToCart({{ $singleIndex->id }})"
                                                             wire:loading>
                                                             <span class="spinner-border spinner-border-sm"
                                                                 role="status" aria-hidden="true"></span>
@@ -104,13 +111,12 @@
                                             </ul>
                                         </div>
                                         <div class="part-2 px-2">
-                                            <h3 class="product-title" title="{{ $inventory->product_name }}">
-                                                {{ Str::limit($inventory->product_name, 25) }}
+                                            <h3 class="product-title" title="{{ $singleIndex->product_name }}">
+                                                {{ Str::limit($singleIndex->product_name, 25) }}
                                             </h3>
-                                            <h5 class="rating">
-                                                {{ $inventory->category->category_name ?? 'Uncategorized' }}</h5>
-                                            <h4>SKU: {{ $inventory->sku }}</h4>
-                                            <h5>£{{ $inventory->price }}</h5>
+                                            <h5 class="rating">{{ $singleIndex->category->category_name }}</h5>
+                                            <h4>SKU: {{ $singleIndex->sku }}</h4>
+                                            <h5>£{{ $singleIndex->price }}</h5>
                                         </div>
                                     </div>
                                 </div>
@@ -123,7 +129,7 @@
 
                         <div class="row">
                             <div class="col-md-12">
-                                {{ $products->links() }}
+                                {{ $inventory->links() }}
                             </div>
                         </div>
                     </div>
@@ -132,4 +138,82 @@
         </div>
     </div>
 
-</div> --}}
+    {{-- Cart Drawer --}}
+    <div>
+        <button type="button"
+            class="btn p-0 border-0 bg-transparent shadow-none position-fixed bottom-0 end-0 me-4 mb-4 z-3 d-inline-flex align-items-center justify-content-center custom-cart-icon position-relative"
+            data-bs-toggle="offcanvas" data-bs-target="#vansCartDrawer" aria-controls="vansCartDrawer"
+            aria-label="Open cart drawer">
+            <i class="fas fa-cart-arrow-down text-site-primary fa-3x "></i>
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill site-primary-yellow-bg text-dark">
+                {{ $cartItemsCount }}
+            </span>
+        </button>
+
+        <div wire:ignore.self class="offcanvas offcanvas-end bg-white" tabindex="-1" id="vansCartDrawer"
+            aria-labelledby="vansCartDrawerLabel" data-bs-backdrop="false" data-bs-scroll="true">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="vansCartDrawerLabel">Cart</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+
+            <div class="offcanvas-body d-flex flex-column">
+                <div class="flex-grow-1 overflow-auto pe-1">
+                    @forelse ($cartItems as $cartItem)
+                        <div class="card border rounded-0 mb-2">
+                            <div class="card-body p-2 position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                                    wire:click="removeCartItem({{ $cartItem['id'] }})"
+                                    wire:target="removeCartItem({{ $cartItem['id'] }})"
+                                    wire:loading.attr="disabled"
+                                    aria-label="Remove item"></button>
+                                <div class="d-flex align-items-start gap-2">
+                                    <img src="{{ $cartItem['image'] }}" alt="Product Image" class="img-fluid"
+                                        style="width: 64px; height: 64px; object-fit: cover;">
+                                    <div class="w-100">
+                                        <h6 class="mb-2">{{ $cartItem['title'] }}</h6>
+                                        <div class="d-flex justify-content-between align-items-center small text-muted">
+                                            <div class="d-flex align-items-center gap-1">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary px-2 py-0"
+                                                    wire:click="decreaseCartItemQty({{ $cartItem['id'] }})"
+                                                    wire:target="decreaseCartItemQty({{ $cartItem['id'] }})"
+                                                    wire:loading.attr="disabled">-</button>
+                                                <input type="number" min="1"
+                                                    class="form-control form-control-sm text-center"
+                                                    style="width: 70px;"
+                                                    value="{{ $cartItem['qty'] }}"
+                                                    wire:change="updateCartItemQty({{ $cartItem['id'] }}, $event.target.value)">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary px-2 py-0"
+                                                    wire:click="increaseCartItemQty({{ $cartItem['id'] }})"
+                                                    wire:target="increaseCartItemQty({{ $cartItem['id'] }})"
+                                                    wire:loading.attr="disabled">+</button>
+                                            </div>
+                                            <span>Price: £{{ number_format($cartItem['price'], 2) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-muted text-center py-4 mb-0">Cart is empty</p>
+                    @endforelse
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center border-top py-3 fs-5">
+                    <strong>Total</strong>
+                    <strong>£{{ number_format($cartTotal, 2) }}</strong>
+                </div>
+
+                <div class="d-grid gap-2 mt-auto">
+                    <button type="button" class="btn site-primary-bg text-white w-100">
+                        Checkout
+                    </button>
+                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="offcanvas">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

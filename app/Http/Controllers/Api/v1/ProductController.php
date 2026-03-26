@@ -285,7 +285,7 @@ class ProductController extends Controller
                 GoogleMapServices::findNearByUsersByMakingChunks(
                     $validatedData->lat,
                     $validatedData->lon,
-                    User::getParentAndChildSellersByCity($validatedData->city),
+                    User::getActiveParentAndChildSellersByCity($validatedData->city),
                     nearByMiles: $validatedData->miles,
                 ),
                 'id'

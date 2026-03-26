@@ -88,7 +88,7 @@ class SellerController extends Controller
                         numberOfRows: 200
                     );
                 } else {
-                    $sellers = User::getParentAndChildSellersByCity(
+                    $sellers = User::getActiveParentAndChildSellersByCity(
                         city: $validatedData->city,
                         numberOfRows: 200
                     );
