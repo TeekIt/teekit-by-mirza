@@ -131,9 +131,12 @@ class AddVanInventoryLivewire extends Component
 
     public function addToCart(int $productId): void
     {
-        $product = Products::query()
-            ->select(['id', 'product_name', 'feature_img', 'price'])
-            ->findOrFail($productId);
+        $product = Products::getProductInfoWithoutRelationsById($productId, [
+            'id',
+            'product_name',
+            'feature_img',
+            'price',
+        ]);
 
         $cart = $this->getCart();
         $cartKey = (string) $productId;
@@ -147,6 +150,7 @@ class AddVanInventoryLivewire extends Component
 
             $cart[$cartKey] = [
                 'id' => $product->id,
+                'sellerId' => $this->nearBySellerId,
                 'title' => $product->product_name,
                 'image' => $image,
                 'price' => (float) $product->price,
@@ -218,7 +222,55 @@ class AddVanInventoryLivewire extends Component
         }
 
         unset($cart[$cartKey]);
+
         $this->putCart($cart);
+    }
+
+    public function getCartItemsValues(): array
+    {
+        return array_values($this->getCart());
+    }
+
+    public function getCartItemsCount(): int
+    {
+        return array_sum(array_column($this->getCartItemsValues(), 'qty'));
+    }
+
+    public function getCartTotal(): float
+    {
+        return array_reduce(
+            $this->getCart(),
+            fn(float $carry, array $item): float => $carry + ((float) $item['price'] * (int) $item['qty']),
+            0.0
+        );
+    }
+
+    public function checkout(): void
+    {
+        /**
+         * * Create a Single Action class for this whole procedure named "ProcessVanOrderAction" and call it from here by passing the cart items and the van details.
+         * STEP 1:
+         * Create a new "Van Order" table with the following details:
+         * - 'company_id' (bigincrements)
+         * - 'van_id' (bigincrements)
+         * - 'order_total' (float)
+         * - 'status' (string)
+         * - 'van_location' (string)
+         * 
+         * Note: we also have to create a new table for "Van Order Items" with the following columns:
+         * - 'van_order_id' (bigincrements)
+         * - 'product_id' (bigincrements)
+         * - 'seller_id' (bigincrements)
+         * - 'price' (float)
+         * - 'qty' (integer)
+         * 
+         * * STEP 2:
+         * Send the following product details as emails to all unique sellers in the cart:
+         * - 'title'
+         * - 'image'
+         * - 'price'
+         * - 'qty'
+         */
     }
 
     /*
@@ -235,13 +287,8 @@ class AddVanInventoryLivewire extends Component
             orderBy: 'desc'
         ) : null;
 
-        $cartItems = array_values($this->getCart());
-        $cartItemsCount = array_sum(array_column($cartItems, 'qty'));
-        $cartTotal = array_reduce(
-            $cartItems,
-            fn(float $carry, array $item): float => $carry + ((float) $item['price'] * (int) $item['qty']),
-            0.0
-        );
+        $cartItemsCount = $this->getCartItemsCount();
+        $cartTotal = $this->getCartTotal();
 
         return view('livewire.admin.add-van-inventory-livewire', compact('inventory', 'cartItems', 'cartItemsCount', 'cartTotal'));
     }

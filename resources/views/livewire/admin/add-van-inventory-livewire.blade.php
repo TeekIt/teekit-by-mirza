@@ -161,9 +161,9 @@
             <div class="offcanvas-body d-flex flex-column">
                 <div class="flex-grow-1 overflow-auto pe-1">
                     @forelse ($cartItems as $cartItem)
-                        <div class="card border rounded-0 mb-2">
+                        <div class="card border rounded-3 mb-2 p-2">
                             <div class="card-body p-2 position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 custom-btn-close-sm"
                                     wire:click="removeCartItem({{ $cartItem['id'] }})"
                                     wire:target="removeCartItem({{ $cartItem['id'] }})"
                                     wire:loading.attr="disabled"
@@ -172,31 +172,30 @@
                                     <img src="{{ $cartItem['image'] }}" alt="Product Image" class="img-fluid"
                                         style="width: 64px; height: 64px; object-fit: cover;">
                                     <div class="w-100">
-                                        <h6 class="mb-2">{{ $cartItem['title'] }}</h6>
+                                        <h6 class="mt-1 mb-3">{{ $cartItem['title'] }}</h6>
                                         <div class="d-flex justify-content-between align-items-center small text-muted">
-                                            <div class="d-flex align-items-center gap-1">
-                                                <button type="button" class="btn btn-sm btn-outline-secondary px-2 py-0"
+                                            <div class="input-group input-group-sm" style="width: 130px;">
+                                                <button type="button" class="btn btn-outline-secondary px-2 rounded-pill rounded-end-0"
                                                     wire:click="decreaseCartItemQty({{ $cartItem['id'] }})"
                                                     wire:target="decreaseCartItemQty({{ $cartItem['id'] }})"
                                                     wire:loading.attr="disabled">-</button>
                                                 <input type="number" min="1"
-                                                    class="form-control form-control-sm text-center"
-                                                    style="width: 70px;"
+                                                    class="form-control text-center"
                                                     value="{{ $cartItem['qty'] }}"
                                                     wire:change="updateCartItemQty({{ $cartItem['id'] }}, $event.target.value)">
-                                                <button type="button" class="btn btn-sm btn-outline-secondary px-2 py-0"
+                                                <button type="button" class="btn btn-outline-secondary px-2 rounded-pill rounded-start-0"
                                                     wire:click="increaseCartItemQty({{ $cartItem['id'] }})"
                                                     wire:target="increaseCartItemQty({{ $cartItem['id'] }})"
                                                     wire:loading.attr="disabled">+</button>
                                             </div>
-                                            <span>Price: £{{ number_format($cartItem['price'], 2) }}</span>
+                                            <span class="mr-2">Price: £{{ number_format($cartItem['price'], 2) }}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     @empty
-                        <p class="text-muted text-center py-4 mb-0">Cart is empty</p>
+                        <p class="text-muted text-center py-4 mb-0">Basket is empty</p>
                     @endforelse
                 </div>
 
@@ -206,10 +205,10 @@
                 </div>
 
                 <div class="d-grid gap-2 mt-auto">
-                    <button type="button" class="btn site-primary-bg text-white w-100">
+                    <button type="button" class="btn site-primary-bg text-white w-100 rounded-pill">
                         Checkout
                     </button>
-                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="offcanvas">
+                    <button type="button" class="btn btn-secondary w-100 rounded-pill" data-bs-dismiss="offcanvas">
                         Close
                     </button>
                 </div>

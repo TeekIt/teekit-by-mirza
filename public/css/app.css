@@ -42,6 +42,11 @@ body {
     transform: scale(1.15);
 }
 
+.custom-btn-close-sm {
+    font-size: 9px;
+    padding: 0.15rem;
+}
+
 .main-pages-bg-img {
     background: url('../images/backgrounds/bg.webp')
 }
