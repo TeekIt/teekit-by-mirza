@@ -220,7 +220,7 @@ class User extends Authenticatable implements JWTSubject
         ?string $businessName = null,
         ?string $businessPhone = null,
         ?string $password = null,
-        array $hours = [],
+        ?array $hours = [],
         ?string $userImg = null,
         ?string $stripeAccountId = null
     ): bool {
