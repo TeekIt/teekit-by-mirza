@@ -24,7 +24,7 @@ class BuyerController extends Controller
         $validatedData = Validator::make($request->all(), [
             'fName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
             'lName' => 'required|string|max:100|regex:/^[A-Za-z\s]+$/',
-            'password' => 'required|string|min:8|max:50',
+            'password' => 'nullable|string|min:8|max:50',
             'countryCode' => 'required|string|max:4',
             'phone' => 'required|string|max:13',
             'fullAddress' => 'required|string',
