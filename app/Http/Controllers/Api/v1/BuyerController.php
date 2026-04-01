@@ -41,7 +41,7 @@ class BuyerController extends Controller
         }
 
         $updated = User::updateInfo(
-            id: JWTAuth::user()->id,
+            id: User::getAuthUser()->id,
             name: $request->fName,
             lName: $request->lName,
             // phone: $request->countryCode . $request->phone,
