@@ -194,6 +194,7 @@ Route::middleware('transaction.wrapper')->group(function () {
 
         Route::prefix('orders')->controller(OrderController::class)->group(function () {
             Route::get('/', OrdersLivewire::class)->name('admin.orders');
+            Route::get('/van_inventory', VanInventoriesLivewire::class)->name('admin.orders.van.inventory');
             Route::get('/verified', 'adminOrdersVerified')->name('admin.orders.verified');
             Route::get('/unverified', 'adminOrdersUnverified')->name('admin.orders.unverified');
             Route::get('/complete', 'completeOrders')->name('admin.orders.complete');

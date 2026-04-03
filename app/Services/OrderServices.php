@@ -29,7 +29,7 @@ final class OrderServices
 
         if ($order instanceof Orders) {
             /* The sum() function will loop over all $orderItems */
-            return $order->order_items->sum(static function ($orderItem) {
+            return $order->orderItems->sum(static function ($orderItem) {
                 return (float) ($orderItem->product->weight * $orderItem->product_qty);
             });
         }
@@ -40,7 +40,7 @@ final class OrderServices
     public static function getTotalHeight(Orders|OrdersFromOtherSeller $order): float
     {
         if ($order instanceof Orders) {
-            return $order->order_items->pluck('product')->sum('height');
+            return $order->orderItems->pluck('product')->sum('height');
         }
 
         return $order->product->height;
@@ -49,7 +49,7 @@ final class OrderServices
     public static function getTotalWidth(Orders|OrdersFromOtherSeller $order): float
     {
         if ($order instanceof Orders) {
-            return $order->order_items->pluck('product')->sum('width');
+            return $order->orderItems->pluck('product')->sum('width');
         }
 
         return $order->product->width;
@@ -58,7 +58,7 @@ final class OrderServices
     public static function getTotalLength(Orders|OrdersFromOtherSeller $order): float
     {
         if ($order instanceof Orders) {
-            return $order->order_items->pluck('product')->sum('length');
+            return $order->orderItems->pluck('product')->sum('length');
         }
 
         return $order->product->length;

@@ -1,6 +1,7 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     @php
         use App\Enums\ProductStatusEnum;
+        use App\Enums\OrderTypeEnum;
         use Illuminate\Support\Str;
     @endphp
 
@@ -205,9 +206,27 @@
                 </div>
 
                 <div class="d-grid gap-2 mt-auto">
-                    <button type="button" class="btn site-primary-bg text-white w-100 rounded-pill">
-                        Checkout
-                    </button>
+                    <div class="dropup">
+                        <button type="button"
+                            class="btn site-primary-bg text-white w-100 rounded-pill dropdown-toggle"
+                            data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                            Checkout
+                        </button>
+                        <ul class="dropdown-menu w-100 mb-1">
+                            <li>
+                                <button type="button" class="dropdown-item p-3 border-bottom"
+                                    wire:click="checkout('{{ OrderTypeEnum::COD->value }}')">
+                                    COD
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item p-3"
+                                    wire:click="checkout('{{ OrderTypeEnum::SELF_PICKUP->value }}')">
+                                    Self Pickup
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                     <button type="button" class="btn btn-secondary w-100 rounded-pill" data-bs-dismiss="offcanvas">
                         Close
                     </button>
