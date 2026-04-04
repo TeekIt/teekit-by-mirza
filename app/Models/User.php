@@ -396,10 +396,12 @@ class User extends Authenticatable implements JWTSubject
         int $exceptSellerId,
         int $numberOfRows = 25
     ): Collection {
+        $city = explode(' ', $city);
+        
         return self::WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('city', '=', $city)
+            ->whereIn('city', $city)
             ->where('id', '!=', $exceptSellerId)
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
@@ -412,13 +414,15 @@ class User extends Authenticatable implements JWTSubject
         int $exceptSellerId,
         int $numberOfRows = 25
     ): Collection {
+        $city = explode(' ', $city);
+
         return self::whereHas('qty', function ($qtyRelation) use ($categoryId) {
             $qtyRelation->where('category_id', '=', $categoryId);
         })
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('city', '=', $city)
+            ->whereIn('city', $city)
             ->where('id', '!=', $exceptSellerId)
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
@@ -440,7 +444,7 @@ class User extends Authenticatable implements JWTSubject
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('city', '=', $city)
+            ->whereIn('city', $city)
             ->where('id', '!=', $exceptSellerId)
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
@@ -450,12 +454,12 @@ class User extends Authenticatable implements JWTSubject
     public static function getBlokedParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
     {
         $city = explode(' ', $city);
-
+        
         return self::WhereUserIsBlocked()
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('city', '=', $city)
+            ->whereIn('city', $city)
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
             ->get();
@@ -469,7 +473,7 @@ class User extends Authenticatable implements JWTSubject
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('city', '=', $city)
+            ->whereIn('city', $city)
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
             ->get();
