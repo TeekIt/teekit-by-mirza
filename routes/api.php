@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\v2\RequestedDeliveryController;
 use App\Http\Controllers\Api\v2\StuartDeliveryController;
 use App\Http\Controllers\Api\v2\SuperWallPackageController;
 use App\Http\Controllers\Api\v2\VanController;
+use App\Http\Controllers\Api\v2\VanInventoryController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -148,6 +149,7 @@ Route::middleware('transaction.wrapper')->group(function () {
             // Route::post('activity/create', '');
         });
     });
+
     /*
     *********************************************************************** 
     * API Routes With Simple JWT Authentication (Without Role Based Guards)
@@ -321,6 +323,7 @@ Route::middleware('transaction.wrapper')->group(function () {
 
         // Route::get('keys', [AuthController::class, 'keys']);
     });
+    
 });
 
 /*
@@ -362,4 +365,13 @@ Route::fallback(function () {
         'API Not Found.',
         config('constants.HTTP_NOT_FOUND')
     );
+});
+Route::prefix('van_inventory')->controller(VanInventoryController::class)->group(function () {
+
+ 
+        Route::get('list', 'index');              
+        Route::get('list/{id}', 'show');          
+        Route::post('create', 'store');           
+        Route::post('update/{id}', 'update');     
+        Route::delete('delete/{id}', 'destroy');  
 });
