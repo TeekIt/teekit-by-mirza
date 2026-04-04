@@ -172,7 +172,7 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::prefix('vans')->group(function () {
             Route::get('/', VansLivewire::class)->name('admin.vans');
             Route::get('/inventories', VanInventoriesLivewire::class)->name('admin.vans.inventories');
-            Route::get('/inventories/add', AddVanInventoryLivewire::class)->name('admin.vans.inventories.add');
+            Route::get('/{vanId}/inventories/add', AddVanInventoryLivewire::class)->name('admin.vans.inventories.add');
             Route::get('/delete', [VanController::class, 'destroy'])->name('admin.vans.del');
             // admin.vans.inventories.del
         });

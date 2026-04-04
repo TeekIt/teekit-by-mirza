@@ -50,10 +50,10 @@ class AddVanInventoryLivewire extends Component
     /*
     * Lifecycle Hooks
     */
-    public function mount(): void
+    public function mount(int $vanId): void
     {
         $this->userId = User::getAuthUser()->id;
-        $this->vanId = request()->query('vanId', 0);
+        $this->vanId = $vanId;
     }
 
     /*
@@ -261,6 +261,9 @@ class AddVanInventoryLivewire extends Component
 
             if (empty($cartItems)) {
                 session()->flash('error', 'Cart is empty.');
+                
+                $this->dispatch('close-cart', ['id' => 'cartDrawer']);
+
                 return;
             }
 
@@ -275,6 +278,7 @@ class AddVanInventoryLivewire extends Component
             );
             /* Operation finished */
             sleep(1);
+            $this->dispatch('close-cart', ['id' => 'cartDrawer']);
 
             if ($vanInventoryOrderPlaced) {
                 session()->forget(self::CART_SESSION_KEY);

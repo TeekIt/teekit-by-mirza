@@ -22,8 +22,6 @@ class Van extends Authenticatable implements JWTSubject
      */
     protected $guarded = [
         'id',
-        'created_at',
-        'updated_at',
     ];
 
     protected $hidden = [

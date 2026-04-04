@@ -143,7 +143,7 @@
     <div>
         <button type="button"
             class="btn p-0 border-0 bg-transparent shadow-none position-fixed bottom-0 end-0 me-4 mb-4 z-3 d-inline-flex align-items-center justify-content-center custom-cart-icon position-relative"
-            data-bs-toggle="offcanvas" data-bs-target="#vansCartDrawer" aria-controls="vansCartDrawer"
+            data-bs-toggle="offcanvas" data-bs-target="#cartDrawer" aria-controls="cartDrawer"
             aria-label="Open cart drawer">
             <i class="fas fa-cart-arrow-down text-site-primary fa-3x "></i>
             <span
@@ -152,10 +152,10 @@
             </span>
         </button>
 
-        <div wire:ignore.self class="offcanvas offcanvas-end bg-white" tabindex="-1" id="vansCartDrawer"
-            aria-labelledby="vansCartDrawerLabel" data-bs-backdrop="false" data-bs-scroll="true">
+        <div wire:ignore.self class="offcanvas offcanvas-end bg-white" tabindex="-1" id="cartDrawer"
+            aria-labelledby="cartDrawerLabel" data-bs-backdrop="false" data-bs-scroll="true">
             <div class="offcanvas-header">
-                <h5 class="offcanvas-title" id="vansCartDrawerLabel">Cart</h5>
+                <h5 class="offcanvas-title" id="cartDrawerLabel">Cart</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
 
@@ -209,20 +209,27 @@
                     <div class="dropup">
                         <button type="button"
                             class="btn site-primary-bg text-white w-100 rounded-pill dropdown-toggle"
-                            data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-                            Checkout
+                            data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"
+                            wire:target="checkout" wire:loading.class="btn-dark"
+                            wire:loading.class.remove="site-primary-bg" wire:loading.attr="disabled">
+                            <span wire:target="checkout" wire:loading.remove>
+                                Checkout
+                            </span>
+                            <span wire:target="checkout" wire:loading>
+                                <span class="spinner-border spinner-border-sm text-light" role="status"></span>
+                            </span>
                         </button>
                         <ul class="dropdown-menu w-100 mb-1">
-                            <li>
-                                <button type="button" class="dropdown-item p-3 border-bottom"
-                                    wire:click="checkout('{{ OrderTypeEnum::COD->value }}')">
-                                    COD
-                                </button>
-                            </li>
                             <li>
                                 <button type="button" class="dropdown-item p-3"
                                     wire:click="checkout('{{ OrderTypeEnum::SELF_PICKUP->value }}')">
                                     Self Pickup
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item p-3 border-bottom"
+                                    wire:click="checkout('{{ OrderTypeEnum::COD->value }}')">
+                                    COD
                                 </button>
                             </li>
                         </ul>
