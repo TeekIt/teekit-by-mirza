@@ -3,8 +3,8 @@
 <meta content="ie=edge" http-equiv="x-ua-compatible">
 <link rel="icon" href="{{ asset('images/logo.webp') }}" type="image/svg+xml" />
 <!-- CSRF Token -->
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<title>{{ config('app.name') }}</title>
+<meta name="csrf-token X" content="{{ csrf_token() }}">
+<title>{{ config('app.name') }} - Dashboard</title>
 <!-- Font Awesome Icons - 5.13.0 -->
 <link href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
 <!-- Theme style - Bootstrap 4 CSS -->

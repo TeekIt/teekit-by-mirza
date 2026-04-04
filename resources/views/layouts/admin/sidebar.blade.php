@@ -26,8 +26,8 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('admin/notification/home') ? 'active' : '' }}"
-                          href="{{ route('admin.notification.home') }}">
+                      <a class="nav-link {{ request()->is('admin/notifications') ? 'active' : '' }}"
+                          href="{{ route('admin.notifications') }}">
                           <i class="nav-icon fas fa-bell"></i>
                           <p class="ml-2">
                               Notifications
@@ -35,8 +35,17 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('admin/promocodes/home') ? 'active' : '' }}"
-                          href="{{ route('admin.promocodes.home') }}">
+                      <a class="nav-link {{ request()->is('admin/vans') ? 'active' : '' }}"
+                          href="{{ route('admin.vans') }}">
+                          <i class="nav-icon fas fa-shuttle-van"></i>
+                          <p class="ml-2">
+                              Vans
+                          </p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link {{ request()->is('admin/promocodes') ? 'active' : '' }}"
+                          href="{{ route('admin.promocodes') }}">
                           <i class="nav-icon fas fa-qrcode"></i>
                           <p class="ml-2">
                               Promo Codes
@@ -88,23 +97,8 @@
                       <a href="{{ route('admin.customers') }}"
                           class="nav-link  @if (request()->is('admin/customers')) active @endif">
                           <i class="nav-icon fas fa-users-cog"></i>
-                          <p class="ml-2"> Customers </p>
-                      </a>
-                  </li>
-                  {{-- <li class="nav-item">
-                      <a class="nav-link {{ request()->is('drivers') ? 'active' : '' }}" href="/drivers">
-                          <i class="nav-icon fas fa-biking"></i>
                           <p class="ml-2">
-                              Drivers
-                          </p>
-                      </a>
-                  </li> --}}
-                  <li class="nav-item">
-                      <a href="{{ route('admin.test.drivers') }}"
-                          class="nav-link {{ request()->routeIs('admin.test.drivers') ? 'active' : '' }}">
-                          <i class="nav-icon fas fa-biking"></i>
-                          <p class="ml-2">
-                              Drivers
+                              Customers
                           </p>
                       </a>
                   </li>
@@ -161,12 +155,6 @@
                               <a href="/withdrawals" class="nav-link">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>Sellers</p>
-                              </a>
-                          </li>
-                          <li class="nav-item">
-                              <a href="/withdrawals-drivers" class="nav-link">
-                                  <i class="fas fa-money nav-icon"></i>
-                                  <p>Drivers</p>
                               </a>
                           </li>
                       </ul>

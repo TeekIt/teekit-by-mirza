@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\v2;
 
-use App\Actions\RequestedDelivery\ListRequestedDeliveriesAction;
+use App\Actions\RequestedDelivery\ListRequestedDeliveryAction;
 use App\Enums\OrderByEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RequestedDelivery\ListRequestedDeliveryRequest;
@@ -13,11 +13,11 @@ class RequestedDeliveryController extends Controller
 {
     public function list(
         ListRequestedDeliveryRequest $request,
-        ListRequestedDeliveriesAction $listRequestedDeliveriesAction
+        ListRequestedDeliveryAction $listRequestedDeliveryAction
     ): JsonResponse {
         $validatedData = (object) $request->validated();
         
-        $data = $listRequestedDeliveriesAction->execute(
+        $data = $listRequestedDeliveryAction->execute(
             orderByEnum: OrderByEnum::DESC,
             creatorId: $validatedData->creatorId,
             columns: [
@@ -39,9 +39,9 @@ class RequestedDeliveryController extends Controller
         );
 
         return JsonResponseServices::getPaginatedApiResponse(
-            data: $data,
-            message: '',
-            httpCode: config('constants.HTTP_OK')
+            $data,
+            '',
+            config('constants.HTTP_OK')
         );
     }
 }

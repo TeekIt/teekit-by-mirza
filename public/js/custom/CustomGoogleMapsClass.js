@@ -134,16 +134,54 @@
         }
 
         setAddress(address) {
-            document.getElementById(this.mapElementsIds.mapAutoCompleteAddressId).value = address;
+            this.setInputValue(this.mapElementsIds.mapAutoCompleteAddressId, address);
         }
 
         setUnitAddress(unitAddress) {
-            document.getElementById(this.mapElementsIds.mapUnitAddressId).value = unitAddress;
+            this.setInputValue(this.mapElementsIds.mapUnitAddressId, unitAddress);
         }
 
         setLatLong(lat, lng) {
-            document.getElementById(this.mapElementsIds.mapLatId).value = lat;
-            document.getElementById(this.mapElementsIds.mapLongId).value = lng;
+            this.setInputValue(this.mapElementsIds.mapLatId, lat);
+            this.setInputValue(this.mapElementsIds.mapLongId, lng);
+        }
+
+        setCity(city) {
+            this.setInputValue(this.mapElementsIds.mapCityId, city);
+        }
+
+        setInputValue(elementId, value = '') {
+            if (!elementId) {
+                return;
+            }
+
+            const element = document.getElementById(elementId);
+
+            if (element) {
+                element.value = value;
+            }
+        }
+
+        getAddressComponent(place, componentTypes) {
+            if (!place || !place.address_components) {
+                return null;
+            }
+
+            for (const component of place.address_components) {
+                for (const componentType of component.types) {
+                    if (componentTypes.includes(componentType)) {
+                        return component;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        extractCity(place) {
+            const cityComponent = this.getAddressComponent(place, ["locality", "postal_town", "administrative_area_level_2"]);
+
+            return (cityComponent) ? cityComponent.long_name : '';
         }
 
         fillAddressFields(place) {
@@ -151,16 +189,17 @@
                 const componentType = component.types[0];
                 switch (componentType) {
                     case "postal_code":
-                        document.getElementById(this.mapElementsIds.mapPostcodeId).value = component.long_name;
+                        this.setInputValue(this.mapElementsIds.mapPostcodeId, component.long_name);
                         break;
-                    case "locality" || "postal_town":
-                        document.getElementById(this.mapElementsIds.mapCityId).value = component.long_name;
+                    case "locality":
+                    case "postal_town":
+                        this.setCity(component.long_name);
                         break;
                     case "administrative_area_level_1":
-                        document.getElementById(this.mapElementsIds.mapStateId).value = component.short_name;
+                        this.setInputValue(this.mapElementsIds.mapStateId, component.short_name);
                         break;
                     case "country":
-                        document.getElementById(this.mapElementsIds.mapCountryId).value = component.long_name;
+                        this.setInputValue(this.mapElementsIds.mapCountryId, component.long_name);
                         break;
                 }
             }

@@ -17,7 +17,7 @@
         <div class="col-md-12">
             <h1 class="text-site-primary fs-3">Reset Password</h1>
             <form method="POST" action="{{ route('password.update') }}" class="mt-3">
-                @csrf
+                {{ csrf_field() }}
                 <input type="hidden" name="token" value="{{ $token }}"
                     class="form-control {{ $errors->has('token') ? 'is-invalid' : '' }}">
                 @error('token')

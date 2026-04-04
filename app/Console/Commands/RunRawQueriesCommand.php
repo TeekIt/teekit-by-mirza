@@ -22,7 +22,7 @@ class RunRawQueriesCommand extends Command
      */
     protected $description = 'Executes all raw queries provided in the handle method';
 
-    protected bool $executeQueries = true;
+    protected bool $executeQueries = false;
 
     /**
      * Execute the console command.

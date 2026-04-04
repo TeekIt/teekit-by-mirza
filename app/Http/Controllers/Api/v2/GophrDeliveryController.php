@@ -16,7 +16,7 @@ use Illuminate\Http\JsonResponse;
 
 class GophrDeliveryController extends Controller
 {
-    public function createDeliveryJob(AddGophrJobRequest $request): JsonResponse
+    public function store(AddGophrJobRequest $request): JsonResponse
     {
         $validatedData = (object) $request->validated();
 

@@ -29,45 +29,14 @@ class User extends Authenticatable implements JWTSubject
     use Billable, HasFactory, Notifiable, SoftDeletes;
 
     /**
-     * The attributes that are mass assignable.
+     * The attributes that aren't mass assignable.
      *
-     * @var array
+     * @var array<string>|bool
      */
-    protected $fillable = [
-        'name',
-        'l_name',
-        'email',
-        'password',
-        'country_code',
-        'phone',
-        'business_name',
-        'business_phone',
-        'business_hours',
-        'full_address',
-        'unit_address',
-        'country',
-        'state',
-        'city',
-        'postcode',
-        'lat',
-        'lon',
-        'bank_details',
-        'settings',
-        'user_img',
-        'is_active',
-        'is_online',
-        'remember_token',
-        'role_id',
-        'pending_withdraw',
-        'total_withdraw',
-        'parent_store_id',
-        'vehicle_type',
-        'application_fee',
-        'temp_code',
-        'referral_code',
-        'stripe_account_id',
-        'last_login',
-        'email_verified_at',
+    protected $guarded = [
+        'id',
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -251,7 +220,7 @@ class User extends Authenticatable implements JWTSubject
         ?string $businessName = null,
         ?string $businessPhone = null,
         ?string $password = null,
-        array $hours = [],
+        ?array $hours = [],
         ?string $userImg = null,
         ?string $stripeAccountId = null
     ): bool {
@@ -427,10 +396,12 @@ class User extends Authenticatable implements JWTSubject
         int $exceptSellerId,
         int $numberOfRows = 25
     ): Collection {
+        $city = explode(' ', $city);
+        
         return self::WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('city', '=', $city)
+            ->whereIn('city', $city)
             ->where('id', '!=', $exceptSellerId)
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
@@ -443,13 +414,15 @@ class User extends Authenticatable implements JWTSubject
         int $exceptSellerId,
         int $numberOfRows = 25
     ): Collection {
+        $city = explode(' ', $city);
+
         return self::whereHas('qty', function ($qtyRelation) use ($categoryId) {
             $qtyRelation->where('category_id', '=', $categoryId);
         })
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->where('city', '=', $city)
+            ->whereIn('city', $city)
             ->where('id', '!=', $exceptSellerId)
             ->orderBy('business_name', 'asc')
             ->take($numberOfRows)
@@ -481,7 +454,7 @@ class User extends Authenticatable implements JWTSubject
     public static function getBlokedParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
     {
         $city = explode(' ', $city);
-
+        
         return self::WhereUserIsBlocked()
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
@@ -492,7 +465,7 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function getParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
+    public static function getActiveParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
     {
         $city = explode(' ', $city);
 
@@ -544,7 +517,7 @@ class User extends Authenticatable implements JWTSubject
     public static function getCustomers(string $search = ''): LengthAwarePaginator
     {
         return self::where('name', 'like', '%' . $search . '%')
-            ->where('role_id', '=', '=', UserRoleEnum::BUYER)
+            ->where('role_id', '=', UserRoleEnum::BUYER->value)
             ->orderByDesc('created_at')
             ->paginate(9);
     }

@@ -64,6 +64,12 @@ return [
             'ignore_exceptions' => true,
         ],
 
+        'importExport' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/importExport.log'),
+            'ignore_exceptions' => false,
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', env('LOG_STACK', 'single')),

@@ -91,7 +91,7 @@ class Products extends Model
             'category_id' => $this->category_id,
             'price' => $this->price,
             'status' => $this->status,
-            'wieght' => $this->weight,
+            'weight' => $this->weight,
             'brand' => $this->brand,
         ];
     }
@@ -196,10 +196,10 @@ class Products extends Model
         );
     }
 
-    public function scopeChildSellerQty(Builder $query, int $child_seller_id): void
+    public function scopeChildSellerQty(Builder $query, int $childSellerId): void
     {
-        $query->leftJoin('qty', function ($join) use ($child_seller_id) {
-            $join->on('qty.product_id', '=', 'products.id')->where('qty.seller_id', '=', $child_seller_id);
+        $query->leftJoin('qty', function ($join) use ($childSellerId) {
+            $join->on('qty.product_id', '=', 'products.id')->where('qty.seller_id', '=', $childSellerId);
         })->select(
             'products.id as prod_id',
             'products.seller_id as parent_seller_id',
@@ -273,15 +273,28 @@ class Products extends Model
     public static function searchProducts(
         string $productName,
         array $sellerIds,
-        ?int $categoryId,
-        ?string $brand,
-        ?float $minPrice,
-        ?float $maxPrice,
-        ?float $minWeight,
-        ?float $maxWeight,
-        ?string $sortBy,
+        ?int $categoryId = null,
+        ?string $sku = null,
+        ?float $minPrice = null,
+        ?float $maxPrice = null,
+        ?float $minWeight = null,
+        ?float $maxWeight = null,
+        ?string $brand = null,
+        ?string $sortBy = null,
     ): array {
+        // $scoutData = self::search($productName)
+        //     ->whereIn('seller_ids', $sellerIds)
+        //     ->paginate(20, 'scoutPage')
+        //     ->toArray();
+
         $scoutData = self::search($productName)
+            ->options([
+                'hybrid' => [
+                    /* 50% keyword, 50% Ai */
+                    'semanticRatio' => 0.5,
+                    'embedder' => 'default'
+                ]
+            ])
             ->whereIn('seller_ids', $sellerIds)
             ->paginate(20, 'scoutPage')
             ->toArray();
@@ -335,6 +348,8 @@ class Products extends Model
             return $query->where('weight', '>=', $minWeight);
         })->when($maxWeight, function ($query) use ($maxWeight) {
             return $query->where('weight', '<=', $maxWeight);
+        })->when($sku, function ($query) use ($sku) {
+            return $query->where('sku', '=', $sku);
         })->when($sortBy, function ($query) use ($sortBy) {
             return match ($sortBy) {
                 SortByEnum::PriceLowToHigh->value => $query->orderBy('price', 'asc'),
@@ -548,31 +563,49 @@ class Products extends Model
             ->when($categoryId, function ($query, $categoryId) {
                 return $query->where('category_id', '=', $categoryId);
             })
-            // ->when($categoryId, function ($query, $categoryId) {
-            //     return $query->whereHas('qty', function ($qtyRelation) use ($categoryId) {
-            //         $qtyRelation->where('category_id', '=', $categoryId);
-            //     });
-            // })
             ->orderBy('id', $orderBy)
             ->paginate(12);
     }
 
     public static function getChildSellerProductsForView(
-        int $child_seller_id,
+        int $childSellerId,
         string $search = '',
-        ?int $category_id = null
+        ?int $categoryId = null
     ): LengthAwarePaginator {
-        $parent_seller_id = User::find($child_seller_id)->parent_store_id;
-        $qty = Qty::where('seller_id', $child_seller_id)->first();
+        $parentSellerId = User::find($childSellerId)->parent_store_id;
+        $qty = Qty::where('seller_id', '=', $childSellerId)->first();
 
-        $query = (empty($qty)) ? self::ParentSellerProducts() : self::ChildSellerQty(child_seller_id: $child_seller_id);
+        $query = (empty($qty)) ? self::ParentSellerProducts() : self::ChildSellerQty(childSellerId: $childSellerId);
 
         return $query->where('products.product_name', 'LIKE', "%{$search}%")
-            ->where('products.seller_id', $parent_seller_id)
-            ->when($category_id, function ($query, $category_id) {
-                return $query->where('category_id', '=', $category_id);
+            ->where('products.seller_id', $parentSellerId)
+            ->when($categoryId, function ($query, $categoryId) {
+                return $query->where('category_id', '=', $categoryId);
             })
             ->paginate(20);
+    }
+
+    public static function getParentOrChildSellerProductsForView(
+        int $sellerId,
+        string $search = '',
+        ?int $categoryId = null,
+        ?ProductStatusEnum $status = null,
+        string $orderBy = 'desc'
+    ): LengthAwarePaginator {
+        return self::with('category')
+            ->withAvg('rattings:ratting', 'average_ratting')
+            ->where('product_name', 'LIKE', "%{$search}%")
+            ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
+                $qtyRelation->where('seller_id', '=', $sellerId);
+            })
+            ->when($categoryId, function ($query, $categoryId) {
+                return $query->where('category_id', '=', $categoryId);
+            })
+            ->when($status, function ($query, $status) {
+                return $query->where('status', '=', $status);
+            })
+            ->orderBy('id', $orderBy)
+            ->paginate(12);
     }
 
     public static function getProductsByParameters(int $seller_id, string $sku, int $catgory_id): Products
@@ -583,20 +616,21 @@ class Products extends Model
             ->first();
     }
 
-    public static function getProductWeight(int $id)
+    public static function getProductWeight(int $id): float
     {
-        $product = self::select('weight')->where('id', $id)->get();
+        // $product = self::select('weight')->where('id', '=', $id)->first()->weight;
 
-        return $product[0]->weight;
+        // return $product->weight;
+
+        return self::select('weight')->where('id', '=', $id)->first()->weight;
     }
 
-    public static function getProductVolume(int $id)
+    public static function getProductVolume(int $id): float
     {
-        $product = self::select(DB::raw('(products.height * products.width * products.length) as volumn'))
+        return self::select(DB::raw('(products.height * products.width * products.length) as volumn'))
             ->where('id', '=', $id)
-            ->get();
-
-        return $product[0]->volumn;
+            ->first()
+            ->volumn;
     }
 
     public static function getProductPrice(int $id): float

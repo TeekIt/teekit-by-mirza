@@ -97,7 +97,7 @@ class Categories extends Model
             ->paginate($perPage);
     }
 
-    public static function allCategories(array $columns = ['*']): Collection
+    public static function getAll(array $columns = ['*']): Collection
     {
         return self::all($columns);
     }

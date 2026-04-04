@@ -116,31 +116,26 @@ class RequestDeliveryFormLivewire extends Component
         $this->currency = '';
     }
 
-    public function updateLivewireProperties(
-        $dropoffLat = null,
-        $dropoffLon = null,
-        $dropoffAddress = null,
-        $dropoffUnitAddress = null,
-        $pickupAddress = null
-    ) {
-        if ($dropoffLat !== null) {
-            $this->dropoffLat = $dropoffLat;
+    public function updateLivewireProperties(array $data = []): void
+    {
+        if (isset($data['dropoffLat'])) {
+            $this->dropoffLat = $data['dropoffLat'];
         }
 
-        if ($dropoffLon !== null) {
-            $this->dropoffLon = $dropoffLon;
+        if (isset($data['dropoffLon'])) {
+            $this->dropoffLon = $data['dropoffLon'];
         }
 
-        if ($dropoffAddress !== null) {
-            $this->dropoffAddress = $dropoffAddress;
+        if (isset($data['dropoffAddress'])) {
+            $this->dropoffAddress = $data['dropoffAddress'];
         }
 
-        if ($dropoffUnitAddress !== null) {
-            $this->dropoffUnitAddress = $dropoffUnitAddress;
+        if (isset($data['dropoffUnitAddress'])) {
+            $this->dropoffUnitAddress = $data['dropoffUnitAddress'];
         }
 
-        if ($pickupAddress !== null) {
-            $this->pickupAddress = $pickupAddress;
+        if (isset($data['pickupAddress'])) {
+            $this->pickupAddress = $data['pickupAddress'];
         }
 
         $this->inputFieldChanged();
@@ -214,7 +209,7 @@ class RequestDeliveryFormLivewire extends Component
 
         try {
             $this->setDeliveryProviderName($deliveryProviderName);
-            
+
             if ($this->deliveryProviderName === DeliveryProviderEnum::STUART->value) {
                 $this->requestDeliveryButtonTxt = 'Request Staurt Delivery';
 

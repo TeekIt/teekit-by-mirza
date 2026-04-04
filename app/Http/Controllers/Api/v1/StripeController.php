@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class StripeController extends Controller
 {
-    public function createPaymentIntent(Request $request)
+    public function store(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'amount' => 'required|numeric',

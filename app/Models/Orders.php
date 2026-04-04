@@ -315,9 +315,9 @@ class Orders extends Model
         * Because only seller products have 'category'
         */
         $orders->each(function ($order) {
-            $order->order_items->each(function ($orderItem) {
-                if ($orderItem->product_belongs_to_type == (new Products)->getMorphClass()) {
-                    $orderItem->product->load('category');
+            $order->order_items?->each(function ($orderItem) {
+                if ($orderItem?->product_belongs_to_type == (new Products)->getMorphClass()) {
+                    $orderItem?->product?->load('category');
                 }
             });
         });
@@ -389,11 +389,11 @@ class Orders extends Model
             ->get();
     }
 
-    public static function getById(int $id, array $columns = ['*']): ?Orders
+    public static function getById(int $id, array $columns = ['*']): Orders
     {
         return self::select($columns)
             ->with(['order_items.product', 'buyer', 'seller'])
             ->where('id', '=', $id)
-            ->first();
+            ->firstOrFail();
     }
 }

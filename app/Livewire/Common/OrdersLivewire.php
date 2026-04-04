@@ -148,7 +148,7 @@ class OrdersLivewire extends Component
         $this->order = Orders::getById($orderId);
         $this->orderItem = $this->order->order_items->firstWhere('id', '=', $orderItemId);
 
-        // $sellersOfTheSameCity = User::getParentAndChildSellersByCity(User::getAuthUser()->city);
+        // $sellersOfTheSameCity = User::getActiveParentAndChildSellersByCity(User::getAuthUser()->city);
         $sellersOfTheSameCityAndCategory = $this->getSellersOfSameCityAndCategory();
         $this->nearbySellers = GoogleMapServices::getNearBySellers(
             $this->order->customer_lat,
@@ -177,6 +177,39 @@ class OrdersLivewire extends Component
             json_encode(GophrDeliveryServices::getJob($gophrDelivery->job_id)),
             true
         );
+    }
+
+    public function resetThisPage()
+    {
+        $this->resetComponent();
+
+        $this->resetPage();
+    }
+
+    public function performSearch()
+    {
+        /**
+         * This method is called when the search query is submitted
+         * Livewire will automatically call render() after this method completes
+         * The render() method will use the updated $search property
+         */
+    }
+
+    public function isSearchByIdSet()
+    {
+        if ($this->search) {
+            $orderId = (int) $this->search;
+            $searchedOrderId = $orderId;
+            $this->requestOrderId = $orderId;
+        } else {
+            $searchedOrderId = $this->requestOrderId;
+        }
+
+        if ($searchedOrderId != 0) {
+            $this->resetPage();
+        }
+
+        return $searchedOrderId;
     }
 
     /*
@@ -236,39 +269,6 @@ class OrdersLivewire extends Component
             report($error);
             $this->errorMessage = $error->getMessage();
         }
-    }
-
-    public function resetThisPage()
-    {
-        $this->resetComponent();
-
-        $this->resetPage();
-    }
-
-    public function performSearch()
-    {
-        /**
-         * This method is called when the search query is submitted
-         * Livewire will automatically call render() after this method completes
-         * The render() method will use the updated $search property
-         */
-    }
-
-    public function isSearchByIdSet()
-    {
-        if ($this->search) {
-            $orderId = (int) $this->search;
-            $searchedOrderId = $orderId;
-            $this->requestOrderId = $orderId;
-        } else {
-            $searchedOrderId = $this->requestOrderId;
-        }
-
-        if ($searchedOrderId != 0) {
-            $this->resetPage();
-        }
-
-        return $searchedOrderId;
     }
 
     public function render()

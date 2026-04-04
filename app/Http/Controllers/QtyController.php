@@ -37,55 +37,7 @@ class QtyController extends Controller
             'qty' => $request->input('qty'),
         ]);
     }
-    /**
-     * It is used to test API's respose time
-     * By sending them bulk requests in a single attempt
-     *
-     * @version 1.9.0
-     */
-    // public function multiCURL()
-    // {
-    //     // *************Multi CURL
-    //     for ($times = 0; $times < 100; $times++) {
-    //         // create both cURL resources
-    //         $ch[$times] = curl_init();
-    //         curl_setopt_array($ch[$times], [
-    //             CURLOPT_URL => 'https://teekitstaging.shop/api/qty/all',
-    //             CURLOPT_RETURNTRANSFER => true,
-    //             CURLOPT_ENCODING => '',
-    //             CURLOPT_MAXREDIRS => 10,
-    //             CURLOPT_TIMEOUT => 0,
-    //             CURLOPT_FOLLOWLOCATION => true,
-    //             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    //             CURLOPT_CUSTOMREQUEST => 'GET',
-    //         ]);
-    //     }
-
-    //     //create the multiple cURL handle
-    //     $mh = curl_multi_init();
-    //     for ($a = 0; $a < count($ch); $a++)
-    //         curl_multi_add_handle($mh, $ch[$a]);
-
-    //     //execute the multi handle
-    //     do {
-    //         $status = curl_multi_exec($mh, $active);
-    //         if ($active) {
-    //             curl_multi_select($mh);
-    //         }
-    //     } while ($active && $status == CURLM_OK);
-
-    //     //close the handles
-    //     for ($a = 0; $a < count($ch); $a++)
-    //         curl_multi_remove_handle($mh, $ch[$a]);
-    //     curl_multi_close($mh);
-
-    //     return JsonResponseServices::getApiResponse(
-    //         $mh,
-    //         config('constants.TRUE_STATUS'),
-    //         config('constants.DATA_UPDATED_SUCCESS'),
-    //         config('constants.HTTP_OK')
-    //     );
-    // }
+    
     /**
      * This method will share parent store
      * qty with their child store

@@ -10,7 +10,7 @@
                         <h4 class="py-4 my-1 text-site-primary">Promo Codes</h4>
                     </div>
                     <div class="col-12 col-md-5 col-xl-3 d-flex gap-2">
-                        <button type="button" class="btn btn-success my-3 py-3 w-100" onclick="selectAll()"
+                        <button type="button" class="btn btn-site-primary my-3 py-3 w-100" onclick="selectAll()"
                             title="Select All">
                             <span class="text-white">All</span>
                         </button>
@@ -43,7 +43,7 @@
                                         enctype="multipart/form-data">
                                         {{ csrf_field() }}
                                         <div class="modal-header">
-                                            <h5 class="modal-title display-center" id="exampleModalLabel">Edit</h5>
+                                            <h5 class="modal-title display-center">Edit Promocode</h5>
                                             <button type="button" class="close" data-bs-dismiss="modal"
                                                 aria-label="Close">
                                                 <span aria-hidden="true">×</span>

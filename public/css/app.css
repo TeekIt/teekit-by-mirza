@@ -2,6 +2,7 @@
 
 :root {
     --primary-bg: #3a4b83;
+    --primary-bg-hover: #29365f;
     --primary-yellow: #ffcf42;
 }
 
@@ -21,12 +22,29 @@ body {
     color: white !important;
 }
 
+.btn-site-primary:hover {
+    background-color: var(--primary-bg-hover) !important;
+}
+
 .site-primary-bg {
     background-color: var(--primary-bg) !important;
 }
 
 .site-primary-yellow-bg {
     background-color: var(--primary-yellow) !important;
+}
+
+.custom-cart-icon {
+    transition: transform 0.2s ease-in-out;
+}
+
+.custom-cart-icon:hover {
+    transform: scale(1.15);
+}
+
+.custom-btn-close-sm {
+    font-size: 9px;
+    padding: 0.15rem;
 }
 
 .main-pages-bg-img {

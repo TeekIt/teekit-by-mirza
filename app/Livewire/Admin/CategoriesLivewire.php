@@ -66,7 +66,7 @@ class CategoriesLivewire extends Component
             );
             /* Operation finished */
             sleep(1);
-            Cache::forget('allCategories');
+            Cache::forget('categoriesList');
             $this->resetComponent();
             $this->dispatch('close-modal', ['id' => 'addCategoryModal']);
 
@@ -76,7 +76,8 @@ class CategoriesLivewire extends Component
                 session()->flash('error', config('constants.INSERTION_FAILED'));
             }
         } catch (Exception $error) {
-            session()->flash('error', $error);
+            report($error);
+            session()->flash('error', $error->getMessage());
         }
     }
 
@@ -101,7 +102,8 @@ class CategoriesLivewire extends Component
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
         } catch (Exception $error) {
-            session()->flash('error', $error);
+            report($error);
+            session()->flash('error', $error->getMessage());
         }
     }
 
@@ -126,7 +128,8 @@ class CategoriesLivewire extends Component
                 session()->flash('error', config('constants.UPDATION_FAILED'));
             }
         } catch (Exception $error) {
-            session()->flash('error', $error);
+            report($error);
+            session()->flash('error', $error->getMessage());
         }
     }
 

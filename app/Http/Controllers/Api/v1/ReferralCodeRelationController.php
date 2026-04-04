@@ -74,7 +74,7 @@ class ReferralCodeRelationController extends Controller
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public function insertReferrals()
+    public function store()
     {
         foreach (User::getAllCustomers() as $customer) {
             $buyer = User::find($customer->id);

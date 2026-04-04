@@ -20,12 +20,10 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class DriverController extends Controller
 {
     /**
-     * It will fetch & show the driver's
-     * info
-     *
+     * It will list the driver's info w.r.t the given driver id
      * @version 1.0.0
      */
-    public function info($id)
+    public function listById($id)
     {
         return User::where('id', $id)
             ->whereHas('roles', function ($q) {
@@ -330,15 +328,6 @@ class DriverController extends Controller
         );
     }
 
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('rider')->factory()->getTTL() * 60,
-        ]);
-    }
-
     /**
      * Driver logIn
      *
@@ -358,7 +347,7 @@ class DriverController extends Controller
             ], 422);
         }
 
-        $credentials = request(['email', 'password']);
+        $credentials = $validatedData->validated();
         $driver_info = [];
         $driver_info = Driver::where('email', $credentials['email'])->first();
         if (Hash::check($credentials['password'], $driver_info->password)) {
@@ -399,5 +388,14 @@ class DriverController extends Controller
                 'message' => config('constants.INVALID_CREDENTIALS'),
             ], 401);
         }
+    }
+    
+    protected function respondWithToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('rider')->factory()->getTTL() * 60,
+        ]);
     }
 }

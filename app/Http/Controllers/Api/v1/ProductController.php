@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Excel as ExcelConstants;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ProductController extends Controller
 {
@@ -35,7 +36,7 @@ class ProductController extends Controller
                 'sellerId' => [
                     'required',
                     'integer',
-                    Rule::exists('users', 'id')->where(fn (Builder $query) => $query->where('role_id', UserRoleEnum::SELLER)),
+                    Rule::exists('users', 'id')->where(fn(Builder $query) => $query->where('role_id', UserRoleEnum::SELLER)),
                 ],
             ],
             messages: [
@@ -65,7 +66,7 @@ class ProductController extends Controller
      *
      * @version 1.0.0
      */
-    public function all(Request $request)
+    public function list(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'page' => 'required|integer',
@@ -74,25 +75,11 @@ class ProductController extends Controller
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
 
-        $pagination = Products::getAllProducts()->toArray();
-        $data = $pagination['data'];
-        unset($pagination['data']);
+        $data = Products::getAllProducts();
 
-        if (! empty($data)) {
-            return JsonResponseServices::getApiResponseExtention(
-                $data,
-                config('constants.TRUE_STATUS'),
-                '',
-                'pagination',
-                $pagination,
-                config('constants.HTTP_OK')
-            );
-        }
-
-        return JsonResponseServices::getApiResponse(
-            [],
-            config('constants.FALSE_STATUS'),
-            config('constants.NO_RECORD'),
+        return JsonResponseServices::getPaginatedApiResponse(
+            $data,
+            '',
             config('constants.HTTP_OK')
         );
     }
@@ -159,12 +146,12 @@ class ProductController extends Controller
 
         $i = 0;
         foreach ($request->items as $item) {
-            $open_time = User::select('business_hours->time->'.$request->day.'->open as open')
+            $open_time = User::select('business_hours->time->' . $request->day . '->open as open')
                 ->where('id', '=', $item['store_id'])
                 ->where('is_active', '=', 1)
                 ->get();
 
-            $close_time = User::select('business_hours->time->'.$request->day.'->close as close')
+            $close_time = User::select('business_hours->time->' . $request->day . '->close as close')
                 ->where('id', '=', $item['store_id'])
                 ->where('is_active', '=', 1)
                 ->get();
@@ -240,7 +227,7 @@ class ProductController extends Controller
         if (is_array($json) === false) {
             $json = json_decode($json, true);
         }
-        $strTempFile = public_path().'/upload/csv/'.'csvOutput'.date('U').'.csv';
+        $strTempFile = public_path() . '/upload/csv/' . 'csvOutput' . date('U') . '.csv';
         $f = fopen($strTempFile, 'w+');
         $csvFilePath = $strTempFile;
         $firstLineKeys = false;
@@ -274,6 +261,7 @@ class ProductController extends Controller
             'productName' => 'required|string',
             'sellerIds' => 'required|string',
             'categoryId' => 'integer',
+            'sku' => 'string',
             'minPrice' => 'integer',
             'maxPrice' => 'integer',
             'minWeight' => 'numeric',
@@ -283,11 +271,8 @@ class ProductController extends Controller
             'lat' => 'required_with:miles|numeric|between:-90,90',
             'lon' => 'required_with:miles|numeric|between:-180,180',
             'city' => 'required_with:miles|string',
+            'sortBy' => ['string', Rule::in(array_column(SortByEnum::cases(), 'value'))],
             'scoutPage' => 'required|integer',
-            'sortBy' => [
-                'string',
-                Rule::in(array_column(SortByEnum::cases(), 'value')),
-            ],
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -300,7 +285,7 @@ class ProductController extends Controller
                 GoogleMapServices::findNearByUsersByMakingChunks(
                     $validatedData->lat,
                     $validatedData->lon,
-                    User::getParentAndChildSellersByCity($validatedData->city),
+                    User::getActiveParentAndChildSellersByCity($validatedData->city),
                     nearByMiles: $validatedData->miles,
                 ),
                 'id'
@@ -322,11 +307,12 @@ class ProductController extends Controller
             $validatedData->productName,
             (isset($nearBySellersIds)) ? $nearBySellersIds : json_decode($validatedData->sellerIds),
             $validatedData->categoryId ?? null,
-            $validatedData->brand ?? null,
+            $validatedData->sku ?? null,
             $validatedData->minPrice ?? null,
             $validatedData->maxPrice ?? null,
             $validatedData->minWeight ?? null,
             $validatedData->maxWeight ?? null,
+            $validatedData->brand ?? null,
             $validatedData->sortBy ?? null,
         );
         /*
@@ -416,7 +402,7 @@ class ProductController extends Controller
         $filename = $file->getClientOriginalName();
         $location = public_path('upload/csv');
         $file->move($location, $filename);
-        $filepath = $location.'/'.$filename;
+        $filepath = $location . '/' . $filename;
         /* Reading file */
         $file = fopen($filepath, 'r');
         $i = 0;
@@ -474,7 +460,7 @@ class ProductController extends Controller
         }
 
         $pagination = Cache::remember(
-            'sellerProducts'.$request->sellerId.$request->page,
+            'sellerProducts' . $request->sellerId . $request->page,
             now()->addHour(),
             function () use ($request) {
                 return Products::getProductsInfoBySellerId(

@@ -24,7 +24,7 @@
                     </button>
                 </div>
                 <form wire:submit="customProductOrderIsAccepted" method="post">
-                    @csrf
+                    {{ csrf_field() }}
                     <div class="modal-body">
                         <div class="col-12 mb-3">
                             <label>Price By Seller</label>
@@ -79,7 +79,7 @@
                     </button>
                 </div>
                 <form wire:submit="cancelOrder({{ $orderId }})" method="post">
-                    @csrf
+                    {{ csrf_field() }}
                     <div class="modal-body">
                         <div class="text-center">
                             <h2>Attention!!</h2>
@@ -115,7 +115,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form wire:submit="assignToStuartDriver">
-                    @csrf
+                    {{ csrf_field() }}
                     <div class="modal-header">
                         <h5 class="modal-title display-center">Add Custom Order Id</h5>
                         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"
@@ -161,7 +161,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <form wire:submit="assignToGophrDriver">
-                    @csrf
+                    {{ csrf_field() }}
                     <div class="modal-header">
                         <h5 class="modal-title display-center">Gophr Delivery</h5>
                         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"

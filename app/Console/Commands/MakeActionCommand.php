@@ -26,7 +26,7 @@ class MakeActionCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Create a new action class for PropSel';
+    protected $description = 'Create a new action class';
 
     /**
      * Command specific code

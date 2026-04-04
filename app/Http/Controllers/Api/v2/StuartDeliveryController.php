@@ -17,7 +17,7 @@ use Illuminate\Http\JsonResponse;
 
 class StuartDeliveryController extends Controller
 {
-    public function createDeliveryJob(AddStuartJobRequest $request): JsonResponse
+    public function store(AddStuartJobRequest $request): JsonResponse
     {
         $validatedData = (object) $request->validated();
 

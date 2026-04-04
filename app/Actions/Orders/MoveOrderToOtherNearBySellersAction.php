@@ -160,9 +160,8 @@ final class MoveOrderToOtherNearBySellersAction
             /* WhatsApp order details to nearby sellers */
             TwilioSmsServices::sendWhatsAppMessageWithMedia(
                 receiverNumber: $singleIndex['country_code'] . $singleIndex['business_phone'],
-                // receiverNumber: '+923170155625',
                 message: $this->buildWhatsAppMessageBody(),
-                mediaUrl: asset(config('constants.BUCKET') . $this->order->order_items[0]->product->feature_img)
+                mediaUrl: [asset(config('constants.BUCKET') . $this->order->order_items[0]->product->feature_img)]
             );
         }
         /* Email order details to nearby sellers */

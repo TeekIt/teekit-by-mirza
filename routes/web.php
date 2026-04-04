@@ -9,14 +9,19 @@ use App\Http\Controllers\Web\v1\OrderController;
 use App\Http\Controllers\Web\v1\PromoCodeController;
 use App\Http\Controllers\Web\v1\SellerController;
 use App\Http\Controllers\Web\v1\StuartDeliveryController;
+use App\Http\Controllers\Web\v1\UserController;
+use App\Http\Controllers\Web\v1\VanController;
 use App\Http\Controllers\Web\v2\ProductController;
 use App\Http\Controllers\Web\v2\StripeController;
+use App\Livewire\Admin\AddVanInventoryLivewire;
 use App\Livewire\Admin\CategoriesLivewire;
 use App\Livewire\Admin\ChildSellersLivewire;
 use App\Livewire\Admin\CustomersLivewire;
-use App\Livewire\Admin\DriversLivewire;
 use App\Livewire\Admin\ParentSellersLivewire;
 use App\Livewire\Admin\ReferralCodesLivewire;
+use App\Livewire\Admin\SearchVanInventoriesLivewire;
+use App\Livewire\Admin\VanInventoriesLivewire;
+use App\Livewire\Admin\VansLivewire;
 use App\Livewire\Common\OrdersLivewire;
 use App\Livewire\Sellers\GeneralSettingsLivewire;
 use App\Livewire\Sellers\InventoryLivewire;
@@ -49,6 +54,12 @@ Route::middleware('transaction.wrapper')->group(function () {
      ***********************************************************************
      */
     Route::get('/', [HomeController::class, 'index'])->name('home');
+    /*
+     *********************************************************************** 
+     * Buyer Routes
+     ***********************************************************************
+     */
+    Route::view('/buyer/delete_account_steps', 'buyer.delete-account-steps')->name('buyer.delete.account.steps');
     /*
      *********************************************************************** 
      * User Settings Routes
@@ -109,7 +120,6 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::prefix('orders')->group(function () {
             Route::get('count', [OrderController::class, 'countSellerOrders'])->name('seller.orders.count');
             Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
-            // Route::get('/of-unique-products', OrdersOfUniqueProductsLivewire::class)->name('seller.orders.of.unique.products');
             Route::get('/{requestOrderId?}', OrdersLivewire::class)->name('seller.orders');
         });
 
@@ -137,7 +147,6 @@ Route::middleware('transaction.wrapper')->group(function () {
     Route::controller(HomeController::class)->group(function () {
         Route::get('/withdrawals', 'withdrawals')->name('withdrawals');
         Route::post('/withdrawals', 'withdrawalsRequest')->name('withdrawal.request');
-        Route::get('/withdrawals-drivers', 'withdrawalDrivers')->name('withdrawals.drivers');
     });
     /*
      *********************************************************************** 
@@ -149,44 +158,50 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::get('/sellers/parent', ParentSellersLivewire::class)->name('admin.sellers.parent');
         Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
         Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
-        Route::get('/drivers', DriversLivewire::class)->name('admin.test.drivers');
-        Route::get('/orders', OrdersLivewire::class)->name('admin.orders');
 
         Route::prefix('categories')->group(function () {
             Route::get('/', CategoriesLivewire::class)->name('admin.categories');
             Route::get('/delete', [CategoriesController::class, 'destroy'])->name('admin.categories.del');
         });
 
-        Route::prefix('notification')->controller(NotificationsController::class)->group(function () {
-            Route::get('/home', 'notificationHome')->name('admin.notification.home');
-            Route::post('/send', 'notificationSend')->name('admin.notification.send');
+        Route::prefix('notifications')->controller(NotificationsController::class)->group(function () {
+            Route::get('/', 'notificationsHome')->name('admin.notifications');
+            Route::post('/send', 'notificationsSend')->name('admin.notifications.send');
+        });
+
+        Route::prefix('vans')->group(function () {
+            Route::get('/', VansLivewire::class)->name('admin.vans');
+            Route::get('/inventories', VanInventoriesLivewire::class)->name('admin.vans.inventories');
+            Route::get('/inventories/add', AddVanInventoryLivewire::class)->name('admin.vans.inventories.add');
+            Route::get('/delete', [VanController::class, 'destroy'])->name('admin.vans.del');
+            // admin.vans.inventories.del
         });
 
         Route::controller(AdminController::class)->group(function () {
             Route::get('/settings', 'settings')->name('admin.settings');
+        });
 
-            Route::prefix('delete')->group(function () {
-                Route::get('/users', 'deleteUsers')->name('admin.del.users');
-                Route::get('/drivers', 'deleteDrivers')->name('admin.del.drivers');
-            });
+        Route::controller(UserController::class)->group(function () {
+            Route::get('delete/users', 'destroy')->name('admin.del.users');
         });
 
         Route::prefix('promocodes')->controller(PromoCodeController::class)->group(function () {
-            Route::get('/home', 'promocodesHome')->name('admin.promocodes.home');
+            Route::get('/', 'promocodesHome')->name('admin.promocodes');
             Route::post('/add', 'promocodesAdd')->name('admin.promocodes.add');
-            Route::get('/delete', 'promoCodesDel')->name('admin.promocodes.del');
+            Route::get('/delete', 'destroy')->name('admin.promocodes.del');
             Route::post('/{id}/update', 'promoCodesUpdate')->name('admin.promocodes.update');
+        });
+
+        Route::prefix('orders')->controller(OrderController::class)->group(function () {
+            Route::get('/', OrdersLivewire::class)->name('admin.orders');
+            Route::get('/verified', 'adminOrdersVerified')->name('admin.orders.verified');
+            Route::get('/unverified', 'adminOrdersUnverified')->name('admin.orders.unverified');
+            Route::get('/complete', 'completeOrders')->name('admin.orders.complete');
+            Route::get('/delete', 'adminOrdersDel')->name('admin.del.orders');
         });
 
         Route::controller(HomeController::class)->group(function () {
             Route::post('/update/pages', 'updatePages')->name('admin.update.pages');
-
-            Route::prefix('orders')->group(function () {
-                Route::get('/verified', 'adminOrdersVerified')->name('admin.orders.verified');
-                Route::get('/unverified', 'adminOrdersUnverified')->name('admin.orders.unverified');
-                Route::get('/complete', 'completeOrders')->name('admin.orders.complete');
-                Route::get('/delete', 'adminOrdersDel')->name('admin.del.orders');
-            });
         });
     });
     /*

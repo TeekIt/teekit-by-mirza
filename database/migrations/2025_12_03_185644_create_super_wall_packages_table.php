@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('super_wall_packages', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
             $table->string('name'); 
             $table->string('super_fast_deliveries');
             $table->integer('unlimited_super_fast_deliveries_on_orders_above')->nullable();

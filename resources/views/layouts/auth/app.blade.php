@@ -53,7 +53,7 @@
                         action="{{ route('login') }}">
                         <div class="row">
                             <div class="col-md-5 mt-3">
-                                @csrf
+                                {{ csrf_field() }}
                                 <div class="form-group">
                                     <input class="form-control mr-sm-2" type="email" required autocomplete="off"
                                         name="email" placeholder="Email" aria-label="email"

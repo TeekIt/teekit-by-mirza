@@ -85,7 +85,7 @@ class NotificationsController extends Controller
      *
      * @version 1.0.0
      */
-    public function notificationHome()
+    public function notificationsHome()
     {
         return view('admin.notification');
     }
@@ -93,7 +93,7 @@ class NotificationsController extends Controller
     /**
      * @author Muhammad Abdullah Mirza
      */
-    public function notificationSend(Request $request)
+    public function notificationsSend(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'title' => 'required|string',

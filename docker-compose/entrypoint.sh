@@ -1,12 +1,17 @@
 #!/bin/bash
 
+#################################################################
+# Please! run "sudo chmod +x entrypoint.sh" command on your local 
+# machine to make the script executable
+#################################################################
+
 # Wait for the container to fully start
-sleep 1
+sleep 5
 
 #################################################################
 # Begin - Commands to run only once when the container is build
 #################################################################
-# # Remove vendor and composer.lock
+# Remove vendor and composer.lock
 # rm -rf /var/www/vendor /var/www/composer.lock
 # # Install dependencies
 # composer install --no-interaction --prefer-dist --optimize-autoloader

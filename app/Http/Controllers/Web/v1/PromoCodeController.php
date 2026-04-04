@@ -33,21 +33,14 @@ class PromoCodeController extends Controller
      *
      * @version 1.0.0
      */
-    public function promoCodesDel(Request $request)
+    public function destroy(Request $request)
     {
-        try {
-            if (Gate::allows('superadmin')) {
-                for ($i = 0; $i < count($request->promocodes); $i++) {
-                    PromoCode::where('id', '=', $request->promocodes[$i])->forceDelete();
-                }
-
-                return response('Promocodes Deleted Successfully');
+        if (Gate::allows('superadmin')) {
+            for ($i = 0; $i < count($request->promocodes); $i++) {
+                PromoCode::where('id', '=', $request->promocodes[$i])->forceDelete();
             }
-        } catch (Throwable $error) {
-            report($error);
-            session()->flash('error', $error->getMessage());
 
-            return back();
+            return response('Promocodes Deleted Successfully');
         }
     }
 

@@ -13,7 +13,7 @@
         <ul class="navbar-nav">
             <li class="nav-item d-block">
                 <form action="{{ route('logout') }}" method="POST">
-                    @csrf
+                    {{ csrf_field() }}
                     <button class="btn btn-outline-primary my-2 my-sm-0 login-btn" type="submit">
                         <i class="fas fa-power-off"></i>
                         Logout

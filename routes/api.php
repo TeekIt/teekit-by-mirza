@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\v2\GophrDeliveryController;
 use App\Http\Controllers\Api\v2\RequestedDeliveryController;
 use App\Http\Controllers\Api\v2\StuartDeliveryController;
 use App\Http\Controllers\Api\v2\SuperWallPackageController;
+use App\Http\Controllers\Api\v2\VanController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -47,10 +48,10 @@ Route::middleware('transaction.wrapper')->group(function () {
      ***********************************************************************
      */
     Route::prefix('auth')->controller(AuthController::class)->group(function () {
-        Route::post('login', 'login');
-        Route::post('login_google', 'loginBuyerFromGoogle');
         Route::post('register', 'registerBuyer');
         Route::post('register_google', 'registerBuyerFromGoogle');
+        Route::post('login', 'loginUser');
+        Route::post('login_google', 'loginBuyerFromGoogle');
         Route::get('verify', 'verify');
 
         Route::middleware(['jwt.verify'])->group(function () {
@@ -91,16 +92,16 @@ Route::middleware('transaction.wrapper')->group(function () {
      */
     Route::prefix('category')->controller(CategoriesController::class)->group(function () {
         Route::get('{categoryId}/products', 'productsByCategory');
+        Route::get('list', 'list');
         Route::get('get-stores-by-category', 'sellers');
-        Route::get('all', 'all');
     });
     /*
      *********************************************************************** 
      * Seller API Routes
      ***********************************************************************
      */
-    Route::prefix('sellers')->controller(SellerController::class)->group(function () {
-        Route::get('/', 'sellers');
+    Route::prefix('seller')->controller(SellerController::class)->group(function () {
+        Route::get('list', 'list');
         Route::post('save/stripe_account_id', 'saveStripeAccountId');
     });
     /*
@@ -118,7 +119,7 @@ Route::middleware('transaction.wrapper')->group(function () {
      */
     Route::prefix('stripe')->controller(StripeController::class)->group(function () {
         Route::prefix('payment_intent')->group(function () {
-            Route::get('create', 'createPaymentIntent');
+            Route::get('create', 'store');
             Route::get('capture', 'capturePaymentIntent');
             Route::get('refund', 'refundPaymentIntent');
         });
@@ -134,10 +135,24 @@ Route::middleware('transaction.wrapper')->group(function () {
      */
     Route::get('page', [PagesController::class, 'getPage']);
     /*
-     *********************************************************************** 
-     * API Routes With JWT Authentication
-     ***********************************************************************
-     */
+    *********************************************************************** 
+    * Van API Routes
+    ***********************************************************************
+    */
+    Route::prefix('van')->controller(VanController::class)->group(function () {
+        Route::post('login', 'loginVan');
+
+        Route::middleware('jwt.verify:van')->group(function () {
+            Route::get('list/{vanId}', 'listById');
+            Route::get('stats/{vanId}', 'statsById');
+            // Route::post('activity/create', '');
+        });
+    });
+    /*
+    *********************************************************************** 
+    * API Routes With Simple JWT Authentication (Without Role Based Guards)
+    ***********************************************************************
+    */
     Route::middleware(['jwt.verify'])->group(function () {
         /*
          *********************************************************************** 
@@ -146,11 +161,11 @@ Route::middleware('transaction.wrapper')->group(function () {
          */
         Route::prefix('product')->group(function () {
             Route::controller(ProductController::class)->group(function () {
-                Route::post('add/bulk', 'importProducts');
+                Route::post('import', 'importProducts');
                 Route::post('update_price_qty/bulk', 'updatePriceAndQtyBulk');
 
                 Route::withoutMiddleware(['jwt.verify'])->group(function () {
-                    Route::get('all', 'all');
+                    Route::get('list', 'list');
                     Route::post('search', 'search');
                     Route::get('view', 'view');
                     Route::get('seller', 'sellerProducts');
@@ -161,11 +176,11 @@ Route::middleware('transaction.wrapper')->group(function () {
             });
             /*
             *********************************************************************** 
-            * Product Ratings API Routes
+            * Product Rating API Routes
             ***********************************************************************
             */
-            Route::prefix('ratings')->controller(RattingController::class)->group(function () {
-                Route::post('add', 'add');
+            Route::prefix('rating')->controller(RattingController::class)->group(function () {
+                Route::post('create', 'store');
                 Route::get('delete/{ratingId}', 'delete');
             });
         });
@@ -180,12 +195,12 @@ Route::middleware('transaction.wrapper')->group(function () {
         });
         /*
          *********************************************************************** 
-         * Orders API Routes
+         * Order API Routes
          ***********************************************************************
          */
-        Route::prefix('orders')->controller(OrderController::class)->group(function () {
+        Route::prefix('order')->controller(OrderController::class)->group(function () {
             Route::withoutMiddleware(['jwt.verify'])->group(function () {
-                Route::post('new', 'new');
+                Route::post('create', 'sotre');
                 Route::post('product_by_buyer', 'orderProductByBuyer');
                 Route::get('get-order-details/{id}', 'getOrderDetailsForApi');
             });
@@ -212,7 +227,7 @@ Route::middleware('transaction.wrapper')->group(function () {
                 Route::post('login', 'loginDriver');
             });
 
-            Route::get('info/{driverId}', 'info');
+            Route::get('list/{driverId}', 'listById');
             Route::post('add-lat-lon', 'addLatLon');
             Route::get('withdrawable-balance', 'getWithdrawalBalance');
             Route::get('request-withdrawal-balance', 'submitWithdrawal');
@@ -224,11 +239,11 @@ Route::middleware('transaction.wrapper')->group(function () {
 
         /*
          *********************************************************************** 
-         * Promo Codes API Routes
+         * Promo Code API Routes
          ***********************************************************************
          */
-        Route::prefix('promocodes')->controller(PromoCodeController::class)->group(function () {
-            Route::get('all', 'allPromoCodes');
+        Route::prefix('promocode')->controller(PromoCodeController::class)->group(function () {
+            Route::get('list', 'list');
             Route::post('validate', 'validatePromoCodes');
             Route::post('fetch_promocode_info', 'fetchPromoCodeInfo');
         });
@@ -239,8 +254,8 @@ Route::middleware('transaction.wrapper')->group(function () {
          ***********************************************************************
          */
         Route::prefix('referral')->controller(ReferralCodeRelationController::class)->group(function () {
+            Route::post('create', 'store');
             Route::post('validate', 'validateReferral');
-            Route::post('insert', 'insertReferrals');
             Route::get('details_by_id/{referralRelationId}', 'fetchReferralRelationDetails');
             Route::post('update/referral_usable/status', 'updateReferralStatus');
         });
@@ -266,7 +281,7 @@ Route::middleware('transaction.wrapper')->group(function () {
          */
         Route::prefix('stuart')->controller(StuartDeliveryController::class)->group(function () {
             Route::prefix('delivery/job')->group(function () {
-                Route::post('create', 'createDeliveryJob');
+                Route::post('create', 'store');
                 Route::get('pricing', 'getDeliveryJobPricing');
                 Route::get('track/{jobId}', 'trackDeliveryJob');
             });
@@ -278,7 +293,7 @@ Route::middleware('transaction.wrapper')->group(function () {
          */
         Route::prefix('gophr')->controller(GophrDeliveryController::class)->group(function () {
             Route::prefix('delivery/job')->group(function () {
-                Route::post('create', 'createDeliveryJob');
+                Route::post('create', 'store');
                 Route::get('pricing', 'getDeliveryJobPricing');
                 Route::get('track/{jobId}', 'trackDeliveryJob');
             });
@@ -303,46 +318,48 @@ Route::middleware('transaction.wrapper')->group(function () {
             Route::put('update/{superWallPackageId}', 'update');
             Route::delete('delete/{superWallPackageId}', 'destroy');
         });
+
         // Route::get('keys', [AuthController::class, 'keys']);
     });
-    /*
-     *********************************************************************** 
-     * Random API Routes
-     ***********************************************************************
-     */
-    Route::get('env', function () {
-        return JsonResponseServices::getApiResponse(
-            ['current_env' => App::environment()],
-            config('constants.TRUE_STATUS'),
-            '',
-            config('constants.HTTP_OK')
-        );
-    });
+});
 
-    Route::get('generate_hash', function () {
-        return JsonResponseServices::getApiResponse(
-            Hash::make($_REQUEST['password']),
-            config('constants.TRUE_STATUS'),
-            '',
-            config('constants.HTTP_OK')
-        );
-    });
+/*
+*********************************************************************** 
+* Random API Routes
+***********************************************************************
+*/
+Route::get('env', function () {
+    return JsonResponseServices::getApiResponse(
+        ['current_env' => App::environment()],
+        config('constants.TRUE_STATUS'),
+        '',
+        config('constants.HTTP_OK')
+    );
+});
 
-    Route::get('cache/remove', function () {
-        return JsonResponseServices::getApiResponse(
-            [],
-            config('constants.TRUE_STATUS'),
-            (dd(Cache::flush())) ? config('constants.CACHE_REMOVED_SUCCESSFULLY') : config('constants.CACHE_REMOVED_FAILED'),
-            config('constants.HTTP_OK')
-        );
-    });
+Route::get('generate_hash', function () {
+    return JsonResponseServices::getApiResponse(
+        Hash::make($_REQUEST['password']),
+        config('constants.TRUE_STATUS'),
+        '',
+        config('constants.HTTP_OK')
+    );
+});
 
-    Route::fallback(function () {
-        return JsonResponseServices::getApiResponse(
-            [],
-            config('constants.FALSE_STATUS'),
-            'API Not Found.',
-            config('constants.HTTP_NOT_FOUND')
-        );
-    });
+Route::get('cache/remove', function () {
+    return JsonResponseServices::getApiResponse(
+        [],
+        config('constants.TRUE_STATUS'),
+        (dd(Cache::flush())) ? config('constants.CACHE_REMOVED_SUCCESSFULLY') : config('constants.CACHE_REMOVED_FAILED'),
+        config('constants.HTTP_OK')
+    );
+});
+
+Route::fallback(function () {
+    return JsonResponseServices::getApiResponse(
+        [],
+        config('constants.FALSE_STATUS'),
+        'API Not Found.',
+        config('constants.HTTP_NOT_FOUND')
+    );
 });

@@ -6,7 +6,7 @@ use App\Enums\OrderByEnum;
 use App\Models\RequestedDelivery;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-final class ListRequestedDeliveriesAction
+final class ListRequestedDeliveryAction
 {
     public function execute(
         OrderByEnum $orderByEnum,

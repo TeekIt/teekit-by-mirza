@@ -18,7 +18,7 @@ class PromoCodeController extends Controller
     /**
      * function will return all promocodes from table
      */
-    public function allPromoCodes()
+    public function list()
     {
         $promocodes = PromoCode::all();
 

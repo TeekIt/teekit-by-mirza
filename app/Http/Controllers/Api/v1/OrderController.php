@@ -34,7 +34,7 @@ class OrderController extends Controller
      *
      * @author Muhammad Abdullah Mirza
      */
-    public function new(Request $request)
+    public function sotre(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'type' => [
@@ -195,7 +195,7 @@ class OrderController extends Controller
             config('constants.HTTP_OK')
         );
     }
-
+    
     /**
      * @author Muhammad Abdullah Mirza
      */

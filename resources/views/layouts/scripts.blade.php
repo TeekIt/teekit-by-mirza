@@ -56,10 +56,12 @@
     @endif
 
     @php
-        $requestDeliveryRoutes = [route('seller.request.delivery.form')];
+        $requestDeliveryRoutes = [route('seller.request.delivery.form'), route('admin.vans.inventories.add')];
     @endphp
     @if (in_array(URL::current(), $requestDeliveryRoutes))
         <script>
+            const isVanInventoryPage = @json(URL::current() === route('admin.vans.inventories.add'));
+
             /* Initialize CustomGoogleMapsClass for pickup address autocomplete */
             const pickupGoogleMapsClass = new CustomGoogleMapsClass({
                 mapAutoCompleteAddressId: 'pickupAddress',
@@ -72,13 +74,28 @@
                 if (place.geometry) {
                     /* Get the full formatted address from Google Places */
                     const fullAddress = `${place.name}, ${place.formatted_address}`;
-
+                    const lat = place.geometry.location.lat();
+                    const lng = place.geometry.location.lng();
+                    const city = pickupGoogleMapsClass.extractCity(place);
+                    /* Set HTML form input fields if present */
                     pickupGoogleMapsClass.setAddress(fullAddress);
+                    pickupGoogleMapsClass.setLatLong(lat, lng);
+                    pickupGoogleMapsClass.setCity(city);
                     /* Update Livewire component properties */
                     if (window.Livewire) {
-                        Livewire.find(document.querySelector('[wire\\:id]')
-                                .getAttribute('wire:id'))
-                            .call('updateLivewireProperties', null, null, null, null, fullAddress);
+                        const livewireComponent = Livewire.find(document.querySelector('[wire\\:id]')
+                            .getAttribute('wire:id'));
+
+                        const promise = livewireComponent.call('updateLivewireProperties', {
+                            pickupAddress: fullAddress,
+                            pickupLat: lat,
+                            pickupLon: lng,
+                            pickupCity: city,
+                        });
+                        
+                        if (isVanInventoryPage) {
+                            promise.then(() => livewireComponent.call('vanLocationChanged'));
+                        }
                     }
                 }
             });
@@ -86,9 +103,8 @@
             /* Initialize CustomGoogleMapsClass for dropoff address autocomplete */
             const dropoffGoogleMapsClass = new CustomGoogleMapsClass({
                 mapAutoCompleteAddressId: 'dropoffAddress',
-                mapUnitAddressId: 'dropoffUnitAddress',
-                mapLatId: 'dropoffLat',
-                mapLongId: 'dropoffLon',
+                // mapLatId: 'dropoffLat',
+                // mapLongId: 'dropoffLon',
             });
 
             const dropoffAutoComplete = dropoffGoogleMapsClass.handleAutoComplete();
@@ -96,18 +112,25 @@
             google.maps.event.addListener(dropoffAutoComplete, 'place_changed', () => {
                 const place = dropoffAutoComplete.getPlace();
                 if (place.geometry) {
-                    const lat = place.geometry.location.lat();
-                    const lng = place.geometry.location.lng();
                     /* Get the full formatted address from Google Places */
                     const fullAddress = `${place.name}, ${place.formatted_address}`;
-                    
+                    const lat = place.geometry.location.lat();
+                    const lng = place.geometry.location.lng();
+                    const city = dropoffGoogleMapsClass.extractCity(place);
+                    /* Set HTML form input fields if present */
                     dropoffGoogleMapsClass.setAddress(fullAddress);
                     dropoffGoogleMapsClass.setLatLong(lat, lng);
+                    dropoffGoogleMapsClass.setCity(city);
                     /* Update Livewire component properties */
                     if (window.Livewire) {
                         Livewire.find(document.querySelector('[wire\\:id]')
                                 .getAttribute('wire:id'))
-                            .call('updateLivewireProperties', lat, lng, fullAddress);
+                            .call('updateLivewireProperties', {
+                                dropoffAddress: fullAddress,
+                                dropoffLat: lat,
+                                dropoffLon: lng,
+                                dropoffCity: city,
+                            });
                     }
                 }
             });
@@ -279,16 +302,16 @@
         });
 
 
-    document.addEventListener('livewire:init', () => {
-       Livewire.on('close-modal', (event) => {
-           $('#' + event[0].id).modal('hide');
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('close-modal', (event) => {
+                $('#' + event[0].id).modal('hide');
+            });
+
+            Livewire.on('show-modal', (event) => {
+                $('#' + event[0].id).modal('show');
+            });
         });
 
-        Livewire.on('show-modal', (event) => {
-           $('#' + event[0].id).modal('show');
-        });
-    });
-    
         /*
          * General JavaScript Methods
          */
@@ -349,42 +372,6 @@
                             },
                             success: function(response) {
                                 if (response == "Users Deleted Successfully") {
-                                    window.location.reload();
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-        }
-
-        const delDrivers = () => {
-            const checkboxes = document.querySelectorAll('.select-checkbox');
-            const drivers = [];
-            let x = 0;
-            for (let i = 0; i < checkboxes.length; i++) {
-                if (checkboxes[i].checked) {
-                    drivers[x] = checkboxes[i].id;
-                    x++;
-                }
-            }
-            if (drivers.length != 0) {
-                Swal.fire({
-                    title: 'Warning!',
-                    text: 'Are you sure you want to delete the selected drivers?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: "{{ route('admin.del.drivers') }}",
-                            type: "get",
-                            data: {
-                                "drivers": drivers
-                            },
-                            success: function(response) {
-                                if (response == "Drivers Deleted Successfully") {
                                     window.location.reload();
                                 }
                             }
@@ -501,6 +488,78 @@
                 });
             }
         }
+
+        const delVans = () => {
+            const checkboxes = document.querySelectorAll('.select-checkbox');
+            const vans = [];
+            let x = 0;
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    vans[x] = checkboxes[i].id;
+                    x++;
+                }
+            }
+            if (vans.length != 0) {
+                Swal.fire({
+                    title: 'Warning!',
+                    text: 'Are you sure you want to delete the selected vans?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('admin.vans.del') }}",
+                            type: "get",
+                            data: {
+                                "vans": vans
+                            },
+                            success: function(response) {
+                                if (response == "Vans Deleted Successfully") {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        // const delVanInventories = () => {
+        //     const checkboxes = document.querySelectorAll('.select-checkbox');
+        //     const vanInventories = [];
+        //     let x = 0;
+        //     for (let i = 0; i < checkboxes.length; i++) {
+        //         if (checkboxes[i].checked) {
+        //             vanInventories[x] = checkboxes[i].id;
+        //             x++;
+        //         }
+        //     }
+        //     if (vanInventories.length != 0) {
+        //         Swal.fire({
+        //             title: 'Warning!',
+        //             text: 'Are you sure you want to delete the selected van inventories?',
+        //             icon: 'warning',
+        //             showCancelButton: true,
+        //             confirmButtonText: 'Yes'
+        //         }).then((result) => {
+        //             if (result.isConfirmed) {
+        //                 $.ajax({
+        //                     url: "",
+        //                     type: "get",
+        //                     data: {
+        //                         "vans": vans
+        //                     },
+        //                     success: function(response) {
+        //                         if (response == "Vans Deleted Successfully") {
+        //                             window.location.reload();
+        //                         }
+        //                     }
+        //                 });
+        //             }
+        //         });
+        //     }
+        // }
     </script>
 
     <script>

@@ -208,7 +208,7 @@ class OrdersFromOtherSeller extends Model
         return self::select($columns)
             ->with(['product', 'buyer', 'seller'])
             ->where('id', '=', $id)
-            ->first();
+            ->firstOrFail();
     }
 
     public static function getForView(array $columns, int $sellerId, string $orderBy): Collection
