@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\v2\StuartDeliveryController;
 use App\Http\Controllers\Api\v2\SuperWallPackageController;
 use App\Http\Controllers\Api\v2\VanController;
 use App\Http\Controllers\Api\v2\VanInventoryController;
+use App\Http\Controllers\Api\v2\VanProductController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -144,11 +145,23 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::post('login', 'loginVan');
 
         Route::middleware('jwt.verify:van')->group(function () {
-            Route::get('list/{vanId}', 'listById');
+            Route::post('list/{vanId}', 'listById');
             Route::get('stats/{vanId}', 'statsById');
             // Route::post('activity/create', '');
         });
+      
     });
+
+    Route::prefix('van/van_products')->controller(VanProductController::class)->group(function () {
+    Route::middleware('jwt.verify:van')->group(function () {
+       Route::post('profile', 'listById');
+       Route::get('list', 'listProducts');  
+
+        Route::get('list/{productId}', 'getProductById'); 
+        Route::get('search', 'searchProducts');
+        Route::get('dashboard/stats', 'dashboardStats');
+    });
+});
 
     /*
     *********************************************************************** 

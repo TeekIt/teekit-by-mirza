@@ -182,4 +182,21 @@ class Van extends Authenticatable implements JWTSubject
             ->orderBy('created_at', $orderBy->value)
             ->paginate(10);
     }
+    //relationship with van products
+    public function vanProducts()
+    {
+        return $this->hasMany(VanProduct::class, 'van_id');
+    }
+    public function activeVanProducts()
+    {
+        return $this->hasMany(VanProduct::class, 'van_id')
+                ->where('status', 'active');
+    }
+
+    public static function getDetailsById(int $vanId)
+    {
+        return self::where('id', $vanId)
+            ->select('id as id', 'operative', 'number_plate', 'user_name')
+            ->first();
+    }
 }
