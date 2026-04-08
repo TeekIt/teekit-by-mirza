@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 
 class RequestedDeliveryController extends Controller
 {
-    public function list(
+    public function listByCreatorId(
         ListRequestedDeliveryRequest $request,
         ListRequestedDeliveryAction $listRequestedDeliveryAction
     ): JsonResponse {

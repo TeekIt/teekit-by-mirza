@@ -38,7 +38,7 @@ class CategoriesController extends Controller
         } else {
             $data = Cache::rememberForever(
                 'categoriesList',
-                fn () => Categories::getAll([
+                fn() => Categories::getAll([
                     'id',
                     'category_name',
                     'category_image',
@@ -64,13 +64,13 @@ class CategoriesController extends Controller
      *
      * @version 1.9.0
      */
-    public function productsByCategory(Request $request)
+    public function listProductsByCategoryId(Request $request)
     {
         $validatedData = Validator::make(
             array_merge($request->route()->parameters(), $request->query()),
             [
-                'categoryId' => 'required|integer',
-                'sellerId' => 'required|integer',
+                'categoryId' => 'required|integer|exists:categories,id',
+                'sellerId' => 'required|integer|exists:users,id',
                 'page' => 'required|integer',
             ]
         );
@@ -81,7 +81,7 @@ class CategoriesController extends Controller
         $validatedData = (object) $validatedData->validated();
 
         $pagination = Cache::remember(
-            'productsByCategory'.$validatedData->categoryId.$validatedData->sellerId.$validatedData->page,
+            'productsByCategory' . $validatedData->categoryId . $validatedData->sellerId . $validatedData->page,
             now()->addDay(),
             function () use ($validatedData) {
                 return Products::getProductsInfoByCategoryId(
@@ -116,14 +116,17 @@ class CategoriesController extends Controller
      *
      * @version 1.0.0
      */
-    public function sellers(Request $request)
+    public function listSellersByCategoryId(Request $request)
     {
-        $validatedData = Validator::make($request->query(), [
-            'categoryId' => 'required|integer',
-            'lat' => 'required|numeric|between:-90,90',
-            'lon' => 'required|numeric|between:-180,180',
-            'city' => 'required|string',
-        ]);
+        $validatedData = Validator::make(
+            array_merge($request->route()->parameters(), $request->query()),
+            [
+                'categoryId' => 'required|integer|exists:categories,id',
+                'lat' => 'required|numeric|between:-90,90',
+                'lon' => 'required|numeric|between:-180,180',
+                'city' => 'required|string',
+            ]
+        );
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
@@ -131,7 +134,7 @@ class CategoriesController extends Controller
         $validatedData = (object) $validatedData->validated();
 
         $data = Cache::remember(
-            'get-sellers-by-category'.$validatedData->categoryId.$validatedData->lat.$validatedData->lon,
+            'listSellersByCategoryId' . $validatedData->categoryId . $validatedData->lat . $validatedData->lon,
             now()->addDay(),
             function () use ($validatedData) {
                 $sellers = Qty::getSellersByGivenParams($validatedData->categoryId, $validatedData->city);

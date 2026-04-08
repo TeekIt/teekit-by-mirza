@@ -32,6 +32,97 @@ class PromoCodeController extends Controller
         );
     }
 
+     /**
+     * It will fetch a promocode and check all
+     * the validation but will not increment the total times
+     * a promocode has been used
+     */
+    public function listByPromoCode(Request $request)
+    {
+        $validatedData = Validator::make($request->all(), [
+            'customerId' => 'required|integer|exists:users,id',
+            'promoCode' => 'required|string|max:20|exists:promo_codes,promo_code',
+        ]);
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
+        }
+        $promoCodesCount = PromoCode::where('promo_code', '=', $request->promoCode)->count();
+        if ($promoCodesCount == 1) {
+            $expiryDate = PromoCode::where('promo_code', '=', $request->promoCode)->pluck('expiry_dt')->first();
+            $currentDate = date('Y-m-d');
+            if ($expiryDate < $currentDate) {
+                return JsonResponseServices::getApiResponse(
+                    [],
+                    config('constants.FALSE_STATUS'),
+                    config('constants.EXPIRED_PROMOCODE'),
+                    config('constants.HTTP_OK')
+                );
+            } else {
+                $promoCodes = PromoCode::where('promo_code', '=', $request->promoCode)->get();
+                if (empty($promoCodes[0]->store_id)) {
+                    $promoCodes[0]->store_id = null;
+                }
+                // below query will pass required data to our helper functions down below to validate
+                $promoCodeData = PromoCode::where('promo_code', $request->promoCode)
+                    ->first(['id', 'usage_limit', 'store_id', 'discount']);
+                /**
+                 * This condition will only work if the
+                 * Promo code is only valid for a specific order#
+                 */
+                if (! empty($promoCodes[0]->order_number)) {
+                    $userOrdersCount = Orders::where('created_by_id', '=', $request->customerId)->count();
+                    if ($promoCodes[0]->order_number == $userOrdersCount + 1) {
+                        $data[0]['promo_code'] = $promoCodes[0];
+                        $data[1]['promo_codes_usage_limit'] = ($promoCodes[0]->usage_limit) ?
+                            PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customerId, $promoCodes[0]->id) :
+                            null;
+                        // $storeData = PromoCodeServices::getTheSellerBelongsToThisPromoCode($promoCodeData);
+                        $data[2]['store'] = ($promoCodeData->store_id) ?
+                            PromoCodeServices::getTheSellerBelongsToThisPromoCode($promoCodeData) :
+                            null;
+
+                        return JsonResponseServices::getApiResponse(
+                            $data,
+                            config('constants.TRUE_STATUS'),
+                            config('constants.VALID_PROMOCODE'),
+                            config('constants.HTTP_OK')
+                        );
+                    } else {
+                        return JsonResponseServices::getApiResponse(
+                            [],
+                            config('constants.FALSE_STATUS'),
+                            'This promo code is only valid for order#'.$promoCodes[0]->order_number,
+                            config('constants.HTTP_OK')
+                        );
+                    }
+                }
+                $data[0]['promo_code'] = $promoCodes[0];
+
+                $data[1]['promo_codes_usage_limit'] = ($promoCodes[0]->usage_limit) ?
+                    PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customerId, $promoCodes[0]->id) :
+                    null;
+
+                $data[2]['store'] = ($promoCodeData->store_id) ?
+                    PromoCodeServices::getTheSellerBelongsToThisPromoCode($promoCodeData) :
+                    null;
+
+                return JsonResponseServices::getApiResponse(
+                    $data,
+                    config('constants.TRUE_STATUS'),
+                    config('constants.VALID_PROMOCODE'),
+                    config('constants.HTTP_OK')
+                );
+            }
+        } else {
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                config('constants.INVALID_PROMOCODE'),
+                config('constants.HTTP_OK')
+            );
+        }
+    }
+
     /**
      * Validates either the given promo code is correct or not
      * It also checks that either the user is submitting this
@@ -40,7 +131,7 @@ class PromoCodeController extends Controller
      *
      * @version 1.2.0
      */
-    public function validatePromoCodes(Request $request)
+    public function validatePromoCode(Request $request)
     {
         $validatedData = Validator::make($request->all(), [
             'customerId' => 'required|integer|exists:users,id',
@@ -94,96 +185,5 @@ class PromoCodeController extends Controller
             config('constants.VALID_PROMOCODE'),
             config('constants.HTTP_OK')
         );
-    }
-
-    /**
-     * It will fetch a promocode and check all
-     * the validation but will not increment the total times
-     * a promocode has been used
-     */
-    public function fetchPromoCodeInfo(Request $request)
-    {
-        $validatedData = Validator::make($request->all(), [
-            'customer_id' => 'required|integer|exists:users,id',
-            'promo_code' => 'required|string|max:20|exists:promo_codes,promo_code',
-        ]);
-        if ($validatedData->fails()) {
-            return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
-        }
-        $promoCodesCount = PromoCode::where('promo_code', '=', $request->promo_code)->count();
-        if ($promoCodesCount == 1) {
-            $expiryDate = PromoCode::where('promo_code', '=', $request->promo_code)->pluck('expiry_dt')->first();
-            $currentDate = date('Y-m-d');
-            if ($expiryDate < $currentDate) {
-                return JsonResponseServices::getApiResponse(
-                    [],
-                    config('constants.FALSE_STATUS'),
-                    config('constants.EXPIRED_PROMOCODE'),
-                    config('constants.HTTP_OK')
-                );
-            } else {
-                $promoCodes = PromoCode::where('promo_code', '=', $request->promo_code)->get();
-                if (empty($promoCodes[0]->store_id)) {
-                    $promoCodes[0]->store_id = null;
-                }
-                // below query will pass required data to our helper functions down below to validate
-                $promoCodeData = PromoCode::where('promo_code', $request->promo_code)
-                    ->first(['id', 'usage_limit', 'store_id', 'discount']);
-                /**
-                 * This condition will only work if the
-                 * Promo code is only valid for a specific order#
-                 */
-                if (! empty($promoCodes[0]->order_number)) {
-                    $userOrdersCount = Orders::where('created_by_id', '=', $request->customer_id)->count();
-                    if ($promoCodes[0]->order_number == $userOrdersCount + 1) {
-                        $data[0]['promo_code'] = $promoCodes[0];
-                        $data[1]['promo_codes_usage_limit'] = ($promoCodes[0]->usage_limit) ?
-                            PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customer_id, $promoCodes[0]->id) :
-                            null;
-                        // $storeData = PromoCodeServices::getTheSellerBelongsToThisPromoCode($promoCodeData);
-                        $data[2]['store'] = ($promoCodeData->store_id) ?
-                            PromoCodeServices::getTheSellerBelongsToThisPromoCode($promoCodeData) :
-                            null;
-
-                        return JsonResponseServices::getApiResponse(
-                            $data,
-                            config('constants.TRUE_STATUS'),
-                            config('constants.VALID_PROMOCODE'),
-                            config('constants.HTTP_OK')
-                        );
-                    } else {
-                        return JsonResponseServices::getApiResponse(
-                            [],
-                            config('constants.FALSE_STATUS'),
-                            'This promo code is only valid for order#'.$promoCodes[0]->order_number,
-                            config('constants.HTTP_OK')
-                        );
-                    }
-                }
-                $data[0]['promo_code'] = $promoCodes[0];
-
-                $data[1]['promo_codes_usage_limit'] = ($promoCodes[0]->usage_limit) ?
-                    PromoCodesUsageLimit::promoCodeTotalUsedByUser($request->customer_id, $promoCodes[0]->id) :
-                    null;
-
-                $data[2]['store'] = ($promoCodeData->store_id) ?
-                    PromoCodeServices::getTheSellerBelongsToThisPromoCode($promoCodeData) :
-                    null;
-
-                return JsonResponseServices::getApiResponse(
-                    $data,
-                    config('constants.TRUE_STATUS'),
-                    config('constants.VALID_PROMOCODE'),
-                    config('constants.HTTP_OK')
-                );
-            }
-        } else {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.INVALID_PROMOCODE'),
-                config('constants.HTTP_OK')
-            );
-        }
     }
 }

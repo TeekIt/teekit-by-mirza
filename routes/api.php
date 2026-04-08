@@ -91,9 +91,9 @@ Route::middleware('transaction.wrapper')->group(function () {
      ***********************************************************************
      */
     Route::prefix('category')->controller(CategoriesController::class)->group(function () {
-        Route::get('{categoryId}/products', 'productsByCategory');
         Route::get('list', 'list');
-        Route::get('get-stores-by-category', 'sellers');
+        Route::get('list/{categoryId}/products', 'listProductsByCategoryId');
+        Route::get('list/{categoryId}/sellers', 'listSellersByCategoryId');
     });
     /*
      *********************************************************************** 
@@ -109,7 +109,7 @@ Route::middleware('transaction.wrapper')->group(function () {
      * Notifications API Routes
      ***********************************************************************
      */
-    Route::prefix('notifications')->controller(NotificationsController::class)->group(function () {
+    Route::prefix('notification')->controller(NotificationsController::class)->group(function () {
         Route::post('save_token', 'saveToken');
     });
     /*
@@ -244,8 +244,8 @@ Route::middleware('transaction.wrapper')->group(function () {
          */
         Route::prefix('promocode')->controller(PromoCodeController::class)->group(function () {
             Route::get('list', 'list');
-            Route::post('validate', 'validatePromoCodes');
-            Route::post('fetch_promocode_info', 'fetchPromoCodeInfo');
+            Route::get('list/{promoCode}', 'listByPromoCode');
+            Route::post('validate', 'validatePromoCode');
         });
 
         /*
@@ -304,7 +304,7 @@ Route::middleware('transaction.wrapper')->group(function () {
          ***********************************************************************
          */
         Route::prefix('delivery')->controller(RequestedDeliveryController::class)->group(function () {
-            Route::get('list/{creatorId}', 'list');
+            Route::get('list/{creatorId}', 'listByCreatorId');
         });
         /*
          *********************************************************************** 
