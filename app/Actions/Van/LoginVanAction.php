@@ -11,8 +11,8 @@ final class LoginVanAction
 {
     public function execute(string $userName, string $password): array
     {
-        $van = Van::getByUserName($userName);
-
+        $van = Van::getByUserName($userName, ['id', 'operative', 'number_plate', 'user_name', 'password']);
+        
         if (! Hash::check($password, $van->password)) {
             throw ValidationException::withMessages([
                 'password' => ['The provided password is incorrect.'],
