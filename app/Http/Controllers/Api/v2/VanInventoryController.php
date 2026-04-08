@@ -5,6 +5,7 @@ use App\Actions\VanInventory\ListVanInventoryAction;
 use App\Actions\VanInventory\CreateVanInventoryAction;
 use App\Actions\VanInventory\UpdateVanInventoryAction;
 use App\Actions\VanInventory\DeleteVanInventoryAction;
+use App\Actions\Van\FetchRecentActivityAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\VanInventory\StoreVanInventoryRequest;
 use App\Http\Requests\VanInventory\UpdateVanInventoryRequest;

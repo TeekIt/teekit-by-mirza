@@ -147,21 +147,22 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::middleware('jwt.verify:van')->group(function () {
             Route::post('list/{vanId}', 'listById');
             Route::get('stats/{vanId}', 'statsById');
-            // Route::post('activity/create', '');
+            Route::get('dashboard/stats', 'dashboardStats');
+            Route::get('activity/recent', 'recentActivities');
+            
         });
       
     });
 
-    Route::prefix('van/van_products')->controller(VanProductController::class)->group(function () {
+    Route::prefix('van/product')->controller(VanProductController::class)->group(function () {
     Route::middleware('jwt.verify:van')->group(function () {
-       Route::post('profile', 'listById');
-       Route::get('list', 'listProducts');  
-
         Route::get('list/{productId}', 'getProductById'); 
+        Route::get('list', 'listProducts');  
         Route::get('search', 'searchProducts');
-        Route::get('dashboard/stats', 'dashboardStats');
+        
     });
 });
+
 
     /*
     *********************************************************************** 

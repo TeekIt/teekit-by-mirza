@@ -11,58 +11,18 @@ use App\Actions\VanProduct\DashboardStatsAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\VanProduct\SyncRequest;
 use App\Http\Requests\VanProduct\ListByIdRequest;
+use App\Http\Requests\VanProduct\ListProductByIdRequest;
 use App\Services\JsonResponseServices;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class VanProductController extends Controller
 {
-    /**
-     * Sync van products with the server
-     *
-     * @param SyncRequest $request
-     * @param SyncVanProductAction $syncVanProductAction
-     * @return JsonResponse
-     */
-    public function sync(SyncRequest $request, SyncVanProductAction $syncVanProductAction): JsonResponse
-    {
-        $validatedData = (object) $request->validated();
-
-        $data = $syncVanProductAction->execute($validatedData->van_id);
-
-        return JsonResponseServices::getApiResponse(
-            $data,
-            config('constants.TRUE_STATUS'),
-            'Data synced successfully',
-            config('constants.HTTP_OK')
-        );
-    }
+    
 
     /**
-     * Fetch details of a van by van_id
-     *
-     * @param ListByIdRequest $request
-     * @param SyncVanProductAction $syncVanProductAction
-     * @return JsonResponse
-     */
-    public function listById(ListByIdRequest $request, SyncVanProductAction $syncVanProductAction): JsonResponse
-    {
-        $vanId = $request->validated()['van_id'];
-
-        $data = $syncVanProductAction->executeById($vanId);
-
-        return JsonResponseServices::getApiResponse(
-            $data ?: [],
-            !empty($data) ? config('constants.TRUE_STATUS') : config('constants.FALSE_STATUS'),
-            !empty($data) ? 'Van details fetched successfully' : 'Van not found',
-            config('constants.HTTP_OK')
-        );
-    }
-
-    /**
-     * List van products with optional filters
-     *
-     * Filters: category_id, status (active/inactive/critical/out_of_stock)
+     * List all products for the logged-in van with optional filters.
      *
      * @param Request $request
      * @param ListProductsAction $action
@@ -70,39 +30,53 @@ class VanProductController extends Controller
      */
     public function listProducts(Request $request, ListProductsAction $action): JsonResponse
     {
-        $filters = $request->only(['category_id', 'status']);
+        // Get logged-in van using auth guard
+        $van = auth()->guard('van')->user();
+        $vanId = $van->id;
 
-        $products = $action->execute($filters);
+        // Map camelCase query parameters to DB columns
+        $filters = [
+            'category_id' => $request->query('categoryID'), // camelCase from request
+            'status' => $request->query('status')
+        ];
 
-        return JsonResponseServices::getApiResponse(
-            $products,
-            $products->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            $products->isEmpty() ? 'No products found' : 'Products fetched successfully',
-            config('constants.HTTP_OK')
-        );
-    }
-
-    /**
-     * Fetch a single product by product ID
-     *
-     * @param int $productId
-     * @param FetchSingleProductAction $fetchSingleProductAction
-     * @return JsonResponse
-     */
-    public function getProductById(int $productId, FetchSingleProductAction $fetchSingleProductAction): JsonResponse
-    {
-        $data = $fetchSingleProductAction->execute($productId);
+        // Execute action to fetch filtered products for this van
+        $data = $action->execute($filters, $vanId);
 
         return JsonResponseServices::getApiResponse(
             $data,
-            !empty($data) ? config('constants.TRUE_STATUS') : config('constants.FALSE_STATUS'),
-            !empty($data) ? 'Product fetched successfully' : 'Product not found',
+            $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            '', // Empty message
             config('constants.HTTP_OK')
         );
     }
 
     /**
-     * Search products by query string
+     * Fetch single product details by ID for the logged-in van.
+     *
+     * @param int $productId
+     * @param FetchSingleProductAction $action
+     * @return JsonResponse
+     */
+    public function getProductById(int $productId, FetchSingleProductAction $action): JsonResponse
+    {
+        // Get logged-in van using auth guard
+        $van = auth()->guard('van')->user();
+        $vanId = $van->id;
+
+        // Execute action to fetch product belonging to this van
+        $data = $action->execute($productId, $vanId);
+
+        return JsonResponseServices::getApiResponse(
+            $data ?? [],
+            $data ? config('constants.TRUE_STATUS') : config('constants.FALSE_STATUS'),
+            '', // Empty message
+            config('constants.HTTP_OK')
+        );
+    }
+
+    /**
+     * Search products by query string for the logged-in van.
      *
      * @param Request $request
      * @param SearchProductsAction $searchProductsAction
@@ -110,43 +84,20 @@ class VanProductController extends Controller
      */
     public function searchProducts(Request $request, SearchProductsAction $searchProductsAction): JsonResponse
     {
+        // Get logged-in van using auth guard
+        $van = auth()->guard('van')->user();
+        $vanId = $van->id;
+
+        // Get search query from request
         $query = $request->query('q', '');
-        $data = $searchProductsAction->execute($query);
+
+        // Execute action to search products for this van
+        $data = $searchProductsAction->execute($query, $vanId);
 
         return JsonResponseServices::getApiResponse(
             $data,
             $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            $data->isEmpty() ? 'No products found for search query' : 'Products fetched successfully',
-            config('constants.HTTP_OK')
-        );
-    }
-
-    /**
-     * Fetch dashboard statistics for a specific van
-     *
-     * @param Request $request
-     * @param DashboardStatsAction $action
-     * @return JsonResponse
-     */
-    public function dashboardStats(Request $request, DashboardStatsAction $action): JsonResponse
-    {
-        $vanId = $request->input('van_id');
-
-        if (!$vanId) {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                'van_id is required',
-                config('constants.HTTP_BAD_REQUEST')
-            );
-        }
-
-        $data = $action->execute($vanId);
-
-        return JsonResponseServices::getApiResponse(
-            $data,
-            config('constants.TRUE_STATUS'),
-            'Dashboard stats fetched successfully',
+            '', // Empty message
             config('constants.HTTP_OK')
         );
     }

@@ -24,6 +24,13 @@ class VanProduct extends Model
     ];
 
     /**
+     * Attributes to append to JSON
+     *
+     * @var array
+     */
+    protected $appends = ['status'];
+
+    /**
      * Attribute type casting
      *
      * @var array
@@ -66,35 +73,7 @@ class VanProduct extends Model
         return $this->belongsTo(Categories::class, 'category_id');
     }
 
-    /**
-     * Get products by Van ID
-     *
-     * @param int $vanId
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public static function getByVanId(int $vanId)
-    {
-        return self::where('van_id', $vanId)
-                   ->with(['seller', 'category'])
-                   ->latest()
-                   ->get();
-    }
-
-    /**
-     * Get active products by Van ID
-     *
-     * @param int $vanId
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    public static function getActiveByVanId(int $vanId)
-    {
-        return self::where('van_id', $vanId)
-                   ->where('status', 'active')
-                   ->with(['seller', 'category'])
-                   ->latest()
-                   ->get();
-    }
-
+    
     /**
      * Fetch a single product by ID with relations
      *
@@ -127,6 +106,7 @@ class VanProduct extends Model
         // Status filter with dynamic threshold handling
         if (!empty($filters['status'])) {
             $status = strtolower($filters['status']);
+
             if ($status === 'critical') {
                 $query->whereColumn('quantity', '<=', 'min_threshold')
                       ->where('quantity', '>', 0);
@@ -146,14 +126,14 @@ class VanProduct extends Model
     }
 
     /**
-     * Fetch single product by ID with relations
+     * Fetch single product by ID
      *
-     * @param int $id
+     * @param int $productId
      * @return VanProduct|null
      */
-    public static function getByProductId(int $id)
+    public static function getByProductId(int $productId)
     {
-        return self::with(['category', 'seller'])->find($id);
+        return self::where('id', $productId)->first();
     }
 
     /**
@@ -172,18 +152,53 @@ class VanProduct extends Model
     }
 
     /**
-     * Accessor: Get dynamic status based on quantity and min_threshold
+     * Scope for category filter
+     */
+    public function scopeCategory($query, $categoryId)
+    {
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Scope for status filter
+     */
+    public function scopeStatus($query, $status)
+    {
+        if (!$status) {
+            return $query;
+        }
+
+        $status = strtolower($status);
+
+        if ($status === 'out_of_stock') {
+            $query->where('quantity', 0);
+        } elseif ($status === 'critical') {
+            $query->where('quantity', '>', 0)
+                  ->whereColumn('quantity', '<=', 'min_threshold');
+        } elseif ($status === 'active') {
+            $query->whereColumn('quantity', '>', 'min_threshold');
+        }
+
+        return $query;
+    }
+
+    /**
+     * Accessor for dynamic status attribute
      *
      * @return string
      */
-    public function getDynamicStatusAttribute(): string
+    public function getStatusAttribute()
     {
         if ($this->quantity == 0) {
             return 'out_of_stock';
         } elseif ($this->quantity <= $this->min_threshold) {
             return 'critical';
+        } else {
+            return 'in_stock';
         }
-
-        return $this->status; // active or inactive
     }
 }

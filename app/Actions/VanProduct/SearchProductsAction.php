@@ -14,14 +14,14 @@ final class SearchProductsAction
      */
     public function execute(string $query)
     {
-        return VanProduct::with(['seller', 'category'])
+        return VanProduct::query()
+            // Grouped search conditions
             ->when($query, function ($q) use ($query) {
-                $q->where('product_name', 'like', "%{$query}%")
-                  ->orWhere('sku', 'like', "%{$query}%")
-                  ->orWhereHas('category', fn($q2) => $q2->where('category_name', 'like', "%{$query}%"))
-                  ->orWhereHas('seller', fn($q3) => $q3->where('name', 'like', "%{$query}%")
-                                                     ->orWhere('email', 'like', "%{$query}%")
-                                                     ->orWhere('country', 'like', "%{$query}%"));
+                $q->where(function ($subQuery) use ($query) {
+                    $subQuery->where('product_name', 'like', "%{$query}%")
+                             ->orWhere('sku', 'like', "%{$query}%")
+                             ->orWhere('brand', 'like', "%{$query}%");
+                });
             })
             ->latest()
             ->get();
