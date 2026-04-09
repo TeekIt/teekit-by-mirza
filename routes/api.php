@@ -149,16 +149,25 @@ Route::middleware('transaction.wrapper')->group(function () {
             Route::get('stats/{vanId}', 'statsById');
             Route::get('dashboard/stats', 'dashboardStats');
             Route::get('activity/recent', 'recentActivities');
-            
         });
       
-    });
+    });   
 
     Route::prefix('van/product')->controller(VanProductController::class)->group(function () {
     Route::middleware('jwt.verify:van')->group(function () {
         Route::get('list/{productId}', 'getProductById'); 
         Route::get('list', 'listProducts');  
         Route::get('search', 'searchProducts');
+
+        
+    });
+});
+
+    Route::prefix('van/operative')->controller(VanProductController::class)->group(function () {
+    Route::middleware('jwt.verify:van')->group(function () {
+        Route::post('usage/record', 'recordUsage');
+        Route::get('usage/history', 'usageHistory');
+
         
     });
 });

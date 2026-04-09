@@ -14,7 +14,7 @@ final class ListProductsAction
                 $query->where('category_id', $filters['category_id']);
             })
             ->when(!empty($filters['status']), function ($query) use ($filters) {
-                // Map API status to DB quantity conditions
+                
                 if ($filters['status'] === 'in_stock') {
                     $query->whereColumn('quantity', '>', 'min_threshold');
                 } elseif ($filters['status'] === 'critical') {

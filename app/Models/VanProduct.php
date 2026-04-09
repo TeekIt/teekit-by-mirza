@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Van;
 use App\Models\User;
 use App\Models\Categories;
-
+use App\Models\OperativeProductUsage;
 class VanProduct extends Model
 {
     use HasFactory;
@@ -200,5 +200,18 @@ class VanProduct extends Model
         } else {
             return 'in_stock';
         }
+    }
+
+    /**
+ * Use quantity of this product (stock update)
+ */
+    public function useQuantity(int $quantityUsed): bool
+    {
+        if ($this->quantity < $quantityUsed) {
+            return false;
+        }
+
+        $this->decrement('quantity', $quantityUsed);
+        return true;
     }
 }

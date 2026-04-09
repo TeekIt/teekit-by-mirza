@@ -8,10 +8,13 @@ use App\Actions\VanProduct\FetchSingleProductAction;
 use App\Actions\VanProduct\ListProductsAction;
 use App\Actions\VanProduct\SearchProductsAction;
 use App\Actions\VanProduct\DashboardStatsAction;
+use App\Actions\VanProductUsage\RecordUsageAction;
+use App\Actions\VanProductUsage\GetUsageHistoryAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\VanProduct\SyncRequest;
 use App\Http\Requests\VanProduct\ListByIdRequest;
 use App\Http\Requests\VanProduct\ListProductByIdRequest;
+use App\Http\Requests\ProductUsageRecord\RecordUsageRequest;
 use App\Services\JsonResponseServices;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -34,9 +37,8 @@ class VanProductController extends Controller
         $van = auth()->guard('van')->user();
         $vanId = $van->id;
 
-        // Map camelCase query parameters to DB columns
         $filters = [
-            'category_id' => $request->query('categoryID'), // camelCase from request
+            'category_id' => $request->query('categoryID'),
             'status' => $request->query('status')
         ];
 
@@ -70,7 +72,7 @@ class VanProductController extends Controller
         return JsonResponseServices::getApiResponse(
             $data ?? [],
             $data ? config('constants.TRUE_STATUS') : config('constants.FALSE_STATUS'),
-            '', // Empty message
+            '',
             config('constants.HTTP_OK')
         );
     }
@@ -101,4 +103,40 @@ class VanProductController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
+        /**
+     * Record parts usage by operative
+     * POST van/operative/usage/record
+     */
+        public function recordUsage(RecordUsageRequest $request, RecordUsageAction $recordUsageAction)
+    {
+        $data = $recordUsageAction->execute($request->validated());
+
+        return JsonResponseServices::getApiResponse(
+            $data,
+            config('constants.TRUE_STATUS'),  
+            '',                               
+            config('constants.HTTP_OK')
+        );
+    }
+
+        /**
+     * Get all usage history for the logged-in van
+     * GET /van/operative/usage/history
+     */
+    public function usageHistory(GetUsageHistoryAction $action)
+    {
+        $van = auth()->guard('van')->user();
+        $vanId = $van->id;
+
+        $data = $action->execute($vanId);
+
+        return JsonResponseServices::getApiResponse(
+            $data,
+            config('constants.TRUE_STATUS'),
+            '', // empty message
+            config('constants.HTTP_OK')
+        );
+    }
+
 }
