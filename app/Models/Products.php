@@ -282,22 +282,22 @@ class Products extends Model
         ?string $brand = null,
         ?string $sortBy = null,
     ): array {
-        // $scoutData = self::search($productName)
-        //     ->whereIn('seller_ids', $sellerIds)
-        //     ->paginate(20, 'scoutPage')
-        //     ->toArray();
-
         $scoutData = self::search($productName)
-            ->options([
-                'hybrid' => [
-                    /* 50% keyword, 50% Ai */
-                    'semanticRatio' => 0.5,
-                    'embedder' => 'default'
-                ]
-            ])
             ->whereIn('seller_ids', $sellerIds)
             ->paginate(20, 'scoutPage')
             ->toArray();
+
+        // $scoutData = self::search($productName)
+        //     ->options([
+        //         'hybrid' => [
+        //             /* 50% keyword, 50% Ai */
+        //             'semanticRatio' => 0.5,
+        //             'embedder' => 'default'
+        //         ]
+        //     ])
+        //     ->whereIn('seller_ids', $sellerIds)
+        //     ->paginate(20, 'scoutPage')
+        //     ->toArray();
 
         $productIds = array_column($scoutData['data'], 'id');
         unset($scoutData['data']);
