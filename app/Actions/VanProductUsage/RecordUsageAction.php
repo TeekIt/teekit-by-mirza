@@ -2,7 +2,7 @@
 
 namespace App\Actions\VanProductUsage;
 
-use App\Models\OperativeProductUsage; 
+use App\Models\VanOperativeProductUsage; 
 use App\Models\VanProduct;
 use Illuminate\Support\Facades\DB;
 
@@ -28,7 +28,7 @@ final class RecordUsageAction{
         }
 
         // Save usage record
-        OperativeProductUsage::create([
+        VanOperativeProductUsage::create([
             'van_id'         => $validated['vanId'],
             'van_product_id'     => $validated['productId'],
             'quantity_used'  => $validated['quantityUsed'],

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Van;
 use App\Models\User;
 use App\Models\Categories;
-use App\Models\OperativeProductUsage;
+use App\Models\VanOperativeProductUsage;
 class VanProduct extends Model
 {
     use HasFactory;

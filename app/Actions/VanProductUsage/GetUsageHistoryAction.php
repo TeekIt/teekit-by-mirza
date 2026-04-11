@@ -2,13 +2,13 @@
 
 namespace App\Actions\VanProductUsage;
 
-use App\Models\OperativeProductUsage;
+use App\Models\VanOperativeProductUsage;
 
 final class GetUsageHistoryAction
 {
       public function execute(int $vanId)
     {
-        return OperativeProductUsage::where('van_id', $vanId)
+        return VanOperativeProductUsage::where('van_id', $vanId)
             ->orderBy('used_at', 'desc')
             ->with(['van:id,operative']) 
             ->get()
