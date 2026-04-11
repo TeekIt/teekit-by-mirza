@@ -26,9 +26,7 @@ return new class extends Migration
             $table->float('weight')->nullable();
             $table->string('brand')->nullable();
             $table->string('size')->nullable();
-            $table->string('status')
-            ->default('active')
-            ->comment('active, inactive, out_of_stock, low_stock, critical');
+            $table->string('status')->default('active')->comment('active, inactive, out_of_stock, low_stock, critical');
             $table->string('contact');
             $table->json('colors')->nullable();
             $table->tinyInteger('bike')->nullable();
