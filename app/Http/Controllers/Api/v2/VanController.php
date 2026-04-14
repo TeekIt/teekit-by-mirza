@@ -42,12 +42,10 @@ class VanController extends Controller
             config('constants.HTTP_OK')
         );
     }
+
     public function dashboardStats(FetchDashboardStatsAction $action)
     {
-        $van = auth()->guard('van')->user();
-
-
-        $data = $action->execute($van->id);
+        $data = $action->execute(auth()->guard('van')->user()->id);
 
         return JsonResponseServices::getApiResponse(
             $data,
@@ -59,8 +57,7 @@ class VanController extends Controller
 
     public function recentActivities(FetchRecentActivityAction $action)
     {
-        $vanId = auth()->guard('van')->user()->id;
-        $data = $action->execute($vanId);
+        $data = $action->execute(auth()->guard('van')->user()->id);
 
         return JsonResponseServices::getApiResponse(
             $data,
@@ -69,17 +66,4 @@ class VanController extends Controller
             config('constants.HTTP_OK')
         );
     }
-    // public function statsById(ListVanRequest $request, ListVanStatsAction $listVanStatsAction): JsonResponse
-    // {
-    //     $validatedData = (object) $request->validated();
-
-    //     $data = $listVanAction->getStats($validatedData->id);
-
-    //     return JsonResponseServices::getApiResponse(
-    //         $data,
-    //         config('constants.TRUE_STATUS'),
-    //         '',
-    //         config('constants.HTTP_OK')
-    //     );
-    // }
 }

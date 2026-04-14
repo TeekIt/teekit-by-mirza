@@ -7,6 +7,7 @@ use App\Http\Middleware\JwtMiddleware;
 use App\Http\Middleware\TransactionWrapper;
 use App\Providers\AppServiceProvider;
 use App\Services\JsonResponseServices;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Auth\Middleware\Authorize;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,6 +22,7 @@ use Jenssegers\Agent\AgentServiceProvider;
 use PrettyRoutes\ServiceProvider;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tymon\JWTAuth\Providers\LaravelServiceProvider;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -87,6 +89,21 @@ return Application::configure(basePath: dirname(__DIR__))
                     config('constants.UNAUTHORIZED_ACTION'),
                     config('constants.HTTP_FORBIDDEN')
                 );
+            }
+        });
+
+        $exceptions->renderable(function (NotFoundHttpException $error, $request) {
+            if ($request->is('api/*')) {
+                $previousException = $error->getPrevious();
+
+                if ($previousException instanceof ModelNotFoundException) {
+                    return JsonResponseServices::getApiResponse(
+                        [],
+                        config('constants.FALSE_STATUS'),
+                        'No results found against id: ' . implode(',', $previousException->getIds()),
+                        config('constants.HTTP_NOT_FOUND')
+                    );
+                }
             }
         });
 

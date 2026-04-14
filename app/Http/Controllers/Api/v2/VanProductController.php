@@ -22,7 +22,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class VanProductController extends Controller
 {
-    
+
 
     /**
      * List all products for the logged-in van with optional filters.
@@ -104,23 +104,23 @@ class VanProductController extends Controller
         );
     }
 
-        /**
+    /**
      * Record parts usage by operative
      * POST van/operative/usage/record
      */
-        public function recordUsage(RecordUsageRequest $request, RecordUsageAction $recordUsageAction)
+    public function recordUsage(RecordUsageRequest $request, RecordUsageAction $recordUsageAction)
     {
         $data = $recordUsageAction->execute($request->validated());
 
         return JsonResponseServices::getApiResponse(
             $data,
-            config('constants.TRUE_STATUS'),  
-            '',                               
+            config('constants.TRUE_STATUS'),
+            '',
             config('constants.HTTP_OK')
         );
     }
 
-        /**
+    /**
      * Get all usage history for the logged-in van
      * GET /van/operative/usage/history
      */
@@ -138,5 +138,4 @@ class VanProductController extends Controller
             config('constants.HTTP_OK')
         );
     }
-
 }

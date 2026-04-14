@@ -138,41 +138,28 @@ Route::middleware('transaction.wrapper')->group(function () {
     Route::get('page', [PagesController::class, 'getPage']);
     /*
     *********************************************************************** 
-    * Van API Routes
+    * Van API Routes (With Role Based Guards)
     ***********************************************************************
     */
-    Route::prefix('van')->controller(VanController::class)->group(function () {
-        Route::post('login', 'loginVan');
-
-        Route::middleware('jwt.verify:van')->group(function () {
-            Route::post('list/{vanId}', 'listById');
-            Route::get('stats/{vanId}', 'statsById');
+    Route::prefix('van')->middleware('jwt.verify:van')->group(function () {
+        Route::controller(VanController::class)->group(function () {
+            Route::post('login', 'loginVan')->withoutMiddleware('jwt.verify:van');
+            Route::get('list/{vanId}', 'listById');
             Route::get('dashboard/stats', 'dashboardStats');
             Route::get('activity/recent', 'recentActivities');
         });
-      
-    });   
 
-    Route::prefix('van/product')->controller(VanProductController::class)->group(function () {
-    Route::middleware('jwt.verify:van')->group(function () {
-        Route::get('list/{productId}', 'getProductById'); 
-        Route::get('list', 'listProducts');  
-        Route::get('search', 'searchProducts');
+        Route::prefix('product')->controller(VanProductController::class)->group(function () {
+            Route::get('list', 'listProducts');
+            Route::get('list/{productId}', 'getProductById');
+            Route::get('search', 'searchProducts');
+        });
 
-        
+        Route::prefix('operative')->controller(VanProductController::class)->group(function () {
+            Route::post('usage/record', 'recordUsage');
+            Route::get('usage/history', 'usageHistory');
+        });
     });
-});
-
-    Route::prefix('van/operative')->controller(VanProductController::class)->group(function () {
-    Route::middleware('jwt.verify:van')->group(function () {
-        Route::post('usage/record', 'recordUsage');
-        Route::get('usage/history', 'usageHistory');
-
-        
-    });
-});
-
-
     /*
     *********************************************************************** 
     * API Routes With Simple JWT Authentication (Without Role Based Guards)
@@ -346,7 +333,6 @@ Route::middleware('transaction.wrapper')->group(function () {
 
         // Route::get('keys', [AuthController::class, 'keys']);
     });
-    
 });
 
 /*
@@ -391,10 +377,10 @@ Route::fallback(function () {
 });
 Route::prefix('van_inventory')->controller(VanInventoryController::class)->group(function () {
 
- 
-        Route::get('list', 'index');              
-        Route::get('list/{id}', 'show');          
-        Route::post('create', 'store');           
-        Route::post('update/{id}', 'update');     
-        Route::delete('delete/{id}', 'destroy');  
+
+    Route::get('list', 'index');
+    Route::get('list/{id}', 'show');
+    Route::post('create', 'store');
+    Route::post('update/{id}', 'update');
+    Route::delete('delete/{id}', 'destroy');
 });
