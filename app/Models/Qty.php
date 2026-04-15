@@ -81,6 +81,8 @@ class Qty extends Model
 
     public static function getSellersByGivenParams(int $categoryId, string $city): ?Collection
     {
+        $city = explode(' ', $city);
+
         return self::select([
             'users.id',
             'users.name',
@@ -107,7 +109,7 @@ class Qty extends Model
             ->where('qty.category_id', '=', $categoryId)
             ->where('products.status', '=', ProductStatusEnum::ENABLE) /* Products should be live */
             ->where('users.is_active', '=', User::ACTIVE) /* Sellers should be active */
-            ->where('users.city', '=', $city)
+            ->whereIn('users.city', $city)
             ->distinct() /* Use distinct to select only unique stores */
             ->get();
     }

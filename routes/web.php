@@ -56,6 +56,12 @@ Route::middleware('transaction.wrapper')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     /*
      *********************************************************************** 
+     * Buyer Routes
+     ***********************************************************************
+     */
+    Route::view('/buyer/delete_account_steps', 'buyer.delete-account-steps')->name('buyer.delete.account.steps');
+    /*
+     *********************************************************************** 
      * User Settings Routes
      ***********************************************************************
      */
