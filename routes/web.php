@@ -172,7 +172,7 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::prefix('vans')->group(function () {
             Route::get('/', VansLivewire::class)->name('admin.vans');
             Route::get('/inventories', VanInventoriesLivewire::class)->name('admin.vans.inventories');
-            Route::get('/inventories/add', AddVanInventoryLivewire::class)->name('admin.vans.inventories.add');
+            Route::get('/{vanId}/inventories/add', AddVanInventoryLivewire::class)->name('admin.vans.inventories.add');
             Route::get('/delete', [VanController::class, 'destroy'])->name('admin.vans.del');
             // admin.vans.inventories.del
         });
@@ -194,6 +194,7 @@ Route::middleware('transaction.wrapper')->group(function () {
 
         Route::prefix('orders')->controller(OrderController::class)->group(function () {
             Route::get('/', OrdersLivewire::class)->name('admin.orders');
+            Route::get('/van_inventory', VanInventoriesLivewire::class)->name('admin.orders.van.inventory');
             Route::get('/verified', 'adminOrdersVerified')->name('admin.orders.verified');
             Route::get('/unverified', 'adminOrdersUnverified')->name('admin.orders.unverified');
             Route::get('/complete', 'completeOrders')->name('admin.orders.complete');

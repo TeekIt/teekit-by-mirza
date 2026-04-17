@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Categories;
+use App\Models\Products;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,9 +20,9 @@ class QtyFactory extends Factory
     public function definition(): array
     {
         return [
-            'seller_id' => $this->faker->numberBetween(1, 5000000),
-            'product_id' => $this->faker->numberBetween(1, 1000000),
-            'category_id' => $this->faker->numberBetween(1, 100),
+            'seller_id' => User::inRandomOrder()->first()->id,
+            'product_id' => Products::inRandomOrder()->first()->id,
+            'category_id' => Categories::inRandomOrder()->first()->id,
             'qty' => $this->faker->randomDigit(),
         ];
     }

@@ -119,6 +119,13 @@
                               </a>
                           </li>
                           <li class="nav-item">
+                              <a href="{{ route('admin.orders.van.inventory') }}"
+                                  class="nav-link {{ request()->routeIs('admin.orders.van.inventory') ? 'active' : '' }}">
+                                  <i class="fas fa-gears nav-icon"></i>
+                                  <p>Van Inventory</p>
+                              </a>
+                          </li>
+                          <li class="nav-item">
                               <a href="{{ route('admin.orders.verified') }}"
                                   class="nav-link {{ request()->routeIs('admin.orders.verified') ? 'active' : '' }}">
                                   <i class="fas fa-gears nav-icon"></i>

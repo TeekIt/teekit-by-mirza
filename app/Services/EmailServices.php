@@ -11,6 +11,7 @@ use App\Mail\ProductByBuyerOrderDetailsToNearBySellersMail;
 use App\Mail\RegeneratedStripeConnectAccMail;
 use App\Mail\SellerApprovedMail;
 use App\Mail\StripeConnectAccMail;
+use App\Mail\VanInventoryOrderMail;
 use App\Models\Orders;
 use App\Models\OrdersFromOtherSeller;
 use App\Models\User;
@@ -21,7 +22,7 @@ final class EmailServices
 {
     public static function getVerificationLink($verificationCode)
     {
-        return url('/').'/auth/verify?token='.$verificationCode;
+        return url('/') . '/auth/verify?token=' . $verificationCode;
     }
 
     public static function sendRegeneratedStripeConnectAccMail(User $user)
@@ -55,7 +56,7 @@ final class EmailServices
     {
         $verificationCode = Crypt::encrypt($user->email);
         $accountVerificationLink = self::getVerificationLink($verificationCode);
-        
+
         Mail::to([config('constants.ADMIN_EMAIL'), 'mirzaabdullahizhar.teekit@gmail.com'])->send(
             new NewSellerRegistrationMail($user, $sellerType, $accountVerificationLink, $parentSeller)
         );
@@ -81,5 +82,14 @@ final class EmailServices
     public static function sendOrderHasBeenCancelledMail(Orders|OrdersFromOtherSeller $order)
     {
         Mail::to([$order->buyer->email])->send(new OrderIsCanceledMail($order));
+    }
+
+    public static function sendVanInventoryOrderMail(
+        string $sellerEmail,
+        string $sellerName,
+        array $orderItems,
+        string $vanLocation
+    ): void {
+        Mail::to($sellerEmail)->send(new VanInventoryOrderMail($sellerName, $orderItems, $vanLocation));
     }
 }

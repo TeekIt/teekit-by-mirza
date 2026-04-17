@@ -63,7 +63,7 @@ final class MoveOrderToOtherNearBySellersAction
     private function setProductType(Orders|OrdersFromOtherSeller $order): void
     {
         $this->productType = ($order instanceof Orders) ?
-            $order->order_items[0]->product_belongs_to_type :
+            $order->orderItems[0]->product_belongs_to_type :
             $order->product_belongs_to_type;
     }
 
@@ -115,7 +115,7 @@ final class MoveOrderToOtherNearBySellersAction
     private function getProductCategoryId(): int
     {
         if ($this->order instanceof Orders) {
-            return $this->order->order_items[0]->product->category_id;
+            return $this->order->orderItems[0]->product->category_id;
         }
         /* OrdersFromOtherSeller has morph relation "product" */
         return $this->order->product->category_id;
@@ -145,7 +145,7 @@ final class MoveOrderToOtherNearBySellersAction
     private function updateInitialTotal(): void
     {
         /* Update initial_total in case of ProductsByBuyer order */
-        $this->order->initial_total = $this->order->order_items[0]->product_price * $this->order->order_items[0]->product_qty;
+        $this->order->initial_total = $this->order->orderItems[0]->product_price * $this->order->orderItems[0]->product_qty;
     }
 
     private function moveOrderToNearbySellers(array $nearbySellers): void
@@ -154,14 +154,14 @@ final class MoveOrderToOtherNearBySellersAction
         foreach ($nearbySellers as $singleIndex) {
             $this->addIntoOrdersFromOtherSeller(
                 order: $this->order,
-                orderItem: $this->order->order_items[0],
+                orderItem: $this->order->orderItems[0],
                 nearBySellerId: $singleIndex['id']
             );
             /* WhatsApp order details to nearby sellers */
             TwilioSmsServices::sendWhatsAppMessageWithMedia(
                 receiverNumber: $singleIndex['country_code'] . $singleIndex['business_phone'],
                 message: $this->buildWhatsAppMessageBody(),
-                mediaUrl: [asset(config('constants.BUCKET') . $this->order->order_items[0]->product->feature_img)]
+                mediaUrl: [asset(config('constants.BUCKET') . $this->order->orderItems[0]->product->feature_img)]
             );
         }
         /* Email order details to nearby sellers */
@@ -200,7 +200,7 @@ final class MoveOrderToOtherNearBySellersAction
          * If there's only 1 item in the order, remove the whole order,
          * else only remove the selected item from current order items
          */
-        ($this->order->order_items->count() == 1) ?
+        ($this->order->orderItems->count() == 1) ?
             Orders::remove($this->order->id) :
             OrderItems::remove($this->orderItem->id);
     }
@@ -246,7 +246,7 @@ final class MoveOrderToOtherNearBySellersAction
 
     private function buildWhatsAppMessageBody(): string
     {
-        $product = $this->order->order_items[0]->product;
+        $product = $this->order->orderItems[0]->product;
         $colors = ProductServices::jsonDecodeColors($product->colors);
 
         $message = "*Hi Dear Seller,*\n\n";
@@ -260,7 +260,7 @@ final class MoveOrderToOtherNearBySellersAction
         $message .= "*ITEM NEEDED:*\n";
         $message .= "─────────────────────────────\n";
         $message .= "*Product Name:* {$product->product_name}\n";
-        $message .= "*Qty:* {$this->order->order_items[0]->product_qty}\n";
+        $message .= "*Qty:* {$this->order->orderItems[0]->product_qty}\n";
         $message .= "*Category:* {$product->category?->category_name}\n";
         $message .= "*Budget:* £{$product->max_price}\n";
         $message .= "*Weight:* {$product->weight}kg\n";
