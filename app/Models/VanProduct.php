@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Van;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use App\Models\Categories;
 use App\Models\VanOperativeProductUsage;
+use Illuminate\Support\Collection;
 class VanProduct extends Model
 {
     use HasFactory;
@@ -80,50 +82,35 @@ class VanProduct extends Model
      * @param int $id
      * @return VanProduct|null
      */
-    public static function getById(int $id)
+   public static function getById(int $productId, int $vanId)
     {
-        return self::with(['seller', 'van', 'category'])
-                   ->find($id);
+    return self::where('id', $productId)
+        ->where('van_id', $vanId)
+        ->first();
     }
-
     /**
-     * List products with optional filters
+     * Search products for a van by query string
      *
-     * Filters: category_id, status, critical/out_of_stock handling
-     *
-     * @param array $filters
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @param int $vanId
+     * @param string $query
+     * @return Collection
      */
-    public function listProducts(array $filters = [])
+
+    public static function searchByVan(int $vanId, string $query)
     {
-        $query = self::with(['category', 'seller']);
-
-        // Category filter
-        if (!empty($filters['category_id'])) {
-            $query->where('category_id', $filters['category_id']);
-        }
-
-        // Status filter with dynamic threshold handling
-        if (!empty($filters['status'])) {
-            $status = strtolower($filters['status']);
-
-            if ($status === 'critical') {
-                $query->whereColumn('quantity', '<=', 'min_threshold')
-                      ->where('quantity', '>', 0);
-            } elseif ($status === 'out_of_stock') {
-                $query->where('quantity', 0);
-            } else {
-                $query->where('status', $status);
-            }
-        }
-
-        $products = $query->latest()->get();
-
-        // Attach dynamic status for every product
-        $products->transform(fn($product) => $product->append('dynamic_status'));
-
-        return $products;
+        return self::query()
+            ->where('van_id', $vanId)
+            ->when($query, function ($q) use ($query) {
+                $q->where(function ($sub) use ($query) {
+                    $sub->where('product_name', 'like', "%{$query}%")
+                        ->orWhere('sku', 'like', "%{$query}%")
+                        ->orWhere('brand', 'like', "%{$query}%");
+                });
+            })
+            ->latest()
+            ->get();
     }
+   
 
     /**
      * Fetch single product by ID
@@ -214,4 +201,96 @@ class VanProduct extends Model
         $this->decrement('quantity', $quantityUsed);
         return true;
     }
+    /**
+     * Fetch recent products for a specific van
+     *
+     * @param int $vanId
+     * @param array $columns
+     * @return Collection
+     */
+    public static function getRecentByVan(int $vanId, array $columns = ['*']): Collection
+    {
+        return self::where('van_id', $vanId)
+            ->latest('updated_at')
+            ->limit(10)
+            ->get($columns);
+    }
+
+        /**
+        * Fetch products for a van with optional filters
+        *
+        * @param array $filters
+        * @param int $vanId
+        * @return Collection
+        */
+  public static function getFilteredProducts(array $filters, int $vanId)
+{
+    $query = self::query()->where('van_id', $vanId);
+
+    // Category Filter
+    if (!empty($filters['category_id'])) {
+        $query->where('category_id', (int) $filters['category_id']);
+    }
+
+    // Status Filter (Fixed - whereColumn ki jagah normal where)
+    if (!empty($filters['status'])) {
+        $status = strtolower(trim($filters['status']));
+
+        if ($status === 'in_stock') {
+            $query->where('quantity', '>', 'min_threshold');
+        } 
+        elseif ($status === 'critical') {
+            $query->where('quantity', '<=', 'min_threshold')
+                  ->where('quantity', '>', 0);
+        } 
+        elseif (in_array($status, ['out_of_stock', 'outofstock'])) {
+            $query->where('quantity', '=', 0);
+        }
+    }
+
+    return $query->orderBy('updated_at', 'desc')->get();
+}
+
+  public static function add(Orders $order, int $vanId): void
+    {
+    DB::transaction(function () use ($order, $vanId) {
+        foreach ($order->order_items as $item) {
+    $product = $item->product;
+
+    if (! $product) {
+        continue;
+    }
+            VanProduct::create([
+                'seller_id' => $order->seller_id,
+                'van_id' => $vanId,
+                'category_id' => $item->product->category_id ?? null,
+                'product_name' => $item->product->name ?? 'N/A',
+                'sku' => $item->product->sku ?? 'N/A',
+                'price' => $item->price ?? 0,
+                'quantity' => $item->quantity ?? 1,
+                'feature_img' => $item->product->feature_img ?? null,
+                'brand' => $item->product->brand ?? null,
+                'weight' => $item->product->weight ?? null,
+                'size' => $item->product->size ?? null,
+                'status' => 'active',
+                'contact' => $order->phone_number ?? '',
+                'colors' => isset($item->product->colors)
+                 ? json_encode($item->product->colors)
+                    : null,
+                'bike' => null,
+                'car' => null,
+                'height' => $item->product->height ?? null,
+                'width' => $item->product->width ?? null,
+                'length' => $item->product->length ?? null,
+                'job_reference' => $order->id,
+                'discount_percentage' => 0,
+                'featured' => 0,
+            ]);
+             }
+
+        $order->order_status = 'complete';
+        $order->save();
+    });
+}
+    
 }

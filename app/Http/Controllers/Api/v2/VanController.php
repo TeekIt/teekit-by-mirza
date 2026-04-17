@@ -43,9 +43,9 @@ class VanController extends Controller
         );
     }
 
-    public function dashboardStats(FetchDashboardStatsAction $action)
+    public function dashboardStats(FetchDashboardStatsAction $fetchDashboardStatsAction): JsonResponse
     {
-        $data = $action->execute(auth()->guard('van')->user()->id);
+        $data = $fetchDashboardStatsAction->execute(auth()->guard('van')->user()->id);
 
         return JsonResponseServices::getApiResponse(
             $data,
@@ -55,9 +55,14 @@ class VanController extends Controller
         );
     }
 
-    public function recentActivities(FetchRecentActivityAction $action)
-    {
-        $data = $action->execute(auth()->guard('van')->user()->id);
+    public function recentActivities(FetchRecentActivityAction $fetchRecentActivityAction): JsonResponse
+        {
+        $columns = ['product_name', 'job_reference', 'quantity', 'updated_at'];
+
+        $data = $fetchRecentActivityAction->execute(
+            auth()->guard('van')->user()->id,
+            $columns
+        );
 
         return JsonResponseServices::getApiResponse(
             $data,

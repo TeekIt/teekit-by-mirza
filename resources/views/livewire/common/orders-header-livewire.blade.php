@@ -234,6 +234,26 @@
         <thead>
             <tr>
                 <div class="d-flex flex-column-reverse flex-md-row justify-content-between pb-4 gap-1">
+                        @if($isVanInventoryPage)
+                       <div>
+                    @if ($order->order_status === OrderStatusEnum::COMPLETE->value)
+                        <button class="btn btn-primary" disabled>Completed</button>
+                    @elseif ($order->order_status === OrderStatusEnum::CANCELLED->value)
+                        <button class="btn btn-dark" disabled>Cancelled</button>
+                    @else
+                        <button class="btn btn-success"
+                            wire:click="orderIsCompleted({{ $order->id }})">
+                            Mark Complete
+                        </button>
+
+                        <button class="btn btn-danger"
+                            wire:click="cancelOrder({{ $order->id }})">
+                        Mark Cancel
+                        </button>
+                    @endif
+                </div>
+
+                    @else
                     @if ($order->disabled)
                         <div class="col-12">
                             <div class="alert alert-secondary" role="alert">
@@ -449,6 +469,8 @@
                         </div>
                     </td>
                 </tr>
+            @endif
+
             @endif
 
             <tr>

@@ -47,5 +47,18 @@ class VanOperativeProductUsage extends Model
     {
         return $this->belongsTo(VanProduct::class, 'van_product_id');
     }
+    /**
+     * Get usage history for a specific van
+     *
+     * @param int $vanId
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getHistoryByVan(int $vanId)
+    {
+        return self::where('van_id', $vanId)
+            ->orderBy('used_at', 'desc')
+            ->with(['van:id,operative'])
+            ->get();
+    }
     
 }

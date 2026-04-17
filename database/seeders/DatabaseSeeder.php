@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             OrderItemsSeeder::class,
             GophrDeliverySeeder::class,
             VanProductSeeder::class,
+            InventoryOrderItemSeeder::class,
         ]);
     }
 }

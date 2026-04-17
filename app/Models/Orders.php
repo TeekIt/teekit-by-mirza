@@ -396,4 +396,5 @@ class Orders extends Model
             ->where('id', '=', $id)
             ->firstOrFail();
     }
+
 }

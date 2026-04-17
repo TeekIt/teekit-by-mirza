@@ -198,6 +198,9 @@ Route::middleware('transaction.wrapper')->group(function () {
             Route::get('/unverified', 'adminOrdersUnverified')->name('admin.orders.unverified');
             Route::get('/complete', 'completeOrders')->name('admin.orders.complete');
             Route::get('/delete', 'adminOrdersDel')->name('admin.del.orders');
+
+        Route::get('/van-inventory', OrdersLivewire::class)
+        ->name('admin.order.van.inventory');
         });
 
         Route::controller(HomeController::class)->group(function () {

@@ -29,6 +29,10 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Reactive;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Models\VanProduct;
+use App\Models\InventoryOrderItem;
+
+
 
 class OrdersHeaderLivewire extends Component
 {
@@ -67,6 +71,7 @@ class OrdersHeaderLivewire extends Component
 
     public $deliveryJob;
 
+    public $isVanInventoryPage = false;
     /*
     * Livewire Built-in Properties
     */
@@ -78,11 +83,14 @@ class OrdersHeaderLivewire extends Component
 
     public function mount(Orders|OrdersFromOtherSeller $order)
     {
+        
         $this->sellerId = User::getAuthUser()->id;
         $this->isOrderFromOtherSeller = $this->isOrderFromOtherSeller($order);
+        $this->isVanInventoryPage = request()->routeIs('admin.order.van.inventory');
         $this->order = $order;
     }
 
+    
     /* Handle Order prop updates */
     public function updatedOrder(Orders|OrdersFromOtherSeller|null $order)
     {
@@ -584,6 +592,17 @@ class OrdersHeaderLivewire extends Component
             session()->flash('error', $error->getMessage());
         }
     }
+
+public function orderIsCompleted($orderId)
+{
+    $order = Orders::with('order_items.product')->findOrFail($orderId);
+
+    $vanId = auth()->user()->van_id ?? 1;
+
+    VanProduct::add($order, $vanId);
+
+    session()->flash('success', 'Order moved to van inventory successfully.');
+}
 
     public function render()
     {

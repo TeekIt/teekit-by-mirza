@@ -7,6 +7,7 @@ use App\Models\GophrDelivery;
 use App\Models\OrderItems;
 use App\Models\Orders;
 use App\Models\User;
+use App\Models\InventoryOrderItem;
 use App\Services\GoogleMapServices;
 use App\Services\GophrDeliveryServices;
 use Carbon\Carbon;
@@ -56,6 +57,8 @@ class OrdersLivewire extends Component
 
     public $errorMessage;
 
+    public $isVanInventoryPage = false;
+
     /*
     * Livewire Built-in Properties
     */
@@ -76,6 +79,7 @@ class OrdersLivewire extends Component
         }
 
         $this->requestOrderId = $request->requestOrderId;
+        $this->isVanInventoryPage = request()->routeIs('admin.order.van.inventory');
 
         $this->resetAllPaginators();
     }
@@ -273,7 +277,11 @@ class OrdersLivewire extends Component
 
     public function render()
     {
-        try {
+     try {        
+            if ($this->isVanInventoryPage) {
+            $data = InventoryOrderItem::getVanInventoryOrders();
+        } else {
+
             if (! User::isSuperAdmin()) {
                 $data = Orders::getOrdersForSellerView(
                     orderId: $this->isSearchByIdSet(),
@@ -286,15 +294,17 @@ class OrdersLivewire extends Component
                     orderBy: 'desc',
                 );
             }
-
-            return view('livewire.common.orders-livewire', compact('data'));
-        } catch (Exception $error) {
-            report($error);
-            $this->errorMessage = config('constants.SEARCH_FAILED');
-
-            $data = [];
-
-            return view('livewire.common.orders-livewire', compact('data'));
         }
+
+        return view('livewire.common.orders-livewire', compact('data'));
+
+    } catch (Exception $error) {
+        report($error);
+        $this->errorMessage = config('constants.SEARCH_FAILED');
+
+        $data = [];
+
+        return view('livewire.common.orders-livewire', compact('data'));
     }
+}
 }
