@@ -6,10 +6,10 @@ use App\Models\VanProduct;
 
 final class FetchSingleProductAction
 {
-    public function execute(int $productId, int $vanId)
-    {
-        return VanProduct::where('id', $productId)
-                         ->where('van_id', $vanId)
-                         ->first();
-    }
+    public function execute(int $productId)
+{
+    $van = auth()->guard('van')->user();
+
+    return VanProduct::getById($productId, $van->id);
+}
 }

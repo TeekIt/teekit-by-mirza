@@ -3,27 +3,22 @@
 namespace App\Actions\VanProduct;
 
 use App\Models\VanProduct;
-
+use Illuminate\Http\Request;
 final class ListProductsAction
 {
-    public function execute(array $filters, int $vanId)
+     public function execute(Request $request)
     {
-        return VanProduct::query()
-            ->where('van_id', $vanId)
-            ->when(!empty($filters['category_id']), function ($query) use ($filters) {
-                $query->where('category_id', $filters['category_id']);
-            })
-            ->when(!empty($filters['status']), function ($query) use ($filters) {
-                
-                if ($filters['status'] === 'in_stock') {
-                    $query->whereColumn('quantity', '>', 'min_threshold');
-                } elseif ($filters['status'] === 'critical') {
-                    $query->whereColumn('quantity', '<=', 'min_threshold')
-                          ->where('quantity', '>', 0);
-                } elseif ($filters['status'] === 'out_of_stock') {
-                    $query->where('quantity', 0);
-                }
-            })
-            ->get();
+        // Get logged-in van using auth guard
+        $van = auth()->guard('van')->user();
+        $vanId = $van->id;
+
+        $filters = [
+            'category_id' => $request->query('categoryID'),
+            'status' => $request->query('status'),
+            'id' => $request->query('productId'),
+        ];
+
+        // Call the model's getFilteredProducts method
+        return VanProduct::getFilteredProducts($filters, $vanId);
     }
 }

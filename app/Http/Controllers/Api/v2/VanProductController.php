@@ -15,6 +15,7 @@ use App\Http\Requests\VanProduct\SyncRequest;
 use App\Http\Requests\VanProduct\ListByIdRequest;
 use App\Http\Requests\VanProduct\ListProductByIdRequest;
 use App\Http\Requests\ProductUsageRecord\RecordUsageRequest;
+use App\Http\Requests\VanProduct\ListProductsRequest;
 use App\Services\JsonResponseServices;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -31,27 +32,18 @@ class VanProductController extends Controller
      * @param ListProductsAction $action
      * @return JsonResponse
      */
-    public function listProducts(Request $request, ListProductsAction $action): JsonResponse
-    {
-        // Get logged-in van using auth guard
-        $van = auth()->guard('van')->user();
-        $vanId = $van->id;
+    public function list(ListProductsRequest $request, ListProductsAction $listProductsAction): JsonResponse
+{
+    // Execute action to fetch filtered products
+    $data = $listProductsAction->execute($request);
 
-        $filters = [
-            'category_id' => $request->query('categoryID'),
-            'status' => $request->query('status')
-        ];
-
-        // Execute action to fetch filtered products for this van
-        $data = $action->execute($filters, $vanId);
-
-        return JsonResponseServices::getApiResponse(
-            $data,
-            $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            '', // Empty message
-            config('constants.HTTP_OK')
-        );
-    }
+    return JsonResponseServices::getApiResponse(
+        $data,
+        $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+        '', // Empty message
+        config('constants.HTTP_OK')
+    );
+}
 
     /**
      * Fetch single product details by ID for the logged-in van.
@@ -60,14 +52,10 @@ class VanProductController extends Controller
      * @param FetchSingleProductAction $action
      * @return JsonResponse
      */
-    public function getProductById(int $productId, FetchSingleProductAction $action): JsonResponse
+    public function listById(ListProductByIdRequest $request, FetchSingleProductAction $action): JsonResponse
     {
-        // Get logged-in van using auth guard
-        $van = auth()->guard('van')->user();
-        $vanId = $van->id;
-
-        // Execute action to fetch product belonging to this van
-        $data = $action->execute($productId, $vanId);
+        
+        $data = $action->execute($productId);
 
         return JsonResponseServices::getApiResponse(
             $data ?? [],
@@ -84,31 +72,25 @@ class VanProductController extends Controller
      * @param SearchProductsAction $searchProductsAction
      * @return JsonResponse
      */
-    public function searchProducts(Request $request, SearchProductsAction $searchProductsAction): JsonResponse
-    {
-        // Get logged-in van using auth guard
-        $van = auth()->guard('van')->user();
-        $vanId = $van->id;
+    public function search(Request $request, SearchProductsAction $action): JsonResponse
+{
+    $query = $request->query('q', '');
 
-        // Get search query from request
-        $query = $request->query('q', '');
+    $data = $action->execute($query);
 
-        // Execute action to search products for this van
-        $data = $searchProductsAction->execute($query, $vanId);
-
-        return JsonResponseServices::getApiResponse(
-            $data,
-            $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            '', // Empty message
-            config('constants.HTTP_OK')
-        );
-    }
+    return JsonResponseServices::getApiResponse(
+        $data,
+        $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+        '',
+        config('constants.HTTP_OK')
+    );
+}
 
     /**
      * Record parts usage by operative
      * POST van/operative/usage/record
      */
-    public function recordUsage(RecordUsageRequest $request, RecordUsageAction $recordUsageAction)
+    public function recordUsage(RecordUsageRequest $request, RecordUsageAction $recordUsageAction): JsonResponse
     {
         $data = $recordUsageAction->execute($request->validated());
 
@@ -124,17 +106,14 @@ class VanProductController extends Controller
      * Get all usage history for the logged-in van
      * GET /van/operative/usage/history
      */
-    public function usageHistory(GetUsageHistoryAction $action)
+    public function usageHistory(GetUsageHistoryAction $action): JsonResponse
     {
-        $van = auth()->guard('van')->user();
-        $vanId = $van->id;
-
-        $data = $action->execute($vanId);
+        $data = $action->execute();
 
         return JsonResponseServices::getApiResponse(
             $data,
             config('constants.TRUE_STATUS'),
-            '', // empty message
+            '',
             config('constants.HTTP_OK')
         );
     }

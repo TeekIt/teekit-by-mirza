@@ -7,7 +7,7 @@ use App\Models\VanProduct;
 use Illuminate\Support\Facades\DB;
 
 final class RecordUsageAction{
-   public function execute(array $validated)
+    public function execute(array $validated)
     {
         $product = VanProduct::find($validated['productId']);
 
@@ -26,20 +26,13 @@ final class RecordUsageAction{
                 'message' => 'Not enough stock available'
             ];
         }
-
-        // Save usage record
-        VanOperativeProductUsage::create([
-            'van_id'         => $validated['vanId'],
-            'van_product_id'     => $validated['productId'],
-            'quantity_used'  => $validated['quantityUsed'],
-            'job_reference'  => $validated['jobReference'],
-            'used_at'        => $validated['timestamp'] ?? now(),
-        ]);
+        VanOperativeProductUsage::add($validated);
 
         return [
-            
+            'success' => true,
             'remaining_stock' => $product->fresh()->quantity,
             'job_reference'   => $validated['jobReference']
         ];
     }
+        
 }

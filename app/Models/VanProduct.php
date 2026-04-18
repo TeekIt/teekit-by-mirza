@@ -231,22 +231,25 @@ class VanProduct extends Model
     if (!empty($filters['category_id'])) {
         $query->where('category_id', (int) $filters['category_id']);
     }
+    if (!empty($filters['id'])) {
+        $query->where('id', (int) $filters['id']);
+    }
 
     // Status Filter (Fixed - whereColumn ki jagah normal where)
-    if (!empty($filters['status'])) {
-        $status = strtolower(trim($filters['status']));
+if (!empty($filters['status'])) {
+    $status = strtolower(trim($filters['status']));
 
-        if ($status === 'in_stock') {
-            $query->where('quantity', '>', 'min_threshold');
-        } 
-        elseif ($status === 'critical') {
-            $query->where('quantity', '<=', 'min_threshold')
-                  ->where('quantity', '>', 0);
-        } 
-        elseif (in_array($status, ['out_of_stock', 'outofstock'])) {
-            $query->where('quantity', '=', 0);
-        }
+    if ($status === 'in_stock') {
+        $query->whereColumn('quantity', '>', 'min_threshold');
+    } 
+    elseif ($status === 'critical') {
+        $query->whereColumn('quantity', '<=', 'min_threshold')
+              ->where('quantity', '>', 0);
+    } 
+    elseif (in_array($status, ['out_of_stock', 'outofstock'])) {
+        $query->where('quantity', '=', 0);
     }
+}
 
     return $query->orderBy('updated_at', 'desc')->get();
 }

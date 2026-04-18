@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class VanOperativeProductUsage extends Model
 {
      use HasFactory, SoftDeletes;
-    protected $table = 'operative_product_usages';
+    protected $table = 'van_operative_product_usages';
     /**
      * Fields protected from mass assignment
      *
@@ -60,5 +60,22 @@ class VanOperativeProductUsage extends Model
             ->with(['van:id,operative'])
             ->get();
     }
+/**
+     * Add a new usage record
+     *
+     * @param array $data
+     * @return self
+     */
+    public static function add(array $data): self
+        {
+            return self::create([
+                'van_id'        => $data['vanId'],
+                'van_product_id'=> $data['productId'],
+                'quantity_used' => $data['quantityUsed'],
+                'job_reference' => $data['jobReference'],
+                'used_at'       => $data['timestamp'] ?? now(),
+            ]);
+        }
+
     
 }

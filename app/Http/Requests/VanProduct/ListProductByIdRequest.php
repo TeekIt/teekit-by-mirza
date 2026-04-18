@@ -1,22 +1,32 @@
 <?php
 
 namespace App\Http\Requests\VanProduct;
+use Illuminate\Validation\Rule;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ListProductsRequest extends FormRequest
+class ListProductByIdRequest extends FormRequest
 {
+
+    protected function prepareForValidation()
+    {
+        // Merge route parameter into request data
+        $this->merge([
+            'productId' => $this->route('productId'),
+        ]);
+    }
     public function rules(): array
     {
+        $vanId = auth()->guard('van')->id();
+
         return [
-            'productId' => 'nullable|integer|exists:van_products,id',
+            'productId' => [
+                'required',
+                'integer',
+                Rule::exists('van_products', 'id')->where('van_id', $vanId),
+            ],
         ];
     }
 
-    public function messages(): array
-    {
-        return [
-            'productId.exists' => 'The selected product does not exist.',
-        ];
-    }
+    
 }

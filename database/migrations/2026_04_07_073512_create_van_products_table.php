@@ -40,6 +40,9 @@ return new class extends Migration
             
             $table->string('job_reference')->nullable();
             $table->integer('quantity')->default(0);
+             $table->integer('min_threshold')
+      ->default(10)
+      ->comment('Minimum stock threshold for inventory alerts');
              
             
             $table->timestamps();
