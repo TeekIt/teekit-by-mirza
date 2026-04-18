@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Web\v1\AdminController;
 use App\Http\Controllers\Web\v1\CategoriesController;
@@ -23,6 +24,7 @@ use App\Livewire\Admin\SearchVanInventoriesLivewire;
 use App\Livewire\Admin\VanInventoriesLivewire;
 use App\Livewire\Admin\VansLivewire;
 use App\Livewire\Common\OrdersLivewire;
+use App\Livewire\Company\CompanyDashboardLivewire;
 use App\Livewire\Sellers\GeneralSettingsLivewire;
 use App\Livewire\Sellers\InventoryLivewire;
 use App\Livewire\Sellers\OrdersFromOtherSellersLivewire;
@@ -150,6 +152,28 @@ Route::middleware('transaction.wrapper')->group(function () {
     });
     /*
      *********************************************************************** 
+     * Van Routes
+     ***********************************************************************
+     */
+    Route::prefix('vans')->middleware(['auth', 'auth.company'])->group(function () {
+        Route::get('/', VansLivewire::class)->name('vans');
+        Route::get('/inventories', VanInventoriesLivewire::class)->name('vans.inventories');
+        Route::get('/{vanId}/inventories/add', AddVanInventoryLivewire::class)->name('vans.inventories.add');
+        Route::get('/delete', [VanController::class, 'destroy'])->name('vans.del');
+        // vans.inventories.del
+
+        Route::prefix('company')->group(function () {
+            Route::post('/register', [RegisterController::class, 'registerVanCompany'])
+                ->name('vans.company.register')
+                ->withoutMiddleware(['auth', 'auth.company']);
+
+            Route::get('/dashboard', CompanyDashboardLivewire::class)->name('vans.company.dashboard');
+            Route::get('/orders', OrdersLivewire::class)->name('vans.company.orders');
+            Route::get('/settings', GeneralSettingsLivewire::class)->name('vans.company.settings');
+        });
+    });
+    /*
+     *********************************************************************** 
      * Admin Routes
      ***********************************************************************
      */
@@ -167,14 +191,6 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::prefix('notifications')->controller(NotificationsController::class)->group(function () {
             Route::get('/', 'notificationsHome')->name('admin.notifications');
             Route::post('/send', 'notificationsSend')->name('admin.notifications.send');
-        });
-
-        Route::prefix('vans')->group(function () {
-            Route::get('/', VansLivewire::class)->name('admin.vans');
-            Route::get('/inventories', VanInventoriesLivewire::class)->name('admin.vans.inventories');
-            Route::get('/{vanId}/inventories/add', AddVanInventoryLivewire::class)->name('admin.vans.inventories.add');
-            Route::get('/delete', [VanController::class, 'destroy'])->name('admin.vans.del');
-            // admin.vans.inventories.del
         });
 
         Route::controller(AdminController::class)->group(function () {

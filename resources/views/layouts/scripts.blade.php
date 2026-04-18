@@ -56,11 +56,11 @@
     @endif
 
     @php
-        $routesArray = ['seller.request.delivery.form', 'admin.vans.inventories.add'];
+        $routesArray = ['seller.request.delivery.form', 'vans.inventories.add'];
     @endphp
     @if (request()->routeIs($routesArray))
         <script>
-            const isVanInventoryPage = @json(request()->routeIs('admin.vans.inventories.add'));
+            const isVanInventoryPage = @json(request()->routeIs('vans.inventories.add'));
 
             /* Initialize CustomGoogleMapsClass for pickup address autocomplete */
             const pickupGoogleMapsClass = new CustomGoogleMapsClass({
@@ -513,7 +513,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "{{ route('admin.vans.del') }}",
+                            url: "{{ route('vans.del') }}",
                             type: "get",
                             data: {
                                 "vans": vans

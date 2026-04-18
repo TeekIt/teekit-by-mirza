@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
@@ -64,7 +65,7 @@ class LoginController extends Controller
             /* Make sure the user is active */
             if ($user->is_active && $this->attemptLogin($request) && $user->email_verified_at != null) {
                 /* Send the normal successful login response */
-                if (Gate::allows('seller') || Gate::allows('child_seller') || Gate::allows('superadmin')) {
+                if (in_array($user->role_id, array_column(UserRoleEnum::cases(), 'value'))) {
                     return $this->sendLoginResponse($request);
                 } else {
                     return redirect()
@@ -72,6 +73,19 @@ class LoginController extends Controller
                         ->withInput($request->only($this->username(), 'remember'))
                         ->withErrors(['active' => 'WARNING! You cannot access private pages.']);
                 }
+                // if (
+                //     Gate::allows('seller') ||
+                //     Gate::allows('child_seller') || 
+                //     Gate::allows('company') || 
+                //     Gate::allows('superadmin')
+                // ) {
+                //     return $this->sendLoginResponse($request);
+                // } else {
+                //     return redirect()
+                //         ->route('login')
+                //         ->withInput($request->only($this->username(), 'remember'))
+                //         ->withErrors(['active' => 'WARNING! You cannot access private pages.']);
+                // }
             } else {
                 /*
                 Increment the failed login attempts and redirect back to the

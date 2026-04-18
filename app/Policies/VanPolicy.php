@@ -13,8 +13,7 @@ class VanPolicy
      */
     public function viewAny(): bool
     {
-        return User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value ||
-            User::getAuthUser()->role_id === UserRoleEnum::COMPANY->value;
+        return User::getAuthUser()->role_id === UserRoleEnum::COMPANY->value;
     }
 
     /**

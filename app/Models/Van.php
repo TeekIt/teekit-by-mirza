@@ -67,6 +67,16 @@ class Van extends Authenticatable implements JWTSubject
     /**
      * Relations
      */
+    public function vanProducts()
+    {
+        return $this->hasMany(VanProduct::class, 'van_id');
+    }
+    
+    public function activeVanProducts()
+    {
+        return $this->hasMany(VanProduct::class, 'van_id')
+            ->where('status', 'active');
+    }
 
     /**
      * Helpers
@@ -166,8 +176,12 @@ class Van extends Authenticatable implements JWTSubject
         return self::select($columns)->where('id', '=', $id)->firstOrFail();
     }
 
-    public static function getAll(OrderByEnum $orderBy, string $search = '', array $columns = ['*']): LengthAwarePaginator
-    {
+    public static function getAll(
+        OrderByEnum $orderBy,
+        string $search = '',
+        ?int $companyId = null,
+        array $columns = ['*']
+    ): LengthAwarePaginator {
         return self::select($columns)
             ->when($search, function ($query) use ($search) {
                 $search = trim(mb_strtolower($search));
@@ -177,18 +191,11 @@ class Van extends Authenticatable implements JWTSubject
                         ->orWhere('number_plate', 'like', '%' . $search . '%');
                 });
             })
+            ->when($companyId , function($query) use ($companyId) {
+                $query->where('company_id', '=', $companyId);
+            })
             ->orderBy('created_at', $orderBy->value)
             ->paginate(10);
-    }
-    //relationship with van products
-    public function vanProducts()
-    {
-        return $this->hasMany(VanProduct::class, 'van_id');
-    }
-    public function activeVanProducts()
-    {
-        return $this->hasMany(VanProduct::class, 'van_id')
-                ->where('status', 'active');
     }
 
     public static function getDetailsById(int $vanId)

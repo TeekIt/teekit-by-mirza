@@ -8,7 +8,7 @@ final class FetchDashboardStatsAction
 {
     public function execute(int $vanId): array
     {
-        $products = VanProduct::where('van_id', $vanId)->get();
+        $products = VanProduct::where('van_id', '=', $vanId)->get();
 
         $totalItems = $products->count();
 
