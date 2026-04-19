@@ -277,34 +277,33 @@ class OrdersLivewire extends Component
 
     public function render()
     {
-     try {        
+        try {
             if ($this->isVanInventoryPage) {
-            $data = InventoryOrderItem::getVanInventoryOrders();
-        } else {
-
-            if (! User::isSuperAdmin()) {
-                $data = Orders::getOrdersForSellerView(
-                    orderId: $this->isSearchByIdSet(),
-                    sellerId: $this->sellerId,
-                    orderBy: 'desc',
-                );
+                $data = InventoryOrderItem::getVanInventoryOrders();
             } else {
-                $data = Orders::getOrdersForSuperAdminView(
-                    orderId: $this->isSearchByIdSet(),
-                    orderBy: 'desc',
-                );
+
+                if (! User::isSuperAdmin()) {
+                    $data = Orders::getOrdersForSellerView(
+                        orderId: $this->isSearchByIdSet(),
+                        sellerId: $this->sellerId,
+                        orderBy: 'desc',
+                    );
+                } else {
+                    $data = Orders::getOrdersForSuperAdminView(
+                        orderId: $this->isSearchByIdSet(),
+                        orderBy: 'desc',
+                    );
+                }
             }
+
+            return view('livewire.common.orders-livewire', compact('data'));
+        } catch (Exception $error) {
+            report($error);
+            $this->errorMessage = config('constants.SEARCH_FAILED');
+
+            $data = [];
+
+            return view('livewire.common.orders-livewire', compact('data'));
         }
-
-        return view('livewire.common.orders-livewire', compact('data'));
-
-    } catch (Exception $error) {
-        report($error);
-        $this->errorMessage = config('constants.SEARCH_FAILED');
-
-        $data = [];
-
-        return view('livewire.common.orders-livewire', compact('data'));
     }
-}
 }

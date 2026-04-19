@@ -150,7 +150,6 @@ Route::middleware('transaction.wrapper')->group(function () {
         });
 
         Route::prefix('product')->controller(VanProductController::class)->group(function () {
-            
             Route::get('list', 'list');
             Route::get('list/{productId}', 'listById')->whereNumber('productId');
             Route::get('search', 'search');
@@ -375,13 +374,4 @@ Route::fallback(function () {
         'API Not Found.',
         config('constants.HTTP_NOT_FOUND')
     );
-});
-Route::prefix('van_inventory')->controller(VanInventoryController::class)->group(function () {
-
-
-    Route::get('list', 'index');
-    Route::get('list/{id}', 'show');
-    Route::post('create', 'store');
-    Route::post('update/{id}', 'update');
-    Route::delete('delete/{id}', 'destroy');
 });

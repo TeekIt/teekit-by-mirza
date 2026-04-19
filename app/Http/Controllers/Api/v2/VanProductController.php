@@ -23,27 +23,17 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class VanProductController extends Controller
 {
-
-
-    /**
-     * List all products for the logged-in van with optional filters.
-     *
-     * @param Request $request
-     * @param ListProductsAction $action
-     * @return JsonResponse
-     */
     public function list(ListProductsRequest $request, ListProductsAction $listProductsAction): JsonResponse
-{
-    // Execute action to fetch filtered products
-    $data = $listProductsAction->execute($request);
+    {
+        $data = $listProductsAction->execute($request);
 
-    return JsonResponseServices::getApiResponse(
-        $data,
-        $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-        '', // Empty message
-        config('constants.HTTP_OK')
-    );
-}
+        return JsonResponseServices::getApiResponse(
+            $data,
+            $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            '', // Empty message
+            config('constants.HTTP_OK')
+        );
+    }
 
     /**
      * Fetch single product details by ID for the logged-in van.
@@ -54,7 +44,7 @@ class VanProductController extends Controller
      */
     public function listById(ListProductByIdRequest $request, FetchSingleProductAction $action): JsonResponse
     {
-        
+
         $data = $action->execute($productId);
 
         return JsonResponseServices::getApiResponse(
@@ -73,18 +63,18 @@ class VanProductController extends Controller
      * @return JsonResponse
      */
     public function search(Request $request, SearchProductsAction $action): JsonResponse
-{
-    $query = $request->query('q', '');
+    {
+        $query = $request->query('q', '');
 
-    $data = $action->execute($query);
+        $data = $action->execute($query);
 
-    return JsonResponseServices::getApiResponse(
-        $data,
-        $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-        '',
-        config('constants.HTTP_OK')
-    );
-}
+        return JsonResponseServices::getApiResponse(
+            $data,
+            $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            '',
+            config('constants.HTTP_OK')
+        );
+    }
 
     /**
      * Record parts usage by operative
