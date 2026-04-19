@@ -19,11 +19,21 @@ class VanInventoriesLivewire extends Component
 
     public string $threshold = '';
 
+    public int $vanId = 0;
+
     protected function rules()
     {
         return [
             
         ];
+    }
+
+    /*
+    * Lifecycle Hooks
+    */
+    public function mount(): void
+    {
+        $this->vanId = request()->query('vanId');
     }
 
     /**

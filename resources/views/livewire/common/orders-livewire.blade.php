@@ -249,7 +249,7 @@
                         </div>
                         <!-- /Order Header -->
                         <div class="card-text">
-                            @foreach ($order->order_items as $orderItem)
+                            @foreach ($order->orderItems as $orderItem)
                                 <!-- Order Items Begins -->
                                 <div class="row mb-2">
                                     <div class="col-md-2">

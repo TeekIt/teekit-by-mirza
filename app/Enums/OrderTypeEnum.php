@@ -8,5 +8,6 @@ enum OrderTypeEnum: string
     case SUPER_FAST_DELIVERY = 'superFastDelivery';
     case SCHEDULED = 'scheduled';
     case SELF_PICKUP = 'self-pickup';
-    case VAN_INVENTORY = 'van-inventory';
+    case VAN_INVENTORY = 'vanInventory';
+    case COD = 'cashOnDelivery';
 }

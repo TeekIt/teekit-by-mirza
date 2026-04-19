@@ -150,7 +150,7 @@ class OrdersLivewire extends Component
         $this->resetComponent();
 
         $this->order = Orders::getById($orderId);
-        $this->orderItem = $this->order->order_items->firstWhere('id', '=', $orderItemId);
+        $this->orderItem = $this->order->orderItems->firstWhere('id', '=', $orderItemId);
 
         // $sellersOfTheSameCity = User::getActiveParentAndChildSellersByCity(User::getAuthUser()->city);
         $sellersOfTheSameCityAndCategory = $this->getSellersOfSameCityAndCategory();

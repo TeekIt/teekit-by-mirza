@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web\v1;
 
 use App\Enums\OrderStatusEnum;
+use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Orders;
 use App\Models\Pages;
@@ -37,10 +38,12 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if (Gate::allows('seller') || Gate::allows('child_seller')) {
+        if (in_array(User::getAuthUser()->role_id, [UserRoleEnum::SELLER->value, UserRoleEnum::CHILD_SELLER->value])) {
             return redirect()->route('seller.dashboard');
-        } else {
-            return $this->adminHome();
+        } elseif (User::getAuthUser()->role_id === UserRoleEnum::COMPANY->value) {
+            return redirect()->route('vans.company.dashboard');
+        } elseif (User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value) {
+            return $this->superAdminHome();
         }
     }
 
@@ -54,7 +57,7 @@ class HomeController extends Controller
     public function changeSettings(Request $request)
     {
         User::where('id', '=', Auth::id())->update([
-            'settings->'.$request->setting_name => $request->value,
+            'settings->' . $request->setting_name => $request->value,
         ]);
 
         return redirect()->route('home');
@@ -170,23 +173,19 @@ class HomeController extends Controller
      *
      * @version 1.0.0
      */
-    public function adminHome()
+    public function superAdminHome()
     {
-        if (Gate::allows('superadmin')) {
-            $pendingOrders = Orders::where('order_status', OrderStatusEnum::PENDING)->count();
-            $totalProducts = Products::count();
-            $totalOrders = Orders::where('payment_status', '!=', 'hidden')->count();
-            $totalSales = Orders::where('payment_status', 'paid')->sum('current_total');
+        $pendingOrders = Orders::where('order_status', OrderStatusEnum::PENDING)->count();
+        $totalOrders = Orders::where('payment_status', '!=', 'hidden')->count();
+        $totalSales = Orders::where('payment_status', 'paid')->sum('current_total');
+        $totalProducts = Products::count();
 
-            return view('admin.home', compact(
-                'pendingOrders',
-                'totalProducts',
-                'totalOrders',
-                'totalSales'
-            ));
-        }
-
-        abort(config('constants.HTTP_UNAUTHORIZED'));
+        return view('admin.home', compact(
+            'pendingOrders',
+            'totalProducts',
+            'totalOrders',
+            'totalSales'
+        ));
     }
 
     public function updatePages(Request $request)

@@ -111,7 +111,7 @@
                     <button type="button" class="btn btn-site-primary my-3 py-3 w-100" title="Export">
                         <i class="fas fa-cloud-download-alt"></i>
                     </button>
-                    <a href="{{ route('admin.vans.inventories.add') }}" class="btn btn-site-primary my-3 py-3 w-100" title="Add New">
+                    <a href="{{ route('vans.inventories.add', ['vanId' => $vanId]) }}" class="btn btn-site-primary my-3 py-3 w-100" title="Add New">
                         <span class="fas fa-plus"></span>
                     </a>
                 </div>

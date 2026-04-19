@@ -144,7 +144,7 @@ class OrdersHeaderLivewire extends Component
     {
         /* Orders model keeps product info on first order_item */
         if ($order instanceof Orders) {
-            return $order->order_items[0]->product_belongs_to_type;
+            return $order->orderItems[0]->product_belongs_to_type;
         }
 
         /* OrdersFromOtherSeller keeps product info on the order record */
@@ -154,7 +154,7 @@ class OrdersHeaderLivewire extends Component
     public function getProductQty(Orders|OrdersFromOtherSeller $order): int
     {
         if ($order instanceof Orders) {
-            return $order->order_items[0]->product_qty;
+            return $order->orderItems[0]->product_qty;
         }
 
         return $order->product_qty;
@@ -163,7 +163,7 @@ class OrdersHeaderLivewire extends Component
     public function getProductCategoryId(Orders|OrdersFromOtherSeller $order): int
     {
         if ($order instanceof Orders) {
-            return $order->order_items[0]->product->category_id;
+            return $order->orderItems[0]->product->category_id;
         }
 
         /* OrdersFromOtherSeller has morph relation "product" */
@@ -182,7 +182,7 @@ class OrdersHeaderLivewire extends Component
              * This function only works for "Custom Product Orders a.k.a ProductsByBuyer Orders" 
              * Hence, this kind of order always has only one order item 
              */
-            return $order->order_items[0]->product_price;
+            return $order->orderItems[0]->product_price;
         }
 
         return $order?->product_price;

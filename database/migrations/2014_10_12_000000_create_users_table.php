@@ -36,7 +36,7 @@ return new class extends Migration
             $table->tinyInteger('is_active')->default(0);
             $table->tinyInteger('is_online')->default(0);
             $table->string('remember_token', 100)->nullable();
-            $table->tinyInteger('role_id')->comment('1: superadmin, 2: seller, 3: buyer, 5: child_seller');
+            $table->tinyInteger('role_id')->comment('Only UserRoleEnum values are allowed');
             $table->double('pending_withdraw', 8, 2)->default(0.00);
             $table->double('total_withdraw', 8, 2)->default(0.00);
             $table->integer('parent_store_id')->nullable();
