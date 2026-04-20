@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('van_products', function (Blueprint $table) {
             $table->bigIncrements('id');
-            
             $table->foreignId('seller_id')->constrained(table: 'users');
             $table->foreignId('category_id')->constrained(table: 'categories');
             $table->foreignId('van_id')->constrained(table: 'vans');
-            
             $table->string('product_name');
             $table->string('sku');
             $table->float('price');
@@ -26,22 +24,19 @@ return new class extends Migration
             $table->float('weight')->nullable();
             $table->string('brand')->nullable();
             $table->string('size')->nullable();
-            $table->string('status')->default('active')->comment('active, inactive, out_of_stock, low_stock, critical');
+            $table->string('status')->default('1')->comment('Only ProductStatusEnum values are allowed');
             $table->string('contact');
             $table->json('colors')->nullable();
             $table->tinyInteger('bike')->nullable();
             $table->tinyInteger('car')->nullable();
             $table->tinyInteger('van')->nullable();
-            
             $table->text('feature_img');
             $table->float('height')->nullable();
             $table->float('width')->nullable();
             $table->float('length')->nullable();
-            
             $table->string('job_reference')->nullable();
             $table->integer('quantity')->default(0);
-             
-            
+            $table->integer('min_threshold')->default(5)->comment('Minimum stock threshold for inventory alerts');
             $table->timestamps();
             $table->softDeletes();
 
@@ -50,14 +45,10 @@ return new class extends Migration
              */
             $table->index('seller_id');
             $table->index('category_id');
-            $table->index('sku');
             $table->fullText('product_name');
-            $table->index('brand');
-            $table->index('price');
-            $table->index('weight');
-            $table->index('job_reference');   
-            $table->index('van_id');      
-            $table->index('quantity');    
+            $table->index('job_reference');
+            $table->index('van_id');
+            $table->index('quantity');
             $table->index('status');
         });
     }

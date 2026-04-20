@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('company_id')->constrained(table: 'users')->cascadeOnDelete();
             $table->foreignId('van_id')->constrained(table: 'vans')->cascadeOnDelete();
             $table->float('order_total');
-            $table->string('status')->comment('Only OrderStatusEnum values are allowed');
+            $table->string('order_status')->comment('Only OrderStatusEnum values are allowed');
             $table->string('type')->comment('Only OrderTypeEnum values are allowed');
             $table->text('van_location');
             $table->timestamps();

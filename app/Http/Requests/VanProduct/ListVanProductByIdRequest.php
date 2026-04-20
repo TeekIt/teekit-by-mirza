@@ -4,7 +4,7 @@ namespace App\Http\Requests\VanProduct;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ListByIdRequest extends FormRequest
+class ListVanProductByIdRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -41,10 +41,6 @@ class ListByIdRequest extends FormRequest
      */
     public function messages()
     {
-        return [
-            'van_id.required' => 'Van ID is required in the request payload.',
-            'van_id.integer'  => 'Van ID must be a valid number.',
-            'van_id.exists'   => 'The specified Van does not exist.',
-        ];
+        
     }
 }

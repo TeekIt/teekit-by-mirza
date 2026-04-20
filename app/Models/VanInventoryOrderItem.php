@@ -27,6 +27,11 @@ class VanInventoryOrderItem extends Model
         return $this->belongsTo(VanInventoryOrder::class);
     }
 
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Products::class);
+    }
+
     /**
      * Helpers
      */

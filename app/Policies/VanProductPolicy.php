@@ -4,63 +4,95 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\VanProduct;
-use Illuminate\Auth\Access\Response;
+use App\Enums\UserRoleEnum;
+use App\Models\Van;
 
 class VanProductPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
-    public function viewAny(User $user): bool
+    public function viewAny(User|Van $user): bool
     {
-        return false;
+        if ($user instanceof User) {
+            return in_array($user->role_id, [
+                UserRoleEnum::SUPERADMIN->value,
+                UserRoleEnum::COMPANY->value,
+            ]);
+        }
+
+        return true;
     }
 
     /**
-     * Determine whether the user can view the model.
+     * View single van product
      */
-    public function view(User $user, VanProduct $vanProduct): bool
+    public function view(?User $user, VanProduct $vanProduct): bool
     {
-        return false;
+        // Web users (Admin / Company)
+        if ($user) {
+            return $user->role_id === UserRoleEnum::SUPERADMIN->value
+                || $user->id === $vanProduct->seller_id;
+        }
+
+        // Van API user
+        return auth('van')->user()->id === $vanProduct->van_id;
     }
 
     /**
-     * Determine whether the user can create models.
+     * Create van product
      */
-    public function create(User $user): bool
+    public function create(): bool
     {
-        return false;
+        return User::getAuthUser()->role_id === UserRoleEnum::SUPERADMIN->value
+            || User::getAuthUser()->role_id === UserRoleEnum::COMPANY->value;
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Update product
      */
     public function update(User $user, VanProduct $vanProduct): bool
     {
-        return false;
+        // if ($user->role_id === UserRoleEnum::SUPERADMIN->value) {
+        //     return true;
+        // }
+
+        // if ($user->role_id !== UserRoleEnum::COMPANY->value) {
+        //     return false;
+        // }
+
+        // return (int) $vanProduct->van->company_id === (int) $user->id;
+        return true;
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Delete product
      */
-    public function delete(User $user, VanProduct $vanProduct): bool
+    public function delete(?User $user, VanProduct $vanProduct): bool
     {
-        return false;
+        if ($user) {
+            return $user->role_id === UserRoleEnum::SUPERADMIN->value
+                || $user->id === $vanProduct->seller_id;
+        }
+
+        return auth('van')->user()->id === $vanProduct->van_id;
     }
 
     /**
-     * Determine whether the user can restore the model.
+     * Restore product
      */
-    public function restore(User $user, VanProduct $vanProduct): bool
+    public function restore(?User $user, VanProduct $vanProduct): bool
     {
-        return false;
+        return false; // safe default
     }
 
     /**
-     * Determine whether the user can permanently delete the model.
+     * Force delete
      */
-    public function forceDelete(User $user, VanProduct $vanProduct): bool
+    public function forceDelete(?User $user, VanProduct $vanProduct): bool
     {
-        return false;
+        return $user
+            ? $user->role_id === UserRoleEnum::SUPERADMIN->value
+            : false;
     }
 }

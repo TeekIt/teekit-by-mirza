@@ -303,7 +303,7 @@ class Orders extends Model
             ->paginate(10);
     }
 
-    public static function getOrdersForSuperAdminView(string $orderBy, ?int $orderId = null): LengthAwarePaginator
+    public static function getOrdersForSuperAdminView(OrderByEnum $orderBy, ?int $orderId = null): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) {
@@ -314,7 +314,7 @@ class Orders extends Model
             ->when($orderId, function ($query) use ($orderId) {
                 return $query->where('id', '=', $orderId);
             })
-            ->orderBy('created_at', $orderBy)
+            ->orderBy('created_at', $orderBy->value)
             ->paginate(10);
         /*
         * Load 'category' for products where 'product_belongs_to_type' is 'Product'
@@ -332,7 +332,7 @@ class Orders extends Model
         return $orders;
     }
 
-    public static function getOrdersForSellerView(string $orderBy, int $sellerId, ?int $orderId = null): LengthAwarePaginator
+    public static function getOrdersForSellerView(OrderByEnum $orderBy, int $sellerId, ?int $orderId = null): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) {
@@ -344,7 +344,7 @@ class Orders extends Model
                 return $query->where('id', '=', $orderId);
             })
             ->where('seller_id', '=', $sellerId)
-            ->orderBy('created_at', $orderBy)
+            ->orderBy('created_at', $orderBy->value)
             ->paginate(10);
         /*
         * Load 'category' for products where 'product_belongs_to_type' is 'Product'
@@ -403,4 +403,5 @@ class Orders extends Model
             ->where('id', '=', $id)
             ->firstOrFail();
     }
+
 }
