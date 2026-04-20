@@ -73,19 +73,6 @@ class LoginController extends Controller
                         ->withInput($request->only($this->username(), 'remember'))
                         ->withErrors(['active' => 'WARNING! You cannot access private pages.']);
                 }
-                // if (
-                //     Gate::allows('seller') ||
-                //     Gate::allows('child_seller') || 
-                //     Gate::allows('company') || 
-                //     Gate::allows('superadmin')
-                // ) {
-                //     return $this->sendLoginResponse($request);
-                // } else {
-                //     return redirect()
-                //         ->route('login')
-                //         ->withInput($request->only($this->username(), 'remember'))
-                //         ->withErrors(['active' => 'WARNING! You cannot access private pages.']);
-                // }
             } else {
                 /*
                 Increment the failed login attempts and redirect back to the

@@ -30,6 +30,9 @@ class Van extends Authenticatable implements JWTSubject
         'deleted_at',
     ];
 
+    /**
+     * Laravel Built-In Helpers
+     */
     protected function userName(): Attribute
     {
         return Attribute::make(
@@ -196,12 +199,5 @@ class Van extends Authenticatable implements JWTSubject
             })
             ->orderBy('created_at', $orderBy->value)
             ->paginate(10);
-    }
-
-    public static function getDetailsById(int $vanId)
-    {
-        return self::where('id', $vanId)
-            ->select('id as id', 'operative', 'number_plate', 'user_name')
-            ->first();
     }
 }

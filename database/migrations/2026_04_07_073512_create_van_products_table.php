@@ -24,7 +24,7 @@ return new class extends Migration
             $table->float('weight')->nullable();
             $table->string('brand')->nullable();
             $table->string('size')->nullable();
-            $table->string('status')->default('active')->comment('active, inactive, out_of_stock, low_stock, critical');
+            $table->string('status')->default('1')->comment('Only ProductStatusEnum values are allowed');
             $table->string('contact');
             $table->json('colors')->nullable();
             $table->tinyInteger('bike')->nullable();
@@ -36,9 +36,7 @@ return new class extends Migration
             $table->float('length')->nullable();
             $table->string('job_reference')->nullable();
             $table->integer('quantity')->default(0);
-            $table->integer('min_threshold')
-                ->default(10)
-                ->comment('Minimum stock threshold for inventory alerts');
+            $table->integer('min_threshold')->default(5)->comment('Minimum stock threshold for inventory alerts');
             $table->timestamps();
             $table->softDeletes();
 

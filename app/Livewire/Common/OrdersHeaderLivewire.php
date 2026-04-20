@@ -31,8 +31,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\VanProduct;
 use App\Models\InventoryOrderItem;
-
-
+use App\Models\VanInventoryOrder;
 
 class OrdersHeaderLivewire extends Component
 {
@@ -81,18 +80,17 @@ class OrdersHeaderLivewire extends Component
         'refreshThisComponent' => '$refresh',
     ];
 
-    public function mount(Orders|OrdersFromOtherSeller $order)
+    public function mount(Orders|OrdersFromOtherSeller|VanInventoryOrder $order)
     {
-        
         $this->sellerId = User::getAuthUser()->id;
         $this->isOrderFromOtherSeller = $this->isOrderFromOtherSeller($order);
         $this->isVanInventoryPage = request()->routeIs('admin.order.van.inventory');
         $this->order = $order;
     }
 
-    
+
     /* Handle Order prop updates */
-    public function updatedOrder(Orders|OrdersFromOtherSeller|null $order)
+    public function updatedOrder(Orders|OrdersFromOtherSeller|VanInventoryOrder|null $order)
     {
         if ($order !== null) {
             $this->isOrderFromOtherSeller = $this->isOrderFromOtherSeller($order);
@@ -123,13 +121,6 @@ class OrdersHeaderLivewire extends Component
         ]);
     }
 
-    /* 
-    public function renderStuartModal($orderId)
-    {
-        $this->orderId = $orderId;
-    }
-    */
-
     public function renderOrderId($orderId)
     {
         $this->orderId = $orderId;
@@ -138,6 +129,11 @@ class OrdersHeaderLivewire extends Component
     public function isOrderFromOtherSeller($order): bool
     {
         return $order instanceof OrdersFromOtherSeller;
+    }
+
+    public function isVanInventoryOrder($order): bool
+    {
+        return $order instanceof VanInventoryOrder;
     }
 
     public function getProductBelongsToType(Orders|OrdersFromOtherSeller $order): ?string
@@ -552,6 +548,34 @@ class OrdersHeaderLivewire extends Component
     //     }
     // }
 
+    public function markVanInventoryOrderComplete(int $orderId)
+    {
+        try {
+            /* Perform some operation */
+            DB::beginTransaction();
+
+            $vanInventoryOrder = VanInventoryOrder::with('orderItems.product')->findOrFail($orderId);
+
+            $this->authorize('update', $vanInventoryOrder);
+
+            VanProduct::addBulk($vanInventoryOrder);
+
+            $vanInventoryOrder->update([
+                'order_status' => OrderStatusEnum::COMPLETE->value,
+            ]);
+
+            DB::commit();
+            /* Operation finished */
+
+            session()->flash('success', 'Order moved to van inventory successfully.');
+        } catch (Exception $error) {
+            DB::rollBack();
+
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
+    }
+
     public function cancelOrder($orderId)
     {
         try {
@@ -593,16 +617,39 @@ class OrdersHeaderLivewire extends Component
         }
     }
 
-public function orderIsCompleted($orderId)
-{
-    $order = Orders::with('order_items.product')->findOrFail($orderId);
+    public function cancelVanInventoryOrder(int $orderId)
+    {
+        try {
+            /* Perform some operation */
+            DB::beginTransaction();
 
-    $vanId = auth()->user()->van_id ?? 1;
+            $vanInventoryOrder = VanInventoryOrder::findOrFail($orderId);
 
-    VanProduct::add($order, $vanId);
+            $this->authorize('update', $vanInventoryOrder);
 
-    session()->flash('success', 'Order moved to van inventory successfully.');
-}
+            $cancelled = $vanInventoryOrder->update([
+                'order_status' => OrderStatusEnum::CANCELLED->value,
+            ]);
+
+            DB::commit();   
+
+            // EmailServices::sendOrderHasBeenCancelledMail($this->selectedOrder);
+            /* Operation finished */
+            sleep(1);
+            $this->dispatch(event: 'refreshThisComponent')->self();
+
+            if ($cancelled) {
+                session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
+            }
+        } catch (Exception $error) {
+            DB::rollBack();
+
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
+    }
 
     public function render()
     {

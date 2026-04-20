@@ -5,21 +5,23 @@ namespace App\Policies;
 use App\Models\User;
 use App\Models\VanProduct;
 use App\Enums\UserRoleEnum;
+use App\Models\Van;
 
 class VanProductPolicy
 {
     /**
-     * View list (index page)
+     * Determine whether the user can view any models.
      */
-    public function viewAny(?User $user): bool
+    public function viewAny(User|Van $user): bool
     {
-        if (!$user) return false;
+        if ($user instanceof User) {
+            return in_array($user->role_id, [
+                UserRoleEnum::SUPERADMIN->value,
+                UserRoleEnum::COMPANY->value,
+            ]);
+        }
 
-        return in_array($user->role_id, [
-            UserRoleEnum::SUPERADMIN->value,
-            UserRoleEnum::COMPANY->value,
-            UserRoleEnum::VAN->value,
-        ]);
+        return true;
     }
 
     /**
@@ -49,14 +51,18 @@ class VanProductPolicy
     /**
      * Update product
      */
-    public function update(?User $user, VanProduct $vanProduct): bool
+    public function update(User $user, VanProduct $vanProduct): bool
     {
-        if ($user) {
-            return $user->role_id === UserRoleEnum::SUPERADMIN->value
-                || $user->id === $vanProduct->seller_id;
-        }
+        // if ($user->role_id === UserRoleEnum::SUPERADMIN->value) {
+        //     return true;
+        // }
 
-        return auth('van')->user()->id === $vanProduct->van_id;
+        // if ($user->role_id !== UserRoleEnum::COMPANY->value) {
+        //     return false;
+        // }
+
+        // return (int) $vanProduct->van->company_id === (int) $user->id;
+        return true;
     }
 
     /**

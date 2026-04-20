@@ -4,82 +4,369 @@
 
     {{-- ************************************ Edit Inventory Modal ************************************ --}}
     <div wire:ignore.self class="modal fade" id="editVanInventoryModal" tabindex="-1">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-dialog-scrollable" role="document">
             <div class="modal-content">
-                <div class="modal-body">
-                    <div class="row">
-                        <form>
-                            <div class="modal-header">
-                                <h5 class="modal-title">Edit Product Inventory</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                                    wire:click="resetComponent"></button>
-                            </div>
-                            <div class="col-12 my-3">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="productName">Product Name</label>
-                                            <input type="text" class="form-control" id="productName"
-                                                placeholder="Enter product name..." wire:model="productName">
-                                        </div>
-                                        <small class="text-danger">
-                                            @error('productName')
-                                                {{ $message }}
-                                            @enderror
-                                        </small>
+                <form wire:submit="updateVanInventory">
+                    <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Van Inventory</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                                wire:click="resetComponent"></button>
+                        </div>
+                        <div class="col-12 my-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="sellerId">Seller ID</label>
+                                        <input type="number" class="form-control" id="sellerId"
+                                            placeholder="Enter seller id..." wire:model="sellerId">
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="price">Price</label>
-                                            <input type="text" class="form-control" id="price"
-                                                placeholder="Enter price..." wire:model="price">
-                                        </div>
-                                        <small class="text-danger">
-                                            @error('price')
-                                                {{ $message }}
-                                            @enderror
-                                        </small>
-                                    </div>
+                                    <small class="text-danger">
+                                        @error('sellerId')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="quantity">Quantity</label>
-                                            <input type="text" class="form-control" id="quantity"
-                                                placeholder="Enter quantity..." wire:model="quantity">
-                                        </div>
-                                        <small class="text-danger">
-                                            @error('quantity')
-                                                {{ $message }}
-                                            @enderror
-                                        </small>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="categoryId">Category</label>
+                                        <select class="form-control" id="categoryId" wire:model="categoryId">
+                                            <option value="">Select category</option>
+                                            @foreach ($categories as $category)
+                                                <option value="{{ $category->id }}">{{ $category->category_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="threshold">Threshold</label>
-                                            <input type="text" class="form-control" id="threshold"
-                                                placeholder="Enter threshold..." wire:model="threshold">
-                                        </div>
-                                        <small class="text-danger">
-                                            @error('threshold')
-                                                {{ $message }}
-                                            @enderror
-                                        </small>
-                                    </div>
+                                    <small class="text-danger">
+                                        @error('categoryId')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary rounded-pill px-5 py-2"
-                                    data-bs-dismiss="modal" wire:click="resetComponent">
-                                    Close
-                                </button>
-                                <button type="button" class="btn site-primary-yellow-bg rounded-pill px-5 py-2">
-                                    Update
-                                </button>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="productVanId">Van ID</label>
+                                        <input type="number" class="form-control" id="productVanId"
+                                            placeholder="Enter van id..." wire:model="productVanId">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('productVanId')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="productName">Product Name</label>
+                                        <input type="text" class="form-control" id="productName"
+                                            placeholder="Enter product name..." wire:model="productName">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('productName')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="price">Price</label>
+                                        <input type="text" class="form-control" id="price"
+                                            placeholder="Enter price..." wire:model="price">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('price')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
                             </div>
-                        </form>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="sku">SKU</label>
+                                        <input type="text" class="form-control" id="sku"
+                                            placeholder="Enter SKU..." wire:model="sku">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('sku')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="featured">Featured</label>
+                                        <select class="form-control" id="featured" wire:model="featured">
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('featured')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="discountPercentage">Discount Percentage</label>
+                                        <input type="text" class="form-control" id="discountPercentage"
+                                            placeholder="Enter discount percentage..." wire:model="discountPercentage">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('discountPercentage')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="weight">Weight</label>
+                                        <input type="number" step="0.01" class="form-control" id="weight"
+                                            placeholder="Enter weight..." wire:model="weight">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('weight')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="brand">Brand</label>
+                                        <input type="text" class="form-control" id="brand"
+                                            placeholder="Enter brand..." wire:model="brand">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('brand')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="size">Size</label>
+                                        <input type="text" class="form-control" id="size"
+                                            placeholder="Enter size..." wire:model="size">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('size')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="productStatus">Status</label>
+                                        <select class="form-control" id="productStatus" wire:model="productStatus">
+                                            <option value="active">Active</option>
+                                            <option value="inactive">Inactive</option>
+                                            <option value="out_of_stock">Out Of Stock</option>
+                                            <option value="low_stock">Low Stock</option>
+                                            <option value="critical">Critical</option>
+                                        </select>
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('productStatus')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="contact">Contact</label>
+                                        <input type="text" class="form-control" id="contact"
+                                            placeholder="Enter contact..." wire:model="contact">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('contact')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="colors">Colors (JSON)</label>
+                                        <textarea class="form-control" id="colors" rows="3" placeholder='Example: ["red","blue"]'
+                                            wire:model="colors"></textarea>
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('colors')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="bike">Bike</label>
+                                        <select class="form-control" id="bike" wire:model="bike">
+                                            <option value="">Select</option>
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('bike')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="car">Car</label>
+                                        <select class="form-control" id="car" wire:model="car">
+                                            <option value="">Select</option>
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('car')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="van">Van</label>
+                                        <select class="form-control" id="van" wire:model="van">
+                                            <option value="">Select</option>
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('van')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="d-block">Feature Image</label>
+                                        @if ($featureImgUpload)
+                                            <img src="{{ $featureImgUpload->temporaryUrl() }}" alt="Feature image preview"
+                                                class="img-fluid rounded border mb-2" style="max-height: 160px;">
+                                        @elseif ($featureImg)
+                                            <img src="{{ str_contains($featureImg, 'https://') ? $featureImg : config('constants.BUCKET') . $featureImg }}"
+                                                alt="Current feature image" class="img-fluid rounded border mb-2"
+                                                style="max-height: 160px;">
+                                        @endif
+
+                                        <input type="file" class="form-control" id="featureImgUpload"
+                                            wire:model="featureImgUpload" accept="image/jpeg,image/png,image/jpg">
+                                        <small class="text-muted">Upload only if you want to replace the current image.</small>
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('featureImgUpload')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="height">Height</label>
+                                        <input type="number" step="0.01" class="form-control" id="height"
+                                            placeholder="Enter height..." wire:model="height">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('height')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="width">Width</label>
+                                        <input type="number" step="0.01" class="form-control" id="width"
+                                            placeholder="Enter width..." wire:model="width">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('width')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="length">Length</label>
+                                        <input type="number" step="0.01" class="form-control" id="length"
+                                            placeholder="Enter length..." wire:model="length">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('length')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="jobReference">Job Reference</label>
+                                        <input type="text" class="form-control" id="jobReference"
+                                            placeholder="Enter job reference..." wire:model="jobReference">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('jobReference')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="quantity">Quantity</label>
+                                        <input type="number" class="form-control" id="quantity"
+                                            placeholder="Enter quantity..." wire:model="quantity">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('quantity')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="threshold">Threshold</label>
+                                        <input type="number" class="form-control" id="threshold"
+                                            placeholder="Enter threshold..." wire:model="threshold">
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('threshold')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary rounded-pill px-5 py-2"
+                            data-bs-dismiss="modal" wire:click="resetComponent">
+                            Close
+                        </button>
+                        <button type="submit" class="btn site-primary-yellow-bg rounded-pill px-5 py-2">
+                            Update
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -93,7 +380,7 @@
                 <div class="col-12 col-xl-3">
                     <div class="input-group py-2 my-2">
                         <input type="text" wire:model.live="search" class="form-control py-2"
-                            placeholder="Search by number plate...">
+                            placeholder="Search by name, qty or threshold...">
                     </div>
                 </div>
                 <div class="col-12 col-xl-6 d-flex gap-1">
@@ -111,7 +398,8 @@
                     <button type="button" class="btn btn-site-primary my-3 py-3 w-100" title="Export">
                         <i class="fas fa-cloud-download-alt"></i>
                     </button>
-                    <a href="{{ route('vans.inventories.add', ['vanId' => $vanId]) }}" class="btn btn-site-primary my-3 py-3 w-100" title="Add New">
+                    <a href="{{ route('vans.inventories.add', ['vanId' => $vanId]) }}"
+                        class="btn btn-site-primary my-3 py-3 w-100" title="Add New">
                         <span class="fas fa-plus"></span>
                     </a>
                 </div>
@@ -136,29 +424,28 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($data as $inventory)
-                                <tr style="cursor: pointer;"
-                                    wire:click="renderEditVanInventoryModal({{ $inventory['id'] }})"
-                                    data-bs-toggle="modal" data-bs-target="#editVanInventoryModal">
+                            @forelse ($data as $singleIndex)
+                                <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>
                                         <input type="checkbox" class="select-checkbox" title="Select"
-                                            id="inventory-{{ $inventory['id'] }}" onclick="event.stopPropagation()">
+                                            id="inventory-{{ $singleIndex->id }}" onclick="event.stopPropagation()">
                                     </td>
-                                    <td>{{ $inventory['name'] }}</td>
-                                    <td>{{ $inventory['price'] }}</td>
-                                    <td>{{ $inventory['qty'] }}</td>
-                                    <td>{{ $inventory['threshold'] }}</td>
+                                    <td>{{ $singleIndex->product_name }}</td>
+                                    <td>{{ $singleIndex->price }}</td>
+                                    <td>{{ $singleIndex->quantity }}</td>
+                                    <td>{{ $singleIndex->min_threshold }}</td>
                                     <td>
-                                        <button type="button" class="btn text-site-primary" title="Edit product"
-                                            onclick="event.stopPropagation()">
+                                        <button type="button" class="btn text-site-primary" title="Edit"
+                                            wire:click="renderEditVanInventoryModal({{ $singleIndex->id }})"
+                                            data-bs-toggle="modal" data-bs-target="#editVanInventoryModal">
                                             <i class="far fa-edit"></i>
                                         </button>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">No inventories found.</td>
+                                    <td colspan="7" class="text-center">{{ config('constants.NO_RECORD') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>

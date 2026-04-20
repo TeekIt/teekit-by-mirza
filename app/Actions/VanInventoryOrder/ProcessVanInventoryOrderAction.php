@@ -36,11 +36,11 @@ final class ProcessVanInventoryOrderAction
             );
 
             foreach ($orderItems as $item) {
-                $order->vanInventoryOrderItems()->create([
+                $order->orderItems()->create([
                     'product_id' => $item['id'],
                     'seller_id' => $item['sellerId'],
-                    'price' => $item['price'],
-                    'qty' => $item['qty'],
+                    'product_price' => $item['price'],
+                    'product_qty' => $item['qty'],
                 ]);
             }
 
