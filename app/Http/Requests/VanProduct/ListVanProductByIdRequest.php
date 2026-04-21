@@ -3,6 +3,7 @@
 namespace App\Http\Requests\VanProduct;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ListVanProductByIdRequest extends FormRequest
 {
@@ -13,8 +14,14 @@ class ListVanProductByIdRequest extends FormRequest
      */
     public function authorize()
     {
-        // Allow all requests. Custom authorization logic can be added here.
         return true;
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'productId' => $this->route('productId'),
+        ]);
     }
 
     /**
@@ -24,23 +31,14 @@ class ListVanProductByIdRequest extends FormRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            // 'van_id' is required, must be an integer, and must exist in the 'vans' table
-            'van_id' => 'required|integer|exists:vans,id',
+            'productId' => [
+                'required',
+                'integer',
+                Rule::exists('van_products', 'id'),
+            ],
         ];
-    }
-
-    /**
-     * Get custom messages for validator errors.
-     * 
-     * These messages will be returned in a standardized API response.
-     *
-     * @return array
-     */
-    public function messages()
-    {
-        
     }
 }

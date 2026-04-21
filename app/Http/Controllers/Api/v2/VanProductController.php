@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\v2;
 use App\Actions\VanProduct\SyncVanProductAction;
 use App\Actions\VanProduct\ListVanProductAction;
 use App\Actions\VanProduct\FetchSingleProductAction;
-use App\Actions\VanProduct\ListProductsAction;
+use App\Actions\VanProduct\ListVanProductsAction;
 use App\Actions\VanProduct\SearchProductsAction;
 use App\Actions\VanProduct\DashboardStatsAction;
 use App\Actions\VanProductUsage\RecordUsageAction;
@@ -15,7 +15,8 @@ use App\Http\Requests\VanProduct\SyncRequest;
 use App\Http\Requests\VanProduct\ListByIdRequest;
 use App\Http\Requests\VanProduct\ListProductByIdRequest;
 use App\Http\Requests\ProductUsageRecord\RecordUsageRequest;
-use App\Http\Requests\VanProduct\ListProductsRequest;
+use App\Http\Requests\VanProduct\ListVanProductByIdRequest;
+use App\Http\Requests\VanProduct\ListVanProductsRequest;
 use App\Services\JsonResponseServices;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,28 +24,22 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class VanProductController extends Controller
 {
-    public function list(ListProductsRequest $request, ListProductsAction $listProductsAction): JsonResponse
+    public function list(ListVanProductsRequest $listVanProductsRequest, ListVanProductsAction $listProductsAction): JsonResponse
     {
-        $data = $listProductsAction->execute($request);
+        $validatedData = $listVanProductsRequest->validated();
+
+        $data = $listProductsAction->execute($validatedData);
 
         return JsonResponseServices::getApiResponse(
             $data,
-            $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            '', // Empty message
+            empty($data) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            '',
             config('constants.HTTP_OK')
         );
     }
 
-    /**
-     * Fetch single product details by ID for the logged-in van.
-     *
-     * @param int $productId
-     * @param FetchSingleProductAction $action
-     * @return JsonResponse
-     */
-    public function listById(ListProductByIdRequest $request, FetchSingleProductAction $action): JsonResponse
+    public function listById(ListVanProductByIdRequest $request, FetchSingleProductAction $action): JsonResponse
     {
-
         $data = $action->execute($productId);
 
         return JsonResponseServices::getApiResponse(

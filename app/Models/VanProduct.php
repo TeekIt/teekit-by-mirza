@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderByEnum;
-use App\Enums\VanInventoryProductStatus;
+use App\Enums\VanProductStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Van;
@@ -59,11 +59,11 @@ class VanProduct extends Model
     public function getStatusAttribute()
     {
         if ($this->quantity == 0) {
-            return 'out_of_stock';
-        } elseif ($this->quantity <= $this->min_threshold) {
-            return 'critical';
+            return VanProductStatusEnum::OUT_OF_STOCK->value;
+        } elseif ($this->quantity < $this->min_threshold) {
+            return VanProductStatusEnum::LOW_STOCK->value;
         } else {
-            return 'in_stock';
+            return VanProductStatusEnum::IN_STOCK->value;
         }
     }
 
@@ -186,23 +186,23 @@ class VanProduct extends Model
     {
         $query = self::query()->where('van_id', $vanId);
 
-        // Category Filter
         if (!empty($filters['category_id'])) {
-            $query->where('category_id', (int) $filters['category_id']);
+            $query->where('category_id', '=',(int) $filters['category_id']);
         }
+        
         if (!empty($filters['id'])) {
-            $query->where('id', (int) $filters['id']);
+            $query->where('id', '=', (int) $filters['id']);
         }
 
         if (!empty($filters['status'])) {
             $status = strtolower(trim($filters['status']));
 
-            if ($status === VanInventoryProductStatus::IN_STOCK->value) {
+            if ($status === VanProductStatusEnum::IN_STOCK->value) {
                 $query->whereColumn('quantity', '>', 0);
-            } elseif ($status === VanInventoryProductStatus::LOW_STOCK->value) {
+            } elseif ($status === VanProductStatusEnum::LOW_STOCK->value) {
                 $query->whereColumn('quantity', '<', 'min_threshold')
                     ->where('quantity', '>', 0);
-            } elseif ($status === VanInventoryProductStatus::OUT_OF_STOCK->value) {
+            } elseif ($status === VanProductStatusEnum::OUT_OF_STOCK->value) {
                 $query->where('quantity', '=', 0);
             }
         }
@@ -210,11 +210,9 @@ class VanProduct extends Model
         return $query->orderBy('updated_at', 'desc')->get();
     }
 
-    public static function getById(int $productId, int $vanId): VanProduct
+    public static function getById(int $id, array $columns = ['*']): VanProduct
     {
-        return self::where('id', '=', $productId)
-            ->where('van_id', '=', $vanId)
-            ->firstOrFail();
+        return self::select($columns)->where('id', '=', $id)->firstOrFail();
     }
 
     public static function getAll(

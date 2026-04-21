@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum VanInventoryProductStatus: string
+enum VanProductStatusEnum: string
 {
     case IN_STOCK = 'inStock';
     case LOW_STOCK = 'lowStock';
