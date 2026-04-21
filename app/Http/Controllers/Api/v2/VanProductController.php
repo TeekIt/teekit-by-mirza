@@ -13,6 +13,7 @@ use App\Actions\VanProductUsage\GetUsageHistoryAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\VanProduct\SyncRequest;
 use App\Http\Requests\VanProduct\ListByIdRequest;
+use App\Http\Requests\VanProduct\SearchProductsRequest;
 use App\Http\Requests\VanProduct\ListProductByIdRequest;
 use App\Http\Requests\ProductUsageRecord\RecordUsageRequest;
 use App\Http\Requests\VanProduct\ListProductsRequest;
@@ -32,18 +33,19 @@ class VanProductController extends Controller
      * @param ListProductsAction $action
      * @return JsonResponse
      */
-    public function list(ListProductsRequest $request, ListProductsAction $listProductsAction): JsonResponse
-{
-    // Execute action to fetch filtered products
-    $data = $listProductsAction->execute($request);
+   public function list(ListProductsRequest $request, ListProductsAction $action): JsonResponse 
+   {
+    $filters = (object) $request->validated();
+
+    $data = $action->execute($filters);
 
     return JsonResponseServices::getApiResponse(
         $data,
         $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-        '', // Empty message
+        '',
         config('constants.HTTP_OK')
     );
-}
+    }
 
     /**
      * Fetch single product details by ID for the logged-in van.
@@ -54,15 +56,16 @@ class VanProductController extends Controller
      */
     public function listById(ListProductByIdRequest $request, FetchSingleProductAction $action): JsonResponse
     {
-        
-        $data = $action->execute($productId);
+    $validatedData = (object) $request->validated();
 
-        return JsonResponseServices::getApiResponse(
-            $data ?? [],
-            $data ? config('constants.TRUE_STATUS') : config('constants.FALSE_STATUS'),
-            '',
-            config('constants.HTTP_OK')
-        );
+    $data = $action->execute($validatedData->productId);
+
+    return JsonResponseServices::getApiResponse(
+        $data ?? [],
+        $data ? config('constants.TRUE_STATUS') : config('constants.FALSE_STATUS'),
+        '',
+        config('constants.HTTP_OK')
+    );
     }
 
     /**
@@ -72,9 +75,11 @@ class VanProductController extends Controller
      * @param SearchProductsAction $searchProductsAction
      * @return JsonResponse
      */
-    public function search(Request $request, SearchProductsAction $action): JsonResponse
+   public function search(SearchProductsRequest $request, SearchProductsAction $action): JsonResponse
 {
-    $query = $request->query('q', '');
+    $validatedData = (object) $request->validated();
+
+    $query = $validatedData->q ?? '';
 
     $data = $action->execute($query);
 
@@ -90,16 +95,18 @@ class VanProductController extends Controller
      * Record parts usage by operative
      * POST van/operative/usage/record
      */
-    public function recordUsage(RecordUsageRequest $request, RecordUsageAction $recordUsageAction): JsonResponse
+   public function recordUsage(RecordUsageRequest $request, RecordUsageAction $recordUsageAction): JsonResponse
     {
-        $data = $recordUsageAction->execute($request->validated());
+    $validatedData = $request->validated();
 
-        return JsonResponseServices::getApiResponse(
-            $data,
-            config('constants.TRUE_STATUS'),
-            '',
-            config('constants.HTTP_OK')
-        );
+    $data = $recordUsageAction->execute($validatedData);
+
+    return JsonResponseServices::getApiResponse(
+        $data,
+        config('constants.TRUE_STATUS'),
+        '',
+        config('constants.HTTP_OK')
+    );
     }
 
     /**
