@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web\v1;
 
+use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use App\Models\PromoCode;
 use App\Models\User;
@@ -35,7 +36,7 @@ class PromoCodeController extends Controller
      */
     public function destroy(Request $request)
     {
-        if (Gate::allows('superadmin')) {
+        if (User::getAuthUser()->role_id == UserRoleEnum::SUPERADMIN->value) {
             for ($i = 0; $i < count($request->promocodes); $i++) {
                 PromoCode::where('id', '=', $request->promocodes[$i])->forceDelete();
             }

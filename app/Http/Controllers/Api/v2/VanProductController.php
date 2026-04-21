@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\v2;
 use App\Actions\VanProduct\SyncVanProductAction;
 use App\Actions\VanProduct\ListVanProductAction;
 use App\Actions\VanProduct\FetchSingleProductAction;
-use App\Actions\VanProduct\ListProductsAction;
+use App\Actions\VanProduct\ListVanProductsAction;
 use App\Actions\VanProduct\SearchProductsAction;
 use App\Actions\VanProduct\DashboardStatsAction;
 use App\Actions\VanProductUsage\RecordUsageAction;
@@ -16,7 +16,8 @@ use App\Http\Requests\VanProduct\ListByIdRequest;
 use App\Http\Requests\VanProduct\SearchProductsRequest;
 use App\Http\Requests\VanProduct\ListProductByIdRequest;
 use App\Http\Requests\ProductUsageRecord\RecordUsageRequest;
-use App\Http\Requests\VanProduct\ListProductsRequest;
+use App\Http\Requests\VanProduct\ListVanProductByIdRequest;
+use App\Http\Requests\VanProduct\ListVanProductsRequest;
 use App\Services\JsonResponseServices;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class VanProductController extends Controller
 {
+<<<<<<< HEAD
 
 
     /**
@@ -57,6 +59,25 @@ class VanProductController extends Controller
     public function listById(ListProductByIdRequest $request, FetchSingleProductAction $action): JsonResponse
     {
     $validatedData = (object) $request->validated();
+=======
+    public function list(ListVanProductsRequest $listVanProductsRequest, ListVanProductsAction $listProductsAction): JsonResponse
+    {
+        $validatedData = $listVanProductsRequest->validated();
+
+        $data = $listProductsAction->execute($validatedData);
+
+        return JsonResponseServices::getApiResponse(
+            $data,
+            empty($data) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            '',
+            config('constants.HTTP_OK')
+        );
+    }
+
+    public function listById(ListVanProductByIdRequest $request, FetchSingleProductAction $action): JsonResponse
+    {
+        $data = $action->execute($productId);
+>>>>>>> dec7bf714545a743664f3de46818a8630c85d910
 
     $data = $action->execute($validatedData->productId);
 
@@ -75,21 +96,27 @@ class VanProductController extends Controller
      * @param SearchProductsAction $searchProductsAction
      * @return JsonResponse
      */
+<<<<<<< HEAD
    public function search(SearchProductsRequest $request, SearchProductsAction $action): JsonResponse
 {
     $validatedData = (object) $request->validated();
 
     $query = $validatedData->q ?? '';
+=======
+    public function search(Request $request, SearchProductsAction $action): JsonResponse
+    {
+        $query = $request->query('q', '');
+>>>>>>> dec7bf714545a743664f3de46818a8630c85d910
 
-    $data = $action->execute($query);
+        $data = $action->execute($query);
 
-    return JsonResponseServices::getApiResponse(
-        $data,
-        $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-        '',
-        config('constants.HTTP_OK')
-    );
-}
+        return JsonResponseServices::getApiResponse(
+            $data,
+            $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
+            '',
+            config('constants.HTTP_OK')
+        );
+    }
 
     /**
      * Record parts usage by operative

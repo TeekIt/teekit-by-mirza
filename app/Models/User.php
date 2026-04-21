@@ -35,8 +35,6 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $guarded = [
         'id',
-        'created_at',
-        'updated_at',
     ];
 
     /**
@@ -336,7 +334,7 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
 
-    public static function createStore(
+    public static function add(
         string $name,
         string $email,
         string $password,

@@ -503,13 +503,13 @@ class OrderController extends Controller
     //             if (!empty($request->order_status)) {
     //                 $orders = $orders->where('order_status', '=', $request->order_status);
     //                 $orders = $orders
-    //                     ->whereHas('order_items.product', function ($q) use ($users) {
+    //                     ->whereHas('orderItems.product', function ($q) use ($users) {
     //                         $q->whereHas('user', function ($w) use ($users) {
     //                             $w->whereIn('id', $users);
     //                         });
     //                     });
     //                 if (\User::getAuthUser()->vehicle_type == 'bike') {
-    //                     $orders = $orders->whereHas('order_items.product', function ($q) {
+    //                     $orders = $orders->whereHas('orderItems.product', function ($q) {
     //                         return $q->where('bike', 1);
     //                     });
     //                 }
@@ -545,7 +545,7 @@ class OrderController extends Controller
     //             $orders = $orders->orWhere(function ($q) use ($nearbyOrders) {
     //                 $q->whereIn('id', $nearbyOrders);
     //                 if (\User::getAuthUser()->vehicle_type == 'bike') {
-    //                     $q->whereHas('order_items.product', function ($query) {
+    //                     $q->whereHas('orderItems.product', function ($query) {
     //                         return $query->where('bike', 1);
     //                     });
     //                 }
@@ -835,7 +835,7 @@ class OrderController extends Controller
         $temp = [];
         $order = Orders::find($orderId);
         $temp['order'] = $order;
-        $temp['order_items'] = OrderItems::with('product.store')->where('order_id', '=', $orderId)->get();
+        $temp['orderItems'] = OrderItems::with('product.store')->where('order_id', '=', $orderId)->get();
 
         return $temp;
     }

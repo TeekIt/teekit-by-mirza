@@ -21,7 +21,14 @@ class Orders extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['*'];
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array<string>|bool
+     */
+    protected $guarded = [
+        'id',
+    ];
 
     protected $hidden = [
         'updated_at',
@@ -31,7 +38,7 @@ class Orders extends Model
     /**
      * Relations
      */
-    public function order_items(): HasMany
+    public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItems::class, 'order_id');
     }
@@ -246,7 +253,7 @@ class Orders extends Model
         array $columns = ['*']
     ): LengthAwarePaginator {
         return self::select($columns)
-            ->with(['order_items.product.store'])
+            ->with(['orderItems.product.store'])
             ->when($orderStatus, function ($query) use ($orderStatus) {
                 return $query->where('order_status', '=', $orderStatus);
             })
@@ -261,8 +268,8 @@ class Orders extends Model
     ): Collection {
         /* Now we will fetch the required data */
         return self::select($columns)
-            ->with(['order_items.product'])
-            ->whereHas('order_items', function ($orderItemsQuery) {
+            ->with(['orderItems.product'])
+            ->whereHas('orderItems', function ($orderItemsQuery) {
                 $orderItemsQuery->where('product_belongs_to_type', (new ProductsByBuyer)->getMorphClass());
             })
             ->where('order_status', '=', OrderStatusEnum::PENDING->value)
@@ -284,11 +291,11 @@ class Orders extends Model
 
         /* Now we will fetch the required data */
         return self::select($columns)
-            ->with(['order_items.product'])
+            ->with(['orderItems.product'])
             ->when($orderId, function ($query) use ($orderId) {
                 return $query->where('id', '=', $orderId);
             })
-            ->whereHas('order_items', function ($orderItemsQuery) {
+            ->whereHas('orderItems', function ($orderItemsQuery) {
                 $orderItemsQuery->where('product_belongs_to_type', (new ProductsByBuyer)->getMorphClass());
             })
             ->where('seller_id', '=', $sellerId)
@@ -296,18 +303,18 @@ class Orders extends Model
             ->paginate(10);
     }
 
-    public static function getOrdersForSuperAdminView(string $orderBy, ?int $orderId = null): LengthAwarePaginator
+    public static function getOrdersForSuperAdminView(OrderByEnum $orderBy, ?int $orderId = null): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) {
             static::isViewed($orderId);
         }
         /* Now we will fetch the required data */
-        $orders = self::with(['order_items.product', 'seller'])
+        $orders = self::with(['orderItems.product', 'seller'])
             ->when($orderId, function ($query) use ($orderId) {
                 return $query->where('id', '=', $orderId);
             })
-            ->orderBy('created_at', $orderBy)
+            ->orderBy('created_at', $orderBy->value)
             ->paginate(10);
         /*
         * Load 'category' for products where 'product_belongs_to_type' is 'Product'
@@ -315,7 +322,7 @@ class Orders extends Model
         * Because only seller products have 'category'
         */
         $orders->each(function ($order) {
-            $order->order_items?->each(function ($orderItem) {
+            $order->orderItems?->each(function ($orderItem) {
                 if ($orderItem?->product_belongs_to_type == (new Products)->getMorphClass()) {
                     $orderItem?->product?->load('category');
                 }
@@ -325,19 +332,19 @@ class Orders extends Model
         return $orders;
     }
 
-    public static function getOrdersForSellerView(string $orderBy, int $sellerId, ?int $orderId = null): LengthAwarePaginator
+    public static function getOrdersForSellerView(OrderByEnum $orderBy, int $sellerId, ?int $orderId = null): LengthAwarePaginator
     {
         /* First we will update the "is_viewed" column if the order is searched by ID */
         if ($orderId) {
             static::isViewed($orderId);
         }
         /* Now we will fetch the required data */
-        $orders = self::with(['order_items.product'])
+        $orders = self::with(['orderItems.product'])
             ->when($orderId, function ($query) use ($orderId) {
                 return $query->where('id', '=', $orderId);
             })
             ->where('seller_id', '=', $sellerId)
-            ->orderBy('created_at', $orderBy)
+            ->orderBy('created_at', $orderBy->value)
             ->paginate(10);
         /*
         * Load 'category' for products where 'product_belongs_to_type' is 'Product'
@@ -345,7 +352,7 @@ class Orders extends Model
         * Because only seller products have 'category'
         */
         $orders->each(function ($order) {
-            $order->order_items->each(function ($orderItem) {
+            $order->orderItems->each(function ($orderItem) {
                 if ($orderItem->product_belongs_to_type == (new Products)->getMorphClass()) {
                     $orderItem->product->load('category');
                 }
@@ -376,7 +383,7 @@ class Orders extends Model
     public static function getByCreatorId(int $creatorId, array $columns = ['*']): Collection
     {
         return self::select($columns)
-            ->with(['order_items.product', 'buyer', 'seller'])
+            ->with(['orderItems.product', 'buyer', 'seller'])
             ->where('created_by_id', '=', $creatorId)
             ->get();
     }
@@ -384,7 +391,7 @@ class Orders extends Model
     public static function getByIds(array $ids, array $columns = ['*']): Collection
     {
         return self::select($columns)
-            ->with(['order_items.product', 'buyer', 'seller'])
+            ->with(['orderItems.product', 'buyer', 'seller'])
             ->whereIn('id', $ids)
             ->get();
     }
@@ -392,7 +399,7 @@ class Orders extends Model
     public static function getById(int $id, array $columns = ['*']): Orders
     {
         return self::select($columns)
-            ->with(['order_items.product', 'buyer', 'seller'])
+            ->with(['orderItems.product', 'buyer', 'seller'])
             ->where('id', '=', $id)
             ->firstOrFail();
     }

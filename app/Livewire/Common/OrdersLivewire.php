@@ -3,11 +3,13 @@
 namespace App\Livewire\Common;
 
 use App\Actions\Orders\MoveOrderToOtherNearBySellersAction;
+use App\Enums\OrderByEnum;
 use App\Models\GophrDelivery;
 use App\Models\OrderItems;
 use App\Models\Orders;
 use App\Models\User;
 use App\Models\InventoryOrderItem;
+use App\Models\VanInventoryOrder;
 use App\Services\GoogleMapServices;
 use App\Services\GophrDeliveryServices;
 use Carbon\Carbon;
@@ -150,7 +152,7 @@ class OrdersLivewire extends Component
         $this->resetComponent();
 
         $this->order = Orders::getById($orderId);
-        $this->orderItem = $this->order->order_items->firstWhere('id', '=', $orderItemId);
+        $this->orderItem = $this->order->orderItems->firstWhere('id', '=', $orderItemId);
 
         // $sellersOfTheSameCity = User::getActiveParentAndChildSellersByCity(User::getAuthUser()->city);
         $sellersOfTheSameCityAndCategory = $this->getSellersOfSameCityAndCategory();
@@ -277,34 +279,35 @@ class OrdersLivewire extends Component
 
     public function render()
     {
-     try {        
-            if ($this->isVanInventoryPage) {
-            $data = InventoryOrderItem::getVanInventoryOrders();
-        } else {
+        try {
 
-            if (! User::isSuperAdmin()) {
-                $data = Orders::getOrdersForSellerView(
-                    orderId: $this->isSearchByIdSet(),
-                    sellerId: $this->sellerId,
-                    orderBy: 'desc',
-                );
-            } else {
+            if (User::isSuperAdmin()) {
                 $data = Orders::getOrdersForSuperAdminView(
                     orderId: $this->isSearchByIdSet(),
-                    orderBy: 'desc',
+                    orderBy: OrderByEnum::DESC,
+                );
+            } elseif (User::isParentSeller() || User::isChildSeller()) {
+                $data = Orders::getOrdersForSellerView(
+                    sellerId: $this->sellerId,
+                    orderId: $this->isSearchByIdSet(),
+                    orderBy: OrderByEnum::DESC,
+                );
+            } else {
+                $data = VanInventoryOrder::getAll(
+                    companyId: $this->sellerId,
+                    vanInventoryOrderId: $this->isSearchByIdSet(),
+                    orderBy: OrderByEnum::DESC,
                 );
             }
+
+            return view('livewire.common.orders-livewire', compact('data'));
+        } catch (Exception $error) {
+            report($error);
+            $this->errorMessage = config('constants.SEARCH_FAILED');
+
+            $data = [];
+
+            return view('livewire.common.orders-livewire', compact('data'));
         }
-
-        return view('livewire.common.orders-livewire', compact('data'));
-
-    } catch (Exception $error) {
-        report($error);
-        $this->errorMessage = config('constants.SEARCH_FAILED');
-
-        $data = [];
-
-        return view('livewire.common.orders-livewire', compact('data'));
     }
-}
 }

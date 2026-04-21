@@ -2,6 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRoleEnum;
+use App\Enums\VanProductStatusEnum;
+use App\Models\Categories;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,9 +21,8 @@ class VanProductFactory extends Factory
     public function definition(): array
     {
         return [
-    
-            'seller_id' => $this->faker->randomElement([13, 14, 15]),
-            'category_id' => $this->faker->randomElement([2, 4, 6]),
+            'seller_id' => User::inRandomOrder()->where('role_id', '=', UserRoleEnum::SELLER->value)->first()->id,
+            'category_id' => Categories::inRandomOrder()->first()->id,
             'van_id' => 2,
 
             'product_name' => $this->faker->word(),
@@ -33,7 +36,7 @@ class VanProductFactory extends Factory
             'brand' => $this->faker->company(),
             'size' => $this->faker->randomElement(['S', 'M', 'L']),
 
-            'status' => 'active',
+            'status' => array_rand(VanProductStatusEnum::cases()),
             'contact' => '03001234567',
 
             'colors' => json_encode([$this->faker->safeColorName()]),

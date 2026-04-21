@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AuthenticateCompany;
 use App\Http\Middleware\AuthenticateParentChildSeller;
 use App\Http\Middleware\AuthenticateSuperAdmin;
 use App\Http\Middleware\CheckForMaintenanceMode;
@@ -46,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(CheckForMaintenanceMode::class);
 
         $middleware->alias([
+            'auth.company' => AuthenticateCompany::class,
             'auth.sellers' => AuthenticateParentChildSeller::class,
             'auth.super.admin' => AuthenticateSuperAdmin::class,
             'bindings' => SubstituteBindings::class,

@@ -6,6 +6,7 @@ use App\Actions\Van\ListVanAction;
 use App\Enums\OrderByEnum;
 use App\Exports\VansExport;
 use App\Imports\VansImport;
+use App\Models\User;
 use App\Models\Van;
 use Exception;
 use Illuminate\Contracts\View\View;
@@ -20,7 +21,9 @@ class VansLivewire extends Component
 {
     use WithFileUploads, WithPagination;
 
-    public $vanId;
+    public int $companyId = 0;
+
+    public int $vanId = 0;
 
     public $userName;
 
@@ -59,6 +62,14 @@ class VansLivewire extends Component
     }
 
     /*
+    * Lifecycle Hooks
+    */
+    public function mount(): void
+    {
+        $this->companyId = User::getAuthUser()->id;
+    }
+
+    /*
      * Custom Helpers
      */
     public function resetComponent(): void
@@ -84,7 +95,7 @@ class VansLivewire extends Component
     {
         $this->authorize('view', Van::find($vanId));
 
-        return $this->redirectRoute('admin.vans.inventories', ['vanId' => $vanId]);
+        return $this->redirectRoute('vans.inventories', ['vanId' => $vanId]);
     }
     /*
      * CRUD Methods
@@ -228,7 +239,8 @@ class VansLivewire extends Component
 
         $data = (new ListVanAction)->execute([
             'orderBy' => OrderByEnum::DESC,
-            'search' => $this->search
+            'search' => $this->search,
+            'companyId' => $this->companyId
         ]);
 
         return view('livewire.admin.vans-livewire', compact('data'));
