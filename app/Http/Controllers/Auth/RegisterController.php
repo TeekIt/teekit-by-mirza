@@ -68,7 +68,7 @@ class RegisterController extends Controller
             'lon' => 'required|numeric|between:-180,180',
         ];
 
-        if ($data['is_child_seller'] != 0) {
+        if ($data['is_child_seller'] == 1) {
             $rules['parent_store'] = 'required|exists:users,business_name';
         }
 
@@ -133,12 +133,18 @@ class RegisterController extends Controller
             },
             "submitted" : null
         }';
+        // dd(isset($validatedData['parent_store']));
 
-        $parentStoreId = (isset($validatedData['parent_store'])) ?
-            User::getSellerByBusinessName($validatedData('parent_store'))->id :
-            null;
+        if (isset($validatedData['parent_store'])) {
+            $parentStoreName = $validatedData['parent_store'];
+            $parentStoreId = User::getSellerByBusinessName($parentStoreName)->id;
+        }
 
-        $user = User::createStore(
+        // $parentStoreId = isset($validatedData['parent_store']) ?
+        //     User::getSellerByBusinessName($validatedData('parent_store'))->id :
+        //     null;
+
+        $user = User::add(
             $validatedData['name'],
             strtolower($validatedData['email']),
             $validatedData['password'],
@@ -155,18 +161,92 @@ class RegisterController extends Controller
             $validatedData['lat'],
             $validatedData['lon'],
             $businessHours,
-            isset($validatedData['parent_store']) ? UserRoleEnum::CHILD_SELLER : UserRoleEnum::SELLER,
-            $parentStoreId
+            isset($parentStoreId) ? UserRoleEnum::CHILD_SELLER : UserRoleEnum::SELLER,
+            isset($parentStoreId) ? $parentStoreId : null
         );
 
         if ($user instanceof User) {
             echo 'User Created';
-            
+
             EmailServices::sendNewSellerMail(
                 $user,
                 $user->role_id,
                 ($user->role_id === UserRoleEnum::CHILD_SELLER) ? $validatedData['parent_store'] : null,
             );
+        }
+    }
+
+    /**
+     * Register a new Van Company user.
+     */
+    public function registerVanCompany(Request $request)
+    {
+        $validatedData = Validator::make($request->all(), [
+            'name' => 'required|string|max:80',
+            'email' => 'required|string|email|max:80|unique:users',
+            'password' => 'required|string|min:8|max:50',
+            'country_code' => 'required|string',
+            'phone' => 'required|string|min:8',
+            'business_name' => 'required|string|max:80|unique:users,business_name',
+            'business_phone' => 'required|string|min:8',
+            'address' => 'required|string',
+            'unit_address' => 'nullable|string',
+            'postcode' => 'required|string',
+            'country' => 'required|string',
+            'state' => 'required|string',
+            'city' => 'required|string',
+            'lat' => 'required|numeric|between:-90,90',
+            'lon' => 'required|numeric|between:-180,180',
+        ]);
+
+        if ($validatedData->fails()) {
+            return JsonResponseServices::getApiResponse(
+                [],
+                config('constants.FALSE_STATUS'),
+                $validatedData->errors(),
+                config('constants.HTTP_OK')
+            );
+        }
+
+        $validatedData = $validatedData->validated();
+
+        $businessHours = '{
+            "time": {
+                "Monday": { "open": null, "close": null, "closed": "on" },
+                "Tuesday": { "open": null, "close": null, "closed": "on" },
+                "Wednesday": { "open": null, "close": null, "closed": "on" },
+                "Thursday": { "open": null, "close": null, "closed": "on" },
+                "Friday": { "open": null, "close": null, "closed": "on" },
+                "Saturday": { "open": null, "close": null, "closed": "on" },
+                "Sunday": { "open": null, "close": null, "closed": "on" }
+            },
+            "submitted" : null
+        }';
+
+        $user = User::add(
+            $validatedData['name'],
+            strtolower($validatedData['email']),
+            $validatedData['password'],
+            $validatedData['country_code'],
+            $validatedData['phone'],
+            $validatedData['address'],
+            $validatedData['unit_address'],
+            $validatedData['postcode'],
+            $validatedData['country'],
+            $validatedData['state'],
+            $validatedData['city'],
+            $validatedData['business_name'],
+            $validatedData['business_phone'],
+            $validatedData['lat'],
+            $validatedData['lon'],
+            $businessHours,
+            UserRoleEnum::COMPANY,
+        );
+
+        if ($user instanceof User) {
+            echo 'User Created';
+
+            EmailServices::sendNewSellerMail($user, UserRoleEnum::COMPANY);
         }
     }
 }

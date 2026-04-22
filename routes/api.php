@@ -18,6 +18,8 @@ use App\Http\Controllers\Api\v2\RequestedDeliveryController;
 use App\Http\Controllers\Api\v2\StuartDeliveryController;
 use App\Http\Controllers\Api\v2\SuperWallPackageController;
 use App\Http\Controllers\Api\v2\VanController;
+use App\Http\Controllers\Api\v2\VanInventoryController;
+use App\Http\Controllers\Api\v2\VanProductController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -136,16 +138,26 @@ Route::middleware('transaction.wrapper')->group(function () {
     Route::get('page', [PagesController::class, 'getPage']);
     /*
     *********************************************************************** 
-    * Van API Routes
+    * Van API Routes (With Role Based Guards)
     ***********************************************************************
     */
-    Route::prefix('van')->controller(VanController::class)->group(function () {
-        Route::post('login', 'loginVan');
-
-        Route::middleware('jwt.verify:van')->group(function () {
+    Route::prefix('van')->middleware('jwt.verify:van')->group(function () {
+        Route::controller(VanController::class)->group(function () {
+            Route::post('login', 'loginVan')->withoutMiddleware('jwt.verify:van');
             Route::get('list/{vanId}', 'listById');
-            Route::get('stats/{vanId}', 'statsById');
-            // Route::post('activity/create', '');
+            Route::get('dashboard/stats', 'dashboardStats');
+            Route::get('activity/recent', 'recentActivities');
+        });
+
+        Route::prefix('product')->controller(VanProductController::class)->group(function () {
+            Route::get('list', 'list');
+            Route::get('list/{productId}', 'listById')->whereNumber('productId');
+            Route::get('search', 'search');
+        });
+
+        Route::prefix('operative')->controller(VanProductController::class)->group(function () {
+            Route::post('usage/record', 'recordUsage');
+            Route::get('usage/history', 'usageHistory');
         });
     });
     /*

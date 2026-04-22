@@ -16,6 +16,8 @@
 
         @if (Auth::user()->role_id == UserRoleEnum::SUPERADMIN->value)
             @include('layouts.admin.sidebar')
+        @elseif(Auth::user()->role_id == UserRoleEnum::COMPANY->value)
+            @include('layouts.company.sidebar')
         @elseif(Auth::user()->role_id == UserRoleEnum::SELLER->value || Auth::user()->role_id == UserRoleEnum::CHILD_SELLER->value)
             @include('layouts.shopkeeper.sidebar')
             <x-seller-business-hours-modal />

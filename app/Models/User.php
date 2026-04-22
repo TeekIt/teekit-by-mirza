@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrderByEnum;
 use App\Enums\UserRoleEnum;
 use App\Models\CommissionAndServiceFee;
 use App\Models\ReferralCodeRelation;
@@ -35,8 +36,6 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $guarded = [
         'id',
-        'created_at',
-        'updated_at',
     ];
 
     /**
@@ -336,7 +335,7 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
 
-    public static function createStore(
+    public static function add(
         string $name,
         string $email,
         string $password,
@@ -498,19 +497,19 @@ class User extends Authenticatable implements JWTSubject
             ->get();
     }
 
-    public static function getParentSellers(string $search = ''): LengthAwarePaginator
+    public static function getParentSellers(OrderByEnum $orderBy, string $search = ''): LengthAwarePaginator
     {
         return self::where('business_name', 'like', '%' . $search . '%')
             ->where('role_id', '=', UserRoleEnum::SELLER)
-            ->orderBy('business_name', 'asc')
+            ->orderBy('created_at', $orderBy->value)
             ->paginate(9);
     }
 
-    public static function getChildSellers(string $search = ''): LengthAwarePaginator
+    public static function getChildSellers(OrderByEnum $orderBy, string $search = ''): LengthAwarePaginator
     {
         return self::where('business_name', 'like', '%' . $search . '%')
             ->where('role_id', '=', UserRoleEnum::CHILD_SELLER)
-            ->orderBy('business_name', 'asc')
+            ->orderBy('created_at', $orderBy->value)
             ->paginate(9);
     }
 

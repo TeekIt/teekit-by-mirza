@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Admin;
 
+use App\Actions\VanInventoryOrder\ProcessVanInventoryOrderAction;
+use App\Enums\OrderTypeEnum;
 use App\Enums\ProductStatusEnum;
 use App\Models\Products;
 use App\Models\User;
 use App\Services\GoogleMapServices;
+use Exception;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -27,6 +30,8 @@ class AddVanInventoryLivewire extends Component
 
     public float $vanLon = 0.0;
 
+    public int $vanId = 0;
+
     public int $nearBySellerId = 0;
 
     public array $nearbySellers = [];
@@ -45,9 +50,10 @@ class AddVanInventoryLivewire extends Component
     /*
     * Lifecycle Hooks
     */
-    public function mount(): void
+    public function mount(int $vanId): void
     {
         $this->userId = User::getAuthUser()->id;
+        $this->vanId = $vanId;
     }
 
     /*
@@ -245,38 +251,46 @@ class AddVanInventoryLivewire extends Component
         );
     }
 
-    public function checkout(): void
-    {
-        /**
-         * * Create a Single Action class for this whole procedure named "ProcessVanOrderAction" and call it from here by passing the cart items and the van details.
-         * STEP 1:
-         * Create a new "Van Order" table with the following details:
-         * - 'company_id' (bigincrements)
-         * - 'van_id' (bigincrements)
-         * - 'order_total' (float)
-         * - 'status' (string)
-         * - 'van_location' (string)
-         * 
-         * Note: we also have to create a new table for "Van Order Items" with the following columns:
-         * - 'van_order_id' (bigincrements)
-         * - 'product_id' (bigincrements)
-         * - 'seller_id' (bigincrements)
-         * - 'price' (float)
-         * - 'qty' (integer)
-         * 
-         * * STEP 2:
-         * Send the following product details as emails to all unique sellers in the cart:
-         * - 'title'
-         * - 'image'
-         * - 'price'
-         * - 'qty'
-         */
-    }
-
     /*
      * CRUD Methods
      */
-    // Coming soon...
+    public function checkout(OrderTypeEnum $vanInventoryOrderType): void
+    {
+        try {
+            $cartItems = $this->getCartItemsValues();
+
+            if (empty($cartItems)) {
+                session()->flash('error', 'Cart is empty.');
+                
+                $this->dispatch('close-cart', ['id' => 'cartDrawer']);
+
+                return;
+            }
+
+            /* Perform checkout operation */
+            $vanInventoryOrderPlaced = (new ProcessVanInventoryOrderAction())->execute(
+                $this->userId,
+                $this->vanId,
+                $this->vanLocation,
+                $vanInventoryOrderType,
+                $cartItems,
+                $this->getCartTotal()
+            );
+            /* Operation finished */
+            sleep(1);
+            $this->dispatch('close-cart', ['id' => 'cartDrawer']);
+
+            if ($vanInventoryOrderPlaced) {
+                session()->forget(self::CART_SESSION_KEY);
+                session()->flash('success', config('constants.ORDER_PLACED_SUCCESSFULLY'));
+            } else {
+                session()->flash('error', config('constants.ORDER_PLACED_FAILED'));
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', config('constants.ORDER_PLACED_FAILED'));
+        }
+    }
 
     public function render(): View
     {
@@ -287,9 +301,15 @@ class AddVanInventoryLivewire extends Component
             orderBy: 'desc'
         ) : null;
 
+        $cartItems = $this->getCartItemsValues();
         $cartItemsCount = $this->getCartItemsCount();
         $cartTotal = $this->getCartTotal();
 
-        return view('livewire.admin.add-van-inventory-livewire', compact('inventory', 'cartItems', 'cartItemsCount', 'cartTotal'));
+        return view('livewire.admin.add-van-inventory-livewire', compact(
+            'inventory',
+            'cartItems',
+            'cartItemsCount',
+            'cartTotal'
+        ));
     }
 }

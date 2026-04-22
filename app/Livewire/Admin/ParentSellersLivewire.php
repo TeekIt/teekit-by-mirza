@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Enums\OrderByEnum;
 use App\Models\Categories;
 use App\Models\CommissionAndServiceFee;
 use App\Models\User;
@@ -413,7 +414,7 @@ class ParentSellersLivewire extends Component
 
     public function render()
     {
-        $data = User::getParentSellers($this->search);
+        $data = User::getParentSellers(OrderByEnum::DESC, $this->search);
 
         return view('livewire.admin.parent-sellers-livewire', compact('data'));
     }

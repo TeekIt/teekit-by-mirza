@@ -17,6 +17,10 @@ return [
             'driver' => 'jwt',
             'provider' => 'vans',
         ],
+        'van_inventory' => [
+            'driver' => 'jwt',
+            'provider' => 'van_inventories',
+        ],
     ],
 
     'providers' => [
@@ -37,6 +41,11 @@ return [
             'model' => App\Models\Van::class,
             'table' => 'vans',
         ],
+        'van_inventory' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\VanInventory::class,
+        'table' => 'van_inventories',
+    ],
     ],
 
     'passwords' => [

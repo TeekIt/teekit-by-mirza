@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Sellers;
 
+use App\Enums\UserRoleEnum;
 use App\Models\Categories;
 use App\Models\Products;
 use App\Models\Qty;
@@ -157,15 +158,26 @@ class InventoryLivewire extends Component
         $featuredProducts = [];
         $this->category_id = ($this->category_id == 0) ? null : $this->category_id;
 
-        if (Gate::allows('seller')) {
-            $data = Products::getParentSellerProductsForView(User::getAuthUser()->id, $this->search, $this->category_id, orderBy: 'desc');
+        if (User::getAuthUser()->role_id == UserRoleEnum::SELLER->value) {
+            $data = Products::getParentSellerProductsForView(
+                User::getAuthUser()->id,
+                $this->search,
+                $this->category_id,
+                orderBy: 'desc'
+            );
+
             $featuredProducts = $this->getFeaturedProducts($data);
-        } elseif (Gate::allows('child_seller')) {
+        } elseif (User::getAuthUser()->role_id == UserRoleEnum::CHILD_SELLER->value) {
             /*
             1st scenario when a child store will come he will have parent products with "0" Qty
             2nd after entering the Qty for each product a child store can see his own entered Qty
              */
-            $data = Products::getChildSellerProductsForView(User::getAuthUser()->id, $this->search, $this->category_id);
+            $data = Products::getChildSellerProductsForView(
+                User::getAuthUser()->id,
+                $this->search,
+                $this->category_id
+            );
+            
             $this->quantity = $this->populateQuantityArray($data);
         }
 

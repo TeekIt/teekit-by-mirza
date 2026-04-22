@@ -35,15 +35,6 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('admin/vans') ? 'active' : '' }}"
-                          href="{{ route('admin.vans') }}">
-                          <i class="nav-icon fas fa-shuttle-van"></i>
-                          <p class="ml-2">
-                              Vans
-                          </p>
-                      </a>
-                  </li>
-                  <li class="nav-item">
                       <a class="nav-link {{ request()->is('admin/promocodes') ? 'active' : '' }}"
                           href="{{ route('admin.promocodes') }}">
                           <i class="nav-icon fas fa-qrcode"></i>

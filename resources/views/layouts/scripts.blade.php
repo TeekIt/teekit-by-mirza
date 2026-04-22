@@ -56,11 +56,11 @@
     @endif
 
     @php
-        $requestDeliveryRoutes = [route('seller.request.delivery.form'), route('admin.vans.inventories.add')];
+        $routesArray = ['seller.request.delivery.form', 'vans.inventories.add'];
     @endphp
-    @if (in_array(URL::current(), $requestDeliveryRoutes))
+    @if (request()->routeIs($routesArray))
         <script>
-            const isVanInventoryPage = @json(URL::current() === route('admin.vans.inventories.add'));
+            const isVanInventoryPage = @json(request()->routeIs('vans.inventories.add'));
 
             /* Initialize CustomGoogleMapsClass for pickup address autocomplete */
             const pickupGoogleMapsClass = new CustomGoogleMapsClass({
@@ -310,6 +310,10 @@
             Livewire.on('show-modal', (event) => {
                 $('#' + event[0].id).modal('show');
             });
+
+            Livewire.on('close-cart', () => {
+                bootstrap.Offcanvas.getInstance(document.getElementById('cartDrawer'))?.hide();
+            });
         });
 
         /*
@@ -509,7 +513,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "{{ route('admin.vans.del') }}",
+                            url: "{{ route('vans.del') }}",
                             type: "get",
                             data: {
                                 "vans": vans

@@ -7,6 +7,7 @@
         use App\Models\Products;
         use App\Models\User;
         use App\Services\ProductServices;
+        use App\Models\VanInventoryOrder;
     @endphp
 
     {{-- These are component specific session messages therefore we are not using global "session-messages" component here --}}
@@ -217,8 +218,9 @@
                     </span>
                 </button>
                 <button type="button" class="btn btn-site-primary my-4 p-1 w-100 mx-1" wire:click="resetThisPage"
-                    wire:target="resetThisPage" wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
-                    wire:loading.attr="disabled" title="Reset this page">
+                    wire:target="resetThisPage" wire:loading.class="btn-dark"
+                    wire:loading.class.remove="btn-site-primary" wire:loading.attr="disabled"
+                    title="Reset this page">
                     <span class="fas fa-sync" wire:target="resetThisPage" wire:loading.remove></span>
                     <span wire:target="resetThisPage" wire:loading>
                         <span class="spinner-border spinner-border-sm text-light" role="status"
@@ -244,11 +246,11 @@
                         <div class="p-2 mb-2">
 
                             <livewire:common.orders-header-livewire :$order :key="'orders-header-livewire-' . $order->id" />
-                                
+
                         </div>
                         <!-- /Order Header -->
                         <div class="card-text">
-                            @foreach ($order->order_items as $orderItem)
+                            @foreach ($order->orderItems as $orderItem)
                                 <!-- Order Items Begins -->
                                 <div class="row mb-2">
                                     <div class="col-md-2">
@@ -266,13 +268,21 @@
                                         <table class="table">
                                             <tr>
                                                 <td class="col-4 text-site-primary"><b>Product Name</b></td>
-                                                <td class="col-8"><b>{{ $orderItem?->product?->product_name }}</b></td>
+                                                <td class="col-8"><b>{{ $orderItem?->product?->product_name }}</b>
+                                                </td>
                                             </tr>
 
                                             <tr>
                                                 <td class="col-4 text-site-primary"><b>Qty</b></td>
                                                 <td class="col-8"> {{ $orderItem?->product_qty }} </td>
                                             </tr>
+
+                                            @if ($order instanceof VanInventoryOrder)
+                                                <tr>
+                                                    <td class="col-4 text-site-primary"><b>Price</b></td>
+                                                    <td class="col-8"> £{{ $orderItem?->product_price }} </td>
+                                                </tr>
+                                            @endif
 
                                             @if ($orderItem?->product_belongs_to_type === (new Products())->getMorphClass())
                                                 <tr>

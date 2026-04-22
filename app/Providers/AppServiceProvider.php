@@ -37,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::before(function ($user, $ability) {
             Gate::define($ability, function ($user) use ($ability) {
+            dd($ability);
+
                 if ($user->role->name == $ability) {
                     return true;
                 }

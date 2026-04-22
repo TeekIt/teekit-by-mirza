@@ -13,6 +13,11 @@ final class ListVanAction
             return Van::getById($filters['id'], $columns);
         }
 
-        return Van::getAll($filters['orderBy'], $filters['search'], $columns);
+        return Van::getAll(
+            $filters['orderBy'], 
+            $filters['search'], 
+            $filters['companyId'] ?? null,
+            $columns
+        );
     }
 }

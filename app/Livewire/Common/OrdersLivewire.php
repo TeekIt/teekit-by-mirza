@@ -3,10 +3,13 @@
 namespace App\Livewire\Common;
 
 use App\Actions\Orders\MoveOrderToOtherNearBySellersAction;
+use App\Enums\OrderByEnum;
 use App\Models\GophrDelivery;
 use App\Models\OrderItems;
 use App\Models\Orders;
 use App\Models\User;
+use App\Models\InventoryOrderItem;
+use App\Models\VanInventoryOrder;
 use App\Services\GoogleMapServices;
 use App\Services\GophrDeliveryServices;
 use Carbon\Carbon;
@@ -56,6 +59,8 @@ class OrdersLivewire extends Component
 
     public $errorMessage;
 
+    public $isVanInventoryPage = false;
+
     /*
     * Livewire Built-in Properties
     */
@@ -76,6 +81,7 @@ class OrdersLivewire extends Component
         }
 
         $this->requestOrderId = $request->requestOrderId;
+        $this->isVanInventoryPage = request()->routeIs('admin.order.van.inventory');
 
         $this->resetAllPaginators();
     }
@@ -146,7 +152,7 @@ class OrdersLivewire extends Component
         $this->resetComponent();
 
         $this->order = Orders::getById($orderId);
-        $this->orderItem = $this->order->order_items->firstWhere('id', '=', $orderItemId);
+        $this->orderItem = $this->order->orderItems->firstWhere('id', '=', $orderItemId);
 
         // $sellersOfTheSameCity = User::getActiveParentAndChildSellersByCity(User::getAuthUser()->city);
         $sellersOfTheSameCityAndCategory = $this->getSellersOfSameCityAndCategory();
@@ -274,16 +280,23 @@ class OrdersLivewire extends Component
     public function render()
     {
         try {
-            if (! User::isSuperAdmin()) {
-                $data = Orders::getOrdersForSellerView(
-                    orderId: $this->isSearchByIdSet(),
-                    sellerId: $this->sellerId,
-                    orderBy: 'desc',
-                );
-            } else {
+
+            if (User::isSuperAdmin()) {
                 $data = Orders::getOrdersForSuperAdminView(
                     orderId: $this->isSearchByIdSet(),
-                    orderBy: 'desc',
+                    orderBy: OrderByEnum::DESC,
+                );
+            } elseif (User::isParentSeller() || User::isChildSeller()) {
+                $data = Orders::getOrdersForSellerView(
+                    sellerId: $this->sellerId,
+                    orderId: $this->isSearchByIdSet(),
+                    orderBy: OrderByEnum::DESC,
+                );
+            } else {
+                $data = VanInventoryOrder::getAll(
+                    companyId: $this->sellerId,
+                    vanInventoryOrderId: $this->isSearchByIdSet(),
+                    orderBy: OrderByEnum::DESC,
                 );
             }
 

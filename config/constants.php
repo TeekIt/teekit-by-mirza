@@ -60,6 +60,7 @@ return [
     | Failure Constants
     |--------------------------------------------------------------------------
     */
+    'ORDER_PLACED_FAILED' => 'Sorry! Due to some error your order could not be placed.',
     'REGISTER_FAILED' => 'Sorry there is an error while your registeration process',
     'INSERTION_FAILED' => 'Failed to insert data',
     'UPDATION_FAILED' => 'Failed to update data',

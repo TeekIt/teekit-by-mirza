@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Enums\OrderByEnum;
 use App\Models\Qty;
 use App\Models\User;
 use Exception;
@@ -147,7 +148,7 @@ class ChildSellersLivewire extends Component
 
     public function render()
     {
-        $data = User::getChildSellers($this->search);
+        $data = User::getChildSellers(OrderByEnum::DESC,$this->search);
 
         return view('livewire.admin.child-sellers-livewire', compact('data'));
     }
