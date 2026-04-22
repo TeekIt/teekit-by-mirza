@@ -187,9 +187,9 @@ class VanProduct extends Model
         $query = self::query()->where('van_id', $vanId);
 
         if (!empty($filters['category_id'])) {
-            $query->where('category_id', '=',(int) $filters['category_id']);
+            $query->where('category_id', '=', (int) $filters['category_id']);
         }
-        
+
         if (!empty($filters['id'])) {
             $query->where('id', '=', (int) $filters['id']);
         }

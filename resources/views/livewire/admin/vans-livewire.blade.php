@@ -386,7 +386,7 @@
                         </thead>
                         <tbody>
                             @forelse ($data as $singleIndex)
-                                    <tr style="cursor: pointer;" wire:click="redirectToVanInventories({{ $singleIndex->id }})">
+                                    <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>
                                             <input type="checkbox" class="select-checkbox" title="Select"

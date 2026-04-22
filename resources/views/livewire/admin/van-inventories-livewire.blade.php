@@ -260,8 +260,9 @@
                                     <div class="form-group">
                                         <label class="d-block">Feature Image</label>
                                         @if ($featureImgUpload)
-                                            <img src="{{ $featureImgUpload->temporaryUrl() }}" alt="Feature image preview"
-                                                class="img-fluid rounded border mb-2" style="max-height: 160px;">
+                                            <img src="{{ $featureImgUpload->temporaryUrl() }}"
+                                                alt="Feature image preview" class="img-fluid rounded border mb-2"
+                                                style="max-height: 160px;">
                                         @elseif ($featureImg)
                                             <img src="{{ str_contains($featureImg, 'https://') ? $featureImg : config('constants.BUCKET') . $featureImg }}"
                                                 alt="Current feature image" class="img-fluid rounded border mb-2"
@@ -270,7 +271,8 @@
 
                                         <input type="file" class="form-control" id="featureImgUpload"
                                             wire:model="featureImgUpload" accept="image/jpeg,image/png,image/jpg">
-                                        <small class="text-muted">Upload only if you want to replace the current image.</small>
+                                        <small class="text-muted">Upload only if you want to replace the current
+                                            image.</small>
                                     </div>
                                     <small class="text-danger">
                                         @error('featureImgUpload')
@@ -374,13 +376,23 @@
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2 align-items-center">
-                <div class="col-12 col-xl-3">
-                    <h4 class="py-4 my-1 text-site-primary">Van Inventories</h4>
+                <div class="col-12 col-xl-2">
+                    <h4 class="py-4 my-1 text-site-primary">Vans Inventories</h4>
                 </div>
-                <div class="col-12 col-xl-3">
+                <div class="col-12 col-xl-2">
                     <div class="input-group py-2 my-2">
                         <input type="text" wire:model.live="search" class="form-control py-2"
                             placeholder="Search by name, qty or threshold...">
+                    </div>
+                </div>
+                <div class="col-12 col-xl-2">
+                    <div class="input-group py-2 my-2">
+                        <select class="form-control py-2" wire:model.live="vanId">
+                            <option value="">Select Van</option>
+                            @foreach ($vans as $singleIndex)
+                                <option value="{{ $singleIndex->id }}">{{ $singleIndex->number_plate }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 <div class="col-12 col-xl-6 d-flex gap-1">
@@ -398,10 +410,24 @@
                     <button type="button" class="btn btn-site-primary my-3 py-3 w-100" title="Export">
                         <i class="fas fa-cloud-download-alt"></i>
                     </button>
-                    <a href="{{ route('vans.inventories.add', ['vanId' => $vanId]) }}"
-                        class="btn btn-site-primary my-3 py-3 w-100" title="Add New">
-                        <span class="fas fa-plus"></span>
-                    </a>
+                    <div class="dropdown w-100 my-3">
+                        <button class="btn btn-site-primary py-3 w-100" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false" title="Add New">
+                            <span class="fas fa-plus"></span>
+                        </button>
+                        <ul class="dropdown-menu w-100 text-start">
+                            <li class="dropdown-item cursor-pointer p-3 border-bottom">
+                                <a class="dropdown-item" href="{{ route('vans.inventory.add.manually') }}">
+                                    Add Manually
+                                </a>
+                            </li>
+                            <li class="dropdown-item cursor-pointer p-3 border-bottom">
+                                <a class="dropdown-item" href="{{ route('vans.inventories.order.online', ['vanId' => (int) $vanId]) }}">
+                                    Order Online
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -426,7 +452,7 @@
                         <tbody>
                             @forelse ($data as $singleIndex)
                                 <tr>
-                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $singleIndex->id }}</td>
                                     <td>
                                         <input type="checkbox" class="select-checkbox" title="Select"
                                             id="inventory-{{ $singleIndex->id }}" onclick="event.stopPropagation()">
@@ -450,6 +476,11 @@
                             @endforelse
                         </tbody>
                     </table>
+                    <div class="row">
+                        <div class="col-md-12">
+                            {{ $data->links() }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

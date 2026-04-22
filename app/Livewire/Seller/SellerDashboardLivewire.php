@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Sellers;
+namespace App\Livewire\Seller;
 
 use App\Models\Orders;
 use App\Models\Qty;

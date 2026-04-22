@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Sellers\Modals;
+namespace App\Livewire\Seller\Modals;
 
 use App\Models\OrderItems;
 use App\Models\Orders;

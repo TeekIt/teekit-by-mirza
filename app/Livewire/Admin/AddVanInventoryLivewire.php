@@ -7,6 +7,7 @@ use App\Enums\OrderTypeEnum;
 use App\Enums\ProductStatusEnum;
 use App\Models\Products;
 use App\Models\User;
+use App\Models\Van;
 use App\Services\GoogleMapServices;
 use Exception;
 use Carbon\Carbon;
@@ -50,10 +51,10 @@ class AddVanInventoryLivewire extends Component
     /*
     * Lifecycle Hooks
     */
-    public function mount(int $vanId): void
+    public function mount(): void
     {
         $this->userId = User::getAuthUser()->id;
-        $this->vanId = $vanId;
+        // $this->vanId = $vanId;
     }
 
     /*
@@ -294,19 +295,25 @@ class AddVanInventoryLivewire extends Component
 
     public function render(): View
     {
-        $inventory = ($this->showInventoryGrid) ? Products::getParentOrChildSellerProductsForView(
+        $data = ($this->showInventoryGrid) ? Products::getParentOrChildSellerProductsForView(
             (int) $this->nearBySellerId,
             search: $this->search,
             status: ProductStatusEnum::ENABLE,
             orderBy: 'desc'
         ) : null;
 
+        $vans = Van::getByCompanyId(
+            $this->userId,
+            ['id', 'company_id', 'number_plate']
+        );
+
         $cartItems = $this->getCartItemsValues();
         $cartItemsCount = $this->getCartItemsCount();
         $cartTotal = $this->getCartTotal();
 
         return view('livewire.admin.add-van-inventory-livewire', compact(
-            'inventory',
+            'data',
+            'vans',
             'cartItems',
             'cartItemsCount',
             'cartTotal'

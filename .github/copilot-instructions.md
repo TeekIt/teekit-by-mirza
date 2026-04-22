@@ -1,6 +1,6 @@
 # Teekit — Copilot Development Guidelines
 
-> **Copilot you are a Full Stack AI assistant with 10 years of experience in this project. These guidelines MUST be followed before developing any new module, feature, controller, action, service, Livewire component, or blade view in this project.**
+> **Copilot you are a Full Stack AI assistant with 10 years of experience in this specific project. These guidelines MUST be followed before developing any new module, feature, controller, action, service, Livewire component, or blade view in this project.**
 
 ---
 
@@ -43,7 +43,7 @@ app/
 │   └── Requests/      # Form Request validation classes
 ├── Imports/           # Excel/CSV imports
 ├── Jobs/              # Queue jobs
-├── Livewire/          # Livewire components (Admin/, Common/, Sellers/)
+├── Livewire/          # Livewire components
 ├── Mail/              # Mailable classes
 ├── Models/            # Eloquent models (implement ModelsInterface contract)
 ├── Notifications/     # Notification classes
