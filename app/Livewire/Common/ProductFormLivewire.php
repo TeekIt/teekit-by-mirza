@@ -3,11 +3,13 @@
 namespace App\Livewire\Common;
 
 use App\Enums\TransportVehicleEnum;
+use App\Enums\UserRoleEnum;
 use App\Models\Categories;
 use App\Models\ProductImage;
 use App\Models\Products;
 use App\Models\Qty;
 use App\Models\User;
+use App\Models\VanProduct;
 use App\Services\ImageServices;
 use App\Services\ProductServices;
 use Exception;
@@ -15,6 +17,7 @@ use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Throwable;
 
 class ProductFormLivewire extends Component
 {
@@ -31,7 +34,7 @@ class ProductFormLivewire extends Component
 
     public int $qty = 0;
 
-    public string $price = '';
+    public float $price = 0.0;
 
     public string $discountPercentage = '';
 
@@ -41,7 +44,7 @@ class ProductFormLivewire extends Component
 
     public ?float $length = null;
 
-    public string $weight = '';
+    public ?float $weight = 0.0;
 
     public ?string $brand = null;
 
@@ -99,22 +102,62 @@ class ProductFormLivewire extends Component
         'galleryUploads.*'   => 'gallery image',
     ];
 
-    public function mount(): void
+    public function mount(?int $productId = null): void
     {
-        if ($this->productId) {
-            $sellerId = User::getAuthUser()->id;
-            $product  = Products::getProductInfoEvenDisabled($sellerId, $this->productId);
+        if ($productId) {
+            $this->productId = $productId;
 
+            $this->populateComponentVariables();
+
+            // $sellerId = User::getAuthUser()->id;
+
+            // $product  = Products::getProductInfoEvenDisabled($sellerId, $this->productId);
+
+            // $product  = Products::find($this->productId);
+            // $this->productName        = $product->product_name;
+            // $this->sku                = $product->sku;
+            // $this->categoryId         = (int) $product->category_id;
+            // $this->qty                = (int) ($product->qty->first()->qty ?? 0);
+            // $this->price              = (string) $product->price;
+            // $this->discountPercentage = (string) ($product->discount_percentage ?? '');
+            // $this->height             = $product->height ? (float) $product->height : null;
+            // $this->width              = $product->width ? (float) $product->width : null;
+            // $this->length             = $product->length ? (float) $product->length : null;
+            // $this->weight             = (string) $product->weight;
+            // $this->brand              = $product->brand;
+            // $this->size               = $product->size;
+            // $this->status             = (string) $product->getRawOriginal('status');
+            // $contact                  = $product->contact ?? '';
+            // $this->contact            = str_starts_with($contact, '+44') ? substr($contact, 3) : $contact;
+            // $this->colors             = $product->colors
+            //     ? array_keys(json_decode($product->colors, true) ?? [])
+            //     : [];
+            // $this->vehicle            = match (true) {
+            //     (bool) $product->bike => TransportVehicleEnum::BIKE->value,
+            //     (bool) $product->car  => TransportVehicleEnum::CAR->value,
+            //     (bool) $product->van  => TransportVehicleEnum::VAN->value,
+            //     default               => '',
+            // };
+            // $this->featureImg         = $product->feature_img ?? '';
+            // $this->existingImages     = $product->images->toArray();
+
+        }
+    }
+
+    public function populateComponentVariables(): void
+    {
+        if (request()->route()->getName() === 'vans.inventory.edit.manually') {
+            $product = VanProduct::getById($this->productId);
             $this->productName        = $product->product_name;
             $this->sku                = $product->sku;
-            $this->categoryId         = (int) $product->category_id;
-            $this->qty                = (int) ($product->qty->first()->qty ?? 0);
-            $this->price              = (string) $product->price;
-            $this->discountPercentage = (string) ($product->discount_percentage ?? '');
-            $this->height             = $product->height ? (float) $product->height : null;
-            $this->width              = $product->width ? (float) $product->width : null;
-            $this->length             = $product->length ? (float) $product->length : null;
-            $this->weight             = (string) $product->weight;
+            $this->categoryId         = $product->category_id;
+            $this->qty                = $product->quantity;
+            $this->price              = $product->price;
+            $this->discountPercentage = $product->discount_percentage;
+            $this->height             = $product->height ? $product->height : null;
+            $this->width              = $product->width ? $product->width : null;
+            $this->length             = $product->length ? $product->length : null;
+            $this->weight             = $product->weight;
             $this->brand              = $product->brand;
             $this->size               = $product->size;
             $this->status             = (string) $product->getRawOriginal('status');
@@ -130,19 +173,33 @@ class ProductFormLivewire extends Component
                 default               => '',
             };
             $this->featureImg         = $product->feature_img ?? '';
-            $this->existingImages     = $product->images->toArray();
         }
     }
 
     public function removeGalleryImage(int $imageId): void
     {
         ProductImage::deleteById($imageId);
+
         $this->existingImages = array_values(
             array_filter($this->existingImages, fn($img) => $img['id'] !== $imageId)
         );
     }
 
-    public function save(): void
+    public function uploadProductGalleryImages(): void
+    {
+        foreach ($this->galleryUploads as $galleryImage) {
+            $fileName = ImageServices::uploadLivewireImg($galleryImage, $this->productId);
+            if ($fileName) {
+                ProductImage::add($this->productId, $fileName);
+            }
+        }
+
+        /* Refresh images without redirecting */
+        $this->existingImages   = Products::find($this->productId)->images->toArray();
+        $this->galleryUploads   = [];
+    }
+    
+    public function addOrUpdateProduct(): void
     {
         $this->validate();
 
@@ -151,9 +208,9 @@ class ProductFormLivewire extends Component
 
             if ($this->featureImgUpload) {
                 $uploaded = ImageServices::uploadLivewireImg($this->featureImgUpload, $sellerId);
-                if (! $uploaded) {
-                    throw new Exception(config('constants.INTERNAL_SERVER_ERROR'));
-                }
+                // if (! $uploaded) {
+                //     throw new Exception(config('constants.INTERNAL_SERVER_ERROR'));
+                // }
                 $this->featureImg = $uploaded;
             }
 
@@ -182,9 +239,29 @@ class ProductFormLivewire extends Component
             ];
 
             if ($this->productId) {
-                $product = Products::findOrFail($this->productId);
-                $product->update($data);
-                Qty::updateQty($this->productId, $sellerId, $this->qty);
+                if (User::getAuthUser()->role_id === UserRoleEnum::COMPANY->value) {
+                    $product = VanProduct::find($this->productId);
+                    $product->update($data);
+                }
+
+                if (request()->route()->getName() === 'seller.edit.inventory.form') {
+                    $product = Products::find($this->productId);
+                    $product->update($data);
+                    Qty::updateQty($this->productId, $sellerId, $this->qty);
+                    $this->uploadProductGalleryImages();
+                    // foreach ($this->galleryUploads as $galleryImage) {
+                    //     $fileName = ImageServices::uploadLivewireImg($galleryImage, $product->id);
+                    //     if ($fileName) {
+                    //         ProductImage::add($product->id, $fileName);
+                    //     }
+                    // }
+
+                    // /* Refresh images without redirecting */
+                    // $this->existingImages   = $product->load('images')->images->toArray();
+                    // $this->featureImgUpload = null;
+                    // $this->galleryUploads   = [];
+                }
+
                 $message = config('constants.DATA_UPDATED_SUCCESS');
             } else {
                 $product = Products::add($data);
@@ -193,30 +270,18 @@ class ProductFormLivewire extends Component
                 $message = config('constants.DATA_INSERTION_SUCCESS');
             }
 
-            foreach ($this->galleryUploads as $galleryImage) {
-                $fileName = ImageServices::uploadLivewireImg($galleryImage, $product->id);
-                if ($fileName) {
-                    ProductImage::add($product->id, $fileName);
-                }
-            }
-
-            // Refresh images without redirecting
-            $this->existingImages   = $product->load('images')->images->toArray();
-            $this->featureImgUpload = null;
-            $this->galleryUploads   = [];
-
             session()->flash('success', $message);
-        } catch (Exception $e) {
-            report($e);
+        } catch (Throwable $error) {
+            logger()->error($error);
             session()->flash('error', config('constants.INTERNAL_SERVER_ERROR'));
         }
     }
 
     public function render(): View
     {
-        return view('livewire.common.product-form-livewire', [
-            'categories'   => Categories::getAll(['id', 'category_name']),
-            'commonColors' => Products::getCommonColors(),
-        ]);
+        $categories = Categories::getAll(['id', 'category_name']);
+        $commonColors = Products::getCommonColors();
+
+        return view('livewire.common.product-form-livewire', compact('categories', 'commonColors'));
     }
 }

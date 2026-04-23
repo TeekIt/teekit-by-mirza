@@ -3,7 +3,7 @@
     <x-session-messages />
 
     {{-- ************************************ Edit Inventory Modal ************************************ --}}
-    <div wire:ignore.self class="modal fade" id="editVanInventoryModal" tabindex="-1">
+    {{-- <div wire:ignore.self class="modal fade" id="editVanInventoryModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-scrollable" role="document">
             <div class="modal-content">
                 <form wire:submit="updateVanInventory">
@@ -371,7 +371,7 @@
                 </form>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <div class="content-header">
         <div class="container-fluid">
@@ -411,8 +411,8 @@
                         <i class="fas fa-cloud-download-alt"></i>
                     </button>
                     <div class="dropdown w-100 my-3">
-                        <button class="btn btn-site-primary py-3 w-100" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false" title="Add New">
+                        <button class="btn btn-site-primary py-3 w-100" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false" title="Add New">
                             <span class="fas fa-plus"></span>
                         </button>
                         <ul class="dropdown-menu w-100 text-start">
@@ -422,7 +422,8 @@
                                 </a>
                             </li>
                             <li class="dropdown-item cursor-pointer p-3 border-bottom">
-                                <a class="dropdown-item" href="{{ route('vans.inventories.order.online', ['vanId' => (int) $vanId]) }}">
+                                <a class="dropdown-item"
+                                    href="{{ route('vans.inventories.order.online', ['vanId' => (int) $vanId]) }}">
                                     Order Online
                                 </a>
                             </li>
@@ -462,11 +463,9 @@
                                     <td>{{ $singleIndex->quantity }}</td>
                                     <td>{{ $singleIndex->min_threshold }}</td>
                                     <td>
-                                        <button type="button" class="btn text-site-primary" title="Edit"
-                                            wire:click="renderEditVanInventoryModal({{ $singleIndex->id }})"
-                                            data-bs-toggle="modal" data-bs-target="#editVanInventoryModal">
+                                        <a href="{{ route('vans.inventory.edit.manually', ['productId' => $singleIndex->id]) }}" class="btn text-site-primary" title="Edit">
                                             <i class="far fa-edit"></i>
-                                        </button>
+                                        </a>
                                     </td>
                                 </tr>
                             @empty
