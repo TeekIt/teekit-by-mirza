@@ -556,7 +556,6 @@ class OrdersHeaderLivewire extends Component
     public function vanInventoryOrderIsAccepted(int $orderId)
     {
         try {
-            // dd('helo    ');
             /* Perform some operation */
             DB::beginTransaction();
 
@@ -673,11 +672,11 @@ class OrdersHeaderLivewire extends Component
             sleep(1);
             $this->dispatch(event: 'refreshThisComponent')->self();
 
-            if ($cancelled && $refunded->status === PaymentIntentStatusEnum::CANCELED->value) {
-                session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
-            } else {
-                session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
-            }
+            // if (! $this->isVanInventoryOrder && $cancelled && $refunded->status === PaymentIntentStatusEnum::CANCELED->value) {
+            //     session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
+            // } else {
+            //     session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
+            // }
         } catch (Exception $error) {
             DB::rollBack();
 
