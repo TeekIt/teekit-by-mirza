@@ -287,6 +287,6 @@ class RequestDeliveryFormLivewire extends Component
 
     public function render()
     {
-        return view('livewire.sellers.request-delivery-form-livewire');
+        return view('livewire.seller.request-delivery-form-livewire');
     }
 }

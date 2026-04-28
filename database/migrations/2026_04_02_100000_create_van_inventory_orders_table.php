@@ -11,11 +11,21 @@ return new class extends Migration
         Schema::create('van_inventory_orders', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->foreignId('company_id')->constrained(table: 'users')->cascadeOnDelete();
+            $table->foreignId('seller_id')->constrained(table: 'users')->cascadeOnDelete();
             $table->foreignId('van_id')->constrained(table: 'vans')->cascadeOnDelete();
             $table->float('order_total');
             $table->string('order_status')->comment('Only OrderStatusEnum values are allowed');
             $table->string('type')->comment('Only OrderTypeEnum values are allowed');
-            $table->text('van_location');
+            $table->string('customer_name')->nullable();
+            $table->decimal('customer_lat', 11, 8);
+            $table->decimal('customer_lon', 11, 8);
+            $table->string('country_code', 4);
+            $table->string('phone_number');
+            $table->text('address');
+            $table->string('country', 70);
+            $table->string('state', 70);
+            $table->string('city', 70);
+            $table->string('postcode', 11);
             $table->timestamps();
             $table->softDeletes();
         });

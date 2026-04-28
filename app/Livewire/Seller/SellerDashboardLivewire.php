@@ -49,7 +49,7 @@ class SellerDashboardLivewire extends Component
                  when order_status = "onTheWay" then 4 when order_status = "delivered" then 5 end'))
             ->paginate(5);
 
-        return view('livewire.sellers.seller-dashboard-livewire', [
+        return view('livewire.seller.seller-dashboard-livewire', [
             'seller' => $seller,
             'pending_orders' => $pending_orders,
             'total_products' => $total_products,

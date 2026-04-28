@@ -181,7 +181,7 @@ class InventoryLivewire extends Component
             $this->quantity = $this->populateQuantityArray($data);
         }
 
-        return view('livewire.sellers.inventory-livewire', [
+        return view('livewire.seller.inventory-livewire', [
             'data' => $data,
             'categories' => $categories,
             'featuredProducts' => $featuredProducts,

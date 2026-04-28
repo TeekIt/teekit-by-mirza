@@ -126,6 +126,6 @@ class WithdrawalLivewire extends Component
             $this->createdAt
         )->paginate(9);
 
-        return view('livewire.sellers.withdrawal-livewire', compact('data'));
+        return view('livewire.seller.withdrawal-livewire', compact('data'));
     }
 }

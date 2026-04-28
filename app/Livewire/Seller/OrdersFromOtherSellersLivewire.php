@@ -286,6 +286,6 @@ class OrdersFromOtherSellersLivewire extends Component
             'desc'
         );
 
-        return view('livewire.sellers.orders-from-other-sellers-livewire', compact('data'));
+        return view('livewire.seller.orders-from-other-sellers-livewire', compact('data'));
     }
 }

@@ -195,6 +195,11 @@ class User extends Authenticatable implements JWTSubject
         return self::getAuthUser()->role_id === UserRoleEnum::CHILD_SELLER->value;
     }
 
+    public static function isCompany(): bool
+    {
+        return self::getAuthUser()->role_id === UserRoleEnum::COMPANY->value;
+    }
+
     public static function adminUsersDel(Request $request)
     {
         for ($i = 0; $i < count($request->users); $i++) {

@@ -139,7 +139,7 @@ class VanProduct extends Model
         $now = now();
         $rows = $vanInventoryOrder->orderItems->map(function ($item) use ($vanInventoryOrder, $now) {
             return [
-                'seller_id' => $item->seller_id,
+                'seller_id' => $vanInventoryOrder->seller_id,
                 'category_id' => $item->product->category_id,
                 'van_id' => $vanInventoryOrder->van_id,
                 'product_name' => $item->product->product_name,

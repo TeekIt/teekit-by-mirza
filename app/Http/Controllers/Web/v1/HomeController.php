@@ -74,7 +74,7 @@ class HomeController extends Controller
     {
         $payment_settings = User::find(Auth::id())->bank_details;
 
-        return view('shopkeeper.settings.payment', compact('payment_settings'));
+        return view('seller.settings.payment', compact('payment_settings'));
     }
 
     /**

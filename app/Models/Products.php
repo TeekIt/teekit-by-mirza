@@ -587,24 +587,30 @@ class Products extends Model
 
     public static function getParentOrChildSellerProductsForView(
         int $sellerId,
-        string $search = '',
+        ?string $search = null,
         ?int $categoryId = null,
         ?ProductStatusEnum $status = null,
         string $orderBy = 'desc'
     ): LengthAwarePaginator {
-        return self::with('category')
+        return self::select('products.*')
+            ->join('qty', function ($join) use ($sellerId) {
+                $join->on('qty.product_id', '=', 'products.id')
+                    ->where('qty.seller_id', '=', $sellerId)
+                    ->whereNull('qty.deleted_at');
+            })
+            ->with('category')
             ->withAvg('rattings:ratting', 'average_ratting')
-            ->where('product_name', 'LIKE', "%{$search}%")
-            ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
-                $qtyRelation->where('seller_id', '=', $sellerId);
+            ->when($search, function ($query, $search) {
+                return $query->where('products.product_name', 'LIKE', "%{$search}%");
             })
             ->when($categoryId, function ($query, $categoryId) {
-                return $query->where('category_id', '=', $categoryId);
+                return $query->where('products.category_id', '=', $categoryId);
             })
             ->when($status, function ($query, $status) {
-                return $query->where('status', '=', $status);
+                return $query->where('products.status', '=', $status);
             })
-            ->orderBy('id', $orderBy)
+            ->distinct()
+            ->orderBy('products.id', $orderBy)
             ->paginate(12);
     }
 

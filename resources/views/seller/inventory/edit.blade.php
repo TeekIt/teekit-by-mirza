@@ -2,7 +2,7 @@
     use App\Models\Products;
 @endphp
 
-@extends('layouts.shopkeeper.app')
+@extends('layouts.seller.app')
 
 @section('styles')
     <style>

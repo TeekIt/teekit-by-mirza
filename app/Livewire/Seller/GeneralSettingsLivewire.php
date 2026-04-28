@@ -272,6 +272,6 @@ class GeneralSettingsLivewire extends Component
     {
         $user = $this->setUserInfo($this->user_id);
 
-        return view('livewire.sellers.general-settings-livewire', compact('user'));
+        return view('livewire.seller.general-settings-livewire', compact('user'));
     }
 }

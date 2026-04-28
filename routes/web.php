@@ -123,6 +123,7 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::prefix('orders')->group(function () {
             Route::get('count', [OrderController::class, 'countSellerOrders'])->name('seller.orders.count');
             Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
+            Route::get('/from-vans', OrdersLivewire::class)->name('seller.orders.from.vans');
             Route::get('/{requestOrderId?}', OrdersLivewire::class)->name('seller.orders');
         });
 

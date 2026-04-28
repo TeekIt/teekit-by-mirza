@@ -29,7 +29,7 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('vans.inventories') ? 'active' : '' }}" href="{{ route('vans.inventories') }}">
-                        <i class="nav-icon fas fa-shuttle-van"></i>
+                        <i class="nav-icon fas fa-truck-loading"></i>
                         <p class="ml-2">Inventory</p>
                     </a>
                 </li>

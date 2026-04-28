@@ -59,7 +59,9 @@ class OrdersLivewire extends Component
 
     public $errorMessage;
 
-    public $isVanInventoryPage = false;
+    public bool $isSellerOrdersPage = false;
+
+    public bool $isSellerOrdersFromVansPage = false;
 
     /*
     * Livewire Built-in Properties
@@ -74,14 +76,15 @@ class OrdersLivewire extends Component
     /*
     * Lifecycle Hooks
     */
-    public function mount(Request $request)
+    public function mount(Request $request): void
     {
         if (! User::isSuperAdmin()) {
             $this->sellerId = User::getAuthUser()->id;
         }
 
         $this->requestOrderId = $request->requestOrderId;
-        $this->isVanInventoryPage = request()->routeIs('admin.order.van.inventory');
+        $this->isSellerOrdersPage = request()->routeIs('seller.orders');
+        $this->isSellerOrdersFromVansPage = request()->routeIs('seller.orders.from.vans');
 
         $this->resetAllPaginators();
     }
@@ -286,13 +289,19 @@ class OrdersLivewire extends Component
                     orderId: $this->isSearchByIdSet(),
                     orderBy: OrderByEnum::DESC,
                 );
-            } elseif (User::isParentSeller() || User::isChildSeller()) {
+            } elseif ((User::isParentSeller() || User::isChildSeller()) && $this->isSellerOrdersPage) {
                 $data = Orders::getOrdersForSellerView(
                     sellerId: $this->sellerId,
                     orderId: $this->isSearchByIdSet(),
                     orderBy: OrderByEnum::DESC,
                 );
-            } else {
+            } elseif ((User::isParentSeller() || User::isChildSeller()) && $this->isSellerOrdersFromVansPage) {
+                $data = VanInventoryOrder::getAll(
+                    sellerId: $this->sellerId,
+                    vanInventoryOrderId: $this->isSearchByIdSet(),
+                    orderBy: OrderByEnum::DESC,
+                );
+            } elseif (User::isCompany()) {
                 $data = VanInventoryOrder::getAll(
                     companyId: $this->sellerId,
                     vanInventoryOrderId: $this->isSearchByIdSet(),

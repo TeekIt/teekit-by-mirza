@@ -133,16 +133,11 @@ class RegisterController extends Controller
             },
             "submitted" : null
         }';
-        // dd(isset($validatedData['parent_store']));
 
         if (isset($validatedData['parent_store'])) {
             $parentStoreName = $validatedData['parent_store'];
             $parentStoreId = User::getSellerByBusinessName($parentStoreName)->id;
         }
-
-        // $parentStoreId = isset($validatedData['parent_store']) ?
-        //     User::getSellerByBusinessName($validatedData('parent_store'))->id :
-        //     null;
 
         $user = User::add(
             $validatedData['name'],

@@ -152,6 +152,6 @@ class SearchAlternativeProductModal extends Component
     {
         $products = Products::getProductsForSAPModal($this->sellerId, $this->search);
 
-        return view('livewire.sellers.modals.search-alternative-product-modal', compact('products'));
+        return view('livewire.seller.modals.search-alternative-product-modal', compact('products'));
     }
 }

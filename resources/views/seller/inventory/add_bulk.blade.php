@@ -1,4 +1,4 @@
-@extends('layouts.shopkeeper.app')
+@extends('layouts.seller.app')
 @section('content')
 <div class="content">
     <!-- Content Header (Page header) -->

@@ -6,7 +6,7 @@
 
 ## 1. Project Overview
 
-**Teekit** (`teekit.co.uk`) is a UK-based e-commerce/marketplace platform connecting sellers (shopkeepers) with buyers, providing product ordering, delivery logistics (Stuart, Gophr, Uber), and a van-based operative/inventory system.
+**Teekit** (`teekit.co.uk`) is a UK-based e-commerce/marketplace platform connecting sellers with buyers, providing product ordering, delivery logistics (Stuart, Gophr, Uber), and a van-based operative/inventory system.
 
 | Layer | Technology |
 |---|---|

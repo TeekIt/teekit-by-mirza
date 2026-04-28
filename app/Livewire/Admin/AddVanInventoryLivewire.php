@@ -21,11 +21,19 @@ class AddVanInventoryLivewire extends Component
 {
     use WithPagination;
 
+    public User $authUser;
+
     public int $userId = 0;
 
-    public string $vanLocation = '';
+    public string $vanAddress = '';
+
+    public string $vanCountry = '';
+
+    public string $vanState = '';
 
     public string $vanCity = '';
+
+    public string $vanPostcode = '';
 
     public float $vanLat = 0.0;
 
@@ -53,14 +61,15 @@ class AddVanInventoryLivewire extends Component
     */
     public function mount(): void
     {
-        $this->userId = User::getAuthUser()->id;
+        $this->authUser = User::getAuthUser();
+        $this->userId = $this->authUser->id;
         // $this->vanId = $vanId;
     }
 
     /*
      * Custom Helpers
      */
-    public function updatedVanLocation(): void
+    public function updatedVanAddress(): void
     {
         $this->resetSearchResults();
     }
@@ -79,11 +88,23 @@ class AddVanInventoryLivewire extends Component
     public function updateLivewireProperties(array $data = []): void
     {
         if (isset($data['pickupAddress'])) {
-            $this->vanLocation = $data['pickupAddress'];
+            $this->vanAddress = $data['pickupAddress'];
+        }
+
+        if (isset($data['pickupCountry'])) {
+            $this->vanCountry = $data['pickupCountry'];
+        }
+
+        if (isset($data['pickupState'])) {
+            $this->vanState = $data['pickupState'];
         }
 
         if (isset($data['pickupCity'])) {
             $this->vanCity = $data['pickupCity'];
+        }
+
+        if (isset($data['pickupPostcode'])) {
+            $this->vanPostcode = $data['pickupPostcode'];
         }
 
         if (isset($data['pickupLat']) && isset($data['pickupLon'])) {
@@ -103,7 +124,7 @@ class AddVanInventoryLivewire extends Component
         );
     }
 
-    public function vanLocationChanged(): void
+    public function vanAddressChanged(): void
     {
         $sellersOfTheSameCity = $this->getSellersOfSameCity();
         $this->nearbySellers = GoogleMapServices::getNearBySellers(
@@ -117,7 +138,7 @@ class AddVanInventoryLivewire extends Component
     public function performSearch(): void
     {
         $this->validate([
-            'vanLocation' => 'required|string',
+            'vanAddress' => 'required|string',
             'nearBySellerId' => 'required|integer|exists:users,id',
         ]);
 
@@ -262,7 +283,7 @@ class AddVanInventoryLivewire extends Component
 
             if (empty($cartItems)) {
                 session()->flash('error', 'Cart is empty.');
-                
+
                 $this->dispatch('close-cart', ['id' => 'cartDrawer']);
 
                 return;
@@ -270,12 +291,22 @@ class AddVanInventoryLivewire extends Component
 
             /* Perform checkout operation */
             $vanInventoryOrderPlaced = (new ProcessVanInventoryOrderAction())->execute(
-                $this->userId,
-                $this->vanId,
-                $this->vanLocation,
-                $vanInventoryOrderType,
-                $cartItems,
-                $this->getCartTotal()
+                companyId: $this->userId,
+                vanId: $this->vanId,
+                customerName: $this->authUser->name,
+                customerLat: $this->authUser->lat,
+                customerLon: $this->authUser->lon,
+                customerCountryCode: $this->authUser->country_code,
+                customerPhoneNumber: $this->authUser->phone,
+                vanAddress: $this->vanAddress,
+                vanCountry: $this->vanCountry,
+                vanState: $this->vanState,
+                vanCity: $this->vanCity,
+                vanPostcode: $this->vanPostcode,
+                vanLat: $this->vanLat,
+                vanLon: $this->vanLon,
+                orderType: $vanInventoryOrderType,
+                orderItems: $cartItems
             );
             /* Operation finished */
             sleep(1);

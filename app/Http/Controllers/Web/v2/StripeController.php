@@ -19,7 +19,7 @@ class StripeController extends Controller
 
         SendRegeneratedStripeConnectAccMailJob::dispatch($user)->onQueue('high');
 
-        return view('shopkeeper.stripe.connect_acc_regenerated_link_sent');
+        return view('seller.stripe.connect_acc_regenerated_link_sent');
     }
 
     public function getCheckoutFormForRequestedDelivery(Request $request)

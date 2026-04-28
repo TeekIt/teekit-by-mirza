@@ -70,7 +70,7 @@
                                 <button type="submit" class="btn site-primary-yellow-bg w-100 rounded-pill py-2"
                                     wire:target="performSearch" wire:loading.class="btn-dark"
                                     wire:loading.class.remove="site-primary-yellow-bg" wire:loading.attr="disabled"
-                                    @disabled(!trim($vanLocation) || !$nearBySellerId)>
+                                    @disabled(!trim($vanAddress) || !$nearBySellerId)>
                                     <span wire:target="performSearch" wire:loading.remove>
                                         Search
                                     </span>

@@ -9,7 +9,7 @@
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
         @include('layouts.common.navbar')
-        @include('layouts.shopkeeper.sidebar')
+        @include('layouts.seller.sidebar')
 
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">

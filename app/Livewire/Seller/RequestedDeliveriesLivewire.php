@@ -277,6 +277,6 @@ class RequestedDeliveriesLivewire extends Component
             ]
         );
         
-        return view('livewire.sellers.requested-deliveries-livewire', compact('data'));
+        return view('livewire.seller.requested-deliveries-livewire', compact('data'));
     }
 }

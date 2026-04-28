@@ -56,11 +56,11 @@
     @endif
 
     @php
-        $routesArray = ['seller.request.delivery.form', 'vans.inventories.add'];
+        $routesArray = ['seller.request.delivery.form', 'vans.inventories.order.online'];
     @endphp
     @if (request()->routeIs($routesArray))
         <script>
-            const isVanInventoryPage = @json(request()->routeIs('vans.inventories.add'));
+            const isVanInventoryPage = @json(request()->routeIs('vans.inventories.order.online'));
 
             /* Initialize CustomGoogleMapsClass for pickup address autocomplete */
             const pickupGoogleMapsClass = new CustomGoogleMapsClass({
@@ -76,7 +76,10 @@
                     const fullAddress = `${place.name}, ${place.formatted_address}`;
                     const lat = place.geometry.location.lat();
                     const lng = place.geometry.location.lng();
+                    const country = pickupGoogleMapsClass.getAddressComponent(place, ['country'])?.long_name;
+                    const state = pickupGoogleMapsClass.getAddressComponent(place, ['administrative_area_level_1'])?.short_name;
                     const city = pickupGoogleMapsClass.extractCity(place);
+                    const postcode = pickupGoogleMapsClass.getAddressComponent(place, ['postal_code'])?.long_name;
                     /* Set HTML form input fields if present */
                     pickupGoogleMapsClass.setAddress(fullAddress);
                     pickupGoogleMapsClass.setLatLong(lat, lng);
@@ -90,11 +93,14 @@
                             pickupAddress: fullAddress,
                             pickupLat: lat,
                             pickupLon: lng,
+                            pickupCountry: country,
+                            pickupState: state,
                             pickupCity: city,
+                            pickupPostcode: postcode,
                         });
                         
                         if (isVanInventoryPage) {
-                            promise.then(() => livewireComponent.call('vanLocationChanged'));
+                            promise.then(() => livewireComponent.call('vanAddressChanged'));
                         }
                     }
                 }
