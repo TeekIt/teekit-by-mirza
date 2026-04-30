@@ -321,4 +321,108 @@ class Van extends Authenticatable implements JWTSubject
             ->where('order_status', '=', 'pending')
             ->count();
     }
+
+    /**
+ * Get stock value breakdown by van for a company
+ * Returns array with van name and stock value
+ *
+ * @return \Illuminate\Support\Collection
+ */
+public static function getStockValueByVan(int $companyId): \Illuminate\Support\Collection
+{
+    $vans = self::where('company_id', '=', $companyId)->get();
+    
+    if ($vans->isEmpty()) {
+        return collect();
+    }
+    return $vans->map(function ($van) {
+        $stockValue = VanProduct::where('van_id', $van->id)
+            ->selectRaw('SUM(price * quantity) as total_value')
+            ->value('total_value') ?? 0;
+        
+        return [
+            'van_id' => $van->id,
+            'van_name' => $van->user_name,
+            'operative' => $van->operative,
+            'number_plate' => $van->number_plate,
+            'stock_value' => (float) $stockValue,
+        ];
+    })->sortByDesc('stock_value')->values();
+}
+
+// Add after getStockValueByVan method
+
+/**
+ * Get all vans for a company (for dropdown)
+ *
+ * @return \Illuminate\Support\Collection
+ */
+public static function getVansForCompany(int $companyId): \Illuminate\Support\Collection
+{
+    return self::where('company_id', '=', $companyId)
+        ->select('id', 'user_name', 'operative', 'number_plate')
+        ->get();
+}
+
+/**
+ * Get stock usage data for a van
+ * Returns daily usage value in (£)
+ *
+ * @param int $vanId
+ * @param string $period (daily|weekly)
+ * @return \Illuminate\Support\Collection
+ */
+public static function getStockUsageByVan(int $vanId, string $period = 'daily'): \Illuminate\Support\Collection
+{
+    $query = VanOperativeProductUsage::where('van_id', $vanId)
+        ->with(['vanProduct:id,price,product_name']);
+    
+    if ($period === 'daily') {
+        $query->whereDate('used_at', '>=', now()->subDays(30));
+        $groupBy = 'DATE(used_at)';
+    } else {
+        $query->whereDate('used_at', '>=', now()->subWeeks(12));
+        $groupBy = 'YEAR(used_at), WEEK(used_at)';
+    }
+    
+    return $query->get()
+        ->map(function ($usage) {
+            $price = $usage->vanProduct->price ?? 0;
+            return [
+                'date' => $usage->used_at->format('Y-m-d'),
+                'quantity_used' => $usage->quantity_used,
+                'price' => $price,
+                'value' => $usage->quantity_used * $price,
+                'job_reference' => $usage->job_reference,
+            ];
+        })
+        ->groupBy('date')
+        ->map(function ($dayGroup) {
+            return [
+                'date' => $dayGroup->first()['date'],
+                'total_quantity' => $dayGroup->sum('quantity_used'),
+                'total_value' => $dayGroup->sum('value'),
+            ];
+        })
+        ->values();
+}
+
+/**
+ * Get total stock usage value for a van
+ *
+ * @param int $vanId
+ * @return float
+ */
+public static function getTotalUsageValue(int $vanId): float
+{
+    $usages = VanOperativeProductUsage::where('van_id', $vanId)
+        ->with(['vanProduct:id,price'])
+        ->get();
+    
+    return $usages->sum(function ($usage) {
+        $price = $usage->vanProduct->price ?? 0;
+        return $usage->quantity_used * $price;
+    });
+}
+
 }
