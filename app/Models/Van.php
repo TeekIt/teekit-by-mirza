@@ -10,6 +10,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\VanOperativeProductUsage;
+use App\Models\VanProduct;
+use App\Models\VanInventoryOrder;
 
 class Van extends Authenticatable implements JWTSubject
 {
@@ -205,5 +208,117 @@ class Van extends Authenticatable implements JWTSubject
             })
             ->orderBy('created_at', $orderBy->value)
             ->paginate(10);
+    }
+    /**
+     * Get total count of vans for a company
+     *
+     * @return int
+     */
+    public static function getVansCountByCompanyId(int $companyId): int
+    {
+        return self::where('company_id', '=', $companyId)->count();
+    }
+
+    /**
+     * Get total stock quantity across all vans for a company
+     *
+     * @return int
+     */
+    public static function getTotalStockByCompanyId(int $companyId): int
+    {
+        $vanIds = self::where('company_id', '=', $companyId)->pluck('id');
+        
+        if ($vanIds->isEmpty()) {
+            return 0;
+        }
+        
+        return VanProduct::whereIn('van_id', $vanIds)->sum('quantity');
+    }
+
+        /**
+         * Get count of active operatives for today
+         * Operatives who have recorded usage during the current day
+         *
+         * @return int
+        */
+    public static function getActiveOperativesCountToday(int $companyId): int
+    {
+        $vans = self::where('company_id', '=', $companyId)->get();
+        
+        if ($vans->isEmpty()) {
+            return 0;
+        }
+        
+        $vanIds = $vans->pluck('id');
+        
+        return VanOperativeProductUsage::whereIn('van_id', $vanIds)
+            ->whereDate('used_at', '=', now()->toDateString())
+            ->distinct('van_id')
+            ->count('van_id');
+    }
+
+    /**
+     * Get total stock value across all vans for a company
+     * Combined monetary value of all inventory (£)
+     *
+     * @return float
+    */
+    public static function getTotalStockValue(int $companyId): float
+    {
+        $vans = self::where('company_id', '=', $companyId)->get();
+        
+        if ($vans->isEmpty()) {
+            return 0.0;
+        }
+        
+        $vanIds = $vans->pluck('id');
+        
+        return VanProduct::whereIn('van_id', $vanIds)
+            ->selectRaw('SUM(price * quantity) as total_value')
+            ->value('total_value') ?? 0.0;
+    }
+    /**
+     * Get count of low stock items across all vans for a company
+     * Items that have fallen below the minimum stock threshold
+     *
+     * @return int
+    */
+
+    public static function getLowStockAlertsCount(int $companyId): int
+    {
+        $vans = self::where('company_id', '=', $companyId)->get();
+        
+        if ($vans->isEmpty()) {
+            return 0;
+        }
+        
+        $vanIds = $vans->pluck('id');
+        
+        // Critical = quantity > 0 AND quantity <= min_threshold
+        return VanProduct::whereIn('van_id', $vanIds)
+            ->where('quantity', '>', 0)
+            ->whereColumn('quantity', '<=', 'min_threshold')
+            ->count();
+    }
+    /**
+     * Get count of pending orders across all vans for a company
+     * Orders that have been placed but not yet fulfilled or delivered
+     *
+     * @return int
+     */
+    public static function getPendingOrdersCount(int $companyId): int
+    {
+        $vans = self::where('company_id', '=', $companyId)->get();
+        
+        if ($vans->isEmpty()) {
+            return 0;
+        }
+        
+        $vanIds = $vans->pluck('id');
+        
+        // Pending status = 'pending'
+        return VanInventoryOrder::whereIn('van_id', $vanIds)
+            ->where('order_status', '=', 'pending')
+            ->count();
     }
 }

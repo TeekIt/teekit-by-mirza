@@ -13,15 +13,26 @@ class CompanyDashboardLivewire extends Component
     {
         $companyId = User::getAuthUser()->id;
 
-        $vans = Van::where('company_id', '=', $companyId)->get();
-        $totalVans = $vans->count();
+        $totalVans = Van::getVansCountByCompanyId($companyId);
 
-        $vanIds = $vans->pluck('id');
-        $totalStock = VanProduct::whereIn('van_id', $vanIds)->sum('quantity');
+        
+        $totalStock = Van::getTotalStockByCompanyId($companyId);
+
+        $activeOperatives = Van::getActiveOperativesCountToday($companyId);
+
+        $totalStockValue = Van::getTotalStockValue($companyId);
+
+        $lowStockAlerts = Van::getLowStockAlertsCount($companyId);
+
+        $pendingOrders = Van::getPendingOrdersCount($companyId);
 
         return view('livewire.company.company-dashboard-livewire', [
             'totalVans' => $totalVans,
             'totalStock' => $totalStock,
+            'activeOperatives' => $activeOperatives,
+            'totalStockValue' => $totalStockValue,
+            'lowStockAlerts' => $lowStockAlerts,
+            'pendingOrders' => $pendingOrders,
         ]);
     }
 }
