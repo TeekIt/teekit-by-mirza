@@ -2,20 +2,18 @@
 
 namespace App\Actions\VanProduct;
 
+use App\Enums\OrderByEnum;
 use App\Models\VanProduct;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 final class SearchProductsAction
 {
-    /**
-     * Search products by query string across multiple columns
-     *
-     * @param string $query
-     * @return \Illuminate\Support\Collection
-     */
-     public function execute(string $query)
+    public function execute(string $query): LengthAwarePaginator
     {
-        $vanId = auth()->guard('van')->id();
-
-        return VanProduct::searchByVan($vanId, $query);
+        return VanProduct::getAll(
+            orderBy: OrderByEnum::DESC,
+            vanId: auth()->guard('van')->id(),
+            search: $query
+        );
     }
 }

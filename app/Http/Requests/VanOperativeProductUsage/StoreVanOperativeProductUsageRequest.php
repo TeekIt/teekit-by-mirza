@@ -1,11 +1,24 @@
 <?php
 
-namespace App\Http\Requests\ProductUsageRecord;
+namespace App\Http\Requests\VanOperativeProductUsage;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RecordUsageRequest extends FormRequest
+class StoreVanOperativeProductUsageRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [

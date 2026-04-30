@@ -24,6 +24,11 @@ class VanInventoryOrder extends Model
         'id',
     ];
 
+    protected $hidden = [
+        'updated_at',
+        'deleted_at',
+    ];
+
     /**
      * Relations
      */
