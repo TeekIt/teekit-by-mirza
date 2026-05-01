@@ -14,7 +14,6 @@ class CompanyDashboardLivewire extends Component
         $companyId = User::getAuthUser()->id;
 
         $totalVans = Van::getVansCountByCompanyId($companyId);
-
         
         $totalStock = Van::getTotalStockByCompanyId($companyId);
 
