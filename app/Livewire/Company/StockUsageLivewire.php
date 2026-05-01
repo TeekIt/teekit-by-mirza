@@ -50,8 +50,9 @@ class StockUsageLivewire extends Component
         $this->totalUsageValue = Van::getTotalUsageValue((int) $this->selectedVanId);
         
         // Get van name for display
-        $van = collect($this->vans)->firstWhere('id', $this->selectedVanId);
+        $van = collect($this->vans)->firstWhere('id', (int) $this->selectedVanId);
         $this->vanName = $van ? $van['operative'] . ' (' . $van['user_name'] . ')' : '';
+        $this->dispatch('usageDataUpdated', ['usageData' => $this->usageData]);
     }
 
     public function render()

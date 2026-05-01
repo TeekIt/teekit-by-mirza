@@ -46,7 +46,7 @@
                                     Stock Usage - {{ $vanName }}
                                 </h5>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body" wire:ignore>
                                 <canvas id="stockUsageChart" width="600" height="300"></canvas>
                             </div>
                         </div>
@@ -91,17 +91,22 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-        var canvas = document.getElementById('stockUsageChart');
-        if (!canvas) return;
-        
-        var ctx = canvas.getContext('2d');
-        
-        var labels = {!! json_encode(array_column(array_reverse($usageData), 'date')) !!};
-        var values = {!! json_encode(array_column(array_reverse($usageData), 'total_value')) !!};
-        
-        new Chart(ctx, {
+document.addEventListener('livewire:init', function () {
+    let stockUsageChart;
+
+    function createChart(labels, values) {
+        const canvas = document.getElementById('stockUsageChart');
+        if (!canvas) {
+            return;
+        }
+
+        if (stockUsageChart) {
+            stockUsageChart.destroy();
+            stockUsageChart = null;
+        }
+
+        const ctx = canvas.getContext('2d');
+        stockUsageChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
@@ -129,6 +134,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
-    }, 500);
+    }
+
+    createChart(
+        {!! json_encode(array_column(array_reverse($usageData), 'date')) !!},
+        {!! json_encode(array_column(array_reverse($usageData), 'total_value')) !!}
+    );
+
+    Livewire.on('usageDataUpdated', function (event) {
+        const usageData = event?.[0]?.usageData || [];
+        const labels = usageData.map(function(item) {
+            return item.date;
+        });
+        const values = usageData.map(function(item) {
+            return item.total_value;
+        });
+        createChart(labels, values);
+    });
 });
 </script>

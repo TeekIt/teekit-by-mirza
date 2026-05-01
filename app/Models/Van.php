@@ -229,7 +229,6 @@ class Van extends Authenticatable implements JWTSubject
             ->sum('van_products.quantity');
     }
 
-<<<<<<< HEAD
     /**
      * Get count of active operatives for today
      * Operatives who have recorded usage during the current day
@@ -252,34 +251,6 @@ class Van extends Authenticatable implements JWTSubject
             ->count('van_id');
     }
 
-    /**
-     * Get total stock value across all vans for a company
-     * Combined monetary value of all inventory (£)
-     *
-     * @return float
-     */
-    public static function getTotalStockValue(int $companyId): float
-    {
-        $vans = self::where('company_id', '=', $companyId)->get();
-
-        if ($vans->isEmpty()) {
-            return 0.0;
-        }
-
-        $vanIds = $vans->pluck('id');
-
-        return VanProduct::whereIn('van_id', $vanIds)
-            ->selectRaw('SUM(price * quantity) as total_value')
-            ->value('total_value') ?? 0.0;
-    }
-    /**
-     * Get count of low stock items across all vans for a company
-     * Items that have fallen below the minimum stock threshold
-     *
-     * @return int
-     */
-=======
-       
     public static function getActiveOperativesCount(int $companyId, string $date): int
     {
         return self::where('company_id', $companyId)
@@ -291,7 +262,6 @@ class Van extends Authenticatable implements JWTSubject
             ->count();
     }
 
-   
     public static function getTotalStockValue(int $companyId): float
     {
         return (float) self::join('van_products', 'vans.id', '=', 'van_products.van_id')
@@ -299,10 +269,8 @@ class Van extends Authenticatable implements JWTSubject
             ->selectRaw('SUM(van_products.price * van_products.quantity) as total_value')
             ->value('total_value') ?? 0.0;
     }
-   
->>>>>>> 68e97ca (Worked on the PR points)
 
-   public static function getLowStockAlertsCount(int $companyId): int
+    public static function getLowStockAlertsCount(int $companyId): int
     {
         return self::join('van_products', 'vans.id', '=', 'van_products.van_id')
             ->where('vans.company_id', $companyId)
@@ -311,7 +279,6 @@ class Van extends Authenticatable implements JWTSubject
             ->count();
     }
 
-   
     public static function getStockValueByVan(int $companyId): \Illuminate\Support\Collection
     {
         $vans = self::where('company_id', '=', $companyId)->get();
@@ -319,22 +286,22 @@ class Van extends Authenticatable implements JWTSubject
         if ($vans->isEmpty()) {
             return collect();
         }
-<<<<<<< HEAD
 
-        $vanIds = $vans->pluck('id');
+        return $vans->map(function ($van) {
+            $stockValue = VanProduct::where('van_id', $van->id)
+                ->selectRaw('SUM(price * quantity) as total_value')
+                ->value('total_value') ?? 0;
 
-        // Critical = quantity > 0 AND quantity <= min_threshold
-        return VanProduct::whereIn('van_id', $vanIds)
-            ->where('quantity', '>', 0)
-            ->whereColumn('quantity', '<', 'min_threshold')
-            ->count();
+            return [
+                'van_id' => $van->id,
+                'van_name' => $van->user_name,
+                'operative' => $van->operative,
+                'number_plate' => $van->number_plate,
+                'stock_value' => (float) $stockValue,
+            ];
+        })->sortByDesc('stock_value')->values();
     }
-    /**
-     * Get count of pending orders across all vans for a company
-     * Orders that have been placed but not yet fulfilled or delivered
-     *
-     * @return int
-     */
+
     public static function getPendingOrdersCount(int $companyId): int
     {
         $vans = self::where('company_id', '=', $companyId)->get();
@@ -345,100 +312,18 @@ class Van extends Authenticatable implements JWTSubject
 
         $vanIds = $vans->pluck('id');
 
-        // Pending status = 'pending'
         return VanInventoryOrder::whereIn('van_id', $vanIds)
             ->where('order_status', '=', OrderStatusEnum::PENDING->value)
             ->count();
     }
 
-    /**
-     * Get stock value breakdown by van for a company
-     * Returns array with van name and stock value
-     *
-     * @return \Illuminate\Support\Collection
-     */
-    public static function getStockValueByVan(int $companyId): \Illuminate\Support\Collection
-    {
-        $vans = self::where('company_id', '=', $companyId)->get();
-
-        if ($vans->isEmpty()) {
-            return collect();
-        }
-        return $vans->map(function ($van) {
-            $stockValue = VanProduct::where('van_id', $van->id)
-                ->selectRaw('SUM(price * quantity) as total_value')
-                ->value('total_value') ?? 0;
-
-            return [
-                'van_id' => $van->id,
-                'van_name' => $van->user_name,
-                'operative' => $van->operative,
-                'number_plate' => $van->number_plate,
-                'stock_value' => (float) $stockValue,
-            ];
-        })->sortByDesc('stock_value')->values();
-    }
-=======
-        return $vans->map(function ($van) {
-            $stockValue = VanProduct::where('van_id', $van->id)
-                ->selectRaw('SUM(price * quantity) as total_value')
-                ->value('total_value') ?? 0;
-            
-            return [
-                'van_id' => $van->id,
-                'van_name' => $van->user_name,
-                'operative' => $van->operative,
-                'number_plate' => $van->number_plate,
-                'stock_value' => (float) $stockValue,
-            ];
-        })->sortByDesc('stock_value')->values();
-    }
-
->>>>>>> 68e97ca (Worked on the PR points)
-
-
-<<<<<<< HEAD
-    /**
-     * Get all vans for a company (for dropdown)
-     *
-     * @return \Illuminate\Support\Collection
-     */
     public static function getVansForCompany(int $companyId): \Illuminate\Support\Collection
     {
         return self::where('company_id', '=', $companyId)
             ->select('id', 'user_name', 'operative', 'number_plate')
             ->get();
-=======
-public static function getVansForCompany(int $companyId): \Illuminate\Support\Collection
-{
-    return self::where('company_id', '=', $companyId)
-        ->select('id', 'user_name', 'operative', 'number_plate')
-        ->get();
-}
-
-
-public static function getStockUsageByVan(int $vanId, string $period = 'daily'): \Illuminate\Support\Collection
-{
-    $query = VanOperativeProductUsage::where('van_id', $vanId)
-        ->with(['vanProduct:id,price,product_name']);
-    
-    if ($period === 'daily') {
-        $query->whereDate('used_at', '>=', now()->subDays(30));
-        $groupBy = 'DATE(used_at)';
-    } else {
-        $query->whereDate('used_at', '>=', now()->subWeeks(12));
-        $groupBy = 'YEAR(used_at), WEEK(used_at)';
->>>>>>> 68e97ca (Worked on the PR points)
     }
 
-    /**
-     * Get stock usage data for a van
-     * Returns daily usage value in (£)
-     *
-     * @param int $vanId
-     * @param string $period (daily|weekly)
-     * @return \Illuminate\Support\Collection
-     */
     public static function getStockUsageByVan(int $vanId, string $period = 'daily'): \Illuminate\Support\Collection
     {
         $query = VanOperativeProductUsage::where('van_id', $vanId)
@@ -474,12 +359,6 @@ public static function getStockUsageByVan(int $vanId, string $period = 'daily'):
             ->values();
     }
 
-    /**
-     * Get total stock usage value for a van
-     *
-     * @param int $vanId
-     * @return float
-     */
     public static function getTotalUsageValue(int $vanId): float
     {
         $usages = VanOperativeProductUsage::where('van_id', $vanId)
@@ -488,42 +367,7 @@ public static function getStockUsageByVan(int $vanId, string $period = 'daily'):
 
         return $usages->sum(function ($usage) {
             $price = $usage->vanProduct->price ?? 0;
-<<<<<<< HEAD
             return $usage->quantity_used * $price;
         });
     }
-=======
-            return [
-                'date' => $usage->used_at->format('Y-m-d'),
-                'quantity_used' => $usage->quantity_used,
-                'price' => $price,
-                'value' => $usage->quantity_used * $price,
-                'job_reference' => $usage->job_reference,
-            ];
-        })
-        ->groupBy('date')
-        ->map(function ($dayGroup) {
-            return [
-                'date' => $dayGroup->first()['date'],
-                'total_quantity' => $dayGroup->sum('quantity_used'),
-                'total_value' => $dayGroup->sum('value'),
-            ];
-        })
-        ->values();
-}
-
-
-public static function getTotalUsageValue(int $vanId): float
-{
-    $usages = VanOperativeProductUsage::where('van_id', $vanId)
-        ->with(['vanProduct:id,price'])
-        ->get();
-    
-    return $usages->sum(function ($usage) {
-        $price = $usage->vanProduct->price ?? 0;
-        return $usage->quantity_used * $price;
-    });
-}
-
->>>>>>> 68e97ca (Worked on the PR points)
 }

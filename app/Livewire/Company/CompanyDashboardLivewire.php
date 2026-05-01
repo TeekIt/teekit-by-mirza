@@ -21,12 +21,9 @@ class CompanyDashboardLivewire extends Component
     public function render()
     {
 
-<<<<<<< HEAD
-        $totalVans = Van::getVansCountByCompanyId($companyId);
-=======
         $totalVans = Van::getVansCountByCompanyId($this->companyId);
-
->>>>>>> 68e97ca (Worked on the PR points)
+        
+        $totalVans = Van::getVansCountByCompanyId($this->companyId);
         
         $totalStock = Van::getTotalStockByCompanyId($this->companyId);
 
