@@ -87,7 +87,10 @@ class Van extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(VanProduct::class, 'van_id')->where('status', 'active');
     }
-
+    public function vanOperativeProductUsages()
+    {
+        return $this->hasMany(VanOperativeProductUsage::class, 'van_id');
+    }
     /**
      * Helpers
      */
@@ -212,21 +215,13 @@ class Van extends Authenticatable implements JWTSubject
             ->orderBy('created_at', $orderBy->value)
             ->paginate(10);
     }
-    /**
-     * Get total count of vans for a company
-     *
-     * @return int
-     */
+    
     public static function getVansCountByCompanyId(int $companyId): int
     {
         return self::where('company_id', '=', $companyId)->count();
     }
 
-    /**
-     * Get total stock quantity across all vans for a company
-     *
-     * @return int
-     */
+    
     public static function getTotalStockByCompanyId(int $companyId): int
     {
         return self::where('company_id', $companyId)
@@ -234,6 +229,7 @@ class Van extends Authenticatable implements JWTSubject
             ->sum('van_products.quantity');
     }
 
+<<<<<<< HEAD
     /**
      * Get count of active operatives for today
      * Operatives who have recorded usage during the current day
@@ -282,14 +278,48 @@ class Van extends Authenticatable implements JWTSubject
      *
      * @return int
      */
+=======
+       
+    public static function getActiveOperativesCount(int $companyId, string $date): int
+    {
+        return self::where('company_id', $companyId)
+            ->select('vans.id')
+            ->distinct()
+            ->whereHas('vanOperativeProductUsages', function ($query) use ($date) {
+                $query->whereDate('used_at', $date);
+            })
+            ->count();
+    }
 
-    public static function getLowStockAlertsCount(int $companyId): int
+   
+    public static function getTotalStockValue(int $companyId): float
+    {
+        return (float) self::join('van_products', 'vans.id', '=', 'van_products.van_id')
+            ->where('vans.company_id', $companyId)
+            ->selectRaw('SUM(van_products.price * van_products.quantity) as total_value')
+            ->value('total_value') ?? 0.0;
+    }
+   
+>>>>>>> 68e97ca (Worked on the PR points)
+
+   public static function getLowStockAlertsCount(int $companyId): int
+    {
+        return self::join('van_products', 'vans.id', '=', 'van_products.van_id')
+            ->where('vans.company_id', $companyId)
+            ->where('van_products.quantity', '>', 0)
+            ->whereColumn('van_products.quantity', '<=', 'van_products.min_threshold')
+            ->count();
+    }
+
+   
+    public static function getStockValueByVan(int $companyId): \Illuminate\Support\Collection
     {
         $vans = self::where('company_id', '=', $companyId)->get();
 
         if ($vans->isEmpty()) {
-            return 0;
+            return collect();
         }
+<<<<<<< HEAD
 
         $vanIds = $vans->pluck('id');
 
@@ -348,9 +378,26 @@ class Van extends Authenticatable implements JWTSubject
             ];
         })->sortByDesc('stock_value')->values();
     }
+=======
+        return $vans->map(function ($van) {
+            $stockValue = VanProduct::where('van_id', $van->id)
+                ->selectRaw('SUM(price * quantity) as total_value')
+                ->value('total_value') ?? 0;
+            
+            return [
+                'van_id' => $van->id,
+                'van_name' => $van->user_name,
+                'operative' => $van->operative,
+                'number_plate' => $van->number_plate,
+                'stock_value' => (float) $stockValue,
+            ];
+        })->sortByDesc('stock_value')->values();
+    }
 
-// Add after getStockValueByVan method
+>>>>>>> 68e97ca (Worked on the PR points)
 
+
+<<<<<<< HEAD
     /**
      * Get all vans for a company (for dropdown)
      *
@@ -361,6 +408,27 @@ class Van extends Authenticatable implements JWTSubject
         return self::where('company_id', '=', $companyId)
             ->select('id', 'user_name', 'operative', 'number_plate')
             ->get();
+=======
+public static function getVansForCompany(int $companyId): \Illuminate\Support\Collection
+{
+    return self::where('company_id', '=', $companyId)
+        ->select('id', 'user_name', 'operative', 'number_plate')
+        ->get();
+}
+
+
+public static function getStockUsageByVan(int $vanId, string $period = 'daily'): \Illuminate\Support\Collection
+{
+    $query = VanOperativeProductUsage::where('van_id', $vanId)
+        ->with(['vanProduct:id,price,product_name']);
+    
+    if ($period === 'daily') {
+        $query->whereDate('used_at', '>=', now()->subDays(30));
+        $groupBy = 'DATE(used_at)';
+    } else {
+        $query->whereDate('used_at', '>=', now()->subWeeks(12));
+        $groupBy = 'YEAR(used_at), WEEK(used_at)';
+>>>>>>> 68e97ca (Worked on the PR points)
     }
 
     /**
@@ -420,7 +488,42 @@ class Van extends Authenticatable implements JWTSubject
 
         return $usages->sum(function ($usage) {
             $price = $usage->vanProduct->price ?? 0;
+<<<<<<< HEAD
             return $usage->quantity_used * $price;
         });
     }
+=======
+            return [
+                'date' => $usage->used_at->format('Y-m-d'),
+                'quantity_used' => $usage->quantity_used,
+                'price' => $price,
+                'value' => $usage->quantity_used * $price,
+                'job_reference' => $usage->job_reference,
+            ];
+        })
+        ->groupBy('date')
+        ->map(function ($dayGroup) {
+            return [
+                'date' => $dayGroup->first()['date'],
+                'total_quantity' => $dayGroup->sum('quantity_used'),
+                'total_value' => $dayGroup->sum('value'),
+            ];
+        })
+        ->values();
+}
+
+
+public static function getTotalUsageValue(int $vanId): float
+{
+    $usages = VanOperativeProductUsage::where('van_id', $vanId)
+        ->with(['vanProduct:id,price'])
+        ->get();
+    
+    return $usages->sum(function ($usage) {
+        $price = $usage->vanProduct->price ?? 0;
+        return $usage->quantity_used * $price;
+    });
+}
+
+>>>>>>> 68e97ca (Worked on the PR points)
 }

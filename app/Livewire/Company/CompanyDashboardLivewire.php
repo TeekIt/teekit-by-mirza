@@ -6,32 +6,45 @@ use App\Models\User;
 use App\Models\Van;
 use App\Models\VanProduct;
 use Livewire\Component;
+use App\Models\VanInventoryOrder;
+use App\Enums\OrderStatusEnum;
 
 class CompanyDashboardLivewire extends Component
 {
+    public $companyId;
+
+    public function mount()
+    {
+        $this->companyId = User::getAuthUser()->id;
+    }
+
     public function render()
     {
-        $companyId = User::getAuthUser()->id;
 
+<<<<<<< HEAD
         $totalVans = Van::getVansCountByCompanyId($companyId);
+=======
+        $totalVans = Van::getVansCountByCompanyId($this->companyId);
+
+>>>>>>> 68e97ca (Worked on the PR points)
         
-        $totalStock = Van::getTotalStockByCompanyId($companyId);
+        $totalStock = Van::getTotalStockByCompanyId($this->companyId);
 
-        $activeOperatives = Van::getActiveOperativesCountToday($companyId);
+        $activeOperatives = Van::getActiveOperativesCount($this->companyId, now()->toDateString());
 
-        $totalStockValue = Van::getTotalStockValue($companyId);
+        $totalStockValue = Van::getTotalStockValue($this->companyId);
 
-        $lowStockAlerts = Van::getLowStockAlertsCount($companyId);
+        $lowStockAlerts = Van::getLowStockAlertsCount($this->companyId);
 
-        $pendingOrders = Van::getPendingOrdersCount($companyId);
+        $pendingOrders = VanInventoryOrder::getOrdersCount($this->companyId, OrderStatusEnum::PENDING);
 
-        return view('livewire.company.company-dashboard-livewire', [
-            'totalVans' => $totalVans,
-            'totalStock' => $totalStock,
-            'activeOperatives' => $activeOperatives,
-            'totalStockValue' => $totalStockValue,
-            'lowStockAlerts' => $lowStockAlerts,
-            'pendingOrders' => $pendingOrders,
-        ]);
-    }
+        return view('livewire.company.company-dashboard-livewire', compact(
+        'totalVans',
+        'totalStock',
+        'activeOperatives',
+        'totalStockValue',
+        'lowStockAlerts',
+        'pendingOrders'
+    ));
+}
 }
