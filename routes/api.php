@@ -18,7 +18,7 @@ use App\Http\Controllers\Api\v2\RequestedDeliveryController;
 use App\Http\Controllers\Api\v2\StuartDeliveryController;
 use App\Http\Controllers\Api\v2\SuperWallPackageController;
 use App\Http\Controllers\Api\v2\VanController;
-use App\Http\Controllers\Api\v2\VanInventoryController;
+use App\Http\Controllers\Api\v2\VanOperativeProductUsageController;
 use App\Http\Controllers\Api\v2\VanProductController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -155,9 +155,9 @@ Route::middleware('transaction.wrapper')->group(function () {
             Route::get('search', 'search');
         });
 
-        Route::prefix('operative')->controller(VanProductController::class)->group(function () {
-            Route::post('usage/record', 'recordUsage');
-            Route::get('usage/history', 'usageHistory');
+        Route::prefix('operative_product_usage')->controller(VanOperativeProductUsageController::class)->group(function () {
+            Route::post('create', 'store');
+            Route::get('list', 'list');
         });
     });
     /*
@@ -214,7 +214,7 @@ Route::middleware('transaction.wrapper')->group(function () {
             Route::withoutMiddleware(['jwt.verify'])->group(function () {
                 Route::post('create', 'sotre');
                 Route::post('product_by_buyer', 'orderProductByBuyer');
-                Route::get('get-order-details/{id}', 'getOrderDetailsForApi');
+                Route::get('list/{orderId}', 'listById');
             });
 
             Route::get('logged_in/buyer', 'showLoggedinBuyerOrders');

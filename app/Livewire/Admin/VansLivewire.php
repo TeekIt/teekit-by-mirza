@@ -91,12 +91,6 @@ class VansLivewire extends Component
         ]);
     }
 
-    public function redirectToVanInventories(int $vanId)
-    {
-        $this->authorize('view', Van::find($vanId));
-
-        return $this->redirectRoute('vans.inventories', ['vanId' => $vanId]);
-    }
     /*
      * CRUD Methods
      */

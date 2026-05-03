@@ -22,10 +22,15 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('vans') ? 'active' : '' }}"
-                        href="{{ route('vans') }}">
+                    <a class="nav-link {{ request()->routeIs('vans') ? 'active' : '' }}" href="{{ route('vans') }}">
                         <i class="nav-icon fas fa-shuttle-van"></i>
                         <p class="ml-2">Vans</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('vans.inventories') ? 'active' : '' }}" href="{{ route('vans.inventories') }}">
+                        <i class="nav-icon fas fa-truck-loading"></i>
+                        <p class="ml-2">Inventory</p>
                     </a>
                 </li>
                 <li class="nav-item">

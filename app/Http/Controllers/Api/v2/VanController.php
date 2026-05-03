@@ -56,7 +56,7 @@ class VanController extends Controller
     }
 
     public function recentActivities(FetchRecentActivityAction $fetchRecentActivityAction): JsonResponse
-        {
+    {
         $columns = ['product_name', 'job_reference', 'quantity', 'updated_at'];
 
         $data = $fetchRecentActivityAction->execute(

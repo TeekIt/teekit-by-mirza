@@ -37,14 +37,18 @@ class OrdersHeaderLivewire extends Component
 {
     use WithPagination;
 
-    public $sellerId;
+    public int $sellerId = 0;
 
-    public $isOrderFromOtherSeller;
+    public bool $isOrderFromOtherSeller = false;
+
+    public bool $isVanInventoryOrder = false;
+
+    public bool $isVanInventoryPage = false;
 
     #[Reactive]
     public $order;
 
-    public $orderId;
+    public int $orderId = 0;
 
     public $currentProdQty;
 
@@ -69,8 +73,6 @@ class OrdersHeaderLivewire extends Component
     public $priceBySeller;
 
     public $deliveryJob;
-
-    public $isVanInventoryPage = false;
     /*
     * Livewire Built-in Properties
     */
@@ -84,6 +86,7 @@ class OrdersHeaderLivewire extends Component
     {
         $this->sellerId = User::getAuthUser()->id;
         $this->isOrderFromOtherSeller = $this->isOrderFromOtherSeller($order);
+        $this->isVanInventoryOrder = $this->isVanInventoryOrder($order);
         $this->isVanInventoryPage = request()->routeIs('admin.order.van.inventory');
         $this->order = $order;
     }
@@ -121,7 +124,7 @@ class OrdersHeaderLivewire extends Component
         ]);
     }
 
-    public function renderOrderId($orderId)
+    public function renderOrderId(mixed $orderId)
     {
         $this->orderId = $orderId;
     }
@@ -134,6 +137,17 @@ class OrdersHeaderLivewire extends Component
     public function isVanInventoryOrder($order): bool
     {
         return $order instanceof VanInventoryOrder;
+    }
+
+    public function getOrderMorphClass(): string
+    {
+        if ($this->isOrderFromOtherSeller) {
+            return (new OrdersFromOtherSeller())->getMorphClass();
+        } elseif ($this->isVanInventoryOrder) {
+            return (new VanInventoryOrder())->getMorphClass();
+        }
+
+        return (new Orders())->getMorphClass();
     }
 
     public function getProductBelongsToType(Orders|OrdersFromOtherSeller $order): ?string
@@ -171,7 +185,7 @@ class OrdersHeaderLivewire extends Component
         return $modalBaseId . $this->order->id;
     }
 
-    public function getProductPrice(Orders|OrdersFromOtherSeller|null $order = null): ?float
+    public function getProductPrice(mixed $order = null): ?float
     {
         if ($order instanceof Orders) {
             /**
@@ -196,7 +210,7 @@ class OrdersHeaderLivewire extends Component
     public function renderTrackGophrDeliveryModal($orderId)
     {
         try {
-            $gophrDelivery = GophrDelivery::getByOrderId((new Orders)->getMorphClass(), $orderId, ['job_id']);
+            $gophrDelivery = GophrDelivery::getByOrderId($this->getOrderMorphClass(), $orderId, ['job_id']);
 
             $response = GophrDeliveryServices::getJob($gophrDelivery->job_id);
             if (isset($response->errors)) {
@@ -266,7 +280,7 @@ class OrdersHeaderLivewire extends Component
         return $response;
     }
 
-    public function prepareGophrJobArray(Orders|OrdersFromOtherSeller $order, string $parcelDescription): array
+    public function prepareGophrJobArray(Orders|OrdersFromOtherSeller|VanInventoryOrder $order, string $parcelDescription): array
     {
         return GophrDeliveryServices::prepareJobArray(
             externalId: UUIDServices::generateUUID(),
@@ -325,10 +339,20 @@ class OrdersHeaderLivewire extends Component
                 $order = OrdersFromOtherSeller::getById($this->orderId);
 
                 $updated = OrdersFromOtherSeller::updateOrderStatus($this->orderId, OrderStatusEnum::ON_THE_WAY);
+
+                $orderBelongsToType = (new OrdersFromOtherSeller())->getMorphClass();
+            } elseif ($this->isVanInventoryOrder) {
+                $order = VanInventoryOrder::getById($this->orderId);
+
+                $updated = VanInventoryOrder::updateOrderStatus($this->orderId, OrderStatusEnum::ON_THE_WAY);
+
+                $orderBelongsToType = (new VanInventoryOrder())->getMorphClass();
             } else {
                 $order = Orders::getById($this->orderId);
 
                 $updated = Orders::updateOrderStatus($this->orderId, OrderStatusEnum::ON_THE_WAY);
+
+                $orderBelongsToType = (new Orders())->getMorphClass();
             }
 
             $parcelDescription = $this->additionalParcelDescription ?? 'Please pickup your order ASAP';
@@ -341,7 +365,7 @@ class OrdersHeaderLivewire extends Component
             }
 
             GophrDelivery::add(
-                (new Orders)->getMorphClass(),
+                $orderBelongsToType,
                 $this->orderId,
                 $this->deliveryJob->data->job_id
             );
@@ -416,6 +440,54 @@ class OrdersHeaderLivewire extends Component
         }
     }
 
+    public function generalOrderIsAccepted(int $orderId)
+    {
+        try {
+            /* Perform some operation */
+            DB::beginTransaction();
+
+            if ($this->isOrderFromOtherSeller) {
+                $this->selectedOrder = OrdersFromOtherSeller::isViewed($orderId);
+
+                OrdersFromOtherSeller::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
+
+                OrdersFromOtherSeller::disableThisOrderForOthers(
+                    parentOrderId: $this->selectedOrder->parent_order_id,
+                    exceptSellerId: $this->sellerId,
+                );
+            } else {
+                $this->selectedOrder = Orders::isViewed($orderId);
+
+                Orders::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
+            }
+
+            $response = $this->capturePayment();
+
+            if ($this->selectedOrder->type == OrderTypeEnum::SELF_PICKUP->value) {
+                /**
+                 * Remove bugs related to "sendPickupYourOrderMail()"
+                 */
+                EmailServices::sendPickupYourOrderMail($this->selectedOrder);
+            }
+
+            DB::commit();
+            /* Operation finished */
+            sleep(1);
+
+            if ($response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
+                $this->dispatch(event: 'refreshThisComponent')->self();
+                $this->dispatch(event: 'callParentRenderMethod');
+            } else {
+                session()->flash('error', config('constants.UPDATION_FAILED'));
+            }
+        } catch (Exception $error) {
+            DB::rollBack();
+
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
+    }
+
     public function customProductOrderIsAccepted()
     {
         $this->validate([
@@ -481,30 +553,15 @@ class OrdersHeaderLivewire extends Component
         }
     }
 
-    public function generalOrderIsAccepted($orderId)
+    public function vanInventoryOrderIsAccepted(int $orderId)
     {
         try {
             /* Perform some operation */
             DB::beginTransaction();
 
-            if ($this->isOrderFromOtherSeller) {
-                $this->selectedOrder = OrdersFromOtherSeller::isViewed($orderId);
+            $this->selectedOrder = VanInventoryOrder::getById($orderId);
 
-                OrdersFromOtherSeller::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
-
-                OrdersFromOtherSeller::disableThisOrderForOthers(
-                    parentOrderId: $this->selectedOrder->parent_order_id,
-                    exceptSellerId: $this->sellerId,
-                );
-            } else {
-                $this->selectedOrder = Orders::isViewed($orderId);
-
-                Orders::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
-            }
-
-            $response = $this->capturePayment();
-
-            DB::commit();
+            $response = VanInventoryOrder::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
 
             if ($this->selectedOrder->type == OrderTypeEnum::SELF_PICKUP->value) {
                 /**
@@ -512,10 +569,12 @@ class OrdersHeaderLivewire extends Component
                  */
                 EmailServices::sendPickupYourOrderMail($this->selectedOrder);
             }
+
+            DB::commit();
             /* Operation finished */
             sleep(1);
 
-            if ($response?->status === PaymentIntentStatusEnum::SUCCEEDED->value) {
+            if ($response === 1) {
                 $this->dispatch(event: 'refreshThisComponent')->self();
                 $this->dispatch(event: 'callParentRenderMethod');
             } else {
@@ -566,8 +625,11 @@ class OrdersHeaderLivewire extends Component
 
             DB::commit();
             /* Operation finished */
+            sleep(1);
 
-            session()->flash('success', 'Order moved to van inventory successfully.');
+            $this->dispatch(event: 'refreshThisComponent')->self();
+
+            session()->flash('success', config('constants.VAN_ORDER_COMPLETED_SUCCESSFULLY'));
         } catch (Exception $error) {
             DB::rollBack();
 
@@ -576,7 +638,7 @@ class OrdersHeaderLivewire extends Component
         }
     }
 
-    public function cancelOrder($orderId)
+    public function cancelOrder(int $orderId)
     {
         try {
             /* Perform some operation */
@@ -586,29 +648,35 @@ class OrdersHeaderLivewire extends Component
                 $this->selectedOrder = OrdersFromOtherSeller::getById($orderId);
 
                 $cancelled = OrdersFromOtherSeller::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
+            } elseif ($this->isVanInventoryOrder) {
+                $this->selectedOrder = VanInventoryOrder::getById($orderId);
+
+                $cancelled = VanInventoryOrder::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
             } else {
                 $this->selectedOrder = Orders::getById($orderId);
 
                 $cancelled = Orders::updateOrderStatus($orderId, OrderStatusEnum::CANCELLED);
             }
 
-            $refunded = StripeServices::refundPaymentIntent($this->selectedOrder->payment_intent_id);
-            if (isset($refunded->error)) {
-                throw new Exception($refunded->error->message);
+            if (! $this->isVanInventoryOrder) {
+                $refunded = StripeServices::refundPaymentIntent($this->selectedOrder->payment_intent_id);
+                if (isset($refunded->error)) {
+                    throw new Exception($refunded->error->message);
+                }
             }
 
-            DB::commit();
-
             EmailServices::sendOrderHasBeenCancelledMail($this->selectedOrder);
+
+            DB::commit();
             /* Operation finished */
             sleep(1);
             $this->dispatch(event: 'refreshThisComponent')->self();
 
-            if ($cancelled && $refunded->status === PaymentIntentStatusEnum::CANCELED->value) {
-                session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
-            } else {
-                session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
-            }
+            // if (! $this->isVanInventoryOrder && $cancelled && $refunded->status === PaymentIntentStatusEnum::CANCELED->value) {
+            //     session()->flash('success', config('constants.ORDER_CANCELLATION_SUCCESS'));
+            // } else {
+            //     session()->flash('error', config('constants.ORDER_CANCELLATION_FAILED'));
+            // }
         } catch (Exception $error) {
             DB::rollBack();
 
@@ -631,7 +699,7 @@ class OrdersHeaderLivewire extends Component
                 'order_status' => OrderStatusEnum::CANCELLED->value,
             ]);
 
-            DB::commit();   
+            DB::commit();
 
             // EmailServices::sendOrderHasBeenCancelledMail($this->selectedOrder);
             /* Operation finished */

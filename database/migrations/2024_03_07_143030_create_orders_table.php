@@ -18,12 +18,12 @@ return new class extends Migration
             $table->float('initial_total');
             $table->float('current_total');
             $table->tinyInteger('total_items');
-            $table->decimal('customer_lat', 11, 8)->nullable();
-            $table->decimal('customer_lon', 11, 8)->nullable();
             $table->string('device', 7)->nullable()->comment('iPhone, Android');
             $table->string('type')->comment('Only OrderTypeEnum values are allowed');
             // $table->dateTime('scheduled_at')->nullable();
             $table->string('customer_name')->nullable();
+            $table->decimal('customer_lat', 11, 8)->nullable();
+            $table->decimal('customer_lon', 11, 8)->nullable();
             $table->string('country_code', 4)->nullable();
             $table->string('phone_number')->nullable();
             $table->string('address')->nullable();

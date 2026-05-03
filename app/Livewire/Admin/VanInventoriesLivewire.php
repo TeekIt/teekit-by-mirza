@@ -4,6 +4,8 @@ namespace App\Livewire\Admin;
 
 use App\Enums\OrderByEnum;
 use App\Models\Categories;
+use App\Models\User;
+use App\Models\Van;
 use App\Models\VanProduct;
 use App\Services\ImageServices;
 use Exception;
@@ -11,10 +13,11 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 
 class VanInventoriesLivewire extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, WithPagination;
 
     public string $search = '';
 
@@ -70,7 +73,14 @@ class VanInventoriesLivewire extends Component
 
     public int $threshold = 0;
 
-    public int $vanId = 0;
+    public $vanId = 0;
+
+    public int $companyId = 0;
+
+    /*
+    * Livewire Built-in Properties
+    */
+    protected $paginationTheme = 'bootstrap';
 
     protected function rules(): array
     {
@@ -108,15 +118,21 @@ class VanInventoriesLivewire extends Component
     */
     public function mount(): void
     {
-        $this->vanId = request()->query('vanId');
+        // $this->vanId = request()->query('vanId');
+        $this->companyId = User::getAuthUser()->id;
     }
 
     /**
-     * Reset to the first page in future if pagination is introduced.
+     * Reset to the first page
      */
     public function updatingSearch(): void
     {
-        // Intentionally left blank for now. Kept to mirror other admin components.
+        /* No function should be kept blank. */
+    }
+
+    public function updatingVanId(): void
+    {
+        $this->resetPage();
     }
 
     public function resetComponent(): void
@@ -153,38 +169,38 @@ class VanInventoriesLivewire extends Component
         ]);
     }
 
-    public function renderEditVanInventoryModal(int $id): void
-    {
-        $inventory = VanProduct::getById($id, $this->vanId);
+    // public function renderEditVanInventoryModal(int $id): void
+    // {
+    //     $inventory = VanProduct::getById($id);
 
-        $this->authorize('update', $inventory);
+    //     $this->authorize('update', $inventory);
 
-        $this->inventoryId = $inventory->id;
-        $this->sellerId = (int) $inventory->seller_id;
-        $this->categoryId = (int) $inventory->category_id;
-        $this->productVanId = (int) $inventory->van_id;
-        $this->productName = $inventory->product_name;
-        $this->sku = $inventory->sku;
-        $this->price = (float) $inventory->price;
-        $this->featured = (int) $inventory->featured;
-        $this->discountPercentage = $inventory->discount_percentage;
-        $this->weight = $inventory->weight;
-        $this->brand = $inventory->brand;
-        $this->size = $inventory->size;
-        $this->productStatus = (string) $inventory->getRawOriginal('status');
-        $this->contact = $inventory->contact;
-        $this->colors = $inventory->getRawOriginal('colors');
-        $this->bike = isset($inventory->bike) ? (int) $inventory->bike : null;
-        $this->car = isset($inventory->car) ? (int) $inventory->car : null;
-        $this->van = isset($inventory->van) ? (int) $inventory->van : null;
-        $this->featureImg = $inventory->feature_img;
-        $this->height = $inventory->height;
-        $this->width = $inventory->width;
-        $this->length = $inventory->length;
-        $this->jobReference = $inventory->job_reference;
-        $this->quantity = (int) $inventory->quantity;
-        $this->threshold = (int) $inventory->min_threshold;
-    }
+    //     $this->inventoryId = $inventory->id;
+    //     $this->sellerId = (int) $inventory->seller_id;
+    //     $this->categoryId = (int) $inventory->category_id;
+    //     $this->productVanId = (int) $inventory->van_id;
+    //     $this->productName = $inventory->product_name;
+    //     $this->sku = $inventory->sku;
+    //     $this->price = (float) $inventory->price;
+    //     $this->featured = (int) $inventory->featured;
+    //     $this->discountPercentage = $inventory->discount_percentage;
+    //     $this->weight = $inventory->weight;
+    //     $this->brand = $inventory->brand;
+    //     $this->size = $inventory->size;
+    //     $this->productStatus = (string) $inventory->getRawOriginal('status');
+    //     $this->contact = $inventory->contact;
+    //     $this->colors = $inventory->getRawOriginal('colors');
+    //     $this->bike = isset($inventory->bike) ? (int) $inventory->bike : null;
+    //     $this->car = isset($inventory->car) ? (int) $inventory->car : null;
+    //     $this->van = isset($inventory->van) ? (int) $inventory->van : null;
+    //     $this->featureImg = $inventory->feature_img;
+    //     $this->height = $inventory->height;
+    //     $this->width = $inventory->width;
+    //     $this->length = $inventory->length;
+    //     $this->jobReference = $inventory->job_reference;
+    //     $this->quantity = (int) $inventory->quantity;
+    //     $this->threshold = (int) $inventory->min_threshold;
+    // }
 
     public function updateVanInventory(): void
     {
@@ -251,11 +267,16 @@ class VanInventoriesLivewire extends Component
         $data = VanProduct::getAll(
             orderBy: OrderByEnum::DESC,
             search: $this->search,
-            vanId: $this->vanId
+            vanId: (int) $this->vanId
+        );
+
+        $vans = Van::getByCompanyId(
+            $this->companyId,
+            ['id', 'company_id', 'number_plate']
         );
 
         $categories = Categories::getAll(['id', 'category_name']);
 
-        return view('livewire.admin.van-inventories-livewire', compact('data', 'categories'));
+        return view('livewire.admin.van-inventories-livewire', compact('data', 'vans', 'categories'));
     }
 }

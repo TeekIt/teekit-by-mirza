@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Models\Orders;
 use App\Models\OrdersFromOtherSeller;
+use App\Models\VanInventoryOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -19,7 +20,7 @@ class OrderIsCanceledMail extends Mailable
      *
      * @return void
      */
-    public function __construct(public Orders|OrdersFromOtherSeller $order) {}
+    public function __construct(public Orders|OrdersFromOtherSeller|VanInventoryOrder $order) {}
 
     /**
      * Get the message envelope.

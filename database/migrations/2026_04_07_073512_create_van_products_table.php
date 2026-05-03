@@ -24,7 +24,7 @@ return new class extends Migration
             $table->float('weight')->nullable();
             $table->string('brand')->nullable();
             $table->string('size')->nullable();
-            $table->string('status')->default('1')->comment('Only ProductStatusEnum values are allowed');
+            $table->string('status')->comment('Only VanProductStatusEnum values are allowed');
             $table->string('contact');
             $table->json('colors')->nullable();
             $table->tinyInteger('bike')->nullable();

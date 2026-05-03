@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\OrderByEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -172,6 +173,11 @@ class Van extends Authenticatable implements JWTSubject
     public static function getByUserName(string $userName, array $columns = ['*']): Van
     {
         return self::select($columns)->where('user_name', '=', $userName)->firstOrFail();
+    }
+
+    public static function getByCompanyId(int $companyId, array $columns = ['*']): Collection
+    {
+        return self::select($columns)->where('company_id', '=', $companyId)->get();
     }
 
     public static function getById(int $id, array $columns = ['*']): Van

@@ -27,7 +27,7 @@ class ProductController extends Controller
     {
         $categories = Categories::all();
 
-        return view('shopkeeper.inventory.add', compact('categories'));
+        return view('seller.inventory.add', compact('categories'));
     }
 
     /**
@@ -78,7 +78,7 @@ class ProductController extends Controller
 
         $inventory = Products::getProductInfoEvenDisabled(User::getAuthUser()->id, $productId);
 
-        return view('shopkeeper.inventory.edit', compact('inventory', 'categories'));
+        return view('seller.inventory.edit', compact('inventory', 'categories'));
     }
 
     /**
@@ -135,7 +135,7 @@ class ProductController extends Controller
 
     public function inventoryAddBulk()
     {
-        return view('shopkeeper.inventory.add_bulk');
+        return view('seller.inventory.add_bulk');
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Orders;
 use App\Models\OrdersFromOtherSeller;
+use App\Models\VanInventoryOrder;
 use App\Models\User;
 
 final class OrderServices
@@ -15,7 +16,7 @@ final class OrderServices
         return $orderTotalAmount + ((2.5 + 1.25) * (self::$maxDistanceInMiles + self::getDeliveryFee($totalWeight)));
     }
 
-    public static function getTotalWeight(array|Orders|OrdersFromOtherSeller $order): float
+    public static function getTotalWeight(array|Orders|OrdersFromOtherSeller|VanInventoryOrder $order): float
     {
         if (is_array($order)) {
             $totalWeight = 0.0;
@@ -27,7 +28,7 @@ final class OrderServices
             return $totalWeight;
         }
 
-        if ($order instanceof Orders) {
+        if ($order instanceof Orders || $order instanceof VanInventoryOrder) {
             /* The sum() function will loop over all $orderItems */
             return $order->orderItems->sum(static function ($orderItem) {
                 return (float) ($orderItem->product->weight * $orderItem->product_qty);
@@ -37,27 +38,27 @@ final class OrderServices
         return $order->product->weight;
     }
 
-    public static function getTotalHeight(Orders|OrdersFromOtherSeller $order): float
+    public static function getTotalHeight(Orders|OrdersFromOtherSeller|VanInventoryOrder $order): float
     {
-        if ($order instanceof Orders) {
+        if ($order instanceof Orders || $order instanceof VanInventoryOrder) {
             return $order->orderItems->pluck('product')->sum('height');
         }
 
         return $order->product->height;
     }
 
-    public static function getTotalWidth(Orders|OrdersFromOtherSeller $order): float
+    public static function getTotalWidth(Orders|OrdersFromOtherSeller|VanInventoryOrder $order): float
     {
-        if ($order instanceof Orders) {
+        if ($order instanceof Orders || $order instanceof VanInventoryOrder) {
             return $order->orderItems->pluck('product')->sum('width');
         }
 
         return $order->product->width;
     }
 
-    public static function getTotalLength(Orders|OrdersFromOtherSeller $order): float
+    public static function getTotalLength(Orders|OrdersFromOtherSeller|VanInventoryOrder $order): float
     {
-        if ($order instanceof Orders) {
+        if ($order instanceof Orders || $order instanceof VanInventoryOrder) {
             return $order->orderItems->pluck('product')->sum('length');
         }
 

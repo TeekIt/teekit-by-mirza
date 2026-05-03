@@ -4,6 +4,7 @@
 */
 (function () {
     class CustomGoogleMapsClass {
+        
         constructor(mapElementsIds = {
             mapCanvasId: 'googleMapCanvas',
             mapAutoCompleteAddressId: 'googleMapAutoCompleteAddress',

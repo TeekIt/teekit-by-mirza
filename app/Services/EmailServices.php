@@ -15,6 +15,7 @@ use App\Mail\VanInventoryOrderMail;
 use App\Models\Orders;
 use App\Models\OrdersFromOtherSeller;
 use App\Models\User;
+use App\Models\VanInventoryOrder;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 
@@ -67,7 +68,7 @@ final class EmailServices
         Mail::to($user->email)->send(new SellerApprovedMail($user));
     }
 
-    public static function sendPickupYourOrderMail(Orders $order)
+    public static function sendPickupYourOrderMail(Orders|OrdersFromOtherSeller|VanInventoryOrder $order)
     {
         Mail::to($order->buyer->email)->send(new OrderIsReadyForPickupMail($order, $order->seller));
     }
@@ -79,7 +80,7 @@ final class EmailServices
         );
     }
 
-    public static function sendOrderHasBeenCancelledMail(Orders|OrdersFromOtherSeller $order)
+    public static function sendOrderHasBeenCancelledMail(Orders|OrdersFromOtherSeller|VanInventoryOrder $order)
     {
         Mail::to([$order->buyer->email])->send(new OrderIsCanceledMail($order));
     }

@@ -23,7 +23,17 @@
                 <div class="col-12">
                     {{-- Van Location + Nearby Seller --}}
                     <div class="row mb-3">
-                        <div class="col-7">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <select class="form-control py-2" wire:model.live="vanId">
+                                    <option value="">Select Van</option>
+                                    @foreach ($vans as $singleIndex)
+                                        <option value="{{ $singleIndex->id }}">{{ $singleIndex->number_plate }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
                             <div class="form-group">
                                 {{-- The "id" attribute is set to "pickupAddress" so we can align it with the
                                     CustomGoogleMapsClass in the scripts.blade.php file --}}
@@ -31,14 +41,12 @@
                                     id="pickupAddress" required>
                             </div>
                         </div>
-                        <div class="col-5">
+                        <div class="col-3">
                             <div class="form-group">
                                 <select class="form-control" wire:model.live="nearBySellerId">
                                     <option value="">Select a near by seller</option>
                                     @foreach ($nearbySellers as $singleIndex)
-                                        <option value="{{ $singleIndex['id'] }}">
-                                            {{ $singleIndex['business_name'] }}
-                                        </option>
+                                        <option value="{{ $singleIndex['id'] }}">{{ $singleIndex['business_name'] }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -62,7 +70,7 @@
                                 <button type="submit" class="btn site-primary-yellow-bg w-100 rounded-pill py-2"
                                     wire:target="performSearch" wire:loading.class="btn-dark"
                                     wire:loading.class.remove="site-primary-yellow-bg" wire:loading.attr="disabled"
-                                    @disabled(!trim($vanLocation) || !$nearBySellerId)>
+                                    @disabled(!trim($vanAddress) || !$nearBySellerId)>
                                     <span wire:target="performSearch" wire:loading.remove>
                                         Search
                                     </span>
@@ -76,11 +84,11 @@
                 </div>
             </div>
 
-            @if ($showInventoryGrid && $inventory)
+            @if ($showInventoryGrid && $data)
                 <section class="section-products mt-4">
                     <div class="container px-0">
                         <div class="row">
-                            @forelse ($inventory as $singleIndex)
+                            @forelse ($data as $singleIndex)
                                 <div class="col-md-6 col-lg-4 col-xl-3 p-2">
                                     <div
                                         class="single-product bg-white p-2 rounded @if ($singleIndex->status->value == ProductStatusEnum::DISABLE->value) disabled-product @endif">
@@ -130,7 +138,7 @@
 
                         <div class="row">
                             <div class="col-md-12">
-                                {{ $inventory->links() }}
+                                {{ $data->links() }}
                             </div>
                         </div>
                     </div>
@@ -164,32 +172,35 @@
                     @forelse ($cartItems as $cartItem)
                         <div class="card border rounded-3 mb-2 p-2">
                             <div class="card-body p-2 position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 custom-btn-close-sm"
+                                <button type="button"
+                                    class="btn-close position-absolute top-0 end-0 m-2 custom-btn-close-sm"
                                     wire:click="removeCartItem({{ $cartItem['id'] }})"
-                                    wire:target="removeCartItem({{ $cartItem['id'] }})"
-                                    wire:loading.attr="disabled"
+                                    wire:target="removeCartItem({{ $cartItem['id'] }})" wire:loading.attr="disabled"
                                     aria-label="Remove item"></button>
                                 <div class="d-flex align-items-start gap-2">
                                     <img src="{{ $cartItem['image'] }}" alt="Product Image" class="img-fluid"
                                         style="width: 64px; height: 64px; object-fit: cover;">
                                     <div class="w-100">
                                         <h6 class="mt-1 mb-3">{{ $cartItem['title'] }}</h6>
-                                        <div class="d-flex justify-content-between align-items-center small text-muted">
+                                        <div
+                                            class="d-flex justify-content-between align-items-center small text-muted">
                                             <div class="input-group input-group-sm" style="width: 130px;">
-                                                <button type="button" class="btn btn-outline-secondary px-2 rounded-pill rounded-end-0"
+                                                <button type="button"
+                                                    class="btn btn-outline-secondary px-2 rounded-pill rounded-end-0"
                                                     wire:click="decreaseCartItemQty({{ $cartItem['id'] }})"
                                                     wire:target="decreaseCartItemQty({{ $cartItem['id'] }})"
                                                     wire:loading.attr="disabled">-</button>
-                                                <input type="number" min="1"
-                                                    class="form-control text-center"
+                                                <input type="number" min="1" class="form-control text-center"
                                                     value="{{ $cartItem['qty'] }}"
                                                     wire:change="updateCartItemQty({{ $cartItem['id'] }}, $event.target.value)">
-                                                <button type="button" class="btn btn-outline-secondary px-2 rounded-pill rounded-start-0"
+                                                <button type="button"
+                                                    class="btn btn-outline-secondary px-2 rounded-pill rounded-start-0"
                                                     wire:click="increaseCartItemQty({{ $cartItem['id'] }})"
                                                     wire:target="increaseCartItemQty({{ $cartItem['id'] }})"
                                                     wire:loading.attr="disabled">+</button>
                                             </div>
-                                            <span class="mr-2">Price: £{{ number_format($cartItem['price'], 2) }}</span>
+                                            <span class="mr-2">Price:
+                                                £{{ number_format($cartItem['price'], 2) }}</span>
                                         </div>
                                     </div>
                                 </div>

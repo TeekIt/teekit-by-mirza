@@ -239,21 +239,97 @@
             <tr>
                 <div class="d-flex flex-column-reverse flex-md-row justify-content-between pb-4 gap-1">
                     @if ($this->isVanInventoryOrder($order))
-                        <div>
-                            @if ($order->order_status === OrderStatusEnum::COMPLETE->value)
-                                <button class="btn btn-success" disabled>Completed</button>
-                            @elseif ($order->order_status === OrderStatusEnum::CANCELLED->value)
-                                <button class="btn btn-dark" disabled>Cancelled</button>
-                            @else
-                                <button class="btn btn-success" wire:click="markVanInventoryOrderComplete({{ $order->id }})">
-                                    Mark Complete
-                                </button>
+                        @if (User::isCompany())
+                            <div>
+                                @if ($order->order_status === OrderStatusEnum::PENDING->value)
+                                    <button class="btn btn-danger"
+                                        wire:click="cancelVanInventoryOrder({{ $order->id }})">
+                                        Cancel
+                                    </button>
+                                @elseif ($order->order_status === OrderStatusEnum::ACCEPTED->value)
+                                    <button class="btn btn-success" disabled>Accepted</button>
+                                @elseif ($order->order_status === OrderStatusEnum::ON_THE_WAY->value)
+                                    <button class="btn btn-success"
+                                        wire:click="markVanInventoryOrderComplete({{ $order->id }})">
+                                        Mark Complete
+                                    </button>
+                                @elseif ($order->order_status === OrderStatusEnum::COMPLETE->value)
+                                    <button class="btn btn-success" disabled>Completed</button>
+                                @elseif ($order->order_status === OrderStatusEnum::CANCELLED->value)
+                                    <button class="btn btn-dark" disabled>Cancelled</button>
+                                @endif
+                            </div>
+                        @endif
 
-                                <button class="btn btn-danger" wire:click="cancelVanInventoryOrder({{ $order->id }})">
-                                    Mark Cancel
-                                </button>
-                            @endif
-                        </div>
+                        @if (User::isParentSeller() || User::isChildSeller())
+                            <div>
+                                @if ($order->order_status === OrderStatusEnum::PENDING->value)
+                                    <button class="btn btn-success"
+                                        wire:click="vanInventoryOrderIsAccepted({{ $order->id }})"
+                                        wire:target="vanInventoryOrderIsAccepted({{ $order->id }})"
+                                        wire:loading.class="btn-dark" wire:loading.class.remove="btn-success"
+                                        wire:loading.attr="disabled" title="Click here when preparing order">
+                                        <span wire:target="vanInventoryOrderIsAccepted({{ $order->id }})"
+                                            wire:loading.remove>
+                                            Accept
+                                        </span>
+                                        <span wire:target="vanInventoryOrderIsAccepted({{ $order->id }})"
+                                            wire:loading>
+                                            <span class="spinner-border spinner-border-sm text-light"
+                                                role="status"></span>
+                                        </span>
+                                    </button>
+                                    <button class="btn btn-danger" wire:click="cancelOrder({{ $order->id }})"
+                                        wire:target="cancelOrder({{ $order->id }})" wire:loading.class="btn-dark"
+                                        wire:loading.class.remove="btn-danger" wire:loading.attr="disabled"
+                                        title="Cancel the whole order">
+                                        <span wire:target="cancelOrder({{ $order->id }})" wire:loading.remove>
+                                            Cancel
+                                        </span>
+                                        <span wire:target="cancelOrder({{ $order->id }})" wire:loading>
+                                            <span class="spinner-border spinner-border-sm text-light"
+                                                role="status"></span>
+                                        </span>
+                                    </button>
+                                @elseif ($order->order_status === OrderStatusEnum::ACCEPTED->value)
+                                    <button type="button" class="btn btn-warning" data-bs-toggle="modal"
+                                        data-bs-target="#gophrModal{{ $order->id }}"
+                                        wire:click="renderOrderId({{ $order->id }})"
+                                        wire:target="renderOrderId({{ $order->id }})"
+                                        wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning"
+                                        wire:loading.attr="disabled" title="Assign this order to delivery boy">
+                                        <span wire:target="renderOrderId({{ $order->id }})" wire:loading.remove>
+                                            Assign To Delivery Boy
+                                        </span>
+                                        <span wire:target="renderOrderId({{ $order->id }})" wire:loading>
+                                            <span class="spinner-border spinner-border-sm text-light"
+                                                role="status"></span>
+                                        </span>
+                                    </button>
+                                @elseif ($order->order_status === OrderStatusEnum::ON_THE_WAY->value)
+                                    <button class="btn btn-dark" data-bs-toggle="modal"
+                                        data-bs-target="#trackGophrDeliveryModal{{ $order->id }}"
+                                        wire:click="renderTrackGophrDeliveryModal({{ $order->id }})"
+                                        wire:target="renderTrackGophrDeliveryModal({{ $order->id }})"
+                                        wire:loading.class="btn-dark" wire:loading.class.remove="btn-dark"
+                                        wire:loading.attr="disabled" title="Track the live status of your delivery">
+                                        <span wire:target="renderTrackGophrDeliveryModal({{ $order->id }})"
+                                            wire:loading.remove>
+                                            Track Delivery
+                                        </span>
+                                        <span wire:target="renderTrackGophrDeliveryModal({{ $order->id }})"
+                                            wire:loading>
+                                            <span class="spinner-border spinner-border-sm text-light"
+                                                role="status"></span>
+                                        </span>
+                                    </button>
+                                @elseif ($order->order_status === OrderStatusEnum::COMPLETE->value)
+                                    <button class="btn btn-success" disabled>Completed</button>
+                                @elseif ($order->order_status === OrderStatusEnum::CANCELLED->value)
+                                    <button class="btn btn-dark" disabled>Cancelled</button>
+                                @endif
+                            </div>
+                        @endif
                     @else
                         @if ($order->disabled)
                             <div class="col-12">
@@ -338,15 +414,8 @@
                                 @if (
                                     $order->type === OrderTypeEnum::SUPER_FAST_DELIVERY->value ||
                                         $order->type === OrderTypeEnum::SAME_DAY_DELIVERY->value)
+
                                     @if ($order->order_status === OrderStatusEnum::ACCEPTED->value)
-                                        <!-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#stuartModal" wire:click="renderStuartModal({{ $order->id }})" wire:target="renderStuartModal({{ $order->id }})" wire:loading.class="btn-dark" wire:loading.class.remove="btn-success" wire:loading.attr="disabled" title="Assign this order to Stuart delivery boy">
-                                                                                                                                                        <span wire:target="renderStuartModal({{ $order->id }})" wire:loading.remove>
-                                                                                                                                                            Assign To Stuart Delivery
-                                                                                                                                                        </span>
-                                                                                                                                                        <span wire:target="renderStuartModal({{ $order->id }})" wire:loading>
-                                                                                                                                                            <span class="spinner-border spinner-border-sm text-light" role="status"></span>
-                                                                                                                                                        </span>
-                                                                                                                                                    </button> -->
                                         <button type="button" class="btn btn-warning" data-bs-toggle="modal"
                                             data-bs-target="#gophrModal{{ $order->id }}"
                                             wire:click="renderOrderId({{ $order->id }})"

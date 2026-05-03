@@ -35,15 +35,6 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('admin/vans') ? 'active' : '' }}"
-                          href="{{ route('admin.vans') }}">
-                          <i class="nav-icon fas fa-shuttle-van"></i>
-                          <p class="ml-2">
-                              Vans
-                          </p>
-                      </a>
-                  </li>
-                  <li class="nav-item">
                       <a class="nav-link {{ request()->is('admin/promocodes') ? 'active' : '' }}"
                           href="{{ route('admin.promocodes') }}">
                           <i class="nav-icon fas fa-qrcode"></i>
@@ -116,13 +107,6 @@
                                   class="nav-link {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>All</p>
-                              </a>
-                          </li>
-                          <li class="nav-item">
-                              <a href="{{ route('admin.orders.van.inventory') }}"
-                                  class="nav-link {{ request()->routeIs('admin.orders.van.inventory') ? 'active' : '' }}">
-                                  <i class="fas fa-gears nav-icon"></i>
-                                  <p>Van Inventory</p>
                               </a>
                           </li>
                           <li class="nav-item">

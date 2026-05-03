@@ -68,7 +68,7 @@ class RegisterController extends Controller
             'lon' => 'required|numeric|between:-180,180',
         ];
 
-        if ($data['is_child_seller'] != 0) {
+        if ($data['is_child_seller'] == 1) {
             $rules['parent_store'] = 'required|exists:users,business_name';
         }
 
@@ -134,9 +134,10 @@ class RegisterController extends Controller
             "submitted" : null
         }';
 
-        $parentStoreId = (isset($validatedData['parent_store'])) ?
-            User::getSellerByBusinessName($validatedData('parent_store'))->id :
-            null;
+        if (isset($validatedData['parent_store'])) {
+            $parentStoreName = $validatedData['parent_store'];
+            $parentStoreId = User::getSellerByBusinessName($parentStoreName)->id;
+        }
 
         $user = User::add(
             $validatedData['name'],
@@ -155,13 +156,13 @@ class RegisterController extends Controller
             $validatedData['lat'],
             $validatedData['lon'],
             $businessHours,
-            isset($validatedData['parent_store']) ? UserRoleEnum::CHILD_SELLER : UserRoleEnum::SELLER,
-            $parentStoreId
+            isset($parentStoreId) ? UserRoleEnum::CHILD_SELLER : UserRoleEnum::SELLER,
+            isset($parentStoreId) ? $parentStoreId : null
         );
 
         if ($user instanceof User) {
             echo 'User Created';
-            
+
             EmailServices::sendNewSellerMail(
                 $user,
                 $user->role_id,

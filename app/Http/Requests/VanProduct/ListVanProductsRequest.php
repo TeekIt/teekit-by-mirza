@@ -21,7 +21,6 @@ class ListVanProductsRequest extends FormRequest
             ],
             'status' => [
                 'nullable',
-                'string',
                 Rule::enum(VanProductStatusEnum::class),
             ],
             'productId' => [
