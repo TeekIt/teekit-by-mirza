@@ -175,8 +175,8 @@ Route::middleware('transaction.wrapper')->group(function () {
             Route::get('/dashboard', CompanyDashboardLivewire::class)->name('vans.company.dashboard');
             Route::get('/orders', OrdersLivewire::class)->name('vans.company.orders');
             Route::get('/settings', GeneralSettingsLivewire::class)->name('vans.company.settings');
-             Route::get('stock-value-by-van', StockValueByVanLivewire::class)->name('company.stock-value-by-van');
-             Route::get('stock-usage', StockUsageLivewire::class)->name('company.stock-usage');
+            Route::get('/stock/value-by-van', StockValueByVanLivewire::class)->name('company.stock.value.by.van');
+            Route::get('/stock/usage', StockUsageLivewire::class)->name('company.stock.usage');
         });
     });
     /*

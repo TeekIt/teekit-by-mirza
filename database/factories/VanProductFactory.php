@@ -54,8 +54,7 @@ class VanProductFactory extends Factory
             'job_reference' => strtoupper($this->faker->bothify('JOB###')),
 
             'quantity' => $this->faker->numberBetween(0, 100),
-            'min_threshold' => 50,
+            'min_threshold' => 5,
         ];
-        
     }
 }

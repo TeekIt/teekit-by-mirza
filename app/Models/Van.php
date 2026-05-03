@@ -87,10 +87,12 @@ class Van extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(VanProduct::class, 'van_id')->where('status', 'active');
     }
-    public function vanOperativeProductUsages()
+
+    public function vanOperativeProductUsages(): HasMany
     {
         return $this->hasMany(VanOperativeProductUsage::class, 'van_id');
     }
+
     /**
      * Helpers
      */
@@ -215,67 +217,44 @@ class Van extends Authenticatable implements JWTSubject
             ->orderBy('created_at', $orderBy->value)
             ->paginate(10);
     }
-    
+
     public static function getVansCountByCompanyId(int $companyId): int
     {
         return self::where('company_id', '=', $companyId)->count();
     }
 
-    
     public static function getTotalStockByCompanyId(int $companyId): int
     {
-        return self::where('company_id', $companyId)
+        return self::where('company_id', '=', $companyId)
             ->join('van_products', 'vans.id', '=', 'van_products.van_id')
             ->sum('van_products.quantity');
     }
 
-    /**
-     * Get count of active operatives for today
-     * Operatives who have recorded usage during the current day
-     *
-     * @return int
-     */
-    public static function getActiveOperativesCountToday(int $companyId): int
-    {
-        $vans = self::where('company_id', '=', $companyId)->get();
-
-        if ($vans->isEmpty()) {
-            return 0;
-        }
-
-        $vanIds = $vans->pluck('id');
-
-        return VanOperativeProductUsage::whereIn('van_id', $vanIds)
-            ->whereDate('used_at', '=', now()->toDateString())
-            ->distinct('van_id')
-            ->count('van_id');
-    }
-
     public static function getActiveOperativesCount(int $companyId, string $date): int
     {
-        return self::where('company_id', $companyId)
+        return self::where('company_id', '=', $companyId)
             ->select('vans.id')
-            ->distinct()
             ->whereHas('vanOperativeProductUsages', function ($query) use ($date) {
                 $query->whereDate('used_at', $date);
             })
+            ->distinct()
             ->count();
     }
 
     public static function getTotalStockValue(int $companyId): float
     {
-        return (float) self::join('van_products', 'vans.id', '=', 'van_products.van_id')
-            ->where('vans.company_id', $companyId)
-            ->selectRaw('SUM(van_products.price * van_products.quantity) as total_value')
-            ->value('total_value') ?? 0.0;
+        return self::where('vans.company_id', '=', $companyId)
+            ->join('van_products', 'vans.id', '=', 'van_products.van_id')
+            ->selectRaw('SUM(van_products.price * van_products.quantity) as total_stock_value')
+            ->value('total_stock_value') ?? 0.0;
     }
 
     public static function getLowStockAlertsCount(int $companyId): int
     {
-        return self::join('van_products', 'vans.id', '=', 'van_products.van_id')
-            ->where('vans.company_id', $companyId)
+        return self::where('vans.company_id', '=', $companyId)
+            ->join('van_products', 'vans.id', '=', 'van_products.van_id')
             ->where('van_products.quantity', '>', 0)
-            ->whereColumn('van_products.quantity', '<=', 'van_products.min_threshold')
+            ->whereColumn('van_products.quantity', '<', 'van_products.min_threshold')
             ->count();
     }
 
@@ -300,21 +279,6 @@ class Van extends Authenticatable implements JWTSubject
                 'stock_value' => (float) $stockValue,
             ];
         })->sortByDesc('stock_value')->values();
-    }
-
-    public static function getPendingOrdersCount(int $companyId): int
-    {
-        $vans = self::where('company_id', '=', $companyId)->get();
-
-        if ($vans->isEmpty()) {
-            return 0;
-        }
-
-        $vanIds = $vans->pluck('id');
-
-        return VanInventoryOrder::whereIn('van_id', $vanIds)
-            ->where('order_status', '=', OrderStatusEnum::PENDING->value)
-            ->count();
     }
 
     public static function getVansForCompany(int $companyId): \Illuminate\Support\Collection

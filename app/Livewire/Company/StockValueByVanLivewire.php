@@ -4,22 +4,26 @@ namespace App\Livewire\Company;
 
 use App\Models\User;
 use App\Models\Van;
+use Illuminate\View\View;
 use Livewire\Component;
 
 class StockValueByVanLivewire extends Component
 {
-    public $stockByVan = [];
-    public $totalValue = 0;
+    public array $stockByVan = [];
+    public int $totalValue = 0;
 
-    public function mount()
+    /*
+    * Lifecycle Hooks
+    */
+    public function mount(): void
     {
         $companyId = User::getAuthUser()->id;
-        
+
         $this->stockByVan = Van::getStockValueByVan($companyId)->toArray();
         $this->totalValue = collect($this->stockByVan)->sum('stock_value');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.company.stock-value-by-van-livewire');
     }

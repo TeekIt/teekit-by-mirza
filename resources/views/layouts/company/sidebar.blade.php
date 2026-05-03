@@ -41,15 +41,15 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('company.stock-value-by-van') ? 'active' : '' }}"
-                    href="{{ route('company.stock-value-by-van') }}">
+                <a class="nav-link {{ request()->routeIs('company.stock.value.by.van') ? 'active' : '' }}"
+                    href="{{ route('company.stock.value.by.van') }}">
                     <i class="nav-icon fas fa-dollar-sign"></i>
-                    <p class="ml-2">Stock Value by Van</p>
+                    <p class="ml-2">Stock Value</p>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('company.stock-usage') ? 'active' : '' }}"
-                    href="{{ route('company.stock-usage') }}">
+                <a class="nav-link {{ request()->routeIs('company.stock.usage') ? 'active' : '' }}"
+                    href="{{ route('company.stock.usage') }}">
                     <i class="nav-icon fas fa-chart-line"></i>
                     <p class="ml-2">Stock Usage</p>
                 </a>
