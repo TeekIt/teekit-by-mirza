@@ -13,6 +13,7 @@ use App\Actions\VanProductUsage\GetUsageHistoryAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\VanProduct\SyncRequest;
 use App\Http\Requests\VanProduct\ListByIdRequest;
+use App\Http\Requests\VanProduct\SearchProductsRequest;
 use App\Http\Requests\VanProduct\ListProductByIdRequest;
 use App\Http\Requests\ProductUsageRecord\RecordUsageRequest;
 use App\Http\Requests\VanProduct\ListVanProductByIdRequest;
@@ -37,8 +38,10 @@ class VanProductController extends Controller
         );
     }
 
-    public function listById(ListVanProductByIdRequest $listVanProductByIdRequest, ListVanProductsAction $listVanProductsAction): JsonResponse
-    {
+    public function listById(
+        ListVanProductByIdRequest $listVanProductByIdRequest,
+        ListVanProductsAction $listVanProductsAction
+    ): JsonResponse {
         $validatedData = $listVanProductByIdRequest->validated();
 
         $data = $listVanProductsAction->execute($validatedData);
