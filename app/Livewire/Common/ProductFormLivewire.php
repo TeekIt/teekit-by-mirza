@@ -102,6 +102,9 @@ class ProductFormLivewire extends Component
         'galleryUploads.*'   => 'gallery image',
     ];
 
+    /*
+    * Lifecycle Hooks
+    */
     public function mount(?int $productId = null): void
     {
         if ($productId) {

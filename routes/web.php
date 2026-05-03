@@ -26,6 +26,8 @@ use App\Livewire\Admin\VansLivewire;
 use App\Livewire\Common\OrdersLivewire;
 use App\Livewire\Common\ProductFormLivewire;
 use App\Livewire\Company\CompanyDashboardLivewire;
+use App\Livewire\Company\StockValueByVanLivewire;
+use App\Livewire\Company\StockUsageLivewire;
 use App\Livewire\Seller\GeneralSettingsLivewire;
 use App\Livewire\Seller\InventoryLivewire;
 use App\Livewire\Seller\OrdersFromOtherSellersLivewire;
@@ -173,6 +175,8 @@ Route::middleware('transaction.wrapper')->group(function () {
             Route::get('/dashboard', CompanyDashboardLivewire::class)->name('vans.company.dashboard');
             Route::get('/orders', OrdersLivewire::class)->name('vans.company.orders');
             Route::get('/settings', GeneralSettingsLivewire::class)->name('vans.company.settings');
+            Route::get('/stock/value-by-van', StockValueByVanLivewire::class)->name('company.stock.value.by.van');
+            Route::get('/stock/usage', StockUsageLivewire::class)->name('company.stock.usage');
         });
     });
     /*

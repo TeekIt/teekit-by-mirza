@@ -124,4 +124,16 @@ class VanInventoryOrder extends Model
             ->orderBy('created_at', $orderBy->value)
             ->paginate($perPage);
     }
+
+    public static function getOrdersCount(?int $companyId = null, ?OrderStatusEnum $orderStatus = null): int
+    {
+        return self::when($companyId, function ($query) use ($companyId) {
+                $query->where('company_id', '=',$companyId);
+            })
+            ->when($orderStatus, function ($query) use ($orderStatus) {
+                $query->where('order_status', '=', $orderStatus->value);
+            })
+            ->count();
+    }
+
 }
