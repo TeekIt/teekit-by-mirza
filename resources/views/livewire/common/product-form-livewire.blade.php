@@ -17,6 +17,28 @@
 
                 <form wire:submit="addOrUpdateProduct" enctype="multipart/form-data">
 
+                    {{-- Row 0: Vans List --}}
+                    @if (!empty($vans))
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label text-site-primary fw-semibold d-block">
+                                    Company Vans<span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" wire:model.live="vanId">
+                                    <option value="">Select van</option>
+                                    @foreach ($vans as $van)
+                                        <option value="{{ $van->id }}">{{ $van->number_plate }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="text-danger d-block">
+                                    @error('vanId')
+                                        {{ $message }}
+                                    @enderror
+                                </small>
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Row 1: Product Name & SKU --}}
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -60,7 +82,7 @@
                             </small>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label text-site-primary fw-semibold">Stock <span
+                            <label class="form-label text-site-primary fw-semibold">Stock<span
                                     class="text-danger">*</span></label>
                             <input type="number" class="form-control" placeholder="Enter stock quantity"
                                 wire:model.blur="qty" min="0">
@@ -72,10 +94,28 @@
                         </div>
                     </div>
 
-                    {{-- Row 3: Price & Discount --}}
+                    @if ($isAuthUserCompany)
+                        {{-- Min Threshold --}}
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label text-site-primary fw-semibold">
+                                    Min Threshold<span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" placeholder="Enter min threshold"
+                                    wire:model.blur="minThreshold" min="0">
+                                <small class="text-danger">
+                                    @error('minThreshold')
+                                        {{ $message }}
+                                    @enderror
+                                </small>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Price & Discount --}}
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label text-site-primary fw-semibold">Price <span
+                            <label class="form-label text-site-primary fw-semibold">Price<span
                                     class="text-danger">*</span></label>
                             <input type="number" step="0.01" class="form-control" placeholder="Enter price"
                                 wire:model.blur="price" min="0">
@@ -215,8 +255,9 @@
                     {{-- Row 9: Vehicle Type --}}
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label class="form-label text-site-primary fw-semibold d-block">Vehicle Type <span
-                                    class="text-danger">*</span></label>
+                            <label class="form-label text-site-primary fw-semibold d-block">
+                                Vehicle Type <span class="text-danger">*</span>
+                            </label>
                             <div class="d-flex gap-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" value="bike"
@@ -319,14 +360,18 @@
                         <div class="col-md-6 offset-md-3 text-center mt-2">
                             <button type="submit"
                                 class="btn site-primary-yellow-bg rounded-pill px-5 py-2 fw-semibold w-100"
-                                wire:loading.attr="disabled" wire:loading.class="btn-dark" wire:target="save">
-                                <span wire:loading wire:target="save"
-                                    class="spinner-border spinner-border-sm me-1"></span>
-                                {{ $productId ? 'Update' : 'Add' }}
+                                wire:target="addOrUpdateProduct" wire:loading.class="btn-dark"
+                                wire:loading.class.remove="btn-warning" wire:loading.attr="disabled">
+                                <span wire:target="addOrUpdateProduct" wire:loading.remove>
+                                    {{ $productId ? 'Update' : 'Add' }}
+                                </span>
+                                <span wire:target="addOrUpdateProduct" wire:loading>
+                                    <span class="spinner-border spinner-border-sm text-dark" role="status"
+                                        aria-hidden="true"></span>
+                                </span>
                             </button>
                         </div>
                     </div>
-
                 </form>
             </div>
         </div>

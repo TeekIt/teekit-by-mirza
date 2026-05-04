@@ -83,11 +83,6 @@ class Van extends Authenticatable implements JWTSubject
         return $this->hasMany(VanProduct::class, 'van_id');
     }
 
-    public function activeVanProducts(): HasMany
-    {
-        return $this->hasMany(VanProduct::class, 'van_id')->where('status', 'active');
-    }
-
     public function vanOperativeProductUsages(): HasMany
     {
         return $this->hasMany(VanOperativeProductUsage::class, 'van_id');
@@ -281,14 +276,14 @@ class Van extends Authenticatable implements JWTSubject
         })->sortByDesc('stock_value')->values();
     }
 
-    public static function getVansForCompany(int $companyId): \Illuminate\Support\Collection
+    public static function getVansForCompany(int $companyId): Collection
     {
         return self::where('company_id', '=', $companyId)
             ->select('id', 'user_name', 'operative', 'number_plate')
             ->get();
     }
 
-    public static function getStockUsageByVan(int $vanId, string $period = 'daily'): \Illuminate\Support\Collection
+    public static function getStockUsageByVan(int $vanId, string $period = 'daily'): Collection
     {
         $query = VanOperativeProductUsage::where('van_id', $vanId)
             ->with(['vanProduct:id,price,product_name']);
@@ -325,7 +320,7 @@ class Van extends Authenticatable implements JWTSubject
 
     public static function getTotalUsageValue(int $vanId): float
     {
-        $usages = VanOperativeProductUsage::where('van_id', $vanId)
+        $usages = VanOperativeProductUsage::where('van_id', '=', $vanId)
             ->with(['vanProduct:id,price'])
             ->get();
 

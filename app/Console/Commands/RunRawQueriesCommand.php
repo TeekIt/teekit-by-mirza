@@ -43,6 +43,12 @@ class RunRawQueriesCommand extends Command
 
                     /* Below queries are already executed on local ENV */
 
+                    // DB::statement('ALTER TABLE `van_products` MODIFY `discount_percentage` INTEGER NULL');
+
+                    // DB::statement('ALTER TABLE `van_products` DROP FOREIGN KEY `van_products_seller_id_foreign`');
+                    // DB::statement('ALTER TABLE `van_products` MODIFY `seller_id` BIGINT UNSIGNED NULL');
+                    // DB::statement('ALTER TABLE `van_products` ADD CONSTRAINT `van_products_seller_id_foreign` FOREIGN KEY (`seller_id`) REFERENCES `users`(`id`)');
+
                     // DB::statement("ALTER TABLE qty ADD INDEX qty_seller_id_product_id_index (seller_id, product_id)");
 
                     // DB::statement("ALTER TABLE `van_inventory_orders` RENAME COLUMN `van_location` TO `address`;");
