@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Admin;
+namespace App\Livewire\Company;
 
 use App\Enums\OrderByEnum;
 use App\Models\Categories;
