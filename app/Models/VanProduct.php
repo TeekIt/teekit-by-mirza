@@ -112,6 +112,9 @@ class VanProduct extends Model
     //         ->get();
     // }
 
+    /**
+     * Helpers
+     */
     public function searchProducts(string $query)
     {
         return self::with(['category', 'seller'])
@@ -130,6 +133,11 @@ class VanProduct extends Model
         $this->decrement('quantity', $quantityUsed);
 
         return true;
+    }
+
+    public static function add(array $data): VanProduct
+    {
+        return self::create($data);
     }
 
     public static function addBulk(VanInventoryOrder $vanInventoryOrder): bool
