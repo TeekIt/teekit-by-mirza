@@ -15,9 +15,6 @@ use Illuminate\Validation\Rule;
 
 class PromoCodeController extends Controller
 {
-    /**
-     * function will return all promocodes from table
-     */
     public function list()
     {
         $promocodes = PromoCode::all();
@@ -34,8 +31,8 @@ class PromoCodeController extends Controller
 
      /**
      * It will fetch a promocode and check all
-     * the validation but will not increment the total times
-     * a promocode has been used
+     * the validations but, it will not increment the total times
+     * a promocode has been used.
      */
     public function listByPromoCode(Request $request)
     {
@@ -46,6 +43,7 @@ class PromoCodeController extends Controller
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+        
         $promoCodesCount = PromoCode::where('promo_code', '=', $request->promoCode)->count();
         if ($promoCodesCount == 1) {
             $expiryDate = PromoCode::where('promo_code', '=', $request->promoCode)->pluck('expiry_dt')->first();
