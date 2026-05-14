@@ -12,6 +12,6 @@ class VanProductSeeder extends Seeder
      */
     public function run(): void
     {
-        VanProduct::factory()->count(20000)->create();
+        VanProduct::factory()->count(5000)->create();
     }
 }
