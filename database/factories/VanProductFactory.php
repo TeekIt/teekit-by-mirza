@@ -23,14 +23,14 @@ class VanProductFactory extends Factory
         return [
             'seller_id' => User::inRandomOrder()->where('role_id', '=', UserRoleEnum::SELLER->value)->first()->id,
             'category_id' => Categories::inRandomOrder()->first()->id,
-            'van_id' => 2,
+            'van_id' => 1,
 
             'product_name' => $this->faker->word(),
             'sku' => strtoupper($this->faker->bothify('SKU-###')),
             'price' => $this->faker->randomFloat(2, 50, 500),
 
             'featured' => $this->faker->boolean(),
-            'discount_percentage' => $this->faker->randomElement(['0%', '5%', '10%']),
+            'discount_percentage' => $this->faker->randomElement([null, '5', '50']),
 
             'weight' => $this->faker->randomFloat(2, 1, 5),
             'brand' => $this->faker->company(),
@@ -45,7 +45,7 @@ class VanProductFactory extends Factory
             'car' => $this->faker->boolean(),
             'van' => 1,
 
-            'feature_img' => 'path/to/image.jpg',
+            'feature_img' => 'https://teekit-production-bucket.lon1.digitaloceanspaces.com/251_60bc01afade5f.webp',
 
             'height' => $this->faker->numberBetween(5, 15),
             'width' => $this->faker->numberBetween(3, 10),
