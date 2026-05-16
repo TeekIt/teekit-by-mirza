@@ -107,13 +107,13 @@ final class ProcessVanInventoryOrderAction
     {
         $orderItemsBySeller = $this->groupOrderItemsBySeller($orderItems);
 
-        foreach ($orderItemsBySeller as $sellerId => $orderItems) {
+        foreach ($orderItemsBySeller as $sellerId => $orderItemsBySeller) {
             $seller = User::getUserByID($sellerId, ['id', 'name', 'email']);
 
             EmailServices::sendVanInventoryOrderMail(
                 $seller->email,
                 $seller->name,
-                $orderItems,
+                $orderItemsBySeller,
                 $vanLocation,
             );
         }

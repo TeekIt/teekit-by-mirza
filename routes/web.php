@@ -162,6 +162,7 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::get('/', VansLivewire::class)->name('vans');
         Route::get('/inventories', VanInventoriesLivewire::class)->name('vans.inventories');
         Route::get('/inventories/order/online', AddVanInventoryLivewire::class)->name('vans.inventories.order.online');
+        Route::get('/inventories/order/pay-as-you-go', AddVanInventoryLivewire::class)->name('vans.inventories.order.pay.as.you.go');
         Route::get('/inventory/{productId}/edit/manually', ProductFormLivewire::class)->name('vans.inventory.edit.manually');
         Route::get('/inventory/add/manually', ProductFormLivewire::class)->name('vans.inventory.add.manually');
         Route::get('/delete', [VanController::class, 'destroy'])->name('vans.del');

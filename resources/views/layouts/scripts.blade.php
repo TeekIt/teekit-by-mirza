@@ -56,11 +56,12 @@
     @endif
 
     @php
-        $routesArray = ['seller.request.delivery.form', 'vans.inventories.order.online'];
+        $routesArray = ['seller.request.delivery.form', 'vans.inventories.order.online', 'vans.inventories.order.pay.as.you.go'];
     @endphp
     @if (request()->routeIs($routesArray))
         <script>
-            const isVanInventoryPage = @json(request()->routeIs('vans.inventories.order.online'));
+            const isVanInventoriesOrderOnlinePage = @json(request()->routeIs('vans.inventories.order.online'));
+            const isVanInventoriesOrderPayAsYouGoPage = @json(request()->routeIs('vans.inventories.order.pay.as.you.go'));
 
             /* Initialize CustomGoogleMapsClass for pickup address autocomplete */
             const pickupGoogleMapsClass = new CustomGoogleMapsClass({
@@ -99,7 +100,7 @@
                             pickupPostcode: postcode,
                         });
                         
-                        if (isVanInventoryPage) {
+                        if (isVanInventoriesOrderOnlinePage || isVanInventoriesOrderPayAsYouGoPage) {
                             promise.then(() => livewireComponent.call('vanAddressChanged'));
                         }
                     }

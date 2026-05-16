@@ -49,6 +49,8 @@ class AddVanInventoryLivewire extends Component
 
     public bool $showInventoryGrid = false;
 
+    public bool $isPayAsYouGoRoute = false;
+
     public const CART_SESSION_KEY = 'add_van_inventory_cart';
 
     /*
@@ -63,7 +65,7 @@ class AddVanInventoryLivewire extends Component
     {
         $this->authUser = User::getAuthUser();
         $this->userId = $this->authUser->id;
-        // $this->vanId = $vanId;
+        $this->isPayAsYouGoRoute = request()->is('*pay-as-you-go*');
     }
 
     /*
@@ -276,6 +278,54 @@ class AddVanInventoryLivewire extends Component
     /*
      * CRUD Methods
      */
+    public function addDirectlyToVan(): void
+    {
+        try {
+            $cartItems = $this->getCartItemsValues();
+
+            if (empty($cartItems)) {
+                session()->flash('error', 'Cart is empty.');
+
+                $this->dispatch('close-cart', ['id' => 'cartDrawer']);
+
+                return;
+            }
+
+            /* Perform checkout operation */
+            $vanInventoryOrderPlaced = (new ProcessVanInventoryOrderAction())->execute(
+                companyId: $this->userId,
+                vanId: $this->vanId,
+                customerName: $this->authUser->name,
+                customerLat: $this->authUser->lat,
+                customerLon: $this->authUser->lon,
+                customerCountryCode: $this->authUser->country_code,
+                customerPhoneNumber: $this->authUser->phone,
+                vanAddress: $this->vanAddress,
+                vanCountry: $this->vanCountry,
+                vanState: $this->vanState,
+                vanCity: $this->vanCity,
+                vanPostcode: $this->vanPostcode,
+                vanLat: $this->vanLat,
+                vanLon: $this->vanLon,
+                orderType: $vanInventoryOrderType,
+                orderItems: $cartItems
+            );
+            /* Operation finished */
+            sleep(1);
+            $this->dispatch('close-cart', ['id' => 'cartDrawer']);
+
+            if ($vanInventoryOrderPlaced) {
+                session()->forget(self::CART_SESSION_KEY);
+                session()->flash('success', config('constants.ORDER_PLACED_SUCCESSFULLY'));
+            } else {
+                session()->flash('error', config('constants.ORDER_PLACED_FAILED'));
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', config('constants.ORDER_PLACED_FAILED'));
+        }
+    }
+
     public function checkout(OrderTypeEnum $vanInventoryOrderType): void
     {
         try {
