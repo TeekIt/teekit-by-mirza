@@ -14,7 +14,6 @@ use App\Http\Controllers\Web\v1\UserController;
 use App\Http\Controllers\Web\v1\VanController;
 use App\Http\Controllers\Web\v2\ProductController;
 use App\Http\Controllers\Web\v2\StripeController;
-use App\Livewire\Admin\AddVanInventoryLivewire;
 use App\Livewire\Admin\CategoriesLivewire;
 use App\Livewire\Admin\ChildSellersLivewire;
 use App\Livewire\Admin\CustomersLivewire;
@@ -25,6 +24,7 @@ use App\Livewire\Admin\VansLivewire;
 use App\Livewire\Common\OrdersLivewire;
 use App\Livewire\Common\ProductFormLivewire;
 use App\Livewire\Company\CompanyDashboardLivewire;
+use App\Livewire\Company\OrderVanInventoryLivewire;
 use App\Livewire\Company\StockValueByVanLivewire;
 use App\Livewire\Company\StockUsageLivewire;
 use App\Livewire\Seller\GeneralSettingsLivewire;
@@ -161,8 +161,8 @@ Route::middleware('transaction.wrapper')->group(function () {
     Route::prefix('vans')->middleware(['auth', 'auth.company'])->group(function () {
         Route::get('/', VansLivewire::class)->name('vans');
         Route::get('/inventories', VanInventoriesLivewire::class)->name('vans.inventories');
-        Route::get('/inventories/order/online', AddVanInventoryLivewire::class)->name('vans.inventories.order.online');
-        Route::get('/inventories/order/pay-as-you-go', AddVanInventoryLivewire::class)->name('vans.inventories.order.pay.as.you.go');
+        Route::get('/inventories/order/online', OrderVanInventoryLivewire::class)->name('vans.inventories.order.online');
+        Route::get('/inventories/order/pay-as-you-go', OrderVanInventoryLivewire::class)->name('vans.inventories.order.pay.as.you.go');
         Route::get('/inventory/{productId}/edit/manually', ProductFormLivewire::class)->name('vans.inventory.edit.manually');
         Route::get('/inventory/add/manually', ProductFormLivewire::class)->name('vans.inventory.add.manually');
         Route::get('/delete', [VanController::class, 'destroy'])->name('vans.del');

@@ -140,7 +140,38 @@ class VanProduct extends Model
         return self::create($data);
     }
 
-    public static function addBulk(VanInventoryOrder $vanInventoryOrder): bool
+    public static function addBulkFromProductsTable(Collection $products, Collection $quantitiesMap, int $vanId): bool
+    {
+        $now = now();
+        $vanProducts = $products->map(fn($product) => [
+            'seller_id' => $product->seller_id,
+            'category_id' => $product->category_id,
+            'van_id' => $vanId,
+            'product_name' => $product->product_name,
+            'sku' => $product->sku,
+            'price' => $product->price,
+            'quantity' => $quantitiesMap[$product->id]['qty'],
+            'featured' => 0,
+            'discount_percentage' => $product->discount_percentage,
+            'weight' => $product->weight,
+            'brand' => $product->brand,
+            'size' => $product->size,
+            'contact' => $product->contact ?? '',
+            'colors' => is_array($product->colors) ? json_encode($product->colors) : $product->colors,
+            'bike' => $product->bike,
+            'car' => $product->car,
+            'van' => $product->van,
+            'feature_img' => $product->feature_img,
+            'height' => $product->height,
+            'width' => $product->width,
+            'length' => $product->length,
+            'created_at' => $now,
+        ])->toArray();
+
+        return self::insert($vanProducts);
+    }
+
+    public static function addBulkFromVanInventoryOrder(VanInventoryOrder $vanInventoryOrder): bool
     {
         $now = now();
         $rows = $vanInventoryOrder->orderItems->map(function ($item) use ($vanInventoryOrder, $now) {
@@ -169,15 +200,13 @@ class VanProduct extends Model
                 'length' => $item->product->length,
                 'job_reference' => null,
                 'quantity' => $item->product_qty,
-                'min_threshold' => 5,
                 'created_at' => $now,
-                'updated_at' => $now,
             ];
         })
             ->values()
             ->all();
 
-        return VanProduct::insert($rows);
+        return self::insert($rows);
     }
 
     public static function getRecentByVan(int $vanId, array $columns = ['*']): Collection

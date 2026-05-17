@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Livewire\Admin;
+namespace App\Livewire\Company;
 
 use App\Actions\VanInventoryOrder\ProcessVanInventoryOrderAction;
+use App\Actions\VanInventoryOrder\ProcessVanInventoryPayAsYouGoOrderAction;
 use App\Enums\OrderTypeEnum;
 use App\Enums\ProductStatusEnum;
 use App\Models\Products;
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class AddVanInventoryLivewire extends Component
+class OrderVanInventoryLivewire extends Component
 {
     use WithPagination;
 
@@ -292,34 +293,18 @@ class AddVanInventoryLivewire extends Component
             }
 
             /* Perform checkout operation */
-            $vanInventoryOrderPlaced = (new ProcessVanInventoryOrderAction())->execute(
-                companyId: $this->userId,
+            $vanInventoryPayAsYouGoOrderPlaced = (new ProcessVanInventoryPayAsYouGoOrderAction())->execute(
                 vanId: $this->vanId,
-                customerName: $this->authUser->name,
-                customerLat: $this->authUser->lat,
-                customerLon: $this->authUser->lon,
-                customerCountryCode: $this->authUser->country_code,
-                customerPhoneNumber: $this->authUser->phone,
-                vanAddress: $this->vanAddress,
-                vanCountry: $this->vanCountry,
-                vanState: $this->vanState,
-                vanCity: $this->vanCity,
-                vanPostcode: $this->vanPostcode,
-                vanLat: $this->vanLat,
-                vanLon: $this->vanLon,
-                orderType: $vanInventoryOrderType,
-                orderItems: $cartItems
+                orderItems: $cartItems,
             );
             /* Operation finished */
             sleep(1);
             $this->dispatch('close-cart', ['id' => 'cartDrawer']);
 
-            if ($vanInventoryOrderPlaced) {
+            if ($vanInventoryPayAsYouGoOrderPlaced) {
                 session()->forget(self::CART_SESSION_KEY);
-                session()->flash('success', config('constants.ORDER_PLACED_SUCCESSFULLY'));
-            } else {
-                session()->flash('error', config('constants.ORDER_PLACED_FAILED'));
-            }
+                session()->flash('success', config('constants.PAY_AS_YOU_GO_ORDER_PLACED_SUCCESSFULLY'));
+            } 
         } catch (Exception $error) {
             report($error);
             session()->flash('error', config('constants.ORDER_PLACED_FAILED'));
@@ -392,7 +377,7 @@ class AddVanInventoryLivewire extends Component
         $cartItemsCount = $this->getCartItemsCount();
         $cartTotal = $this->getCartTotal();
 
-        return view('livewire.admin.add-van-inventory-livewire', compact(
+        return view('livewire.company.order-van-inventory-livewire', compact(
             'data',
             'vans',
             'cartItems',

@@ -57,7 +57,7 @@
                         <!-- small box -->
                         <div class="small-box bg-warning">
                             <div class="inner">
-                                <h3>{{ $totalStockValue }}</h3>
+                                <h3>£{{ $totalStockValue }}</h3>
                                 <p>Total Stock Value</p>
                             </div>
                             <div class="icon">

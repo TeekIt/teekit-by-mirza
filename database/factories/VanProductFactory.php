@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\UserRoleEnum;
 use App\Enums\VanProductStatusEnum;
+use App\Enums\VanProductTypeEnum;
 use App\Models\Categories;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -36,8 +37,8 @@ class VanProductFactory extends Factory
             'brand' => $this->faker->company(),
             'size' => $this->faker->randomElement(['S', 'M', 'L']),
 
-            'status' => array_rand(VanProductStatusEnum::cases()),
-            'contact' => '03001234567',
+            'status' => $this->faker->randomElement(VanProductStatusEnum::cases())->value,
+            'contact' => '3001234567',
 
             'colors' => json_encode([$this->faker->safeColorName()]),
 
@@ -55,6 +56,7 @@ class VanProductFactory extends Factory
 
             'quantity' => $this->faker->numberBetween(0, 100),
             'min_threshold' => 5,
+            'type' => $this->faker->randomElement(VanProductTypeEnum::cases())->value,
         ];
     }
 }

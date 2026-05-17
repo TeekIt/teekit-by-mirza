@@ -4,6 +4,7 @@ namespace App\Livewire\Common;
 
 use App\Enums\TransportVehicleEnum;
 use App\Enums\UserRoleEnum;
+use App\Enums\VanProductTypeEnum;
 use App\Models\Categories;
 use App\Models\ProductImage;
 use App\Models\Products;
@@ -47,7 +48,7 @@ class ProductFormLivewire extends Component
 
     public float $price = 0.0;
 
-    public string $discountPercentage = '';
+    public ?string $discountPercentage = null;
 
     public ?float $height = null;
 
@@ -73,6 +74,8 @@ class ProductFormLivewire extends Component
 
     public int $minThreshold = 0;
 
+    public ?VanProductTypeEnum $type = null;
+
     public ?TemporaryUploadedFile $featureImgUpload = null;
 
     public string $featureImg = '';
@@ -96,7 +99,10 @@ class ProductFormLivewire extends Component
             'length'             => ['nullable', 'numeric', 'min:0'],
             'weight'             => ['required', 'numeric', 'min:0'],
             'brand'              => ['nullable', 'string', 'max:255'],
-            'status'             => ['required', 'in:0,1'],
+            'status'             => array_filter([
+                $this->isAuthUserCompany ? 'nullable' : 'required',
+                'in:0,1',
+            ]),
             'contact'            => ['required', 'string', 'min:10', 'max:10'],
             'colors'             => ['nullable', 'array'],
             'featureImgUpload'   => array_filter([
@@ -186,9 +192,7 @@ class ProductFormLivewire extends Component
             $this->status             = (string) $product->getRawOriginal('status');
             $contact                  = $product->contact ?? '';
             $this->contact            = str_starts_with($contact, '+44') ? substr($contact, 3) : $contact;
-            $this->colors             = $product->colors
-                ? array_keys(json_decode($product->colors, true) ?? [])
-                : [];
+            $this->colors             = is_array($decoded = json_decode($product->colors, true)) ? array_keys($decoded) : [];
             $this->vehicle            = match (true) {
                 (bool) $product->bike => TransportVehicleEnum::BIKE->value,
                 (bool) $product->car  => TransportVehicleEnum::CAR->value,
@@ -198,7 +202,17 @@ class ProductFormLivewire extends Component
             $this->vanId              = $product->van_id;
             $this->featureImg         = $product->feature_img ?? '';
             $this->minThreshold       = $product->min_threshold;
+            $this->type               = VanProductTypeEnum::from($product->type);
         }
+    }
+
+    public function isPayAsYouGo($productType = null): bool
+    {
+        if ($productType instanceof VanProductTypeEnum) {
+            return $productType === VanProductTypeEnum::PAY_AS_YOU_GO;
+        }
+
+        return false;
     }
 
     public function removeGalleryImage(int $imageId): void

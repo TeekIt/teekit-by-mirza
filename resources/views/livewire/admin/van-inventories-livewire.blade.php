@@ -1,5 +1,9 @@
 <div class="container-xxl flex-grow-1 container-p-y">
 
+    @php
+        use Illuminate\Support\Str;
+    @endphp
+
     <x-session-messages />
 
     <div class="content-header">
@@ -11,7 +15,7 @@
                 <div class="col-12 col-xl-2">
                     <div class="input-group py-2 my-2">
                         <input type="text" wire:model.live="search" class="form-control py-2"
-                            placeholder="Search by name, qty or threshold...">
+                            placeholder="Search by name, qty or threshold..." title="Search by name, qty or threshold...">
                     </div>
                 </div>
                 <div class="col-12 col-xl-2">
@@ -73,7 +77,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-                    <table class="table text-center table-hover table-responsive-sm border-bottom">
+                    <table class="table table-hover table-responsive-sm border-bottom">
                         <thead>
                             <tr class="bg-primary text-white">
                                 <th scope="col">#</th>
@@ -82,7 +86,8 @@
                                 <th scope="col">Price</th>
                                 <th scope="col">Qty</th>
                                 <th scope="col">Threshold</th>
-                                <th scope="col">Options</th>
+                                <th scope="col">Type</th>
+                                <th scope="col" class="text-center">Options</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -93,11 +98,14 @@
                                         <input type="checkbox" class="select-checkbox" title="Select"
                                             id="inventory-{{ $singleIndex->id }}" onclick="event.stopPropagation()">
                                     </td>
-                                    <td>{{ $singleIndex->product_name }}</td>
+                                    <td title="{{ $singleIndex->product_name }}">
+                                        {{ Str::limit($singleIndex->product_name, 30) }}
+                                    </td>
                                     <td>{{ $singleIndex->price }}</td>
                                     <td>{{ $singleIndex->quantity }}</td>
                                     <td>{{ $singleIndex->min_threshold }}</td>
-                                    <td>
+                                    <td>{{ $singleIndex->type }}</td>
+                                    <td class="text-center">
                                         <a href="{{ route('vans.inventory.edit.manually', ['productId' => $singleIndex->id]) }}" class="btn text-site-primary" title="Edit">
                                             <i class="far fa-edit"></i>
                                         </a>

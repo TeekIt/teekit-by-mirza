@@ -11,7 +11,9 @@
         <div class="container-fluid">
             <div class="row mb-2 align-items-center">
                 <div class="col-12">
-                    <h4 class="py-4 my-1 text-site-primary">Add Van Inventory</h4>
+                    <h4 class="py-4 my-1 text-site-primary">
+                        {{ $isPayAsYouGoRoute ? 'Order Pay As You Go Van Inventory' : 'Order Van Inventory' }}
+                    </h4>
                 </div>
             </div>
         </div>
