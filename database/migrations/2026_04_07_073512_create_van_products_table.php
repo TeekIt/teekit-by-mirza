@@ -37,6 +37,7 @@ return new class extends Migration
             $table->string('job_reference')->nullable();
             $table->integer('quantity')->default(0);
             $table->integer('min_threshold')->default(5)->comment('Minimum stock threshold for inventory alerts');
+            $table->string('type')->comment("Only VanProductTypeEnum values are allowed");
             $table->timestamps();
             $table->softDeletes();
 
@@ -48,8 +49,6 @@ return new class extends Migration
             $table->fullText('product_name');
             $table->index('job_reference');
             $table->index('van_id');
-            $table->index('quantity');
-            $table->index('status');
         });
     }
 

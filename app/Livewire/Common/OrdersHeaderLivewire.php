@@ -617,7 +617,7 @@ class OrdersHeaderLivewire extends Component
 
             $this->authorize('update', $vanInventoryOrder);
 
-            VanProduct::addBulk($vanInventoryOrder);
+            VanProduct::addBulkFromVanInventoryOrder($vanInventoryOrder);
 
             $vanInventoryOrder->update([
                 'order_status' => OrderStatusEnum::COMPLETE->value,

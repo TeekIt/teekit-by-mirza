@@ -11,7 +11,9 @@
         <div class="container-fluid">
             <div class="row mb-2 align-items-center">
                 <div class="col-12">
-                    <h4 class="py-4 my-1 text-site-primary">Add Van Inventory</h4>
+                    <h4 class="py-4 my-1 text-site-primary">
+                        {{ $isPayAsYouGoRoute ? 'Order Pay As You Go Van Inventory' : 'Order Van Inventory' }}
+                    </h4>
                 </div>
             </div>
         </div>
@@ -46,7 +48,8 @@
                                 <select class="form-control" wire:model.live="nearBySellerId">
                                     <option value="">Select a near by seller</option>
                                     @foreach ($nearbySellers as $singleIndex)
-                                        <option value="{{ $singleIndex['id'] }}">{{ $singleIndex['business_name'] }}</option>
+                                        <option value="{{ $singleIndex['id'] }}">{{ $singleIndex['business_name'] }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -218,32 +221,49 @@
 
                 <div class="d-grid gap-2 mt-auto">
                     <div class="dropup">
-                        <button type="button"
-                            class="btn site-primary-bg text-white w-100 rounded-pill dropdown-toggle"
-                            data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"
-                            wire:target="checkout" wire:loading.class="btn-dark"
-                            wire:loading.class.remove="site-primary-bg" wire:loading.attr="disabled">
-                            <span wire:target="checkout" wire:loading.remove>
-                                Checkout
-                            </span>
-                            <span wire:target="checkout" wire:loading>
-                                <span class="spinner-border spinner-border-sm text-light" role="status"></span>
-                            </span>
-                        </button>
-                        <ul class="dropdown-menu w-100 mb-1">
-                            <li>
-                                <button type="button" class="dropdown-item p-3"
-                                    wire:click="checkout('{{ OrderTypeEnum::SELF_PICKUP->value }}')">
-                                    Self Pickup
-                                </button>
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item p-3 border-bottom"
-                                    wire:click="checkout('{{ OrderTypeEnum::COD->value }}')">
-                                    COD
-                                </button>
-                            </li>
-                        </ul>
+                        @if ($isPayAsYouGoRoute)
+                            <div class="alert alert-secondary" role="alert">
+                                Add to your Van now & pay later when the products are used.
+                            </div>
+                            <button type="button" class="btn site-primary-bg text-white w-100 rounded-pill"
+                                wire:click="addDirectlyToVan" wire:target="addDirectlyToVan"
+                                wire:loading.class="btn-dark" wire:loading.class.remove="site-primary-bg"
+                                wire:loading.attr="disabled">
+                                <span wire:target="addDirectlyToVan" wire:loading.remove>
+                                    Add to Van
+                                </span>
+                                <span wire:target="addDirectlyToVan" wire:loading>
+                                    <span class="spinner-border spinner-border-sm text-light" role="status"></span>
+                                </span>
+                            </button>
+                        @else
+                            <button type="button"
+                                class="btn site-primary-bg text-white w-100 rounded-pill dropdown-toggle"
+                                data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"
+                                wire:target="checkout" wire:loading.class="btn-dark"
+                                wire:loading.class.remove="site-primary-bg" wire:loading.attr="disabled">
+                                <span wire:target="checkout" wire:loading.remove>
+                                    Checkout
+                                </span>
+                                <span wire:target="checkout" wire:loading>
+                                    <span class="spinner-border spinner-border-sm text-light" role="status"></span>
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu w-100 mb-1">
+                                <li>
+                                    <button type="button" class="dropdown-item p-3"
+                                        wire:click="checkout('{{ OrderTypeEnum::SELF_PICKUP->value }}')">
+                                        Self Pickup
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="dropdown-item p-3 border-bottom"
+                                        wire:click="checkout('{{ OrderTypeEnum::COD->value }}')">
+                                        COD
+                                    </button>
+                                </li>
+                            </ul>
+                        @endif
                     </div>
                     <button type="button" class="btn btn-secondary w-100 rounded-pill" data-bs-dismiss="offcanvas">
                         Close

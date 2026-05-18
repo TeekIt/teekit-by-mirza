@@ -17,7 +17,7 @@
 
                 <form wire:submit="addOrUpdateProduct" enctype="multipart/form-data">
 
-                    {{-- Row 0: Vans List --}}
+                    {{-- Vans List --}}
                     @if (!empty($vans))
                         <div class="row">
                             <div class="col-12 mb-3">
@@ -39,7 +39,7 @@
                         </div>
                     @endif
 
-                    {{-- Row 1: Product Name & SKU --}}
+                    {{-- Product Name & SKU --}}
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-site-primary fw-semibold">Product Name <span
@@ -64,7 +64,7 @@
                         </div>
                     </div>
 
-                    {{-- Row 2: Category & Stock --}}
+                    {{-- Category & Stock --}}
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-site-primary fw-semibold">Category <span
@@ -85,7 +85,7 @@
                             <label class="form-label text-site-primary fw-semibold">Stock<span
                                     class="text-danger">*</span></label>
                             <input type="number" class="form-control" placeholder="Enter stock quantity"
-                                wire:model.blur="qty" min="0">
+                                wire:model.blur="qty" min="0" @if ($this->isPayAsYouGo($type)) disabled @endif>
                             <small class="text-danger">
                                 @error('qty')
                                     {{ $message }}
@@ -138,7 +138,7 @@
                         </div>
                     </div>
 
-                    {{-- Row 4: Height & Width --}}
+                    {{-- Height & Width --}}
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-site-primary fw-semibold">Height (cm)</label>
@@ -162,7 +162,7 @@
                         </div>
                     </div>
 
-                    {{-- Row 5: Length & Weight --}}
+                    {{-- Length & Weight --}}
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-site-primary fw-semibold">Length (cm)</label>
@@ -187,7 +187,7 @@
                         </div>
                     </div>
 
-                    {{-- Row 6: Brand --}}
+                    {{-- Brand --}}
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label class="form-label text-site-primary fw-semibold">Brand</label>
@@ -201,21 +201,29 @@
                         </div>
                     </div>
 
-                    {{-- Row 7: Status & Contact --}}
+                    {{-- Status & Contact --}}
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label text-site-primary fw-semibold">Status <span
-                                    class="text-danger">*</span></label>
-                            <select class="form-control" wire:model.live="status">
-                                <option value="">Select status</option>
-                                <option value="1">Enabled</option>
-                                <option value="0">Disabled</option>
-                            </select>
-                            <small class="text-danger">
-                                @error('status')
-                                    {{ $message }}
-                                @enderror
-                            </small>
+                            @if ($isAuthUserCompany)
+                                <label class="form-label text-site-primary fw-semibold">
+                                    Status
+                                </label>
+                                <input type="text" class="form-control" value="{{ $status }}" disabled>
+                            @else
+                                <label class="form-label text-site-primary fw-semibold">
+                                    Status<span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" wire:model.live="status">
+                                    <option value="">Select status</option>
+                                    <option value="1">Enabled</option>
+                                    <option value="0">Disabled</option>
+                                </select>
+                                <small class="text-danger">
+                                    @error('status')
+                                        {{ $message }}
+                                    @enderror
+                                </small>
+                            @endif
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-site-primary fw-semibold">Contact <span
@@ -234,7 +242,7 @@
                         </div>
                     </div>
 
-                    {{-- Row 8: Colors --}}
+                    {{-- Colors --}}
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label class="form-label text-site-primary fw-semibold">Colors</label>
@@ -252,7 +260,7 @@
                         </div>
                     </div>
 
-                    {{-- Row 9: Vehicle Type --}}
+                    {{-- Vehicle Type --}}
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label class="form-label text-site-primary fw-semibold d-block">
@@ -283,7 +291,7 @@
                         </div>
                     </div>
 
-                    {{-- Row 10: Feature Image --}}
+                    {{-- Feature Image --}}
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-site-primary fw-semibold d-block">
@@ -377,4 +385,9 @@
         </div>
     </div>
 
+    <style>
+        input:disabled {
+            background-color: #e1e1e1 !important;
+        }
+    </style>
 </div>

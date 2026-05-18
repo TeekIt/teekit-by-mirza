@@ -169,39 +169,6 @@ class VanInventoriesLivewire extends Component
         ]);
     }
 
-    // public function renderEditVanInventoryModal(int $id): void
-    // {
-    //     $inventory = VanProduct::getById($id);
-
-    //     $this->authorize('update', $inventory);
-
-    //     $this->inventoryId = $inventory->id;
-    //     $this->sellerId = (int) $inventory->seller_id;
-    //     $this->categoryId = (int) $inventory->category_id;
-    //     $this->productVanId = (int) $inventory->van_id;
-    //     $this->productName = $inventory->product_name;
-    //     $this->sku = $inventory->sku;
-    //     $this->price = (float) $inventory->price;
-    //     $this->featured = (int) $inventory->featured;
-    //     $this->discountPercentage = $inventory->discount_percentage;
-    //     $this->weight = $inventory->weight;
-    //     $this->brand = $inventory->brand;
-    //     $this->size = $inventory->size;
-    //     $this->productStatus = (string) $inventory->getRawOriginal('status');
-    //     $this->contact = $inventory->contact;
-    //     $this->colors = $inventory->getRawOriginal('colors');
-    //     $this->bike = isset($inventory->bike) ? (int) $inventory->bike : null;
-    //     $this->car = isset($inventory->car) ? (int) $inventory->car : null;
-    //     $this->van = isset($inventory->van) ? (int) $inventory->van : null;
-    //     $this->featureImg = $inventory->feature_img;
-    //     $this->height = $inventory->height;
-    //     $this->width = $inventory->width;
-    //     $this->length = $inventory->length;
-    //     $this->jobReference = $inventory->job_reference;
-    //     $this->quantity = (int) $inventory->quantity;
-    //     $this->threshold = (int) $inventory->min_threshold;
-    // }
-
     public function updateVanInventory(): void
     {
         $vanProduct = VanProduct::with('van')->findOrFail($this->inventoryId);

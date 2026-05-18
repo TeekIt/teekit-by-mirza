@@ -43,7 +43,14 @@ class RunRawQueriesCommand extends Command
 
                     /* Below queries are already executed on local ENV */
 
-                    DB::statement('ALTER TABLE `van_products` MODIFY `discount_percentage` INTEGER NULL');
+                    // DB::statement("ALTER TABLE `van_products` 
+                    //     ADD COLUMN `type` VARCHAR(255) NOT NULL COMMENT 'Only VanProductTypeEnum values are allowed' 
+                    //     AFTER `min_threshold`"
+                    // );
+
+                    DB::statement("UPDATE `van_products` SET `type` = 'manual' WHERE `type` != 'payAsYouGo'");
+
+                    // DB::statement('ALTER TABLE `van_products` MODIFY `discount_percentage` INTEGER NULL');
 
                     // DB::statement('ALTER TABLE `van_products` DROP FOREIGN KEY `van_products_seller_id_foreign`');
                     // DB::statement('ALTER TABLE `van_products` MODIFY `seller_id` BIGINT UNSIGNED NULL');
