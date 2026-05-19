@@ -276,29 +276,19 @@ class Van extends Authenticatable implements JWTSubject
         })->sortByDesc('stock_value')->values();
     }
 
-    public static function getVansForCompany(int $companyId): Collection
+    public static function getStockUsageByVan(int $vanId, string $period = 'daily'): \Illuminate\Support\Collection
     {
-        return self::where('company_id', '=', $companyId)
-            ->select('id', 'user_name', 'operative', 'number_plate')
-            ->get();
-    }
-
-    public static function getStockUsageByVan(int $vanId, string $period = 'daily'): Collection
-    {
-        $query = VanOperativeProductUsage::where('van_id', $vanId)
-            ->with(['vanProduct:id,price,product_name']);
+        $query = VanOperativeProductUsage::with(['vanProduct:id,price,product_name'])->where('van_id', '=', $vanId);
 
         if ($period === 'daily') {
             $query->whereDate('used_at', '>=', now()->subDays(30));
-            $groupBy = 'DATE(used_at)';
         } else {
             $query->whereDate('used_at', '>=', now()->subWeeks(12));
-            $groupBy = 'YEAR(used_at), WEEK(used_at)';
         }
 
         return $query->get()
             ->map(function ($usage) {
-                $price = $usage->vanProduct->price ?? 0;
+                $price = $usage->vanProduct->price;
                 return [
                     'date' => $usage->used_at->format('Y-m-d'),
                     'quantity_used' => $usage->quantity_used,

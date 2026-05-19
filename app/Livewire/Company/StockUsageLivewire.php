@@ -9,20 +9,22 @@ use Livewire\Component;
 
 class StockUsageLivewire extends Component
 {
-    public $vans = [];
-    public $selectedVanId = '';
-    public $selectedPeriod = 'daily';
-    public $usageData = [];
-    public $totalUsageValue = 0;
-    public $vanName = '';
+    public array $vans = [];
+    public int $selectedVanId = 0;
+    public string $selectedPeriod = 'daily';
+    public array $usageData = [];
+    public float $totalUsageValue = 0.0;
+    public string $vanName = '';
 
     /*
     * Lifecycle Hooks
     */
     public function mount(): void
     {
-        $companyId = User::getAuthUser()->id;
-        $this->vans = Van::getVansForCompany($companyId)->toArray();
+        $this->vans = Van::getByCompanyId(
+            companyId: User::getAuthUser()->id,
+            columns: ['id', 'user_name', 'operative', 'number_plate']
+        )->toArray();
 
         if (!empty($this->vans)) {
             $this->selectedVanId = $this->vans[0]['id'];
@@ -47,14 +49,14 @@ class StockUsageLivewire extends Component
         }
 
         $this->usageData = Van::getStockUsageByVan(
-            (int) $this->selectedVanId,
-            $this->selectedPeriod
+            vanId: $this->selectedVanId,
+            period: $this->selectedPeriod
         )->toArray();
 
-        $this->totalUsageValue = Van::getTotalUsageValue((int) $this->selectedVanId);
+        $this->totalUsageValue = Van::getTotalUsageValue($this->selectedVanId);
 
         /* Get van name for display */
-        $van = collect($this->vans)->firstWhere('id', (int) $this->selectedVanId);
+        $van = collect($this->vans)->firstWhere('id', $this->selectedVanId);
         $this->vanName = $van ? $van['operative'] . ' (' . $van['user_name'] . ')' : '';
         $this->dispatch('usageDataUpdated', ['usageData' => $this->usageData]);
     }
