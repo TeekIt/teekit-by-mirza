@@ -55,8 +55,6 @@ services:
       - dockerhosted_db
     environment:
       PMA_HOST: dockerhosted_db
-      PMA_USER: ${DB_USERNAME}
-      PMA_PASSWORD: ${DB_PASSWORD}
       PMA_PORT: 3306
     networks:
       - teekit-network
