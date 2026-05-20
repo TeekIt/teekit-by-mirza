@@ -48,7 +48,7 @@ class RunRawQueriesCommand extends Command
                     //     AFTER `min_threshold`"
                     // );
 
-                    DB::statement("UPDATE `van_products` SET `type` = 'manual' WHERE `type` != 'payAsYouGo'");
+                    // DB::statement("UPDATE `van_products` SET `type` = 'manual' WHERE `type` != 'payAsYouGo'");
 
                     // DB::statement('ALTER TABLE `van_products` MODIFY `discount_percentage` INTEGER NULL');
 
