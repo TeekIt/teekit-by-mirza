@@ -9,9 +9,12 @@
 sleep 5
 
 #################################################################
-# Begin - Commands to run only once when the container is build
+# Begin - Commands to uncomment only once when the container is build
 #################################################################
-# Remove vendor and composer.lock
+
+# # Note: Please! comment the following commands after a successful docker compose build, to avoid re-installations & other basic configurations
+
+# # Remove vendor and composer.lock
 # rm -rf /var/www/vendor /var/www/composer.lock
 # # Install dependencies
 # composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -20,7 +23,7 @@ sleep 5
 # php artisan scout:sync-index-settings
 # php artisan scout:import "App\Models\Products"
 #################################################################
-# End - Commands to run only once when the container is build
+# End - Commands to uncomment only once when the container is build
 #################################################################
 
 # Cache everything at the end

@@ -1,76 +1,177 @@
-**How To Deploy Teek it On A Cloud Server With Ubuntu Terminal**
------
-Web App:
-1) composer install.
-2) Create & modify the .env file.
-3) Change the owner of the following files:-
-	a) chown -R www-data:www-data bootstrap/
-	b) chown -R www-data:www-data storage/
+# Deployment Guide
+## Localhost Deployment
 
-DB:
-1) Create a database cluster on Digital Ocean.
-2) Modify the .env file according to the new database cluster credentials.
-3) Keep DB_HOST=localhost in the .env file.
-4) Now Install PhpMyadmin:
-	https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-20-04
-5) Import your local DB into the live DB.
+**Prerequisites:**
+* [WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
+* Docker
+* Docker Compose
+---
+**Execute the following commands in WSL/Linux based terminal:**
+1. Prepare the directory and clone the repository:
+```bash
+   sudo mkdir -p /var/www
+   cd /var/www
+   sudo git clone https://github.com/mirza-organization/teekit-by-mirza.git
+   cd teekit-by-mirza
+   ```
 
-**How To Resolve Digital Ocean Droplet Console Time Out Error**
------
-First check the set of rules of your default UFW firewall:<br>
-sudo ufw status numbered
+2. Configure the environment:
+```bash
+   sudo cp .env.example .env
+   ```
 
-Now check the default port of your SSH:<br>
-grep -i port /etc/ssh/sshd_config
+3. Copy the `teekit_database.sql` file to the `docker-compose/mysql` directory.
 
-Now if UFW is not allowing SSH port then please add it in UFW rules:<br>
-sudo ufw allow ssh_port_number (type your SSH port default number here)
+4. Read the `docker-compose/entrypoint.sh` file carefully and follow all necessary commands.
 
-Now restart your SSH:<br>
-sudo systemctl start ssh
+5. Build and start the container:
+```bash
+   sudo docker compose up -d --build
+   ```
 
-**How To Install MeiliSearch**
------
-How To Install On Localhost:<br>
-Reference:<br>
-https://docs.meilisearch.com/learn/getting_started/quick_start.html#setup-and-installation
+6. Navigate back to the "www" directory and set up the global Nginx proxy:
+```bash
+   cd ../
+   sudo mkdir -p nginx-docker/conf.d
+   cd nginx-docker/
+   sudo nano docker-compose.yml
+   ```
 
-Goto the reference Doc & jump to the Local installation section. From there you can select the method of installation according to your own OS. After downloading meilisearch pkg just run it & see if it's working or not. 
-Default port for meilisearch is localhost:7700<br>
-After running meilisearch on your Windows execute the following commands:<br>
-php artisan scout:import "App\Products"<br>
-php artisan scout:sync-index-settings<br>
+7. Add the following configuration to the Nginx `docker-compose.yml` file:
+```yaml
+   services:
+     nginx:
+       image: nginx:alpine
+       container_name: global-nginx
+       restart: unless-stopped
+       ports:
+         - "80:80"
+       volumes:
+         - ./conf.d:/etc/nginx/conf.d
+         - /var/www:/var/www
+       networks:
+         - nginx-network
 
-How To Install On Production:<br>
-Reference:<br>
-https://postsrc.com/posts/setting-up-meilisearch-on-production-ubuntu-for-laravel-project
-https://docs.meilisearch.com/learn/cookbooks/running_production.html#a-quick-introduction
+   networks:
+     nginx-network:
+       # Ensure this network exists. If not, create it manually:
+       # docker network create nginx-network
+       external: true
+   ```
 
-1) curl -L https://install.meilisearch.com | sh
-2) Enter: ./meilisearch --help (In case of any help required)
-3) nano /etc/systemd/system/meilisearch.service
-Paste the following script, do note that you will have to change the master key into your own securely defined master key:-
+8. Save and exit (`Ctrl + X` => `Y` => `Enter`).
 
-[Unit]
-Description=MeiliSearch
-After=systemd-user-sessions.service
+9. Create the Nginx server block for your Laravel app:
+```bash
+   cd conf.d/
+   sudo nano teekit.conf
+   ```
 
-[Service]
-Type=simple
-ExecStart=/usr/bin/meilisearch --http-addr 127.0.0.1:7700 --env production --master-key 0000-kxkkkk-shhhh-shhhhhhh
+10. Add the following server block (customize the domain according to your needs):
+```nginx
+    server {
+        listen 80; # 443 for HTTPS
 
-[Install]
-WantedBy=default.target
+        server_name teekit-by-mirza.docker; # Use server Public IP in production if no domain available 
 
-4) systemctl enable meilisearch
-5) systemctl start meilisearch
-6) systemctl status meilisearch (Check that the service is actually running)
-7) Now connect Laravel with Meilisearch by adding the following into your .env file:<br>
-SCOUT_DRIVER=meilisearch
-MEILISEARCH_HOST=http://127.0.0.1:7700
-MEILISEARCH_KEY=masterKey
-8) Run the following commands:<br>
-php artisan scout:sync-index-settings<br>
-php artisan scout:import "App\Products"<br>
+        root /var/www/teekit-by-mirza/public;
 
+        index index.php;
 
+        error_log  /var/log/nginx/error.log;
+        access_log /var/log/nginx/access.log;
+
+        location ~ \.php$ {
+            try_files $uri =404;
+            fastcgi_split_path_info ^(.+\.php)(/.+)$;
+            fastcgi_pass teekit-by-mirza:9000;
+            fastcgi_index index.php;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param PATH_INFO $fastcgi_path_info;
+        }
+        
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+            gzip_static on;
+        }
+    }
+```
+
+11. Navigate back to the Nginx root directory (nginx-docker) and start the container:
+```bash
+    cd ../
+    sudo docker compose up -d --build
+```
+
+12. Map the domain locally (Windows Only, for iOS the location is different):
+* Navigate to `C:\Windows\System32\drivers\etc\hosts` open in **Notepad**.
+* Now open another **Notepad** as Administrator (search from taskbar).
+* Copy the contents of the `hosts` file into the administrator **Notepad**, and add the following lines at the bottom of the file:
+```text
+      # Custom generated Hosts
+      127.0.0.1       teekit-by-mirza.docker
+  ```
+* Save the administrator **Notepad** and overwrite the default `hosts` file in `C:\Windows\System32\drivers\etc`.
+
+13. THaaa-Daaa that's it 😅. Now visit `http://teekit-by-mirza.docker`.
+
+--- 
+## Production Deployment
+
+**Prerequisites:**
+* VPS with Ubuntu LTS
+* Docker
+* Docker Compose
+
+1. Follow **Steps 1 through 10** from the Localhost Deployment section & **skip Step 5**.
+
+2. Create a new user on production before building the containers:
+```bash
+   # Create a new group (DO NOT CHANGE GROUPNAME)
+   sudo groupadd -g 1000 mirza
+
+   # Create a new user, assign them to the group, & create their home directory 
+   # (DO NOT CHANGE USERNAME)
+   sudo useradd -u 1000 -g mirza -m -s /bin/bash mirza
+
+   # Set a secure password for this new user
+   sudo passwd mirza
+   ```
+
+3. Build and start the Laravel application:
+```bash
+   cd /var/www/teekit-by-mirza
+   sudo docker compose up -d --build
+   ```
+
+4. Build and start the Nginx proxy:
+```bash
+   cd /var/www/nginx-docker
+   sudo docker compose up -d --build
+   ```
+
+5. THaaa-Daaa we are done😅. Visit your domain.
+---
+## **How To Resolve Digital Ocean Droplet "Console Time Out Error"**
+1. Access the Droplet from "Recovery console".
+
+2. Now check the set of rules of your default UFW firewall:
+```bash
+   sudo ufw status numbered
+   ```
+
+3. Now check the default port of your SSH:
+```bash
+   grep -i port /etc/ssh/sshd_config
+   ```
+
+4. Now if UFW is not allowing SSH port then please add it in UFW rules (type your SSH port default number here):
+```bash
+   sudo ufw allow ssh_port_number 
+   ```
+
+5. Now restart your SSH:
+```bash
+   sudo systemctl start ssh
+   ```
