@@ -2,7 +2,7 @@
 ## Localhost Deployment
 
 **Prerequisites:**
-* [WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
+* <a href="https://learn.microsoft.com/en-us/windows/wsl/install" target="_blank">WSL</a>
 * Docker
 * Docker Compose
 ---
@@ -124,7 +124,7 @@
 * Docker
 * Docker Compose
 
-1. Follow **Steps 1 through 10** from the Localhost Deployment section & **skip Step 5**.
+1. Follow **Steps 1 through 10** from the [Localhost Deployment](https://github.com/mirza-organization/teekit-by-mirza/tree/staging#localhost-deployment) section & **skip Step 5**.
 
 2. Create a new user on production before building the containers:
 ```bash
