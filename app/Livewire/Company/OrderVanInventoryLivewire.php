@@ -4,8 +4,10 @@ namespace App\Livewire\Company;
 
 use App\Actions\VanInventoryOrder\ProcessVanInventoryOrderAction;
 use App\Actions\VanInventoryOrder\ProcessVanInventoryPayAsYouGoOrderAction;
+use App\Enums\OrderByEnum;
 use App\Enums\OrderTypeEnum;
 use App\Enums\ProductStatusEnum;
+use App\Models\Categories;
 use App\Models\Products;
 use App\Models\User;
 use App\Models\Van;
@@ -48,9 +50,19 @@ class OrderVanInventoryLivewire extends Component
 
     public string $search = '';
 
+    public ?int $categoryId = null;
+
+    public ?OrderByEnum $orderBy = null;
+
+    public ?string $orderByPrice = null;
+
     public bool $showInventoryGrid = false;
 
     public bool $isPayAsYouGoRoute = false;
+
+    public Collection $vans;
+
+    public Collection $categories;
 
     public const CART_SESSION_KEY = 'add_van_inventory_cart';
 
@@ -67,6 +79,12 @@ class OrderVanInventoryLivewire extends Component
         $this->authUser = User::getAuthUser();
         $this->userId = $this->authUser->id;
         $this->isPayAsYouGoRoute = request()->is('*pay-as-you-go*');
+        $this->categories = Categories::all(['id', 'category_name']);
+
+         $this->vans = Van::getByCompanyId(
+            companyId: $this->userId,
+            columns: ['id', 'company_id', 'number_plate']
+        );
     }
 
     /*
@@ -141,11 +159,10 @@ class OrderVanInventoryLivewire extends Component
     public function performSearch(): void
     {
         $this->validate([
+            'vanId' => 'required|integer|exists:vans,id',
             'vanAddress' => 'required|string',
             'nearBySellerId' => 'required|integer|exists:users,id',
         ]);
-
-        // $this->resetPage();
 
         $this->showInventoryGrid = true;
     }
@@ -362,16 +379,16 @@ class OrderVanInventoryLivewire extends Component
     public function render(): View
     {
         $data = ($this->showInventoryGrid) ? Products::getParentOrChildSellerProductsForView(
-            (int) $this->nearBySellerId,
+            $this->nearBySellerId,
             search: $this->search,
+            categoryId: $this->categoryId,
             status: ProductStatusEnum::ENABLE,
-            orderBy: 'desc'
+            orderBy: $this->orderBy ?? OrderByEnum::DESC,
+            orderByPrice: $this->orderByPrice
         ) : null;
 
-        $vans = Van::getByCompanyId(
-            $this->userId,
-            ['id', 'company_id', 'number_plate']
-        );
+        $vans = $this->vans;
+        $categories = $this->categories;
 
         $cartItems = $this->getCartItemsValues();
         $cartItemsCount = $this->getCartItemsCount();
@@ -380,6 +397,7 @@ class OrderVanInventoryLivewire extends Component
         return view('livewire.company.order-van-inventory-livewire', compact(
             'data',
             'vans',
+            'categories',
             'cartItems',
             'cartItemsCount',
             'cartTotal'

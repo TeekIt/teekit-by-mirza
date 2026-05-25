@@ -2,6 +2,7 @@
     @php
         use App\Enums\ProductStatusEnum;
         use App\Enums\OrderTypeEnum;
+        use App\Enums\OrderByEnum;
         use Illuminate\Support\Str;
     @endphp
 
@@ -11,9 +12,26 @@
         <div class="container-fluid">
             <div class="row mb-2 align-items-center">
                 <div class="col-12">
-                    <h4 class="py-4 my-1 text-site-primary">
-                        {{ $isPayAsYouGoRoute ? 'Order Pay As You Go Van Inventory' : 'Order Van Inventory' }}
-                    </h4>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h4 class="py-4 my-1 text-site-primary">
+                                {{ $isPayAsYouGoRoute ? 'Order Pay As You Go Van Inventory' : 'Order Van Inventory' }}
+                            </h4>
+                        </div>
+
+                        <div>
+                            <button type="button"
+                                class="btn p-0 border-0 bg-transparent shadow-none me-4 mb-4 z-3 d-inline-flex align-items-center justify-content-center custom-cart-icon position-relative"
+                                data-bs-toggle="offcanvas" data-bs-target="#cartDrawer" aria-controls="cartDrawer"
+                                aria-label="Open cart drawer">
+                                <i class="fas fa-cart-arrow-down text-site-primary fa-3x "></i>
+                                <span
+                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill site-primary-yellow-bg text-dark">
+                                    {{ $cartItemsCount }}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -25,7 +43,7 @@
                 <div class="col-12">
                     {{-- Van Location + Nearby Seller --}}
                     <div class="row mb-3">
-                        <div class="col-3">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <select class="form-control py-2" wire:model.live="vanId">
                                     <option value="">Select Van</option>
@@ -35,7 +53,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 {{-- The "id" attribute is set to "pickupAddress" so we can align it with the
                                     CustomGoogleMapsClass in the scripts.blade.php file --}}
@@ -43,7 +61,7 @@
                                     id="pickupAddress" required>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <select class="form-control" wire:model.live="nearBySellerId">
                                     <option value="">Select a near by seller</option>
@@ -67,13 +85,46 @@
                             </div>
                         </div>
 
+                        {{-- Filters --}}
+                        <div class="row mb-4 g-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <select class="form-control py-2" wire:model.live="orderBy">
+                                        <option value="{{ OrderByEnum::DESC }}">Newest First</option>
+                                        <option value="{{ OrderByEnum::ASC }}">Oldest First</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <select class="form-control py-2" wire:model.live="orderByPrice">
+                                        <option value="">Filter by price</option>
+                                        <option value="{{ OrderByEnum::DESC }}">High to Low</option>
+                                        <option value="{{ OrderByEnum::ASC }}">Low to High</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <select class="form-control py-2" wire:model.live="categoryId">
+                                        <option value="">Filter by category</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->category_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Search Button --}}
                         <div class="row">
                             <div class="col-12">
                                 <button type="submit" class="btn site-primary-yellow-bg w-100 rounded-pill py-2"
                                     wire:target="performSearch" wire:loading.class="btn-dark"
                                     wire:loading.class.remove="site-primary-yellow-bg" wire:loading.attr="disabled"
-                                    @disabled(!trim($vanAddress) || !$nearBySellerId)>
+                                    @disabled(!$vanId || !trim($vanAddress) || !$nearBySellerId)>
                                     <span wire:target="performSearch" wire:loading.remove>
                                         Search
                                     </span>
@@ -152,17 +203,6 @@
 
     {{-- Cart Drawer --}}
     <div>
-        <button type="button"
-            class="btn p-0 border-0 bg-transparent shadow-none position-fixed bottom-0 end-0 me-4 mb-4 z-3 d-inline-flex align-items-center justify-content-center custom-cart-icon position-relative"
-            data-bs-toggle="offcanvas" data-bs-target="#cartDrawer" aria-controls="cartDrawer"
-            aria-label="Open cart drawer">
-            <i class="fas fa-cart-arrow-down text-site-primary fa-3x "></i>
-            <span
-                class="position-absolute top-0 start-100 translate-middle badge rounded-pill site-primary-yellow-bg text-dark">
-                {{ $cartItemsCount }}
-            </span>
-        </button>
-
         <div wire:ignore.self class="offcanvas offcanvas-end bg-white" tabindex="-1" id="cartDrawer"
             aria-labelledby="cartDrawerLabel" data-bs-backdrop="false" data-bs-scroll="true">
             <div class="offcanvas-header">

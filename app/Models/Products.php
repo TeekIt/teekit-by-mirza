@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrderByEnum;
 use App\Enums\ProductStatusEnum;
 use App\Enums\SortByEnum;
 use Illuminate\Database\Eloquent\Builder;
@@ -590,7 +591,8 @@ class Products extends Model
         ?string $search = null,
         ?int $categoryId = null,
         ?ProductStatusEnum $status = null,
-        string $orderBy = 'desc'
+        ?string $orderByPrice = null,
+        OrderByEnum $orderBy = OrderByEnum::DESC
     ): LengthAwarePaginator {
         return self::select('products.*')
             ->join('qty', function ($join) use ($sellerId) {
@@ -609,8 +611,11 @@ class Products extends Model
             ->when($status, function ($query, $status) {
                 return $query->where('products.status', '=', $status);
             })
+            ->when($orderByPrice, function ($query, $orderByPrice) {
+                return $query->orderBy('products.price', $orderByPrice);
+            })
             ->distinct()
-            ->orderBy('products.id', $orderBy)
+            ->orderBy('products.created_at', $orderBy->value)
             ->paginate(12);
     }
 
