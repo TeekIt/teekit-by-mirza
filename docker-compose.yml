@@ -87,8 +87,8 @@ services:
 networks:
   teekit-network:
     driver: bridge
+  # 'external: true' tells Docker that the network already exists externally (not created by this Docker Compose file)
+  # Hence, if it does not then create it manually with the following command:
+  # docker network create network-name
   nginx-network:
-    # This tells Docker the network already exists
-    # Hence, if it does not then create it manually with the following command:
-    # docker network create nginx-network
     external: true
