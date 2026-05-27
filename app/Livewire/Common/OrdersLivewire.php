@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Common;
 
+use Illuminate\Contracts\View\View;
 use App\Actions\Orders\MoveOrderToOtherNearBySellersAction;
 use App\Enums\OrderByEnum;
 use App\Models\GophrDelivery;
@@ -279,7 +280,7 @@ class OrdersLivewire extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         try {
 

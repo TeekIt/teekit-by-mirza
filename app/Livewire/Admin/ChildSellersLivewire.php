@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use Illuminate\Contracts\View\View;
 use App\Enums\OrderByEnum;
 use App\Models\Qty;
 use App\Models\User;
@@ -140,7 +141,7 @@ class ChildSellersLivewire extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $data = User::getChildSellers(OrderByEnum::DESC, $this->search);
 

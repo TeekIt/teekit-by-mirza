@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use Illuminate\Contracts\View\View;
 use App\Models\User;
 use Exception;
 use Livewire\Component;
@@ -115,7 +116,7 @@ class CustomersLivewire extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $data = User::getCustomers($this->search);
 

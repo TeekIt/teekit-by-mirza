@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Seller;
 
+use Illuminate\Contracts\View\View;
 use App\Enums\UserRoleEnum;
 use App\Models\Categories;
 use App\Models\Products;
@@ -152,7 +153,7 @@ class InventoryLivewire extends Component
         });
     }
 
-    public function render()
+    public function render(): View
     {
         $categories = Categories::getAll(['id', 'category_name']);
         $featuredProducts = [];

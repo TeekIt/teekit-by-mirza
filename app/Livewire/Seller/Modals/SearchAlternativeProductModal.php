@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Seller\Modals;
 
+use Illuminate\Contracts\View\View;
 use App\Models\OrderItems;
 use App\Models\Orders;
 use App\Models\Products;
@@ -148,7 +149,7 @@ class SearchAlternativeProductModal extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         $products = Products::getProductsForSAPModal($this->sellerId, $this->search);
 

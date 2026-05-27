@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use Illuminate\Contracts\View\View;
 use App\Enums\OrderByEnum;
 use App\Models\Categories;
 use App\Models\CommissionAndServiceFee;
@@ -411,7 +412,7 @@ class ParentSellersLivewire extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $data = User::getParentSellers(OrderByEnum::DESC, $this->search);
 

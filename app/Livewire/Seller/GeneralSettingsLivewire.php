@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Seller;
 
+use Illuminate\Contracts\View\View;
 use App\Services\ImageServices;
 use App\Models\User;
 use Exception;
@@ -268,7 +269,7 @@ class GeneralSettingsLivewire extends Component
         return $user;
     }
 
-    public function render()
+    public function render(): View
     {
         $user = $this->setUserInfo($this->user_id);
 

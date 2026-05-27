@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Seller;
 
+use Illuminate\Contracts\View\View;
 use App\Models\User;
 use App\Models\WithdrawalRequests;
 use Livewire\Component;
@@ -117,7 +118,7 @@ class WithdrawalLivewire extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         $data = WithdrawalRequests::getWithdrawalRequests(
             User::getAuthUser()->id,

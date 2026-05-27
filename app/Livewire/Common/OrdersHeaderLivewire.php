@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Common;
 
+use Illuminate\Contracts\View\View;
 use App\Actions\Orders\MoveOrderToOtherNearBySellersAction;
 use App\Enums\GophrCancellationReasonEnum;
 use App\Enums\OrderStatusEnum;
@@ -718,7 +719,7 @@ class OrdersHeaderLivewire extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.common.orders-header-livewire');
     }

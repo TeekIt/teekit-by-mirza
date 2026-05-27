@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Seller;
 
+use Illuminate\Contracts\View\View;
 use App\Actions\RequestedDelivery\ListRequestedDeliveryAction;
 use App\Enums\DeliveryProviderEnum;
 use App\Enums\OrderByEnum;
@@ -254,7 +255,7 @@ class RequestedDeliveriesLivewire extends Component
     //     $this->requestedDeliveryId    = $requestedDelivery->id;
     // }
 
-    public function render()
+    public function render(): View
     {
         $data = (new ListRequestedDeliveryAction())->execute(
             orderByEnum: OrderByEnum::DESC,

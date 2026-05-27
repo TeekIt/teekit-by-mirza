@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Seller;
 
+use Illuminate\Contracts\View\View;
 use App\Enums\OrderStatusEnum;
 use App\Enums\OrderTypeEnum;
 use App\Models\OrdersFromOtherSeller;
@@ -258,7 +259,7 @@ class OrdersFromOtherSellersLivewire extends Component
     * Will add the order amount into the seller's wallet
     */
 
-    public function render()
+    public function render(): View
     {
         $data = OrdersFromOtherSeller::getForView(
             [

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Seller;
 
+use Illuminate\Contracts\View\View;
 use App\Models\Orders;
 use App\Models\Qty;
 use App\Models\User;
@@ -37,7 +38,7 @@ class SellerDashboardLivewire extends Component
     */
     //
 
-    public function render()
+    public function render(): View
     {
         $seller = User::getUserByID(id: $this->seller_id, columns: ['*']);
         $pending_orders = Orders::getOrdersByStatusWhereSellerId($this->seller_id, 'pending')->count();

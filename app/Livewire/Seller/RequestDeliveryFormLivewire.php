@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Seller;
 
+use Illuminate\Contracts\View\View;
 use App\Enums\DeliveryProviderEnum;
 use App\Enums\PackageTransportTypeEnum;
 use App\Enums\PackageWeightEnum;
@@ -285,7 +286,7 @@ class RequestDeliveryFormLivewire extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.seller.request-delivery-form-livewire');
     }
