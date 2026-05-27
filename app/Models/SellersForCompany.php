@@ -41,4 +41,13 @@ class SellersForCompany extends Model
     /**
      * Helpers
      */
+    public static function addBulk(array $data): bool
+    {
+        return self::insert($data);
+    }
+
+    public static function deleteByCompanyAndSellerId(int $companyId, int $sellerId): bool
+    {
+        return self::where('company_id', '=', $companyId)->where('seller_id', '=', $sellerId)->forceDelete();
+    }
 }

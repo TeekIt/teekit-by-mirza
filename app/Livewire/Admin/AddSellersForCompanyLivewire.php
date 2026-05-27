@@ -36,15 +36,38 @@ class AddSellersForCompanyLivewire extends Component
 
     public Collection $categories;
 
+    /*
+    * Livewire Built-in Properties
+    */
     protected $paginationTheme = 'bootstrap';
 
+    protected function rules(): array
+    {
+        return [
+            'companyId' => 'required|integer|exists:users,id',
+            'sellerId' => 'required|integer|exists:users,id',
+            'selectedProducts' => 'required|array|min:1',
+        ];
+    }
+
+    /*
+     * Livewire Lifecycle Hooks
+     */
     public function mount(int $companyId): void
     {
         $this->companyId = $companyId;
         $this->categories = Categories::all(['id', 'category_name']);
     }
 
-    public function resetComponent()
+    public function updatedSellerId(): void
+    {
+        $this->selectedProducts = [];
+    }
+
+    /*
+     * Custom Helpers
+     */
+    public function resetComponent(): void
     {
         $this->resetValidation();
 
@@ -60,35 +83,32 @@ class AddSellersForCompanyLivewire extends Component
 
     public function addSellerAndProducts(): void
     {
-        $this->validate([
-            'companyId' => 'required|integer|exists:users,id',
-            'sellerId' => 'required|integer|exists:users,id',
-            'selectedProducts' => 'required|array|min:1',
-        ]);
+        $this->validate();
 
         try {
+            /* Perform some operation */
             DB::transaction(function () {
-                // Delete existing relationships for this company and seller pair
-                SellersForCompany::where('company_id', '=',$this->companyId)
-                    ->where('seller_id', '=',$this->sellerId)
-                    ->delete();
+                SellersForCompany::deleteByCompanyAndSellerId($this->companyId, $this->sellerId);
 
-                // Bulk insert newly selected products
+                /* Bulk insert newly selected products */
                 $now = now();
-                $insertData = [];
-                $productIds = array_unique(array_filter(array_map('intval', $this->selectedProducts)));
-
-                foreach ($productIds as $productId) {
-                    $insertData[] = [
+                $groupedData = [];
+                // $productIds = array_unique(array_filter(array_map('intval', $this->selectedProducts)));
+                
+                foreach ($this->selectedProducts as $productId) {
+                    $groupedData[] = [
                         'company_id' => $this->companyId,
                         'seller_id' => $this->sellerId,
-                        'product_id' => $productId,
+                        'product_id' => (int) $productId,
                         'created_at' => $now,
                     ];
                 }
 
-                SellersForCompany::insert($insertData);
+                SellersForCompany::addBulk($groupedData);
             });
+            /* Operation finished */
+            sleep(1);
+            $this->resetComponent();
 
             session()->flash('success', config('constants.DATA_INSERTION_SUCCESS'));
         } catch (Exception $error) {

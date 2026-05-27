@@ -10,25 +10,23 @@
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2 align-items-center">
-                <div class="col-12">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h4 class="py-4 my-1 text-site-primary">
-                                Add Sellers For Company
-                            </h4>
-                        </div>
+                <div class="col-12 col-sm-6 col-md-7 col-xl-9">
+                    <h4 class="py-4 my-1 text-site-primary">
+                        Add Sellers For Company
+                    </h4>
+                </div>
 
-                        <div>
-                            <button type="button" class="btn btn-site-primary my-3 py-3 w-100"
-                                wire:click="addSellerAndProducts" wire:target="addSellerAndProducts"
-                                wire:loading.attr="disabled" @disabled(!$sellerId)>
-                                <span class="fas fa-plus"></span>
-                                <span wire:target="addSellerAndProducts" wire:loading>
-                                    <span class="spinner-border spinner-border-sm text-light" role="status"></span>
-                                </span>
-                            </button>
-                        </div>
-                    </div>
+                <div class="col-12 col-md-5 col-xl-3 d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn btn-site-primary my-3 py-3" style="width: calc((100% - 16px) / 3);"
+                        wire:click="addSellerAndProducts" wire:target="addSellerAndProducts"
+                        wire:loading.attr="disabled" @disabled(!$selectedProducts) title="Add Seller & Products">
+                        <span wire:target="addSellerAndProducts" wire:loading.remove>
+                            <i class="fas fa-plus"></i>
+                        </span>
+                        <span wire:target="addSellerAndProducts" wire:loading>
+                            <span class="spinner-border spinner-border-sm text-light" role="status"></span>
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -118,7 +116,7 @@
                                             style="background:url('{{ $featureImageUrl }}') no-repeat center; position: relative;">
 
                                             {{-- Checkbox at top left corner --}}
-                                            <div class="position-absolute" style="left: 20px; z-index: 10;">
+                                            <div class="position-absolute" style="left: 30px; z-index: 10;">
                                                 <input type="checkbox"
                                                     class="form-check-input select-checkbox cursor-pointer"
                                                     style="width: 24px; height: 24px; border: 2px solid #bbb;"
@@ -152,7 +150,7 @@
                 </section>
             @else
                 <div class="py-5">
-                    <p class="text-dark fs-2 text-center">Please select a seller</p>
+                    <p class="text-dark fs-2 p-2 text-center">Please select a seller</p>
                 </div>
             @endif
         </div>

@@ -41,7 +41,7 @@ class SubCategoriesLivewire extends Component
         ]);
     }
 
-    public function renderEditSubCategoryModal($id)
+    public function renderEditSubCategoryModal(int $id): void
     {
         $subCategory = SubCategory::find($id);
         $this->subCategoryId = $subCategory->id;

@@ -15,11 +15,11 @@ class CategoriesLivewire extends Component
 {
     use WithFileUploads, WithPagination;
 
-    public $categoryId;
+    public int $categoryId;
 
     public $image;
 
-    public $name;
+    public string $name;
 
     /*
     * Livewire Built-in Properties
