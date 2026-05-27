@@ -179,7 +179,7 @@
                     </div>
                 </div>
             @empty
-                <h1 class="text-dark">No Sellers Found 🥺</h1>
+                <p class="text-dark fs-2 text-center">{{ config('constants.NO_RECORD') }} 🥺</p>
             @endforelse
         </div>
         <div class="row">

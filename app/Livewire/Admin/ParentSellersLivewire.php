@@ -128,7 +128,6 @@ class ParentSellersLivewire extends Component
 
     public function resetAllErrors()
     {
-        $this->resetErrorBag();
         $this->resetValidation();
     }
 
@@ -177,7 +176,7 @@ class ParentSellersLivewire extends Component
 
             $this->enableThis('enable_different_commissions');
             /* Convert different_commissions to an array of associative arrays */
-            $different_commissions = collect($commission->different_commissions)->map(fn ($item) => (array) $item);
+            $different_commissions = collect($commission->different_commissions)->map(fn($item) => (array) $item);
 
             /* Align commissions according to categories */
             $this->different_commissions = collect($this->categories)
@@ -202,7 +201,7 @@ class ParentSellersLivewire extends Component
 
             $this->enableThis('enable_different_service_fees');
             /* Convert different_service_fees to an array of associative arrays */
-            $different_service_fees = collect($service_fee->different_service_fees)->map(fn ($item) => (array) $item);
+            $different_service_fees = collect($service_fee->different_service_fees)->map(fn($item) => (array) $item);
 
             /* Align service fees according to categories */
             $this->different_service_fees = collect($this->categories)
@@ -394,7 +393,7 @@ class ParentSellersLivewire extends Component
         try {
             /* Perform some operation */
             $status = ($is_active) ? self::BLOCK : self::ACTIVE;
-            $status_cahnged = User::activeOrBlockSeller($id, $status);
+            $status_cahnged = User::activateOrBlock($id, $status);
             /* Operation finished */
             if ($status_cahnged) {
                 $this->resetPage();

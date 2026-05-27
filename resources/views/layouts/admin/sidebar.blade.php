@@ -85,6 +85,15 @@
                       </ul>
                   </li>
                   <li class="nav-item">
+                      <a href="{{ route('admin.companies') }}"
+                          class="nav-link @if (request()->is('admin/companies')) active @endif">
+                          <i class="nav-icon fas fa-building"></i>
+                          <p class="ml-2">
+                              Companies
+                          </p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
                       <a href="{{ route('admin.customers') }}"
                           class="nav-link  @if (request()->is('admin/customers')) active @endif">
                           <i class="nav-icon fas fa-users-cog"></i>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web\v1;
 
+use App\Enums\OrderByEnum;
 use App\Enums\UserRoleEnum;
 use App\Http\Controllers\Controller;
 use App\Models\PromoCode;
@@ -23,7 +24,7 @@ class PromoCodeController extends Controller
     public function promocodesHome()
     {
         /* Get stores names for select dropdown */
-        $stores = User::getParentAndChildSellers(['id', 'business_name']);
+        $stores = User::getParentAndChildSellers(columns: ['id', 'business_name']);
         $promoCodes = PromoCode::getAll('desc');
 
         return view('admin.promo_codes', compact('promoCodes', 'stores'));

@@ -8,7 +8,6 @@ use App\Models\GophrDelivery;
 use App\Models\OrderItems;
 use App\Models\Orders;
 use App\Models\User;
-use App\Models\InventoryOrderItem;
 use App\Models\VanInventoryOrder;
 use App\Services\GoogleMapServices;
 use App\Services\GophrDeliveryServices;

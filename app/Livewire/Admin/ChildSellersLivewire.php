@@ -53,7 +53,7 @@ class ChildSellersLivewire extends Component
 
     public function resetComponent()
     {
-        $this->resetAllErrors();
+        $this->resetValidation();
 
         $this->reset([
             'name',
@@ -71,12 +71,6 @@ class ChildSellersLivewire extends Component
             'is_online',
             'application_fee',
         ]);
-    }
-
-    public function resetAllErrors()
-    {
-        $this->resetErrorBag();
-        $this->resetValidation();
     }
 
     public function renderInfoModal($id)
@@ -128,7 +122,7 @@ class ChildSellersLivewire extends Component
         try {
             /* Perform some operation */
             $status = ($is_active === 1) ? 0 : 1;
-            $status_cahnged = User::activeOrBlockSeller($id, $status);
+            $status_cahnged = User::activateOrBlock($id, $status);
             /* Operation finished */
             if ($status_cahnged) {
                 $this->resetPage();
@@ -148,7 +142,7 @@ class ChildSellersLivewire extends Component
 
     public function render()
     {
-        $data = User::getChildSellers(OrderByEnum::DESC,$this->search);
+        $data = User::getChildSellers(OrderByEnum::DESC, $this->search);
 
         return view('livewire.admin.child-sellers-livewire', compact('data'));
     }

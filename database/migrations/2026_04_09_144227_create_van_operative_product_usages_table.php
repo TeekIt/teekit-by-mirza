@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('van_operative_product_usages', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('van_id')->constrained('vans')->cascadeOnDelete();
-            $table->foreignId('van_product_id')->constrained('van_products')->cascadeOnDelete();
+            $table->foreignId('van_id')->constrained(table: 'vans')->cascadeOnDelete();
+            $table->foreignId('van_product_id')->constrained(table: 'van_products')->cascadeOnDelete();
             $table->integer('quantity_used');
             $table->string('job_reference');
             $table->timestamp('used_at')->nullable();

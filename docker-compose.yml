@@ -49,7 +49,7 @@ services:
     container_name: teekit-phpmyadmin
     restart: unless-stopped
     ports:
-      - "8090:80"
+      - "9090:80"
     depends_on:
       - dockerhosted_db
     environment:

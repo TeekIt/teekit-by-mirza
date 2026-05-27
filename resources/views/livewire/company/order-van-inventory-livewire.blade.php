@@ -90,8 +90,8 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <select class="form-control py-2" wire:model.live="orderBy">
-                                        <option value="{{ OrderByEnum::DESC }}">Newest First</option>
-                                        <option value="{{ OrderByEnum::ASC }}">Oldest First</option>
+                                        <option value="{{ OrderByEnum::DESC }}">Oldest First</option>
+                                        <option value="{{ OrderByEnum::ASC }}">Newest First</option>
                                     </select>
                                 </div>
                             </div>

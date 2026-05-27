@@ -14,8 +14,10 @@ use App\Http\Controllers\Web\v1\UserController;
 use App\Http\Controllers\Web\v1\VanController;
 use App\Http\Controllers\Web\v2\ProductController;
 use App\Http\Controllers\Web\v2\StripeController;
+use App\Livewire\Admin\AddSellersForCompanyLivewire;
 use App\Livewire\Admin\CategoriesLivewire;
 use App\Livewire\Admin\ChildSellersLivewire;
+use App\Livewire\Admin\CompaniesLivewire;
 use App\Livewire\Admin\CustomersLivewire;
 use App\Livewire\Admin\ParentSellersLivewire;
 use App\Livewire\Admin\ReferralCodesLivewire;
@@ -188,7 +190,10 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::get('/referralcodes', ReferralCodesLivewire::class)->name('admin.referralcodes');
         Route::get('/sellers/parent', ParentSellersLivewire::class)->name('admin.sellers.parent');
         Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
+        Route::get('/companies', CompaniesLivewire::class)->name('admin.companies');
         Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
+
+        Route::get('/companies/{companyId}/add-sellers', AddSellersForCompanyLivewire::class)->name('admin.companies.add.sellers');
 
         Route::prefix('categories')->group(function () {
             Route::get('/', CategoriesLivewire::class)->name('admin.categories');

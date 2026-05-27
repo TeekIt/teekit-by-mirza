@@ -70,7 +70,6 @@ class CustomersLivewire extends Component
 
     public function resetAllErrors()
     {
-        $this->resetErrorBag();
         $this->resetValidation();
     }
 
@@ -98,7 +97,7 @@ class CustomersLivewire extends Component
         try {
             /* Perform some operation */
             $status = ($is_active === 1) ? 0 : 1;
-            $status_cahnged = User::activeOrBlockCustomer($id, $status);
+            $status_cahnged = User::activateOrBlock($id, $status);
             /* Operation finished */
             if ($status_cahnged) {
                 $this->resetPage();

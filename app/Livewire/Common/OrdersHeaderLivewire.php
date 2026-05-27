@@ -30,7 +30,6 @@ use Livewire\Attributes\Reactive;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\VanProduct;
-use App\Models\InventoryOrderItem;
 use App\Models\VanInventoryOrder;
 
 class OrdersHeaderLivewire extends Component
