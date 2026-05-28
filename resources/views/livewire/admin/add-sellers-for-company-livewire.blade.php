@@ -57,7 +57,7 @@
                                 <div class="form-group">
                                     <input type="text" class="form-control"
                                         placeholder="Enter product name (optional)"
-                                        wire:model.live.debounce.300ms="search">
+                                        wire:model.live.debounce.500ms="search">
                                 </div>
                             </div>
                         </div>

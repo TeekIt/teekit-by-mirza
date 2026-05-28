@@ -424,7 +424,7 @@ The project uses a consistent navy-blue and golden-yellow brand palette. All new
 ```html
 <div class="input-group mb-3">
     <input type="search" class="form-control" placeholder="Search..."
-           wire:model.live.debounce.300ms="search">
+           wire:model.live.debounce.500ms="search">
     <span class="input-group-text"><i class="fas fa-search"></i></span>
 </div>
 ```
@@ -505,7 +505,7 @@ class ItemsLivewire extends Component
 - Use `$this->authorize()` with Policies before every state-changing action
 - Flash messages via `session()->flash('success'|'error', config('constants.*'))`
 - Close modals via `$this->dispatch('close-modal', ['id' => 'modalId'])`
-- Bind search with `wire:model.live.debounce.300ms="search"`
+- Bind search with `wire:model.live.debounce.500ms="search"`
 
 ---
 
