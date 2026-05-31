@@ -40,9 +40,7 @@ class RunRawQueriesCommand extends Command
                     // DROP FOREIGN KEY orders_from_other_sellers_parent_order_id_foreign');
 
                     /* Below queries are already executed on staging ENV */
-
-                    /* Below queries are already executed on local ENV */
-
+                    
                     // DB::statement("ALTER TABLE `van_products` 
                     //     ADD COLUMN `type` VARCHAR(255) NOT NULL COMMENT 'Only VanProductTypeEnum values are allowed' 
                     //     AFTER `min_threshold`"
@@ -76,6 +74,9 @@ class RunRawQueriesCommand extends Command
                     //     ADD COLUMN `city` VARCHAR(70) NOT NULL AFTER `state`,
                     //     ADD COLUMN `postcode` VARCHAR(11) NOT NULL AFTER `city`
                     // ");
+
+                    /* Below queries are already executed on local ENV */
+
                 });
             }
         } catch (Exception $error) {
