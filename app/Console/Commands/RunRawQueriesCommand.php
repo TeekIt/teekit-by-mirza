@@ -40,7 +40,7 @@ class RunRawQueriesCommand extends Command
                     // DROP FOREIGN KEY orders_from_other_sellers_parent_order_id_foreign');
 
                     /* Below queries are already executed on staging ENV */
-
+                    
                     // DB::statement("ALTER TABLE `van_products` 
                     //     ADD COLUMN `type` VARCHAR(255) NOT NULL COMMENT 'Only VanProductTypeEnum values are allowed' 
                     //     AFTER `min_threshold`"

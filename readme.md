@@ -137,6 +137,9 @@
 
    # Set a secure password for this new user
    sudo passwd mirza
+
+   # Grant the ownership of your app's directory to the newly created user
+   sudo chown mirza:mirza -R /var/www/teekit-by-mirza
    ```
 
 3. Build and start the Laravel application:
