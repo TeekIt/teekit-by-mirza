@@ -75,33 +75,34 @@ class RunRawQueriesCommand extends Command
                     //     ADD COLUMN `postcode` VARCHAR(11) NOT NULL AFTER `city`
                     // ");
 
+                    // DB::statement(
+                    //     'ALTER TABLE `van_products`
+                    // ADD COLUMN `company_id` BIGINT UNSIGNED NOT NULL AFTER `seller_id`,
+                    // ADD CONSTRAINT `van_products_company_id_foreign`
+                    // FOREIGN KEY (`company_id`) REFERENCES `users`(`id`)
+                    // ON DELETE CASCADE'
+                    // );
+
+                    // DB::statement(
+                    //     'ALTER TABLE `van_products`
+                    // DROP FOREIGN KEY `van_products_van_id_foreign`'
+                    // );
+
+                    // DB::statement(
+                    //     'ALTER TABLE `van_products`
+                    // MODIFY COLUMN `van_id` BIGINT UNSIGNED NOT NULL AFTER `company_id`,
+                    // ADD CONSTRAINT `van_products_van_id_foreign`
+                    // FOREIGN KEY (`van_id`) REFERENCES `vans`(`id`)
+                    // ON DELETE CASCADE'
+                    // );
+
+                    // DB::statement(
+                    //     "ALTER TABLE `van_products`
+                    // MODIFY COLUMN `featured` TINYINT NOT NULL DEFAULT 0 COMMENT 'Only IsFeaturedEnum values are allowed'"
+                    // );
+
                     /* Below queries are already executed on local ENV */
 
-                    DB::statement(
-                        'ALTER TABLE `van_products`
-                    ADD COLUMN `company_id` BIGINT UNSIGNED NOT NULL AFTER `seller_id`,
-                    ADD CONSTRAINT `van_products_company_id_foreign`
-                    FOREIGN KEY (`company_id`) REFERENCES `users`(`id`)
-                    ON DELETE CASCADE'
-                    );
-
-                    DB::statement(
-                        'ALTER TABLE `van_products`
-                    DROP FOREIGN KEY `van_products_van_id_foreign`'
-                    );
-
-                    DB::statement(
-                        'ALTER TABLE `van_products`
-                    MODIFY COLUMN `van_id` BIGINT UNSIGNED NOT NULL AFTER `company_id`,
-                    ADD CONSTRAINT `van_products_van_id_foreign`
-                    FOREIGN KEY (`van_id`) REFERENCES `vans`(`id`)
-                    ON DELETE CASCADE'
-                    );
-
-                    DB::statement(
-                        "ALTER TABLE `van_products`
-                    MODIFY COLUMN `featured` TINYINT NOT NULL DEFAULT 0 COMMENT 'Only IsFeaturedEnum values are allowed'"
-                    );
                 });
             }
         } catch (Exception $error) {
