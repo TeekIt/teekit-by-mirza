@@ -87,6 +87,7 @@
                                 <th scope="col">Qty</th>
                                 <th scope="col">Threshold</th>
                                 <th scope="col">Type</th>
+                                <th scope="col">Created At</th>
                                 <th scope="col" class="text-center">Options</th>
                             </tr>
                         </thead>
@@ -105,6 +106,7 @@
                                     <td>{{ $singleIndex->quantity }}</td>
                                     <td>{{ $singleIndex->min_threshold }}</td>
                                     <td>{{ $singleIndex->type }}</td>
+                                    <td>{{ $singleIndex->created_at }}</td>
                                     <td class="text-center">
                                         <a href="{{ route('vans.inventory.edit.manually', ['productId' => $singleIndex->id]) }}" class="btn text-site-primary" title="Edit">
                                             <i class="far fa-edit"></i>
@@ -113,7 +115,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">{{ config('constants.NO_RECORD') }}</td>
+                                    <td colspan="9" class="text-center">{{ config('constants.NO_RECORD') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>

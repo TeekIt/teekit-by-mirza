@@ -20,6 +20,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Str;
 
 class ProductFormLivewire extends Component
 {
@@ -42,11 +43,11 @@ class ProductFormLivewire extends Component
 
     public string $sku = '';
 
-    public int $categoryId = 0;
+    public ?int $categoryId = null;
 
-    public int $qty = 0;
+    public ?int $qty = null;
 
-    public float $price = 0.0;
+    public ?float $price = null;
 
     public ?string $discountPercentage = null;
 
@@ -56,7 +57,7 @@ class ProductFormLivewire extends Component
 
     public ?float $length = null;
 
-    public ?float $weight = 0.0;
+    public ?float $weight = null;
 
     public ?string $brand = null;
 
@@ -72,7 +73,7 @@ class ProductFormLivewire extends Component
 
     public ?int $vanId = null;
 
-    public int $minThreshold = 0;
+    public ?int $minThreshold = null;
 
     public ?VanProductTypeEnum $type = null;
 
@@ -135,7 +136,6 @@ class ProductFormLivewire extends Component
 
         if ($productId) {
             $this->productId = $productId;
-
             $this->populateComponentVariables();
         }
     }
@@ -208,11 +208,13 @@ class ProductFormLivewire extends Component
 
     public function isPayAsYouGo($productType = null): bool
     {
-        if ($productType instanceof VanProductTypeEnum) {
-            return $productType === VanProductTypeEnum::PAY_AS_YOU_GO;
-        }
+        return $productType === VanProductTypeEnum::PAY_AS_YOU_GO;
 
-        return false;
+        // if ($productType instanceof VanProductTypeEnum) {
+        //     return $productType === VanProductTypeEnum::PAY_AS_YOU_GO;
+        // }
+
+        // return false;
     }
 
     public function removeGalleryImage(int $imageId): void
@@ -253,7 +255,7 @@ class ProductFormLivewire extends Component
                 'seller_id'           => $this->authUserId,
                 'category_id'         => $this->categoryId,
                 'product_name'        => $this->productName,
-                'sku'                 => $this->sku,
+                'sku'                 => strtoupper(Str::remove(' ', $this->sku)),
                 'price'               => $this->price,
                 'discount_percentage' => $this->discountPercentage !== '' ? (float) $this->discountPercentage : 0.00,
                 'height'              => $this->height,
@@ -278,6 +280,7 @@ class ProductFormLivewire extends Component
                 $data['van_id'] = $this->vanId;
                 $data['quantity'] = $this->qty;
                 $data['min_threshold'] = $this->minThreshold;
+                $data['type'] = VanProductTypeEnum::MANUAL->value;
             }
 
             /* Update Product */
@@ -305,8 +308,9 @@ class ProductFormLivewire extends Component
                 }
 
                 $message = config('constants.DATA_UPDATED_SUCCESS');
-            } else {
-                /* Add Product */
+            }
+            /* Add Product */ else {
+
                 if ($this->isAuthUserCompany) {
                     VanProduct::add($data);
                 }

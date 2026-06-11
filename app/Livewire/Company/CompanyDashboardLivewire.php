@@ -4,7 +4,6 @@ namespace App\Livewire\Company;
 
 use App\Models\User;
 use App\Models\Van;
-use App\Models\VanProduct;
 use Livewire\Component;
 use App\Models\VanInventoryOrder;
 use App\Enums\OrderStatusEnum;

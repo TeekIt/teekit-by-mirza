@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('van_products', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->foreignId('seller_id')->nullable()->constrained('users');
+            $table->foreignId('company_id')->constrained(table: 'users')->cascadeOnDelete();
+            $table->foreignId('van_id')->constrained(table: 'vans')->cascadeOnDelete();
             $table->foreignId('category_id')->constrained(table: 'categories');
-            $table->foreignId('van_id')->constrained(table: 'vans');
             $table->string('product_name');
             $table->string('sku');
             $table->float('price');
-            $table->tinyInteger('featured')->default(0)->comment('0:not_featured, 1:featured');
+            $table->tinyInteger('featured')->default(0)->comment('Only IsFeaturedEnum values are allowed');
             $table->integer('discount_percentage')->nullable();
             $table->float('weight')->nullable();
             $table->string('brand')->nullable();

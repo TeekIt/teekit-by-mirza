@@ -8,10 +8,10 @@ use App\Models\VanProduct;
 class VanProductSeeder extends Seeder
 {
     /**
-     * Seed the van_products table with sample data
+     * Run the database seeds.
      */
     public function run(): void
     {
-        VanProduct::factory()->count(5000)->create();
+        VanProduct::factory()->count(1000)->create();
     }
 }

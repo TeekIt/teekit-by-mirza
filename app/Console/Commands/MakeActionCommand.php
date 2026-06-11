@@ -17,9 +17,9 @@ class MakeActionCommand extends Command
      */
     protected $signature = 'make:action {name}';
 
-    protected $successCode = Command::SUCCESS;
+    protected int $successCode = Command::SUCCESS;
 
-    protected $failureCode = Command::FAILURE;
+    protected int $failureCode = Command::FAILURE;
 
     /**
      * The console command description.
@@ -31,9 +31,9 @@ class MakeActionCommand extends Command
     /**
      * Command specific code
      */
-    protected $namespace = 'App\\Actions';
+    protected string $namespace = 'App\\Actions';
 
-    protected $className;
+    protected string $className;
 
     public function getClassStub(): string
     {

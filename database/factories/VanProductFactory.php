@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\IsFeaturedEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\VanProductStatusEnum;
 use App\Enums\VanProductTypeEnum;
@@ -23,6 +24,8 @@ class VanProductFactory extends Factory
     {
         return [
             'seller_id' => User::inRandomOrder()->where('role_id', '=', UserRoleEnum::SELLER->value)->first()->id,
+            // 'company_id' => User::inRandomOrder()->where('role_id', '=', UserRoleEnum::COMPANY->value)->first()->id,
+            'company_id' => 767,
             'category_id' => Categories::inRandomOrder()->first()->id,
             'van_id' => 1,
 
@@ -30,7 +33,7 @@ class VanProductFactory extends Factory
             'sku' => strtoupper($this->faker->bothify('SKU-###')),
             'price' => $this->faker->randomFloat(2, 50, 500),
 
-            'featured' => $this->faker->boolean(),
+            'featured' => $this->faker->randomElement(IsFeaturedEnum::cases())->value,
             'discount_percentage' => $this->faker->randomElement([null, '5', '50']),
 
             'weight' => $this->faker->randomFloat(2, 1, 5),
@@ -56,7 +59,8 @@ class VanProductFactory extends Factory
 
             'quantity' => $this->faker->numberBetween(0, 100),
             'min_threshold' => 5,
-            'type' => $this->faker->randomElement(VanProductTypeEnum::cases())->value,
+            // 'type' => $this->faker->randomElement(VanProductTypeEnum::cases())->value,
+            'type' => VanProductTypeEnum::PAY_AS_YOU_GO->value,
         ];
     }
 }

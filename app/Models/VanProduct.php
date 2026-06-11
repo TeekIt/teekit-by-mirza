@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\OrderByEnum;
 use App\Enums\VanProductStatusEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Van;
@@ -11,9 +12,11 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Models\Categories;
 use App\Models\VanOperativeProductUsage;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class VanProduct extends Model
 {
@@ -54,6 +57,13 @@ class VanProduct extends Model
     /**
      * Laravel Built-In Helpers
      */
+    protected function sku(): Attribute
+    {
+        return Attribute::make(
+            set: fn(string $value) => strtoupper(preg_replace('/\s+/', '', $value)),
+        );
+    }
+
     public function getStatusAttribute()
     {
         if ($this->quantity == 0) {
@@ -68,16 +78,16 @@ class VanProduct extends Model
     /**
      * Scopes
      */
-    public function scopeCategory($query, $categoryId)
+    public function scopeCategory(Builder $query, ?int $categoryId): Builder
     {
         if ($categoryId) {
-            $query->where('category_id', $categoryId);
+            $query->where('category_id', '=', $categoryId);
         }
 
         return $query;
     }
 
-    public function scopeStatus($query, $status)
+    public function scopeStatus(Builder $query, ?string $status): Builder
     {
         if (!$status) {
             return $query;
@@ -115,15 +125,6 @@ class VanProduct extends Model
     /**
      * Helpers
      */
-    public function searchProducts(string $query)
-    {
-        return self::with(['category', 'seller'])
-            ->where('product_name', 'like', "%{$query}%")
-            ->orWhere('sku', 'like', "%{$query}%")
-            ->latest()
-            ->get();
-    }
-
     public function useQuantity(int $quantityUsed): bool
     {
         if ($this->quantity < $quantityUsed) {
@@ -171,10 +172,10 @@ class VanProduct extends Model
         return self::insert($vanProducts);
     }
 
-    public static function addBulkFromVanInventoryOrder(VanInventoryOrder $vanInventoryOrder): bool
+    public static function addBulkFromVanInventoryOrderTable(VanInventoryOrder $vanInventoryOrder): bool
     {
         $now = now();
-        $rows = $vanInventoryOrder->orderItems->map(function ($item) use ($vanInventoryOrder, $now) {
+        $vanProducts = $vanInventoryOrder->orderItems->map(function ($item) use ($vanInventoryOrder, $now) {
             return [
                 'seller_id' => $vanInventoryOrder->seller_id,
                 'category_id' => $item->product->category_id,
@@ -206,7 +207,7 @@ class VanProduct extends Model
             ->values()
             ->all();
 
-        return self::insert($rows);
+        return self::insert($vanProducts);
     }
 
     public static function getRecentByVan(int $vanId, array $columns = ['*']): Collection
@@ -225,6 +226,7 @@ class VanProduct extends Model
     public static function getAll(
         OrderByEnum $orderBy,
         ?string $search = null,
+        ?int $companyId = null,
         ?int $vanId = null,
         ?int $categoryId = null,
         ?VanProductStatusEnum $status = null,
@@ -241,6 +243,9 @@ class VanProduct extends Model
                         ->orWhere('sku', 'like', "%{$search}%")
                         ->orWhere('brand', 'like', "%{$search}%");
                 });
+            })
+            ->when($companyId, function ($query) use ($companyId) {
+                return $query->where('company_id', '=', $companyId);
             })
             ->when($vanId, function ($query) use ($vanId) {
                 $query->where('van_id', '=', $vanId);

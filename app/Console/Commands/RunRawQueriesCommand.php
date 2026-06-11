@@ -40,7 +40,7 @@ class RunRawQueriesCommand extends Command
                     // DROP FOREIGN KEY orders_from_other_sellers_parent_order_id_foreign');
 
                     /* Below queries are already executed on staging ENV */
-                    
+
                     // DB::statement("ALTER TABLE `van_products` 
                     //     ADD COLUMN `type` VARCHAR(255) NOT NULL COMMENT 'Only VanProductTypeEnum values are allowed' 
                     //     AFTER `min_threshold`"
@@ -77,6 +77,31 @@ class RunRawQueriesCommand extends Command
 
                     /* Below queries are already executed on local ENV */
 
+                    DB::statement(
+                        'ALTER TABLE `van_products`
+                    ADD COLUMN `company_id` BIGINT UNSIGNED NOT NULL AFTER `seller_id`,
+                    ADD CONSTRAINT `van_products_company_id_foreign`
+                    FOREIGN KEY (`company_id`) REFERENCES `users`(`id`)
+                    ON DELETE CASCADE'
+                    );
+
+                    DB::statement(
+                        'ALTER TABLE `van_products`
+                    DROP FOREIGN KEY `van_products_van_id_foreign`'
+                    );
+
+                    DB::statement(
+                        'ALTER TABLE `van_products`
+                    MODIFY COLUMN `van_id` BIGINT UNSIGNED NOT NULL AFTER `company_id`,
+                    ADD CONSTRAINT `van_products_van_id_foreign`
+                    FOREIGN KEY (`van_id`) REFERENCES `vans`(`id`)
+                    ON DELETE CASCADE'
+                    );
+
+                    DB::statement(
+                        "ALTER TABLE `van_products`
+                    MODIFY COLUMN `featured` TINYINT NOT NULL DEFAULT 0 COMMENT 'Only IsFeaturedEnum values are allowed'"
+                    );
                 });
             }
         } catch (Exception $error) {

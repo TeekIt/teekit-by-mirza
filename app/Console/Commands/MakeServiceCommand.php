@@ -17,9 +17,9 @@ class MakeServiceCommand extends Command
      */
     protected $signature = 'make:service {name}';
 
-    protected $successCode = Command::SUCCESS;
+    protected int $successCode = Command::SUCCESS;
 
-    protected $failureCode = Command::FAILURE;
+    protected int $failureCode = Command::FAILURE;
 
     /**
      * The console command description.
@@ -31,9 +31,9 @@ class MakeServiceCommand extends Command
     /**
      * Command specific code
      */
-    protected $namespace = 'App\\Services';
+    protected string $namespace = 'App\\Services';
 
-    protected $className;
+    protected string $className;
 
     public function getClassStub(): string
     {

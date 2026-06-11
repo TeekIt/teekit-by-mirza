@@ -220,7 +220,7 @@ class Van extends Authenticatable implements JWTSubject
 
     public static function getTotalStockByCompanyId(int $companyId): int
     {
-        return self::where('company_id', '=', $companyId)
+        return self::where('vans.company_id', '=', $companyId)
             ->join('van_products', 'vans.id', '=', 'van_products.van_id')
             ->sum('van_products.quantity');
     }

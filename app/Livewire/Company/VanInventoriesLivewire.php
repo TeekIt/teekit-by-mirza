@@ -73,7 +73,7 @@ class VanInventoriesLivewire extends Component
 
     public int $threshold = 0;
 
-    public $vanId = 0;
+    public ?int $vanId = null;
 
     public int $companyId = 0;
 
@@ -118,7 +118,6 @@ class VanInventoriesLivewire extends Component
     */
     public function mount(): void
     {
-        // $this->vanId = request()->query('vanId');
         $this->companyId = User::getAuthUser()->id;
     }
 
@@ -169,72 +168,13 @@ class VanInventoriesLivewire extends Component
         ]);
     }
 
-    public function updateVanInventory(): void
-    {
-        $vanProduct = VanProduct::with('van')->findOrFail($this->inventoryId);
-
-        // $this->authorize('update', $vanProduct);
-
-        $this->validate();
-
-        try {
-            if ($this->featureImgUpload) {
-                $uploadedImage = ImageServices::uploadLivewireImg($this->featureImgUpload, $this->vanId);
-                if (! $uploadedImage) {
-                    throw new Exception(config('constants.INTERNAL_SERVER_ERROR'));
-                }
-
-                $this->featureImg = $uploadedImage;
-            }
-
-            $updated = $vanProduct->update([
-                'seller_id' => $this->sellerId,
-                'category_id' => $this->categoryId,
-                'van_id' => $this->productVanId,
-                'product_name' => $this->productName,
-                'sku' => $this->sku,
-                'price' => $this->price,
-                'featured' => $this->featured,
-                'discount_percentage' => $this->discountPercentage,
-                'weight' => $this->weight,
-                'brand' => $this->brand,
-                'size' => $this->size,
-                'status' => $this->productStatus,
-                'contact' => $this->contact,
-                'colors' => $this->colors,
-                'bike' => $this->bike,
-                'car' => $this->car,
-                'van' => $this->van,
-                'feature_img' => $this->featureImg,
-                'height' => $this->height,
-                'width' => $this->width,
-                'length' => $this->length,
-                'job_reference' => $this->jobReference,
-                'quantity' => $this->quantity,
-                'min_threshold' => $this->threshold,
-            ]);
-
-            sleep(1);
-            $this->resetComponent();
-            $this->dispatch('close-modal', ['id' => 'editVanInventoryModal']);
-
-            if ($updated) {
-                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
-            } else {
-                session()->flash('error', config('constants.UPDATION_FAILED'));
-            }
-        } catch (Exception $error) {
-            report($error);
-            session()->flash('error', $error->getMessage());
-        }
-    }
-
     public function render(): View
     {
         $data = VanProduct::getAll(
             orderBy: OrderByEnum::DESC,
             search: $this->search,
-            vanId: (int) $this->vanId
+            vanId: (int) $this->vanId,
+            companyId: $this->companyId,
         );
 
         $vans = Van::getByCompanyId(
