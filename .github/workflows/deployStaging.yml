@@ -35,9 +35,17 @@ jobs:
 
             # Other commands
             composer dump-autoload
-            php artisan run:raw-queries
-            php artisan queue:restart
-            php artisan scout:sync-index-settings
+            
+            # docker exec -it teekit-by-mirza php artisan run:raw-queries
+
+            docker exec -i teekit-by-mirza sh -c "php artisan run:raw-queries && 
+            php artisan queue:restart && 
+            php artisan scout:sync-index-settings"
+
+
+            # php artisan run:raw-queries
+            # php artisan queue:restart
+            # php artisan scout:sync-index-settings
             # php artisan scout:flush "App\Products"
             # php artisan scout:import "App\Products"
             
