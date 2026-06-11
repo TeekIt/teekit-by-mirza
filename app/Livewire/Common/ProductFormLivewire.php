@@ -277,6 +277,7 @@ class ProductFormLivewire extends Component
 
             if ($this->isAuthUserCompany) {
                 $data['seller_id'] = null;
+                $data['company_id'] = $this->authUserId;
                 $data['van_id'] = $this->vanId;
                 $data['quantity'] = $this->qty;
                 $data['min_threshold'] = $this->minThreshold;
