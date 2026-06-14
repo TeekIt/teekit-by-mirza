@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\IsFeaturedEnum;
 use App\Enums\OrderByEnum;
 use App\Enums\VanProductStatusEnum;
+use App\Enums\VanProductTypeEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -141,10 +143,11 @@ class VanProduct extends Model
         return self::create($data);
     }
 
-    public static function addBulkFromProductsTable(Collection $products, Collection $quantitiesMap, int $vanId): bool
+    public static function addBulkFromProductsTable(Collection $products, Collection $quantitiesMap, int $companyId, int $vanId): bool
     {
         $now = now();
         $vanProducts = $products->map(fn($product) => [
+            'company_id' => $companyId,
             'seller_id' => $product->seller_id,
             'category_id' => $product->category_id,
             'van_id' => $vanId,
@@ -152,7 +155,7 @@ class VanProduct extends Model
             'sku' => $product->sku,
             'price' => $product->price,
             'quantity' => $quantitiesMap[$product->id]['qty'],
-            'featured' => 0,
+            'featured' => IsFeaturedEnum::NO->value,
             'discount_percentage' => $product->discount_percentage,
             'weight' => $product->weight,
             'brand' => $product->brand,
@@ -166,6 +169,7 @@ class VanProduct extends Model
             'height' => $product->height,
             'width' => $product->width,
             'length' => $product->length,
+            'type' => VanProductTypeEnum::PAY_AS_YOU_GO->value,
             'created_at' => $now,
         ])->toArray();
 

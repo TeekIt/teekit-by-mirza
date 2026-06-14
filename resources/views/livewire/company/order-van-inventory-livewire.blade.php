@@ -18,19 +18,6 @@
                                 {{ $isPayAsYouGoRoute ? 'Order Pay As You Go Van Inventory' : 'Order Van Inventory' }}
                             </h4>
                         </div>
-
-                        <div>
-                            <button type="button"
-                                class="btn p-0 border-0 bg-transparent shadow-none me-4 mb-4 z-3 d-inline-flex align-items-center justify-content-center custom-cart-icon position-relative"
-                                data-bs-toggle="offcanvas" data-bs-target="#cartDrawer" aria-controls="cartDrawer"
-                                aria-label="Open cart drawer">
-                                <i class="fas fa-cart-arrow-down text-site-primary fa-3x "></i>
-                                <span
-                                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill site-primary-yellow-bg text-dark">
-                                    {{ $cartItemsCount }}
-                                </span>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -51,6 +38,11 @@
                                         <option value="{{ $singleIndex->id }}">{{ $singleIndex->number_plate }}</option>
                                     @endforeach
                                 </select>
+                                <small class="text-danger">
+                                    @error('vanId')
+                                        {{ $message }}
+                                    @enderror
+                                </small>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -111,7 +103,8 @@
                                     <select class="form-control py-2" wire:model.live="categoryId">
                                         <option value="">Filter by category</option>
                                         @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->category_name }}</option>
+                                            <option value="{{ $category->id }}">{{ $category->category_name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -201,8 +194,20 @@
         </div>
     </div>
 
-    {{-- Cart Drawer --}}
     <div>
+        {{-- Cart Icon --}}
+        <button type="button"
+            class="btn p-0 border-0 bg-transparent shadow-none z-3 d-inline-flex align-items-center justify-content-center custom-cart-icon position-fixed bottom-0 end-0 me-5 mb-4"
+            data-bs-toggle="offcanvas" data-bs-target="#cartDrawer" aria-controls="cartDrawer"
+            aria-label="Open cart drawer">
+            <i class="fas fa-cart-arrow-down text-site-primary fa-2x d-sm-none"></i>
+            <i class="fas fa-cart-arrow-down text-site-primary fa-3x d-none d-sm-inline-block"></i>
+            <span
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill site-primary-yellow-bg text-dark">
+                {{ $cartItemsCount }}
+            </span>
+        </button>
+        {{-- Cart Drawer --}}
         <div wire:ignore.self class="offcanvas offcanvas-end bg-white" tabindex="-1" id="cartDrawer"
             aria-labelledby="cartDrawerLabel" data-bs-backdrop="false" data-bs-scroll="true">
             <div class="offcanvas-header">

@@ -45,16 +45,12 @@ class UserFactory extends Factory
                 'name' => 'Test Company',
                 'email' => 'company@test.com',
                 'password' => Hash::make('password123'),
-
                 'role_id' => UserRoleEnum::COMPANY->value,
                 'business_name' => 'Test Company Ltd',
-
                 'country' => 'United Kingdom',
                 'state' => 'England',
                 'city' => 'London',
-
                 'user_img' => '365_Tool station_62f621c9edc33.png',
-
                 'is_active' => 1,
             ];
         });
