@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Admin;
+namespace App\Livewire\Company;
 
 use App\Actions\Van\ListVanAction;
 use App\Enums\OrderByEnum;
@@ -25,29 +25,34 @@ class VansLivewire extends Component
 
     public int $vanId = 0;
 
-    public $userName;
+    public ?string $userName = null;
 
-    public $oldUserName;
+    public ?string $oldUserName = null;
 
-    public $operative;
+    public ?string $operative = null;
 
-    public $numberPlate;
+    public ?string $numberPlate = null;
 
-    public $oldNumberPlate;
+    public ?string $oldNumberPlate = null;
 
-    public $payload;
+    public ?int $payload = null;
 
-    public $width;
+    public ?float $width = null;
 
-    public $height;
+    public ?float $height = null;
 
-    public $length;
+    public ?float $length = null;
 
-    public $password;
+    public ?string $password = null;
 
-    public $excelFile;
+    public mixed $excelFile = null;
 
-    public $search = '';
+    public string $search = '';
+
+    /*
+    * Livewire Built-in Properties
+    */
+    protected $paginationTheme = 'bootstrap';
 
     protected function rules(): array
     {
@@ -89,6 +94,11 @@ class VansLivewire extends Component
             'excelFile',
             'search',
         ]);
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
     }
 
     /*
@@ -236,7 +246,7 @@ class VansLivewire extends Component
             'search' => $this->search,
             'companyId' => $this->companyId
         ]);
-
-        return view('livewire.admin.vans-livewire', compact('data'));
+        
+        return view('livewire.company.vans-livewire', compact('data'));
     }
 }
