@@ -127,6 +127,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Qty::class, 'seller_id');
     }
 
+    public function vans(): HasMany
+    {
+        return $this->hasMany(Van::class, 'company_id');
+    }
+
     /**
      * Validators
      */

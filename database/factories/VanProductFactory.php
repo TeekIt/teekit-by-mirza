@@ -24,10 +24,7 @@ class VanProductFactory extends Factory
     {
         return [
             'seller_id' => User::inRandomOrder()->where('role_id', '=', UserRoleEnum::SELLER->value)->first()->id,
-            // 'company_id' => User::inRandomOrder()->where('role_id', '=', UserRoleEnum::COMPANY->value)->first()->id,
-            'company_id' => 767,
             'category_id' => Categories::inRandomOrder()->first()->id,
-            'van_id' => 1,
 
             'product_name' => $this->faker->word(),
             'sku' => strtoupper($this->faker->bothify('SKU-###')),
@@ -59,8 +56,26 @@ class VanProductFactory extends Factory
 
             'quantity' => $this->faker->numberBetween(0, 100),
             'min_threshold' => 5,
-            // 'type' => $this->faker->randomElement(VanProductTypeEnum::cases())->value,
-            'type' => VanProductTypeEnum::PAY_AS_YOU_GO->value,
+            'type' => $this->faker->randomElement(VanProductTypeEnum::cases())->value,
         ];
+    }
+
+    public function forCompany(User $user): static
+    {
+        return $this->state(function (array $attributes) use ($user) {
+            return [
+                'company_id' => $user->id,
+                'van_id' => $user->vans()->first()->id,
+            ];
+        });
+    }
+
+    public function payAsYouGo(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => VanProductTypeEnum::PAY_AS_YOU_GO->value,
+            ];
+        });
     }
 }

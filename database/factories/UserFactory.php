@@ -37,16 +37,16 @@ class UserFactory extends Factory
             ];
         });
     }
+    
     public function company(): static
     {
         return $this->state(function (array $attributes) {
             return [
-                'id' => 767,
-                'name' => 'Test Company',
-                'email' => 'company@test.com',
-                'password' => Hash::make('password123'),
+                'name' => 'Test Company User',
+                'email' => $this->faker->companyEmail(),
+                'password' => Hash::make('company12345678'),
                 'role_id' => UserRoleEnum::COMPANY->value,
-                'business_name' => 'Test Company Ltd',
+                'business_name' => $this->faker->company(),
                 'country' => 'United Kingdom',
                 'state' => 'England',
                 'city' => 'London',

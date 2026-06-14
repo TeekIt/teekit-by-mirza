@@ -20,8 +20,7 @@ class VanFactory extends Factory
     public function definition(): array
     {
         return [
-            'company_id' => User::inRandomOrder()->where('role_id', '=', UserRoleEnum::SUPERADMIN->value)->first()->id,
-            // 'company_id' => User::inRandomOrder()->first()->id,
+            'company_id' => User::inRandomOrder()->where('role_id', '=', UserRoleEnum::COMPANY->value)->first()->id,
             'user_name' => $this->faker->unique()->bothify('van_#####'),
             'operative' => $this->faker->name(),
             'number_plate' => $this->faker->unique()->bothify('??##???'),
@@ -31,5 +30,12 @@ class VanFactory extends Factory
             'length' => $this->faker->randomFloat(2, 1, 20),
             'password' => Hash::make('van12345678'),
         ];
+    }
+
+    public function forCompany(User $company): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'company_id' => $company->id,
+        ]);
     }
 }

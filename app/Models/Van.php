@@ -201,9 +201,9 @@ class Van extends Authenticatable implements JWTSubject
             ->when($search, function ($query) use ($search) {
                 $search = trim(mb_strtolower($search));
                 $query->where(function ($query) use ($search) {
-                    $query->where('user_name', 'like', '%' . $search . '%')
-                        ->orWhere('operative', 'like', '%' . $search . '%')
-                        ->orWhere('number_plate', 'like', '%' . $search . '%');
+                    $query->where('user_name', 'like', "%{$search}%")
+                        ->orWhere('operative', 'like', "%{$search}%")
+                        ->orWhere('number_plate', 'like', "%{$search}%");
                 });
             })
             ->when($companyId, function ($query) use ($companyId) {
