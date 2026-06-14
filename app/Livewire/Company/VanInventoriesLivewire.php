@@ -59,7 +59,7 @@ class VanInventoriesLivewire extends Component
 
     public string $featureImg = '';
 
-    public $featureImgUpload = null;
+    public mixed $featureImgUpload = null;
 
     public ?float $height = null;
 
@@ -121,12 +121,9 @@ class VanInventoriesLivewire extends Component
         $this->companyId = User::getAuthUser()->id;
     }
 
-    /**
-     * Reset to the first page
-     */
     public function updatingSearch(): void
     {
-        /* No function should be kept blank. */
+        $this->resetPage();
     }
 
     public function updatingVanId(): void

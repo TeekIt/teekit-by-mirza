@@ -74,6 +74,10 @@ class VansLivewire extends Component
         $this->companyId = User::getAuthUser()->id;
     }
 
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
     /*
      * Custom Helpers
      */
@@ -94,11 +98,6 @@ class VansLivewire extends Component
             'excelFile',
             'search',
         ]);
-    }
-
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
     }
 
     /*
