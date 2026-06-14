@@ -22,7 +22,7 @@ use App\Livewire\Admin\CustomersLivewire;
 use App\Livewire\Admin\ParentSellersLivewire;
 use App\Livewire\Admin\ReferralCodesLivewire;
 use App\Livewire\Company\VanInventoriesLivewire;
-use App\Livewire\Admin\VansLivewire;
+use App\Livewire\Company\VansLivewire;
 use App\Livewire\Common\OrdersLivewire;
 use App\Livewire\Common\ProductFormLivewire;
 use App\Livewire\Company\CompanyDashboardLivewire;
