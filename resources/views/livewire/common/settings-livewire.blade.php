@@ -23,7 +23,8 @@
                             <div class="p-3">
                                 <div class="col-md-12 my-2">
                                     <label for="full_address">Address 1</label>
-                                    <input type="text" class="form-control" wire:model="fullAddress" id="modalFullAddress" />
+                                    <input type="text" class="form-control" wire:model="fullAddress"
+                                        id="modalFullAddress" />
                                     {{-- <input type="text" class="form-control" id="modalFullAddress" /> --}}
                                     <small class="text-danger">
                                         @error('fullAddress')
@@ -33,11 +34,14 @@
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_unit_address">Address 2 (optional)</label>
-                                    <input type="text" class="form-control" placeholder="Apartment, unit, suite, or floor#" wire:model="unitAddress" id="modal_unit_address" />
+                                    <input type="text" class="form-control"
+                                        placeholder="Apartment, unit, suite, or floor#" wire:model="unitAddress"
+                                        id="modal_unit_address" />
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_postcode">Postcode</label>
-                                    <input type="text" class="form-control" wire:model="postcode" id="modal_postcode" />
+                                    <input type="text" class="form-control" wire:model="postcode"
+                                        id="modal_postcode" />
                                     <small class="text-danger">
                                         @error('postcode')
                                             {{ $message }}
@@ -46,7 +50,8 @@
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_country">Country</label>
-                                    <input type="text" class="form-control" wire:model="country" id="modal_country" />
+                                    <input type="text" class="form-control" wire:model="country"
+                                        id="modal_country" />
                                     <small class="text-danger">
                                         @error('country')
                                             {{ $message }}
@@ -205,7 +210,9 @@
                                 <div class="col-12 mb-3">
                                     <label>Business Phone</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" wire:model="businessPhone"
+                                        <input type="text" class="form-control country-code"
+                                            wire:model.live="countryCode" disabled>
+                                        <input type="number" class="form-control" wire:model="businessPhone"
                                             placeholder="Enter your business number">
                                         <button type="button" class="btn btn-site-primary"
                                             wire:click="updateBusinessPhone" wire:loading.class="btn-dark"
@@ -227,7 +234,15 @@
                                 <div class="col-12 mb-3">
                                     <label>Personal Phone</label>
                                     <div class="input-group">
-                                        <input type="tel" class="form-control" wire:model="phone"
+                                        <select class="form-control country-code" wire:model.live="countryCode">
+                                            <option value="+44" @if (($countryCode ?? '') === '+44') selected @endif>
+                                                +44
+                                            </option>
+                                            <option value="+92" @if (($countryCode ?? '') === '+92') selected @endif>
+                                                +92
+                                            </option>
+                                        </select>
+                                        <input type="number" class="form-control" wire:model="phone"
                                             placeholder="Enter your phone number">
                                         <button type="button" class="btn btn-site-primary" wire:click="updatePhone"
                                             wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
@@ -652,6 +667,10 @@
     </div>
 
     <style>
+        .country-code {
+            max-width: 64px;
+        }
+
         .cstm-edit-btn {
             background: #ffcf42;
             color: black;

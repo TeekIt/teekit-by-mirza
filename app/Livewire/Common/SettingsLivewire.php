@@ -18,10 +18,13 @@ class SettingsLivewire extends Component
 
     public ?string $name = null;
 
-    // $l_name,
+    public ?string $lName = null;
+
     public ?string $email = null;
 
     public ?string $businessName = null;
+
+    public ?string $countryCode = null;
 
     public ?string $businessPhone = null;
 
@@ -47,14 +50,14 @@ class SettingsLivewire extends Component
 
     public ?string $city = null;
 
-    public ?float $lat = 0.0;
+    public ?float $lat = null;
 
-    public ?float $lon = 0.0;
+    public ?float $lon = null;
 
     /*
      * Lifecycle Hooks
      */
-    public function mount()
+    public function mount(): void
     {
         $this->userId = User::getAuthUser()->id;
     }
@@ -62,7 +65,7 @@ class SettingsLivewire extends Component
     /*
     * Helpers
     */
-    public function resetComponent()
+    public function resetComponent(): void
     {
         $this->resetValidation();
 
@@ -71,6 +74,7 @@ class SettingsLivewire extends Component
             'email',
             'businessName',
             'businessPhone',
+            'countryCode',
             'phone',
             'oldPassword',
             'newPassword',
@@ -87,7 +91,7 @@ class SettingsLivewire extends Component
         ]);
     }
 
-    public function setUserInfo()
+    public function setUserInfo(): User
     {
         $user = User::find($this->userId);
         $this->name = $user->name;
@@ -95,6 +99,7 @@ class SettingsLivewire extends Component
         $this->email = $user->email;
         $this->businessName = $user->business_name;
         $this->businessPhone = $user->business_phone;
+        $this->countryCode = $user->country_code;
         $this->phone = $user->phone;
         $this->userImg = $user->user_img;
         $this->fullAddress = $user->full_address;
@@ -112,7 +117,7 @@ class SettingsLivewire extends Component
     /*
     * CRUD Methods
     */
-    public function updateImage()
+    public function updateImage(): void
     {
         $this->validate([
             'imageToUpload' => 'required|image|max:1024',
@@ -154,7 +159,7 @@ class SettingsLivewire extends Component
     //     CsvFileServices::exportAsCsv($products, $this->userId);
     // }
 
-    public function passwordUpdate()
+    public function passwordUpdate(): void
     {
         $this->validate([
             'oldPassword' => 'required|min:8',
@@ -182,7 +187,7 @@ class SettingsLivewire extends Component
         }
     }
 
-    public function updateName()
+    public function updateName(): void
     {
         $this->validate([
             'name' => 'required|string|max:80',
@@ -206,7 +211,7 @@ class SettingsLivewire extends Component
         }
     }
 
-    public function updateBusinessName()
+    public function updateBusinessName(): void
     {
         $this->validate([
             'businessName' => 'required|string|max:80|unique:users,business_name',
@@ -230,7 +235,7 @@ class SettingsLivewire extends Component
         }
     }
 
-    public function updateEmail()
+    public function updateEmail(): void
     {
         $this->validate([
             'email' => 'required|email|max:80|unique:users',
@@ -254,7 +259,7 @@ class SettingsLivewire extends Component
         }
     }
 
-    public function updateBusinessPhone()
+    public function updateBusinessPhone(): void
     {
         $this->validate([
             'businessPhone' => 'required|string|min:10|max:10',
@@ -278,7 +283,7 @@ class SettingsLivewire extends Component
         }
     }
 
-    public function updatePhone()
+    public function updatePhone(): void
     {
         $this->validate([
             'phone' => 'required|string|min:10|max:10',
