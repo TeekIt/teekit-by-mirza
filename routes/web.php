@@ -29,7 +29,7 @@ use App\Livewire\Company\CompanyDashboardLivewire;
 use App\Livewire\Company\OrderVanInventoryLivewire;
 use App\Livewire\Company\StockValueByVanLivewire;
 use App\Livewire\Company\StockUsageLivewire;
-use App\Livewire\Seller\GeneralSettingsLivewire;
+use App\Livewire\Common\SettingsLivewire;
 use App\Livewire\Seller\InventoryLivewire;
 use App\Livewire\Seller\OrdersFromOtherSellersLivewire;
 use App\Livewire\Seller\RequestDeliveryFormLivewire;
@@ -138,7 +138,7 @@ Route::middleware('transaction.wrapper')->group(function () {
         });
 
         Route::prefix('settings')->group(function () {
-            Route::get('/general', GeneralSettingsLivewire::class)->name('seller.settings');
+            Route::get('/general', SettingsLivewire::class)->name('seller.settings');
 
             Route::controller(SellerController::class)->group(function () {
                 // Route::post('/update-location', 'updateLocation')->name('seller.settings.update.location');
@@ -176,7 +176,7 @@ Route::middleware('transaction.wrapper')->group(function () {
 
             Route::get('/dashboard', CompanyDashboardLivewire::class)->name('vans.company.dashboard');
             Route::get('/orders', OrdersLivewire::class)->name('vans.company.orders');
-            Route::get('/settings', GeneralSettingsLivewire::class)->name('vans.company.settings');
+            Route::get('/settings', SettingsLivewire::class)->name('vans.company.settings');
             Route::get('/stock/value-by-van', StockValueByVanLivewire::class)->name('company.stock.value.by.van');
             Route::get('/stock/usage', StockUsageLivewire::class)->name('company.stock.usage');
         });

@@ -7,39 +7,37 @@
         <x-session-messages />
 
         {{-- ************************************ Google Map Modal ************************************ --}}
-        <div wire:ignore.self class="modal hide" id="mapModal">
+        <div wire:ignore.self class="modal hide" id="googleMapModal">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <!-- Modal Header -->
                     <div class="modal-header">
                         <h4 class="modal-title">Add Location</h4>
-                        <button type="button" id="closeLocationModel" class="close" data-bs-dismiss="modal">&times;</button>
+                        <button type="button" id="closeLocationModel" class="close"
+                            data-bs-dismiss="modal">&times;</button>
                     </div>
                     <!-- Modal body -->
                     <div class="modal-body">
-                        <form action="{{ route('seller.settings.update.location') }}" method="POST">
+                        <form wire:submit="updateLocation">
                             {{ csrf_field() }}
                             <div class="p-3">
                                 <div class="col-md-12 my-2">
                                     <label for="full_address">Address 1</label>
-                                    <input type="text" class="form-control" name="full_address" id="modal_address"
-                                        value="{{ Str::limit($user->full_address, 50) }}" />
+                                    <input type="text" class="form-control" wire:model="fullAddress" id="modalFullAddress" />
+                                    {{-- <input type="text" class="form-control" id="modalFullAddress" /> --}}
                                     <small class="text-danger">
-                                        @error('full_address')
+                                        @error('fullAddress')
                                             {{ $message }}
                                         @enderror
                                     </small>
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_unit_address">Address 2 (optional)</label>
-                                    <input type="text" class="form-control"
-                                        placeholder="Apartment, unit, suite, or floor#" name="unit_address"
-                                        id="modal_unit_address" value="{{ $user->unit_address }}">
+                                    <input type="text" class="form-control" placeholder="Apartment, unit, suite, or floor#" wire:model="unitAddress" id="modal_unit_address" />
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_postcode">Postcode</label>
-                                    <input type="text" class="form-control" name="postcode" id="modal_postcode"
-                                        value="{{ $user->postcode }}" />
+                                    <input type="text" class="form-control" wire:model="postcode" id="modal_postcode" />
                                     <small class="text-danger">
                                         @error('postcode')
                                             {{ $message }}
@@ -48,8 +46,7 @@
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_country">Country</label>
-                                    <input type="text" class="form-control" name="country" id="modal_country"
-                                        value="{{ $user->country }}" />
+                                    <input type="text" class="form-control" wire:model="country" id="modal_country" />
                                     <small class="text-danger">
                                         @error('country')
                                             {{ $message }}
@@ -58,8 +55,7 @@
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_state">State/Province</label>
-                                    <input type="text" class="form-control" name="state" id="modal_state"
-                                        value="{{ $user->state }}" />
+                                    <input type="text" class="form-control" wire:model="state" id="modal_state" />
                                     <small class="text-danger">
                                         @error('state')
                                             {{ $message }}
@@ -68,8 +64,7 @@
                                 </div>
                                 <div class="col-md-12 my-2">
                                     <label for="modal_city">City</label>
-                                    <input type="text" class="form-control" name="city" id="modal_city"
-                                        value="{{ $user->city }}" />
+                                    <input type="text" class="form-control" wire:model="city" id="modal_city" />
                                     <small class="text-danger">
                                         @error('city')
                                             {{ $message }}
@@ -77,14 +72,16 @@
                                     </small>
                                 </div>
                                 {{-- Google Maps --}}
-                                <div class="col-md-12 my-2" wire:ignore>
+                                {{-- <div class="col-md-12 my-2" wire:ignore>
+                                    <div style="min-height: 300px;" id="map-canvas"></div>
+                                </div> --}}
+                                <div class="col-md-12 my-2">
                                     <div style="min-height: 300px;" id="map-canvas"></div>
                                 </div>
                                 <div class="row my-2">
                                     <div class="col-md-6">
                                         <label for="modal_lat">Lat</label>
-                                        <input type="text" class="form-control" name="lat" id="modal_lat"
-                                            value="{{ $user->lat }}" />
+                                        <input type="text" class="form-control" wire:model="lat" id="modal_lat" />
                                         <small class="text-danger">
                                             @error('lat')
                                                 {{ $message }}
@@ -93,8 +90,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label for="modal_long">Long</label>
-                                        <input type="text" class="form-control" name="lon" id="modal_long"
-                                            value="{{ $user->lon }}" />
+                                        <input type="text" class="form-control" wire:model="lon" id="modal_long" />
                                         <small class="text-danger">
                                             @error('lon')
                                                 {{ $message }}
@@ -102,8 +98,16 @@
                                         </small>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-site-primary mt-3 w-100">
-                                    Update
+                                <button type="submit" class="btn btn-site-primary mt-3 w-100"
+                                    wire:target="updateLocation" wire:loading.class="btn-dark"
+                                    wire:loading.class.remove="btn-site-primary" wire:loading.attr="disabled"
+                                    title="Update Location">
+                                    <span wire:target="updateLocation" wire:loading.remove>
+                                        Update
+                                    </span>
+                                    <span wire:target="updateLocation" wire:loading>
+                                        <span class="spinner-border spinner-border-sm text-light" role="status"></span>
+                                    </span>
                                 </button>
                             </div>
                         </form>
@@ -158,7 +162,7 @@
                                 <div class="col-12 mb-3">
                                     <label>Business Name</label>
                                     <div class="input-group">
-                                        <input type="text" wire:model="business_name" class="form-control"
+                                        <input type="text" wire:model="businessName" class="form-control"
                                             placeholder="Enter your business name">
                                         <button type="button" class="btn btn-site-primary"
                                             wire:click="updateBusinessName" wire:loading.class="btn-dark"
@@ -172,7 +176,7 @@
                                         </button>
                                     </div>
                                     <small class="text-danger">
-                                        @error('business_name')
+                                        @error('businessName')
                                             {{ $message }}
                                         @enderror
                                     </small>
@@ -201,7 +205,7 @@
                                 <div class="col-12 mb-3">
                                     <label>Business Phone</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" wire:model="business_phone"
+                                        <input type="text" class="form-control" wire:model="businessPhone"
                                             placeholder="Enter your business number">
                                         <button type="button" class="btn btn-site-primary"
                                             wire:click="updateBusinessPhone" wire:loading.class="btn-dark"
@@ -215,7 +219,7 @@
                                         </button>
                                     </div>
                                     <small class="text-danger">
-                                        @error('business_phone')
+                                        @error('businessPhone')
                                             {{ $message }}
                                         @enderror
                                     </small>
@@ -282,11 +286,12 @@
                                                             alt="Store image not uploaded 🥺">
                                                         <div>
                                                             <input type="file" class="my-3"
-                                                                wire:model="image_to_upload" accept="image/*">
-                                                            @error('image_to_upload')
+                                                                wire:model="imageToUpload" accept="image/*">
+                                                            @error('imageToUpload')
                                                                 <div class="text-danger small">{{ $message }}</div>
                                                             @enderror
-                                                            <div wire:loading wire:target="image_to_upload" class="small text-muted">
+                                                            <div wire:loading wire:target="imageToUpload"
+                                                                class="small text-muted">
                                                                 Uploading...
                                                             </div>
                                                             <div class="col-12 my-1">
@@ -297,10 +302,11 @@
                                                                         wire:loading.class="btn-dark"
                                                                         wire:loading.class.remove="cstm-edit-btn"
                                                                         wire:loading.attr="disabled"
-                                                                        wire:target="updateImage,image_to_upload">
+                                                                        wire:target="updateImage,imageToUpload">
                                                                         <span wire:loading.remove
-                                                                            wire:target="updateImage,image_to_upload">Upload</span>
-                                                                        <span wire:loading wire:target="updateImage,image_to_upload">
+                                                                            wire:target="updateImage,imageToUpload">Upload</span>
+                                                                        <span wire:loading
+                                                                            wire:target="updateImage,imageToUpload">
                                                                             <span
                                                                                 class="spinner-border spinner-border-sm text-light"
                                                                                 role="status" aria-hidden="true">
@@ -433,7 +439,7 @@
                                                                         <button type="button"
                                                                             class="col-12 px-5 py-2 border-0 rounded-pill cstm-edit-btn"
                                                                             data-bs-toggle="modal"
-                                                                            data-bs-target="#mapModal">
+                                                                            data-bs-target="#googleMapModal">
                                                                             Edit Location
                                                                         </button>
                                                                     </div>
@@ -452,17 +458,25 @@
                                                                     <div class="form-group">
                                                                         <input type="password"
                                                                             class="form-control w-100"
-                                                                            wire:model="old_password"
+                                                                            wire:model="oldPassword"
                                                                             placeholder="Old Password" required
-                                                                            wire:model="old_password"
                                                                             minlength="8">
+                                                                        <small class="text-danger">
+                                                                            @error('oldPassword')
+                                                                                {{ $message }}
+                                                                            @enderror
+                                                                        </small>
 
                                                                         <input type="password"
                                                                             class="form-control w-100"
-                                                                            wire:model="new_password"
+                                                                            wire:model="newPassword"
                                                                             placeholder="New Password" required
-                                                                            wire:model="new_password"
                                                                             minlength="8">
+                                                                        <small class="text-danger">
+                                                                            @error('newPassword')
+                                                                                {{ $message }}
+                                                                            @enderror
+                                                                        </small>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -652,5 +666,38 @@
             border: 1px solid red;
         }
     </style>
+
+    @script
+        <script>
+            /* Listen the 'location-updated' event, dispatched from updateLivewireProperties().
+             * This is needed because the Google Map Modal has wire:ignore.self, which prevents
+             * Livewire from morphing (updating) child input elements during re-renders. */
+            $wire.on('location-updated', (event) => {
+                const data = event[0];
+
+                const setVal = (id, value) => {
+                    const element = document.getElementById(id);
+                    if (element) element.value = value;
+                };
+                /* Update Livewire's client-side state so properties are
+                 * sent correctly on the next wire:submit (form submission). */
+                $wire.fullAddress = data.fullAddress;
+                $wire.postcode = data.postcode;
+                $wire.country = data.country;
+                $wire.state = data.state;
+                $wire.city = data.city;
+                $wire.lat = data.lat;
+                $wire.lon = data.lon;
+                /* Update modal input fields, So the data is displayed in the modal */
+                setVal('modalFullAddress', data.fullAddress);
+                setVal('modal_postcode', data.postcode);
+                setVal('modal_country', data.country);
+                setVal('modal_state', data.state);
+                setVal('modal_city', data.city);
+                setVal('modal_lat', data.lat);
+                setVal('modal_long', data.lon);
+            });
+        </script>
+    @endscript
 
 </div>
