@@ -138,10 +138,10 @@ Route::middleware('transaction.wrapper')->group(function () {
         });
 
         Route::prefix('settings')->group(function () {
-            Route::get('/general', GeneralSettingsLivewire::class)->name('seller.settings.general');
+            Route::get('/general', GeneralSettingsLivewire::class)->name('seller.settings');
 
             Route::controller(SellerController::class)->group(function () {
-                Route::post('/update-location', 'updateStoreLocation')->name('seller.settings.update.location');
+                // Route::post('/update-location', 'updateLocation')->name('seller.settings.update.location');
                 Route::post('/update-required-info', 'updateSellerRequiredInfo')->name('seller.update.required.info');
             });
         });
