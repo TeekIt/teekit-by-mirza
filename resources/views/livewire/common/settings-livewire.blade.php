@@ -165,6 +165,56 @@
                                     </small>
                                 </div>
                                 <div class="col-12 mb-3">
+                                    <label>Email</label>
+                                    <div class="input-group">
+                                        <input type="email" class="form-control" wire:model="email"
+                                            placeholder="Enter your email address" disabled>
+                                        {{-- <button type="button" class="btn btn-site-primary" wire:click="updateEmail"
+                                            wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
+                                            wire:loading.attr="disabled" wire:target="updateEmail">
+                                            <span wire:loading.remove wire:target="updateEmail">Update</span>
+                                            <span wire:loading wire:target="updateEmail">
+                                                <span class="spinner-border spinner-border-sm text-light"
+                                                    role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button> --}}
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('email')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label>Personal Phone</label>
+                                    <div class="input-group">
+                                        <select class="form-control country-code" wire:model.live="countryCode">
+                                            @foreach (['+44', '+92'] as $singleIndex)
+                                                <option value="{{ $singleIndex }}"
+                                                    @if (($countryCode ?? '') === $singleIndex) selected @endif>
+                                                    {{ $singleIndex }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <input type="number" class="form-control" wire:model="phone"
+                                            placeholder="Enter your phone number">
+                                        <button type="button" class="btn btn-site-primary" wire:click="updatePhone"
+                                            wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
+                                            wire:loading.attr="disabled" wire:target="updatePhone">
+                                            <span wire:loading.remove wire:target="updatePhone">Update</span>
+                                            <span wire:loading wire:target="updatePhone">
+                                                <span class="spinner-border spinner-border-sm text-light"
+                                                    role="status" aria-hidden="true"></span>
+                                            </span>
+                                        </button>
+                                    </div>
+                                    <small class="text-danger">
+                                        @error('phone')
+                                            {{ $message }}
+                                        @enderror
+                                    </small>
+                                </div>
+                                <div class="col-12 mb-3">
                                     <label>Business Name</label>
                                     <div class="input-group">
                                         <input type="text" wire:model="businessName" class="form-control"
@@ -187,31 +237,10 @@
                                     </small>
                                 </div>
                                 <div class="col-12 mb-3">
-                                    <label>Email</label>
-                                    <div class="input-group">
-                                        <input type="email" class="form-control" wire:model="email"
-                                            placeholder="Enter your email address">
-                                        <button type="button" class="btn btn-site-primary" wire:click="updateEmail"
-                                            wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
-                                            wire:loading.attr="disabled" wire:target="updateEmail">
-                                            <span wire:loading.remove wire:target="updateEmail">Update</span>
-                                            <span wire:loading wire:target="updateEmail">
-                                                <span class="spinner-border spinner-border-sm text-light"
-                                                    role="status" aria-hidden="true"></span>
-                                            </span>
-                                        </button>
-                                    </div>
-                                    <small class="text-danger">
-                                        @error('email')
-                                            {{ $message }}
-                                        @enderror
-                                    </small>
-                                </div>
-                                <div class="col-12 mb-3">
                                     <label>Business Phone</label>
                                     <div class="input-group">
                                         <input type="text" class="form-control country-code"
-                                            wire:model.live="countryCode" disabled>
+                                            wire:model="countryCode" disabled>
                                         <input type="number" class="form-control" wire:model="businessPhone"
                                             placeholder="Enter your business number">
                                         <button type="button" class="btn btn-site-primary"
@@ -227,35 +256,6 @@
                                     </div>
                                     <small class="text-danger">
                                         @error('businessPhone')
-                                            {{ $message }}
-                                        @enderror
-                                    </small>
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label>Personal Phone</label>
-                                    <div class="input-group">
-                                        <select class="form-control country-code" wire:model.live="countryCode">
-                                            <option value="+44" @if (($countryCode ?? '') === '+44') selected @endif>
-                                                +44
-                                            </option>
-                                            <option value="+92" @if (($countryCode ?? '') === '+92') selected @endif>
-                                                +92
-                                            </option>
-                                        </select>
-                                        <input type="number" class="form-control" wire:model="phone"
-                                            placeholder="Enter your phone number">
-                                        <button type="button" class="btn btn-site-primary" wire:click="updatePhone"
-                                            wire:loading.class="btn-dark" wire:loading.class.remove="btn-site-primary"
-                                            wire:loading.attr="disabled" wire:target="updatePhone">
-                                            <span wire:loading.remove wire:target="updatePhone">Update</span>
-                                            <span wire:loading wire:target="updatePhone">
-                                                <span class="spinner-border spinner-border-sm text-light"
-                                                    role="status" aria-hidden="true"></span>
-                                            </span>
-                                        </button>
-                                    </div>
-                                    <small class="text-danger">
-                                        @error('phone')
                                             {{ $message }}
                                         @enderror
                                     </small>
@@ -359,14 +359,14 @@
                                                                 <tr>
                                                                     <td>
                                                                         <input type="text"
-                                                                            value="{{ $user->business_phone }}"
+                                                                            value="{{ $user->country_code }} {{ $user->business_phone }}"
                                                                             class="form-control w-100" disabled />
                                                                     </td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td>
                                                                         <input type="text"
-                                                                            value="{{ $user->phone }}"
+                                                                            value="{{ $user->country_code }} {{ $user->phone }}"
                                                                             class="form-control w-100" disabled />
                                                                     </td>
                                                                 </tr>
@@ -669,6 +669,11 @@
     <style>
         .country-code {
             max-width: 64px;
+        }
+
+        .country-code:disabled {
+            background-color: #e9ecef !important;
+            opacity: 1;
         }
 
         .cstm-edit-btn {

@@ -217,6 +217,7 @@ class User extends Authenticatable implements JWTSubject
         ?string $name = null,
         ?string $lName = null,
         ?string $email = null,
+        ?string $countryCode = null,
         ?string $phone = null,
         ?string $fullAddress = null,
         ?string $unitAddress = null,
@@ -244,8 +245,11 @@ class User extends Authenticatable implements JWTSubject
         if (! is_null($email)) {
             $user->email = $email;
         }
+        if (! is_null($countryCode)) {
+            $user->country_code = $countryCode;
+        }
         if (! is_null($phone)) {
-            $user->phone = '+44' . $phone;
+            $user->phone = $phone;
         }
         if (! is_null($fullAddress)) {
             $user->full_address = $fullAddress;
@@ -275,7 +279,7 @@ class User extends Authenticatable implements JWTSubject
             $user->business_name = $businessName;
         }
         if (! is_null($businessPhone)) {
-            $user->business_phone = '+44' . $businessPhone;
+            $user->business_phone = $businessPhone;
         }
         if (! is_null($password)) {
             $user->password = Hash::make($password);

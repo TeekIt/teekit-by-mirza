@@ -94,22 +94,22 @@ class SettingsLivewire extends Component
     public function setUserInfo(): User
     {
         $user = User::find($this->userId);
-        $this->name = $user->name;
+        $this->name = $this->name ?? $user->name;
         // $this->l_name = $user->l_name;
-        $this->email = $user->email;
-        $this->businessName = $user->business_name;
-        $this->businessPhone = $user->business_phone;
-        $this->countryCode = $user->country_code;
-        $this->phone = $user->phone;
-        $this->userImg = $user->user_img;
-        $this->fullAddress = $user->full_address;
-        $this->unitAddress = $user->unit_address;
-        $this->postcode = $user->postcode;
-        $this->country = $user->country;
-        $this->state = $user->state;
-        $this->city = $user->city;
-        $this->lat = $user->lat;
-        $this->lon = $user->lon;
+        $this->email = $this->email ?? $user->email;
+        $this->businessName = $this->businessName ?? $user->business_name;
+        $this->businessPhone = $this->businessPhone ?? $user->business_phone;
+        $this->countryCode = $this->countryCode ?? $user->country_code;
+        $this->phone = $this->phone ?? $user->phone;
+        $this->userImg = $this->userImg ?? $user->user_img;
+        $this->fullAddress = $this->fullAddress ?? $user->full_address;
+        $this->unitAddress = $this->unitAddress ?? $user->unit_address;
+        $this->postcode = $this->postcode ?? $user->postcode;
+        $this->country = $this->country ?? $user->country;
+        $this->state = $this->state ?? $user->state;
+        $this->city = $this->city ?? $user->city;
+        $this->lat = $this->lat ?? $user->lat;
+        $this->lon = $this->lon ?? $user->lon;
 
         return $user;
     }
@@ -192,6 +192,7 @@ class SettingsLivewire extends Component
         $this->validate([
             'name' => 'required|string|max:80',
         ]);
+        
         try {
             /* Perform some operation */
             $updated = User::updateInfo(
@@ -216,6 +217,7 @@ class SettingsLivewire extends Component
         $this->validate([
             'businessName' => 'required|string|max:80|unique:users,business_name',
         ]);
+
         try {
             /* Perform some operation */
             $updated = User::updateInfo(
@@ -240,6 +242,7 @@ class SettingsLivewire extends Component
         $this->validate([
             'email' => 'required|email|max:80|unique:users',
         ]);
+
         try {
             /* Perform some operation */
             $updated = User::updateInfo(
@@ -264,6 +267,7 @@ class SettingsLivewire extends Component
         $this->validate([
             'businessPhone' => 'required|string|min:10|max:10',
         ]);
+
         try {
             /* Perform some operation */
             $updated = User::updateInfo(
@@ -286,12 +290,15 @@ class SettingsLivewire extends Component
     public function updatePhone(): void
     {
         $this->validate([
+            'countryCode' => 'required|string',
             'phone' => 'required|string|min:10|max:10',
         ]);
+
         try {
             /* Perform some operation */
             $updated = User::updateInfo(
                 $this->userId,
+                countryCode: $this->countryCode,
                 phone: $this->phone
             );
             /* Operation finished */
