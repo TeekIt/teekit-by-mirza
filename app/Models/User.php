@@ -293,10 +293,10 @@ class User extends Authenticatable implements JWTSubject
         return $user->save();
     }
 
-    public static function updateStoreLocation(
-        int $user_id,
-        string $full_address,
-        ?string $unit_address,
+    public static function updateLocation(
+        int $userId,
+        string $fullAddress,
+        ?string $unitAddress,
         string $country,
         string $state,
         string $city,
@@ -304,11 +304,9 @@ class User extends Authenticatable implements JWTSubject
         string $lat,
         string $lon
     ): bool {
-        $user = self::findOrFail($user_id);
-        $user->full_address = $full_address;
-        if (! is_null($unit_address)) {
-            $user->unit_address = $unit_address;
-        }
+        $user = self::findOrFail($userId);
+        $user->full_address = $fullAddress;
+        $user->unit_address = $unitAddress;
         $user->country = $country;
         $user->state = $state;
         $user->city = $city;

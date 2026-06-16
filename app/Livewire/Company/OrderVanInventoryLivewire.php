@@ -28,27 +28,27 @@ class OrderVanInventoryLivewire extends Component
 
     public int $companyId;
 
-    public string $vanAddress = '';
+    public ?string $vanAddress = null;
 
-    public string $vanCountry = '';
+    public ?string $vanCountry = null;
 
-    public string $vanState = '';
+    public ?string $vanState = null;
 
-    public string $vanCity = '';
+    public ?string $vanCity = null;
 
-    public string $vanPostcode = '';
+    public ?string $vanPostcode = null;
 
-    public float $vanLat = 0.0;
+    public ?float $vanLat = null;
 
-    public float $vanLon = 0.0;
+    public ?float $vanLon = null;
 
     public ?int $vanId = null;
 
-    public int $nearBySellerId = 0;
+    public ?int $nearBySellerId = null;
 
     public array $nearbySellers = [];
 
-    public string $search = '';
+    public ?string $search = null;
 
     public ?int $categoryId = null;
 
@@ -89,7 +89,7 @@ class OrderVanInventoryLivewire extends Component
         $this->isPayAsYouGoRoute = request()->is('*pay-as-you-go*');
         $this->categories = Categories::all(['id', 'category_name']);
 
-         $this->vans = Van::getByCompanyId(
+        $this->vans = Van::getByCompanyId(
             companyId: $this->companyId,
             columns: ['id', 'company_id', 'number_plate']
         );
@@ -98,7 +98,7 @@ class OrderVanInventoryLivewire extends Component
     /*
      * Custom Helpers
      */
-     public function resetComponent()
+    public function resetComponent()
     {
         $this->resetValidation();
 
@@ -354,7 +354,7 @@ class OrderVanInventoryLivewire extends Component
             if ($vanInventoryPayAsYouGoOrderPlaced) {
                 session()->forget(self::CART_SESSION_KEY);
                 session()->flash('success', config('constants.PAY_AS_YOU_GO_ORDER_PLACED_SUCCESSFULLY'));
-            } 
+            }
         } catch (Exception $error) {
             report($error);
             session()->flash('error', config('constants.ORDER_PLACED_FAILED'));
@@ -363,6 +363,10 @@ class OrderVanInventoryLivewire extends Component
 
     public function checkout(OrderTypeEnum $vanInventoryOrderType): void
     {
+        $this->validate([
+            'vanId' => 'required|integer|exists:vans,id',
+        ]);
+
         try {
             $cartItems = $this->getCartItemsValues();
 
@@ -406,6 +410,8 @@ class OrderVanInventoryLivewire extends Component
         } catch (Exception $error) {
             report($error);
             session()->flash('error', config('constants.ORDER_PLACED_FAILED'));
+
+            throw $error;
         }
     }
 

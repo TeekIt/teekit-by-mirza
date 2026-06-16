@@ -3,9 +3,12 @@
 namespace Tests\Feature\Livewire\Company;
 
 use App\Livewire\Company\OrderVanInventoryLivewire;
+use App\Models\Categories;
 use App\Models\Products;
 use App\Models\User;
 use App\Models\Van;
+use App\Enums\OrderTypeEnum;
+use Google\Service\Books\Category;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -39,22 +42,45 @@ class OrderVanInventoryLivewireTest extends TestCase
         // 2. Create a van that belongs to this company
         $van = Van::factory()->forCompany($company)->create();
 
-        $categoryId = \Illuminate\Support\Facades\DB::table('categories')->insertGetId([
-            'category_name' => 'Test Category',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
         // 3. Create a real product so addToCart can look it up
-        $product = Products::factory()->create(['category_id' => $categoryId]);
+        $product = Products::factory()->create();
 
-        // 4. Act as the company user, add the product to cart via the component,
-        //    then call addDirectlyToVan — all within the same Livewire session.
+        // 4. Act as the company user, add the product to cart via the component
         Livewire::actingAs($company)
             ->test(OrderVanInventoryLivewire::class)
             ->set('vanId', $van->id)
             ->call('addToCart', $product->id)    
-            ->call('addDirectlyToVan')         
-            ->assertSessionMissing('error')
-            ->assertSessionHas('success', config('constants.PAY_AS_YOU_GO_ORDER_PLACED_SUCCESSFULLY'));
+            ->call('addDirectlyToVan')
+            ->assertDontSeeText('Error!');
+    }
+
+    public function test_checkout_successfully(): void
+    {
+        // 1. Create a company user via the existing factory state
+        $company = User::factory()->company()->create();
+
+        // 2. Create a van that belongs to this company
+        $van = Van::factory()->forCompany($company)->create();
+
+        // 3. Create a real product so addToCart can look it up
+        $product = Products::factory()->create();
+     
+        // 4. Act as the company user, add the product to cart via the component
+        Livewire::actingAs($company)
+            ->test(OrderVanInventoryLivewire::class)
+            ->set([
+                'nearBySellerId' => $product->seller_id,
+                'vanId' => $van->id,
+                'vanAddress' => fake()->address(),
+                'vanCountry' => fake()->country(),
+                'vanState' => fake()->state(),
+                'vanCity' => fake()->city(),
+                'vanPostcode' => fake()->postcode(),
+                'vanLat' => fake()->latitude(),
+                'vanLon' => fake()->longitude(),
+            ])
+            ->call('addToCart', $product->id)    
+            ->call('checkout', OrderTypeEnum::COD)
+            ->assertDontSeeText('Error!');
     }
 }

@@ -160,6 +160,7 @@ class VanProduct extends Model
             'weight' => $product->weight,
             'brand' => $product->brand,
             'size' => $product->size,
+            'status' => VanProductStatusEnum::IN_STOCK->value,
             'contact' => $product->contact ?? '',
             'colors' => is_array($product->colors) ? json_encode($product->colors) : $product->colors,
             'bike' => $product->bike,
