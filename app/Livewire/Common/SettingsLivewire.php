@@ -305,31 +305,6 @@ class SettingsLivewire extends Component
 
     public function updateLivewireProperties(array $data = []): void
     {
-        // if (isset($data['pickupAddress'])) {
-        //     $this->fullAddress = $data['pickupAddress'];
-        // }
-
-        // if (isset($data['pickupCountry'])) {
-        //     $this->country = $data['pickupCountry'];
-        // }
-
-        // if (isset($data['pickupState'])) {
-        //     $this->state = $data['pickupState'];
-        // }
-
-        // if (isset($data['pickupCity'])) {
-        //     $this->city = $data['pickupCity'];
-        // }
-
-        // if (isset($data['pickupPostcode'])) {
-        //     $this->postcode = $data['pickupPostcode'];
-        // }
-
-        // if (isset($data['pickupLat']) && isset($data['pickupLon'])) {
-        //     $this->lat = $data['pickupLat'];
-        //     $this->lon = $data['pickupLon'];
-        // }
-
         /* Dispatch browser event to update DOM inputs inside wire:ignore.self modal */
         $this->dispatch('location-updated', [
             'fullAddress' => $data['pickupAddress'] ?? null,
