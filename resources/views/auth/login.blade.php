@@ -5,12 +5,7 @@
 @endphp
 
 @section('content')
-    <style>
-        .country-code {
-            max-width: 64px;
-        }
-    </style>
-
+    
     @include('components.google-map-modal')
     <div class="rounded-5 px-5 pt-4 mb-5 bg-light shadow">
         <div class="row">
@@ -453,4 +448,9 @@
             });
         }
     </script>
+    <style>
+        .country-code {
+            max-width: 64px;
+        }
+    </style>
 @endsection
