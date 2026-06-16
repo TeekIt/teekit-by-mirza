@@ -2,6 +2,7 @@
 
     @php
         use App\Enums\UserRoleEnum;
+        use App\Enums\VanProductStatusEnum;
         use App\Models\User;
     @endphp
 
@@ -187,9 +188,9 @@
                         </div>
                     </div>
 
-                    {{-- Brand --}}
+                    {{-- Brand & Contact --}}
                     <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label text-site-primary fw-semibold">Brand</label>
                             <input type="text" class="form-control" placeholder="Enter brand"
                                 wire:model.blur="brand">
@@ -199,35 +200,10 @@
                                 @enderror
                             </small>
                         </div>
-                    </div>
-
-                    {{-- Status & Contact --}}
-                    <div class="row">
                         <div class="col-md-6 mb-3">
-                            @if ($isAuthUserCompany)
-                                <label class="form-label text-site-primary fw-semibold">
-                                    Status
-                                </label>
-                                <input type="text" class="form-control" value="{{ $status }}" disabled>
-                            @else
-                                <label class="form-label text-site-primary fw-semibold">
-                                    Status<span class="text-danger">*</span>
-                                </label>
-                                <select class="form-control" wire:model.live="status">
-                                    <option value="">Select status</option>
-                                    <option value="1">Enabled</option>
-                                    <option value="0">Disabled</option>
-                                </select>
-                                <small class="text-danger">
-                                    @error('status')
-                                        {{ $message }}
-                                    @enderror
-                                </small>
-                            @endif
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label text-site-primary fw-semibold">Contact <span
-                                    class="text-danger">*</span></label>
+                            <label class="form-label text-site-primary fw-semibold">
+                                Contact <span class="text-danger">*</span>
+                            </label>
                             <div class="input-group">
                                 <span class="input-group-text">+44</span>
                                 <input type="number" class="form-control" placeholder="Enter 10-digit number"
@@ -236,6 +212,45 @@
                             </div>
                             <small class="text-danger">
                                 @error('contact')
+                                    {{ $message }}
+                                @enderror
+                            </small>
+                        </div>
+                    </div>
+
+                    {{-- Status --}}
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            @if ($isAuthUserCompany && $productId)
+                                <label class="form-label text-site-primary fw-semibold">
+                                    Status
+                                </label>
+                                @if ($status == VanProductStatusEnum::IN_STOCK)
+                                    <input type="text" class="form-control text-success border-success fw-bold"
+                                        value="{{ $status }}" disabled>
+                                @endif
+
+                                @if ($status == VanProductStatusEnum::LOW_STOCK)
+                                    <input type="text" class="form-control text-warning border-warning fw-bold"
+                                        value="{{ $status }}" disabled>
+                                @endif
+
+                                @if ($status == VanProductStatusEnum::OUT_OF_STOCK)
+                                    <input type="text" class="form-control text-danger border-danger fw-bold"
+                                        value="{{ $status }}" disabled>
+                                @endif
+                            @elseif($isAuthUserParentSeller)
+                                <label class="form-label text-site-primary fw-semibold">
+                                    Status<span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" wire:model.live="status">
+                                    <option value="">Select status</option>
+                                    <option value="1">Enabled</option>
+                                    <option value="0">Disabled</option>
+                                </select>
+                            @endif
+                            <small class="text-danger">
+                                @error('status')
                                     {{ $message }}
                                 @enderror
                             </small>
