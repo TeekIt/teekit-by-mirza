@@ -61,6 +61,8 @@ class UserFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
+                'business_name' => null,
+                'business_phone' => null,
                 'role_id' => UserRoleEnum::BUYER->value,
             ];
         });

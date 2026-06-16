@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class OrderVanInventoryLivewireTest extends TestCase
 {
-    public function test_renders_successfully(): void
+    public function testRendersSuccessfully(): void
     {
         // 1. Create a company user via the existing factory state
         $company = User::factory()->company()->create();
@@ -34,7 +34,7 @@ class OrderVanInventoryLivewireTest extends TestCase
             ->assertStatus(config('constants.HTTP_OK'));
     }
 
-    public function test_addDirectlyToVan_successfully(): void
+    public function testAddDirectlyToVanSuccessfully(): void
     {
         // 1. Create a company user via the existing factory state
         $company = User::factory()->company()->create();
@@ -51,10 +51,11 @@ class OrderVanInventoryLivewireTest extends TestCase
             ->set('vanId', $van->id)
             ->call('addToCart', $product->id)    
             ->call('addDirectlyToVan')
+            ->assertSeeText('Success!')
             ->assertDontSeeText('Error!');
     }
 
-    public function test_checkout_successfully(): void
+    public function testCheckoutSuccessfully(): void
     {
         // 1. Create a company user via the existing factory state
         $company = User::factory()->company()->create();
@@ -81,6 +82,7 @@ class OrderVanInventoryLivewireTest extends TestCase
             ])
             ->call('addToCart', $product->id)    
             ->call('checkout', OrderTypeEnum::COD)
+            ->assertSeeText('Success!')
             ->assertDontSeeText('Error!');
     }
 }
