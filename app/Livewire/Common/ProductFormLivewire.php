@@ -229,7 +229,9 @@ class ProductFormLivewire extends Component
         $this->weight             = $product->weight;
         $this->brand              = $product->brand;
         $this->size               = $product->size;
-        $this->status             = $product->status;
+        $this->status             = ($product instanceof VanProduct) ?
+            VanProductStatusEnum::from($product->status) :
+            ProductStatusEnum::from($product->status);
         $this->countryCode        = $product->country_code ?? '+44';
         $this->contact            = $product->contact;
         $this->colors             = is_array($decoded = json_decode($product->colors, true)) ? array_keys($decoded) : [];
