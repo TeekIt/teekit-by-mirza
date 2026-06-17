@@ -94,8 +94,8 @@ class ProductFormLivewire extends Component
             'productName'        => ['required', 'string', 'max:255'],
             'sku'                => ['required', 'string', 'max:255'],
             'categoryId'         => ['required', 'integer', 'exists:categories,id'],
-            'qty'                => ['required', 'integer', 'min:0'],
-            'price'              => ['required', 'numeric', 'min:0'],
+            'qty'                => ['required', 'integer', 'min:1'],
+            'price'              => ['required', 'numeric', 'min:1'],
             'discountPercentage' => ['nullable', 'numeric'],
             'minThreshold'       => $this->isAuthUserCompany ?
                 ['required', 'integer', 'min:0'] :
@@ -105,10 +105,6 @@ class ProductFormLivewire extends Component
             'length'             => ['nullable', 'numeric', 'min:0'],
             'weight'             => ['required', 'numeric', 'min:0'],
             'brand'              => ['nullable', 'string', 'max:255'],
-            // 'status'             => array_filter([
-            //     $this->isAuthUserCompany ? 'nullable' : 'required',
-            //     'in:0,1',
-            // ]),
             'status'             => $this->isAuthUserCompany ?
                 ($this->productId ? ['required', Rule::enum(VanProductStatusEnum::class)] : ['nullable']) :
                 ['required', Rule::enum(ProductStatusEnum::class)],
@@ -118,7 +114,9 @@ class ProductFormLivewire extends Component
                 ['nullable'] :
                 ['required', 'image', 'max:1024', 'mimes:jpeg,jpg,png'],
             'galleryUploads.*'   => ['nullable', 'image', 'max:1024', 'mimes:jpeg,jpg,png'],
-            'vehicle'            => ['required', Rule::enum(TransportVehicleEnum::class)],
+            'vehicle'            => $this->isAuthUserCompany ?
+                ['nullable'] :
+                ['required', Rule::enum(TransportVehicleEnum::class)],
             'vanId'              => $this->isAuthUserCompany ?
                 ['required', 'integer', 'exists:vans,id'] :
                 ['nullable'],
@@ -296,9 +294,9 @@ class ProductFormLivewire extends Component
                 'colors'              => ! empty($this->colors)
                     ? ProductServices::jsonEncodeColors($this->colors)
                     : null,
-                'bike'                => $this->vehicle === TransportVehicleEnum::BIKE->value ? 1 : 0,
-                'car'                 => $this->vehicle === TransportVehicleEnum::CAR->value ? 1 : 0,
-                'van'                 => $this->vehicle === TransportVehicleEnum::VAN->value ? 1 : 0,
+                'bike'                => ($this->vehicle === TransportVehicleEnum::BIKE->value) ? 1 : 0,
+                'car'                 => ($this->vehicle === TransportVehicleEnum::CAR->value) ? 1 : 0,
+                'van'                 => ($this->vehicle === TransportVehicleEnum::VAN->value) ? 1 : 0,
                 'feature_img'         => $this->featureImg,
             ];
 
@@ -306,6 +304,10 @@ class ProductFormLivewire extends Component
                 $data['seller_id'] = null;
                 $data['company_id'] = $this->authUserId;
                 $data['van_id'] = $this->vanId;
+                $data['status'] = ($this->qty < $this->minThreshold) ?
+                    VanProductStatusEnum::LOW_STOCK->value :
+                    VanProductStatusEnum::IN_STOCK->value;
+                $data['van'] = 1;
                 $data['quantity'] = $this->qty;
                 $data['min_threshold'] = $this->minThreshold;
                 $data['type'] = VanProductTypeEnum::MANUAL->value;

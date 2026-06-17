@@ -221,6 +221,7 @@
                     {{-- Status --}}
                     <div class="row">
                         <div class="col-md-12 mb-3">
+                            {{-- If Updating Product --}}
                             @if ($isAuthUserCompany && $productId)
                                 <label class="form-label text-site-primary fw-semibold">
                                     Status
@@ -276,35 +277,37 @@
                     </div>
 
                     {{-- Vehicle Type --}}
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label text-site-primary fw-semibold d-block">
-                                Vehicle Type <span class="text-danger">*</span>
-                            </label>
-                            <div class="d-flex gap-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" value="bike"
-                                        wire:model.live="vehicle" id="vehicleBike">
-                                    <label class="form-check-label" for="vehicleBike">Cycle / Bike</label>
+                    @if ($isAuthUserParentSeller)
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label text-site-primary fw-semibold d-block">
+                                    Vehicle Type <span class="text-danger">*</span>
+                                </label>
+                                <div class="d-flex gap-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" value="bike"
+                                            wire:model.live="vehicle" id="bike">
+                                        <label class="form-check-label" for="bike">Cycle / Bike</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" value="car"
+                                            wire:model.live="vehicle" id="car">
+                                        <label class="form-check-label" for="car">Car</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" value="van"
+                                            wire:model.live="vehicle" id="van">
+                                        <label class="form-check-label" for="van">Van</label>
+                                    </div>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" value="car"
-                                        wire:model.live="vehicle" id="vehicleCar">
-                                    <label class="form-check-label" for="vehicleCar">Car</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" value="van"
-                                        wire:model.live="vehicle" id="vehicleVan">
-                                    <label class="form-check-label" for="vehicleVan">Van</label>
-                                </div>
+                                <small class="text-danger">
+                                    @error('vehicle')
+                                        {{ $message }}
+                                    @enderror
+                                </small>
                             </div>
-                            <small class="text-danger">
-                                @error('vehicle')
-                                    {{ $message }}
-                                @enderror
-                            </small>
                         </div>
-                    </div>
+                    @endif
 
                     {{-- Feature Image --}}
                     <div class="row">

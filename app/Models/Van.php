@@ -218,13 +218,6 @@ class Van extends Authenticatable implements JWTSubject
         return self::where('company_id', '=', $companyId)->count();
     }
 
-    public static function getTotalStockByCompanyId(int $companyId): int
-    {
-        return self::where('vans.company_id', '=', $companyId)
-            ->join('van_products', 'vans.id', '=', 'van_products.van_id')
-            ->sum('van_products.quantity');
-    }
-
     public static function getActiveOperativesCount(int $companyId, string $date): int
     {
         return self::where('company_id', '=', $companyId)
