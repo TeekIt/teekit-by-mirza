@@ -16,13 +16,14 @@ use App\Models\Categories;
 use App\Models\VanOperativeProductUsage;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class VanProduct extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * Fields protected from mass assignment
@@ -37,6 +38,40 @@ class VanProduct extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    /**
+     * Laravel Built-In Helpers
+     */
+    
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => VanProductStatusEnum::class,
+        ];
+    }
+
+    protected function sku(): Attribute
+    {
+        return Attribute::make(
+            set: fn(string $value) => strtoupper(preg_replace('/\s+/', '', $value)),
+        );
+    }
+
+    public function getStatusAttribute()
+    {
+        if ($this->quantity == 0) {
+            return VanProductStatusEnum::OUT_OF_STOCK->value;
+        } elseif ($this->quantity < $this->min_threshold) {
+            return VanProductStatusEnum::LOW_STOCK->value;
+        } else {
+            return VanProductStatusEnum::IN_STOCK->value;
+        }
+    }
 
     /**
      * Relations
@@ -54,27 +89,6 @@ class VanProduct extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Categories::class, 'category_id');
-    }
-
-    /**
-     * Laravel Built-In Helpers
-     */
-    protected function sku(): Attribute
-    {
-        return Attribute::make(
-            set: fn(string $value) => strtoupper(preg_replace('/\s+/', '', $value)),
-        );
-    }
-
-    public function getStatusAttribute()
-    {
-        if ($this->quantity == 0) {
-            return VanProductStatusEnum::OUT_OF_STOCK->value;
-        } elseif ($this->quantity < $this->min_threshold) {
-            return VanProductStatusEnum::LOW_STOCK->value;
-        } else {
-            return VanProductStatusEnum::IN_STOCK->value;
-        }
     }
 
     /**
