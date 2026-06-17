@@ -7,6 +7,7 @@ use App\Models\Van;
 use Livewire\Component;
 use App\Models\VanInventoryOrder;
 use App\Enums\OrderStatusEnum;
+use App\Models\VanProduct;
 use Illuminate\View\View;
 
 class CompanyDashboardLivewire extends Component
@@ -24,7 +25,7 @@ class CompanyDashboardLivewire extends Component
     public function render(): View
     {
         $totalVans = Van::getVansCountByCompanyId($this->companyId);
-        $totalStock = Van::getTotalStockByCompanyId($this->companyId);
+        $totalStock = VanProduct::getTotalStockByCompanyId($this->companyId);
         $activeOperatives = Van::getActiveOperativesCount($this->companyId, now()->toDateString());
         $totalStockValue = Van::getTotalStockValue($this->companyId);
         $lowStockAlerts = Van::getLowStockAlertsCount($this->companyId);

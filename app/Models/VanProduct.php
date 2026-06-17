@@ -215,9 +215,14 @@ class VanProduct extends Model
         return self::insert($vanProducts);
     }
 
+    public static function getTotalStockByCompanyId(int $companyId): int
+    {
+        return self::where('company_id', '=', $companyId)->sum('quantity');
+    }
+
     public static function getRecentByVan(int $vanId, array $columns = ['*']): Collection
     {
-        return self::where('van_id', $vanId)
+        return self::where('van_id', '=', $vanId)
             ->latest('updated_at')
             ->limit(10)
             ->get($columns);
