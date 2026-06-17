@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\DB;
 
 final class ProcessVanInventoryPayAsYouGoOrderAction
 {
-    public function execute(int $vanId, array $orderItems): bool
+    public function execute(int $companyId, int $vanId, array $orderItems): bool
     {
-        return DB::transaction(function () use ($vanId, $orderItems): bool {
+        return DB::transaction(function () use ($companyId, $vanId, $orderItems): bool {
             $productIds = array_column($orderItems, 'id');
             $products = Products::whereIn('id', $productIds)->get();
             $orderItemsMap = collect($orderItems)->keyBy('id');
@@ -18,6 +18,7 @@ final class ProcessVanInventoryPayAsYouGoOrderAction
             return VanProduct::addBulkFromProductsTable(
                 $products,
                 $orderItemsMap,
+                $companyId,
                 $vanId
             );
         });

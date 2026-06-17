@@ -2,6 +2,9 @@
 
     @php
         use App\Enums\UserRoleEnum;
+        use App\Enums\VanProductStatusEnum;
+        use App\Enums\ProductStatusEnum;
+        use App\Enums\TransportVehicleEnum;
         use App\Models\User;
     @endphp
 
@@ -85,7 +88,7 @@
                             <label class="form-label text-site-primary fw-semibold">Stock<span
                                     class="text-danger">*</span></label>
                             <input type="number" class="form-control" placeholder="Enter stock quantity"
-                                wire:model.blur="qty" min="0" @if ($this->isPayAsYouGo($type)) disabled @endif>
+                                wire:model.blur="qty" min="1" @if ($this->isPayAsYouGo($type)) disabled @endif>
                             <small class="text-danger">
                                 @error('qty')
                                     {{ $message }}
@@ -187,9 +190,9 @@
                         </div>
                     </div>
 
-                    {{-- Brand --}}
+                    {{-- Brand & Contact --}}
                     <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label text-site-primary fw-semibold">Brand</label>
                             <input type="text" class="form-control" placeholder="Enter brand"
                                 wire:model.blur="brand">
@@ -199,37 +202,12 @@
                                 @enderror
                             </small>
                         </div>
-                    </div>
-
-                    {{-- Status & Contact --}}
-                    <div class="row">
                         <div class="col-md-6 mb-3">
-                            @if ($isAuthUserCompany)
-                                <label class="form-label text-site-primary fw-semibold">
-                                    Status
-                                </label>
-                                <input type="text" class="form-control" value="{{ $status }}" disabled>
-                            @else
-                                <label class="form-label text-site-primary fw-semibold">
-                                    Status<span class="text-danger">*</span>
-                                </label>
-                                <select class="form-control" wire:model.live="status">
-                                    <option value="">Select status</option>
-                                    <option value="1">Enabled</option>
-                                    <option value="0">Disabled</option>
-                                </select>
-                                <small class="text-danger">
-                                    @error('status')
-                                        {{ $message }}
-                                    @enderror
-                                </small>
-                            @endif
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label text-site-primary fw-semibold">Contact <span
-                                    class="text-danger">*</span></label>
+                            <label class="form-label text-site-primary fw-semibold">
+                                Contact <span class="text-danger">*</span>
+                            </label>
                             <div class="input-group">
-                                <span class="input-group-text">+44</span>
+                                <span class="input-group-text">{{ $countryCode }}</span>
                                 <input type="number" class="form-control" placeholder="Enter 10-digit number"
                                     wire:model.blur="contact"
                                     oninput="this.value = this.value.replace(/[^0-9]/g, '')">
@@ -242,13 +220,53 @@
                         </div>
                     </div>
 
+                    {{-- Status --}}
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            {{-- If Updating Product --}}
+                            @if ($isAuthUserCompany && $productId)
+                                <label class="form-label text-site-primary fw-semibold">
+                                    Status
+                                </label>
+                                @if ($status == VanProductStatusEnum::IN_STOCK)
+                                    <input type="text" class="form-control text-success border-success fw-bold"
+                                        value="{{ $status }}" disabled>
+                                @endif
+
+                                @if ($status == VanProductStatusEnum::LOW_STOCK)
+                                    <input type="text" class="form-control text-warning border-warning fw-bold"
+                                        value="{{ $status }}" disabled>
+                                @endif
+
+                                @if ($status == VanProductStatusEnum::OUT_OF_STOCK)
+                                    <input type="text" class="form-control text-danger border-danger fw-bold"
+                                        value="{{ $status }}" disabled>
+                                @endif
+                            @elseif($isAuthUserParentSeller)
+                                <label class="form-label text-site-primary fw-semibold">
+                                    Status<span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" wire:model.live="status">
+                                    <option value="">Select status</option>
+                                    <option value="{{ ProductStatusEnum::ENABLE }}">Enabled</option>
+                                    <option value="{{ ProductStatusEnum::DISABLE }}">Disabled</option>
+                                </select>
+                            @endif
+                            <small class="text-danger">
+                                @error('status')
+                                    {{ $message }}
+                                @enderror
+                            </small>
+                        </div>
+                    </div>
+
                     {{-- Colors --}}
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label class="form-label text-site-primary fw-semibold">Colors</label>
-                            <select class="form-control" wire:model.live="colors" multiple size="5">
-                                @foreach ($commonColors as $color)
-                                    <option value="{{ $color }}">{{ $color }}</option>
+                            <label class="form-label text-site-primary fw-semibold">Select Colors</label>
+                            <select class="form-control colors" wire:model.live="colors" multiple>
+                                @foreach ($commonColors as $singleIndex)
+                                    <option value="{{ $singleIndex }}">{{ $singleIndex }}</option>
                                 @endforeach
                             </select>
                             <small class="text-muted">Hold Ctrl / Cmd to select multiple colors.</small>
@@ -261,35 +279,37 @@
                     </div>
 
                     {{-- Vehicle Type --}}
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label text-site-primary fw-semibold d-block">
-                                Vehicle Type <span class="text-danger">*</span>
-                            </label>
-                            <div class="d-flex gap-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" value="bike"
-                                        wire:model.live="vehicle" id="vehicleBike">
-                                    <label class="form-check-label" for="vehicleBike">Cycle / Bike</label>
+                    @if ($isAuthUserParentSeller)
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label text-site-primary fw-semibold d-block">
+                                    Vehicle Type <span class="text-danger">*</span>
+                                </label>
+                                <div class="d-flex gap-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" value="bike"
+                                            wire:model.live="vehicle" id="bike" @if($vehicle == TransportVehicleEnum::BIKE) checked @endif>
+                                        <label class="form-check-label" for="bike">Cycle / Bike</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" value="car"
+                                            wire:model.live="vehicle" id="car" @if($vehicle == TransportVehicleEnum::CAR) checked @endif>
+                                        <label class="form-check-label" for="car">Car</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" value="van"
+                                            wire:model.live="vehicle" id="van" @if($vehicle == TransportVehicleEnum::VAN) checked @endif>
+                                        <label class="form-check-label" for="van">Van</label>
+                                    </div>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" value="car"
-                                        wire:model.live="vehicle" id="vehicleCar">
-                                    <label class="form-check-label" for="vehicleCar">Car</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" value="van"
-                                        wire:model.live="vehicle" id="vehicleVan">
-                                    <label class="form-check-label" for="vehicleVan">Van</label>
-                                </div>
+                                <small class="text-danger">
+                                    @error('vehicle')
+                                        {{ $message }}
+                                    @enderror
+                                </small>
                             </div>
-                            <small class="text-danger">
-                                @error('vehicle')
-                                    {{ $message }}
-                                @enderror
-                            </small>
                         </div>
-                    </div>
+                    @endif
 
                     {{-- Feature Image --}}
                     <div class="row">
@@ -324,10 +344,9 @@
                         </div>
 
                         {{-- Gallery --}}
-                        @if (User::getAuthUser()->role_id == UserRoleEnum::SELLER->value)
+                        @if ($isAuthUserParentSeller)
                             <div class="col-md-6 mb-3">
                                 <label class="form-label text-site-primary fw-semibold d-block">Image Gallery</label>
-
                                 {{-- Existing gallery images --}}
                                 @if (!empty($existingImages))
                                     <div class="d-flex flex-wrap gap-2 mb-2">
@@ -390,4 +409,14 @@
             background-color: #e1e1e1 !important;
         }
     </style>
+
+    @script
+        <script>
+            $(document).ready(function() {
+                $('.colors').select2({
+                    allowClear: false
+                });
+            });
+        </script>
+    @endscript
 </div>

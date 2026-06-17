@@ -22,14 +22,14 @@ use App\Livewire\Admin\CustomersLivewire;
 use App\Livewire\Admin\ParentSellersLivewire;
 use App\Livewire\Admin\ReferralCodesLivewire;
 use App\Livewire\Company\VanInventoriesLivewire;
-use App\Livewire\Admin\VansLivewire;
+use App\Livewire\Company\VansLivewire;
 use App\Livewire\Common\OrdersLivewire;
 use App\Livewire\Common\ProductFormLivewire;
 use App\Livewire\Company\CompanyDashboardLivewire;
 use App\Livewire\Company\OrderVanInventoryLivewire;
 use App\Livewire\Company\StockValueByVanLivewire;
 use App\Livewire\Company\StockUsageLivewire;
-use App\Livewire\Seller\GeneralSettingsLivewire;
+use App\Livewire\Common\SettingsLivewire;
 use App\Livewire\Seller\InventoryLivewire;
 use App\Livewire\Seller\OrdersFromOtherSellersLivewire;
 use App\Livewire\Seller\RequestDeliveryFormLivewire;
@@ -72,8 +72,6 @@ Route::middleware('transaction.wrapper')->group(function () {
      ***********************************************************************
      */
     Route::prefix('settings')->middleware(['auth', 'auth.sellers'])->controller(HomeController::class)->group(function () {
-        Route::get('/payment', 'paymentSettings')->name('setting.payment');
-        Route::post('/payment/update', 'paymentSettingsUpdate')->name('payment_settings_update');
         Route::post('/password/update', 'adminPasswordUpdate')->name('password_update');
         Route::get('/change_settings/{setting_name}/{value}', 'changeSettings')->name('change_settings')
             ->where([
@@ -110,14 +108,11 @@ Route::middleware('transaction.wrapper')->group(function () {
 
         Route::prefix('inventory')->group(function () {
             Route::get('/', InventoryLivewire::class)->name('seller.inventory');
+            Route::get('/add/manually', ProductFormLivewire::class)->name('seller.inventory.add.manually');
+            Route::get('/{productId}/edit/manually', ProductFormLivewire::class)->name('seller.inventory.edit.manually');
 
             Route::controller(ProductController::class)->group(function () {
-                Route::get('/add', 'addSingleInventoryForm')->name('seller.add.single.inventory.form');
-                Route::post('/add', 'addSingleInventory')->name('seller.add.single.inventory');
-                Route::get('/edit/{productId}', 'editSingleInventoryForm')->name('seller.edit.inventory.form');
-                Route::post('/update/{productId}', 'updateInventory')->name('seller.edit.inventory');
                 Route::get('/add_bulk', 'inventoryAddBulk')->name('seller.add.bulk.inventory');
-                Route::get('/delete/image/{imageId}', 'deleteImg')->name('seller.delete.img');
             });
 
             // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
@@ -138,10 +133,10 @@ Route::middleware('transaction.wrapper')->group(function () {
         });
 
         Route::prefix('settings')->group(function () {
-            Route::get('/general', GeneralSettingsLivewire::class)->name('seller.settings.general');
+            Route::get('/general', SettingsLivewire::class)->name('seller.settings');
 
             Route::controller(SellerController::class)->group(function () {
-                Route::post('/update-location', 'updateStoreLocation')->name('seller.settings.update.location');
+                // Route::post('/update-location', 'updateLocation')->name('seller.settings.update.location');
                 Route::post('/update-required-info', 'updateSellerRequiredInfo')->name('seller.update.required.info');
             });
         });
@@ -165,8 +160,8 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::get('/inventories', VanInventoriesLivewire::class)->name('vans.inventories');
         Route::get('/inventories/order/online', OrderVanInventoryLivewire::class)->name('vans.inventories.order.online');
         Route::get('/inventories/order/pay-as-you-go', OrderVanInventoryLivewire::class)->name('vans.inventories.order.pay.as.you.go');
-        Route::get('/inventory/{productId}/edit/manually', ProductFormLivewire::class)->name('vans.inventory.edit.manually');
         Route::get('/inventory/add/manually', ProductFormLivewire::class)->name('vans.inventory.add.manually');
+        Route::get('/inventory/{productId}/edit/manually', ProductFormLivewire::class)->name('vans.inventory.edit.manually');
         Route::get('/delete', [VanController::class, 'destroy'])->name('vans.del');
         // vans.inventories.del
 
@@ -176,7 +171,7 @@ Route::middleware('transaction.wrapper')->group(function () {
 
             Route::get('/dashboard', CompanyDashboardLivewire::class)->name('vans.company.dashboard');
             Route::get('/orders', OrdersLivewire::class)->name('vans.company.orders');
-            Route::get('/settings', GeneralSettingsLivewire::class)->name('vans.company.settings');
+            Route::get('/settings', SettingsLivewire::class)->name('vans.company.settings');
             Route::get('/stock/value-by-van', StockValueByVanLivewire::class)->name('company.stock.value.by.van');
             Route::get('/stock/usage', StockUsageLivewire::class)->name('company.stock.usage');
         });

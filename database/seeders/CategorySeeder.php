@@ -2,18 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\Van;
+use App\Models\Categories;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class VanSeeder extends Seeder
+class CategorySeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Van::factory(30)->forCompany(User::find(767))->create();
+        Categories::factory(5)->create();
     }
 }

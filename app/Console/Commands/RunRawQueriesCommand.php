@@ -22,7 +22,7 @@ class RunRawQueriesCommand extends Command
      */
     protected $description = 'Executes all raw queries provided in the handle method';
 
-    protected bool $executeQueries = false;
+    protected bool $executeQueries = true;
 
     /**
      * Execute the console command.
@@ -102,7 +102,13 @@ class RunRawQueriesCommand extends Command
                     // );
 
                     /* Below queries are already executed on local ENV */
+                    DB::statement(
+                        "ALTER TABLE `products` ADD COLUMN `country_code` VARCHAR(4) NULL AFTER `status`"
+                    );
 
+                    DB::statement(
+                        "ALTER TABLE `van_products` ADD COLUMN `country_code` VARCHAR(4) NULL AFTER `status`"
+                    );
                 });
             }
         } catch (Exception $error) {

@@ -201,9 +201,9 @@ class Van extends Authenticatable implements JWTSubject
             ->when($search, function ($query) use ($search) {
                 $search = trim(mb_strtolower($search));
                 $query->where(function ($query) use ($search) {
-                    $query->where('user_name', 'like', '%' . $search . '%')
-                        ->orWhere('operative', 'like', '%' . $search . '%')
-                        ->orWhere('number_plate', 'like', '%' . $search . '%');
+                    $query->where('user_name', 'like', "%{$search}%")
+                        ->orWhere('operative', 'like', "%{$search}%")
+                        ->orWhere('number_plate', 'like', "%{$search}%");
                 });
             })
             ->when($companyId, function ($query) use ($companyId) {
@@ -216,13 +216,6 @@ class Van extends Authenticatable implements JWTSubject
     public static function getVansCountByCompanyId(int $companyId): int
     {
         return self::where('company_id', '=', $companyId)->count();
-    }
-
-    public static function getTotalStockByCompanyId(int $companyId): int
-    {
-        return self::where('vans.company_id', '=', $companyId)
-            ->join('van_products', 'vans.id', '=', 'van_products.van_id')
-            ->sum('van_products.quantity');
     }
 
     public static function getActiveOperativesCount(int $companyId, string $date): int

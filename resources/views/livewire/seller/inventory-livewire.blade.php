@@ -2,60 +2,67 @@
     @php
         use Illuminate\Support\Str;
         use App\Enums\ProductStatusEnum;
+        use App\Enums\UserRoleEnum;
     @endphp
 
     <x-session-messages />
 
     <div class="row">
-        <div class="col-12 col-sm-12 col-md-4 py-4 my-2">
-            <input type="text" wire:model.live.debounce.500ms="search" class="form-control" placeholder="Search here...">
-        </div>
-        <div class="col-12 col-sm-12 col-md-3 py-4 my-2">
-            <select class="form-control" wire:model.live.debounce.500ms="category_id">
-                <option value="0">Select category</option>
-                @foreach ($categories as $cat)
-                    <option value="{{ $cat->id }}">{{ $cat->category_name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-12 col-sm-12 col-md-5 d-flex">
-            @if (Auth::user()->role->name == 'child_seller')
-                <button type="button" class="btn btn-primary col-12 col-sm-12 col-md-3 my-4 p-1 w-100 mx-1 rounded"
-                    title="Update bulk">
-                    <i class="fas fa-angle-double-up"></i>
-                </button>
-            @else
-                <button type="button" class="btn btn-warning my-4 p-1 w-100 mx-1 rounded"
-                    wire:click="toggleAllProducts(1)" wire:target="toggleAllProducts(1)" wire:loading.class="btn-dark"
-                    wire:loading.class.remove="btn-warning" wire:loading.attr="disabled" title="Enable All">
-                    <span class="fa fa-toggle-on" wire:target="toggleAllProducts(1)" wire:loading.remove></span>
-                    <span wire:target="toggleAllProducts(1)" wire:loading>
-                        <span class="spinner-border spinner-border-sm text-light" role="status"
-                            aria-hidden="true"></span>
-                    </span>
-                </button>
-                <button type="button" class="btn btn-danger text-white py-3 my-4 p-1 w-100 mx-1"
-                    wire:click="toggleAllProducts(0)" wire:target="toggleAllProducts(0)" wire:loading.class="btn-dark"
-                    wire:loading.class.remove="btn-danger" wire:loading.attr="disabled" title="Disable All">
-                    <i class="fas fa-ban" wire:target="toggleAllProducts(0)" wire:loading.remove></i>
-                    <span wire:target="toggleAllProducts(0)" wire:loading>
-                        <span class="spinner-border spinner-border-sm text-light" role="status"
-                            aria-hidden="true"></span>
-                    </span>
-                </button>
-                <a type="button" href="{{ route('seller.add.single.inventory.form') }}"
-                    class="btn btn-primary my-4 py-3 w-100 mx-1 px-0" title="Add New">
-                    <span class="fas fa-plus"></span>
-                </a>
-                {{-- <a type="button" href="{{ route('seller.add.bulk.inventory') }}" class="btn btn-primary my-4 py-3 w-100 mx-1 px-0" title="Add Bulk">
-                    <span class="fas fa-plus"></span>
-                    <span class="fas fa-boxes"></span>
-                </a> --}}
-            @endif
+        <div class="col-lg-12 py-4 my-2">
+            <div class="row">
+                <div class="col-lg-8 col-sm-12 col-md-8">
+                    <div class="row">
+                        <div class="col-12 col-sm-8 mb-2">
+                            <input type="text" wire:model.live.debounce.500ms="search" class="form-control"
+                                placeholder="Search here...">
+                        </div>
+                        <div class="col-12 col-sm-4 mb-2">
+                            <select class="form-control" wire:model.live.debounce.500ms="category_id">
+                                <option value="0">Select category</option>
+                                @foreach ($categories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->category_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-12 col-md-4 d-flex flex-sm-row">
+                    @if (Auth::user()->role_id == UserRoleEnum::CHILD_SELLER->value)
+                        <button type="button" class="btn btn-site-primary p-1 w-100 mx-1" title="Update bulk">
+                            <i class="fas fa-angle-double-up"></i>
+                        </button>
+                    @else
+                        <button type="button" class="btn btn-site-primary p-1 w-100 mx-1"
+                            wire:click="toggleAllProducts(1)" wire:target="toggleAllProducts(1)"
+                            wire:loading.class="btn-dark" wire:loading.class.remove="btn-warning"
+                            wire:loading.attr="disabled" title="Enable All">
+                            <span class="fa fa-toggle-on" wire:target="toggleAllProducts(1)" wire:loading.remove></span>
+                            <span wire:target="toggleAllProducts(1)" wire:loading>
+                                <span class="spinner-border spinner-border-sm text-light" role="status"
+                                    aria-hidden="true"></span>
+                            </span>
+                        </button>
+                        <button type="button" class="btn btn-secondary p-1 w-100 mx-1"
+                            wire:click="toggleAllProducts(0)" wire:target="toggleAllProducts(0)"
+                            wire:loading.class="btn-dark" wire:loading.class.remove="btn-danger"
+                            wire:loading.attr="disabled" title="Disable All">
+                            <i class="fas fa-ban" wire:target="toggleAllProducts(0)" wire:loading.remove></i>
+                            <span wire:target="toggleAllProducts(0)" wire:loading>
+                                <span class="spinner-border spinner-border-sm text-light" role="status"
+                                    aria-hidden="true"></span>
+                            </span>
+                        </button>
+                        <a type="button" href="{{ route('seller.inventory.add.manually') }}"
+                            class="btn btn-site-primary pt-2 w-100 mx-1" title="Add New">
+                            <span class="fas fa-plus"></span>
+                        </a>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 
-    @if (Auth::user()->role->name == 'seller')
+    @if (Auth::user()->role_id == UserRoleEnum::SELLER->value)
         <div class="container-xxl flex-grow-1 container-p-y">
             <section class="section-products">
                 <div class="container">
@@ -113,7 +120,9 @@
                                                     </li>
                                                 @endif
                                                 <li>
-                                                    <a href="{{ route('seller.edit.inventory.form', ['productId' => $inventory->id]) }}"
+                                                    <a href="{{ route('seller.inventory.edit.manually', [
+                                                        'productId' => $inventory->id,
+                                                    ]) }}"
                                                         title="Edit Product">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
@@ -222,7 +231,9 @@
                                                     </li>
                                                 @endif
                                                 <li>
-                                                    <a href="{{ route('seller.edit.inventory.form', ['productId' => $inventory->id]) }}"
+                                                    <a href="{{ route('seller.inventory.edit.manually', [
+                                                        'productId' => $inventory->id,
+                                                    ]) }}"
                                                         title="Edit Product">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
@@ -277,7 +288,7 @@
                 </div>
             </section>
         </div>
-    @elseif (Auth::user()->role->name == 'child_seller')
+    @elseif (Auth::user()->role_id == UserRoleEnum::CHILD_SELLER->value)
         <div class="container">
             <div class="row">
                 <table class="table">

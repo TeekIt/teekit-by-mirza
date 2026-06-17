@@ -20,31 +20,19 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Attributes\SearchUsingFullText;
 use Laravel\Scout\Searchable;
+use Illuminate\Support\Str;
 
 class Products extends Model
 {
     use HasFactory, Searchable, SoftDeletes;
 
-    protected $fillable = [
-        'seller_id',
-        'category_id',
-        'product_name',
-        'sku',
-        'price',
-        'discount_percentage',
-        'weight',
-        'brand',
-        'size',
-        'status',
-        'contact',
-        'colors',
-        'bike',
-        'car',
-        'van',
-        'feature_img',
-        'height',
-        'width',
-        'length',
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array<string>|bool
+     */
+    protected $guarded = [
+        'id',
     ];
 
     protected $hidden = [
@@ -52,6 +40,10 @@ class Products extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    /**
+     * Laravel Built-In Helpers
+     */
 
     /**
      * Get the attributes that should be cast.
@@ -65,22 +57,15 @@ class Products extends Model
         ];
     }
 
-    /**
-     * Laravel Built-In Helpers
-     */
-    protected function status(): Attribute
+    protected function sku(): Attribute
     {
         return Attribute::make(
-            set: fn($value) => (string) $value
+            set: fn(string $value) => strtoupper(preg_replace('/\s+/', '', $value)),
         );
     }
 
     /**
      * Scout Built-In Helpers
-     */
-
-    /**
-     * Get the indexable data array for the model.
      */
     #[SearchUsingFullText(['product_name'])]
     public function toSearchableArray(): array
@@ -144,8 +129,7 @@ class Products extends Model
     }
 
     /**
-     * Fetch all sellers related to a product.
-     * "Sellers" could be parent or child sellers.
+     * Fetch all sellers related to a product. "Sellers" could be parent or child sellers.
      */
     public function sellers(): BelongsToMany
     {
@@ -541,14 +525,39 @@ class Products extends Model
         return self::select($columns)->where('id', '=', $id)->WhereProductIsEnable()->first();
     }
 
-    public static function getParentSellerProducts(int $seller_id): LengthAwarePaginator
+    public static function getById(int $id, int $sellerId, array $columns = ['*']): Products
     {
-        return self::WhereProductIsEnable()->where('seller_id', '=', $seller_id)->paginate(20);
+        return self::select($columns)
+            ->with([
+                'sellers' => function ($sellersRelation) use ($sellerId) {
+                    $sellersRelation->select(
+                        User::getSellerCommonColumns()
+                    )->where('seller_id', '=', $sellerId);
+                },
+                'qty' => function ($qtyRelation) use ($sellerId) {
+                    $qtyRelation->select('id', 'product_id', 'qty')->where('seller_id', '=', $sellerId);
+                },
+                'images:id,product_id,product_image',
+                'category:id,category_name,category_image',
+            ])
+            ->whereHas('qty', function ($qtyRelation) use ($sellerId) {
+                $qtyRelation->where('seller_id', '=', $sellerId);
+            })
+            ->where('id', '=', $id)
+            ->firstOrFail();
     }
 
-    public static function getParentSellerProductsAsc(int $seller_id): Collection
+    public static function getParentSellerProducts(int $sellerId): LengthAwarePaginator
     {
-        return self::WhereProductIsEnable()->where('seller_id', '=', $seller_id)->orderBy('id', 'asc')->get();
+        return self::WhereProductIsEnable()->where('seller_id', '=', $sellerId)->paginate(20);
+    }
+
+    public static function getParentSellerProductsAsc(int $sellerId): Collection
+    {
+        return self::WhereProductIsEnable()
+            ->where('seller_id', '=', $sellerId)
+            ->orderBy('created_at', OrderByEnum::ASC->value)
+            ->get();
     }
 
     public static function getParentSellerProductsForView(
@@ -619,20 +628,16 @@ class Products extends Model
             ->paginate(12);
     }
 
-    public static function getProductsByParameters(int $seller_id, string $sku, int $catgory_id): Products
+    public static function getProductsByParameters(int $sellerId, string $sku, int $categoryId): Products
     {
-        return self::where('seller_id', '=', $seller_id)
+        return self::where('seller_id', '=', $sellerId)
             ->where('sku', '=', $sku)
-            ->where('category_id', '=', $catgory_id)
+            ->where('category_id', '=', $categoryId)
             ->first();
     }
 
     public static function getProductWeight(int $id): float
     {
-        // $product = self::select('weight')->where('id', '=', $id)->first()->weight;
-
-        // return $product->weight;
-
         return self::select('weight')->where('id', '=', $id)->first()->weight;
     }
 

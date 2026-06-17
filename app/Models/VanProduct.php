@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\IsFeaturedEnum;
 use App\Enums\OrderByEnum;
 use App\Enums\VanProductStatusEnum;
+use App\Enums\VanProductTypeEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,13 +16,14 @@ use App\Models\Categories;
 use App\Models\VanOperativeProductUsage;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class VanProduct extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * Fields protected from mass assignment
@@ -35,6 +38,40 @@ class VanProduct extends Model
         'updated_at',
         'deleted_at',
     ];
+
+    /**
+     * Laravel Built-In Helpers
+     */
+    
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => VanProductStatusEnum::class,
+        ];
+    }
+
+    protected function sku(): Attribute
+    {
+        return Attribute::make(
+            set: fn(string $value) => strtoupper(preg_replace('/\s+/', '', $value)),
+        );
+    }
+
+    public function getStatusAttribute()
+    {
+        if ($this->quantity == 0) {
+            return VanProductStatusEnum::OUT_OF_STOCK->value;
+        } elseif ($this->quantity < $this->min_threshold) {
+            return VanProductStatusEnum::LOW_STOCK->value;
+        } else {
+            return VanProductStatusEnum::IN_STOCK->value;
+        }
+    }
 
     /**
      * Relations
@@ -52,27 +89,6 @@ class VanProduct extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Categories::class, 'category_id');
-    }
-
-    /**
-     * Laravel Built-In Helpers
-     */
-    protected function sku(): Attribute
-    {
-        return Attribute::make(
-            set: fn(string $value) => strtoupper(preg_replace('/\s+/', '', $value)),
-        );
-    }
-
-    public function getStatusAttribute()
-    {
-        if ($this->quantity == 0) {
-            return VanProductStatusEnum::OUT_OF_STOCK->value;
-        } elseif ($this->quantity < $this->min_threshold) {
-            return VanProductStatusEnum::LOW_STOCK->value;
-        } else {
-            return VanProductStatusEnum::IN_STOCK->value;
-        }
     }
 
     /**
@@ -141,10 +157,11 @@ class VanProduct extends Model
         return self::create($data);
     }
 
-    public static function addBulkFromProductsTable(Collection $products, Collection $quantitiesMap, int $vanId): bool
+    public static function addBulkFromProductsTable(Collection $products, Collection $quantitiesMap, int $companyId, int $vanId): bool
     {
         $now = now();
         $vanProducts = $products->map(fn($product) => [
+            'company_id' => $companyId,
             'seller_id' => $product->seller_id,
             'category_id' => $product->category_id,
             'van_id' => $vanId,
@@ -152,20 +169,22 @@ class VanProduct extends Model
             'sku' => $product->sku,
             'price' => $product->price,
             'quantity' => $quantitiesMap[$product->id]['qty'],
-            'featured' => 0,
+            'featured' => IsFeaturedEnum::NO->value,
             'discount_percentage' => $product->discount_percentage,
             'weight' => $product->weight,
             'brand' => $product->brand,
             'size' => $product->size,
+            'status' => VanProductStatusEnum::IN_STOCK->value,
             'contact' => $product->contact ?? '',
             'colors' => is_array($product->colors) ? json_encode($product->colors) : $product->colors,
-            'bike' => $product->bike,
-            'car' => $product->car,
-            'van' => $product->van,
+            'bike' => null,
+            'car' => null,
+            'van' => 1,
             'feature_img' => $product->feature_img,
             'height' => $product->height,
             'width' => $product->width,
             'length' => $product->length,
+            'type' => VanProductTypeEnum::PAY_AS_YOU_GO->value,
             'created_at' => $now,
         ])->toArray();
 
@@ -194,7 +213,7 @@ class VanProduct extends Model
                     : null,
                 'bike' => null,
                 'car' => null,
-                'van' => null,
+                'van' => 1,
                 'feature_img' => $item->product->feature_img,
                 'height' => $item->product->height,
                 'width' => $item->product->width,
@@ -210,9 +229,14 @@ class VanProduct extends Model
         return self::insert($vanProducts);
     }
 
+    public static function getTotalStockByCompanyId(int $companyId): int
+    {
+        return self::where('company_id', '=', $companyId)->sum('quantity');
+    }
+
     public static function getRecentByVan(int $vanId, array $columns = ['*']): Collection
     {
-        return self::where('van_id', $vanId)
+        return self::where('van_id', '=', $vanId)
             ->latest('updated_at')
             ->limit(10)
             ->get($columns);

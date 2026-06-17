@@ -26,29 +26,29 @@ class OrderVanInventoryLivewire extends Component
 
     public User $authUser;
 
-    public int $userId = 0;
+    public int $companyId;
 
-    public string $vanAddress = '';
+    public ?string $vanAddress = null;
 
-    public string $vanCountry = '';
+    public ?string $vanCountry = null;
 
-    public string $vanState = '';
+    public ?string $vanState = null;
 
-    public string $vanCity = '';
+    public ?string $vanCity = null;
 
-    public string $vanPostcode = '';
+    public ?string $vanPostcode = null;
 
-    public float $vanLat = 0.0;
+    public ?float $vanLat = null;
 
-    public float $vanLon = 0.0;
+    public ?float $vanLon = null;
 
-    public int $vanId = 0;
+    public ?int $vanId = null;
 
-    public int $nearBySellerId = 0;
+    public ?int $nearBySellerId = null;
 
     public array $nearbySellers = [];
 
-    public string $search = '';
+    public ?string $search = null;
 
     public ?int $categoryId = null;
 
@@ -71,18 +71,26 @@ class OrderVanInventoryLivewire extends Component
     */
     protected $paginationTheme = 'bootstrap';
 
+    protected function rules(): array
+    {
+        return [
+            'vanId' => 'required|integer|exists:vans,id',
+            'vanAddress' => 'required|string',
+            'nearBySellerId' => 'required|integer|exists:users,id',
+        ];
+    }
     /*
     * Lifecycle Hooks
     */
     public function mount(): void
     {
         $this->authUser = User::getAuthUser();
-        $this->userId = $this->authUser->id;
+        $this->companyId = $this->authUser->id;
         $this->isPayAsYouGoRoute = request()->is('*pay-as-you-go*');
         $this->categories = Categories::all(['id', 'category_name']);
 
-         $this->vans = Van::getByCompanyId(
-            companyId: $this->userId,
+        $this->vans = Van::getByCompanyId(
+            companyId: $this->companyId,
             columns: ['id', 'company_id', 'number_plate']
         );
     }
@@ -90,6 +98,29 @@ class OrderVanInventoryLivewire extends Component
     /*
      * Custom Helpers
      */
+    public function resetComponent()
+    {
+        $this->resetValidation();
+
+        $this->reset([
+            'vanId',
+            'vanAddress',
+            'vanCountry',
+            'vanState',
+            'vanCity',
+            'vanPostcode',
+            'vanLat',
+            'vanLon',
+            'nearBySellerId',
+            'nearbySellers',
+            'search',
+            'categoryId',
+            'orderBy',
+            'orderByPrice',
+            'showInventoryGrid',
+        ]);
+    }
+
     public function updatedVanAddress(): void
     {
         $this->resetSearchResults();
@@ -152,17 +183,13 @@ class OrderVanInventoryLivewire extends Component
             $this->vanLat,
             $this->vanLon,
             $sellersOfTheSameCity,
-            $this->userId,
+            $this->companyId,
         );
     }
 
     public function performSearch(): void
     {
-        $this->validate([
-            'vanId' => 'required|integer|exists:vans,id',
-            'vanAddress' => 'required|string',
-            'nearBySellerId' => 'required|integer|exists:users,id',
-        ]);
+        $this->validate();
 
         $this->showInventoryGrid = true;
     }
@@ -298,6 +325,10 @@ class OrderVanInventoryLivewire extends Component
      */
     public function addDirectlyToVan(): void
     {
+        $this->validate([
+            'vanId' => 'required|integer|exists:vans,id',
+        ]);
+
         try {
             $cartItems = $this->getCartItemsValues();
 
@@ -311,17 +342,19 @@ class OrderVanInventoryLivewire extends Component
 
             /* Perform checkout operation */
             $vanInventoryPayAsYouGoOrderPlaced = (new ProcessVanInventoryPayAsYouGoOrderAction())->execute(
+                companyId: $this->companyId,
                 vanId: $this->vanId,
                 orderItems: $cartItems,
             );
             /* Operation finished */
             sleep(1);
             $this->dispatch('close-cart', ['id' => 'cartDrawer']);
+            $this->resetComponent();
 
             if ($vanInventoryPayAsYouGoOrderPlaced) {
                 session()->forget(self::CART_SESSION_KEY);
                 session()->flash('success', config('constants.PAY_AS_YOU_GO_ORDER_PLACED_SUCCESSFULLY'));
-            } 
+            }
         } catch (Exception $error) {
             report($error);
             session()->flash('error', config('constants.ORDER_PLACED_FAILED'));
@@ -330,6 +363,10 @@ class OrderVanInventoryLivewire extends Component
 
     public function checkout(OrderTypeEnum $vanInventoryOrderType): void
     {
+        $this->validate([
+            'vanId' => 'required|integer|exists:vans,id',
+        ]);
+
         try {
             $cartItems = $this->getCartItemsValues();
 
@@ -343,7 +380,7 @@ class OrderVanInventoryLivewire extends Component
 
             /* Perform checkout operation */
             $vanInventoryOrderPlaced = (new ProcessVanInventoryOrderAction())->execute(
-                companyId: $this->userId,
+                companyId: $this->companyId,
                 vanId: $this->vanId,
                 customerName: $this->authUser->name,
                 customerLat: $this->authUser->lat,
@@ -373,6 +410,8 @@ class OrderVanInventoryLivewire extends Component
         } catch (Exception $error) {
             report($error);
             session()->flash('error', config('constants.ORDER_PLACED_FAILED'));
+
+            throw $error;
         }
     }
 

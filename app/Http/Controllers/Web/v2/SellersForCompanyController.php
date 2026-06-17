@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web\v2;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSellersForCompanyRequest;
 use App\Http\Requests\UpdateSellersForCompanyRequest;
 use App\Models\SellersForCompany;

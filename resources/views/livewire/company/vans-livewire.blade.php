@@ -387,7 +387,7 @@
                         <tbody>
                             @forelse ($data as $singleIndex)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $singleIndex->id }}</td>
                                         <td>
                                             <input type="checkbox" class="select-checkbox" title="Select"
                                                 onclick="event.stopPropagation();"

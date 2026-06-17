@@ -17,7 +17,14 @@ class OrdersFromOtherSeller extends Model
 {
     use HasFactory, Prunable, SoftDeletes;
 
-    protected $fillable = ['*'];
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array<string>|bool
+     */
+    protected $guarded = [
+        'id',
+    ];
 
     protected $hidden = [
         'updated_at',
@@ -74,7 +81,7 @@ class OrdersFromOtherSeller extends Model
         ?OrderStatusEnum $orderStatus = null
     ): bool {
         $order = self::findOrFail($id);
-        
+
         if (! is_null($initialTotal)) {
             $order->initial_total = $initialTotal;
         }

@@ -86,7 +86,7 @@ final class ProcessVanInventoryOrderAction
                 $orders[(int) $sellerId] = $order;
             }
 
-            $this->sendEmailsToSellers($orderItems, $vanAddress);
+            $this->sendEmailsToSellers($groupedOrderItemsBySeller, $vanAddress);
 
             return $orders;
         });
@@ -103,11 +103,9 @@ final class ProcessVanInventoryOrderAction
         return $groupedOrderItemsBySeller;
     }
 
-    private function sendEmailsToSellers(array $orderItems, string $vanLocation): void
+    private function sendEmailsToSellers(array $groupedOrderItemsBySeller, string $vanLocation): void
     {
-        $orderItemsBySeller = $this->groupOrderItemsBySeller($orderItems);
-
-        foreach ($orderItemsBySeller as $sellerId => $orderItemsBySeller) {
+        foreach ($groupedOrderItemsBySeller as $sellerId => $orderItemsBySeller) {
             $seller = User::getUserByID($sellerId, ['id', 'name', 'email']);
 
             EmailServices::sendVanInventoryOrderMail(

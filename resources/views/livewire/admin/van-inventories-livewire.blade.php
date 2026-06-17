@@ -30,17 +30,17 @@
                 </div>
                 <div class="col-12 col-xl-6 d-flex gap-1">
                     <button type="button" class="btn btn-site-primary my-3 py-3 w-100" onclick="selectAll()"
-                        title="Select All">
+                        title="Select All" disabled>
                         <span class="text-white">All</span>
                     </button>
                     <button type="button" class="btn btn-danger my-3 py-3 w-100" onclick="delVans()"
-                        title="Delete Selected">
+                        title="Delete Selected" disabled>
                         <i class="fas fa-trash-alt"></i>
                     </button>
-                    <button type="button" class="btn btn-site-primary my-3 py-3 w-100" title="Import">
+                    <button type="button" class="btn btn-site-primary my-3 py-3 w-100" title="Import" disabled>
                         <i class="fas fa-cloud-upload-alt"></i>
                     </button>
-                    <button type="button" class="btn btn-site-primary my-3 py-3 w-100" title="Export">
+                    <button type="button" class="btn btn-site-primary my-3 py-3 w-100" title="Export" disabled>
                         <i class="fas fa-cloud-download-alt"></i>
                     </button>
                     <div class="dropdown w-100 my-3">

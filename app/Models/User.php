@@ -127,6 +127,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Qty::class, 'seller_id');
     }
 
+    public function vans(): HasMany
+    {
+        return $this->hasMany(Van::class, 'company_id');
+    }
+
     /**
      * Validators
      */
@@ -212,6 +217,7 @@ class User extends Authenticatable implements JWTSubject
         ?string $name = null,
         ?string $lName = null,
         ?string $email = null,
+        ?string $countryCode = null,
         ?string $phone = null,
         ?string $fullAddress = null,
         ?string $unitAddress = null,
@@ -239,8 +245,11 @@ class User extends Authenticatable implements JWTSubject
         if (! is_null($email)) {
             $user->email = $email;
         }
+        if (! is_null($countryCode)) {
+            $user->country_code = $countryCode;
+        }
         if (! is_null($phone)) {
-            $user->phone = '+44' . $phone;
+            $user->phone = $phone;
         }
         if (! is_null($fullAddress)) {
             $user->full_address = $fullAddress;
@@ -270,7 +279,7 @@ class User extends Authenticatable implements JWTSubject
             $user->business_name = $businessName;
         }
         if (! is_null($businessPhone)) {
-            $user->business_phone = '+44' . $businessPhone;
+            $user->business_phone = $businessPhone;
         }
         if (! is_null($password)) {
             $user->password = Hash::make($password);
@@ -288,10 +297,10 @@ class User extends Authenticatable implements JWTSubject
         return $user->save();
     }
 
-    public static function updateStoreLocation(
-        int $user_id,
-        string $full_address,
-        ?string $unit_address,
+    public static function updateLocation(
+        int $userId,
+        string $fullAddress,
+        ?string $unitAddress,
         string $country,
         string $state,
         string $city,
@@ -299,11 +308,9 @@ class User extends Authenticatable implements JWTSubject
         string $lat,
         string $lon
     ): bool {
-        $user = self::findOrFail($user_id);
-        $user->full_address = $full_address;
-        if (! is_null($unit_address)) {
-            $user->unit_address = $unit_address;
-        }
+        $user = self::findOrFail($userId);
+        $user->full_address = $fullAddress;
+        $user->unit_address = $unitAddress;
         $user->country = $country;
         $user->state = $state;
         $user->city = $city;
