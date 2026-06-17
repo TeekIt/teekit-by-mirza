@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('brand')->nullable();
             $table->string('size')->nullable();
             $table->string('status')->comment('Only VanProductStatusEnum values are allowed');
+            $table->string('country_code', 4)->nullable();
             $table->string('contact');
             $table->json('colors')->nullable();
             $table->tinyInteger('bike')->nullable();
