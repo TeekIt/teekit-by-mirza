@@ -78,30 +78,15 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('seller.settings') ? 'active' : '' }}"
+                        href="{{ route('seller.settings') }}">
                         <i class="nav-icon fas fa-cogs"></i>
-                        <p>
+                        <p class="ml-2">
                             Settings
-                            <i class="fas fa-angle-left right"></i>
                         </p>
                     </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{{ route('seller.settings') }}" class="nav-link ">
-                                <i class="fas fa-gears nav-icon"></i>
-                                <p>General</p>
-                            </a>
-                        </li>
-                        {{-- <li class="nav-item">
-                            <a href="{{route('setting.payment')}}" class="nav-link ">
-                                <i class="fas fa-money nav-icon"></i>
-                                <p>Payment</p>
-                            </a>
-                        </li> --}}
-                    </ul>
                 </li>
-
             </ul>
         </nav>
         <!-- /.sidebar-menu -->

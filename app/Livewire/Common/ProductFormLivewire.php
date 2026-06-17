@@ -18,11 +18,11 @@ use App\Services\ImageServices;
 use App\Services\ProductServices;
 use Exception;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ProductFormLivewire extends Component
@@ -44,7 +44,7 @@ class ProductFormLivewire extends Component
 
     public string $productName = '';
 
-    public string $sku = '';
+    public ?string $sku = null;
 
     public ?int $categoryId = null;
 
@@ -68,7 +68,9 @@ class ProductFormLivewire extends Component
 
     public ProductStatusEnum|VanProductStatusEnum|null $status = null;
 
-    public string $contact = '';
+    public string $countryCode = '+44';
+
+    public ?string $contact = null;
 
     public array $colors = [];
 
@@ -82,11 +84,13 @@ class ProductFormLivewire extends Component
 
     public ?TemporaryUploadedFile $featureImgUpload = null;
 
-    public string $featureImg = '';
+    public ?string $featureImg = null;
 
     public array $galleryUploads = [];
 
     public array $existingImages = [];
+
+    public ?string $message = null;
 
     protected function rules(): array
     {
@@ -137,7 +141,7 @@ class ProductFormLivewire extends Component
 
         if ($productId) {
             $this->productId = $productId;
-            $this->populateComponentVariables();
+            $this->populateComponentVariablesWithProductData($productId);
         }
     }
 
@@ -163,6 +167,7 @@ class ProductFormLivewire extends Component
             'brand',
             'size',
             'status',
+            'countryCode',
             'contact',
             'colors',
             'vehicle',
@@ -174,61 +179,84 @@ class ProductFormLivewire extends Component
         ]);
     }
 
-    public function populateComponentVariables(): void
+    public function getProductData(int $productId): VanProduct|Products
     {
-        if (request()->route()->getName() === 'vans.inventory.edit.manually') {
-            $product = VanProduct::getById($this->productId);
-            $this->productName        = $product->product_name;
-            $this->sku                = $product->sku;
-            $this->categoryId         = $product->category_id;
-            $this->qty                = $product->quantity;
-            $this->price              = $product->price;
-            $this->discountPercentage = $product->discount_percentage;
-            $this->height             = $product->height ? $product->height : null;
-            $this->width              = $product->width ? $product->width : null;
-            $this->length             = $product->length ? $product->length : null;
-            $this->weight             = $product->weight;
-            $this->brand              = $product->brand;
-            $this->size               = $product->size;
-            $this->status             = VanProductStatusEnum::from($product->status);
-            $contact                  = $product->contact ?? '';
-            $this->contact            = str_starts_with($contact, '+44') ? substr($contact, 3) : $contact;
-            $this->colors             = is_array($decoded = json_decode($product->colors, true)) ? array_keys($decoded) : [];
-            $this->vehicle            = match (true) {
-                (bool) $product->bike => TransportVehicleEnum::BIKE,
-                (bool) $product->car  => TransportVehicleEnum::CAR,
-                (bool) $product->van  => TransportVehicleEnum::VAN,
-                default               => null,
-            };
-            $this->vanId              = $product->van_id;
-            $this->featureImg         = $product->feature_img ?? '';
-            $this->minThreshold       = $product->min_threshold;
-            $this->type               = VanProductTypeEnum::from($product->type);
+        return (request()->route()->getName() === 'vans.inventory.edit.manually') ?
+            VanProduct::getById($productId) :
+            Products::getById($productId, $this->authUserId);
+    }
+
+    public function getQty(VanProduct|Products $product): int
+    {
+        if ($product instanceof VanProduct) {
+            return $product->quantity;
         }
+
+        return $product->qty[0]->qty;
+    }
+
+    // public function getStatus(VanProduct|Products $product): VanProductStatusEnum|ProductStatusEnum
+    // {
+    //     if ($product instanceof VanProduct) {
+    //         return VanProductStatusEnum::from($product->status);
+    //     }
+
+    //     return ProductStatusEnum::from($product->status);
+    // }
+
+    public function getVehicle(VanProduct|Products $product): TransportVehicleEnum|null
+    {
+        return match (true) {
+            (bool) $product->bike => TransportVehicleEnum::BIKE,
+            (bool) $product->car  => TransportVehicleEnum::CAR,
+            (bool) $product->van  => TransportVehicleEnum::VAN,
+            default               => null,
+        };
+    }
+
+    public function populateComponentVariablesWithProductData(int $productId): void
+    {
+        $product = $this->getProductData($productId);
+        $this->productName        = $product->product_name;
+        $this->sku                = $product->sku;
+        $this->categoryId         = $product->category_id;
+        $this->qty                = $this->getQty($product);
+        $this->price              = $product->price;
+        $this->discountPercentage = $product->discount_percentage;
+        $this->height             = $product->height;
+        $this->width              = $product->width;
+        $this->length             = $product->length;
+        $this->weight             = $product->weight;
+        $this->brand              = $product->brand;
+        $this->size               = $product->size;
+        $this->status             = $product->status;
+        $this->countryCode        = $product->country_code ?? '+44';
+        $this->contact            = $product->contact;
+        $this->colors             = is_array($decoded = json_decode($product->colors, true)) ? array_keys($decoded) : [];
+        $this->vehicle            = $this->getVehicle($product);
+        $this->vanId              = ($product instanceof VanProduct) ? $product->van_id : null;
+        $this->featureImg         = $product->feature_img;
+        $this->minThreshold       = ($product instanceof VanProduct) ? $product->min_threshold : null;
+        $this->type               = ($product instanceof VanProduct) ? VanProductTypeEnum::from($product->type) : null;
     }
 
     public function isPayAsYouGo($productType = null): bool
     {
         return $productType === VanProductTypeEnum::PAY_AS_YOU_GO;
-
-        // if ($productType instanceof VanProductTypeEnum) {
-        //     return $productType === VanProductTypeEnum::PAY_AS_YOU_GO;
-        // }
-
-        // return false;
     }
 
-    public function uploadProductGalleryImages(): void
+    public function uploadProductGalleryImages(int $productId): void
     {
         foreach ($this->galleryUploads as $galleryImage) {
-            $fileName = ImageServices::uploadLivewireImg($galleryImage, $this->productId);
+            $fileName = ImageServices::uploadLivewireImg($galleryImage, $productId);
             if ($fileName) {
-                ProductImage::add($this->productId, $fileName);
+                ProductImage::add($productId, $fileName);
             }
         }
 
         /* Refresh images without redirecting */
-        $this->existingImages   = Products::find($this->productId)->images->toArray();
+        // $this->existingImages   = ($this->productId) ? Products::find($this->productId)->images->toArray() : [];
+        $this->existingImages   = Products::find($productId)->images->toArray();
         $this->galleryUploads   = [];
     }
 
@@ -238,13 +266,13 @@ class ProductFormLivewire extends Component
             VanProduct::find($productId)->update($data);
         }
 
-        if ($this->isAuthUserParentSeller || $this->isAuthUserChildSeller) {
+        if ($this->isAuthUserParentSeller) {
             $product = Products::find($productId);
 
             $product->update($data);
             Qty::updateQty($productId, $this->authUserId, $this->qty);
 
-            $this->uploadProductGalleryImages();
+            $this->uploadProductGalleryImages($productId);
         }
     }
 
@@ -254,80 +282,84 @@ class ProductFormLivewire extends Component
             VanProduct::add($data);
         }
 
-        if ($this->isAuthUserParentSeller || $this->isAuthUserChildSeller) {
+        if ($this->isAuthUserParentSeller) {
             $product = Products::add($data);
 
             Qty::add($this->authUserId, $product->id, $this->categoryId, $this->qty);
 
-            $this->uploadProductGalleryImages();
+            $this->uploadProductGalleryImages($product->id);
         }
 
         $this->resetComponent();
     }
 
+    /*
+    * CRUD Methods
+    */
     public function addOrUpdateProduct(): void
     {
         $this->validate();
 
         try {
             /* Perform some operation */
-            if ($this->featureImgUpload) {
-                $uploadedFilePath = ImageServices::uploadLivewireImg($this->featureImgUpload, $this->authUserId);
-                $this->featureImg = $uploadedFilePath;
-            }
+            DB::transaction(function () {
+                if ($this->featureImgUpload) {
+                    $uploadedFilePath = ImageServices::uploadLivewireImg($this->featureImgUpload, $this->authUserId);
+                    $this->featureImg = $uploadedFilePath;
+                }
 
-            $data = [
-                'seller_id'           => $this->authUserId,
-                'category_id'         => $this->categoryId,
-                'product_name'        => $this->productName,
-                'sku'                 => strtoupper(Str::remove(' ', $this->sku)),
-                'price'               => $this->price,
-                'discount_percentage' => $this->discountPercentage !== '' ? (float) $this->discountPercentage : 0.00,
-                'height'              => $this->height,
-                'width'               => $this->width,
-                'length'              => $this->length,
-                'weight'              => $this->weight,
-                'brand'               => $this->brand,
-                'size'                => $this->size,
-                'status'              => $this->status,
-                'contact'             => '+44' . $this->contact,
-                'colors'              => ! empty($this->colors)
-                    ? ProductServices::jsonEncodeColors($this->colors)
-                    : null,
-                'bike'                => ($this->vehicle === TransportVehicleEnum::BIKE->value) ? 1 : 0,
-                'car'                 => ($this->vehicle === TransportVehicleEnum::CAR->value) ? 1 : 0,
-                'van'                 => ($this->vehicle === TransportVehicleEnum::VAN->value) ? 1 : 0,
-                'feature_img'         => $this->featureImg,
-            ];
+                $data = [
+                    'seller_id'           => $this->authUserId,
+                    'category_id'         => $this->categoryId,
+                    'product_name'        => $this->productName,
+                    'sku'                 => $this->sku,
+                    'price'               => $this->price,
+                    'discount_percentage' => ($this->discountPercentage !== '') ? $this->discountPercentage : 0,
+                    'height'              => $this->height,
+                    'width'               => $this->width,
+                    'length'              => $this->length,
+                    'weight'              => $this->weight,
+                    'brand'               => $this->brand,
+                    'size'                => $this->size,
+                    'status'              => $this->status->value,
+                    'country_code'        => $this->countryCode,
+                    'contact'             => $this->contact,
+                    'colors'              => (! empty($this->colors)) ? ProductServices::jsonEncodeColors($this->colors) : null,
+                    'bike'                => ($this->vehicle === TransportVehicleEnum::BIKE) ? 1 : 0,
+                    'car'                 => ($this->vehicle === TransportVehicleEnum::CAR) ? 1 : 0,
+                    'van'                 => ($this->vehicle === TransportVehicleEnum::VAN) ? 1 : 0,
+                    'feature_img'         => $this->featureImg,
+                ];
 
-            if ($this->isAuthUserCompany) {
-                $data['seller_id'] = null;
-                $data['company_id'] = $this->authUserId;
-                $data['van_id'] = $this->vanId;
-                $data['status'] = ($this->qty < $this->minThreshold) ?
-                    VanProductStatusEnum::LOW_STOCK->value :
-                    VanProductStatusEnum::IN_STOCK->value;
-                $data['van'] = 1;
-                $data['quantity'] = $this->qty;
-                $data['min_threshold'] = $this->minThreshold;
-                $data['type'] = VanProductTypeEnum::MANUAL->value;
-            }
+                if ($this->isAuthUserCompany) {
+                    $data['seller_id'] = null;
+                    $data['company_id'] = $this->authUserId;
+                    $data['van_id'] = $this->vanId;
+                    $data['status'] = ($this->qty < $this->minThreshold) ?
+                        VanProductStatusEnum::LOW_STOCK->value :
+                        VanProductStatusEnum::IN_STOCK->value;
+                    $data['van'] = 1;
+                    $data['quantity'] = $this->qty;
+                    $data['min_threshold'] = $this->minThreshold;
+                    $data['type'] = VanProductTypeEnum::MANUAL->value;
+                }
 
-            if ($this->productId) {
+                if ($this->productId) {
 
-                $this->updateProduct($this->productId, $data);
+                    $this->updateProduct($this->productId, $data);
 
-                $message = config('constants.DATA_UPDATED_SUCCESS');
-            } else {
+                    $this->message = config('constants.DATA_UPDATED_SUCCESS');
+                } else {
 
-                $this->addProduct($data);
+                    $this->addProduct($data);
 
-                $message = config('constants.DATA_INSERTION_SUCCESS');
-            }
+                    $this->message = config('constants.DATA_INSERTION_SUCCESS');
+                }
+            });
             /* Operation finished */
             sleep(1);
 
-            session()->flash('success', $message);
+            session()->flash('success', $this->message);
         } catch (Exception $error) {
             report($error);
             session()->flash('error', config('constants.INTERNAL_SERVER_ERROR'));

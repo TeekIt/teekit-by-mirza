@@ -72,8 +72,6 @@ Route::middleware('transaction.wrapper')->group(function () {
      ***********************************************************************
      */
     Route::prefix('settings')->middleware(['auth', 'auth.sellers'])->controller(HomeController::class)->group(function () {
-        Route::get('/payment', 'paymentSettings')->name('setting.payment');
-        Route::post('/payment/update', 'paymentSettingsUpdate')->name('payment_settings_update');
         Route::post('/password/update', 'adminPasswordUpdate')->name('password_update');
         Route::get('/change_settings/{setting_name}/{value}', 'changeSettings')->name('change_settings')
             ->where([
@@ -110,14 +108,11 @@ Route::middleware('transaction.wrapper')->group(function () {
 
         Route::prefix('inventory')->group(function () {
             Route::get('/', InventoryLivewire::class)->name('seller.inventory');
+            Route::get('/add/manually', ProductFormLivewire::class)->name('seller.inventory.add.manually');
+            Route::get('/{productId}/edit/manually', ProductFormLivewire::class)->name('seller.inventory.edit.manually');
 
             Route::controller(ProductController::class)->group(function () {
-                Route::get('/add', 'addSingleInventoryForm')->name('seller.add.single.inventory.form');
-                Route::post('/add', 'addSingleInventory')->name('seller.add.single.inventory');
-                Route::get('/edit/{productId}', 'editSingleInventoryForm')->name('seller.edit.inventory.form');
-                Route::post('/update/{productId}', 'updateInventory')->name('seller.edit.inventory');
                 Route::get('/add_bulk', 'inventoryAddBulk')->name('seller.add.bulk.inventory');
-                Route::get('/delete/image/{imageId}', 'deleteImg')->name('seller.delete.img');
             });
 
             // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
@@ -165,8 +160,8 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::get('/inventories', VanInventoriesLivewire::class)->name('vans.inventories');
         Route::get('/inventories/order/online', OrderVanInventoryLivewire::class)->name('vans.inventories.order.online');
         Route::get('/inventories/order/pay-as-you-go', OrderVanInventoryLivewire::class)->name('vans.inventories.order.pay.as.you.go');
-        Route::get('/inventory/{productId}/edit/manually', ProductFormLivewire::class)->name('vans.inventory.edit.manually');
         Route::get('/inventory/add/manually', ProductFormLivewire::class)->name('vans.inventory.add.manually');
+        Route::get('/inventory/{productId}/edit/manually', ProductFormLivewire::class)->name('vans.inventory.edit.manually');
         Route::get('/delete', [VanController::class, 'destroy'])->name('vans.del');
         // vans.inventories.del
 
