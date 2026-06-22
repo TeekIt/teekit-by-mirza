@@ -417,7 +417,7 @@ class OrdersHeaderLivewire extends Component
         }
     }
 
-    public function sendCustomProductOrderToAnOtherSeller($orderId)
+    public function sendCustomProductOrderToAnOtherSeller(int $orderId)
     {
         try {
             /* Perform some operation */
@@ -464,9 +464,6 @@ class OrdersHeaderLivewire extends Component
             $response = $this->capturePayment();
 
             if ($this->selectedOrder->type == OrderTypeEnum::SELF_PICKUP->value) {
-                /**
-                 * Remove bugs related to "sendPickupYourOrderMail()"
-                 */
                 EmailServices::sendPickupYourOrderMail($this->selectedOrder);
             }
 
@@ -561,12 +558,9 @@ class OrdersHeaderLivewire extends Component
 
             $this->selectedOrder = VanInventoryOrder::getById($orderId);
 
-            $response = VanInventoryOrder::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
+            VanInventoryOrder::updateOrderStatus($orderId, OrderStatusEnum::ACCEPTED);
 
             if ($this->selectedOrder->type == OrderTypeEnum::SELF_PICKUP->value) {
-                /**
-                 * Remove bugs related to "sendPickupYourOrderMail()"
-                 */
                 EmailServices::sendPickupYourOrderMail($this->selectedOrder);
             }
 
@@ -574,17 +568,13 @@ class OrdersHeaderLivewire extends Component
             /* Operation finished */
             sleep(1);
 
-            if ($response === 1) {
-                $this->dispatch(event: 'refreshThisComponent')->self();
-                $this->dispatch(event: 'callParentRenderMethod');
-            } else {
-                session()->flash('error', config('constants.UPDATION_FAILED'));
-            }
+            $this->dispatch(event: 'refreshThisComponent')->self();
+            $this->dispatch(event: 'callParentRenderMethod');
         } catch (Exception $error) {
             DB::rollBack();
 
             report($error);
-            session()->flash('error', $error->getMessage());
+            session()->flash('error', config('constants.INTERNAL_SERVER_ERROR'));
         }
     }
 
@@ -619,9 +609,7 @@ class OrdersHeaderLivewire extends Component
 
             VanProduct::addBulkFromVanInventoryOrderTable($vanInventoryOrder);
 
-            $vanInventoryOrder->update([
-                'order_status' => OrderStatusEnum::COMPLETE->value,
-            ]);
+            $vanInventoryOrder->updateOrderStatus($orderId, OrderStatusEnum::COMPLETE);
 
             DB::commit();
             /* Operation finished */
