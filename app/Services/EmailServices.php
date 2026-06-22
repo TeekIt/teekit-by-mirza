@@ -21,31 +21,31 @@ use Illuminate\Support\Facades\Mail;
 
 final class EmailServices
 {
-    public static function getVerificationLink($verificationCode)
+    public static function getVerificationLink(string $verificationCode): string
     {
         return url('/') . '/auth/verify?token=' . $verificationCode;
     }
 
-    public static function sendRegeneratedStripeConnectAccMail(User $user)
+    public static function sendRegeneratedStripeConnectAccMail(User $user): void
     {
         $response = StripeServices::getConnectAccountLink($user);
 
         Mail::to($user->email)->send(new RegeneratedStripeConnectAccMail($response->url));
     }
 
-    public static function sendStripeConnectAccMail(User $user)
+    public static function sendStripeConnectAccMail(User $user): void
     {
         $response = StripeServices::getConnectAccountLink($user);
 
         Mail::to($user->email)->send(new StripeConnectAccMail($user, $response->url));
     }
 
-    public static function sendProductByBuyerOrderDetailsToNearBySellersMail(array $nearBySellersEmails, Orders $order)
+    public static function sendProductByBuyerOrderDetailsToNearBySellersMail(array $nearBySellersEmails, Orders $order): void
     {
         Mail::to('azim@teekit.co.uk')->bcc($nearBySellersEmails)->send(new ProductByBuyerOrderDetailsToNearBySellersMail($order));
     }
 
-    public static function sendBuyerAccVerificationMail(User $user)
+    public static function sendBuyerAccVerificationMail(User $user): void
     {
         $verificationCode = Crypt::encrypt($user->email);
         $accountVerificationLink = self::getVerificationLink($verificationCode);
@@ -53,7 +53,7 @@ final class EmailServices
         Mail::to($user->email)->send(new BuyerVerificationMail($user, $accountVerificationLink));
     }
 
-    public static function sendNewSellerMail(User $user, UserRoleEnum $sellerType, ?string $parentSeller = null)
+    public static function sendNewSellerMail(User $user, UserRoleEnum $sellerType, ?string $parentSeller = null): void
     {
         $verificationCode = Crypt::encrypt($user->email);
         $accountVerificationLink = self::getVerificationLink($verificationCode);
@@ -63,24 +63,24 @@ final class EmailServices
         );
     }
 
-    public static function sendSellerApprovedMail(User $user)
+    public static function sendSellerApprovedMail(User $user): void
     {
         Mail::to($user->email)->send(new SellerApprovedMail($user));
     }
 
-    public static function sendPickupYourOrderMail(Orders|OrdersFromOtherSeller|VanInventoryOrder $order)
+    public static function sendPickupYourOrderMail(Orders|OrdersFromOtherSeller|VanInventoryOrder $order): void
     {
         Mail::to($order->buyer->email)->send(new OrderIsReadyForPickupMail($order, $order->seller));
     }
 
-    public static function sendPickupYourOrderFromOtherSellerMail(OrdersFromOtherSeller $ordersFromOtherSeller)
+    public static function sendPickupYourOrderFromOtherSellerMail(OrdersFromOtherSeller $ordersFromOtherSeller): void
     {
         Mail::to($ordersFromOtherSeller->buyer->email)->send(
             new OrderIsReadyForPickupMail($ordersFromOtherSeller, $ordersFromOtherSeller->seller)
         );
     }
 
-    public static function sendOrderHasBeenCancelledMail(Orders|OrdersFromOtherSeller|VanInventoryOrder $order)
+    public static function sendOrderHasBeenCancelledMail(Orders|OrdersFromOtherSeller|VanInventoryOrder $order): void
     {
         Mail::to([$order->buyer->email])->send(new OrderIsCanceledMail($order));
     }
