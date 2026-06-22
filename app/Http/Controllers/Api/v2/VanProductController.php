@@ -38,10 +38,8 @@ class VanProductController extends Controller
         );
     }
 
-    public function listById(
-        ListVanProductByIdRequest $listVanProductByIdRequest,
-        ListVanProductsAction $listVanProductsAction
-    ): JsonResponse {
+    public function listById(ListVanProductByIdRequest $listVanProductByIdRequest, ListVanProductsAction $listVanProductsAction): JsonResponse
+    {
         $validatedData = $listVanProductByIdRequest->validated();
 
         $data = $listVanProductsAction->execute($validatedData);

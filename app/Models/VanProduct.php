@@ -42,18 +42,18 @@ class VanProduct extends Model
     /**
      * Laravel Built-In Helpers
      */
-    
+
     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'status' => VanProductStatusEnum::class,
-        ];
-    }
+    // protected function casts(): array
+    // {
+    //     return [
+    //         'status' => VanProductStatusEnum::class,
+    //     ];
+    // }
 
     protected function sku(): Attribute
     {
@@ -62,7 +62,7 @@ class VanProduct extends Model
         );
     }
 
-    public function getStatusAttribute()
+    public function getStatusAttribute(): string
     {
         if ($this->quantity == 0) {
             return VanProductStatusEnum::OUT_OF_STOCK->value;
@@ -175,7 +175,8 @@ class VanProduct extends Model
             'brand' => $product->brand,
             'size' => $product->size,
             'status' => VanProductStatusEnum::IN_STOCK->value,
-            'contact' => $product->contact ?? '',
+            'country_code' => User::getAuthUser()->country_code,
+            'contact' => User::getAuthUser()->contact,
             'colors' => is_array($product->colors) ? json_encode($product->colors) : $product->colors,
             'bike' => null,
             'car' => null,
@@ -196,6 +197,7 @@ class VanProduct extends Model
         $now = now();
         $vanProducts = $vanInventoryOrder->orderItems->map(function ($item) use ($vanInventoryOrder, $now) {
             return [
+                'company_id' => $vanInventoryOrder->company_id,
                 'seller_id' => $vanInventoryOrder->seller_id,
                 'category_id' => $item->product->category_id,
                 'van_id' => $vanInventoryOrder->van_id,
@@ -203,14 +205,14 @@ class VanProduct extends Model
                 'sku' => $item->product->sku,
                 'price' => $item->product_price,
                 'featured' => 0,
-                'discount_percentage' => '0',
+                'discount_percentage' => null,
                 'weight' => $item->product->weight,
                 'brand' => $item->product->brand,
                 'size' => $item->product->size,
-                'contact' => '',
-                'colors' => isset($item->product->colors)
-                    ? json_encode($item->product->colors)
-                    : null,
+                'status' => ($item->product_qty < 5) ? VanProductStatusEnum::LOW_STOCK->value : VanProductStatusEnum::IN_STOCK->value,
+                'country_code' => User::getAuthUser()->country_code,
+                'contact' => User::getAuthUser()->business_phone,
+                'colors' => isset($item->product->colors) ? json_encode($item->product->colors) : null,
                 'bike' => null,
                 'car' => null,
                 'van' => 1,
@@ -220,6 +222,7 @@ class VanProduct extends Model
                 'length' => $item->product->length,
                 'job_reference' => null,
                 'quantity' => $item->product_qty,
+                // 'type' => null,
                 'created_at' => $now,
             ];
         })
@@ -278,7 +281,7 @@ class VanProduct extends Model
                 $query->where('category_id', '=', $categoryId);
             })
             ->when($status, function ($query) use ($status) {
-                $query->where('status', '=', $status->value);
+                $query->where('status', '=', $status);
             })
             ->orderBy('created_at', $orderBy->value)
             ->paginate($perPage);

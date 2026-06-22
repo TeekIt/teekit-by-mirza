@@ -14,7 +14,7 @@ final class ListVanProductsAction
         if(isset($filters['productId'])){
             return VanProduct::getById($filters['productId']);
         }
-
+        
         return VanProduct::getAll(
             orderBy:OrderByEnum::DESC,
             /* Get logged-in van using "van" auth guard */
