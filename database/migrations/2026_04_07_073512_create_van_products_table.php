@@ -13,18 +13,20 @@ return new class extends Migration
     {
         Schema::create('van_products', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->foreignId('seller_id')->constrained(table: 'users');
+            $table->foreignId('seller_id')->nullable()->constrained('users');
+            $table->foreignId('company_id')->constrained(table: 'users')->cascadeOnDelete();
+            $table->foreignId('van_id')->constrained(table: 'vans')->cascadeOnDelete();
             $table->foreignId('category_id')->constrained(table: 'categories');
-            $table->foreignId('van_id')->constrained(table: 'vans');
             $table->string('product_name');
             $table->string('sku');
             $table->float('price');
-            $table->tinyInteger('featured')->default(0)->comment('0:not_featured, 1:featured');
-            $table->string('discount_percentage');
+            $table->tinyInteger('featured')->default(0)->comment('Only IsFeaturedEnum values are allowed');
+            $table->integer('discount_percentage')->nullable();
             $table->float('weight')->nullable();
             $table->string('brand')->nullable();
             $table->string('size')->nullable();
-            $table->string('status')->default('1')->comment('Only ProductStatusEnum values are allowed');
+            $table->string('status')->comment('Only VanProductStatusEnum values are allowed');
+            $table->string('country_code', 4)->nullable();
             $table->string('contact');
             $table->json('colors')->nullable();
             $table->tinyInteger('bike')->nullable();
@@ -37,6 +39,7 @@ return new class extends Migration
             $table->string('job_reference')->nullable();
             $table->integer('quantity')->default(0);
             $table->integer('min_threshold')->default(5)->comment('Minimum stock threshold for inventory alerts');
+            $table->string('type')->comment("Only VanProductTypeEnum values are allowed");
             $table->timestamps();
             $table->softDeletes();
 
@@ -48,8 +51,6 @@ return new class extends Migration
             $table->fullText('product_name');
             $table->index('job_reference');
             $table->index('van_id');
-            $table->index('quantity');
-            $table->index('status');
         });
     }
 

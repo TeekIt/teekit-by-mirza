@@ -24,6 +24,7 @@ class EloquentRelationServiceProvider extends ServiceProvider
             'ProductsByBuyer' => \App\Models\ProductsByBuyer::class,
             'Order' => \App\Models\Orders::class,
             'OrdersFromOtherSeller' => \App\Models\OrdersFromOtherSeller::class,
+            'VanInventoryOrder' => \App\Models\VanInventoryOrder::class,
         ]);
     }
 }

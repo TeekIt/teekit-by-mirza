@@ -13,6 +13,7 @@ use App\Actions\VanProductUsage\GetUsageHistoryAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\VanProduct\SyncRequest;
 use App\Http\Requests\VanProduct\ListByIdRequest;
+use App\Http\Requests\VanProduct\SearchProductsRequest;
 use App\Http\Requests\VanProduct\ListProductByIdRequest;
 use App\Http\Requests\ProductUsageRecord\RecordUsageRequest;
 use App\Http\Requests\VanProduct\ListVanProductByIdRequest;
@@ -24,23 +25,24 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class VanProductController extends Controller
 {
-    public function list(ListVanProductsRequest $listVanProductsRequest, ListVanProductsAction $listProductsAction): JsonResponse
+    public function list(ListVanProductsRequest $listVanProductsRequest, ListVanProductsAction $listVanProductsAction): JsonResponse
     {
         $validatedData = $listVanProductsRequest->validated();
 
-        $data = $listProductsAction->execute($validatedData);
+        $data = $listVanProductsAction->execute($validatedData);
 
-        return JsonResponseServices::getApiResponse(
+        return JsonResponseServices::getPaginatedApiResponse(
             $data,
-            empty($data) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
             '',
             config('constants.HTTP_OK')
         );
     }
 
-    public function listById(ListVanProductByIdRequest $request, FetchSingleProductAction $action): JsonResponse
+    public function listById(ListVanProductByIdRequest $listVanProductByIdRequest, ListVanProductsAction $listVanProductsAction): JsonResponse
     {
-        $data = $action->execute($productId);
+        $validatedData = $listVanProductByIdRequest->validated();
+
+        $data = $listVanProductsAction->execute($validatedData);
 
         return JsonResponseServices::getApiResponse(
             $data ?? [],
@@ -50,54 +52,14 @@ class VanProductController extends Controller
         );
     }
 
-    /**
-     * Search products by query string for the logged-in van.
-     *
-     * @param Request $request
-     * @param SearchProductsAction $searchProductsAction
-     * @return JsonResponse
-     */
-    public function search(Request $request, SearchProductsAction $action): JsonResponse
+    public function search(Request $request, SearchProductsAction $searchProductsAction): JsonResponse
     {
         $query = $request->query('q', '');
 
-        $data = $action->execute($query);
+        $data = $searchProductsAction->execute($query);
 
-        return JsonResponseServices::getApiResponse(
+        return JsonResponseServices::getPaginatedApiResponse(
             $data,
-            $data->isEmpty() ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            '',
-            config('constants.HTTP_OK')
-        );
-    }
-
-    /**
-     * Record parts usage by operative
-     * POST van/operative/usage/record
-     */
-    public function recordUsage(RecordUsageRequest $request, RecordUsageAction $recordUsageAction): JsonResponse
-    {
-        $data = $recordUsageAction->execute($request->validated());
-
-        return JsonResponseServices::getApiResponse(
-            $data,
-            config('constants.TRUE_STATUS'),
-            '',
-            config('constants.HTTP_OK')
-        );
-    }
-
-    /**
-     * Get all usage history for the logged-in van
-     * GET /van/operative/usage/history
-     */
-    public function usageHistory(GetUsageHistoryAction $action): JsonResponse
-    {
-        $data = $action->execute();
-
-        return JsonResponseServices::getApiResponse(
-            $data,
-            config('constants.TRUE_STATUS'),
             '',
             config('constants.HTTP_OK')
         );

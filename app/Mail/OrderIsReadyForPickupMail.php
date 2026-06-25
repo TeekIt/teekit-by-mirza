@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\Orders;
 use App\Models\OrdersFromOtherSeller;
 use App\Models\User;
+use App\Models\VanInventoryOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -20,7 +21,7 @@ class OrderIsReadyForPickupMail extends Mailable
      *
      * @return void
      */
-    public function __construct(public Orders|OrdersFromOtherSeller $order, public User $user) {}
+    public function __construct(private Orders|OrdersFromOtherSeller|VanInventoryOrder $order, private User $user) {}
 
     /**
      * Get the message envelope.

@@ -14,24 +14,28 @@ use App\Http\Controllers\Web\v1\UserController;
 use App\Http\Controllers\Web\v1\VanController;
 use App\Http\Controllers\Web\v2\ProductController;
 use App\Http\Controllers\Web\v2\StripeController;
-use App\Livewire\Admin\AddVanInventoryLivewire;
+use App\Livewire\Admin\AddSellersForCompanyLivewire;
 use App\Livewire\Admin\CategoriesLivewire;
 use App\Livewire\Admin\ChildSellersLivewire;
+use App\Livewire\Admin\CompaniesLivewire;
 use App\Livewire\Admin\CustomersLivewire;
 use App\Livewire\Admin\ParentSellersLivewire;
 use App\Livewire\Admin\ReferralCodesLivewire;
-use App\Livewire\Admin\SearchVanInventoriesLivewire;
-use App\Livewire\Admin\VanInventoriesLivewire;
-use App\Livewire\Admin\VansLivewire;
+use App\Livewire\Company\VanInventoriesLivewire;
+use App\Livewire\Company\VansLivewire;
 use App\Livewire\Common\OrdersLivewire;
+use App\Livewire\Common\ProductFormLivewire;
 use App\Livewire\Company\CompanyDashboardLivewire;
-use App\Livewire\Sellers\GeneralSettingsLivewire;
-use App\Livewire\Sellers\InventoryLivewire;
-use App\Livewire\Sellers\OrdersFromOtherSellersLivewire;
-use App\Livewire\Sellers\RequestDeliveryFormLivewire;
-use App\Livewire\Sellers\RequestedDeliveriesLivewire;
-use App\Livewire\Sellers\SellerDashboardLivewire;
-use App\Livewire\Sellers\WithdrawalLivewire;
+use App\Livewire\Company\OrderVanInventoryLivewire;
+use App\Livewire\Company\StockValueByVanLivewire;
+use App\Livewire\Company\StockUsageLivewire;
+use App\Livewire\Common\SettingsLivewire;
+use App\Livewire\Seller\InventoryLivewire;
+use App\Livewire\Seller\OrdersFromOtherSellersLivewire;
+use App\Livewire\Seller\RequestDeliveryFormLivewire;
+use App\Livewire\Seller\RequestedDeliveriesLivewire;
+use App\Livewire\Seller\SellerDashboardLivewire;
+use App\Livewire\Seller\WithdrawalLivewire;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -68,8 +72,6 @@ Route::middleware('transaction.wrapper')->group(function () {
      ***********************************************************************
      */
     Route::prefix('settings')->middleware(['auth', 'auth.sellers'])->controller(HomeController::class)->group(function () {
-        Route::get('/payment', 'paymentSettings')->name('setting.payment');
-        Route::post('/payment/update', 'paymentSettingsUpdate')->name('payment_settings_update');
         Route::post('/password/update', 'adminPasswordUpdate')->name('password_update');
         Route::get('/change_settings/{setting_name}/{value}', 'changeSettings')->name('change_settings')
             ->where([
@@ -106,14 +108,11 @@ Route::middleware('transaction.wrapper')->group(function () {
 
         Route::prefix('inventory')->group(function () {
             Route::get('/', InventoryLivewire::class)->name('seller.inventory');
+            Route::get('/add/manually', ProductFormLivewire::class)->name('seller.inventory.add.manually');
+            Route::get('/{productId}/edit/manually', ProductFormLivewire::class)->name('seller.inventory.edit.manually');
 
             Route::controller(ProductController::class)->group(function () {
-                Route::get('/add', 'addSingleInventoryForm')->name('seller.add.single.inventory.form');
-                Route::post('/add', 'addSingleInventory')->name('seller.add.single.inventory');
-                Route::get('/edit/{productId}', 'editSingleInventoryForm')->name('seller.edit.inventory.form');
-                Route::post('/update/{productId}', 'updateInventory')->name('seller.edit.inventory');
                 Route::get('/add_bulk', 'inventoryAddBulk')->name('seller.add.bulk.inventory');
-                Route::get('/delete/image/{imageId}', 'deleteImg')->name('seller.delete.img');
             });
 
             // Route::post('/update_child_qty', [QtyController::class, 'updateChildQty'])->name('update_child_qty');
@@ -122,6 +121,7 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::prefix('orders')->group(function () {
             Route::get('count', [OrderController::class, 'countSellerOrders'])->name('seller.orders.count');
             Route::get('/from-other-sellers', OrdersFromOtherSellersLivewire::class)->name('seller.orders.from.others');
+            Route::get('/from-vans', OrdersLivewire::class)->name('seller.orders.from.vans');
             Route::get('/{requestOrderId?}', OrdersLivewire::class)->name('seller.orders');
         });
 
@@ -133,10 +133,10 @@ Route::middleware('transaction.wrapper')->group(function () {
         });
 
         Route::prefix('settings')->group(function () {
-            Route::get('/general', GeneralSettingsLivewire::class)->name('seller.settings.general');
+            Route::get('/general', SettingsLivewire::class)->name('seller.settings');
 
             Route::controller(SellerController::class)->group(function () {
-                Route::post('/update-location', 'updateStoreLocation')->name('seller.settings.update.location');
+                // Route::post('/update-location', 'updateLocation')->name('seller.settings.update.location');
                 Route::post('/update-required-info', 'updateSellerRequiredInfo')->name('seller.update.required.info');
             });
         });
@@ -158,18 +158,22 @@ Route::middleware('transaction.wrapper')->group(function () {
     Route::prefix('vans')->middleware(['auth', 'auth.company'])->group(function () {
         Route::get('/', VansLivewire::class)->name('vans');
         Route::get('/inventories', VanInventoriesLivewire::class)->name('vans.inventories');
-        Route::get('/{vanId}/inventories/add', AddVanInventoryLivewire::class)->name('vans.inventories.add');
+        Route::get('/inventories/order/online', OrderVanInventoryLivewire::class)->name('vans.inventories.order.online');
+        Route::get('/inventories/order/pay-as-you-go', OrderVanInventoryLivewire::class)->name('vans.inventories.order.pay.as.you.go');
+        Route::get('/inventory/add/manually', ProductFormLivewire::class)->name('vans.inventory.add.manually');
+        Route::get('/inventory/{productId}/edit/manually', ProductFormLivewire::class)->name('vans.inventory.edit.manually');
         Route::get('/delete', [VanController::class, 'destroy'])->name('vans.del');
         // vans.inventories.del
 
         Route::prefix('company')->group(function () {
-            Route::post('/register', [RegisterController::class, 'registerVanCompany'])
-                ->name('vans.company.register')
+            Route::post('/register', [RegisterController::class, 'registerVanCompany'])->name('vans.company.register')
                 ->withoutMiddleware(['auth', 'auth.company']);
 
             Route::get('/dashboard', CompanyDashboardLivewire::class)->name('vans.company.dashboard');
             Route::get('/orders', OrdersLivewire::class)->name('vans.company.orders');
-            Route::get('/settings', GeneralSettingsLivewire::class)->name('vans.company.settings');
+            Route::get('/settings', SettingsLivewire::class)->name('vans.company.settings');
+            Route::get('/stock/value-by-van', StockValueByVanLivewire::class)->name('company.stock.value.by.van');
+            Route::get('/stock/usage', StockUsageLivewire::class)->name('company.stock.usage');
         });
     });
     /*
@@ -181,7 +185,10 @@ Route::middleware('transaction.wrapper')->group(function () {
         Route::get('/referralcodes', ReferralCodesLivewire::class)->name('admin.referralcodes');
         Route::get('/sellers/parent', ParentSellersLivewire::class)->name('admin.sellers.parent');
         Route::get('/sellers/child', ChildSellersLivewire::class)->name('admin.sellers.child');
+        Route::get('/companies', CompaniesLivewire::class)->name('admin.companies');
         Route::get('/customers', CustomersLivewire::class)->name('admin.customers');
+
+        Route::get('/companies/{companyId}/add-sellers', AddSellersForCompanyLivewire::class)->name('admin.companies.add.sellers');
 
         Route::prefix('categories')->group(function () {
             Route::get('/', CategoriesLivewire::class)->name('admin.categories');
@@ -216,8 +223,8 @@ Route::middleware('transaction.wrapper')->group(function () {
             Route::get('/complete', 'completeOrders')->name('admin.orders.complete');
             Route::get('/delete', 'adminOrdersDel')->name('admin.del.orders');
 
-        Route::get('/van-inventory', OrdersLivewire::class)
-        ->name('admin.order.van.inventory');
+            Route::get('/van-inventory', OrdersLivewire::class)
+                ->name('admin.order.van.inventory');
         });
 
         Route::controller(HomeController::class)->group(function () {

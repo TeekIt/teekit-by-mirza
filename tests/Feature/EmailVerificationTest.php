@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class EmailVerificationTest extends TestCase
 {
-    public function test_verification_endpoint(): void
+    public function testVerificationEndpoint(): void
     {
         Mail::fake();
 

@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Enums\OrderByEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class VanOperativeProductUsage extends Model
 {
-     use HasFactory, SoftDeletes;
-    protected $table = 'van_operative_product_usages';
+    use HasFactory, SoftDeletes;
+
     /**
      * Fields protected from mass assignment
      *
@@ -17,6 +21,9 @@ class VanOperativeProductUsage extends Model
      */
     protected $guarded = [
         'id',
+    ];
+
+    protected $hidden = [
         'created_at',
         'updated_at',
         'deleted_at',
@@ -33,49 +40,41 @@ class VanOperativeProductUsage extends Model
     ];
 
     /**
-     * Relationship: Usage belongs to Van
+     * Relations
      */
-    public function van()
+    public function van(): BelongsTo
     {
         return $this->belongsTo(Van::class);
     }
 
-    /**
-     * Relationship: Usage belongs to Van Product
-     */
-    public function vanProduct()
+    public function vanProduct(): BelongsTo
     {
         return $this->belongsTo(VanProduct::class, 'van_product_id');
     }
-    /**
-     * Get usage history for a specific van
-     *
-     * @param int $vanId
-     * @return \Illuminate\Support\Collection
-     */
-    public static function getHistoryByVan(int $vanId)
-    {
-        return self::where('van_id', $vanId)
-            ->orderBy('used_at', 'desc')
-            ->with(['van:id,operative'])
-            ->get();
-    }
-/**
-     * Add a new usage record
-     *
-     * @param array $data
-     * @return self
-     */
-    public static function add(array $data): self
-        {
-            return self::create([
-                'van_id'        => $data['vanId'],
-                'van_product_id'=> $data['productId'],
-                'quantity_used' => $data['quantityUsed'],
-                'job_reference' => $data['jobReference'],
-                'used_at'       => $data['timestamp'] ?? now(),
-            ]);
-        }
 
-    
+    public static function add(array $data): VanOperativeProductUsage
+    {
+        return self::create([
+            'van_id'        => $data['vanId'],
+            'van_product_id' => $data['productId'],
+            'quantity_used' => $data['quantityUsed'],
+            'job_reference' => $data['jobReference'],
+            'used_at'       => $data['timestamp'] ?? now(),
+        ]);
+    }
+
+    public static function getAll(
+        OrderByEnum $orderBy,
+        ?int $vanId = null,
+        int $perPage = 10,
+        array $columns = ['*']
+    ): LengthAwarePaginator {
+        return self::select($columns)
+            ->with(['vanProduct:id,product_name'])
+            ->when($vanId, function ($query) use ($vanId) {
+                $query->where('van_id', '=', $vanId);
+            })
+            ->orderBy('used_at', $orderBy->value)
+            ->paginate($perPage);
+    }
 }

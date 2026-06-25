@@ -2,8 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Enums\IsFeaturedEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\VanProductStatusEnum;
+use App\Enums\VanProductTypeEnum;
 use App\Models\Categories;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,21 +25,20 @@ class VanProductFactory extends Factory
         return [
             'seller_id' => User::inRandomOrder()->where('role_id', '=', UserRoleEnum::SELLER->value)->first()->id,
             'category_id' => Categories::inRandomOrder()->first()->id,
-            'van_id' => 2,
 
             'product_name' => $this->faker->word(),
             'sku' => strtoupper($this->faker->bothify('SKU-###')),
             'price' => $this->faker->randomFloat(2, 50, 500),
 
-            'featured' => $this->faker->boolean(),
-            'discount_percentage' => $this->faker->randomElement(['0%', '5%', '10%']),
+            'featured' => $this->faker->randomElement(IsFeaturedEnum::cases())->value,
+            'discount_percentage' => $this->faker->randomElement([null, '5', '50']),
 
             'weight' => $this->faker->randomFloat(2, 1, 5),
             'brand' => $this->faker->company(),
             'size' => $this->faker->randomElement(['S', 'M', 'L']),
 
-            'status' => array_rand(VanProductStatusEnum::cases()),
-            'contact' => '03001234567',
+            'status' => $this->faker->randomElement(VanProductStatusEnum::cases())->value,
+            'contact' => '3001234567',
 
             'colors' => json_encode([$this->faker->safeColorName()]),
 
@@ -45,7 +46,7 @@ class VanProductFactory extends Factory
             'car' => $this->faker->boolean(),
             'van' => 1,
 
-            'feature_img' => 'path/to/image.jpg',
+            'feature_img' => 'https://teekit-production-bucket.lon1.digitaloceanspaces.com/251_60bc01afade5f.webp',
 
             'height' => $this->faker->numberBetween(5, 15),
             'width' => $this->faker->numberBetween(3, 10),
@@ -54,8 +55,27 @@ class VanProductFactory extends Factory
             'job_reference' => strtoupper($this->faker->bothify('JOB###')),
 
             'quantity' => $this->faker->numberBetween(0, 100),
-            'min_threshold' => 50,
+            'min_threshold' => 5,
+            'type' => $this->faker->randomElement(VanProductTypeEnum::cases())->value,
         ];
-        
+    }
+
+    public function forCompany(User $user): static
+    {
+        return $this->state(function (array $attributes) use ($user) {
+            return [
+                'company_id' => $user->id,
+                'van_id' => $user->vans()->first()->id,
+            ];
+        });
+    }
+
+    public function payAsYouGo(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => VanProductTypeEnum::PAY_AS_YOU_GO->value,
+            ];
+        });
     }
 }

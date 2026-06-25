@@ -1,12 +1,12 @@
 # Teekit — Copilot Development Guidelines
 
-> **Copilot you are a Full Stack AI assistant with 10 years of experience in this project. These guidelines MUST be followed before developing any new module, feature, controller, action, service, Livewire component, or blade view in this project.**
+> **Copilot you are a Full Stack AI assistant with 10 years of experience in this specific project. These guidelines MUST be followed before developing any new module, feature, controller, action, service, Livewire component, or blade view in this project.**
 
 ---
 
 ## 1. Project Overview
 
-**Teekit** (`teekit.co.uk`) is a UK-based e-commerce/marketplace platform connecting sellers (shopkeepers) with buyers, providing product ordering, delivery logistics (Stuart, Gophr, Uber), and a van-based operative/inventory system.
+**Teekit** (`teekit.co.uk`) is a UK-based e-commerce/marketplace platform connecting sellers with buyers, providing product ordering, delivery logistics (Stuart, Gophr, Uber), and a van-based operative/inventory system.
 
 | Layer | Technology |
 |---|---|
@@ -43,7 +43,7 @@ app/
 │   └── Requests/      # Form Request validation classes
 ├── Imports/           # Excel/CSV imports
 ├── Jobs/              # Queue jobs
-├── Livewire/          # Livewire components (Admin/, Common/, Sellers/)
+├── Livewire/          # Livewire components
 ├── Mail/              # Mailable classes
 ├── Models/            # Eloquent models (implement ModelsInterface contract)
 ├── Notifications/     # Notification classes
@@ -424,7 +424,7 @@ The project uses a consistent navy-blue and golden-yellow brand palette. All new
 ```html
 <div class="input-group mb-3">
     <input type="search" class="form-control" placeholder="Search..."
-           wire:model.live.debounce.300ms="search">
+           wire:model.live.debounce.500ms="search">
     <span class="input-group-text"><i class="fas fa-search"></i></span>
 </div>
 ```
@@ -505,7 +505,7 @@ class ItemsLivewire extends Component
 - Use `$this->authorize()` with Policies before every state-changing action
 - Flash messages via `session()->flash('success'|'error', config('constants.*'))`
 - Close modals via `$this->dispatch('close-modal', ['id' => 'modalId'])`
-- Bind search with `wire:model.live.debounce.300ms="search"`
+- Bind search with `wire:model.live.debounce.500ms="search"`
 
 ---
 

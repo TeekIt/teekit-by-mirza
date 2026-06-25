@@ -64,20 +64,6 @@ class HomeController extends Controller
     }
 
     /**
-     * Display's payment view
-     *
-     * @author Huzaifa Haleem
-     *
-     * @version 1.0.0
-     */
-    public function paymentSettings()
-    {
-        $payment_settings = User::find(Auth::id())->bank_details;
-
-        return view('shopkeeper.settings.payment', compact('payment_settings'));
-    }
-
-    /**
      * Update's user password
      *
      * @author Muhammad Abdullah Mirza
@@ -103,37 +89,6 @@ class HomeController extends Controller
         } else {
             return redirect()->back()->with('flash', flash('Your old password is incorrect.')->error());
         }
-    }
-
-    /**
-     * Update's payment settings
-     *
-     * @author Huzaifa Haleem
-     *
-     * @version 1.0.0
-     */
-    public function paymentSettingsUpdate(Request $request)
-    {
-        $data = $request->all();
-        if (
-            empty($data['bank']['two']['bank_name']) ||
-            empty($data['bank']['two']['account_number']) ||
-            empty($data['bank']['two']['branch'])
-        ) {
-            unset($data['bank']['two']);
-        }
-
-        unset($data['_token']);
-
-        $data = $data['bank'];
-
-        $user = User::find(Auth::id());
-        $user->bank_details = json_encode($data);
-        $user->save();
-
-        flash('Bank Details Updated');
-
-        return redirect()->back();
     }
 
     /**

@@ -34,17 +34,5 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrap();
 
         Schema::defaultStringLength(191);
-
-        Gate::before(function ($user, $ability) {
-            Gate::define($ability, function ($user) use ($ability) {
-            dd($ability);
-
-                if ($user->role->name == $ability) {
-                    return true;
-                }
-
-                return false;
-            });
-        });
     }
 }

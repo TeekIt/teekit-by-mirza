@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use Illuminate\Contracts\View\View;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -15,7 +16,7 @@ class ReferralCodesLivewire extends Component
     */
     protected $paginationTheme = 'bootstrap';
 
-    public function render()
+    public function render(): View
     {
         $data = User::getBuyersWithReferralCode();
 

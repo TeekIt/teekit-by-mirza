@@ -25,7 +25,8 @@ return new class extends Migration
             $table->index('seller_id');
             $table->index('product_id');
             $table->index('category_id');
-            $table->index('qty');
+            /* Composite index */
+            $table->index(['seller_id', 'product_id'], 'qty_seller_id_product_id_index');
         });
     }
 

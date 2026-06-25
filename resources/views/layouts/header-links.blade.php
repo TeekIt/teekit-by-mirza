@@ -10,13 +10,13 @@
 <!-- Theme style - Bootstrap 4 CSS -->
 <link href="{{ asset('css/adminlte.min.css') }}" rel="stylesheet">
 <!-- Bootstrap 5 CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link href="{{ asset('css/bootstrap-5.3.3.min.css') }}" rel="stylesheet">
 <!-- Custom CSS -->
 <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 <link href="{{ asset('css/custom-styles.css') }}" rel="stylesheet">
 <!-- Google Font: Source Sans Pro -->
 <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 <!-- JQuery Time Picker CSS -->
-<link rel="stylesheet" href="{{ asset('css/jquery.timepicker.min.css') }}">
+<link href="{{ asset('css/jquery.timepicker.min.css') }}" rel="stylesheet">
 <!-- JQuery Multi Selector -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<link href="{{ asset('css/select2.min.css') }}" rel="stylesheet" />

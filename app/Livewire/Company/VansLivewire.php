@@ -1,0 +1,251 @@
+<?php
+
+namespace App\Livewire\Company;
+
+use App\Actions\Van\ListVanAction;
+use App\Enums\OrderByEnum;
+use App\Exports\VansExport;
+use App\Imports\VansImport;
+use App\Models\User;
+use App\Models\Van;
+use Exception;
+use Illuminate\Contracts\View\View;
+use Maatwebsite\Excel\Validators\ValidationException as ExcelValidationException;
+use Livewire\Component;
+use Livewire\WithFileUploads;
+use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Excel as ExcelConstants;
+
+class VansLivewire extends Component
+{
+    use WithFileUploads, WithPagination;
+
+    public int $companyId = 0;
+
+    public int $vanId = 0;
+
+    public ?string $userName = null;
+
+    public ?string $oldUserName = null;
+
+    public ?string $operative = null;
+
+    public ?string $numberPlate = null;
+
+    public ?string $oldNumberPlate = null;
+
+    public ?int $payload = null;
+
+    public ?float $width = null;
+
+    public ?float $height = null;
+
+    public ?float $length = null;
+
+    public ?string $password = null;
+
+    public mixed $excelFile = null;
+
+    public string $search = '';
+
+    /*
+    * Livewire Built-in Properties
+    */
+    protected $paginationTheme = 'bootstrap';
+
+    protected function rules(): array
+    {
+        return (new Van)->getValidationRules($this->vanId);
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'userName.regex' => 'Blank spaces are not allowed.',
+        ];
+    }
+
+    /*
+    * Lifecycle Hooks
+    */
+    public function mount(): void
+    {
+        $this->companyId = User::getAuthUser()->id;
+    }
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+    /*
+     * Custom Helpers
+     */
+    public function resetComponent(): void
+    {
+        $this->resetValidation();
+
+        $this->reset([
+            'vanId',
+            'userName',
+            'operative',
+            'numberPlate',
+            'payload',
+            'width',
+            'height',
+            'length',
+            'password',
+            'excelFile',
+            'search',
+        ]);
+    }
+
+    /*
+     * CRUD Methods
+     */
+    public function renderEditVanModal(int $id): void
+    {
+        $van = Van::find($id);
+
+        $this->authorize('view', $van);
+
+        $this->vanId = $van->id;
+        $this->userName = $van->user_name;
+        $this->oldUserName = $van->user_name;
+        $this->operative = $van->operative;
+        $this->numberPlate = $van->number_plate;
+        $this->oldNumberPlate = $van->number_plate;
+        $this->payload = $van->payload ?? '';
+        $this->width = $van->width ?? '';
+        $this->height = $van->height ?? '';
+        $this->length = $van->length ?? '';
+    }
+
+    public function addVan(): void
+    {
+        $this->authorize('create', Van::class);
+
+        $this->validate();
+
+        try {
+            /* Perform some operation */
+            $inserted = Van::add(
+                $this->userName,
+                $this->operative,
+                $this->numberPlate,
+                $this->payload,
+                $this->width,
+                $this->height,
+                $this->length,
+                $this->password
+            );
+            /* Operation finished */
+            sleep(1);
+            $this->resetComponent();
+            $this->dispatch('close-modal', ['id' => 'addVanModal']);
+
+            if ($inserted) {
+                session()->flash('success', config('constants.DATA_INSERTION_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.INSERTION_FAILED'));
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
+    }
+
+    public function updateVan(): void
+    {
+        $van = Van::find($this->vanId);
+
+        $this->authorize('update', $van);
+
+        $this->validate();
+
+        try {
+            /* Perform some operation */
+            $updated = Van::updateInfo(
+                $this->vanId,
+                $this->userName,
+                $this->operative,
+                $this->numberPlate,
+                $this->payload,
+                $this->width,
+                $this->height,
+                $this->length,
+                $this->password
+            );
+            /* Operation finished */
+            sleep(1);
+            $this->resetComponent();
+            $this->dispatch('close-modal', ['id' => 'editVanModal']);
+
+            if ($updated) {
+                session()->flash('success', config('constants.DATA_UPDATED_SUCCESS'));
+            } else {
+                session()->flash('error', config('constants.UPDATION_FAILED'));
+            }
+        } catch (Exception $error) {
+            report($error);
+            session()->flash('error', $error->getMessage());
+        }
+    }
+
+    public function importVans()
+    {
+        $this->validate([
+            'excelFile' => 'required|file|mimes:csv|max:2048',
+        ]);
+
+        try {
+            /* Perform some operation */
+            Excel::import(new VansImport, $this->excelFile, ExcelConstants::CSV);
+            /* Operation finished */
+            sleep(1);
+            $this->resetComponent();
+            $this->dispatch('close-modal', ['id' => 'importVansModal']);
+
+            session()->flash('success', config('constants.DATA_INSERTION_SUCCESS'));
+        } catch (ExcelValidationException $error) {
+            $this->dispatch('close-modal', ['id' => 'importVansModal']);
+
+            session()->flash('error', $error->getMessage());
+        } catch (Exception $error) {
+            logger()->channel('importExport')->error($error->getMessage());
+
+            $this->dispatch('close-modal', ['id' => 'importVansModal']);
+
+            session()->flash('error', config('constants.IMPORT_FAILED'));
+        }
+    }
+
+    public function exportVans()
+    {
+        try {
+            /* Perform some operation */
+            $fileName = 'vans-' . now()->format('m-d-Y:H:i:s') . '.csv';
+            /* Operation finished */
+            return Excel::download(new VansExport, $fileName, ExcelConstants::CSV);
+        } catch (Exception $error) {
+            logger()->channel('importExport')->error($error->getMessage());
+
+            $this->dispatch('close-modal', ['id' => 'importVansModal']);
+
+            session()->flash('error', config('constants.EXPORT_FAILED'));
+        }
+    }
+
+    public function render(): View
+    {
+        $this->authorize('viewAny', Van::class);
+
+        $data = (new ListVanAction)->execute([
+            'orderBy' => OrderByEnum::DESC,
+            'search' => $this->search,
+            'companyId' => $this->companyId
+        ]);
+        
+        return view('livewire.company.vans-livewire', compact('data'));
+    }
+}

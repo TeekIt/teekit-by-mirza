@@ -13,7 +13,6 @@ class DatabaseSeeder extends Seeder
     {
           
         $this->call([
-            UserSeeder::class,
             QtySeeder::class,
             ReferralCodeRelationSeeder::class,
             DriverSeeder::class,
@@ -22,7 +21,6 @@ class DatabaseSeeder extends Seeder
             OrderItemsSeeder::class,
             GophrDeliverySeeder::class,
             VanProductSeeder::class,
-            InventoryOrderItemSeeder::class,
         ]);
     }
 }

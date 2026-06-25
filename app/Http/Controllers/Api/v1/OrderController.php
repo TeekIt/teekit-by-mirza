@@ -381,36 +381,25 @@ class OrderController extends Controller
     {
         $validatedData = Validator::make($request->all(), [
             'orderStatus' => [
-                Rule::in(array_column(OrderStatusEnum::cases(), 'value')),
+                Rule::enum(OrderStatusEnum::class),
             ],
             'page' => 'integer',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
         }
+
         $validatedData = (object) $validatedData->validated();
 
         if (isset($validatedData->orderStatus)) {
             $orderStatus = OrderStatusEnum::from($validatedData->orderStatus);
         }
 
-        $orders = Orders::getLoggedinBuyerOrders($orderStatus ?? null)->toArray();
+        $data = Orders::getLoggedinBuyerOrders($orderStatus ?? null);
 
-        $data = $orders['data'];
-        $pagination = $orders;
-        unset($pagination['data']);
-        /*
-        * Just creating this variable so we don't have to call the "empty()" function again & again
-        * Because it will increase the API response time
-        */
-        $dataIsEmpty = empty($data);
-
-        return JsonResponseServices::getApiResponseExtention(
-            ($dataIsEmpty) ? [] : $data,
-            ($dataIsEmpty) ? config('constants.FALSE_STATUS') : config('constants.TRUE_STATUS'),
-            ($dataIsEmpty) ? config('constants.NO_RECORD') : '',
-            'pagination',
-            ($dataIsEmpty) ? (object) [] : $pagination,
+        return JsonResponseServices::getPaginatedApiResponse(
+            $data,
+            '',
             config('constants.HTTP_OK')
         );
     }
@@ -843,10 +832,10 @@ class OrderController extends Controller
     /**
      * It will get order details via given id
      */
-    public function getOrderDetailsForApi(Request $request)
+    public function listById(Request $request)
     {
         $validatedData = Validator::make($request->route()->parameters(), [
-            'id' => 'required|integer',
+            'orderId' => 'required|integer|exists:orders,id',
         ]);
         if ($validatedData->fails()) {
             return JsonResponseServices::getApiValidationFailedResponse($validatedData->errors());
@@ -854,16 +843,7 @@ class OrderController extends Controller
 
         $validatedData = (object) $validatedData->validated();
 
-        if (! Orders::checkIfOrderExists($validatedData->id)) {
-            return JsonResponseServices::getApiResponse(
-                [],
-                config('constants.FALSE_STATUS'),
-                config('constants.NO_RECORD'),
-                config('constants.HTTP_OK')
-            );
-        }
-
-        $order = Orders::getById($validatedData->id);
+        $order = Orders::getById($validatedData->orderId);
 
         return JsonResponseServices::getApiResponse(
             $order,

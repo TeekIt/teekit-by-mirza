@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 class TwilioSmsServicesTest extends TestCase
 {
-    // use RefreshDatabase;
     use WithFaker;
 
     public function testSendSmsIsWorking(): void

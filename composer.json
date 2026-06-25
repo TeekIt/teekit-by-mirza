@@ -34,6 +34,7 @@
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^2.0",
+        "brianium/paratest": "^7.8",
         "filp/whoops": "^2.8",
         "fruitcake/laravel-debugbar": "^4.0",
         "mockery/mockery": "^1.6",

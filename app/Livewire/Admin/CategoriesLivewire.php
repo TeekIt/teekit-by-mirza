@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use Illuminate\Contracts\View\View;
 use App\Models\Categories;
 use App\Services\ImageServices;
 use Exception;
@@ -14,11 +15,11 @@ class CategoriesLivewire extends Component
 {
     use WithFileUploads, WithPagination;
 
-    public $categoryId;
+    public int $categoryId;
 
     public $image;
 
-    public $name;
+    public string $name;
 
     /*
     * Livewire Built-in Properties
@@ -133,7 +134,7 @@ class CategoriesLivewire extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         $data = Categories::getCategoriesForView();
 

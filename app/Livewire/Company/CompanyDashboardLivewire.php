@@ -4,24 +4,40 @@ namespace App\Livewire\Company;
 
 use App\Models\User;
 use App\Models\Van;
-use App\Models\VanProduct;
 use Livewire\Component;
+use App\Models\VanInventoryOrder;
+use App\Enums\OrderStatusEnum;
+use App\Models\VanProduct;
+use Illuminate\View\View;
 
 class CompanyDashboardLivewire extends Component
 {
-    public function render()
+    public int $companyId;
+
+    /*
+    * Lifecycle Hooks
+    */
+    public function mount(): void
     {
-        $companyId = User::getAuthUser()->id;
+        $this->companyId = User::getAuthUser()->id;
+    }
 
-        $vans = Van::where('company_id', '=', $companyId)->get();
-        $totalVans = $vans->count();
+    public function render(): View
+    {
+        $totalVans = Van::getVansCountByCompanyId($this->companyId);
+        $totalStock = VanProduct::getTotalStockByCompanyId($this->companyId);
+        $activeOperatives = Van::getActiveOperativesCount($this->companyId, now()->toDateString());
+        $totalStockValue = Van::getTotalStockValue($this->companyId);
+        $lowStockAlerts = Van::getLowStockAlertsCount($this->companyId);
+        $pendingOrders = VanInventoryOrder::getOrdersCount($this->companyId, OrderStatusEnum::PENDING);
 
-        $vanIds = $vans->pluck('id');
-        $totalStock = VanProduct::whereIn('van_id', $vanIds)->sum('quantity');
-
-        return view('livewire.company.company-dashboard-livewire', [
-            'totalVans' => $totalVans,
-            'totalStock' => $totalStock,
-        ]);
+        return view('livewire.company.company-dashboard-livewire', compact(
+            'totalVans',
+            'totalStock',
+            'activeOperatives',
+            'totalStockValue',
+            'lowStockAlerts',
+            'pendingOrders'
+        ));
     }
 }

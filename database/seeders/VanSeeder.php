@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use App\Models\Van;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -13,6 +14,6 @@ class VanSeeder extends Seeder
      */
     public function run(): void
     {
-        Van::factory(5)->create();
+        Van::factory(30)->forCompany(User::find(767))->create();
     }
 }

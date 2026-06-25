@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('gophr_deliveries', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->morphs('order_belongs_to');  /* This column can either belong to "orders" or "orders_from_other_sellers" */
+            $table->morphs('order_belongs_to');  /* This column can either belong to "orders", "orders_from_other_sellers", or "van_inventory_orders" */
             $table->uuid('job_id');
             $table->timestamps();
             $table->softDeletes();

@@ -46,6 +46,7 @@ return [
     'ORDER_UPDATED' => 'Updated',
     'ORDER_DELIVERED_SUCCESSFULLY' => 'You have successfully delivered your order 🎉',
     'ORDER_COMPLETED_SUCCESSFULLY' => 'Your order has been completed successfully',
+    'ORDER_ACCEPTED_SUCCESSFULLY' => 'Order has been accepted successfully',
     'VALID_PROMOCODE' => 'You have entered a valid promo code',
     'BANK_DETAILS_UPDATED' => 'Bank Account details are successfully updated',
     'VERIFICATION_SUCCESS' => 'Verification Successful',
@@ -53,8 +54,11 @@ return [
     'WITHDRAWAL_REQUEST_SUBMITTED' => 'Withdrawal request is successfully submitted',
     'PRODUCT_REMOVED_SUCCESSFULLY' => 'Product has been removed successfully',
     'ORDER_PLACED_SUCCESSFULLY' => 'Your order has been placed successfully',
+    'PAY_AS_YOU_GO_ORDER_PLACED_SUCCESSFULLY' => 'Pay as you go products added to the Van successfully. You can pay for them after use',
     'SENT_TO_OTHER_STORE_SUCCESS' => 'Your order has been sent to another store',
     'PARENT_QTY_SYNCED_SUCCESS' => 'Quantities synced',
+    /* Van Management System */
+    'VAN_ORDER_COMPLETED_SUCCESSFULLY' => 'Order completed, products moved to van inventory successfully',
     /*
     |--------------------------------------------------------------------------
     | Failure Constants

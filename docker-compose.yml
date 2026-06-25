@@ -32,13 +32,13 @@ services:
     restart: unless-stopped
     ports:
       - "3306:3306"
+    command: --default-authentication-plugin=caching_sha2_password
     environment:
       MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_USER: ${DB_USERNAME}
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+      # SERVICE_NAME: mysql
     volumes:
       - ./docker-compose/mysql:/docker-entrypoint-initdb.d
     networks:
@@ -50,7 +50,7 @@ services:
     container_name: teekit-phpmyadmin
     restart: unless-stopped
     ports:
-      - "8090:80"
+      - "9090:80"
     depends_on:
       - dockerhosted_db
     environment:
@@ -88,8 +88,8 @@ services:
 networks:
   teekit-network:
     driver: bridge
+  # 'external: true' tells Docker that the network already exists externally (not created by this Docker Compose file)
+  # Hence, if it does not then create it manually with the following command:
+  # docker network create network-name
   nginx-network:
-    # This tells Docker the network already exists
-    # Hence, if it does not then create it manually with the following command:
-    # docker network create nginx-network
     external: true

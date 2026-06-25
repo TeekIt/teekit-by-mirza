@@ -13,57 +13,105 @@ final class ProcessVanInventoryOrderAction
     public function execute(
         int $companyId,
         int $vanId,
-        string $vanLocation,
+        string $customerName,
+        string $customerLat,
+        string $customerLon,
+        string $customerCountryCode,
+        string $customerPhoneNumber,
+        string $vanAddress,
+        string $vanCountry,
+        string $vanState,
+        string $vanCity,
+        string $vanPostcode,
+        float $vanLat,
+        float $vanLon,
         OrderTypeEnum $orderType,
-        array $orderItems,
-        float $orderTotal
-    ): VanInventoryOrder {
-        
+        array $orderItems
+    ): array {
+
         return DB::transaction(function () use (
             $companyId,
             $vanId,
-            $vanLocation,
+            $customerName,
+            $customerLat,
+            $customerLon,
+            $customerCountryCode,
+            $customerPhoneNumber,
+            $vanAddress,
+            $vanCountry,
+            $vanState,
+            $vanCity,
+            $vanPostcode,
+            $vanLat,
+            $vanLon,
             $orderType,
-            $orderItems,
-            $orderTotal
-        ): VanInventoryOrder {
-            $order = VanInventoryOrder::add(
-                $companyId,
-                $vanId,
-                $orderTotal,
-                $orderType,
-                $vanLocation,
-            );
+            $orderItems
+        ): array {
+            $groupedOrderItemsBySeller = $this->groupOrderItemsBySeller($orderItems);
 
-            foreach ($orderItems as $item) {
-                $order->orderItems()->create([
-                    'product_id' => $item['id'],
-                    'seller_id' => $item['sellerId'],
-                    'product_price' => $item['price'],
-                    'product_qty' => $item['qty'],
-                ]);
+            $orders = [];
+            foreach ($groupedOrderItemsBySeller as $sellerId => $sellerOrderItems) {
+                $sellerOrderTotal = 0.0;
+                foreach ($sellerOrderItems as $item) {
+                    $sellerOrderTotal += (float) $item['price'] * (int) $item['qty'];
+                }
+
+                $order = VanInventoryOrder::add(
+                    companyId: $companyId,
+                    sellerId: $sellerId,
+                    vanId: $vanId,
+                    orderTotal: $sellerOrderTotal,
+                    type: $orderType,
+                    customerName: $customerName,
+                    customerLat: $customerLat,
+                    customerLon: $customerLon,
+                    countryCode: $customerCountryCode,
+                    phoneNumber: $customerPhoneNumber,
+                    address: $vanAddress,
+                    country: $vanCountry,
+                    state: $vanState,
+                    city: $vanCity,
+                    postcode: $vanPostcode,
+                );
+
+                foreach ($sellerOrderItems as $item) {
+                    $order->orderItems()->create([
+                        'product_id' => $item['id'],
+                        'seller_id' => $item['sellerId'],
+                        'product_price' => $item['price'],
+                        'product_qty' => $item['qty'],
+                    ]);
+                }
+
+                $orders[(int) $sellerId] = $order;
             }
 
-            $this->sendEmailsToSellers($orderItems, $vanLocation);
+            $this->sendEmailsToSellers($groupedOrderItemsBySeller, $vanAddress);
 
-            return $order;
+            return $orders;
         });
     }
 
-    private function sendEmailsToSellers(array $orderItems, string $vanLocation): void
+    private function groupOrderItemsBySeller(array $orderItems): array
     {
-        $orderItemsBySeller = [];
+        $groupedOrderItemsBySeller = [];
+
         foreach ($orderItems as $item) {
-            $orderItemsBySeller[$item['sellerId']][] = $item;
+            $groupedOrderItemsBySeller[$item['sellerId']][] = $item;
         }
 
-        foreach ($orderItemsBySeller as $sellerId => $orderItems) {
+        return $groupedOrderItemsBySeller;
+    }
+
+    private function sendEmailsToSellers(array $groupedOrderItemsBySeller, string $vanLocation): void
+    {
+        foreach ($groupedOrderItemsBySeller as $sellerId => $orderItemsBySeller) {
             $seller = User::getUserByID($sellerId, ['id', 'name', 'email']);
 
             EmailServices::sendVanInventoryOrderMail(
                 $seller->email,
                 $seller->name,
-                $orderItems,
+                $orderItemsBySeller,
                 $vanLocation,
             );
         }

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use Illuminate\Contracts\View\View;
 use App\Models\Categories;
 use App\Models\SubCategory;
 use Exception;
@@ -40,7 +41,7 @@ class SubCategoriesLivewire extends Component
         ]);
     }
 
-    public function renderEditSubCategoryModal($id)
+    public function renderEditSubCategoryModal(int $id): void
     {
         $subCategory = SubCategory::find($id);
         $this->subCategoryId = $subCategory->id;
@@ -106,7 +107,7 @@ class SubCategoriesLivewire extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.admin.sub-categories-livewire');
     }

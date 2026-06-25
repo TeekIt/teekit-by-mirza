@@ -24,9 +24,9 @@
     <script src="{{ asset('js/custom/CustomGoogleMapsClass.js') }}"></script>
 
     @php
-        $googleMapRoutes = [route('seller.settings.general'), route('login')];
+        $routesArray = [route('login')];
     @endphp
-    @if (in_array(URL::current(), $googleMapRoutes))
+    @if (in_array(URL::current(), $routesArray))
         <script>
             new CustomGoogleMapsClass({
                 mapCanvasId: 'map-canvas',
@@ -56,16 +56,34 @@
     @endif
 
     @php
-        $routesArray = ['seller.request.delivery.form', 'vans.inventories.add'];
+        $routesArray = [
+            'seller.settings',
+            'vans.company.settings',
+            'seller.request.delivery.form',
+            'vans.inventories.order.online',
+            'vans.inventories.order.pay.as.you.go',
+        ];
     @endphp
     @if (request()->routeIs($routesArray))
         <script>
-            const isVanInventoryPage = @json(request()->routeIs('vans.inventories.add'));
+            const isVansCompanySettingsPage = @json(request()->routeIs('vans.company.settings'));
+            const isSellerSettingsPage = @json(request()->routeIs('seller.settings'));
+            const isVanInventoriesOrderOnlinePage = @json(request()->routeIs('vans.inventories.order.online'));
+            const isVanInventoriesOrderPayAsYouGoPage = @json(request()->routeIs('vans.inventories.order.pay.as.you.go'));
 
             /* Initialize CustomGoogleMapsClass for pickup address autocomplete */
-            const pickupGoogleMapsClass = new CustomGoogleMapsClass({
-                mapAutoCompleteAddressId: 'pickupAddress',
-            });
+            let pickupGoogleMapsClass;
+
+            if (isVansCompanySettingsPage || isSellerSettingsPage) {
+                pickupGoogleMapsClass = new CustomGoogleMapsClass({
+                    mapCanvasId: 'map-canvas',
+                    mapAutoCompleteAddressId: 'modalFullAddress',
+                });
+            } else {
+                pickupGoogleMapsClass = new CustomGoogleMapsClass({
+                    mapAutoCompleteAddressId: 'pickupAddress',
+                });
+            }
 
             const pickupAutoComplete = pickupGoogleMapsClass.handleAutoComplete();
 
@@ -76,7 +94,11 @@
                     const fullAddress = `${place.name}, ${place.formatted_address}`;
                     const lat = place.geometry.location.lat();
                     const lng = place.geometry.location.lng();
+                    const country = pickupGoogleMapsClass.getAddressComponent(place, ['country'])?.long_name;
+                    const state = pickupGoogleMapsClass.getAddressComponent(place, ['administrative_area_level_1'])
+                        ?.short_name;
                     const city = pickupGoogleMapsClass.extractCity(place);
+                    const postcode = pickupGoogleMapsClass.getAddressComponent(place, ['postal_code'])?.long_name;
                     /* Set HTML form input fields if present */
                     pickupGoogleMapsClass.setAddress(fullAddress);
                     pickupGoogleMapsClass.setLatLong(lat, lng);
@@ -90,11 +112,14 @@
                             pickupAddress: fullAddress,
                             pickupLat: lat,
                             pickupLon: lng,
+                            pickupCountry: country,
+                            pickupState: state,
                             pickupCity: city,
+                            pickupPostcode: postcode,
                         });
-                        
-                        if (isVanInventoryPage) {
-                            promise.then(() => livewireComponent.call('vanLocationChanged'));
+
+                        if (isVanInventoriesOrderOnlinePage || isVanInventoriesOrderPayAsYouGoPage) {
+                            promise.then(() => livewireComponent.call('vanAddressChanged'));
                         }
                     }
                 }

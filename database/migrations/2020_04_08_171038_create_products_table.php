@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('brand')->nullable();
             $table->string('size')->nullable();
             $table->enum('status', [0, 1])->comment('0: disable, 1: enable')->nullable();
+            $table->string('country_code', 4)->nullable();
             $table->string('contact');
             $table->json('colors')->nullable();
             $table->tinyInteger('bike')->nullable();

@@ -254,13 +254,13 @@
                                 <!-- Order Items Begins -->
                                 <div class="row mb-2">
                                     <div class="col-md-2">
-                                        <span class="img-container">
+                                        <span class="img-container d-block ratio ratio-1x1 border border-5 border-light">
                                             @if (str_contains($orderItem?->product?->feature_img, 'https://'))
-                                                <img class="d-block m-auto"
-                                                    src="{{ asset($orderItem->product->feature_img) }}">
+                                                <img class="w-100 h-100 object-fit-contain"
+                                                    src="{{ asset($orderItem->product->feature_img) }}" alt="Product image">
                                             @else
-                                                <img class="d-block m-auto"
-                                                    src="{{ config('constants.BUCKET') . $orderItem?->product?->feature_img }}">
+                                                <img class="w-100 h-100 object-fit-contain"
+                                                    src="{{ config('constants.BUCKET') . $orderItem?->product?->feature_img }}" alt="Product image">
                                             @endif
                                         </span>
                                     </div>
@@ -312,7 +312,7 @@
                                                                 <button type="button" class="btn btn-site-primary"
                                                                     data-bs-toggle="modal"
                                                                     data-bs-target="#searchAlternativeProductModal"
-                                                                    wire:click="renderSAPModal({{ $order->id }}, {{ $orderItem->product->id }}, {{ $orderItem->product_qty }}, '{{ $order->customer_name }}', '{{ $order->phone_number }}')">
+                                                                    wire:click="renderSAPModal({{ $order->id }}, {{ $orderItem->product?->id }}, {{ $orderItem->product_qty }}, '{{ $order->customer_name }}', '{{ $order->phone_number }}')">
                                                                     <i class="fas fa-search"></i>
                                                                     Search Alternative
                                                                 </button>

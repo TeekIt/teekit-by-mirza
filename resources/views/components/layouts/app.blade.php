@@ -19,7 +19,7 @@
         @elseif(Auth::user()->role_id == UserRoleEnum::COMPANY->value)
             @include('layouts.company.sidebar')
         @elseif(Auth::user()->role_id == UserRoleEnum::SELLER->value || Auth::user()->role_id == UserRoleEnum::CHILD_SELLER->value)
-            @include('layouts.shopkeeper.sidebar')
+            @include('layouts.seller.sidebar')
             <x-seller-business-hours-modal />
         @endif
 

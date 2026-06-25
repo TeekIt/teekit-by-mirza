@@ -90,9 +90,9 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Custom Properties
      */
-    public const ACTIVE = 1;
+    public const int ACTIVE = 1;
 
-    public const BLOCK = 0;
+    public const int BLOCK = 0;
 
     /**
      * Relations
@@ -125,6 +125,11 @@ class User extends Authenticatable implements JWTSubject
     public function qty(): HasMany
     {
         return $this->hasMany(Qty::class, 'seller_id');
+    }
+
+    public function vans(): HasMany
+    {
+        return $this->hasMany(Van::class, 'company_id');
     }
 
     /**
@@ -195,6 +200,11 @@ class User extends Authenticatable implements JWTSubject
         return self::getAuthUser()->role_id === UserRoleEnum::CHILD_SELLER->value;
     }
 
+    public static function isCompany(): bool
+    {
+        return self::getAuthUser()->role_id === UserRoleEnum::COMPANY->value;
+    }
+
     public static function adminUsersDel(Request $request)
     {
         for ($i = 0; $i < count($request->users); $i++) {
@@ -207,6 +217,7 @@ class User extends Authenticatable implements JWTSubject
         ?string $name = null,
         ?string $lName = null,
         ?string $email = null,
+        ?string $countryCode = null,
         ?string $phone = null,
         ?string $fullAddress = null,
         ?string $unitAddress = null,
@@ -234,8 +245,11 @@ class User extends Authenticatable implements JWTSubject
         if (! is_null($email)) {
             $user->email = $email;
         }
+        if (! is_null($countryCode)) {
+            $user->country_code = $countryCode;
+        }
         if (! is_null($phone)) {
-            $user->phone = '+44' . $phone;
+            $user->phone = $phone;
         }
         if (! is_null($fullAddress)) {
             $user->full_address = $fullAddress;
@@ -265,7 +279,7 @@ class User extends Authenticatable implements JWTSubject
             $user->business_name = $businessName;
         }
         if (! is_null($businessPhone)) {
-            $user->business_phone = '+44' . $businessPhone;
+            $user->business_phone = $businessPhone;
         }
         if (! is_null($password)) {
             $user->password = Hash::make($password);
@@ -283,10 +297,10 @@ class User extends Authenticatable implements JWTSubject
         return $user->save();
     }
 
-    public static function updateStoreLocation(
-        int $user_id,
-        string $full_address,
-        ?string $unit_address,
+    public static function updateLocation(
+        int $userId,
+        string $fullAddress,
+        ?string $unitAddress,
         string $country,
         string $state,
         string $city,
@@ -294,11 +308,9 @@ class User extends Authenticatable implements JWTSubject
         string $lat,
         string $lon
     ): bool {
-        $user = self::findOrFail($user_id);
-        $user->full_address = $full_address;
-        if (! is_null($unit_address)) {
-            $user->unit_address = $unit_address;
-        }
+        $user = self::findOrFail($userId);
+        $user->full_address = $fullAddress;
+        $user->unit_address = $unitAddress;
         $user->country = $country;
         $user->state = $state;
         $user->city = $city;
@@ -379,14 +391,17 @@ class User extends Authenticatable implements JWTSubject
         ]);
     }
 
-    public static function getParentAndChildSellers(array $columns): Collection
-    {
+    public static function getParentAndChildSellers(
+        OrderByEnum $orderBy = OrderByEnum::DESC,
+        int $isActive = self::ACTIVE,
+        array $columns = ['*']
+    ): Collection {
         return self::select($columns)
-            ->WhereUserIsActive()
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
-            ->orderBy('business_name', 'asc')
+            ->where('is_active', '=', $isActive)
+            ->orderBy('business_name', $orderBy->value)
             ->get();
     }
 
@@ -396,7 +411,7 @@ class User extends Authenticatable implements JWTSubject
         int $numberOfRows = 25
     ): Collection {
         $city = explode(' ', $city);
-        
+
         return self::WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
             ->whereNotNull('lon')
@@ -453,7 +468,7 @@ class User extends Authenticatable implements JWTSubject
     public static function getBlokedParentAndChildSellersByCity(string $city, int $numberOfRows = 25): Collection
     {
         $city = explode(' ', $city);
-        
+
         return self::WhereUserIsBlocked()
             ->WhereRoleIsParentOrChildSeller()
             ->whereNotNull('lat')
@@ -495,6 +510,19 @@ class User extends Authenticatable implements JWTSubject
         return self::select($columns)
             ->where('role_id', '=', UserRoleEnum::SELLER)
             ->get();
+    }
+
+    public static function getByRole(
+        UserRoleEnum $role,
+        OrderByEnum $orderBy,
+        string $search = '',
+        array $columns = ['*']
+    ): LengthAwarePaginator {
+        return self::select($columns)
+            ->where('business_name', 'like', '%' . $search . '%')
+            ->where('role_id', '=', $role->value)
+            ->orderBy('created_at', $orderBy->value)
+            ->paginate(9);
     }
 
     public static function getParentSellers(OrderByEnum $orderBy, string $search = ''): LengthAwarePaginator
@@ -554,36 +582,6 @@ class User extends Authenticatable implements JWTSubject
         return self::select($columns)->findOrFail($id);
     }
 
-    public function nearbyUsers($user_lat, $user_lon, $radius): User
-    {
-        return self::selectRaw('*, (  3961 * acos( cos( radians(' . $user_lat . ') ) *
-                                cos( radians(users.lat) ) *
-                                cos( radians(users.lon) - radians(' . $user_lon . ') ) +
-                                sin( radians(' . $user_lat . ') ) *
-                                sin( radians(users.lat) ) ) )
-                                AS distance')
-            ->having('distance', '<', $radius)
-            ->orderBy('distance', 'ASC')
-            ->get();
-    }
-
-    public static function activeOrBlockSeller(int $id, int $status): bool
-    {
-        $updated = self::where('id', '=', $id)->update(['is_active' => $status]);
-
-        if ($status == self::ACTIVE) {
-            $user = self::findOrFail($id);
-            EmailServices::sendSellerApprovedMail($user);
-        }
-
-        return $updated;
-    }
-
-    public static function activeOrBlockCustomer(int $id, int $status): int
-    {
-        return self::where('id', '=', $id)->update(['is_active' => $status]);
-    }
-
     public static function getUserRole(int $id): SupportCollection
     {
         return self::where('id', '=', $id)->pluck('role_id');
@@ -614,6 +612,40 @@ class User extends Authenticatable implements JWTSubject
         return null;
     }
 
+    public static function getAuthUser(): self
+    {
+        return auth()->user();
+    }
+
+    public function nearbyUsers($user_lat, $user_lon, $radius): User
+    {
+        return self::selectRaw('*, (  3961 * acos( cos( radians(' . $user_lat . ') ) *
+                                cos( radians(users.lat) ) *
+                                cos( radians(users.lon) - radians(' . $user_lon . ') ) +
+                                sin( radians(' . $user_lat . ') ) *
+                                sin( radians(users.lat) ) ) )
+                                AS distance')
+            ->having('distance', '<', $radius)
+            ->orderBy('distance', 'ASC')
+            ->get();
+    }
+
+    public static function activateOrBlock(int $id, int $status): bool
+    {
+        $updated = self::where('id', '=', $id)->update(['is_active' => $status]);
+
+        if ($status == self::ACTIVE) {
+
+            $user = self::findOrFail($id);
+
+            if (in_array($user->role_id, [UserRoleEnum::SELLER->value, UserRoleEnum::CHILD_SELLER->value])) {
+                EmailServices::sendSellerApprovedMail($user);
+            }
+        }
+
+        return $updated;
+    }
+
     public static function verifyReferralCode(int $id, string $referral_code)
     {
         $data = self::where('id', '!=', $id)->where('referral_code', $referral_code)->first();
@@ -629,10 +661,5 @@ class User extends Authenticatable implements JWTSubject
     public static function deductFromWallet(int $id, float $amount)
     {
         return self::where('id', '=', $id)->decrement('pending_withdraw', $amount);
-    }
-
-    public static function getAuthUser(): self
-    {
-        return auth()->user();
     }
 }

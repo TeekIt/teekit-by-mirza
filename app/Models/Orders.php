@@ -354,7 +354,7 @@ class Orders extends Model
         $orders->each(function ($order) {
             $order->orderItems->each(function ($orderItem) {
                 if ($orderItem->product_belongs_to_type == (new Products)->getMorphClass()) {
-                    $orderItem->product->load('category');
+                    $orderItem->product?->load('category');
                 }
             });
         });

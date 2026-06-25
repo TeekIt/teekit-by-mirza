@@ -15,10 +15,8 @@
           <nav class="mt-5">
               <ul class="nav nav-pills nav-sidebar flex-column" data-accordion="false" data-widget="treeview"
                   role="menu">
-                  <!-- Add icons to the links using the .nav-icon class
-                 with font-awesome or any other icon font library -->
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="/">
+                      <a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="/" wire:navigate>
                           <i class="nav-icon fas fa-tachometer-alt"></i>
                           <p class="ml-2">
                               Dashboard
@@ -27,7 +25,7 @@
                   </li>
                   <li class="nav-item">
                       <a class="nav-link {{ request()->is('admin/notifications') ? 'active' : '' }}"
-                          href="{{ route('admin.notifications') }}">
+                          href="{{ route('admin.notifications') }}" wire:navigate>
                           <i class="nav-icon fas fa-bell"></i>
                           <p class="ml-2">
                               Notifications
@@ -36,7 +34,7 @@
                   </li>
                   <li class="nav-item">
                       <a class="nav-link {{ request()->is('admin/promocodes') ? 'active' : '' }}"
-                          href="{{ route('admin.promocodes') }}">
+                          href="{{ route('admin.promocodes') }}" wire:navigate>
                           <i class="nav-icon fas fa-qrcode"></i>
                           <p class="ml-2">
                               Promo Codes
@@ -44,7 +42,7 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a class="nav-link {{ request()->is('admin/referralcodes') ? 'active' : '' }}"
+                      <a class="nav-link {{ request()->is('admin/referralcodes') ? 'active' : '' }}" wire:navigate
                           href="{{ route('admin.referralcodes') }}">
                           <i class="nav-icon fas fa-share-alt-square"></i>
                           <p class="ml-2">
@@ -62,21 +60,14 @@
                       </a>
                       <ul class="nav nav-treeview">
                           <li class="nav-item">
-                              <a href="{{ route('admin.sellers.parent') }}"
+                              <a href="{{ route('admin.sellers.parent') }}" wire:navigate
                                   class="nav-link @if (request()->is('admin/sellers/parent')) active @endif">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>Parent</p>
                               </a>
                           </li>
-                          {{-- <li class="nav-item">
-                              <a href="{{ route('admin.sellers.parent') }}"
-                                  class="nav-link @if (request()->is('admin/sellers/parent')) active @endif">
-                                  <i class="fas fa-gears nav-icon"></i>
-                                  <p>Parent</p>
-                              </a>
-                          </li> --}}
                           <li class="nav-item">
-                              <a href="{{ route('admin.sellers.child') }}"
+                              <a href="{{ route('admin.sellers.child') }}" wire:navigate
                                   class="nav-link @if (request()->is('admin/sellers/child')) active @endif">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>Child</p>
@@ -85,7 +76,16 @@
                       </ul>
                   </li>
                   <li class="nav-item">
-                      <a href="{{ route('admin.customers') }}"
+                      <a href="{{ route('admin.companies') }}" wire:navigate
+                          class="nav-link @if (request()->is('admin/companies')) active @endif">
+                          <i class="nav-icon fas fa-building"></i>
+                          <p class="ml-2">
+                              Companies
+                          </p>
+                      </a>
+                  </li>
+                  <li class="nav-item">
+                      <a href="{{ route('admin.customers') }}" wire:navigate
                           class="nav-link  @if (request()->is('admin/customers')) active @endif">
                           <i class="nav-icon fas fa-users-cog"></i>
                           <p class="ml-2">
@@ -103,28 +103,28 @@
                       </a>
                       <ul class="nav nav-treeview">
                           <li class="nav-item">
-                              <a href="{{ route('admin.orders') }}"
+                              <a href="{{ route('admin.orders') }}" wire:navigate
                                   class="nav-link {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>All</p>
                               </a>
                           </li>
                           <li class="nav-item">
-                              <a href="{{ route('admin.orders.verified') }}"
+                              <a href="{{ route('admin.orders.verified') }}" wire:navigate
                                   class="nav-link {{ request()->routeIs('admin.orders.verified') ? 'active' : '' }}">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>Verified</p>
                               </a>
                           </li>
                           <li class="nav-item">
-                              <a href="{{ route('admin.orders.unverified') }}"
+                              <a href="{{ route('admin.orders.unverified') }}" wire:navigate
                                   class="nav-link {{ request()->routeIs('admin.orders.unverified') ? 'active' : '' }}">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>Unverified</p>
                               </a>
                           </li>
                           <li class="nav-item">
-                              <a href="{{ route('admin.orders.complete') }}"
+                              <a href="{{ route('admin.orders.complete') }}" wire:navigate
                                   class="nav-link {{ request()->routeIs('admin.orders.complete') ? 'active' : '' }}">
                                   <i class="fas fa-money nav-icon"></i>
                                   <p>Completed</p>
@@ -143,7 +143,7 @@
                       </a>
                       <ul class="nav nav-treeview">
                           <li class="nav-item">
-                              <a href="/withdrawals" class="nav-link">
+                              <a href="/withdrawals" wire:navigate class="nav-link">
                                   <i class="fas fa-gears nav-icon"></i>
                                   <p>Sellers</p>
                               </a>
@@ -151,7 +151,7 @@
                       </ul>
                   </li>
                   <li class="nav-item">
-                      <a href="{{ route('admin.categories') }}"
+                      <a href="{{ route('admin.categories') }}" wire:navigate
                           class="nav-link {{ request()->routeIs('admin.categories') ? 'active' : '' }}">
                           <i class="nav-icon fas fa-clipboard-list"></i>
                           <p class="ml-2">
@@ -161,7 +161,7 @@
                       </a>
                   </li>
                   <li class="nav-item">
-                      <a href="{{ route('admin.settings') }}"
+                      <a href="{{ route('admin.settings') }}" wire:navigate
                           class="nav-link {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                           <i class="nav-icon fa fa-cog"></i>
                           <p class="ml-2">
